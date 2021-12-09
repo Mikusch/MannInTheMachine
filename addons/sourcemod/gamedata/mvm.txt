@@ -1,0 +1,110 @@
+/*
+ * Copyright (C) 2021  Mikusch
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+"Games"
+{
+	"tf"
+	{
+		"Signatures"
+		{
+			"CPopulationManager::AllocateBots"
+			{
+				"linux"		"@_ZN18CPopulationManager12AllocateBotsEv"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x14\x53\x8B\xD9\x80\xBB\x81\x05\x00\x00\x00"
+			}
+			"CTFBotSpawner::Spawn"
+			{
+				"linux"		"@_ZN13CTFBotSpawner5SpawnERK6VectorP10CUtlVectorI7CHandleI11CBaseEntityE10CUtlMemoryIS6_iEE"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x70\x01\x00\x00"
+			}
+			"CTFPlayer::RemovePlayerAttributes"
+			{
+				"linux"		"@_ZN9CTFPlayer22RemovePlayerAttributesEb"
+				"windows"	"\x55\x8B\xEC\x53\x8B\xD9\x56\x8B\xB3\x30\x0A\x00\x00"
+			}
+			"CTFGameRules::GetTeamAssignmentOverride"
+			{
+				"linux"		"@_ZN12CTFGameRules25GetTeamAssignmentOverrideEP9CTFPlayerib"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x10\x81\x65\xF4\xFF\xFF\x0F\xFF\x8D\x45\xF0\x53"
+			}
+		}
+		"Offsets"
+		{
+			"CTFBotSpawner::m_class"
+			{
+				"linux"		"8"
+				"windows"	"8"
+			}
+			"CTFBotSpawner::m_defaultAttributes::m_attributeFlags"
+			{
+				"linux"		"76"
+				"windows"	"76"
+			}
+		}
+		"Functions"
+		{
+			"CPopulationManager::AllocateBots"
+			{
+				"signature"	"CPopulationManager::AllocateBots"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"ignore"
+			}
+			"CTFBotSpawner::Spawn"
+			{
+				"signature"	"CTFBotSpawner::Spawn"
+				"callconv"	"thiscall"
+				"return"	"bool"
+				"this"		"address"
+				"arguments"
+				{
+					"rawHere"
+					{
+						"type"	"vectorptr"
+						"flags"	"byref"
+					}
+					"result"
+					{
+						"type"	"int"
+					}
+				}
+			}
+			"CTFGameRules::GetTeamAssignmentOverride"
+			{
+				"signature"	"CTFGameRules::GetTeamAssignmentOverride"
+				"callconv"	"thiscall"
+				"return"	"int"
+				"this"		"ignore"
+				"arguments"
+				{
+					"pTFPlayer"
+					{
+						"type"	"cbaseentity"
+					}
+					"iDesiredTeam"
+					{
+						"type"	"int"
+					}
+					"bAutoBalance"
+					{
+						"type"	"bool"
+					}
+				}
+			}
+		}
+	}
+}

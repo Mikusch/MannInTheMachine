@@ -80,8 +80,8 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 	params.GetVector(1, here);
 	
 	TFClassType m_class = view_as<TFClassType>(LoadFromAddress(spawner + view_as<Address>(g_OffsetClass), NumberType_Int32));
-	int m_health = LoadFromAddress(spawner + view_as<Address>(g_OffsetHealth), NumberType_Int8);
-	float m_scale = float(LoadFromAddress(spawner + view_as<Address>(g_OffsetScale), NumberType_Int32));
+	int m_health = LoadFromAddress(spawner + view_as<Address>(g_OffsetHealth), NumberType_Int32);
+	float m_scale = view_as<float>(LoadFromAddress(spawner + view_as<Address>(g_OffsetScale), NumberType_Int32));
 	
 	if (GameRules_IsMannVsMachineMode())
 	{
@@ -310,7 +310,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 		// but it has more bot checks so once again we just replicate code
 		// TODO: Add the rest
 		SetEntData(newPlayer, g_OffsetIsMissionEnemy, true);
-		PrintToChatAll("Marking %N as mission enemy", newPlayer);
+		//PrintToChatAll("Marking %N as mission enemy", newPlayer);
 	}
 	
 	// Finally, suppress the original function
@@ -349,7 +349,7 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Post(DHookReturn ret, 
 
 public MRESReturn DHookCallback_EventKilled_Pre(int client, DHookParam params)
 {
-	PrintToChatAll("Is %N mission enemy? %d", client, GetEntData(client, g_OffsetIsMissionEnemy));
+	//PrintToChatAll("Is %N mission enemy? %d", client, GetEntData(client, g_OffsetIsMissionEnemy));
 	SetEntityFlags(client, GetEntityFlags(client) | FL_FAKECLIENT);
 }
 

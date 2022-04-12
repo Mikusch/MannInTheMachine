@@ -18,20 +18,82 @@
 #include <sourcemod>
 #include <tf2_stocks>
 #include <dhooks>
+#include <tf2attributes>
 
 #pragma semicolon 1
 #pragma newdecls required
 
 int g_OffsetClass;
+int g_OffsetHealth;
+int g_OffsetScale;
 int g_OffsetAttributeFlags;
+int g_OffsetIsMissionEnemy;
+
+ConVar tf_mvm_miniboss_scale;
 
 enum struct PlayerAttributes
 {
 	int attributeFlags;
 	int spawnPoint;
+	float scaleOverride;
 }
 
 PlayerAttributes g_PlayerAttributes[MAXPLAYERS + 1];
+
+char g_szClassNames[][] =
+{
+	"", //TF_CLASS_UNDEFINED
+	
+	"scout",
+	"sniper",
+	"soldier",
+	"demoman",
+	"medic",
+	"heavyweapons",
+	"pyro",
+	"spy",
+	"engineer",
+};
+
+char g_szBotModels[][] =
+{
+	"", //TF_CLASS_UNDEFINED
+	
+	"models/bots/scout/bot_scout.mdl",
+	"models/bots/sniper/bot_sniper.mdl",
+	"models/bots/soldier/bot_soldier.mdl",
+	"models/bots/demo/bot_demo.mdl",
+	"models/bots/medic/bot_medic.mdl",
+	"models/bots/heavy/bot_heavy.mdl",
+	"models/bots/pyro/bot_pyro.mdl",
+	"models/bots/spy/bot_spy.mdl",
+	"models/bots/engineer/bot_engineer.mdl",
+};
+
+char g_szBotBossModels[][] = 
+{
+	"", //TF_CLASS_UNDEFINED
+	
+	"models/bots/scout_boss/bot_scout_boss.mdl",
+	"models/bots/sniper/bot_sniper.mdl",
+	"models/bots/soldier_boss/bot_soldier_boss.mdl",
+	"models/bots/demo_boss/bot_demo_boss.mdl",
+	"models/bots/medic/bot_medic.mdl",
+	"models/bots/heavy_boss/bot_heavy_boss.mdl",
+	"models/bots/pyro_boss/bot_pyro_boss.mdl",
+	"models/bots/spy/bot_spy.mdl",
+	"models/bots/engineer/bot_engineer.mdl",
+};
+
+enum
+{
+	DONT_BLEED = -1,
+	
+	BLOOD_COLOR_RED = 0,
+	BLOOD_COLOR_YELLOW,
+	BLOOD_COLOR_GREEN,
+	BLOOD_COLOR_MECH,
+};
 
 enum AttributeType
 {
@@ -68,7 +130,7 @@ enum AttributeType
 #include "mvm/dhooks.sp"
 #include "mvm/sdkcalls.sp"
 
-public Plugin myinfo =
+public Plugin myinfo = 
 {
 	name = "Unnamed Experiment", 
 	author = "Mikusch", 
@@ -83,6 +145,8 @@ public void OnPluginStart()
 	
 	AddCommandListener(CommandListener_JoinTeam, "jointeam");
 	
+	tf_mvm_miniboss_scale = FindConVar("tf_mvm_miniboss_scale");
+	
 	GameData gamedata = new GameData("mvm");
 	if (gamedata)
 	{
@@ -90,7 +154,10 @@ public void OnPluginStart()
 		SDKCalls_Initialize(gamedata);
 		
 		g_OffsetClass = gamedata.GetOffset("CTFBotSpawner::m_class");
+		g_OffsetHealth = gamedata.GetOffset("CTFBotSpawner::m_health");
+		g_OffsetScale = gamedata.GetOffset("CTFBotSpawner::m_scale");
 		g_OffsetAttributeFlags = gamedata.GetOffset("CTFBotSpawner::m_defaultAttributes::m_attributeFlags");
+		g_OffsetIsMissionEnemy = gamedata.GetOffset("CTFPlayer::m_bIsMissionEnemy");
 		
 		delete gamedata;
 	}
@@ -100,26 +167,49 @@ public void OnPluginStart()
 	}
 	
 	HookEvent("player_death", Event_PlayerDeath);
+	HookEvent("player_team", Event_PlayerTeam);
+	
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (IsClientInGame(client))
+			OnClientPutInServer(client);
+	}
+}
+
+public void OnClientPutInServer(int client)
+{
+	DHooks_HookClient(client);
 }
 
 public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 {
 	int victim = GetClientOfUserId(event.GetInt("userid"));
 	
-	if (TF2_GetClientTeam(victim) == TFTeam_Blue)
+	/*if (TF2_GetClientTeam(victim) == TFTeam_Blue)
 	{
 		TF2_ChangeClientTeam(victim, TFTeam_Spectator);
-	}
+	}*/
 }
 
-int GetClass(Address spawner)
+public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 {
-	return LoadFromAddress(spawner + view_as<Address>(g_OffsetClass), NumberType_Int32);
+	int client = GetClientOfUserId(event.GetInt("userid"));
 }
 
-int GetDefaultAttributeFlags(Address spawner)
+any GetDefaultAttributeFlags(Address spawner)
 {
 	return LoadFromAddress(spawner + view_as<Address>(g_OffsetAttributeFlags), NumberType_Int32);
+}
+
+void SetModelScale(int client, float scale, float duration = 0.0)
+{
+	float vecScale[3];
+	vecScale[0] = scale;
+	vecScale[1] = scale;
+	vecScale[2] = duration;
+	
+	SetVariantVector3D(vecScale);
+	AcceptEntityInput(client, "SetModelScale");
 }
 
 bool GameRules_IsMannVsMachineMode()

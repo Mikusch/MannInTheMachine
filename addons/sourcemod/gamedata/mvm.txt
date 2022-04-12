@@ -44,10 +44,35 @@
 		}
 		"Offsets"
 		{
+			"CTFPlayer::Event_Killed"
+			{
+				"linux"		"67"
+				"windows"	"66"
+			}
+			"IPopulationSpawner::GetClassIcon"
+			{
+				"linux"		"7"
+				"windows"	"6"
+			}
+			"CTFPlayer::m_bIsMissionEnemy"
+			{
+				"linux"		"8820"
+				"windows"	"8816"
+			}
 			"CTFBotSpawner::m_class"
 			{
 				"linux"		"8"
 				"windows"	"8"
+			}
+			"CTFBotSpawner::m_health"
+			{
+				"linux"		"16"
+				"windows"	"16"
+			}
+			"CTFBotSpawner::m_scale"
+			{
+				"linux"		"20"
+				"windows"	"20"
 			}
 			"CTFBotSpawner::m_defaultAttributes::m_attributeFlags"
 			{
@@ -102,6 +127,20 @@
 					"bAutoBalance"
 					{
 						"type"	"bool"
+					}
+				}
+			}
+			"CTFPlayer::Event_Killed"
+			{
+				"offset"	"CTFPlayer::Event_Killed"
+				"hooktype"	"entity"
+				"return"	"void"
+				"this"		"entity"
+				"arguments"
+				{
+					"info"
+					{
+						"type"	"int"
 					}
 				}
 			}

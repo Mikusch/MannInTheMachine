@@ -16,10 +16,12 @@
  */
  
 static Handle g_SDKCallRemovePlayerAttributes;
+static Handle g_SDKCallGetClassIcon;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
 	g_SDKCallRemovePlayerAttributes = PrepSDKCall_RemovePlayerAttributes(gamedata);
+	g_SDKCallGetClassIcon = PrepSDKCall_GetClassIcon(gamedata);
 }
 
 static Handle PrepSDKCall_RemovePlayerAttributes(GameData gamedata)
@@ -30,13 +32,36 @@ static Handle PrepSDKCall_RemovePlayerAttributes(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDK call: CTFPlayer::RemovePlayerAttributes");
+		LogMessage("Failed to create SDKCall: CTFPlayer::RemovePlayerAttributes");
 	
 	return call;
 }
+
+static Handle PrepSDKCall_GetClassIcon(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Raw);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "IPopulationSpawner::GetClassIcon");
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: IPopulationSpawner::GetClassIcon");
+	
+	return call;
+}
+
 
 void SDKCall_RemovePlayerAttributes(int player, bool setBonuses)
 {
 	if (g_SDKCallRemovePlayerAttributes)
 		SDKCall(g_SDKCallRemovePlayerAttributes, player, setBonuses);
+}
+
+Address SDKCall_GetClassIcon(Address spawner, int nSpawnNum = -1)
+{
+	if (g_SDKCallGetClassIcon)
+		return SDKCall(g_SDKCallGetClassIcon, spawner, nSpawnNum);	// string_t
+	
+	return Address_Null;
 }

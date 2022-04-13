@@ -24,6 +24,7 @@
 #pragma newdecls required
 
 int g_OffsetClass;
+int g_OffsetClassIcon;
 int g_OffsetHealth;
 int g_OffsetScale;
 int g_OffsetAttributeFlags;
@@ -40,10 +41,9 @@ enum struct PlayerAttributes
 
 PlayerAttributes g_PlayerAttributes[MAXPLAYERS + 1];
 
-char g_szClassNames[][] =
+char g_aRawPlayerClassNames[][] =
 {
-	"", //TF_CLASS_UNDEFINED
-	
+	"undefined",
 	"scout",
 	"sniper",
 	"soldier",
@@ -53,6 +53,26 @@ char g_szClassNames[][] =
 	"pyro",
 	"spy",
 	"engineer",
+	"civilian",
+	"",
+	"random"
+};
+
+char g_aRawPlayerClassNamesShort[][] =
+{
+	"undefined",
+	"scout",
+	"sniper",
+	"soldier",
+	"demo",	// short
+	"medic",
+	"heavy",// short
+	"pyro",
+	"spy",
+	"engineer",
+	"civilian",
+	"",
+	"random"
 };
 
 char g_szBotModels[][] =
@@ -154,6 +174,7 @@ public void OnPluginStart()
 		SDKCalls_Initialize(gamedata);
 		
 		g_OffsetClass = gamedata.GetOffset("CTFBotSpawner::m_class");
+		g_OffsetClassIcon = gamedata.GetOffset("CTFBotSpawner::m_iszClassIcon");
 		g_OffsetHealth = gamedata.GetOffset("CTFBotSpawner::m_health");
 		g_OffsetScale = gamedata.GetOffset("CTFBotSpawner::m_scale");
 		g_OffsetAttributeFlags = gamedata.GetOffset("CTFBotSpawner::m_defaultAttributes::m_attributeFlags");
@@ -246,4 +267,22 @@ public Action CommandListener_JoinTeam(int client, const char[] command, int arg
 	ChangeClientTeam(client, iTeam);
 	SetEntityFlags(client, GetEntityFlags(client) & ~FL_FAKECLIENT);
 	return Plugin_Handled;
+}
+
+int UTIL_StringtToCharArray(Address string_t, char[] buffer, int maxlen)
+{
+	if (string_t == Address_Null)
+		ThrowError("string_t address is null");
+	
+	if (maxlen <= 0)
+		ThrowError("Buffer size is negative or zero");
+	
+	int max = maxlen - 1;
+	int i = 0;
+	for (; i < max; i++)
+	if ((buffer[i] = view_as<char>(LoadFromAddress(string_t + view_as<Address>(i), NumberType_Int8))) == '\0')
+		return i;
+	
+	buffer[i] = '\0';
+	return i;
 }

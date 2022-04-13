@@ -69,6 +69,36 @@ public MRESReturn DHookCallback_AllocateBots_Pre(int populator)
 	return MRES_Supercede;
 }
 
+TFClassType GetClass(Address spawner)
+{
+	return view_as<TFClassType>(LoadFromAddress(spawner + view_as<Address>(g_OffsetClass), NumberType_Int32));
+}
+
+// Copy of CTFBotSpawner::GetClassIcon
+int GetClassIcon(Address spawner, char[] buffer, int maxlen)
+{
+	Address string_t = view_as<Address>(LoadFromAddress(spawner + view_as<Address>(g_OffsetClassIcon), NumberType_Int32));
+	if (string_t != Address_Null)
+		return UTIL_StringtToCharArray(string_t, buffer, maxlen);
+	
+	return strcopy(buffer, maxlen, g_aRawPlayerClassNamesShort[GetClass(spawner)]);
+}
+
+int GetHealth(Address spawner)
+{
+	return LoadFromAddress(spawner + view_as<Address>(g_OffsetHealth), NumberType_Int32);
+}
+
+float GetScale(Address spawner)
+{
+	return view_as<float>(LoadFromAddress(spawner + view_as<Address>(g_OffsetScale), NumberType_Int32));
+}
+
+public Action Timer_SetIcon(Handle timer, int client)
+{
+	SetEntPropString(client, Prop_Send, "m_iszClassIcon", "demoknight");
+}
+
 public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHookParam params)
 {
 	// The player spawning logic.
@@ -79,9 +109,12 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 	float here[3];
 	params.GetVector(1, here);
 	
-	TFClassType m_class = view_as<TFClassType>(LoadFromAddress(spawner + view_as<Address>(g_OffsetClass), NumberType_Int32));
-	int m_health = LoadFromAddress(spawner + view_as<Address>(g_OffsetHealth), NumberType_Int32);
-	float m_scale = view_as<float>(LoadFromAddress(spawner + view_as<Address>(g_OffsetScale), NumberType_Int32));
+	TFClassType m_class = GetClass(spawner);
+	int m_health = GetHealth(spawner);
+	float m_scale = GetScale(spawner);
+	
+	char m_iszClassIcon[64];
+	GetClassIcon(spawner, m_iszClassIcon, sizeof(m_iszClassIcon));
 	
 	if (GameRules_IsMannVsMachineMode())
 	{
@@ -183,8 +216,10 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 		TF2_ChangeClientTeam(newPlayer, team);
 		
 		SetEntProp(newPlayer, Prop_Data, "m_bAllowInstantSpawn", true);
-		FakeClientCommand(newPlayer, "joinclass %s", g_szClassNames[m_class]);
-		//newBot->GetPlayerClass()->SetClassIconName( GetClassIcon() );
+		FakeClientCommand(newPlayer, "joinclass %s", g_aRawPlayerClassNames[m_class]);
+		PrintToChatAll("Spawning %N icon as %s", newPlayer, m_iszClassIcon);
+		SetEntPropString(newPlayer, Prop_Send, "m_iszClassIcon", m_iszClassIcon);
+		
 		
 		// TODO: Implement the EventChangeAttributes system
 		//ClearEventChangeAttributes();
@@ -350,6 +385,7 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Post(DHookReturn ret, 
 public MRESReturn DHookCallback_EventKilled_Pre(int client, DHookParam params)
 {
 	//PrintToChatAll("Is %N mission enemy? %d", client, GetEntData(client, g_OffsetIsMissionEnemy));
+	// TODO: Only do this for BLU team
 	SetEntityFlags(client, GetEntityFlags(client) | FL_FAKECLIENT);
 }
 

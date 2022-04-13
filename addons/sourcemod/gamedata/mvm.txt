@@ -49,11 +49,6 @@
 				"linux"		"67"
 				"windows"	"66"
 			}
-			"IPopulationSpawner::GetClassIcon"
-			{
-				"linux"		"7"
-				"windows"	"6"
-			}
 			"CTFPlayer::m_bIsMissionEnemy"
 			{
 				"linux"		"8820"
@@ -63,6 +58,11 @@
 			{
 				"linux"		"8"
 				"windows"	"8"
+			}
+			"CTFBotSpawner::m_iszClassIcon"
+			{
+				"linux"		"12"
+				"windows"	"12"
 			}
 			"CTFBotSpawner::m_health"
 			{

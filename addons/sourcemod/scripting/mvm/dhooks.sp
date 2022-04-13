@@ -15,12 +15,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+enum struct PopulatorData
+{
+	Address spawner;
+	Address populator;
+}
+
 static DynamicHook g_DHookEventKilled;
+
+static ArrayList g_Populators;
 
 static int g_InternalSpawnPoint = INVALID_ENT_REFERENCE;
 
 void DHooks_Initialize(GameData gamedata)
 {
+	g_Populators = new ArrayList(sizeof(PopulatorData));
+	
+	CreateDynamicDetour(gamedata, "CTFBotSpawner::CTFBotSpawner", DHookCallback_CTFBotSpawner_Pre);
 	CreateDynamicDetour(gamedata, "CPopulationManager::AllocateBots", DHookCallback_AllocateBots_Pre);
 	CreateDynamicDetour(gamedata, "CTFBotSpawner::Spawn", DHookCallback_Spawn_Pre);
 	CreateDynamicDetour(gamedata, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_GetTeamAssignmentOverride_Pre, DHookCallback_GetTeamAssignmentOverride_Post);
@@ -63,6 +74,15 @@ static DynamicHook CreateDynamicHook(GameData gamedata, const char[] name)
 	return hook;
 }
 
+public MRESReturn DHookCallback_CTFBotSpawner_Pre(Address spawner, DHookReturn ret, DHookParam param)
+{
+	PopulatorData data;
+	data.spawner = spawner;
+	data.populator = param.Get(1);
+	
+	g_Populators.PushArray(data, sizeof(data));
+}
+
 public MRESReturn DHookCallback_AllocateBots_Pre(int populator)
 {
 	// No bots in MY home!
@@ -97,6 +117,48 @@ float GetScale(Address spawner)
 public Action Timer_SetIcon(Handle timer, int client)
 {
 	SetEntPropString(client, Prop_Send, "m_iszClassIcon", "demoknight");
+}
+
+void StartIdleSound(int player)
+{
+	if (!GameRules_IsMannVsMachineMode())
+		return;
+	
+	if (GetEntProp(player, Prop_Send, "m_bIsMiniBoss"))
+	{
+		char pszSoundName[PLATFORM_MAX_PATH];
+		
+		TFClassType class = TF2_GetPlayerClass(player);
+		switch (class)
+		{
+			case TFClass_Heavy:
+			{
+				strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantHeavyLoop");
+			}
+			case TFClass_Soldier:
+			{
+				strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantSoldierLoop");
+			}
+			
+			case TFClass_DemoMan:
+			{
+				strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantDemomanLoop");
+			}
+			case TFClass_Scout:
+			{
+				strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantScoutLoop");
+			}
+			case TFClass_Pyro:
+			{
+				strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantPyroLoop");
+			}
+		}
+		
+		if (pszSoundName[0] != '\0')
+		{
+			EmitGameSoundToAll(pszSoundName, player);
+		}
+	}
 }
 
 public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHookParam params)
@@ -217,9 +279,19 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 		
 		SetEntProp(newPlayer, Prop_Data, "m_bAllowInstantSpawn", true);
 		FakeClientCommand(newPlayer, "joinclass %s", g_aRawPlayerClassNames[m_class]);
-		PrintToChatAll("Spawning %N icon as %s", newPlayer, m_iszClassIcon);
-		SetEntPropString(newPlayer, Prop_Send, "m_iszClassIcon", m_iszClassIcon);
+		PrintToChatAll("Setting %N icon as %s", newPlayer, m_iszClassIcon);
+		//SetEntPropString(newPlayer, Prop_Send, "m_iszClassIcon", m_iszClassIcon);
 		
+		int index = g_Populators.FindValue(spawner, PopulatorData::spawner);
+		if (index != -1)
+		{
+			Address populator = g_Populators.Get(index);
+			PrintToChatAll("Populator used for spawn: %X", populator);
+		}
+		else
+		{
+			LogError("No populator found for spawner with address %X", spawner);
+		}
 		
 		// TODO: Implement the EventChangeAttributes system
 		//ClearEventChangeAttributes();
@@ -309,7 +381,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 		ModifyMaxHealth(newPlayer, nHealth);
 		//PrintToChat(newPlayer, "%N MAX HEALTH %f", newPlayer, nHealth);
 		
-		// newBot->StartIdleSound();
+		StartIdleSound(newPlayer);
 		
 		// TODO: Spawn with full charge
 		

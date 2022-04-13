@@ -21,6 +21,11 @@
 	{
 		"Signatures"
 		{
+			"CTFBotSpawner::CTFBotSpawner"
+			{
+				"linux"		"@_ZN13CTFBotSpawnerC2EP10IPopulator"
+				"windows"	"\x55\x8B\xEC\x8B\x45\x08\x56\x57\x8B\xF9\x89\x47\x04"
+			}
 			"CPopulationManager::AllocateBots"
 			{
 				"linux"		"@_ZN18CPopulationManager12AllocateBotsEv"
@@ -82,6 +87,20 @@
 		}
 		"Functions"
 		{
+			"CTFBotSpawner::CTFBotSpawner"
+			{
+				"signature"	"CTFBotSpawner::CTFBotSpawner"
+				"callconv"	"thiscall"
+				"return"	"int"
+				"this"		"address"
+				"arguments"
+				{
+					"populator"
+					{
+						"type"	"int"
+					}
+				}
+			}
 			"CPopulationManager::AllocateBots"
 			{
 				"signature"	"CPopulationManager::AllocateBots"

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Mikusch
+ * Copyright (C) 2022  Mikusch
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 #include <tf2_stocks>
 #include <dhooks>
 #include <tf2attributes>
+#include <smmem/vec>
 
 #pragma semicolon 1
 #pragma newdecls required
@@ -28,6 +29,7 @@ int g_OffsetClassIcon;
 int g_OffsetHealth;
 int g_OffsetScale;
 int g_OffsetAttributeFlags;
+int g_OffsetItems;
 int g_OffsetIsMissionEnemy;
 
 ConVar tf_mvm_miniboss_scale;
@@ -147,15 +149,19 @@ enum AttributeType
 	PROJECTILE_SHIELD			= 1<<27,				// medic projectile shield
 };
 
+#include "mvm/data.sp"
+
 #include "mvm/dhooks.sp"
+#include "mvm/helpers.sp"
+#include "mvm/memory.sp"
 #include "mvm/sdkcalls.sp"
 
-public Plugin myinfo = 
+public Plugin myinfo =
 {
-	name = "Unnamed Experiment", 
-	author = "Mikusch", 
-	description = "Will it blend?", 
-	version = "1.0.0", 
+	name = "Unnamed Experiment",
+	author = "Mikusch",
+	description = "Will it blend?",
+	version = "1.0.0",
 	url = "https://github.com/Mikusch"
 }
 
@@ -178,6 +184,7 @@ public void OnPluginStart()
 		g_OffsetHealth = gamedata.GetOffset("CTFBotSpawner::m_health");
 		g_OffsetScale = gamedata.GetOffset("CTFBotSpawner::m_scale");
 		g_OffsetAttributeFlags = gamedata.GetOffset("CTFBotSpawner::m_defaultAttributes::m_attributeFlags");
+		g_OffsetItems = gamedata.GetOffset("CTFBotSpawner::m_defaultAttributes::m_items");
 		g_OffsetIsMissionEnemy = gamedata.GetOffset("CTFPlayer::m_bIsMissionEnemy");
 		
 		delete gamedata;
@@ -217,25 +224,40 @@ public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 	int client = GetClientOfUserId(event.GetInt("userid"));
 }
 
-any GetDefaultAttributeFlags(Address spawner)
+void OnEventChangeAttributes(int player, EventChangeAttributes_t pEvent)
 {
-	return LoadFromAddress(spawner + view_as<Address>(g_OffsetAttributeFlags), NumberType_Int32);
+	for (int i = 0; i < pEvent.m_items.Count(); i++)
+	{
+		char item[256];
+		LoadStringFromAddress(DereferencePointer(pEvent.m_items.Get(i)), item, sizeof(item));
+		
+		// TODO
+		AddItem(player, item);
+	}
 }
 
-void SetModelScale(int client, float scale, float duration = 0.0)
+void PostRobotSpawn(int newPlayer)
 {
-	float vecScale[3];
-	vecScale[0] = scale;
-	vecScale[1] = scale;
-	vecScale[2] = duration;
+	SetEntData(newPlayer, g_OffsetIsMissionEnemy, true);
+}
+
+void ModifyMaxHealth(int client, int newMaxHealth, bool setCurrentHealth = true, bool allowModelScaling = true)
+{
+	int maxHealth = GetEntProp(GetPlayerResourceEntity(), Prop_Send, "m_iMaxHealth", _, client);
+	if (maxHealth != newMaxHealth)
+	{
+		TF2Attrib_SetByName(client, "hidden maxhealth non buffed", float(newMaxHealth - maxHealth));
+	}
 	
-	SetVariantVector3D(vecScale);
-	AcceptEntityInput(client, "SetModelScale");
-}
-
-bool GameRules_IsMannVsMachineMode()
-{
-	return view_as<bool>(GameRules_GetProp("m_bPlayingMannVsMachine"));
+	if (setCurrentHealth)
+	{
+		SetEntProp(client, Prop_Data, "m_iHealth", newMaxHealth);
+	}
+	
+	if (allowModelScaling && GetEntProp(client, Prop_Send, "m_bIsMiniBoss"))
+	{
+		SetModelScale(client, g_PlayerAttributes[client].scaleOverride > 0.0 ? g_PlayerAttributes[client].scaleOverride : tf_mvm_miniboss_scale.FloatValue);
+	}
 }
 
 public Action Command_JoinTeamBlue(int client, int args)
@@ -264,7 +286,7 @@ public Action CommandListener_JoinTeam(int client, const char[] command, int arg
 		iTeam = TFTeam_Blue;
 	
 	SetEntityFlags(client, GetEntityFlags(client) | FL_FAKECLIENT);
-	ChangeClientTeam(client, iTeam);
+	TF2_ChangeClientTeam(client, iTeam);
 	SetEntityFlags(client, GetEntityFlags(client) & ~FL_FAKECLIENT);
 	return Plugin_Handled;
 }

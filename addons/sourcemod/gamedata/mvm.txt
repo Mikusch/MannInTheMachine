@@ -84,6 +84,11 @@
 				"linux"		"76"
 				"windows"	"76"
 			}
+			"CTFBotSpawner::m_defaultAttributes::m_items"
+			{
+				"linux"		"84"
+				"windows"	"84"
+			}
 		}
 		"Functions"
 		{

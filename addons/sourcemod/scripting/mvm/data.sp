@@ -1,0 +1,61 @@
+/*
+ * Copyright (C) 2022  Mikusch
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+methodmap EventChangeAttributes_t
+{
+	public EventChangeAttributes_t(Address spawner)
+	{
+		return view_as<EventChangeAttributes_t>(spawner);
+	}
+	
+	property Address m_spawner
+	{
+		public get()
+		{
+			return view_as<Address>(this);
+		}
+	}
+	
+	property any m_attributeFlags
+	{
+		public get()
+		{
+			return LoadFromAddress(this.m_spawner + view_as<Address>(g_OffsetAttributeFlags), NumberType_Int32);
+		}
+	}
+	
+	property CUtlVector m_items
+	{
+		public get()
+		{
+			return CUtlVector(this.m_spawner + view_as<Address>(g_OffsetItems));
+		}
+	}
+};
+
+methodmap CTFBotSpawner
+{
+	public CTFBotSpawner(Address spawner)
+	{
+		return view_as<CTFBotSpawner>(spawner);
+	}
+	
+	public EventChangeAttributes_t GetEventChangeAttributes()
+	{
+		return view_as<EventChangeAttributes_t>(this);
+	}
+};

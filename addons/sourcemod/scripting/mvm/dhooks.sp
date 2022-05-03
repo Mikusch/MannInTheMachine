@@ -81,6 +81,8 @@ public MRESReturn DHookCallback_CTFBotSpawner_Pre(Address spawner, DHookReturn r
 	data.populator = param.Get(1);
 	
 	g_Populators.PushArray(data, sizeof(data));
+	
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_AllocateBots_Pre(int populator)
@@ -114,14 +116,9 @@ float GetScale(Address spawner)
 	return view_as<float>(LoadFromAddress(spawner + view_as<Address>(g_OffsetScale), NumberType_Int32));
 }
 
-public Action Timer_SetIcon(Handle timer, int client)
-{
-	SetEntPropString(client, Prop_Send, "m_iszClassIcon", "demoknight");
-}
-
 void StartIdleSound(int player)
 {
-	if (!GameRules_IsMannVsMachineMode())
+	if (!IsMannVsMachineMode())
 		return;
 	
 	if (GetEntProp(player, Prop_Send, "m_bIsMiniBoss"))
@@ -163,6 +160,8 @@ void StartIdleSound(int player)
 
 public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHookParam params)
 {
+	EventChangeAttributes_t m_defaultAttributes = CTFBotSpawner(spawner).GetEventChangeAttributes();
+	
 	// The player spawning logic.
 	// This is essentially a copy of CTFBotSpawner::Spawn, doing everything it does on human players instead.
 	
@@ -178,7 +177,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 	char m_iszClassIcon[64];
 	GetClassIcon(spawner, m_iszClassIcon, sizeof(m_iszClassIcon));
 	
-	if (GameRules_IsMannVsMachineMode())
+	if (IsMannVsMachineMode())
 	{
 		if (GameRules_GetRoundState() != RoundState_RoundRunning)
 		{
@@ -269,7 +268,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 		
 		TFTeam team = TFTeam_Red;
 		
-		if (GameRules_IsMannVsMachineMode())
+		if (IsMannVsMachineMode())
 		{
 			team = TFTeam_Blue;
 		}
@@ -308,32 +307,34 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 		
 		// newBot->SetTeleportWhere( m_teleportWhereName );
 		
-		if (GetDefaultAttributeFlags(spawner) & MINIBOSS)
+		if (m_defaultAttributes.m_attributeFlags & MINIBOSS)
 		{
 			SetEntProp(newPlayer, Prop_Send, "m_bIsMiniBoss", true);
 		}
 		
-		if (GetDefaultAttributeFlags(spawner) & USE_BOSS_HEALTH_BAR)
+		if (m_defaultAttributes.m_attributeFlags & USE_BOSS_HEALTH_BAR)
 		{
 			SetEntProp(newPlayer, Prop_Send, "m_bUseBossHealthBar", true);
 		}
 		
-		if (GetDefaultAttributeFlags(spawner) & BULLET_IMMUNE)
+		if (m_defaultAttributes.m_attributeFlags & BULLET_IMMUNE)
 		{
 			TF2_AddCondition(newPlayer, TFCond_BulletImmune);
 		}
 		
-		if (GetDefaultAttributeFlags(spawner) & BLAST_IMMUNE)
+		if (m_defaultAttributes.m_attributeFlags & BLAST_IMMUNE)
 		{
 			TF2_AddCondition(newPlayer, TFCond_BlastImmune);
 		}
 		
-		if (GetDefaultAttributeFlags(spawner) & FIRE_IMMUNE)
+		if (m_defaultAttributes.m_attributeFlags & FIRE_IMMUNE)
 		{
 			TF2_AddCondition(newPlayer, TFCond_FireImmune);
 		}
 		
-		if (GameRules_IsMannVsMachineMode())
+		OnEventChangeAttributes(newPlayer, m_defaultAttributes);
+		
+		if (IsMannVsMachineMode())
 		{
 			// initialize currency to be dropped on death to zero
 			SetEntProp(newPlayer, Prop_Send, "m_nCurrency", 0);
@@ -390,7 +391,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 		bool halloweenPopFile = false;
 		if (halloweenPopFile)
 		{
-			// TODO: Halloween Pop File
+			// TODO: Implement Halloween Pop File
 		}
 		else
 		{
@@ -413,11 +414,9 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 			}
 		}
 		
-		// NOTE: This is actually done in CMissionPopulator::UpdateMission,
-		// but it has more bot checks so once again we just replicate code
-		// TODO: Add the rest
-		SetEntData(newPlayer, g_OffsetIsMissionEnemy, true);
-		//PrintToChatAll("Marking %N as mission enemy", newPlayer);
+		// Code that normally gets executed in CMissionPopulator::UpdateMission after the spawner is done.
+		// We don't have easy access to that, so we do it right here instead.
+		PostRobotSpawn(newPlayer);
 	}
 	
 	// Finally, suppress the original function
@@ -425,43 +424,31 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 	return MRES_Supercede;
 }
 
-void ModifyMaxHealth(int client, int newMaxHealth, bool setCurrentHealth = true, bool allowModelScaling = true)
-{
-	int maxHealth = GetEntProp(GetPlayerResourceEntity(), Prop_Send, "m_iMaxHealth", _, client);
-	if (maxHealth != newMaxHealth)
-	{
-		TF2Attrib_SetByName(client, "hidden maxhealth non buffed", float(newMaxHealth - maxHealth));
-	}
-	
-	if (setCurrentHealth)
-	{
-		SetEntProp(client, Prop_Data, "m_iHealth", newMaxHealth);
-	}
-	
-	if (allowModelScaling && GetEntProp(client, Prop_Send, "m_bIsMiniBoss"))
-	{
-		SetModelScale(client, g_PlayerAttributes[client].scaleOverride > 0.0 ? g_PlayerAttributes[client].scaleOverride : tf_mvm_miniboss_scale.FloatValue);
-	}
-}
-
 public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, DHookParam params)
 {
 	GameRules_SetProp("m_bPlayingMannVsMachine", false);
+	
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_GetTeamAssignmentOverride_Post(DHookReturn ret, DHookParam params)
 {
 	GameRules_SetProp("m_bPlayingMannVsMachine", true);
+	
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_EventKilled_Pre(int client, DHookParam params)
 {
-	//PrintToChatAll("Is %N mission enemy? %d", client, GetEntData(client, g_OffsetIsMissionEnemy));
 	// TODO: Only do this for BLU team
 	SetEntityFlags(client, GetEntityFlags(client) | FL_FAKECLIENT);
+	
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_EventKilled_Post(int client, DHookParam params)
 {
 	SetEntityFlags(client, GetEntityFlags(client) & ~FL_FAKECLIENT);
+	
+	return MRES_Ignored;
 }

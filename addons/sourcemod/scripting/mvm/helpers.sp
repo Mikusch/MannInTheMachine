@@ -36,10 +36,79 @@ void SetModelScale(int entity, float scale, float duration = 0.0)
 	AcceptEntityInput(entity, "SetModelScale");
 }
 
+bool IsMiscSlot(int iSlot)
+{
+	return iSlot == LOADOUT_POSITION_MISC
+		|| iSlot == LOADOUT_POSITION_MISC2
+		|| iSlot == LOADOUT_POSITION_HEAD;
+}
+
+bool IsTauntSlot(int iSlot)
+{
+	return iSlot == LOADOUT_POSITION_TAUNT
+		|| iSlot == LOADOUT_POSITION_TAUNT2
+		|| iSlot == LOADOUT_POSITION_TAUNT3
+		|| iSlot == LOADOUT_POSITION_TAUNT4
+		|| iSlot == LOADOUT_POSITION_TAUNT5
+		|| iSlot == LOADOUT_POSITION_TAUNT6
+		|| iSlot == LOADOUT_POSITION_TAUNT7
+		|| iSlot == LOADOUT_POSITION_TAUNT8;
+}
+
+bool IsWearableSlot(int iSlot)
+{
+	return iSlot == LOADOUT_POSITION_HEAD
+		|| iSlot == LOADOUT_POSITION_MISC
+		|| iSlot == LOADOUT_POSITION_ACTION
+		|| IsMiscSlot(iSlot)
+		|| IsTauntSlot(iSlot);
+}
+
 void AddItem(int player, const char[] pszItemName)
 {
 	int defindex = FindItemByName(pszItemName);
 	
+	// If we already have an item in that slot, remove it
+	TFClassType class = TF2_GetPlayerClass(player);
+	int slot = TF2Econ_GetItemLoadoutSlot(defindex, class);
+	int newItemRegionMask = TF2Econ_GetItemEquipRegionMask(defindex);
+	
+	if (IsWearableSlot(slot))
+	{
+		for (int wbl = 0; wbl < TF2Util_GetPlayerWearableCount(player); wbl++)
+		{
+			int pWearable = TF2Util_GetPlayerWearable(player, wbl);
+			if (pWearable == -1)
+				continue;
+			
+			int wearableDefindex = GetEntProp(pWearable, Prop_Send, "m_iItemDefinitionIndex");
+			int wearableRegionMask = TF2Econ_GetItemEquipRegionMask(wearableDefindex);
+			
+			if (wearableRegionMask & newItemRegionMask)
+			{
+				TF2_RemoveWeaponSlot(player, pWearable);
+			}
+		}
+	}
+	else
+	{
+		int entity = TF2Util_GetPlayerLoadoutEntity(player, slot);
+		if (entity != -1)
+		{
+			RemoveEntity(entity);
+		}
+	}
+	
+	int item = CreateAndEquipItem(player, defindex);
+	
+	if (TF2Util_IsEntityWearable(item))
+		TF2Util_EquipPlayerWearable(player, item)
+	else
+		EquipPlayerWeapon(player, item);
+}
+
+int CreateAndEquipItem(int player, int defindex)
+{
 	Handle hItem = TF2Items_CreateItem(PRESERVE_ATTRIBUTES);
 	
 	char classname[64];
@@ -55,8 +124,7 @@ void AddItem(int player, const char[] pszItemName)
 	
 	SetEntProp(item, Prop_Send, "m_bValidatedAttachedEntity", true);
 	
-	// TODO: Wearable support
-	EquipPlayerWeapon(player, item);
+	return item;
 }
 
 static int FindItemByName(const char[] name)

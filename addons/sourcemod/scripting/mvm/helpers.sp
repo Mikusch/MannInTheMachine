@@ -38,5 +38,52 @@ void SetModelScale(int entity, float scale, float duration = 0.0)
 
 void AddItem(int player, const char[] pszItemName)
 {
-	PrintToChatAll("Adding item %s to %N", player, pszItemName);
+	int defindex = FindItemByName(pszItemName);
+	
+	Handle hItem = TF2Items_CreateItem(PRESERVE_ATTRIBUTES);
+	
+	char classname[64];
+	TF2Econ_GetItemClassName(defindex, classname, sizeof(classname));
+	
+	TF2Items_SetClassname(hItem, classname);
+	TF2Items_SetItemIndex(hItem, defindex);
+	TF2Items_SetLevel(hItem, 1);
+	
+	int item = TF2Items_GiveNamedItem(player, hItem);
+	
+	delete hItem;
+	
+	SetEntProp(item, Prop_Send, "m_bValidatedAttachedEntity", true);
+	
+	// TODO: Wearable support
+	EquipPlayerWeapon(player, item);
+}
+
+static int FindItemByName(const char[] name)
+{
+	if (!name[0])
+	{
+		return TF_ITEMDEF_DEFAULT;
+	}
+	
+	static StringMap s_ItemDefsByName;
+	if (s_ItemDefsByName)
+	{
+		int value = TF_ITEMDEF_DEFAULT;
+		return s_ItemDefsByName.GetValue(name, value) ? value : TF_ITEMDEF_DEFAULT;
+	}
+	
+	s_ItemDefsByName = new StringMap();
+	
+	ArrayList itemList = TF2Econ_GetItemList();
+	char nameBuffer[64];
+	for (int i, nItems = itemList.Length; i < nItems; i++)
+	{
+		int itemdef = itemList.Get(i);
+		TF2Econ_GetItemName(itemdef, nameBuffer, sizeof(nameBuffer));
+		s_ItemDefsByName.SetValue(nameBuffer, itemdef);
+	}
+	delete itemList;
+	
+	return FindItemByName(name);
 }

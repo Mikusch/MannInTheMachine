@@ -20,6 +20,8 @@
 #include <dhooks>
 #include <tf2attributes>
 #include <smmem/vec>
+#include <tf_econ_data>
+#include <tf2items>
 
 #pragma semicolon 1
 #pragma newdecls required
@@ -226,13 +228,17 @@ public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 
 void OnEventChangeAttributes(int player, EventChangeAttributes_t pEvent)
 {
-	for (int i = 0; i < pEvent.m_items.Count(); i++)
+	if (pEvent)
 	{
-		char item[256];
-		LoadStringFromAddress(DereferencePointer(pEvent.m_items.Get(i)), item, sizeof(item));
-		
-		// TODO
-		AddItem(player, item);
+		// give items to bot before apply attribute changes
+		for (int i = 0; i < pEvent.m_items.Count(); i++)
+		{
+			char item[256];
+			LoadStringFromAddress(DereferencePointer(pEvent.m_items.Get(i)), item, sizeof(item));
+			
+			// TODO
+			AddItem(player, item);
+		}
 	}
 }
 

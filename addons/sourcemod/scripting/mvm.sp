@@ -33,6 +33,8 @@ int g_OffsetHealth;
 int g_OffsetScale;
 int g_OffsetAttributeFlags;
 int g_OffsetItems;
+int g_OffsetItemsAttributes;
+int g_OffsetCharacterAttributes;
 int g_OffsetIsMissionEnemy;
 
 ConVar tf_mvm_miniboss_scale;
@@ -69,9 +71,9 @@ char g_aRawPlayerClassNamesShort[][] =
 	"scout",
 	"sniper",
 	"soldier",
-	"demo",	// short
+	"demo",		// short
 	"medic",
-	"heavy",// short
+	"heavy",	// short
 	"pyro",
 	"spy",
 	"engineer",
@@ -224,6 +226,8 @@ public void OnPluginStart()
 		g_OffsetScale = gamedata.GetOffset("CTFBotSpawner::m_scale");
 		g_OffsetAttributeFlags = gamedata.GetOffset("CTFBotSpawner::m_defaultAttributes::m_attributeFlags");
 		g_OffsetItems = gamedata.GetOffset("CTFBotSpawner::m_defaultAttributes::m_items");
+		g_OffsetItemsAttributes = gamedata.GetOffset("CTFBotSpawner::m_defaultAttributes::m_itemsAttributes");
+		g_OffsetCharacterAttributes = gamedata.GetOffset("CTFBotSpawner::m_defaultAttributes::m_characterAttributes");
 		g_OffsetIsMissionEnemy = gamedata.GetOffset("CTFPlayer::m_bIsMissionEnemy");
 		
 		delete gamedata;
@@ -267,6 +271,28 @@ void OnEventChangeAttributes(int player, EventChangeAttributes_t pEvent)
 {
 	if (pEvent)
 	{
+		// remove any player attributes
+		SDKCall_RemovePlayerAttributes( player, false );
+		// and add ones that we want specifically
+		for (int i = 0; i < pEvent.m_characterAttributes.Count(); i++)
+		{
+			//PrintToChatAll("character attribute %i", i);
+			/*const CEconItemAttributeDefinition *pDef = pEvent->m_characterAttributes[i].GetAttributeDefinition();
+			if ( pDef )
+			{
+				Assert( GetAttributeList() );
+				GetAttributeList()->SetRuntimeAttributeValue( pDef, pEvent->m_characterAttributes[i].m_value.asFloat );
+			}*/
+		}
+		
+		for (int i = 0; i < pEvent.m_itemsAttributes.Count(); i++)
+		{
+			char itemName[256];
+			LoadStringFromAddress(DereferencePointer(pEvent.m_itemsAttributes.Get(i)) + 0x4, itemName, sizeof(itemName));
+			
+			PrintToChatAll("item %s attribs %d", item,CUtlVector(pEvent.m_itemsAttributes.Get(i) + 0x8).Count());
+		}
+		
 		// give items to bot before apply attribute changes
 		for (int i = 0; i < pEvent.m_items.Count(); i++)
 		{

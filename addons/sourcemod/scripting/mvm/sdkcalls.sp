@@ -16,15 +16,17 @@
  */
 
 static Handle g_SDKCallRemovePlayerAttributes;
+static Handle g_SDKCallPostInventoryApplication;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
 	g_SDKCallRemovePlayerAttributes = PrepSDKCall_RemovePlayerAttributes(gamedata);
+	g_SDKCallPostInventoryApplication = PrepSDKCall_PostInventoryApplication(gamedata);
 }
 
 static Handle PrepSDKCall_RemovePlayerAttributes(GameData gamedata)
 {
-	StartPrepSDKCall(SDKCall_Entity);
+	StartPrepSDKCall(SDKCall_Player);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::RemovePlayerAttributes");
 	PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_ByValue);
 	
@@ -35,8 +37,26 @@ static Handle PrepSDKCall_RemovePlayerAttributes(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_PostInventoryApplication(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::PostInventoryApplication");
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFPlayer::PostInventoryApplication");
+	
+	return call;
+}
+
 void SDKCall_RemovePlayerAttributes(int player, bool setBonuses)
 {
 	if (g_SDKCallRemovePlayerAttributes)
 		SDKCall(g_SDKCallRemovePlayerAttributes, player, setBonuses);
+}
+
+void SDKCall_PostInventoryApplication(int player)
+{
+	if (g_SDKCallPostInventoryApplication)
+		SDKCall(g_SDKCallPostInventoryApplication, player);
 }

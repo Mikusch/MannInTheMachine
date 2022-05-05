@@ -75,6 +75,7 @@ void AddItem(int player, const char[] pszItemName)
 	
 	if (IsWearableSlot(slot))
 	{
+		// Remove any wearable that has a conflicting equip_region
 		for (int wbl = 0; wbl < TF2Util_GetPlayerWearableCount(player); wbl++)
 		{
 			int pWearable = TF2Util_GetPlayerWearable(player, wbl);
@@ -82,6 +83,11 @@ void AddItem(int player, const char[] pszItemName)
 				continue;
 			
 			int wearableDefindex = GetEntProp(pWearable, Prop_Send, "m_iItemDefinitionIndex");
+			
+			// TODO: What causes this?
+			if (wearableDefindex == 65535)
+				continue;
+			
 			int wearableRegionMask = TF2Econ_GetItemEquipRegionMask(wearableDefindex);
 			
 			if (wearableRegionMask & newItemRegionMask)
@@ -105,6 +111,8 @@ void AddItem(int player, const char[] pszItemName)
 		TF2Util_EquipPlayerWearable(player, item)
 	else
 		EquipPlayerWeapon(player, item);
+	
+	SDKCall_PostInventoryApplication(player);
 }
 
 int CreateAndEquipItem(int player, int defindex)

@@ -45,6 +45,22 @@ methodmap EventChangeAttributes_t
 			return CUtlVector(this.m_spawner + view_as<Address>(g_OffsetItems));
 		}
 	}
+	
+	property CUtlVector m_itemsAttributes
+	{
+		public get()
+		{
+			return CUtlVector(this.m_spawner + view_as<Address>(g_OffsetItemsAttributes));
+		}
+	}
+	
+	property CUtlVector m_characterAttributes
+	{
+		public get()
+		{
+			return CUtlVector(this.m_spawner + view_as<Address>(g_OffsetCharacterAttributes));
+		}
+	}
 };
 
 methodmap CTFBotSpawner

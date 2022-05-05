@@ -46,6 +46,11 @@
 				"linux"		"@_ZN12CTFGameRules25GetTeamAssignmentOverrideEP9CTFPlayerib"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x10\x81\x65\xF4\xFF\xFF\x0F\xFF\x8D\x45\xF0\x53"
 			}
+			"CTFPlayer::PostInventoryApplication"
+			{
+				"linux"		"@_ZN9CTFPlayer24PostInventoryApplicationEv"
+				"windows"	"\x55\x8B\xEC\x51\x53\x8B\xD9\x56\x57\x8D\x8B\xB0\x19\x00\x00"
+			}
 		}
 		"Offsets"
 		{
@@ -88,6 +93,16 @@
 			{
 				"linux"		"84"
 				"windows"	"84"
+			}
+			"CTFBotSpawner::m_defaultAttributes::m_itemsAttributes"
+			{
+				"linux"		"104"
+				"windows"	"104"
+			}
+			"CTFBotSpawner::m_defaultAttributes::m_characterAttributes"
+			{
+				"linux"		"0"
+				"windows"	"0"
 			}
 		}
 		"Functions"

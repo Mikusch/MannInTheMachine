@@ -135,7 +135,7 @@ int CreateAndEquipItem(int player, int defindex)
 	return item;
 }
 
-static int FindItemByName(const char[] name)
+int FindItemByName(const char[] name)
 {
 	if (!name[0])
 	{

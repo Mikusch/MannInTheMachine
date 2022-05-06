@@ -101,8 +101,8 @@
 			}
 			"CTFBotSpawner::m_defaultAttributes::m_characterAttributes"
 			{
-				"linux"		"0"
-				"windows"	"0"
+				"linux"		"80"
+				"windows"	"80"
 			}
 		}
 		"Functions"

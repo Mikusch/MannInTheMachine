@@ -285,6 +285,7 @@ void OnEventChangeAttributes(int player, EventChangeAttributes_t pEvent)
 			}*/
 		}
 		
+		PrintToChatAll("Found %d items attributes", pEvent.m_itemsAttributes.Count());
 		for (int i = 0; i < pEvent.m_itemsAttributes.Count(); i++)
 		{
 			Address itemAttributes = pEvent.m_itemsAttributes.Get(i);
@@ -301,8 +302,8 @@ void OnEventChangeAttributes(int player, EventChangeAttributes_t pEvent)
 				
 				//if ( entity != -1 && itemDef == GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"))
 				{
-					CUtlVector m_attributes = CUtlVector(itemAttributes + 0x8);
-					for (int iAtt = 0; iAtt < m_attributes.Count(); ++iAtt)
+					CUtlVector m_attributes = CUtlVector(itemAttributes + view_as<Address>(0x08));
+					for (int iAtt = 0; iAtt < m_attributes.Count(); iAtt++)
 					{
 						Address attrib = m_attributes.Get(iAtt);
 						
@@ -310,7 +311,7 @@ void OnEventChangeAttributes(int player, EventChangeAttributes_t pEvent)
 						int defIndex = TF2Attrib_GetDefIndex(attrib);
 						float value = TF2Attrib_GetValue(attrib);
 						
-						PrintToChatAll("Attribute %d with value: %f", defIndex, value);
+						PrintToChatAll("attrib %d (flValue: %f)", defIndex, value);
 					}
 					
 					// move on to the next set of attributes
@@ -325,7 +326,6 @@ void OnEventChangeAttributes(int player, EventChangeAttributes_t pEvent)
 			char item[256];
 			LoadStringFromAddress(DereferencePointer(pEvent.m_items.Get(i)), item, sizeof(item));
 			
-			// TODO
 			AddItem(player, item);
 		}
 	}

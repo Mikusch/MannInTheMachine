@@ -160,7 +160,7 @@ void StartIdleSound(int player)
 
 public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHookParam params)
 {
-	EventChangeAttributes_t m_defaultAttributes = CTFBotSpawner(spawner).GetEventChangeAttributes();
+	EventChangeAttributes_t m_defaultAttributes = CTFBotSpawner(spawner).m_defaultAttributes;
 	
 	// The player spawning logic.
 	// This is essentially a copy of CTFBotSpawner::Spawn, doing everything it does on human players instead.

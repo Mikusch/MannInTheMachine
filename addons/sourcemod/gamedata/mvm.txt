@@ -94,25 +94,30 @@
 				"linux"		"20"
 				"windows"	"20"
 			}
-			"CTFBotSpawner::m_defaultAttributes::m_attributeFlags"
+			"CTFBotSpawner::m_defaultAttributes"
 			{
-				"linux"		"76"
-				"windows"	"76"
+				"linux"		"56"
+				"windows"	"56"
 			}
-			"CTFBotSpawner::m_defaultAttributes::m_items"
+			"EventChangeAttributes_t::m_attributeFlags"
 			{
-				"linux"		"84"
-				"windows"	"84"
+				"linux"		"20"
+				"windows"	"20"
 			}
-			"CTFBotSpawner::m_defaultAttributes::m_itemsAttributes"
+			"EventChangeAttributes_t::m_items"
 			{
-				"linux"		"104"
-				"windows"	"104"
+				"linux"		"28"
+				"windows"	"28"
 			}
-			"CTFBotSpawner::m_defaultAttributes::m_characterAttributes"
+			"EventChangeAttributes_t::m_itemsAttributes"
 			{
-				"linux"		"124"
-				"windows"	"124"
+				"linux"		"48"
+				"windows"	"48"
+			}
+			"EventChangeAttributes_t::m_characterAttributes"
+			{
+				"linux"		"68"
+				"windows"	"68"
 			}
 		}
 		"Functions"

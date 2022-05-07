@@ -31,10 +31,13 @@ int g_OffsetClass;
 int g_OffsetClassIcon;
 int g_OffsetHealth;
 int g_OffsetScale;
+int g_OffsetDefaultAttributes;
+
 int g_OffsetAttributeFlags;
 int g_OffsetItems;
 int g_OffsetItemsAttributes;
 int g_OffsetCharacterAttributes;
+
 int g_OffsetIsMissionEnemy;
 
 ConVar tf_mvm_miniboss_scale;
@@ -224,10 +227,13 @@ public void OnPluginStart()
 		g_OffsetClassIcon = gamedata.GetOffset("CTFBotSpawner::m_iszClassIcon");
 		g_OffsetHealth = gamedata.GetOffset("CTFBotSpawner::m_health");
 		g_OffsetScale = gamedata.GetOffset("CTFBotSpawner::m_scale");
-		g_OffsetAttributeFlags = gamedata.GetOffset("CTFBotSpawner::m_defaultAttributes::m_attributeFlags");
-		g_OffsetItems = gamedata.GetOffset("CTFBotSpawner::m_defaultAttributes::m_items");
-		g_OffsetItemsAttributes = gamedata.GetOffset("CTFBotSpawner::m_defaultAttributes::m_itemsAttributes");
-		g_OffsetCharacterAttributes = gamedata.GetOffset("CTFBotSpawner::m_defaultAttributes::m_characterAttributes");
+		g_OffsetDefaultAttributes = gamedata.GetOffset("CTFBotSpawner::m_defaultAttributes");
+		
+		g_OffsetAttributeFlags = gamedata.GetOffset("EventChangeAttributes_t::m_attributeFlags");
+		g_OffsetItems = gamedata.GetOffset("EventChangeAttributes_t::m_items");
+		g_OffsetItemsAttributes = gamedata.GetOffset("EventChangeAttributes_t::m_itemsAttributes");
+		g_OffsetCharacterAttributes = gamedata.GetOffset("EventChangeAttributes_t::m_characterAttributes");
+		
 		g_OffsetIsMissionEnemy = gamedata.GetOffset("CTFPlayer::m_bIsMissionEnemy");
 		
 		delete gamedata;
@@ -271,18 +277,28 @@ void OnEventChangeAttributes(int player, EventChangeAttributes_t pEvent)
 {
 	if (pEvent)
 	{
+		// TODO: Weapon restrictions
+		
+		// cache off health value before we clear attribute because ModifyMaxHealth adds new attribute and reset the health
+		int nHealth = GetEntProp(player, Prop_Data, "m_iHealth");
+		int nMaxHealth = GetEntProp(GetPlayerResourceEntity(), Prop_Send, "m_iMaxHealth", _, player);
+		
 		// remove any player attributes
 		SDKCall_RemovePlayerAttributes(player, false);
 		// and add ones that we want specifically
 		for (int i = 0; i < pEvent.m_characterAttributes.Count(); i++)
 		{
+			// static_attrib_t
 			Address pDef = pEvent.m_characterAttributes.Get(i, 8);
 			
 			int defIndex = LoadFromAddress(pDef, NumberType_Int16);
-			float value = LoadFromAddress(pDef + 4, NumberType_Int32);
+			float value = LoadFromAddress(pDef + view_as<Address>(0x4), NumberType_Int32);
 			
 			TF2Attrib_SetByDefIndex(player, defIndex, value);
 		}
+		
+		ModifyMaxHealth(player, nMaxHealth);
+		SetEntProp(player,Prop_Data, "m_iHealth", nHealth);
 		
 		// give items to bot before apply attribute changes
 		for (int i = 0; i < pEvent.m_items.Count(); i++)
@@ -317,7 +333,7 @@ void OnEventChangeAttributes(int player, EventChangeAttributes_t pEvent)
 						Address attrib = m_attributes.Get(iAtt, 8);
 						
 						int defIndex = LoadFromAddress(attrib, NumberType_Int16);
-						float value = LoadFromAddress(attrib + 4, NumberType_Int32);
+						float value = LoadFromAddress(attrib + view_as<Address>(0x4), NumberType_Int32);
 						
 						TF2Attrib_SetByDefIndex(entity, defIndex, value);
 					}
@@ -341,22 +357,22 @@ void PostRobotSpawn(int newPlayer)
 	SetEntData(newPlayer, g_OffsetIsMissionEnemy, true);
 }
 
-void ModifyMaxHealth(int client, int newMaxHealth, bool setCurrentHealth = true, bool allowModelScaling = true)
+void ModifyMaxHealth(int player, int newMaxHealth, bool setCurrentHealth = true, bool allowModelScaling = true)
 {
-	int maxHealth = GetEntProp(GetPlayerResourceEntity(), Prop_Send, "m_iMaxHealth", _, client);
+	int maxHealth = GetEntProp(GetPlayerResourceEntity(), Prop_Send, "m_iMaxHealth", _, player);
 	if (maxHealth != newMaxHealth)
 	{
-		TF2Attrib_SetByName(client, "hidden maxhealth non buffed", float(newMaxHealth - maxHealth));
+		TF2Attrib_SetByName(player, "hidden maxhealth non buffed", float(newMaxHealth - maxHealth));
 	}
 	
 	if (setCurrentHealth)
 	{
-		SetEntProp(client, Prop_Data, "m_iHealth", newMaxHealth);
+		SetEntProp(player, Prop_Data, "m_iHealth", newMaxHealth);
 	}
 	
-	if (allowModelScaling && GetEntProp(client, Prop_Send, "m_bIsMiniBoss"))
+	if (allowModelScaling && GetEntProp(player, Prop_Send, "m_bIsMiniBoss"))
 	{
-		SetModelScale(client, g_PlayerAttributes[client].scaleOverride > 0.0 ? g_PlayerAttributes[client].scaleOverride : tf_mvm_miniboss_scale.FloatValue);
+		SetModelScale(player, g_PlayerAttributes[player].scaleOverride > 0.0 ? g_PlayerAttributes[player].scaleOverride : tf_mvm_miniboss_scale.FloatValue);
 	}
 }
 

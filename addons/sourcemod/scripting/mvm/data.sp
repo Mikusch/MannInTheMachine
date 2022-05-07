@@ -17,24 +17,16 @@
 
 methodmap EventChangeAttributes_t
 {
-	public EventChangeAttributes_t(Address spawner)
+	public EventChangeAttributes_t(Address address)
 	{
-		return view_as<EventChangeAttributes_t>(spawner);
-	}
-	
-	property Address m_spawner
-	{
-		public get()
-		{
-			return view_as<Address>(this);
-		}
+		return view_as<EventChangeAttributes_t>(address);
 	}
 	
 	property any m_attributeFlags
 	{
 		public get()
 		{
-			return LoadFromAddress(this.m_spawner + view_as<Address>(g_OffsetAttributeFlags), NumberType_Int32);
+			return LoadFromAddress(view_as<Address>(this) + view_as<Address>(g_OffsetAttributeFlags), NumberType_Int32);
 		}
 	}
 	
@@ -42,7 +34,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return CUtlVector(this.m_spawner + view_as<Address>(g_OffsetItems));
+			return CUtlVector(view_as<Address>(this) + view_as<Address>(g_OffsetItems));
 		}
 	}
 	
@@ -50,7 +42,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return CUtlVector(this.m_spawner + view_as<Address>(g_OffsetItemsAttributes));
+			return CUtlVector(view_as<Address>(this) + view_as<Address>(g_OffsetItemsAttributes));
 		}
 	}
 	
@@ -58,7 +50,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return CUtlVector(this.m_spawner + view_as<Address>(g_OffsetCharacterAttributes));
+			return CUtlVector(view_as<Address>(this) + view_as<Address>(g_OffsetCharacterAttributes));
 		}
 	}
 };
@@ -68,6 +60,14 @@ methodmap CTFBotSpawner
 	public CTFBotSpawner(Address spawner)
 	{
 		return view_as<CTFBotSpawner>(spawner);
+	}
+	
+	property EventChangeAttributes_t m_defaultAttributes
+	{
+		public get()
+		{
+			return view_as<EventChangeAttributes_t>(view_as<Address>(this) + view_as<Address>(g_OffsetDefaultAttributes));
+		}
 	}
 	
 	public EventChangeAttributes_t GetEventChangeAttributes()

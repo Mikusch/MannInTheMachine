@@ -23,6 +23,7 @@
 #include <tf_econ_data>
 #include <tf2items>
 #include <tf2utils>
+#include <loadsoundscript>
 
 #pragma semicolon 1
 #pragma newdecls required
@@ -196,6 +197,7 @@ enum
 #include "mvm/data.sp"
 
 #include "mvm/dhooks.sp"
+#include "mvm/events.sp"
 #include "mvm/helpers.sp"
 #include "mvm/memory.sp"
 #include "mvm/sdkcalls.sp"
@@ -216,6 +218,8 @@ public void OnPluginStart()
 	AddCommandListener(CommandListener_JoinTeam, "jointeam");
 	
 	tf_mvm_miniboss_scale = FindConVar("tf_mvm_miniboss_scale");
+	
+	Events_Initialize();
 	
 	GameData gamedata = new GameData("mvm");
 	if (gamedata)
@@ -242,9 +246,6 @@ public void OnPluginStart()
 	{
 		SetFailState("Could not find mvm gamedata");
 	}
-	
-	HookEvent("player_death", Event_PlayerDeath);
-	HookEvent("player_team", Event_PlayerTeam);
 	
 	for (int client = 1; client <= MaxClients; client++)
 	{
@@ -273,6 +274,7 @@ public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 	int client = GetClientOfUserId(event.GetInt("userid"));
 }
 
+// TODO: The game assumes that robots already have stock items and doesn't specify them in the popfile
 void OnEventChangeAttributes(int player, EventChangeAttributes_t pEvent)
 {
 	if (pEvent)
@@ -309,7 +311,6 @@ void OnEventChangeAttributes(int player, EventChangeAttributes_t pEvent)
 			AddItem(player, item);
 		}
 		
-		PrintToChatAll("Found %d items attributes", pEvent.m_itemsAttributes.Count());
 		for (int i = 0; i < pEvent.m_itemsAttributes.Count(); i++)
 		{
 			Address itemAttributes = pEvent.m_itemsAttributes.Get(i);
@@ -317,7 +318,6 @@ void OnEventChangeAttributes(int player, EventChangeAttributes_t pEvent)
 			char itemName[64];
 			LoadStringFromAddress(DereferencePointer(itemAttributes), itemName, sizeof(itemName));
 			
-			PrintToChatAll("Found %s: %d", itemName, FindItemByName(itemName));
 			int itemDef = FindItemByName(itemName);
 			
 			for (int iItemSlot = LOADOUT_POSITION_PRIMARY; iItemSlot < CLASS_LOADOUT_POSITION_COUNT; iItemSlot++)
@@ -405,22 +405,4 @@ public Action CommandListener_JoinTeam(int client, const char[] command, int arg
 	TF2_ChangeClientTeam(client, iTeam);
 	SetEntityFlags(client, GetEntityFlags(client) & ~FL_FAKECLIENT);
 	return Plugin_Handled;
-}
-
-int UTIL_StringtToCharArray(Address string_t, char[] buffer, int maxlen)
-{
-	if (string_t == Address_Null)
-		ThrowError("string_t address is null");
-	
-	if (maxlen <= 0)
-		ThrowError("Buffer size is negative or zero");
-	
-	int max = maxlen - 1;
-	int i = 0;
-	for (; i < max; i++)
-	if ((buffer[i] = view_as<char>(LoadFromAddress(string_t + view_as<Address>(i), NumberType_Int8))) == '\0')
-		return i;
-	
-	buffer[i] = '\0';
-	return i;
 }

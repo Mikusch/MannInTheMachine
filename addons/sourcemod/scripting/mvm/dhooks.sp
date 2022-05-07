@@ -116,48 +116,6 @@ float GetScale(Address spawner)
 	return view_as<float>(LoadFromAddress(spawner + view_as<Address>(g_OffsetScale), NumberType_Int32));
 }
 
-void StartIdleSound(int player)
-{
-	if (!IsMannVsMachineMode())
-		return;
-	
-	if (GetEntProp(player, Prop_Send, "m_bIsMiniBoss"))
-	{
-		char pszSoundName[PLATFORM_MAX_PATH];
-		
-		TFClassType class = TF2_GetPlayerClass(player);
-		switch (class)
-		{
-			case TFClass_Heavy:
-			{
-				strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantHeavyLoop");
-			}
-			case TFClass_Soldier:
-			{
-				strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantSoldierLoop");
-			}
-			
-			case TFClass_DemoMan:
-			{
-				strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantDemomanLoop");
-			}
-			case TFClass_Scout:
-			{
-				strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantScoutLoop");
-			}
-			case TFClass_Pyro:
-			{
-				strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantPyroLoop");
-			}
-		}
-		
-		if (pszSoundName[0] != '\0')
-		{
-			EmitGameSoundToAll(pszSoundName, player);
-		}
-	}
-}
-
 public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHookParam params)
 {
 	EventChangeAttributes_t m_defaultAttributes = CTFBotSpawner(spawner).m_defaultAttributes;
@@ -382,7 +340,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 		ModifyMaxHealth(newPlayer, nHealth);
 		//PrintToChat(newPlayer, "%N MAX HEALTH %f", newPlayer, nHealth);
 		
-		StartIdleSound(newPlayer);
+		Player(newPlayer).StartIdleSound();
 		
 		// TODO: Spawn with full charge
 		

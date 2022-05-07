@@ -165,3 +165,21 @@ int FindItemByName(const char[] name)
 	
 	return FindItemByName(name);
 }
+
+int UTIL_StringtToCharArray(Address string_t, char[] buffer, int maxlen)
+{
+	if (string_t == Address_Null)
+		ThrowError("string_t address is null");
+	
+	if (maxlen <= 0)
+		ThrowError("Buffer size is negative or zero");
+	
+	int max = maxlen - 1;
+	int i = 0;
+	for (; i < max; i++)
+	if ((buffer[i] = view_as<char>(LoadFromAddress(string_t + view_as<Address>(i), NumberType_Int8))) == '\0')
+		return i;
+	
+	buffer[i] = '\0';
+	return i;
+}

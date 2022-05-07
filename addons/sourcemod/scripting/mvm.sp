@@ -276,13 +276,12 @@ void OnEventChangeAttributes(int player, EventChangeAttributes_t pEvent)
 		// and add ones that we want specifically
 		for (int i = 0; i < pEvent.m_characterAttributes.Count(); i++)
 		{
-			//PrintToChatAll("character attribute %i", i);
-			/*const CEconItemAttributeDefinition *pDef = pEvent->m_characterAttributes[i].GetAttributeDefinition();
-			if ( pDef )
-			{
-				Assert( GetAttributeList() );
-				GetAttributeList()->SetRuntimeAttributeValue( pDef, pEvent->m_characterAttributes[i].m_value.asFloat );
-			}*/
+			Address pDef = pEvent.m_characterAttributes.Get(i, 8);
+			
+			int defIndex = LoadFromAddress(pDef, NumberType_Int16);
+			float value = LoadFromAddress(pDef + 4, NumberType_Int32);
+			
+			TF2Attrib_SetByDefIndex(player, defIndex, value);
 		}
 		
 		// give items to bot before apply attribute changes

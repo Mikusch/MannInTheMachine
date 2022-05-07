@@ -272,7 +272,7 @@ void OnEventChangeAttributes(int player, EventChangeAttributes_t pEvent)
 	if (pEvent)
 	{
 		// remove any player attributes
-		SDKCall_RemovePlayerAttributes( player, false );
+		SDKCall_RemovePlayerAttributes(player, false);
 		// and add ones that we want specifically
 		for (int i = 0; i < pEvent.m_characterAttributes.Count(); i++)
 		{
@@ -285,12 +285,21 @@ void OnEventChangeAttributes(int player, EventChangeAttributes_t pEvent)
 			}*/
 		}
 		
+		// give items to bot before apply attribute changes
+		for (int i = 0; i < pEvent.m_items.Count(); i++)
+		{
+			char item[64];
+			LoadStringFromAddress(DereferencePointer(pEvent.m_items.Get(i)), item, sizeof(item));
+			
+			AddItem(player, item);
+		}
+		
 		PrintToChatAll("Found %d items attributes", pEvent.m_itemsAttributes.Count());
 		for (int i = 0; i < pEvent.m_itemsAttributes.Count(); i++)
 		{
 			Address itemAttributes = pEvent.m_itemsAttributes.Get(i);
 			
-			char itemName[256];
+			char itemName[64];
 			LoadStringFromAddress(DereferencePointer(itemAttributes), itemName, sizeof(itemName));
 			
 			PrintToChatAll("Found %s: %d", itemName, FindItemByName(itemName));
@@ -300,18 +309,24 @@ void OnEventChangeAttributes(int player, EventChangeAttributes_t pEvent)
 			{
 				int entity = TF2Util_GetPlayerLoadoutEntity(player, iItemSlot);
 				
-				//if ( entity != -1 && itemDef == GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"))
+				if (entity != -1 && itemDef == GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"))
 				{
-					CUtlVector m_attributes = CUtlVector(itemAttributes + view_as<Address>(0x08));
+					CUtlVector m_attributes = CUtlVector(itemAttributes + view_as<Address>(0x8));
 					for (int iAtt = 0; iAtt < m_attributes.Count(); iAtt++)
 					{
-						Address attrib = m_attributes.Get(iAtt);
+						// item_attributes_t
+						Address attrib = m_attributes.Get(iAtt, 8);
 						
-						// TODO: This does not report correct values for all entries
-						int defIndex = TF2Attrib_GetDefIndex(attrib);
-						float value = TF2Attrib_GetValue(attrib);
+						int defIndex = LoadFromAddress(attrib, NumberType_Int16);
+						float value = LoadFromAddress(attrib + 4, NumberType_Int32);
 						
-						PrintToChatAll("attrib %d (flValue: %f)", defIndex, value);
+						TF2Attrib_SetByDefIndex(entity, defIndex, value);
+					}
+					
+					if (entity != -1)
+					{
+						// update model incase we change style
+						SDKCall_UpdateModelToClass(entity);
 					}
 					
 					// move on to the next set of attributes
@@ -319,15 +334,6 @@ void OnEventChangeAttributes(int player, EventChangeAttributes_t pEvent)
 				}
 			} // for each slot
 		} // for each set of attributes
-		
-		// give items to bot before apply attribute changes
-		for (int i = 0; i < pEvent.m_items.Count(); i++)
-		{
-			char item[256];
-			LoadStringFromAddress(DereferencePointer(pEvent.m_items.Get(i)), item, sizeof(item));
-			
-			AddItem(player, item);
-		}
 	}
 }
 

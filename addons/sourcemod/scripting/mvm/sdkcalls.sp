@@ -17,11 +17,15 @@
 
 static Handle g_SDKCallRemovePlayerAttributes;
 static Handle g_SDKCallPostInventoryApplication;
+static Handle g_SDKCallUpdateModelToClass;
+static Handle g_SDKCallWeaponDetach;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
 	g_SDKCallRemovePlayerAttributes = PrepSDKCall_RemovePlayerAttributes(gamedata);
 	g_SDKCallPostInventoryApplication = PrepSDKCall_PostInventoryApplication(gamedata);
+	g_SDKCallUpdateModelToClass = PrepSDKCall_UpdateModelToClass(gamedata);
+	g_SDKCallWeaponDetach = PrepSDKCall_WeaponDetach(gamedata);
 }
 
 static Handle PrepSDKCall_RemovePlayerAttributes(GameData gamedata)
@@ -49,6 +53,31 @@ static Handle PrepSDKCall_PostInventoryApplication(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_UpdateModelToClass(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CEconEntity::UpdateModelToClass");
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CEconEntity::UpdateModelToClass");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_WeaponDetach(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CBaseCombatCharacter::Weapon_Detach");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CBaseCombatCharacter::Weapon_Detach");
+	
+	return call;
+}
+
 void SDKCall_RemovePlayerAttributes(int player, bool setBonuses)
 {
 	if (g_SDKCallRemovePlayerAttributes)
@@ -59,4 +88,16 @@ void SDKCall_PostInventoryApplication(int player)
 {
 	if (g_SDKCallPostInventoryApplication)
 		SDKCall(g_SDKCallPostInventoryApplication, player);
+}
+
+void SDKCall_UpdateModelToClass(int entity)
+{
+	if (g_SDKCallUpdateModelToClass)
+		SDKCall(g_SDKCallUpdateModelToClass, entity);
+}
+
+void SDKCall_WeaponDetach(int player, int weapon)
+{
+	if (g_SDKCallWeaponDetach)
+		SDKCall(g_SDKCallWeaponDetach, player, weapon);
 }

@@ -101,6 +101,7 @@ void AddItem(int player, const char[] pszItemName)
 		int entity = TF2Util_GetPlayerLoadoutEntity(player, slot);
 		if (entity != -1)
 		{
+			SDKCall_WeaponDetach(player, entity);
 			RemoveEntity(entity);
 		}
 	}
@@ -117,13 +118,14 @@ void AddItem(int player, const char[] pszItemName)
 
 int CreateAndEquipItem(int player, int defindex)
 {
-	Handle hItem = TF2Items_CreateItem(PRESERVE_ATTRIBUTES);
+	Handle hItem = TF2Items_CreateItem(PRESERVE_ATTRIBUTES | FORCE_GENERATION);
 	
 	char classname[64];
 	TF2Econ_GetItemClassName(defindex, classname, sizeof(classname));
 	
 	TF2Items_SetClassname(hItem, classname);
 	TF2Items_SetItemIndex(hItem, defindex);
+	TF2Items_SetQuality(hItem, 1);
 	TF2Items_SetLevel(hItem, 1);
 	
 	int item = TF2Items_GiveNamedItem(player, hItem);

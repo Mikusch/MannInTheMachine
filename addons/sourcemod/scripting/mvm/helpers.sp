@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-bool IsMannVsMachineMode()
+bool GameRules_IsMannVsMachineMode()
 {
 	return view_as<bool>(GameRules_GetProp("m_bPlayingMannVsMachine"));
 }

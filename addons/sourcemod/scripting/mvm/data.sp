@@ -16,6 +16,9 @@
  */
 
 static char g_PlayerIdleSounds[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
+static AttributeType g_PlayerAttributeFlags[MAXPLAYERS + 1];
+static int g_PlayerSpawnPointEntity[MAXPLAYERS + 1];
+static float g_PlayerModelScaleOverride[MAXPLAYERS + 1];
 
 methodmap Player
 {
@@ -32,21 +35,84 @@ methodmap Player
 		}
 	}
 	
+	property any m_attributeFlags
+	{
+		public get()
+		{
+			return g_PlayerAttributeFlags[this._client];
+		}
+		public set(any attributeFlag)
+		{
+			g_PlayerAttributeFlags[this._client] = attributeFlag;
+		}
+	}
+	
+	property int m_spawnPointEntity
+	{
+		public get()
+		{
+			return g_PlayerSpawnPointEntity[this._client];
+		}
+		public set(int spawnPoint)
+		{
+			g_PlayerSpawnPointEntity[this._client] = spawnPoint;
+		}
+	}
+	
+	property float m_fModelScaleOverride
+	{
+		public get()
+		{
+			return g_PlayerModelScaleOverride[this._client];
+		}
+		public set(float fScale)
+		{
+			g_PlayerModelScaleOverride[this._client] = fScale;
+		}
+	}
+	
+	public void SetAttribute(any attributeFlag)
+	{
+		this.m_attributeFlags |= attributeFlag;
+	}
+	
+	public void ClearAttribute(any attributeFlag)
+	{
+		this.m_attributeFlags &= ~attributeFlag;
+	}
+	
+	public void ClearAllAttributes()
+	{
+		this.m_attributeFlags = 0;
+	}
+	
+	public bool HasAttribute(any attributeFlag)
+	{
+		return this.m_attributeFlags & attributeFlag ? true : false;
+	}
+	
 	public int GetIdleSound(char[] buffer, int maxlen)
 	{
-		return strcopy(buffer, maxlen, g_PlayerIdleSounds[view_as<int>(this)]);
+		return strcopy(buffer, maxlen, g_PlayerIdleSounds[this._client]);
 	}
 	
 	public int SetIdleSound(const char[] soundName)
 	{
-		return strcopy(g_PlayerIdleSounds[view_as<int>(this)], sizeof(g_PlayerIdleSounds[]), soundName);
+		return strcopy(g_PlayerIdleSounds[this._client], sizeof(g_PlayerIdleSounds[]), soundName);
+	}
+	
+	public void SetScaleOverride(float fScale)
+	{
+		this.m_fModelScaleOverride = fScale;
+		
+		SetModelScale(this._client, this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : 1.0);
 	}
 	
 	public void StartIdleSound()
 	{
 		this.StopIdleSound();
 		
-		if (!IsMannVsMachineMode())
+		if (!GameRules_IsMannVsMachineMode())
 			return;
 		
 		if (GetEntProp(this._client, Prop_Send, "m_bIsMiniBoss"))
@@ -98,6 +164,116 @@ methodmap Player
 			this.SetIdleSound("");
 		}
 	}
+	
+	public void ModifyMaxHealth(int nNewMaxHealth, bool bSetCurrentHealth = true, bool bAllowModelScaling = true)
+	{
+		int maxHealth = this.GetMaxHealth();
+		if (maxHealth != nNewMaxHealth)
+		{
+			TF2Attrib_SetByName(this._client, "hidden maxhealth non buffed", float(nNewMaxHealth - maxHealth));
+		}
+		
+		if (bSetCurrentHealth)
+		{
+			SetEntProp(this._client, Prop_Data, "m_iHealth", nNewMaxHealth);
+		}
+		
+		if (bAllowModelScaling && GetEntProp(this._client, Prop_Send, "m_bIsMiniBoss"))
+		{
+			SetModelScale(this._client, this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : tf_mvm_miniboss_scale.FloatValue);
+		}
+	}
+	
+	public int GetMaxHealth()
+	{
+		return GetEntProp(GetPlayerResourceEntity(), Prop_Send, "m_iMaxHealth", _, this._client)
+	}
+	
+	public void OnEventChangeAttributes(EventChangeAttributes_t pEvent)
+	{
+		if (pEvent)
+		{
+			// TODO: Weapon restrictions
+			
+			this.ClearAllAttributes();
+			this.SetAttribute(pEvent.m_attributeFlags);
+			
+			if (GameRules_IsMannVsMachineMode())
+			{
+				this.SetAttribute(BECOME_SPECTATOR_ON_DEATH);
+				this.SetAttribute(RETAIN_BUILDINGS);
+			}
+			
+			// cache off health value before we clear attribute because ModifyMaxHealth adds new attribute and reset the health
+			int nHealth = GetEntProp(this._client, Prop_Data, "m_iHealth");
+			int nMaxHealth = this.GetMaxHealth();
+			
+			// remove any player attributes
+			SDKCall_RemovePlayerAttributes(this._client, false);
+			// and add ones that we want specifically
+			for (int i = 0; i < pEvent.m_characterAttributes.Count(); i++)
+			{
+				// static_attrib_t
+				Address pDef = pEvent.m_characterAttributes.Get(i, 8);
+				
+				int defIndex = LoadFromAddress(pDef, NumberType_Int16);
+				float value = LoadFromAddress(pDef + view_as<Address>(0x4), NumberType_Int32);
+				
+				TF2Attrib_SetByDefIndex(this._client, defIndex, value);
+			}
+			
+			this.ModifyMaxHealth(nMaxHealth);
+			SetEntProp(this._client, Prop_Data, "m_iHealth", nHealth);
+			
+			// give items to bot before apply attribute changes
+			for (int i = 0; i < pEvent.m_items.Count(); i++)
+			{
+				char item[64];
+				LoadStringFromAddress(DereferencePointer(pEvent.m_items.Get(i)), item, sizeof(item));
+				
+				AddItem(this._client, item);
+			}
+			
+			for (int i = 0; i < pEvent.m_itemsAttributes.Count(); i++)
+			{
+				Address itemAttributes = pEvent.m_itemsAttributes.Get(i);
+				
+				char itemName[64];
+				LoadStringFromAddress(DereferencePointer(itemAttributes), itemName, sizeof(itemName));
+				
+				int itemDef = FindItemByName(itemName);
+				
+				for (int iItemSlot = LOADOUT_POSITION_PRIMARY; iItemSlot < CLASS_LOADOUT_POSITION_COUNT; iItemSlot++)
+				{
+					int entity = TF2Util_GetPlayerLoadoutEntity(this._client, iItemSlot);
+					
+					if (entity != -1 && itemDef == GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"))
+					{
+						CUtlVector m_attributes = CUtlVector(itemAttributes + view_as<Address>(0x8));
+						for (int iAtt = 0; iAtt < m_attributes.Count(); iAtt++)
+						{
+							// item_attributes_t
+							Address attrib = m_attributes.Get(iAtt, 8);
+							
+							int defIndex = LoadFromAddress(attrib, NumberType_Int16);
+							float value = LoadFromAddress(attrib + view_as<Address>(0x4), NumberType_Int32);
+							
+							TF2Attrib_SetByDefIndex(entity, defIndex, value);
+						}
+						
+						if (entity != -1)
+						{
+							// update model incase we change style
+							SDKCall_UpdateModelToClass(entity);
+						}
+						
+						// move on to the next set of attributes
+						break;
+					}
+				} // for each slot
+			} // for each set of attributes
+		}
+	}
 }
 
 methodmap EventChangeAttributes_t
@@ -147,16 +323,57 @@ methodmap CTFBotSpawner
 		return view_as<CTFBotSpawner>(spawner);
 	}
 	
+	property Address _spawner
+	{
+		public get()
+		{
+			return view_as<Address>(this);
+		}
+	}
+	
 	property EventChangeAttributes_t m_defaultAttributes
 	{
 		public get()
 		{
-			return view_as<EventChangeAttributes_t>(view_as<Address>(this) + view_as<Address>(g_OffsetDefaultAttributes));
+			return view_as<EventChangeAttributes_t>(this._spawner + view_as<Address>(g_OffsetDefaultAttributes));
+		}
+	}
+	
+	property int m_health
+	{
+		public get()
+		{
+			return LoadFromAddress(this._spawner + view_as<Address>(g_OffsetHealth), NumberType_Int32);
+		}
+	}
+	
+	property TFClassType m_class
+	{
+		public get()
+		{
+			return view_as<TFClassType>(LoadFromAddress(this._spawner + view_as<Address>(g_OffsetClass), NumberType_Int32));
+		}
+	}
+	
+	property float m_scale
+	{
+		public get()
+		{
+			return view_as<float>(LoadFromAddress(this._spawner + view_as<Address>(g_OffsetScale), NumberType_Int32));
 		}
 	}
 	
 	public EventChangeAttributes_t GetEventChangeAttributes()
 	{
 		return view_as<EventChangeAttributes_t>(this);
+	}
+	
+	public int GetClassIcon(char[] buffer, int maxlen)
+	{
+		Address string_t = view_as<Address>(LoadFromAddress(this._spawner + view_as<Address>(g_OffsetClassIcon), NumberType_Int32));
+		if (string_t != Address_Null)
+			return UTIL_StringtToCharArray(string_t, buffer, maxlen);
+		
+		return strcopy(buffer, maxlen, g_aRawPlayerClassNamesShort[CTFBotSpawner(this._spawner).m_class]);
 	}
 };

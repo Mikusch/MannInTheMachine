@@ -91,34 +91,9 @@ public MRESReturn DHookCallback_AllocateBots_Pre(int populator)
 	return MRES_Supercede;
 }
 
-TFClassType GetClass(Address spawner)
+public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookParam params)
 {
-	return view_as<TFClassType>(LoadFromAddress(spawner + view_as<Address>(g_OffsetClass), NumberType_Int32));
-}
-
-// Copy of CTFBotSpawner::GetClassIcon
-int GetClassIcon(Address spawner, char[] buffer, int maxlen)
-{
-	Address string_t = view_as<Address>(LoadFromAddress(spawner + view_as<Address>(g_OffsetClassIcon), NumberType_Int32));
-	if (string_t != Address_Null)
-		return UTIL_StringtToCharArray(string_t, buffer, maxlen);
-	
-	return strcopy(buffer, maxlen, g_aRawPlayerClassNamesShort[GetClass(spawner)]);
-}
-
-int GetHealth(Address spawner)
-{
-	return LoadFromAddress(spawner + view_as<Address>(g_OffsetHealth), NumberType_Int32);
-}
-
-float GetScale(Address spawner)
-{
-	return view_as<float>(LoadFromAddress(spawner + view_as<Address>(g_OffsetScale), NumberType_Int32));
-}
-
-public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHookParam params)
-{
-	EventChangeAttributes_t m_defaultAttributes = CTFBotSpawner(spawner).m_defaultAttributes;
+	CTFBotSpawner m_spawner = CTFBotSpawner(pThis);
 	
 	// The player spawning logic.
 	// This is essentially a copy of CTFBotSpawner::Spawn, doing everything it does on human players instead.
@@ -128,14 +103,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 	float here[3];
 	params.GetVector(1, here);
 	
-	TFClassType m_class = GetClass(spawner);
-	int m_health = GetHealth(spawner);
-	float m_scale = GetScale(spawner);
-	
-	char m_iszClassIcon[64];
-	GetClassIcon(spawner, m_iszClassIcon, sizeof(m_iszClassIcon));
-	
-	if (IsMannVsMachineMode())
+	if (GameRules_IsMannVsMachineMode())
 	{
 		if (GameRules_GetRoundState() != RoundState_RoundRunning)
 		{
@@ -167,7 +135,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 	}
 	*/
 	
-	/*if ( TFGameRules() && TFGameRules()->IsMannVsMachineMode() )
+	/*if ( TFGameRules() && TFGameRules()->GameRules_IsMannVsMachineMode() )
 	{
 		if ( m_class == TF_CLASS_ENGINEER && m_defaultAttributes.m_attributeFlags & CTFBot::TELEPORT_TO_HINT && CTFBotMvMEngineerHintFinder::FindHint( true, false ) == false )
 		{
@@ -181,6 +149,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 	}
 	*/
 	
+	// find dead player we can re-use
 	for (int client = 1; client <= MaxClients; client++)
 	{
 		if (!IsClientInGame(client))
@@ -190,19 +159,17 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 			continue;
 		
 		newPlayer = client;
-		g_PlayerAttributes[newPlayer].attributeFlags = 0;
+		Player(newPlayer).ClearAllAttributes();
 		break;
 	}
 	
-	// if ( newBot == NULL )
-	// TODO: A lot of shit
 	if (newPlayer == -1)
 	{
-		LogMessage("Not enough players in the server to spawn a robot");
+		LogMessage("Not enough players to spawn a wanted robot!");
 	}
 	else
 	{
-		LogMessage("Spawning %N as robot", newPlayer);
+		LogMessage("Spawning %N as a robot.", newPlayer);
 	}
 	
 	if (newPlayer != -1)
@@ -222,24 +189,26 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 		}
 		
 		DispatchKeyValueVector(g_InternalSpawnPoint, "origin", here);
-		g_PlayerAttributes[newPlayer].spawnPoint = g_InternalSpawnPoint;
+		Player(newPlayer).m_spawnPointEntity = g_InternalSpawnPoint;
 		
 		TFTeam team = TFTeam_Red;
 		
-		if (IsMannVsMachineMode())
+		if (GameRules_IsMannVsMachineMode())
 		{
-			team = TFTeam_Blue;
+			team = TFTeam_Invaders;
 		}
 		
 		// TODO: CTFBot::ChangeTeam does a little bit more, like making team switches silent
 		TF2_ChangeClientTeam(newPlayer, team);
 		
-		SetEntProp(newPlayer, Prop_Data, "m_bAllowInstantSpawn", true);
-		FakeClientCommand(newPlayer, "joinclass %s", g_aRawPlayerClassNames[m_class]);
-		PrintToChatAll("Setting %N icon as %s", newPlayer, m_iszClassIcon);
-		//SetEntPropString(newPlayer, Prop_Send, "m_iszClassIcon", m_iszClassIcon);
+		char m_iszClassIcon[64];
+		m_spawner.GetClassIcon(m_iszClassIcon, sizeof(m_iszClassIcon));
 		
-		int index = g_Populators.FindValue(spawner, PopulatorData::spawner);
+		SetEntProp(newPlayer, Prop_Data, "m_bAllowInstantSpawn", true);
+		FakeClientCommand(newPlayer, "joinclass %s", g_aRawPlayerClassNames[m_spawner.m_class]);
+		SetEntPropString(newPlayer, Prop_Send, "m_iszClassIcon", m_iszClassIcon);
+		
+		int index = g_Populators.FindValue(pThis, PopulatorData::spawner);
 		if (index != -1)
 		{
 			Address populator = g_Populators.Get(index);
@@ -247,7 +216,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 		}
 		else
 		{
-			LogError("No populator found for spawner with address %X", spawner);
+			LogError("No populator found for spawner with address %X", pThis);
 		}
 		
 		// TODO: Implement the EventChangeAttributes system
@@ -265,45 +234,45 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 		
 		// newBot->SetTeleportWhere( m_teleportWhereName );
 		
-		if (m_defaultAttributes.m_attributeFlags & MINIBOSS)
+		if (m_spawner.m_defaultAttributes.m_attributeFlags & MINIBOSS)
 		{
 			SetEntProp(newPlayer, Prop_Send, "m_bIsMiniBoss", true);
 		}
 		
-		if (m_defaultAttributes.m_attributeFlags & USE_BOSS_HEALTH_BAR)
+		if (m_spawner.m_defaultAttributes.m_attributeFlags & USE_BOSS_HEALTH_BAR)
 		{
 			SetEntProp(newPlayer, Prop_Send, "m_bUseBossHealthBar", true);
 		}
 		
-		if (m_defaultAttributes.m_attributeFlags & BULLET_IMMUNE)
+		if (m_spawner.m_defaultAttributes.m_attributeFlags & BULLET_IMMUNE)
 		{
 			TF2_AddCondition(newPlayer, TFCond_BulletImmune);
 		}
 		
-		if (m_defaultAttributes.m_attributeFlags & BLAST_IMMUNE)
+		if (m_spawner.m_defaultAttributes.m_attributeFlags & BLAST_IMMUNE)
 		{
 			TF2_AddCondition(newPlayer, TFCond_BlastImmune);
 		}
 		
-		if (m_defaultAttributes.m_attributeFlags & FIRE_IMMUNE)
+		if (m_spawner.m_defaultAttributes.m_attributeFlags & FIRE_IMMUNE)
 		{
 			TF2_AddCondition(newPlayer, TFCond_FireImmune);
 		}
 		
-		OnEventChangeAttributes(newPlayer, m_defaultAttributes);
+		Player(newPlayer).OnEventChangeAttributes(m_spawner.m_defaultAttributes);
 		
-		if (IsMannVsMachineMode())
+		if (GameRules_IsMannVsMachineMode())
 		{
 			// initialize currency to be dropped on death to zero
 			SetEntProp(newPlayer, Prop_Send, "m_nCurrency", 0);
 			
 			// announce Spies
-			if (m_class == TFClass_Spy)
+			if (m_spawner.m_class == TFClass_Spy)
 			{
 				int spyCount = 0;
 				for (int client = 1; client <= MaxClients; client++)
 				{
-					if (IsClientInGame(client) && IsPlayerAlive(client) && TF2_GetClientTeam(client) == TFTeam_Blue)
+					if (IsClientInGame(client) && IsPlayerAlive(client) && TF2_GetClientTeam(client) == TFTeam_Invaders)
 					{
 						if (TF2_GetPlayerClass(client) == TFClass_Spy)
 						{
@@ -323,39 +292,38 @@ public MRESReturn DHookCallback_Spawn_Pre(Address spawner, DHookReturn ret, DHoo
 			
 		}
 		
-		// SetScaleOverride
-		// TODO: Can be done better
-		g_PlayerAttributes[newPlayer].scaleOverride = m_scale;
-		SetModelScale(newPlayer, m_scale > 0.0 ? m_scale : 1.0);
+		Player(newPlayer).SetScaleOverride(m_spawner.m_scale);
 		
-		int nHealth = m_health;
+		int nHealth = m_spawner.m_health;
 		
 		if (nHealth <= 0.0)
 		{
-			nHealth = GetEntProp(GetPlayerResourceEntity(), Prop_Send, "m_iMaxHealth", _, newPlayer);
+			nHealth = Player(newPlayer).GetMaxHealth();
 		}
 		
 		// TODO: Support populator health multiplier
 		// nHealth *= g_pPopulationManager->GetHealthMultiplier( false );
-		ModifyMaxHealth(newPlayer, nHealth);
-		//PrintToChat(newPlayer, "%N MAX HEALTH %f", newPlayer, nHealth);
+		Player(newPlayer).ModifyMaxHealth(nHealth);
 		
 		Player(newPlayer).StartIdleSound();
 		
-		// TODO: Spawn with full charge
+		if (Player(newPlayer).HasAttribute(SPAWN_WITH_FULL_CHARGE))
+		{
+			// TODO: Spawn players with full charge
+		}
 		
 		TFClassType nClassIndex = TF2_GetPlayerClass(newPlayer);
 		
 		bool halloweenPopFile = false;
 		if (halloweenPopFile)
 		{
-			// TODO: Implement Halloween Pop File
+			// TODO: Implement Halloween popfile
 		}
 		else
 		{
 			if (nClassIndex >= TFClass_Scout && nClassIndex <= TFClass_Engineer)
 			{
-				if (m_scale >= FindConVar("tf_mvm_miniboss_scale").FloatValue || GetEntProp(newPlayer, Prop_Send, "m_bIsMiniBoss") && FileExists(g_szBotBossModels[nClassIndex], true))
+				if (m_spawner.m_scale >= FindConVar("tf_mvm_miniboss_scale").FloatValue || GetEntProp(newPlayer, Prop_Send, "m_bIsMiniBoss") && FileExists(g_szBotBossModels[nClassIndex], true))
 				{
 					SetVariantString(g_szBotBossModels[nClassIndex]);
 					AcceptEntityInput(newPlayer, "SetCustomModel");

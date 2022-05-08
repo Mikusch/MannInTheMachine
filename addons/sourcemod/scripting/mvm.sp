@@ -28,6 +28,9 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+const TFTeam TFTeam_Defenders = TFTeam_Red;
+const TFTeam TFTeam_Invaders = TFTeam_Blue;
+
 int g_OffsetClass;
 int g_OffsetClassIcon;
 int g_OffsetHealth;
@@ -42,15 +45,6 @@ int g_OffsetCharacterAttributes;
 int g_OffsetIsMissionEnemy;
 
 ConVar tf_mvm_miniboss_scale;
-
-enum struct PlayerAttributes
-{
-	int attributeFlags;
-	int spawnPoint;
-	float scaleOverride;
-}
-
-PlayerAttributes g_PlayerAttributes[MAXPLAYERS + 1];
 
 char g_aRawPlayerClassNames[][] =
 {
@@ -213,10 +207,6 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-	RegConsoleCmd("sm_joinblue", Command_JoinTeamBlue);
-	
-	AddCommandListener(CommandListener_JoinTeam, "jointeam");
-	
 	tf_mvm_miniboss_scale = FindConVar("tf_mvm_miniboss_scale");
 	
 	Events_Initialize();
@@ -274,135 +264,7 @@ public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 	int client = GetClientOfUserId(event.GetInt("userid"));
 }
 
-// TODO: The game assumes that robots already have stock items and doesn't specify them in the popfile
-void OnEventChangeAttributes(int player, EventChangeAttributes_t pEvent)
-{
-	if (pEvent)
-	{
-		// TODO: Weapon restrictions
-		
-		// cache off health value before we clear attribute because ModifyMaxHealth adds new attribute and reset the health
-		int nHealth = GetEntProp(player, Prop_Data, "m_iHealth");
-		int nMaxHealth = GetEntProp(GetPlayerResourceEntity(), Prop_Send, "m_iMaxHealth", _, player);
-		
-		// remove any player attributes
-		SDKCall_RemovePlayerAttributes(player, false);
-		// and add ones that we want specifically
-		for (int i = 0; i < pEvent.m_characterAttributes.Count(); i++)
-		{
-			// static_attrib_t
-			Address pDef = pEvent.m_characterAttributes.Get(i, 8);
-			
-			int defIndex = LoadFromAddress(pDef, NumberType_Int16);
-			float value = LoadFromAddress(pDef + view_as<Address>(0x4), NumberType_Int32);
-			
-			TF2Attrib_SetByDefIndex(player, defIndex, value);
-		}
-		
-		ModifyMaxHealth(player, nMaxHealth);
-		SetEntProp(player,Prop_Data, "m_iHealth", nHealth);
-		
-		// give items to bot before apply attribute changes
-		for (int i = 0; i < pEvent.m_items.Count(); i++)
-		{
-			char item[64];
-			LoadStringFromAddress(DereferencePointer(pEvent.m_items.Get(i)), item, sizeof(item));
-			
-			AddItem(player, item);
-		}
-		
-		for (int i = 0; i < pEvent.m_itemsAttributes.Count(); i++)
-		{
-			Address itemAttributes = pEvent.m_itemsAttributes.Get(i);
-			
-			char itemName[64];
-			LoadStringFromAddress(DereferencePointer(itemAttributes), itemName, sizeof(itemName));
-			
-			int itemDef = FindItemByName(itemName);
-			
-			for (int iItemSlot = LOADOUT_POSITION_PRIMARY; iItemSlot < CLASS_LOADOUT_POSITION_COUNT; iItemSlot++)
-			{
-				int entity = TF2Util_GetPlayerLoadoutEntity(player, iItemSlot);
-				
-				if (entity != -1 && itemDef == GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"))
-				{
-					CUtlVector m_attributes = CUtlVector(itemAttributes + view_as<Address>(0x8));
-					for (int iAtt = 0; iAtt < m_attributes.Count(); iAtt++)
-					{
-						// item_attributes_t
-						Address attrib = m_attributes.Get(iAtt, 8);
-						
-						int defIndex = LoadFromAddress(attrib, NumberType_Int16);
-						float value = LoadFromAddress(attrib + view_as<Address>(0x4), NumberType_Int32);
-						
-						TF2Attrib_SetByDefIndex(entity, defIndex, value);
-					}
-					
-					if (entity != -1)
-					{
-						// update model incase we change style
-						SDKCall_UpdateModelToClass(entity);
-					}
-					
-					// move on to the next set of attributes
-					break;
-				}
-			} // for each slot
-		} // for each set of attributes
-	}
-}
-
 void PostRobotSpawn(int newPlayer)
 {
 	SetEntData(newPlayer, g_OffsetIsMissionEnemy, true);
-}
-
-void ModifyMaxHealth(int player, int newMaxHealth, bool setCurrentHealth = true, bool allowModelScaling = true)
-{
-	int maxHealth = GetEntProp(GetPlayerResourceEntity(), Prop_Send, "m_iMaxHealth", _, player);
-	if (maxHealth != newMaxHealth)
-	{
-		TF2Attrib_SetByName(player, "hidden maxhealth non buffed", float(newMaxHealth - maxHealth));
-	}
-	
-	if (setCurrentHealth)
-	{
-		SetEntProp(player, Prop_Data, "m_iHealth", newMaxHealth);
-	}
-	
-	if (allowModelScaling && GetEntProp(player, Prop_Send, "m_bIsMiniBoss"))
-	{
-		SetModelScale(player, g_PlayerAttributes[player].scaleOverride > 0.0 ? g_PlayerAttributes[player].scaleOverride : tf_mvm_miniboss_scale.FloatValue);
-	}
-}
-
-public Action Command_JoinTeamBlue(int client, int args)
-{
-	FakeClientCommand(client, "jointeam blue");
-	return Plugin_Handled;
-}
-
-public Action CommandListener_JoinTeam(int client, const char[] command, int argc)
-{
-	char strTeam[16];
-	if (argc > 0)
-		GetCmdArg(1, strTeam, sizeof(strTeam));
-	
-	TFTeam iTeam = TFTeam_Unassigned;
-	if (StrEqual(strTeam, "red", false))
-		iTeam = TFTeam_Red;
-	else if (StrEqual(strTeam, "blue", false))
-		iTeam = TFTeam_Blue;
-	else if (StrEqual(strTeam, "spectate", false) || StrEqual(strTeam, "spectator", false))
-		iTeam = TFTeam_Spectator;
-	else if (!StrEqual(command, "autoteam", false))
-		return Plugin_Continue;
-	
-	if (IsFakeClient(client))
-		iTeam = TFTeam_Blue;
-	
-	SetEntityFlags(client, GetEntityFlags(client) | FL_FAKECLIENT);
-	TF2_ChangeClientTeam(client, iTeam);
-	SetEntityFlags(client, GetEntityFlags(client) & ~FL_FAKECLIENT);
-	return Plugin_Handled;
 }

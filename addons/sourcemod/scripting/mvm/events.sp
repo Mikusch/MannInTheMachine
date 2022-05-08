@@ -22,7 +22,32 @@ void Events_Initialize()
 
 public void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 {
-	int victim = GetClientOfUserId(event.GetInt("userid"));
+	int userid = event.GetInt("userid");
+	int victim = GetClientOfUserId(userid);
 	
-	Player(victim).StopIdleSound();
+	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
+	{
+		Player(victim).StopIdleSound();
+		
+		// CTFBotDead::Update
+		CreateTimer(5.0, Timer_DeadTimer, userid);
+	}
+}
+
+public Action Timer_DeadTimer(Handle timer, int userid)
+{
+	int player = GetClientOfUserId(userid);
+	if (player == 0)
+		return Plugin_Continue;
+	
+	if (Player(player).HasAttribute(REMOVE_ON_DEATH))
+	{
+		ServerCommand("kickid %d", userid);
+	}
+	else if (Player(player).HasAttribute(BECOME_SPECTATOR_ON_DEATH))
+	{
+		TF2_ChangeClientTeam(player, TFTeam_Spectator);
+	}
+	
+	return Plugin_Continue;
 }

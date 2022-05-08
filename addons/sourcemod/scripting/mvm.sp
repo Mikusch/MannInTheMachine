@@ -17,6 +17,7 @@
 
 #include <sourcemod>
 #include <tf2_stocks>
+#include <sdkhooks>
 #include <dhooks>
 #include <tf2attributes>
 #include <smmem/vec>
@@ -37,6 +38,7 @@ int g_OffsetHealth;
 int g_OffsetScale;
 int g_OffsetDefaultAttributes;
 
+int g_OffsetWeaponRestriction;
 int g_OffsetAttributeFlags;
 int g_OffsetItems;
 int g_OffsetItemsAttributes;
@@ -120,6 +122,14 @@ enum
 	BLOOD_COLOR_MECH,
 };
 
+enum WeaponRestrictionType
+{
+	ANY_WEAPON		= 0,
+	MELEE_ONLY		= 0x0001,
+	PRIMARY_ONLY	= 0x0002,
+	SECONDARY_ONLY	= 0x0004,
+};
+
 enum AttributeType
 {
 	REMOVE_ON_DEATH				= 1<<0,					// kick bot from server when killed
@@ -195,6 +205,7 @@ enum
 #include "mvm/helpers.sp"
 #include "mvm/memory.sp"
 #include "mvm/sdkcalls.sp"
+#include "mvm/sdkhooks.sp"
 
 public Plugin myinfo =
 {
@@ -223,6 +234,7 @@ public void OnPluginStart()
 		g_OffsetScale = gamedata.GetOffset("CTFBotSpawner::m_scale");
 		g_OffsetDefaultAttributes = gamedata.GetOffset("CTFBotSpawner::m_defaultAttributes");
 		
+		g_OffsetWeaponRestriction = gamedata.GetOffset("EventChangeAttributes_t::m_weaponRestriction");
 		g_OffsetAttributeFlags = gamedata.GetOffset("EventChangeAttributes_t::m_attributeFlags");
 		g_OffsetItems = gamedata.GetOffset("EventChangeAttributes_t::m_items");
 		g_OffsetItemsAttributes = gamedata.GetOffset("EventChangeAttributes_t::m_itemsAttributes");
@@ -247,6 +259,7 @@ public void OnPluginStart()
 public void OnClientPutInServer(int client)
 {
 	DHooks_HookClient(client);
+	SDKHooks_HookClient(client);
 }
 
 public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast)

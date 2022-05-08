@@ -99,6 +99,11 @@
 				"linux"		"56"
 				"windows"	"56"
 			}
+			"EventChangeAttributes_t::m_weaponRestriction"
+			{
+				"linux"		"8"
+				"windows"	"8"
+			}
 			"EventChangeAttributes_t::m_attributeFlags"
 			{
 				"linux"		"20"

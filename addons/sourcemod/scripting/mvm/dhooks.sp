@@ -91,12 +91,13 @@ public MRESReturn DHookCallback_AllocateBots_Pre(int populator)
 	return MRES_Supercede;
 }
 
+/*
+ * This detour supercedes the original function and recreates it
+ * as accurately as possible to spawn players instead of bots.
+ */
 public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookParam params)
 {
 	CTFBotSpawner m_spawner = CTFBotSpawner(pThis);
-	
-	// The player spawning logic.
-	// This is essentially a copy of CTFBotSpawner::Spawn, doing everything it does on human players instead.
 	
 	int newPlayer = -1;
 	

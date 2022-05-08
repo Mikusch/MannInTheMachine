@@ -16,6 +16,7 @@
  */
 
 static char g_PlayerIdleSounds[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
+static WeaponRestrictionType g_PlayerWeaponRestrictionFlags[MAXPLAYERS + 1];
 static AttributeType g_PlayerAttributeFlags[MAXPLAYERS + 1];
 static int g_PlayerSpawnPointEntity[MAXPLAYERS + 1];
 static float g_PlayerModelScaleOverride[MAXPLAYERS + 1];
@@ -35,13 +36,25 @@ methodmap Player
 		}
 	}
 	
-	property any m_attributeFlags
+	property WeaponRestrictionType m_weaponRestrictionFlags
+	{
+		public get()
+		{
+			return g_PlayerWeaponRestrictionFlags[this._client];
+		}
+		public set(WeaponRestrictionType restrictionFlags)
+		{
+			g_PlayerWeaponRestrictionFlags[this._client] = restrictionFlags;
+		}
+	}
+	
+	property AttributeType m_attributeFlags
 	{
 		public get()
 		{
 			return g_PlayerAttributeFlags[this._client];
 		}
-		public set(any attributeFlag)
+		public set(AttributeType attributeFlag)
 		{
 			g_PlayerAttributeFlags[this._client] = attributeFlag;
 		}
@@ -71,22 +84,37 @@ methodmap Player
 		}
 	}
 	
-	public void SetAttribute(any attributeFlag)
+	public void ClearWeaponRestrictions()
+	{
+		this.m_weaponRestrictionFlags = ANY_WEAPON;
+	}
+	
+	public void SetWeaponRestriction(WeaponRestrictionType restrictionFlags)
+	{
+		this.m_weaponRestrictionFlags |= restrictionFlags;
+	}
+	
+	public bool HasWeaponRestriction(WeaponRestrictionType restrictionFlags)
+	{
+		return this.m_weaponRestrictionFlags & restrictionFlags ? true : false;
+	}
+	
+	public void SetAttribute(AttributeType attributeFlag)
 	{
 		this.m_attributeFlags |= attributeFlag;
 	}
 	
-	public void ClearAttribute(any attributeFlag)
+	public void ClearAttribute(AttributeType attributeFlag)
 	{
 		this.m_attributeFlags &= ~attributeFlag;
 	}
 	
 	public void ClearAllAttributes()
 	{
-		this.m_attributeFlags = 0;
+		this.m_attributeFlags = view_as<AttributeType>(0);
 	}
 	
-	public bool HasAttribute(any attributeFlag)
+	public bool HasAttribute(AttributeType attributeFlag)
 	{
 		return this.m_attributeFlags & attributeFlag ? true : false;
 	}
@@ -193,10 +221,9 @@ methodmap Player
 	{
 		if (pEvent)
 		{
-			// TODO: Weapon restrictions
-			
-			this.ClearAllAttributes();
-			this.SetAttribute(pEvent.m_attributeFlags);
+			this.ClearWeaponRestrictions();
+			PrintToChatAll("weapon restriction %d", pEvent.m_weaponRestriction)
+			this.SetWeaponRestriction(pEvent.m_weaponRestriction);
 			
 			if (GameRules_IsMannVsMachineMode())
 			{
@@ -274,6 +301,35 @@ methodmap Player
 			} // for each set of attributes
 		}
 	}
+	
+	public bool IsWeaponRestricted(int weapon)
+	{
+		if (weapon == -1)
+		{
+			return false;
+		}
+		
+		// Get the weapon's loadout slot
+		int itemdef = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")
+		int iLoadoutSlot = TF2Econ_GetItemLoadoutSlot(itemdef, TF2_GetPlayerClass(this._client));
+		
+		if (this.HasWeaponRestriction(MELEE_ONLY))
+		{
+			return (iLoadoutSlot != LOADOUT_POSITION_MELEE);
+		}
+		
+		if (this.HasWeaponRestriction(PRIMARY_ONLY))
+		{
+			return (iLoadoutSlot != LOADOUT_POSITION_PRIMARY);
+		}
+		
+		if (this.HasWeaponRestriction(SECONDARY_ONLY))
+		{
+			return (iLoadoutSlot != LOADOUT_POSITION_SECONDARY);
+		}
+		
+		return false;
+	}
 }
 
 methodmap EventChangeAttributes_t
@@ -281,6 +337,14 @@ methodmap EventChangeAttributes_t
 	public EventChangeAttributes_t(Address address)
 	{
 		return view_as<EventChangeAttributes_t>(address);
+	}
+	
+	property WeaponRestrictionType m_weaponRestriction
+	{
+		public get()
+		{
+			return LoadFromAddress(view_as<Address>(this) + view_as<Address>(g_OffsetWeaponRestriction), NumberType_Int32);
+		}
 	}
 	
 	property any m_attributeFlags

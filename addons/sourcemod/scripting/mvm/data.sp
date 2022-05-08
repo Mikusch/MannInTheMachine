@@ -195,7 +195,7 @@ methodmap Player
 	
 	public void ModifyMaxHealth(int nNewMaxHealth, bool bSetCurrentHealth = true, bool bAllowModelScaling = true)
 	{
-		int maxHealth = this.GetMaxHealth();
+		int maxHealth = TF2Util_GetEntityMaxHealth(this._client);
 		if (maxHealth != nNewMaxHealth)
 		{
 			TF2Attrib_SetByName(this._client, "hidden maxhealth non buffed", float(nNewMaxHealth - maxHealth));
@@ -210,11 +210,6 @@ methodmap Player
 		{
 			SetModelScale(this._client, this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : tf_mvm_miniboss_scale.FloatValue);
 		}
-	}
-	
-	public int GetMaxHealth()
-	{
-		return GetEntProp(GetPlayerResourceEntity(), Prop_Send, "m_iMaxHealth", _, this._client)
 	}
 	
 	public void OnEventChangeAttributes(EventChangeAttributes_t pEvent)
@@ -233,10 +228,10 @@ methodmap Player
 			
 			// cache off health value before we clear attribute because ModifyMaxHealth adds new attribute and reset the health
 			int nHealth = GetEntProp(this._client, Prop_Data, "m_iHealth");
-			int nMaxHealth = this.GetMaxHealth();
+			int nMaxHealth = TF2Util_GetEntityMaxHealth(this._client);
 			
 			// remove any player attributes
-			SDKCall_RemovePlayerAttributes(this._client, false);
+			TF2Attrib_RemoveAll(this._client);
 			// and add ones that we want specifically
 			for (int i = 0; i < pEvent.m_characterAttributes.Count(); i++)
 			{

@@ -35,6 +35,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CPopulationManager::AllocateBots", DHookCallback_AllocateBots_Pre);
 	CreateDynamicDetour(gamedata, "CTFBotSpawner::Spawn", DHookCallback_Spawn_Pre);
 	CreateDynamicDetour(gamedata, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_GetTeamAssignmentOverride_Pre, DHookCallback_GetTeamAssignmentOverride_Post);
+	CreateDynamicDetour(gamedata, "CTFPlayer::GetLoadoutItem", DHookCallback_GetLoadoutItem_Pre, DHookCallback_GetLoadoutItem_Post);
 	
 	g_DHookEventKilled = CreateDynamicHook(gamedata, "CTFPlayer::Event_Killed");
 }
@@ -176,7 +177,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 	if (newPlayer != -1)
 	{
 		// Remove any player attributes
-		SDKCall_RemovePlayerAttributes(newPlayer, false);
+		TF2Attrib_RemoveAll(newPlayer);
 		
 		/*
 		// clear any old TeleportWhere settings 
@@ -299,7 +300,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		
 		if (nHealth <= 0.0)
 		{
-			nHealth = Player(newPlayer).GetMaxHealth();
+			nHealth = TF2Util_GetEntityMaxHealth(newPlayer);
 		}
 		
 		// TODO: Support populator health multiplier
@@ -361,6 +362,27 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 public MRESReturn DHookCallback_GetTeamAssignmentOverride_Post(DHookReturn ret, DHookParam params)
 {
 	GameRules_SetProp("m_bPlayingMannVsMachine", true);
+	
+	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_GetLoadoutItem_Pre(int player, DHookReturn ret, DHookParam params)
+{
+	// Generate base items for robot players
+	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
+	{
+		GameRules_SetProp("m_bIsInTraining", true);
+	}
+	
+	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_GetLoadoutItem_Post(int player, DHookReturn ret, DHookParam params)
+{
+	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
+	{
+		GameRules_SetProp("m_bIsInTraining", false);
+	}
 	
 	return MRES_Ignored;
 }

@@ -22,7 +22,7 @@ void SDKHooks_HookClient(int client)
 
 public Action SDKHookCB_Client_WeaponCanSwitchTo(int client, int weapon)
 {
-	if (Player(client).IsWeaponRestricted(weapon))
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders && Player(client).IsWeaponRestricted(weapon))
 	{
 		return Plugin_Handled;
 	}

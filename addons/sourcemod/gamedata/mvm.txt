@@ -36,11 +36,6 @@
 				"linux"		"@_ZN13CTFBotSpawner5SpawnERK6VectorP10CUtlVectorI7CHandleI11CBaseEntityE10CUtlMemoryIS6_iEE"
 				"windows"	"\x55\x8B\xEC\x81\xEC\x70\x01\x00\x00"
 			}
-			"CTFPlayer::RemovePlayerAttributes"
-			{
-				"linux"		"@_ZN9CTFPlayer22RemovePlayerAttributesEb"
-				"windows"	"\x55\x8B\xEC\x53\x8B\xD9\x56\x8B\xB3\x30\x0A\x00\x00"
-			}
 			"CTFGameRules::GetTeamAssignmentOverride"
 			{
 				"linux"		"@_ZN12CTFGameRules25GetTeamAssignmentOverrideEP9CTFPlayerib"
@@ -50,6 +45,11 @@
 			{
 				"linux"		"@_ZN9CTFPlayer24PostInventoryApplicationEv"
 				"windows"	"\x55\x8B\xEC\x51\x53\x8B\xD9\x56\x57\x8D\x8B\xB0\x19\x00\x00"
+			}
+			"CTFPlayer::GetLoadoutItem"
+			{
+				"linux"		"@_ZN9CTFPlayer14GetLoadoutItemEiib"
+				"windows"	"\x55\x8B\xEC\x51\x53\x56\x8B\xF1\x8B\x0D\x2A\x2A\x2A\x2A\x57\x89\x75\xFC"
 			}
 			"CEconEntity::UpdateModelToClass"
 			{
@@ -184,6 +184,28 @@
 						"type"	"int"
 					}
 					"bAutoBalance"
+					{
+						"type"	"bool"
+					}
+				}
+			}
+			"CTFPlayer::GetLoadoutItem"
+			{
+				"signature"		"CTFPlayer::GetLoadoutItem"
+				"callconv"		"thiscall"
+				"return"		"int"
+				"this"			"entity"
+				"arguments"
+				{
+					"iClass"
+					{
+						"type"	"int"
+					}
+					"iSlot"
+					{
+						"type"	"int"
+					}
+					"bReportWhitelistFails"
 					{
 						"type"	"bool"
 					}

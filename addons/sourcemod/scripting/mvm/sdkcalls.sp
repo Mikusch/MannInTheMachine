@@ -15,30 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-static Handle g_SDKCallRemovePlayerAttributes;
 static Handle g_SDKCallPostInventoryApplication;
 static Handle g_SDKCallUpdateModelToClass;
 static Handle g_SDKCallWeaponDetach;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
-	g_SDKCallRemovePlayerAttributes = PrepSDKCall_RemovePlayerAttributes(gamedata);
 	g_SDKCallPostInventoryApplication = PrepSDKCall_PostInventoryApplication(gamedata);
 	g_SDKCallUpdateModelToClass = PrepSDKCall_UpdateModelToClass(gamedata);
 	g_SDKCallWeaponDetach = PrepSDKCall_WeaponDetach(gamedata);
-}
-
-static Handle PrepSDKCall_RemovePlayerAttributes(GameData gamedata)
-{
-	StartPrepSDKCall(SDKCall_Player);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::RemovePlayerAttributes");
-	PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_ByValue);
-	
-	Handle call = EndPrepSDKCall();
-	if (!call)
-		LogMessage("Failed to create SDKCall: CTFPlayer::RemovePlayerAttributes");
-	
-	return call;
 }
 
 static Handle PrepSDKCall_PostInventoryApplication(GameData gamedata)
@@ -76,12 +61,6 @@ static Handle PrepSDKCall_WeaponDetach(GameData gamedata)
 		LogMessage("Failed to create SDKCall: CBaseCombatCharacter::Weapon_Detach");
 	
 	return call;
-}
-
-void SDKCall_RemovePlayerAttributes(int player, bool setBonuses)
-{
-	if (g_SDKCallRemovePlayerAttributes)
-		SDKCall(g_SDKCallRemovePlayerAttributes, player, setBonuses);
 }
 
 void SDKCall_PostInventoryApplication(int player)

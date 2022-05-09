@@ -21,11 +21,6 @@
 	{
 		"Signatures"
 		{
-			"CTFBotSpawner::CTFBotSpawner"
-			{
-				"linux"		"@_ZN13CTFBotSpawnerC2EP10IPopulator"
-				"windows"	"\x55\x8B\xEC\x8B\x45\x08\x56\x57\x8B\xF9\x89\x47\x04"
-			}
 			"CPopulationManager::AllocateBots"
 			{
 				"linux"		"@_ZN18CPopulationManager12AllocateBotsEv"
@@ -35,6 +30,16 @@
 			{
 				"linux"		"@_ZN13CTFBotSpawner5SpawnERK6VectorP10CUtlVectorI7CHandleI11CBaseEntityE10CUtlMemoryIS6_iEE"
 				"windows"	"\x55\x8B\xEC\x81\xEC\x70\x01\x00\x00"
+			}
+			"CWaveSpawnPopulator::Update"
+			{
+				"linux"		"@_ZN19CWaveSpawnPopulator6UpdateEv"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x40\x53\x56\x57\x33\xDB"
+			}
+			"CMissionPopulator::UpdateMission"
+			{
+				"linux"		"@_ZN17CMissionPopulator13UpdateMissionEN6CTFBot11MissionTypeE"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x5C\x8B\x15\x2A\x2A\x2A\x2A"
 			}
 			"CTFGameRules::GetTeamAssignmentOverride"
 			{
@@ -74,6 +79,16 @@
 				"linux"		"8820"
 				"windows"	"8816"
 			}
+			"CTFPlayer::m_bIsLimitedSupportEnemy"
+			{
+				"linux"		"8828"
+				"windows"	"8824"
+			}
+			"CTFPlayer::m_pWaveSpawnPopulator"
+			{
+				"linux"		"8848"
+				"windows"	"8844"
+			}
 			"CTFBotSpawner::m_class"
 			{
 				"linux"		"8"
@@ -98,6 +113,11 @@
 			{
 				"linux"		"56"
 				"windows"	"56"
+			}
+			"CWaveSpawnPopulator::m_bLimitedSupport"
+			{
+				"linux"		"1229"
+				"windows"	"1229"
 			}
 			"EventChangeAttributes_t::m_weaponRestriction"
 			{
@@ -127,20 +147,6 @@
 		}
 		"Functions"
 		{
-			"CTFBotSpawner::CTFBotSpawner"
-			{
-				"signature"	"CTFBotSpawner::CTFBotSpawner"
-				"callconv"	"thiscall"
-				"return"	"int"
-				"this"		"address"
-				"arguments"
-				{
-					"populator"
-					{
-						"type"	"int"
-					}
-				}
-			}
 			"CPopulationManager::AllocateBots"
 			{
 				"signature"	"CPopulationManager::AllocateBots"
@@ -162,6 +168,27 @@
 						"flags"	"byref"
 					}
 					"result"
+					{
+						"type"	"int"
+					}
+				}
+			}
+			"CWaveSpawnPopulator::Update"
+			{
+				"signature"	"CWaveSpawnPopulator::Update"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"address"
+			}
+			"CMissionPopulator::UpdateMission"
+			{
+				"signature"	"CMissionPopulator::UpdateMission"
+				"callconv"	"thiscall"
+				"return"	"bool"
+				"this"		"address"
+				"arguments"
+				{
+					"mission"
 					{
 						"type"	"int"
 					}

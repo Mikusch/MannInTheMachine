@@ -15,25 +15,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-enum struct PopulatorData
-{
-	Address spawner;
-	Address populator;
-}
-
 static DynamicHook g_DHookEventKilled;
 
-static ArrayList g_Populators;
+static ArrayList m_justSpawnedVector;
 
 static int g_InternalSpawnPoint = INVALID_ENT_REFERENCE;
 
 void DHooks_Initialize(GameData gamedata)
 {
-	g_Populators = new ArrayList(sizeof(PopulatorData));
+	m_justSpawnedVector = new ArrayList(MaxClients);
 	
-	CreateDynamicDetour(gamedata, "CTFBotSpawner::CTFBotSpawner", DHookCallback_CTFBotSpawner_Pre);
 	CreateDynamicDetour(gamedata, "CPopulationManager::AllocateBots", DHookCallback_AllocateBots_Pre);
 	CreateDynamicDetour(gamedata, "CTFBotSpawner::Spawn", DHookCallback_Spawn_Pre);
+	CreateDynamicDetour(gamedata, "CWaveSpawnPopulator::Update", _, DHookCallback_WaveSpawnPopulatorUpdate_Post);
+	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMission", _, DHookCallback_MissionPopulatorUpdateMission_Post);
 	CreateDynamicDetour(gamedata, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_GetTeamAssignmentOverride_Pre, DHookCallback_GetTeamAssignmentOverride_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::GetLoadoutItem", DHookCallback_GetLoadoutItem_Pre, DHookCallback_GetLoadoutItem_Post);
 	
@@ -75,17 +70,6 @@ static DynamicHook CreateDynamicHook(GameData gamedata, const char[] name)
 	return hook;
 }
 
-public MRESReturn DHookCallback_CTFBotSpawner_Pre(Address spawner, DHookReturn ret, DHookParam param)
-{
-	PopulatorData data;
-	data.spawner = spawner;
-	data.populator = param.Get(1);
-	
-	g_Populators.PushArray(data, sizeof(data));
-	
-	return MRES_Ignored;
-}
-
 public MRESReturn DHookCallback_AllocateBots_Pre(int populator)
 {
 	// No bots in MY home!
@@ -104,6 +88,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 	
 	float here[3];
 	params.GetVector(1, here);
+	CUtlVector result = CUtlVector(params.Get(2));
 	
 	if (GameRules_IsMannVsMachineMode())
 	{
@@ -167,7 +152,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 	
 	if (newPlayer == -1)
 	{
-		LogMessage("Not enough players to spawn a wanted robot!");
+		//LogMessage("Not enough players to spawn a wanted robot!");
 	}
 	else
 	{
@@ -209,17 +194,6 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		SetEntProp(newPlayer, Prop_Data, "m_bAllowInstantSpawn", true);
 		FakeClientCommand(newPlayer, "joinclass %s", g_aRawPlayerClassNames[m_spawner.m_class]);
 		SetEntPropString(newPlayer, Prop_Send, "m_iszClassIcon", m_iszClassIcon);
-		
-		int index = g_Populators.FindValue(pThis, PopulatorData::spawner);
-		if (index != -1)
-		{
-			Address populator = g_Populators.Get(index);
-			PrintToChatAll("Populator used for spawn: %X", populator);
-		}
-		else
-		{
-			LogError("No populator found for spawner with address %X", pThis);
-		}
 		
 		// TODO: Implement the EventChangeAttributes system
 		//ClearEventChangeAttributes();
@@ -342,14 +316,88 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 			}
 		}
 		
-		// Code that normally gets executed in CMissionPopulator::UpdateMission after the spawner is done.
-		// We don't have easy access to that, so we do it right here instead.
-		PostRobotSpawn(newPlayer);
+		if (result)
+		{
+			result.AddToTail(GetEntityAddress(newPlayer));
+		}
+		
+		// For easy access in WaveSpawnPopulator::Update()
+		m_justSpawnedVector.Push(newPlayer);
+		
+		params.Set(2, result);
+		ret.Value = true;
+		return MRES_Supercede;
 	}
 	
 	// Finally, suppress the original function
 	ret.Value = false;
 	return MRES_Supercede;
+}
+
+public MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
+{
+	for (int i = 0; i < m_justSpawnedVector.Length; i++)
+	{
+		int player = m_justSpawnedVector.Get(i);
+		
+		SetEntProp(player, Prop_Send, "m_nCurrency", 0);
+		SetEntData(player, g_OffsetWaveSpawnPopulator, pThis);
+		
+		char iszClassIconName[64];
+		GetEntPropString(player, Prop_Send, "m_iszClassIcon", iszClassIconName, sizeof(iszClassIconName));
+		
+		// Allows client UI to know if a specific spawner is active
+		SetMannVsMachineWaveClassActive(iszClassIconName);
+		
+		bool bLimitedSupport = LoadFromAddress(pThis + view_as<Address>(g_OffsetLimitedSupport), NumberType_Int8);
+		if (bLimitedSupport)
+		{
+			SetEntData(player, g_OffsetIsLimitedSupportEnemy, true);
+		}
+		
+		// TODO
+		/*
+		// what bot should do after spawning at teleporter exit
+		if ( bTeleported )
+		{
+			OnBotTeleported( bot );
+		}
+		*/
+	}
+	
+	// After we are done, clear the vector
+	m_justSpawnedVector.Clear();
+	
+	return MRES_Supercede;
+}
+
+public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis, DHookReturn ret, DHookParam params)
+{
+	for (int i = 0; i < m_justSpawnedVector.Length; i++)
+	{
+		int player = m_justSpawnedVector.Get(i);
+		
+		SetEntData(player, g_OffsetIsMissionEnemy, true);
+		
+		char iszClassIconName[64];
+		GetEntPropString(player, Prop_Send, "m_iszClassIcon", iszClassIconName, sizeof(iszClassIconName));
+		
+		int iFlags = MVM_CLASS_FLAG_MISSION;
+		if (GetEntProp(player, Prop_Send, "m_bIsMiniBoss"))
+		{
+			iFlags |= MVM_CLASS_FLAG_MINIBOSS;
+		}
+		else if (Player(player).HasAttribute(ALWAYS_CRIT))
+		{
+			iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
+		}
+		IncrementMannVsMachineWaveClassCount(iszClassIconName, iFlags);
+	}
+	
+	// After we are done, clear the vector
+	m_justSpawnedVector.Clear();
+	
+	return MRES_Handled;
 }
 
 public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, DHookParam params)

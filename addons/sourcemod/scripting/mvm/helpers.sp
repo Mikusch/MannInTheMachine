@@ -20,11 +20,6 @@ bool GameRules_IsMannVsMachineMode()
 	return view_as<bool>(GameRules_GetProp("m_bPlayingMannVsMachine"));
 }
 
-int GetPopulator()
-{
-	return FindEntityByClassname(MaxClients + 1, "info_populator");
-}
-
 void SetModelScale(int entity, float scale, float duration = 0.0)
 {
 	float vecScale[3];
@@ -182,4 +177,71 @@ int UTIL_StringtToCharArray(Address string_t, char[] buffer, int maxlen)
 	
 	buffer[i] = '\0';
 	return i;
+}
+
+void IncrementMannVsMachineWaveClassCount(const char[] iszClassIconName, int iFlags)
+{
+	int obj = FindEntityByClassname(MaxClients + 1, "tf_objective_resource");
+	if (obj == -1)
+		return;
+	
+	int i = 0;
+	for (i = 0; i < GetEntPropArraySize(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
+	{
+		char waveClassName[64];
+		if (GetEntPropString(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames", waveClassName, sizeof(waveClassName), i) && StrEqual(waveClassName, iszClassIconName) && (GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassFlags", _, i) & iFlags))
+		{
+			SetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts", GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts", _, i) + 1, _, i);
+			
+			if (GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts", _, i) <= 0)
+			{
+				SetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts", 1, _, i);
+			}
+			
+			return;
+		}
+	}
+	
+	for (i = 0; i < GetEntPropArraySize(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames2"); ++i)
+	{
+		char waveClassName[64];
+		if (GetEntPropString(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames2", waveClassName, sizeof(waveClassName), i) && StrEqual(waveClassName, iszClassIconName) && (GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassFlags2", _, i) & iFlags))
+		{
+			SetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts2", GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts2", _, i) + 1, _, i);
+			
+			if (GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts2", _, i) <= 0)
+			{
+				SetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts2", 1, _, i);
+			}
+			
+			return;
+		}
+	}
+}
+
+void SetMannVsMachineWaveClassActive(const char[] iszClassIconName, bool bActive = true)
+{
+	int obj = FindEntityByClassname(MaxClients + 1, "tf_objective_resource");
+	if (obj == -1)
+		return;
+	
+	for (int i = 0; i < GetEntPropArraySize(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
+	{
+		char waveClassName[64];
+		if (GetEntPropString(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames", waveClassName, sizeof(waveClassName), i) && StrEqual(waveClassName, iszClassIconName))
+		{
+			SetEntProp(obj, Prop_Send, "m_bMannVsMachineWaveClassActive", bActive, _, i);
+			return;
+		}
+	}
+	
+	for (int i = 0; i < GetEntPropArraySize(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames2"); ++i)
+	{
+		char waveClassName[64];
+		if (GetEntPropString(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames2", waveClassName, sizeof(waveClassName), i) && StrEqual(waveClassName, iszClassIconName))
+		{
+			SetEntProp(obj, Prop_Send, "m_bMannVsMachineWaveClassActive2", bActive, _, i);
+			return;
+		}
+	}
 }

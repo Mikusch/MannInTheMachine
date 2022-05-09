@@ -29,6 +29,14 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+#define MVM_CLASS_FLAG_NONE				0
+#define MVM_CLASS_FLAG_NORMAL			(1<<0)
+#define MVM_CLASS_FLAG_SUPPORT			(1<<1)
+#define MVM_CLASS_FLAG_MISSION			(1<<2)
+#define MVM_CLASS_FLAG_MINIBOSS			(1<<3)
+#define MVM_CLASS_FLAG_ALWAYSCRIT		(1<<4)
+#define MVM_CLASS_FLAG_SUPPORT_LIMITED	(1<<5)
+
 const TFTeam TFTeam_Defenders = TFTeam_Red;
 const TFTeam TFTeam_Invaders = TFTeam_Blue;
 
@@ -37,6 +45,7 @@ int g_OffsetClassIcon;
 int g_OffsetHealth;
 int g_OffsetScale;
 int g_OffsetDefaultAttributes;
+int g_OffsetLimitedSupport;
 
 int g_OffsetWeaponRestriction;
 int g_OffsetAttributeFlags;
@@ -45,6 +54,8 @@ int g_OffsetItemsAttributes;
 int g_OffsetCharacterAttributes;
 
 int g_OffsetIsMissionEnemy;
+int g_OffsetIsLimitedSupportEnemy;
+int g_OffsetWaveSpawnPopulator;
 
 ConVar tf_mvm_miniboss_scale;
 
@@ -205,7 +216,6 @@ enum
 #include "mvm/helpers.sp"
 #include "mvm/memory.sp"
 #include "mvm/sdkcalls.sp"
-#include "mvm/sdkhooks.sp"
 
 public Plugin myinfo =
 {
@@ -233,6 +243,7 @@ public void OnPluginStart()
 		g_OffsetHealth = gamedata.GetOffset("CTFBotSpawner::m_health");
 		g_OffsetScale = gamedata.GetOffset("CTFBotSpawner::m_scale");
 		g_OffsetDefaultAttributes = gamedata.GetOffset("CTFBotSpawner::m_defaultAttributes");
+		g_OffsetLimitedSupport = gamedata.GetOffset("CWaveSpawnPopulator::m_bLimitedSupport");
 		
 		g_OffsetWeaponRestriction = gamedata.GetOffset("EventChangeAttributes_t::m_weaponRestriction");
 		g_OffsetAttributeFlags = gamedata.GetOffset("EventChangeAttributes_t::m_attributeFlags");
@@ -241,6 +252,8 @@ public void OnPluginStart()
 		g_OffsetCharacterAttributes = gamedata.GetOffset("EventChangeAttributes_t::m_characterAttributes");
 		
 		g_OffsetIsMissionEnemy = gamedata.GetOffset("CTFPlayer::m_bIsMissionEnemy");
+		g_OffsetIsLimitedSupportEnemy = gamedata.GetOffset("CTFPlayer::m_bIsLimitedSupportEnemy");
+		g_OffsetWaveSpawnPopulator = gamedata.GetOffset("CTFPlayer::m_pWaveSpawnPopulator");
 		
 		delete gamedata;
 	}
@@ -259,25 +272,4 @@ public void OnPluginStart()
 public void OnClientPutInServer(int client)
 {
 	DHooks_HookClient(client);
-	SDKHooks_HookClient(client);
-}
-
-public void Event_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
-{
-	int victim = GetClientOfUserId(event.GetInt("userid"));
-	
-	/*if (TF2_GetClientTeam(victim) == TFTeam_Blue)
-	{
-		TF2_ChangeClientTeam(victim, TFTeam_Spectator);
-	}*/
-}
-
-public void Event_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
-{
-	int client = GetClientOfUserId(event.GetInt("userid"));
-}
-
-void PostRobotSpawn(int newPlayer)
-{
-	SetEntData(newPlayer, g_OffsetIsMissionEnemy, true);
 }

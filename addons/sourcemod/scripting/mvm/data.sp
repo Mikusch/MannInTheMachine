@@ -217,7 +217,6 @@ methodmap Player
 		if (pEvent)
 		{
 			this.ClearWeaponRestrictions();
-			PrintToChatAll("weapon restriction %d", pEvent.m_weaponRestriction)
 			this.SetWeaponRestriction(pEvent.m_weaponRestriction);
 			
 			if (GameRules_IsMannVsMachineMode())
@@ -272,7 +271,7 @@ methodmap Player
 					if (entity != -1 && itemDef == GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"))
 					{
 						CUtlVector m_attributes = CUtlVector(itemAttributes + view_as<Address>(0x8));
-						for (int iAtt = 0; iAtt < m_attributes.Count(); iAtt++)
+						for (int iAtt = 0; iAtt < m_attributes.Count(); ++iAtt)
 						{
 							// item_attributes_t
 							Address attrib = m_attributes.Get(iAtt, 8);

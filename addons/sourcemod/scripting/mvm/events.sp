@@ -18,6 +18,7 @@
 void Events_Initialize()
 {
 	HookEvent("player_death", EventHook_PlayerDeath);
+	HookEvent("post_inventory_application", EventHook_PostInventoryApplication);
 }
 
 public void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
@@ -34,19 +35,39 @@ public void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroad
 	}
 }
 
+public void EventHook_PostInventoryApplication(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	{
+		for (int iItemSlot = LOADOUT_POSITION_PRIMARY; iItemSlot < CLASS_LOADOUT_POSITION_COUNT; iItemSlot++)
+		{
+			int entity = TF2Util_GetPlayerLoadoutEntity(client, iItemSlot);
+			
+			if (Player(client).IsWeaponRestricted(entity))
+			{
+				SDKCall_WeaponDetach(client, entity);
+				RemoveEntity(entity);
+			}
+		}
+	}
+}
+
 public Action Timer_DeadTimer(Handle timer, int userid)
 {
-	int player = GetClientOfUserId(userid);
-	if (player == 0)
-		return Plugin_Continue;
+	int client = GetClientOfUserId(userid);
 	
-	if (Player(player).HasAttribute(REMOVE_ON_DEATH))
+	if (client != 0 && !IsPlayerAlive(client))
 	{
-		ServerCommand("kickid %d", userid);
-	}
-	else if (Player(player).HasAttribute(BECOME_SPECTATOR_ON_DEATH))
-	{
-		TF2_ChangeClientTeam(player, TFTeam_Spectator);
+		if (Player(client).HasAttribute(REMOVE_ON_DEATH))
+		{
+			ServerCommand("kickid %d", userid);
+		}
+		else if (Player(client).HasAttribute(BECOME_SPECTATOR_ON_DEATH))
+		{
+			TF2_ChangeClientTeam(client, TFTeam_Spectator);
+		}
 	}
 	
 	return Plugin_Continue;

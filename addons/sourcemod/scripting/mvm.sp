@@ -273,3 +273,28 @@ public void OnClientPutInServer(int client)
 {
 	DHooks_HookClient(client);
 }
+
+public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
+{
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	{
+		if (Player(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
+		{
+			TF2_AddCondition(client, TFCond_CritCanteen);
+		}
+	}
+}
+
+public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname, bool &result)
+{
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	{
+		if (Player(client).HasAttribute(ALWAYS_CRIT))
+		{
+			result = true;
+			return Plugin_Changed;
+		}
+	}
+	
+	return Plugin_Continue;
+}

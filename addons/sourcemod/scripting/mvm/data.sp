@@ -219,6 +219,9 @@ methodmap Player
 			this.ClearWeaponRestrictions();
 			this.SetWeaponRestriction(pEvent.m_weaponRestriction);
 			
+			this.ClearAllAttributes();
+			this.SetAttribute(pEvent.m_attributeFlags);
+			
 			if (GameRules_IsMannVsMachineMode())
 			{
 				this.SetAttribute(BECOME_SPECTATOR_ON_DEATH);

@@ -285,7 +285,13 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		
 		if (Player(newPlayer).HasAttribute(SPAWN_WITH_FULL_CHARGE))
 		{
-			// TODO: Spawn players with full charge
+			int weapon = GetPlayerWeaponSlot(newPlayer, TF_WPN_TYPE_SECONDARY);
+			if (HasEntProp(weapon, Prop_Send, "m_flChargeLevel"))
+			{
+				SetEntPropFloat(weapon, Prop_Send, "m_flChargeLevel", 1.0);
+			}
+			
+			SetEntPropFloat(newPlayer, Prop_Send, "m_flRageMeter", 100.0);
 		}
 		
 		TFClassType nClassIndex = TF2_GetPlayerClass(newPlayer);

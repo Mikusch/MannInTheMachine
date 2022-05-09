@@ -245,3 +245,25 @@ void SetMannVsMachineWaveClassActive(const char[] iszClassIconName, bool bActive
 		}
 	}
 }
+
+bool IsSpaceToSpawnHere(const float where[3])
+{
+	// make sure a player will fit here
+	float bloat = 5.0;
+	
+	float mins[3], maxs[3], vecBloat[3];
+	
+	vecBloat[0] = bloat;
+	vecBloat[1] = bloat;
+	vecBloat[2] = 0.0;
+	SubtractVectors(VEC_HULL_MIN, vecBloat, mins);
+	
+	vecBloat[0] = bloat;
+	vecBloat[1] = bloat;
+	vecBloat[2] = bloat;
+	AddVectors(VEC_HULL_MAX, vecBloat, maxs);
+	
+	TR_TraceHull(where, where, mins, maxs, MASK_SOLID | CONTENTS_PLAYERCLIP);
+	
+	return TR_GetFraction() >= 1.0;
+}

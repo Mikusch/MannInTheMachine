@@ -86,9 +86,21 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 	
 	int newPlayer = -1;
 	
-	float here[3];
-	params.GetVector(1, here);
+	float rawHere[3];
+	params.GetVector(1, rawHere);
 	CUtlVector result = CUtlVector(params.Get(2));
+	
+	float here[3];
+	here[0] = rawHere[0];
+	here[1] = rawHere[1];
+	here[2] = rawHere[2];
+	
+	CTFNavArea area = view_as<CTFNavArea>(TheNavMesh.GetNearestNavArea(here, .checkGround = false));
+	if (area && area.HasAttributeTF(NO_SPAWNING))
+	{
+		ret.Value = false;
+		return MRES_Supercede;
+	}
 	
 	if (GameRules_IsMannVsMachineMode())
 	{
@@ -99,42 +111,37 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		}
 	}
 	
-	/*
 	// the ground may be variable here, try a few heights
 	float z;
-	for( z = 0.0f; z<StepHeight; z += 4.0f )
+	for (z = 0.0; z < sv_stepsize.FloatValue; z += 4.0)
 	{
-		here.z = rawHere.z + StepHeight;
-
-		if ( IsSpaceToSpawnHere( here ) )
+		here[2] = rawHere[2] + sv_stepsize.FloatValue;
+		
+		if (IsSpaceToSpawnHere(here))
 		{
 			break;
 		}
 	}
 	
-	if ( z >= StepHeight )
+	if (z >= sv_stepsize.FloatValue)
 	{
-		if ( tf_populator_debug.GetBool() ) 
-		{
-			DevMsg( "CTFBotSpawner: %3.2f: *** No space to spawn at (%f, %f, %f)\n", gpGlobals->curtime, here.x, here.y, here.z );
-		}
-		return false;
+		ret.Value = false;
+		return MRES_Supercede;
 	}
-	*/
 	
-	/*if ( TFGameRules() && TFGameRules()->GameRules_IsMannVsMachineMode() )
+	// TODO: Engineer hints
+	/*if (TFGameRules() && TFGameRules()- > GameRules_IsMannVsMachineMode())
 	{
-		if ( m_class == TF_CLASS_ENGINEER && m_defaultAttributes.m_attributeFlags & CTFBot::TELEPORT_TO_HINT && CTFBotMvMEngineerHintFinder::FindHint( true, false ) == false )
+		if (m_class == TF_CLASS_ENGINEER && m_defaultAttributes.m_attributeFlags & CTFBot::TELEPORT_TO_HINT && CTFBotMvMEngineerHintFinder::FindHint(true, false) == false)
 		{
-			if ( tf_populator_debug.GetBool() ) 
+			if (tf_populator_debug.GetBool())
 			{
-				DevMsg( "CTFBotSpawner: %3.2f: *** No teleporter hint for engineer\n", gpGlobals->curtime );
+				DevMsg("CTFBotSpawner: %3.2f: *** No teleporter hint for engineer\n", gpGlobals- > curtime);
 			}
-
+			
 			return false;
 		}
-	}
-	*/
+	}*/
 	
 	// find dead player we can re-use
 	for (int client = 1; client <= MaxClients; client++)
@@ -148,15 +155,6 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		newPlayer = client;
 		Player(newPlayer).ClearAllAttributes();
 		break;
-	}
-	
-	if (newPlayer == -1)
-	{
-		//LogMessage("Not enough players to spawn a wanted robot!");
-	}
-	else
-	{
-		LogMessage("Spawning %N as a robot.", newPlayer);
 	}
 	
 	if (newPlayer != -1)
@@ -286,7 +284,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		if (Player(newPlayer).HasAttribute(SPAWN_WITH_FULL_CHARGE))
 		{
 			int weapon = GetPlayerWeaponSlot(newPlayer, TF_WPN_TYPE_SECONDARY);
-			if (HasEntProp(weapon, Prop_Send, "m_flChargeLevel"))
+			if (weapon != -1 && HasEntProp(weapon, Prop_Send, "m_flChargeLevel"))
 			{
 				SetEntPropFloat(weapon, Prop_Send, "m_flChargeLevel", 1.0);
 			}

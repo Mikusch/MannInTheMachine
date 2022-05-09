@@ -25,9 +25,14 @@
 #include <tf2items>
 #include <tf2utils>
 #include <loadsoundscript>
+#include <cbasenpc>
+#include <cbasenpc/tf/nav>
 
 #pragma semicolon 1
 #pragma newdecls required
+
+#define VEC_HULL_MIN	{-24.0, -24.0, 0.0}
+#define VEC_HULL_MAX	{24.0, 24.0, 82.0}
 
 #define MVM_CLASS_FLAG_NONE				0
 #define MVM_CLASS_FLAG_NORMAL			(1<<0)
@@ -58,6 +63,7 @@ int g_OffsetIsLimitedSupportEnemy;
 int g_OffsetWaveSpawnPopulator;
 
 ConVar tf_mvm_miniboss_scale;
+ConVar sv_stepsize;
 
 char g_aRawPlayerClassNames[][] =
 {
@@ -139,6 +145,25 @@ enum WeaponRestrictionType
 	MELEE_ONLY		= 0x0001,
 	PRIMARY_ONLY	= 0x0002,
 	SECONDARY_ONLY	= 0x0004,
+};
+
+enum
+{
+	TF_WPN_TYPE_PRIMARY = 0,
+	TF_WPN_TYPE_SECONDARY,
+	TF_WPN_TYPE_MELEE,
+	TF_WPN_TYPE_GRENADE,
+	TF_WPN_TYPE_BUILDING,
+	TF_WPN_TYPE_PDA,
+	TF_WPN_TYPE_ITEM1,
+	TF_WPN_TYPE_ITEM2,
+	TF_WPN_TYPE_HEAD,
+	TF_WPN_TYPE_MISC,
+	TF_WPN_TYPE_MELEE_ALLCLASS,
+	TF_WPN_TYPE_SECONDARY2,
+	TF_WPN_TYPE_PRIMARY2,
+
+	TF_WPN_TYPE_COUNT,
 };
 
 enum AttributeType
@@ -229,6 +254,7 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	tf_mvm_miniboss_scale = FindConVar("tf_mvm_miniboss_scale");
+	sv_stepsize = FindConVar("sv_stepsize");
 	
 	Events_Initialize();
 	

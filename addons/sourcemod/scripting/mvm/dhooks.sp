@@ -91,9 +91,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 	CUtlVector result = CUtlVector(params.Get(2));
 	
 	float here[3];
-	here[0] = rawHere[0];
-	here[1] = rawHere[1];
-	here[2] = rawHere[2];
+	here = Vector(rawHere[0], rawHere[1], rawHere[2]);
 	
 	CTFNavArea area = view_as<CTFNavArea>(TheNavMesh.GetNearestNavArea(here, .checkGround = false));
 	if (area && area.HasAttributeTF(NO_SPAWNING))

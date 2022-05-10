@@ -74,6 +74,11 @@
 				"linux"		"67"
 				"windows"	"66"
 			}
+			"CBaseEntity::GetRefEHandle"
+			{
+				"linux"		"3"
+				"windows"	"2"
+			}
 			"CTFPlayer::m_bIsMissionEnemy"
 			{
 				"linux"		"8820"

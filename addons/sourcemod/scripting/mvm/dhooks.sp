@@ -88,7 +88,6 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 	
 	float rawHere[3];
 	params.GetVector(1, rawHere);
-	CUtlVector result = CUtlVector(params.Get(2));
 	
 	float here[3];
 	here = Vector(rawHere[0], rawHere[1], rawHere[2]);
@@ -318,10 +317,11 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 			}
 		}
 		
-		if (result)
+		if (params.Get(2))
 		{
-			result.AddToTail(newPlayer);
-			params.Set(2, result);
+			// EntityHandleVector_t
+			CUtlVector result = CUtlVector(params.Get(2));
+			result.AddToTail(LoadFromAddress(SDKCall_GetRefEHandle(newPlayer), NumberType_Int32));
 		}
 		
 		// For easy access in WaveSpawnPopulator::Update()

@@ -18,12 +18,14 @@
 static Handle g_SDKCallPostInventoryApplication;
 static Handle g_SDKCallUpdateModelToClass;
 static Handle g_SDKCallWeaponDetach;
+static Handle g_SDKCallGetRefEHandle;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
 	g_SDKCallPostInventoryApplication = PrepSDKCall_PostInventoryApplication(gamedata);
 	g_SDKCallUpdateModelToClass = PrepSDKCall_UpdateModelToClass(gamedata);
 	g_SDKCallWeaponDetach = PrepSDKCall_WeaponDetach(gamedata);
+	g_SDKCallGetRefEHandle = PrepSDKCall_GetRefEHandle(gamedata);
 }
 
 static Handle PrepSDKCall_PostInventoryApplication(GameData gamedata)
@@ -63,6 +65,19 @@ static Handle PrepSDKCall_WeaponDetach(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_GetRefEHandle(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CBaseEntity::GetRefEHandle");
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CBaseEntity::GetRefEHandle");
+	
+	return call;
+}
+
 void SDKCall_PostInventoryApplication(int player)
 {
 	if (g_SDKCallPostInventoryApplication)
@@ -79,4 +94,12 @@ void SDKCall_WeaponDetach(int player, int weapon)
 {
 	if (g_SDKCallWeaponDetach)
 		SDKCall(g_SDKCallWeaponDetach, player, weapon);
+}
+
+Address SDKCall_GetRefEHandle(int entity)
+{
+	if (g_SDKCallGetRefEHandle)
+		return SDKCall(g_SDKCallGetRefEHandle, entity);
+	
+	return Address_Null;
 }

@@ -20,6 +20,7 @@ static WeaponRestrictionType g_PlayerWeaponRestrictionFlags[MAXPLAYERS + 1];
 static AttributeType g_PlayerAttributeFlags[MAXPLAYERS + 1];
 static int g_PlayerSpawnPointEntity[MAXPLAYERS + 1];
 static float g_PlayerModelScaleOverride[MAXPLAYERS + 1];
+static ArrayList g_PlayerTags[MAXPLAYERS + 1];
 
 methodmap Player
 {
@@ -57,6 +58,18 @@ methodmap Player
 		public set(AttributeType attributeFlag)
 		{
 			g_PlayerAttributeFlags[this._client] = attributeFlag;
+		}
+	}
+	
+	property ArrayList m_tags
+	{
+		public get()
+		{
+			return g_PlayerTags[this._client];
+		}
+		public set(ArrayList tags)
+		{
+			g_PlayerTags[this._client] = tags;
 		}
 	}
 	
@@ -117,6 +130,50 @@ methodmap Player
 	public bool HasAttribute(AttributeType attributeFlag)
 	{
 		return this.m_attributeFlags & attributeFlag ? true : false;
+	}
+	
+	public void ClearTags()
+	{
+		this.m_tags.Clear();
+	}
+	
+	public void AddTag(const char[] tag)
+	{
+		if (!this.HasTag(tag))
+		{
+			this.m_tags.PushString(tag);
+		}
+	}
+	
+	public void RemoveTag(const char[] tag)
+	{
+		for (int i = 0; i < this.m_tags.Length; ++i)
+		{
+			char m_tag[64];
+			this.m_tags.GetString(i, m_tag, sizeof(m_tag));
+			
+			if (StrEqual(tag, m_tag))
+			{
+				this.m_tags.Erase(i);
+				return;
+			}
+		}
+	}
+	
+	public bool HasTag(const char[] tag)
+	{
+		for (int i = 0; i < this.m_tags.Length; ++i)
+		{
+			char m_tag[64];
+			this.m_tags.GetString(i, m_tag, sizeof(m_tag));
+			
+			if (StrEqual(tag, m_tag))
+			{
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	public int GetIdleSound(char[] buffer, int maxlen)
@@ -296,6 +353,16 @@ methodmap Player
 					}
 				} // for each slot
 			} // for each set of attributes
+			
+			// tags
+			this.ClearTags();
+			for (int i = 0; i < pEvent.m_tags.Count(); ++i)
+			{
+				char tag[64];
+				LoadStringFromAddress(DereferencePointer(pEvent.m_tags.Get(i)), tag, sizeof(tag));
+				
+				this.AddTag(tag);
+			}
 		}
 	}
 	
@@ -326,6 +393,12 @@ methodmap Player
 		}
 		
 		return false;
+	}
+	
+	public void Reset()
+	{
+		delete this.m_tags;
+		this.m_tags = new ArrayList(64);
 	}
 }
 
@@ -373,6 +446,14 @@ methodmap EventChangeAttributes_t
 		public get()
 		{
 			return CUtlVector(view_as<Address>(this) + view_as<Address>(g_OffsetCharacterAttributes));
+		}
+	}
+	
+	property CUtlVector m_tags
+	{
+		public get()
+		{
+			return CUtlVector(view_as<Address>(this) + view_as<Address>(g_OffsetTags));
 		}
 	}
 };

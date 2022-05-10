@@ -16,6 +16,7 @@
  */
 
 static DynamicHook g_DHookEventKilled;
+static DynamicHook g_DHookPassesFilterImpl;
 
 static ArrayList m_justSpawnedVector;
 
@@ -34,6 +35,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CTFPlayer::GetLoadoutItem", DHookCallback_GetLoadoutItem_Pre, DHookCallback_GetLoadoutItem_Post);
 	
 	g_DHookEventKilled = CreateDynamicHook(gamedata, "CTFPlayer::Event_Killed");
+	g_DHookPassesFilterImpl = CreateDynamicHook(gamedata, "CBaseFilter::PassesFilterImpl");
 }
 
 void DHooks_HookClient(int client)
@@ -42,6 +44,14 @@ void DHooks_HookClient(int client)
 	{
 		g_DHookEventKilled.HookEntity(Hook_Pre, client, DHookCallback_EventKilled_Pre);
 		g_DHookEventKilled.HookEntity(Hook_Post, client, DHookCallback_EventKilled_Post);
+	}
+}
+
+void DHooks_OnEntityCreated(int entity, const char[] classname)
+{
+	if (StrEqual(classname, "filter_tf_bot_has_tag"))
+	{
+		g_DHookPassesFilterImpl.HookEntity(Hook_Pre, entity, DHookCallback_PassesFilterImpl_Pre);
 	}
 }
 
@@ -466,6 +476,45 @@ public MRESReturn DHookCallback_EventKilled_Pre(int client, DHookParam params)
 public MRESReturn DHookCallback_EventKilled_Post(int client, DHookParam params)
 {
 	SetEntityFlags(client, GetEntityFlags(client) & ~FL_FAKECLIENT);
+	
+	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret, DHookParam params)
+{
+	int pEntity = params.Get(2);
+	if (0 < pEntity < MaxClients && TF2_GetClientTeam(pEntity) == TFTeam_Invaders)
+	{
+		bool m_bRequireAllTags = GetEntProp(filter, Prop_Data, "m_bRequireAllTags") != 0;
+		
+		char m_iszTags[256];
+		GetEntPropString(filter, Prop_Data, "m_iszTags", m_iszTags, sizeof(m_iszTags));
+		
+		// max. 4 tags with a length of 64 chars
+		char tags[4][64];
+		int count = ExplodeString(m_iszTags, " ", tags, sizeof(tags), sizeof(tags[]));
+		
+		bool bPasses = false;
+		for (int i = 0; i < count; ++i)
+		{
+			if (Player(pEntity).HasTag(tags[i]))
+			{
+				bPasses = true;
+				if (!m_bRequireAllTags)
+				{
+					break;
+				}
+			}
+			else if (m_bRequireAllTags)
+			{
+				ret.Value = false;
+				return MRES_Supercede;
+			}
+		}
+		
+		ret.Value = bPasses;
+		return MRES_Supercede;
+	}
 	
 	return MRES_Ignored;
 }

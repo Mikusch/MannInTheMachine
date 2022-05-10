@@ -84,6 +84,11 @@
 				"linux"		"3"
 				"windows"	"2"
 			}
+			"CBaseFilter::PassesFilterImpl"
+			{
+				"linux"		"196"
+				"windows"	"195"
+			}
 			"CTFPlayer::m_bIsMissionEnemy"
 			{
 				"linux"		"8820"
@@ -266,6 +271,24 @@
 					"info"
 					{
 						"type"	"int"
+					}
+				}
+			}
+			"CBaseFilter::PassesFilterImpl"
+			{
+				"offset"	"CBaseFilter::PassesFilterImpl"
+				"hooktype"	"entity"
+				"return"	"bool"
+				"this"		"entity"
+				"arguments"
+				{
+					"pCaller"
+					{
+						"type"	"cbaseentity"
+					}
+					"pEntity"
+					{
+						"type"	"cbaseentity"
 					}
 				}
 			}

@@ -298,6 +298,13 @@ public void OnPluginStart()
 public void OnClientPutInServer(int client)
 {
 	DHooks_HookClient(client);
+	
+	Player(client).Reset();
+}
+
+public void OnEntityCreated(int entity, const char[] classname)
+{
+	DHooks_OnEntityCreated(entity, classname);
 }
 
 public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])

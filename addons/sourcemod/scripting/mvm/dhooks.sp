@@ -25,6 +25,7 @@ void DHooks_Initialize(GameData gamedata)
 {
 	m_justSpawnedVector = new ArrayList(MaxClients);
 	
+	CreateDynamicDetour(gamedata, "CTFGCServerSystem::PreClientUpdate", DHookCallback_PreClientUpdate_Pre, DHookCallback_PreClientUpdate_Post);
 	CreateDynamicDetour(gamedata, "CPopulationManager::AllocateBots", DHookCallback_AllocateBots_Pre);
 	CreateDynamicDetour(gamedata, "CTFBotSpawner::Spawn", DHookCallback_Spawn_Pre);
 	CreateDynamicDetour(gamedata, "CWaveSpawnPopulator::Update", _, DHookCallback_WaveSpawnPopulatorUpdate_Post);
@@ -68,6 +69,22 @@ static DynamicHook CreateDynamicHook(GameData gamedata, const char[] name)
 		LogError("Failed to create hook setup handle for %s", name);
 	
 	return hook;
+}
+
+public MRESReturn DHookCallback_PreClientUpdate_Pre()
+{
+	// Allows us to have an MvM server with 32 visible player slots
+	GameRules_SetProp("m_bPlayingMannVsMachine", false);
+	
+	return MRES_Handled;
+}
+
+public MRESReturn DHookCallback_PreClientUpdate_Post()
+{
+	// Set it back afterwards
+	GameRules_SetProp("m_bPlayingMannVsMachine", true);
+	
+	return MRES_Handled;
 }
 
 public MRESReturn DHookCallback_AllocateBots_Pre(int populator)

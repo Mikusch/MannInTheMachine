@@ -21,6 +21,11 @@
 	{
 		"Signatures"
 		{
+			"CTFGCServerSystem::PreClientUpdate"
+			{
+				"linux"		"@_ZN17CTFGCServerSystem15PreClientUpdateEv"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x20\x53\x56\x8B\xD9\x57\x89\x5D\xF4\xE8\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A"
+			}
 			"CPopulationManager::AllocateBots"
 			{
 				"linux"		"@_ZN18CPopulationManager12AllocateBotsEv"
@@ -152,6 +157,13 @@
 		}
 		"Functions"
 		{
+			"CTFGCServerSystem::PreClientUpdate"
+			{
+				"signature"	"CTFGCServerSystem::PreClientUpdate"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"ignore"
+			}
 			"CPopulationManager::AllocateBots"
 			{
 				"signature"	"CPopulationManager::AllocateBots"

@@ -320,19 +320,20 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		
 		if (result)
 		{
-			result.AddToTail(GetEntityAddress(newPlayer));
+			result.AddToTail(newPlayer);
+			params.Set(2, result);
 		}
 		
 		// For easy access in WaveSpawnPopulator::Update()
 		m_justSpawnedVector.Push(newPlayer);
-		
-		params.Set(2, result);
-		ret.Value = true;
+	}
+	else
+	{
+		ret.Value = false;
 		return MRES_Supercede;
 	}
 	
-	// Finally, suppress the original function
-	ret.Value = false;
+	ret.Value = true;
 	return MRES_Supercede;
 }
 

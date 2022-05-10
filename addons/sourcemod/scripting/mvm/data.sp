@@ -395,10 +395,14 @@ methodmap Player
 		return false;
 	}
 	
+	public void Initialize()
+	{
+		this.m_tags = new ArrayList(64);
+	}
+	
 	public void Reset()
 	{
-		delete this.m_tags;
-		this.m_tags = new ArrayList(64);
+		this.m_tags.Clear();
 	}
 }
 
@@ -455,6 +459,11 @@ methodmap EventChangeAttributes_t
 		{
 			return CUtlVector(view_as<Address>(this) + view_as<Address>(g_OffsetTags));
 		}
+	}
+	
+	public void GetEventName(char[] buffer, int maxlen)
+	{
+		LoadStringFromAddress(DereferencePointer(view_as<Address>(this) + view_as<Address>(g_OffsetEventName)), buffer, maxlen);
 	}
 };
 

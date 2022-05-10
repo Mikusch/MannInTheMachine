@@ -134,6 +134,16 @@
 				"linux"		"1229"
 				"windows"	"1229"
 			}
+			"CPopulationManager::m_defaultEventChangeAttributesName"
+			{
+				"linux"		"1760"
+				"windows"	"1740"
+			}
+			"EventChangeAttributes_t::m_eventName"
+			{
+				"linux"		"0"
+				"windows"	"0"
+			}
 			"EventChangeAttributes_t::m_weaponRestriction"
 			{
 				"linux"		"8"
@@ -158,6 +168,11 @@
 			{
 				"linux"		"68"
 				"windows"	"68"
+			}
+			"EventChangeAttributes_t::m_tags"
+			{
+				"linux"		"88"
+				"windows"	"88"
 			}
 		}
 		"Functions"

@@ -51,12 +51,15 @@ int g_OffsetHealth;
 int g_OffsetScale;
 int g_OffsetDefaultAttributes;
 int g_OffsetLimitedSupport;
+int g_OffsetDefaultEventChangeAttributesName;
 
+int g_OffsetEventName;
 int g_OffsetWeaponRestriction;
 int g_OffsetAttributeFlags;
 int g_OffsetItems;
 int g_OffsetItemsAttributes;
 int g_OffsetCharacterAttributes;
+int g_OffsetTags;
 
 int g_OffsetIsMissionEnemy;
 int g_OffsetIsLimitedSupportEnemy;
@@ -270,12 +273,15 @@ public void OnPluginStart()
 		g_OffsetScale = gamedata.GetOffset("CTFBotSpawner::m_scale");
 		g_OffsetDefaultAttributes = gamedata.GetOffset("CTFBotSpawner::m_defaultAttributes");
 		g_OffsetLimitedSupport = gamedata.GetOffset("CWaveSpawnPopulator::m_bLimitedSupport");
+		g_OffsetDefaultEventChangeAttributesName = gamedata.GetOffset("CPopulationManager::m_defaultEventChangeAttributesName");
 		
+		g_OffsetEventName = gamedata.GetOffset("EventChangeAttributes_t::m_eventName");
 		g_OffsetWeaponRestriction = gamedata.GetOffset("EventChangeAttributes_t::m_weaponRestriction");
 		g_OffsetAttributeFlags = gamedata.GetOffset("EventChangeAttributes_t::m_attributeFlags");
 		g_OffsetItems = gamedata.GetOffset("EventChangeAttributes_t::m_items");
 		g_OffsetItemsAttributes = gamedata.GetOffset("EventChangeAttributes_t::m_itemsAttributes");
 		g_OffsetCharacterAttributes = gamedata.GetOffset("EventChangeAttributes_t::m_characterAttributes");
+		g_OffsetTags = gamedata.GetOffset("EventChangeAttributes_t::m_tags");
 		
 		g_OffsetIsMissionEnemy = gamedata.GetOffset("CTFPlayer::m_bIsMissionEnemy");
 		g_OffsetIsLimitedSupportEnemy = gamedata.GetOffset("CTFPlayer::m_bIsLimitedSupportEnemy");
@@ -290,6 +296,8 @@ public void OnPluginStart()
 	
 	for (int client = 1; client <= MaxClients; client++)
 	{
+		Player(client).Initialize();
+		
 		if (IsClientInGame(client))
 			OnClientPutInServer(client);
 	}

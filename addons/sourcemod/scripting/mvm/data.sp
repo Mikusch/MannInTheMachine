@@ -467,6 +467,10 @@ methodmap Player
 	
 	public void Reset()
 	{
+		this.m_weaponRestrictionFlags = ANY_WEAPON;
+		this.m_attributeFlags = 0;
+		this.m_spawnPointEntity = -1;
+		this.m_fModelScaleOverride = 0.0;
 		this.m_tags.Clear();
 		this.m_eventChangeAttributes.Clear();
 	}

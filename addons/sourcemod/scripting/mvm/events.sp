@@ -18,6 +18,7 @@
 void Events_Initialize()
 {
 	HookEvent("player_death", EventHook_PlayerDeath);
+	HookEvent("player_team", EventHook_PlayerTeam);
 	HookEvent("post_inventory_application", EventHook_PostInventoryApplication);
 }
 
@@ -33,6 +34,13 @@ public void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroad
 		// CTFBotDead::Update
 		CreateTimer(5.0, Timer_DeadTimer, userid);
 	}
+}
+
+public void EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	
+	Player(client).Reset();
 }
 
 public void EventHook_PostInventoryApplication(Event event, const char[] name, bool dontBroadcast)

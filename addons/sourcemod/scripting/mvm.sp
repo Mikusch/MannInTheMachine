@@ -341,3 +341,11 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 	
 	return Plugin_Continue;
 }
+
+public void TF2_OnConditionAdded(int client, TFCond condition)
+{
+	if (condition == TFCond_MVMBotRadiowave)
+	{
+		TF2_StunPlayer(client, TF2Util_GetPlayerConditionDuration(client, TFCond_MVMBotRadiowave), 1.0, TF_STUNFLAG_SLOWDOWN | TF_STUNFLAG_BONKSTUCK | TF_STUNFLAG_NOSOUNDOREFFECT);
+	}
+}

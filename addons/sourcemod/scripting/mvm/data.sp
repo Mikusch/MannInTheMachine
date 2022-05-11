@@ -407,8 +407,6 @@ methodmap Player
 	
 	public bool IsWeaponRestricted(int weapon)
 	{
-		return false;
-		
 		if (weapon == -1)
 		{
 			return false;
@@ -420,17 +418,17 @@ methodmap Player
 		
 		if (this.HasWeaponRestriction(MELEE_ONLY))
 		{
-			return (iLoadoutSlot != LOADOUT_POSITION_MELEE);
+			return (iLoadoutSlot == LOADOUT_POSITION_PRIMARY) || (iLoadoutSlot == LOADOUT_POSITION_SECONDARY);
 		}
 		
 		if (this.HasWeaponRestriction(PRIMARY_ONLY))
 		{
-			return (iLoadoutSlot != LOADOUT_POSITION_PRIMARY);
+			return (iLoadoutSlot == LOADOUT_POSITION_MELEE) || (iLoadoutSlot == LOADOUT_POSITION_SECONDARY);
 		}
 		
 		if (this.HasWeaponRestriction(SECONDARY_ONLY))
 		{
-			return (iLoadoutSlot != LOADOUT_POSITION_SECONDARY);
+			return (iLoadoutSlot == LOADOUT_POSITION_MELEE) || (iLoadoutSlot == LOADOUT_POSITION_PRIMARY);
 		}
 		
 		return false;

@@ -31,6 +31,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CTFBotSpawner::Spawn", DHookCallback_Spawn_Pre);
 	CreateDynamicDetour(gamedata, "CWaveSpawnPopulator::Update", _, DHookCallback_WaveSpawnPopulatorUpdate_Post);
 	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMission", _, DHookCallback_MissionPopulatorUpdateMission_Post);
+	CreateDynamicDetour(gamedata, "CPointPopulatorInterface::InputChangeBotAttributes", DHookCallback_InputChangeBotAttributes_Pre);
 	CreateDynamicDetour(gamedata, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_GetTeamAssignmentOverride_Pre, DHookCallback_GetTeamAssignmentOverride_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::GetLoadoutItem", DHookCallback_GetLoadoutItem_Pre, DHookCallback_GetLoadoutItem_Post);
 	
@@ -429,6 +430,37 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 	m_justSpawnedVector.Clear();
 	
 	return MRES_Handled;
+}
+
+public MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterface, DHookParam params)
+{
+	Address iszVal = params.GetObjectVar(1, 0x8, ObjectValueType_Int);
+	
+	char pszEventName[64];
+	UTIL_StringtToCharArray(iszVal, pszEventName, sizeof(pszEventName));
+	
+	if (GameRules_IsMannVsMachineMode())
+	{
+		for (int client = 1; client <= MaxClients; client++)
+		{
+			if (!IsClientInGame(client))
+				continue;
+			
+			if (TF2_GetClientTeam(client) != TFTeam_Invaders)
+				continue;
+			
+			if (!IsPlayerAlive(client))
+				continue;
+			
+			EventChangeAttributes_t pEvent = Player(client).GetEventChangeAttributes(pszEventName);
+			if (pEvent)
+			{
+				Player(client).OnEventChangeAttributes(pEvent);
+			}
+		}
+	}
+	
+	return MRES_Supercede;
 }
 
 public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, DHookParam params)

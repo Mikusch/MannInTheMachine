@@ -46,6 +46,11 @@
 				"linux"		"@_ZN17CMissionPopulator13UpdateMissionEN6CTFBot11MissionTypeE"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x5C\x8B\x15\x2A\x2A\x2A\x2A"
 			}
+			"CPointPopulatorInterface::InputChangeBotAttributes"
+			{
+				"linux"		"@_ZN24CPointPopulatorInterface24InputChangeBotAttributesER11inputdata_t"
+				"windows"	"\x55\x8B\xEC\x8B\x4D\x08\x83\xEC\x14\x83\xC1\x08"
+			}
 			"CTFGameRules::GetTeamAssignmentOverride"
 			{
 				"linux"		"@_ZN12CTFGameRules25GetTeamAssignmentOverrideEP9CTFPlayerib"
@@ -233,6 +238,20 @@
 					"mission"
 					{
 						"type"	"int"
+					}
+				}
+			}
+			"CPointPopulatorInterface::InputChangeBotAttributes"
+			{
+				"signature"	"CPointPopulatorInterface::InputChangeBotAttributes"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
+				"arguments"
+				{
+					"inputdata"
+					{
+						"type"	"objectptr"
 					}
 				}
 			}

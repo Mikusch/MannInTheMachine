@@ -129,6 +129,11 @@
 				"linux"		"56"
 				"windows"	"56"
 			}
+			"CTFBotSpawner::m_eventChangeAttributes"
+			{
+				"linux"		"164"
+				"windows"	"164"
+			}
 			"CWaveSpawnPopulator::m_bLimitedSupport"
 			{
 				"linux"		"1229"

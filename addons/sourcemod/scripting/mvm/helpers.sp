@@ -246,6 +246,11 @@ void SetMannVsMachineWaveClassActive(const char[] iszClassIconName, bool bActive
 	}
 }
 
+int GetPopulator()
+{
+	return FindEntityByClassname(MaxClients + 1, "info_populator");
+}
+
 bool IsSpaceToSpawnHere(const float where[3])
 {
 	// make sure a player will fit here

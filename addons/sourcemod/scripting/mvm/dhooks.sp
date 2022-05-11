@@ -217,18 +217,11 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		FakeClientCommand(newPlayer, "joinclass %s", g_aRawPlayerClassNames[m_spawner.m_class]);
 		SetEntPropString(newPlayer, Prop_Send, "m_iszClassIcon", m_iszClassIcon);
 		
-		// TODO: Implement the EventChangeAttributes system
-		//ClearEventChangeAttributes();
-		/*CUtlVector eventChangeAttributes = CUtlVector(address + view_as<Address>(0x0A4));
-		PrintToChatAll("m_eventChangeAttributes:size %d",eventChangeAttributes.Count());
-		for ( int i=0; i<eventChangeAttributes.Count(); ++i )
+		Player(newPlayer).ClearEventChangeAttributes();
+		for (int i = 0; i < m_spawner.m_eventChangeAttributes.Count(); ++i)
 		{
-			PrintToChatAll("%i: %i", i, eventChangeAttributes.Get(i, 11));
-			int skill = LoadFromAddress(eventChangeAttributes.Get(i, 11) + 0x14, NumberType_Int32);
-			PrintToServer("skill %d", skill);
-			//3C LInux
-			//newBot->AddEventChangeAttributes( &m_eventChangeAttributes[i] );
-		}*/
+			Player(newPlayer).AddEventChangeAttributes(m_spawner.m_eventChangeAttributes.Get(i, 108));
+		}
 		
 		// newBot->SetTeleportWhere( m_teleportWhereName );
 		
@@ -256,8 +249,6 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		{
 			TF2_AddCondition(newPlayer, TFCond_FireImmune);
 		}
-		
-		Player(newPlayer).OnEventChangeAttributes(m_spawner.m_defaultAttributes);
 		
 		if (GameRules_IsMannVsMachineMode())
 		{
@@ -304,6 +295,16 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		Player(newPlayer).ModifyMaxHealth(nHealth);
 		
 		Player(newPlayer).StartIdleSound();
+		
+		char defaultEventChangeAttributesName[64];
+		UTIL_StringtToCharArray(view_as<Address>(GetEntData(GetPopulator(), g_OffsetDefaultEventChangeAttributesName)), defaultEventChangeAttributesName, sizeof(defaultEventChangeAttributesName));
+		
+		EventChangeAttributes_t pEventChangeAttributes = Player(newPlayer).GetEventChangeAttributes(defaultEventChangeAttributesName);
+		if (!pEventChangeAttributes)
+		{
+			pEventChangeAttributes = m_spawner.m_defaultAttributes;
+		}
+		Player(newPlayer).OnEventChangeAttributes(pEventChangeAttributes);
 		
 		if (Player(newPlayer).HasAttribute(SPAWN_WITH_FULL_CHARGE))
 		{

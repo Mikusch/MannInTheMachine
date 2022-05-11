@@ -21,6 +21,7 @@ static AttributeType g_PlayerAttributeFlags[MAXPLAYERS + 1];
 static int g_PlayerSpawnPointEntity[MAXPLAYERS + 1];
 static float g_PlayerModelScaleOverride[MAXPLAYERS + 1];
 static ArrayList g_PlayerTags[MAXPLAYERS + 1];
+static ArrayList g_PlayerEventChangeAttributes[MAXPLAYERS + 1];
 
 methodmap Player
 {
@@ -70,6 +71,18 @@ methodmap Player
 		public set(ArrayList tags)
 		{
 			g_PlayerTags[this._client] = tags;
+		}
+	}
+	
+	property ArrayList m_eventChangeAttributes
+	{
+		public get()
+		{
+			return g_PlayerEventChangeAttributes[this._client];
+		}
+		public set(ArrayList attributes)
+		{
+			g_PlayerEventChangeAttributes[this._client] = attributes;
 		}
 	}
 	
@@ -269,6 +282,32 @@ methodmap Player
 		}
 	}
 	
+	public void ClearEventChangeAttributes()
+	{
+		this.m_eventChangeAttributes.Clear();
+	}
+	
+	public void AddEventChangeAttributes(EventChangeAttributes_t newEvent)
+	{
+		this.m_eventChangeAttributes.Push(newEvent);
+	}
+	
+	public EventChangeAttributes_t GetEventChangeAttributes(const char[] pszEventName)
+	{
+		for (int i = 0; i < this.m_eventChangeAttributes.Length; ++i)
+		{
+			EventChangeAttributes_t attributes = this.m_eventChangeAttributes.Get(i)
+			
+			char eventName[64];
+			attributes.GetEventName(eventName, sizeof(eventName));
+			if (StrEqual(eventName, pszEventName, false)) // TODO: Why false? Shouldn't they be equal already
+			{
+				return attributes;
+			}
+		}
+		return EventChangeAttributes_t(Address_Null);
+	}
+	
 	public void OnEventChangeAttributes(EventChangeAttributes_t pEvent)
 	{
 		if (pEvent)
@@ -368,6 +407,8 @@ methodmap Player
 	
 	public bool IsWeaponRestricted(int weapon)
 	{
+		return false;
+		
 		if (weapon == -1)
 		{
 			return false;
@@ -398,11 +439,13 @@ methodmap Player
 	public void Initialize()
 	{
 		this.m_tags = new ArrayList(64);
+		this.m_eventChangeAttributes = new ArrayList();
 	}
 	
 	public void Reset()
 	{
 		this.m_tags.Clear();
+		this.m_eventChangeAttributes.Clear();
 	}
 }
 
@@ -487,6 +530,14 @@ methodmap CTFBotSpawner
 		public get()
 		{
 			return view_as<EventChangeAttributes_t>(this._spawner + view_as<Address>(g_OffsetDefaultAttributes));
+		}
+	}
+	
+	property CUtlVector m_eventChangeAttributes
+	{
+		public get()
+		{
+			return CUtlVector(this._spawner + view_as<Address>(g_OffsetEventChangeAttributes));
 		}
 	}
 	

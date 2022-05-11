@@ -41,16 +41,7 @@ public void EventHook_PostInventoryApplication(Event event, const char[] name, b
 	
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
-		for (int iItemSlot = LOADOUT_POSITION_PRIMARY; iItemSlot < CLASS_LOADOUT_POSITION_COUNT; iItemSlot++)
-		{
-			int entity = TF2Util_GetPlayerLoadoutEntity(client, iItemSlot);
-			
-			if (Player(client).IsWeaponRestricted(entity))
-			{
-				SDKCall_WeaponDetach(client, entity);
-				RemoveEntity(entity);
-			}
-		}
+		Player(client).EquipRequiredWeapon();
 	}
 }
 

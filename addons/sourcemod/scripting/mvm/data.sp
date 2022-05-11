@@ -416,25 +416,44 @@ methodmap Player
 		int itemdef = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")
 		int iLoadoutSlot = TF2Econ_GetItemLoadoutSlot(itemdef, TF2_GetPlayerClass(this._client));
 		
-		if (iLoadoutSlot == LOADOUT_POSITION_ACTION)
-		{
-			// Always restrict action items
-			return true;
-		}
-		
 		if (this.HasWeaponRestriction(MELEE_ONLY))
 		{
-			return (iLoadoutSlot == LOADOUT_POSITION_PRIMARY) || (iLoadoutSlot == LOADOUT_POSITION_SECONDARY);
+			return (iLoadoutSlot != LOADOUT_POSITION_MELEE);
 		}
 		
 		if (this.HasWeaponRestriction(PRIMARY_ONLY))
 		{
-			return (iLoadoutSlot == LOADOUT_POSITION_MELEE) || (iLoadoutSlot == LOADOUT_POSITION_SECONDARY);
+			return (iLoadoutSlot != LOADOUT_POSITION_PRIMARY);
 		}
 		
 		if (this.HasWeaponRestriction(SECONDARY_ONLY))
 		{
-			return (iLoadoutSlot == LOADOUT_POSITION_MELEE) || (iLoadoutSlot == LOADOUT_POSITION_PRIMARY);
+			return (iLoadoutSlot != LOADOUT_POSITION_SECONDARY);
+		}
+		
+		return false;
+	}
+	
+	public bool EquipRequiredWeapon()
+	{
+		if (this.HasWeaponRestriction(MELEE_ONLY))
+		{
+			// force use of melee weapons
+			SetEntPropEnt(this._client, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(this._client, TF_WPN_TYPE_MELEE));
+			return true;
+		}
+		
+		if (this.HasWeaponRestriction(PRIMARY_ONLY))
+		{
+			SetEntPropEnt(this._client, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(this._client, TF_WPN_TYPE_PRIMARY));
+			return true;
+		}
+		
+		if (this.HasWeaponRestriction(SECONDARY_ONLY))
+		{
+			
+			SetEntPropEnt(this._client, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(this._client, TF_WPN_TYPE_SECONDARY));
+			return true;
 		}
 		
 		return false;

@@ -245,6 +245,7 @@ enum
 #include "mvm/helpers.sp"
 #include "mvm/memory.sp"
 #include "mvm/sdkcalls.sp"
+#include "mvm/sdkhooks.sp"
 
 public Plugin myinfo =
 {
@@ -308,6 +309,7 @@ public void OnPluginStart()
 public void OnClientPutInServer(int client)
 {
 	DHooks_HookClient(client);
+	SDKHooks_HookClient(client);
 	
 	Player(client).Reset();
 }

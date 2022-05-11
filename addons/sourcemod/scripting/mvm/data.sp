@@ -416,6 +416,12 @@ methodmap Player
 		int itemdef = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")
 		int iLoadoutSlot = TF2Econ_GetItemLoadoutSlot(itemdef, TF2_GetPlayerClass(this._client));
 		
+		if (iLoadoutSlot == LOADOUT_POSITION_ACTION)
+		{
+			// Always restrict action items
+			return true;
+		}
+		
 		if (this.HasWeaponRestriction(MELEE_ONLY))
 		{
 			return (iLoadoutSlot == LOADOUT_POSITION_PRIMARY) || (iLoadoutSlot == LOADOUT_POSITION_SECONDARY);

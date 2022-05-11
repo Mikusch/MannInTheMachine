@@ -319,11 +319,21 @@ public void OnEntityCreated(int entity, const char[] classname)
 
 public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
 {
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
 		if (Player(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
 		{
 			TF2_AddCondition(client, TFCond_CritCanteen);
+		}
+		
+		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(client).GetLastKnownArea());
+		TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(client) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
+		
+		if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
+		{
+			TF2_AddCondition(client, TFCond_Ubercharged, 0.5);
+			TF2_AddCondition(client, TFCond_UberchargedHidden, 0.5);
+			TF2_AddCondition(client, TFCond_UberchargeFading, 0.5);
 		}
 	}
 }

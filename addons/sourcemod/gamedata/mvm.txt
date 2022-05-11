@@ -84,6 +84,11 @@
 				"linux"		"67"
 				"windows"	"66"
 			}
+			"CTFPlayer::ShouldGib"
+			{
+				"linux"		"294"
+				"windows"	"293"
+			}
 			"CBaseEntity::GetRefEHandle"
 			{
 				"linux"		"3"
@@ -309,7 +314,21 @@
 				{
 					"info"
 					{
-						"type"	"int"
+						"type"	"objectptr"
+					}
+				}
+			}
+			"CTFPlayer::ShouldGib"
+			{
+				"offset"	"CTFPlayer::ShouldGib"
+				"hooktype"	"entity"
+				"return"	"bool"
+				"this"		"entity"
+				"arguments"
+				{
+					"info"
+					{
+						"type"	"objectptr"
 					}
 				}
 			}

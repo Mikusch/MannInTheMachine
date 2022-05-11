@@ -331,6 +331,7 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 		
 		if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
 		{
+			// invading bots get uber while they leave their spawn so they don't drop their cash where players can't pick it up
 			TF2_AddCondition(client, TFCond_Ubercharged, 0.5);
 			TF2_AddCondition(client, TFCond_UberchargedHidden, 0.5);
 			TF2_AddCondition(client, TFCond_UberchargeFading, 0.5);

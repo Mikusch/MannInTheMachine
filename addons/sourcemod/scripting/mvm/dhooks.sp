@@ -16,6 +16,7 @@
  */
 
 static DynamicHook g_DHookEventKilled;
+static DynamicHook g_DHookShouldGib;
 static DynamicHook g_DHookPassesFilterImpl;
 
 static ArrayList m_justSpawnedVector;
@@ -36,6 +37,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CTFPlayer::GetLoadoutItem", DHookCallback_GetLoadoutItem_Pre, DHookCallback_GetLoadoutItem_Post);
 	
 	g_DHookEventKilled = CreateDynamicHook(gamedata, "CTFPlayer::Event_Killed");
+	g_DHookShouldGib = CreateDynamicHook(gamedata, "CTFPlayer::ShouldGib");
 	g_DHookPassesFilterImpl = CreateDynamicHook(gamedata, "CBaseFilter::PassesFilterImpl");
 }
 
@@ -45,6 +47,11 @@ void DHooks_HookClient(int client)
 	{
 		g_DHookEventKilled.HookEntity(Hook_Pre, client, DHookCallback_EventKilled_Pre);
 		g_DHookEventKilled.HookEntity(Hook_Post, client, DHookCallback_EventKilled_Post);
+	}
+	
+	if (g_DHookShouldGib)
+	{
+		g_DHookShouldGib.HookEntity(Hook_Pre, client, DHookCallback_ShouldGib_Pre);
 	}
 }
 
@@ -498,17 +505,28 @@ public MRESReturn DHookCallback_GetLoadoutItem_Post(int player, DHookReturn ret,
 	return MRES_Ignored;
 }
 
-public MRESReturn DHookCallback_EventKilled_Pre(int client, DHookParam params)
+public MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 {
 	// TODO: Only do this for BLU team
-	SetEntityFlags(client, GetEntityFlags(client) | FL_FAKECLIENT);
+	SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
 	
 	return MRES_Ignored;
 }
 
-public MRESReturn DHookCallback_EventKilled_Post(int client, DHookParam params)
+public MRESReturn DHookCallback_EventKilled_Post(int player, DHookParam params)
 {
-	SetEntityFlags(client, GetEntityFlags(client) & ~FL_FAKECLIENT);
+	SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
+	
+	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_ShouldGib_Pre(int player, DHookReturn ret, DHookParam params)
+{
+	if (GameRules_IsMannVsMachineMode() && (GetEntProp(player, Prop_Send, "m_bIsMiniBoss") || GetEntPropFloat(player, Prop_Send, "m_flModelScale") > 1.0))
+	{
+		ret.Value = true;
+		return MRES_Supercede;
+	}
 	
 	return MRES_Ignored;
 }

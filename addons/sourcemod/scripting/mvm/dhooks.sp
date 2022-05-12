@@ -314,6 +314,12 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		}
 		Player(newPlayer).OnEventChangeAttributes(pEventChangeAttributes);
 		
+		int pFlag = Player(newPlayer).GetFlagToFetch();
+		if (pFlag != -1)
+		{
+			Player(newPlayer).m_hFollowingFlagTarget = pFlag;
+		}
+		
 		if (Player(newPlayer).HasAttribute(SPAWN_WITH_FULL_CHARGE))
 		{
 			int weapon = GetPlayerWeaponSlot(newPlayer, TF_WPN_TYPE_SECONDARY);
@@ -416,6 +422,7 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 	{
 		int player = m_justSpawnedVector.Get(i);
 		
+		Player(player).m_hFollowingFlagTarget = -1;
 		SetEntData(player, g_OffsetIsMissionEnemy, true);
 		
 		char iszClassIconName[64];

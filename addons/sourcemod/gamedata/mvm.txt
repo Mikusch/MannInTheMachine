@@ -66,6 +66,11 @@
 				"linux"		"@_ZN9CTFPlayer14GetLoadoutItemEiib"
 				"windows"	"\x55\x8B\xEC\x51\x53\x56\x8B\xF1\x8B\x0D\x2A\x2A\x2A\x2A\x57\x89\x75\xFC"
 			}
+			"CTFPlayer::HasTheFlag"
+			{
+				"linux"		"@_ZNK9CTFPlayer10HasTheFlagEP11ETFFlagTypei"
+				"windows"	"\x55\x8B\xEC\x56\x8B\xF1\x57\x8B\x96\xC0\x20\x00\x00"
+			}
 			"CEconEntity::UpdateModelToClass"
 			{
 				"linux"		"@_ZN11CEconEntity18UpdateModelToClassEv"
@@ -89,6 +94,11 @@
 				"linux"		"294"
 				"windows"	"293"
 			}
+			"CTFItem::PickUp"
+			{
+				"linux"		"266"
+				"windows"	"228"
+			}
 			"CBaseEntity::GetRefEHandle"
 			{
 				"linux"		"3"
@@ -98,6 +108,11 @@
 			{
 				"linux"		"196"
 				"windows"	"195"
+			}
+			"CTFPlayer::m_flSpawnTime"
+			{
+				"linux"		"8616"
+				"windows"	"8612"
 			}
 			"CTFPlayer::m_bIsMissionEnemy"
 			{

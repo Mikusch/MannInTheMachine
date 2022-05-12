@@ -19,6 +19,8 @@ static Handle g_SDKCallPostInventoryApplication;
 static Handle g_SDKCallUpdateModelToClass;
 static Handle g_SDKCallWeaponDetach;
 static Handle g_SDKCallGetRefEHandle;
+static Handle g_SDKCallHasTheFlag;
+static Handle g_SDKCallPickUp;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
@@ -26,6 +28,8 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallUpdateModelToClass = PrepSDKCall_UpdateModelToClass(gamedata);
 	g_SDKCallWeaponDetach = PrepSDKCall_WeaponDetach(gamedata);
 	g_SDKCallGetRefEHandle = PrepSDKCall_GetRefEHandle(gamedata);
+	g_SDKCallHasTheFlag = PrepSDKCall_HasTheFlag(gamedata);
+	g_SDKCallPickUp = PrepSDKCall_PickUp(gamedata);
 }
 
 static Handle PrepSDKCall_PostInventoryApplication(GameData gamedata)
@@ -78,6 +82,33 @@ static Handle PrepSDKCall_GetRefEHandle(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_HasTheFlag(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::HasTheFlag");
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFPlayer::HasTheFlag");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_PickUp(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTFItem::PickUp");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFItem::PickUp");
+	
+	return call;
+}
+
 void SDKCall_PostInventoryApplication(int player)
 {
 	if (g_SDKCallPostInventoryApplication)
@@ -102,4 +133,17 @@ Address SDKCall_GetRefEHandle(int entity)
 		return SDKCall(g_SDKCallGetRefEHandle, entity);
 	
 	return Address_Null;
+}
+
+bool SDKCall_HasTheFlag(int player)
+{
+	if (g_SDKCallHasTheFlag)
+		return SDKCall(g_SDKCallHasTheFlag, player);
+	
+	return false;
+}
+
+void SDKCall_PickUp(int flag, int player, bool invisible)
+{
+	SDKCall(g_SDKCallPickUp, flag, player, invisible);
 }

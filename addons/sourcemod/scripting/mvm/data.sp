@@ -15,6 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+static BombDeployingState_t g_PlayerDeployingBombState[MAXPLAYERS + 1];
+static CountdownTimer g_PlayerDeployingBombTimer[MAXPLAYERS + 1];
+static float g_PlayerDeployingAnchorPos[MAXPLAYERS + 1][3];
+static int g_PlayerFollowingFlagTarget[MAXPLAYERS + 1] = {-1,...};
 static char g_PlayerIdleSounds[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
 static WeaponRestrictionType g_PlayerWeaponRestrictionFlags[MAXPLAYERS + 1];
 static AttributeType g_PlayerAttributeFlags[MAXPLAYERS + 1];
@@ -35,6 +39,47 @@ methodmap Player
 		public get()
 		{
 			return view_as<int>(this);
+		}
+	}
+	
+	property BombDeployingState_t m_nDeployingBombState
+	{
+		public get()
+		{
+			return g_PlayerDeployingBombState[this._client];
+		}
+		public set(BombDeployingState_t nDeployingBombState)
+		{
+			g_PlayerDeployingBombState[this._client] = nDeployingBombState;
+		}
+	}
+	
+	/*property CountdownTimer m_nDeployingBombTimer
+	{
+		public get()
+		{
+			return g_PlayerBombTimer[this._client];
+		}
+		public set(CountdownTimer timer)
+		{
+			g_PlayerBombTimer[this._client] = timer;
+		}
+	}*/
+	
+	public void GetDeployingBombAnchorPos(float pos[3])
+	{
+		//pos = g_PlayerDeployingAnchorPos;
+	}
+	
+	property int m_hFollowingFlagTarget
+	{
+		public get()
+		{
+			return g_PlayerFollowingFlagTarget[this._client];
+		}
+		public set(int pFlag)
+		{
+			g_PlayerFollowingFlagTarget[this._client] = pFlag;
 		}
 	}
 	
@@ -459,6 +504,122 @@ methodmap Player
 		return false;
 	}
 	
+	public int GetFlagToFetch()
+	{
+		int nCarriedFlags = 0;
+		
+		// MvM Engineer bot never pick up a flag
+		if (GameRules_IsMannVsMachineMode())
+		{
+			if (TF2_GetClientTeam(this._client) == TFTeam_Invaders && TF2_GetPlayerClass(this._client) == TFClass_Engineer)
+			{
+				return -1;
+			}
+			
+			if (this.HasAttribute(IGNORE_FLAG))
+			{
+				return -1;
+			}
+			
+			if (this.m_hFollowingFlagTarget != -1)
+			{
+				return this.m_hFollowingFlagTarget;
+			}
+		}
+		
+		ArrayList flagsVector = new ArrayList();
+		
+		// Collect flags
+		int flag = MaxClients + 1;
+		while ((flag = FindEntityByClassname(flag, "item_teamflag")) != -1)
+		{
+			if (GetEntProp(flag, Prop_Send, "m_bDisabled"))
+				continue;
+			
+			// If I'm carrying a flag, look for mine and early-out
+			if (SDKCall_HasTheFlag(this._client))
+			{
+				if (GetEntPropEnt(flag, Prop_Send, "m_hOwnerEntity") == this._client)
+				{
+					delete flagsVector;
+					return flag;
+				}
+			}
+			
+			switch (view_as<ETFFlagType>(GetEntProp(flag, Prop_Send, "m_nType")))
+			{
+				case TF_FLAGTYPE_CTF:
+				{
+					if (view_as<TFTeam>(GetEntProp(flag, Prop_Send, "m_iTeamNum")) == GetEnemyTeam(TF2_GetClientTeam(this._client)))
+					{
+						// we want to steal the other team's flag
+						flagsVector.Push(flag);
+					}
+				}
+				
+				case TF_FLAGTYPE_ATTACK_DEFEND, TF_FLAGTYPE_TERRITORY_CONTROL, TF_FLAGTYPE_INVADE:
+				{
+					if (view_as<TFTeam>(GetEntProp(flag, Prop_Send, "m_iTeamNum")) != GetEnemyTeam(TF2_GetClientTeam(this._client)))
+					{
+						// we want to move our team's flag or a neutral flag
+						flagsVector.Push(flag);
+					}
+				}
+			}
+			
+			if (GetEntProp(flag, Prop_Send, "m_nFlagStatus") == TF_FLAGINFO_STOLEN)
+			{
+				nCarriedFlags++;
+			}
+		}
+		
+		int pClosestFlag = -1;
+		float flClosestFlagDist = float(cellmax);
+		int pClosestUncarriedFlag = -1;
+		float flClosestUncarriedFlagDist = float(cellmax);
+		
+		if (GameRules_IsMannVsMachineMode())
+		{
+			for (int i = 0; i < flagsVector.Length; i++)
+			{
+				flag = flagsVector.Get(i);
+				
+				// Find the closest
+				float flagOrigin[3], playerOrigin[3];
+				GetEntPropVector(flag, Prop_Data, "m_vecAbsOrigin", flagOrigin);
+				GetClientAbsOrigin(this._client, playerOrigin);
+				
+				float origins[3];
+				SubtractVectors(flagOrigin, playerOrigin, origins);
+				
+				float flDist = GetVectorLength(origins, true);
+				if (flDist < flClosestFlagDist)
+				{
+					pClosestFlag = flag;
+					flClosestFlagDist = flDist;
+				}
+				
+				// Find the closest uncarried
+				if (nCarriedFlags < flagsVector.Length && GetEntProp(flag, Prop_Send, "m_nFlagStatus") != TF_FLAGINFO_STOLEN)
+				{
+					if (flDist < flClosestUncarriedFlagDist)
+					{
+						pClosestUncarriedFlag = flag;
+						flClosestUncarriedFlagDist = flDist;
+					}
+				}
+			}
+		}
+		
+		delete flagsVector;
+		
+		// If we have an uncarried flag, prioritize
+		if (pClosestUncarriedFlag != -1)
+			return pClosestUncarriedFlag;
+		
+		return pClosestFlag;
+	}
+	
 	public void Initialize()
 	{
 		this.m_tags = new ArrayList(64);
@@ -467,8 +628,9 @@ methodmap Player
 	
 	public void Reset()
 	{
+		this.m_hFollowingFlagTarget = -1;
 		this.m_weaponRestrictionFlags = ANY_WEAPON;
-		this.m_attributeFlags = 0;
+		this.m_attributeFlags = view_as<AttributeType>(0);
 		this.m_spawnPointEntity = -1;
 		this.m_fModelScaleOverride = 0.0;
 		this.m_tags.Clear();

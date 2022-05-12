@@ -273,3 +273,13 @@ float[] Vector(float x, float y, float z)
 	vec[2] = z;
 	return vec;
 }
+
+TFTeam GetEnemyTeam(TFTeam team)
+{
+	switch (team)
+	{
+		case TFTeam_Red: { return TFTeam_Blue; }
+		case TFTeam_Blue: { return TFTeam_Red; }
+		default: { return team; }
+	}
+}

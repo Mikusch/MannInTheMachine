@@ -42,6 +42,10 @@
 #define MVM_CLASS_FLAG_ALWAYSCRIT		(1<<4)
 #define MVM_CLASS_FLAG_SUPPORT_LIMITED	(1<<5)
 
+#define TF_FLAGINFO_HOME		0
+#define TF_FLAGINFO_STOLEN		(1<<0)
+#define TF_FLAGINFO_DROPPED		(1<<1)
+
 const TFTeam TFTeam_Defenders = TFTeam_Red;
 const TFTeam TFTeam_Invaders = TFTeam_Blue;
 
@@ -62,10 +66,13 @@ int g_OffsetItemsAttributes;
 int g_OffsetCharacterAttributes;
 int g_OffsetTags;
 
+int g_OffsetSpawnTime;
 int g_OffsetIsMissionEnemy;
 int g_OffsetIsLimitedSupportEnemy;
 int g_OffsetWaveSpawnPopulator;
 
+ConVar tf_deploying_bomb_delay_time;
+ConVar tf_deploying_bomb_time;
 ConVar tf_mvm_miniboss_scale;
 ConVar sv_stepsize;
 
@@ -149,6 +156,27 @@ enum WeaponRestrictionType
 	MELEE_ONLY		= 0x0001,
 	PRIMARY_ONLY	= 0x0002,
 	SECONDARY_ONLY	= 0x0004,
+};
+
+enum ETFFlagType
+{
+	TF_FLAGTYPE_CTF = 0,
+	TF_FLAGTYPE_ATTACK_DEFEND,
+	TF_FLAGTYPE_TERRITORY_CONTROL,
+	TF_FLAGTYPE_INVADE,
+	TF_FLAGTYPE_RESOURCE_CONTROL,
+	TF_FLAGTYPE_ROBOT_DESTRUCTION,
+	TF_FLAGTYPE_PLAYER_DESTRUCTION
+};
+
+enum BombDeployingState_t
+{
+	TF_BOMB_DEPLOYING_NONE,
+	TF_BOMB_DEPLOYING_DELAY,
+	TF_BOMB_DEPLOYING_ANIMATING,
+	TF_BOMB_DEPLOYING_COMPLETE,
+
+	TF_BOMB_DEPLOYING_NOT_COUNT,
 };
 
 enum
@@ -238,6 +266,53 @@ enum
 	CLASS_LOADOUT_POSITION_COUNT,
 };
 
+enum struct CountdownTimer
+{
+	float timestamp;
+	float duration;
+	
+	void Reset()
+	{
+		this.timestamp = GetGameTime() + this.duration;
+	}
+	
+	void Start(float duration)
+	{
+		this.timestamp = GetGameTime() + duration;
+		this.duration = duration;
+	}
+	
+	void Invalidate()
+	{
+		this.timestamp = -1.0;
+	}
+	
+	bool HasStarted()
+	{
+		return this.timestamp > 0.0;
+	}
+	
+	bool IsElapsed()
+	{
+		return GetGameTime() > this.timestamp;
+	}
+	
+	float GetElapsedTime()
+	{
+		return GetGameTime() - this.timestamp + this.duration;
+	}
+	
+	float GetRemainingTime()
+	{
+		return this.timestamp - GetGameTime();
+	}
+	
+	float GetCountdownDuration()
+	{
+		return this.HasStarted() ? this.duration : 0.0;
+	}
+}
+
 #include "mvm/data.sp"
 
 #include "mvm/dhooks.sp"
@@ -258,6 +333,8 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");
+	tf_deploying_bomb_time = FindConVar("tf_deploying_bomb_time");
 	tf_mvm_miniboss_scale = FindConVar("tf_mvm_miniboss_scale");
 	sv_stepsize = FindConVar("sv_stepsize");
 	
@@ -286,6 +363,7 @@ public void OnPluginStart()
 		g_OffsetCharacterAttributes = gamedata.GetOffset("EventChangeAttributes_t::m_characterAttributes");
 		g_OffsetTags = gamedata.GetOffset("EventChangeAttributes_t::m_tags");
 		
+		g_OffsetSpawnTime = gamedata.GetOffset("CTFPlayer::m_flSpawnTime");
 		g_OffsetIsMissionEnemy = gamedata.GetOffset("CTFPlayer::m_bIsMissionEnemy");
 		g_OffsetIsLimitedSupportEnemy = gamedata.GetOffset("CTFPlayer::m_bIsLimitedSupportEnemy");
 		g_OffsetWaveSpawnPopulator = gamedata.GetOffset("CTFPlayer::m_pWaveSpawnPopulator");
@@ -317,6 +395,7 @@ public void OnClientPutInServer(int client)
 public void OnEntityCreated(int entity, const char[] classname)
 {
 	DHooks_OnEntityCreated(entity, classname);
+	SDKHooks_OnEntityCreated(entity, classname);
 }
 
 public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
@@ -337,6 +416,16 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 			TF2_AddCondition(client, TFCond_Ubercharged, 0.5);
 			TF2_AddCondition(client, TFCond_UberchargedHidden, 0.5);
 			TF2_AddCondition(client, TFCond_UberchargeFading, 0.5);
+		}
+		
+		int flag = Player(client).GetFlagToFetch();
+		if (flag != -1 && GetEntProp(flag, Prop_Send, "m_nFlagStatus") == TF_FLAGINFO_HOME)
+		{
+			if (GetGameTime() - GetEntData(client, g_OffsetSpawnTime) < 1.0 && TF2_GetClientTeam(client) != TFTeam_Spectator)
+			{
+				// we just spawned - give us the flag
+				SDKCall_PickUp(flag, client, true);
+			}
 		}
 	}
 }

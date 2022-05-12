@@ -421,7 +421,7 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 		int flag = Player(client).GetFlagToFetch();
 		if (flag != -1 && GetEntProp(flag, Prop_Send, "m_nFlagStatus") == TF_FLAGINFO_HOME)
 		{
-			if (GetGameTime() - GetEntData(client, g_OffsetSpawnTime) < 1.0 && TF2_GetClientTeam(client) != TFTeam_Spectator)
+			if (GetGameTime() - GetEntDataFloat(client, g_OffsetSpawnTime) < 1.0 && TF2_GetClientTeam(client) != TFTeam_Spectator)
 			{
 				// we just spawned - give us the flag
 				SDKCall_PickUp(flag, client, true);

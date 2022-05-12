@@ -365,6 +365,24 @@
 					}
 				}
 			}
+			"CTFItem::PickUp"
+			{
+				"offset"	"CTFItem::PickUp"
+				"hooktype"	"entity"
+				"return"	"void"
+				"this"		"entity"
+				"arguments"
+				{
+					"pPlayer"
+					{
+						"type"	"cbaseentity"
+					}
+					"bInvisible"
+					{
+						"type"	"bool"
+					}
+				}
+			}
 		}
 	}
 }

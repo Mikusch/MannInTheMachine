@@ -18,6 +18,7 @@
 static DynamicHook g_DHookEventKilled;
 static DynamicHook g_DHookShouldGib;
 static DynamicHook g_DHookPassesFilterImpl;
+static DynamicHook g_DHookPickUp;
 
 static ArrayList m_justSpawnedVector;
 
@@ -39,6 +40,7 @@ void DHooks_Initialize(GameData gamedata)
 	g_DHookEventKilled = CreateDynamicHook(gamedata, "CTFPlayer::Event_Killed");
 	g_DHookShouldGib = CreateDynamicHook(gamedata, "CTFPlayer::ShouldGib");
 	g_DHookPassesFilterImpl = CreateDynamicHook(gamedata, "CBaseFilter::PassesFilterImpl");
+	g_DHookPickUp = CreateDynamicHook(gamedata, "CTFItem::PickUp");
 }
 
 void DHooks_HookClient(int client)
@@ -60,6 +62,10 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 	if (StrEqual(classname, "filter_tf_bot_has_tag"))
 	{
 		g_DHookPassesFilterImpl.HookEntity(Hook_Pre, entity, DHookCallback_PassesFilterImpl_Pre);
+	}
+	else if (StrEqual(classname, "item_teamflag"))
+	{
+		g_DHookPickUp.HookEntity(Hook_Pre, entity, DHookCallback_PickUp_Pre);
 	}
 }
 
@@ -572,6 +578,21 @@ public MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret
 		
 		ret.Value = bPasses;
 		return MRES_Supercede;
+	}
+	
+	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
+{
+	int pPlayer = params.Get(1);
+	
+	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(pPlayer) == TFTeam_Invaders)
+	{
+		if (Player(pPlayer).HasAttribute(IGNORE_FLAG))
+			return MRES_Supercede;
+		
+		Player(pPlayer).m_hFollowingFlagTarget = item;
 	}
 	
 	return MRES_Ignored;

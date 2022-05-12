@@ -237,6 +237,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 			Player(newPlayer).AddEventChangeAttributes(m_spawner.m_eventChangeAttributes.Get(i, 108));
 		}
 		
+		// TODO
 		// newBot->SetTeleportWhere( m_teleportWhereName );
 		
 		if (m_spawner.m_defaultAttributes.m_attributeFlags & MINIBOSS)
@@ -551,11 +552,11 @@ public MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret
 	{
 		bool m_bRequireAllTags = GetEntProp(filter, Prop_Data, "m_bRequireAllTags") != 0;
 		
-		char m_iszTags[256];
+		char m_iszTags[512];
 		GetEntPropString(filter, Prop_Data, "m_iszTags", m_iszTags, sizeof(m_iszTags));
 		
-		// max. 4 tags with a length of 64 chars
-		char tags[4][64];
+		// max. 8 tags with a length of 64 characters each
+		char tags[8][64];
 		int count = ExplodeString(m_iszTags, " ", tags, sizeof(tags), sizeof(tags[]));
 		
 		bool bPasses = false;

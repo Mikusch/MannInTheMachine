@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+ 
+MvMBombDeploy bombDeploy;
 
 void SDKHooks_HookClient(int client)
 {
@@ -24,6 +26,7 @@ void SDKHooks_OnEntityCreated(int entity, const char[] classname)
 {
 	if (StrEqual(classname, "func_capturezone"))
 	{
+		SDKHook(entity, SDKHook_StartTouch, SDKHookCB_CaptureZone_StartTouch);
 		SDKHook(entity, SDKHook_Touch, SDKHookCB_CaptureZone_Touch);
 	}
 }
@@ -38,11 +41,22 @@ public Action SDKHookCB_Client_WeaponCanSwitchTo(int client, int weapon)
 	return Plugin_Continue;
 }
 
+public Action SDKHookCB_CaptureZone_StartTouch(int zone, int other)
+{
+	if (GameRules_IsMannVsMachineMode() && 0 < other <= MaxClients && SDKCall_HasTheFlag(other))
+	{
+		bombDeploy.Reset();
+		bombDeploy.Start(other);
+	}
+	
+	return Plugin_Continue;
+}
+
 public Action SDKHookCB_CaptureZone_Touch(int zone, int other)
 {
-	if (GameRules_IsMannVsMachineMode())
+	if (GameRules_IsMannVsMachineMode() && 0 < other <= MaxClients && SDKCall_HasTheFlag(other))
 	{
-		//OnBombDeployStart(other);
+		bombDeploy.Update(other);
 	}
 	
 	return Plugin_Continue;

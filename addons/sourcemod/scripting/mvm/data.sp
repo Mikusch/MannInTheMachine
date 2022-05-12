@@ -16,8 +16,6 @@
  */
 
 static BombDeployingState_t g_PlayerDeployingBombState[MAXPLAYERS + 1];
-static CountdownTimer g_PlayerDeployingBombTimer[MAXPLAYERS + 1];
-static float g_PlayerDeployingAnchorPos[MAXPLAYERS + 1][3];
 static int g_PlayerFollowingFlagTarget[MAXPLAYERS + 1] = {-1,...};
 static char g_PlayerIdleSounds[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
 static WeaponRestrictionType g_PlayerWeaponRestrictionFlags[MAXPLAYERS + 1];
@@ -52,23 +50,6 @@ methodmap Player
 		{
 			g_PlayerDeployingBombState[this._client] = nDeployingBombState;
 		}
-	}
-	
-	/*property CountdownTimer m_nDeployingBombTimer
-	{
-		public get()
-		{
-			return g_PlayerBombTimer[this._client];
-		}
-		public set(CountdownTimer timer)
-		{
-			g_PlayerBombTimer[this._client] = timer;
-		}
-	}*/
-	
-	public void GetDeployingBombAnchorPos(float pos[3])
-	{
-		//pos = g_PlayerDeployingAnchorPos;
 	}
 	
 	property int m_hFollowingFlagTarget

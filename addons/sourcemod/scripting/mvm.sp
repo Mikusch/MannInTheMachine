@@ -321,6 +321,7 @@ enum struct CountdownTimer
 #include "mvm/memory.sp"
 #include "mvm/sdkcalls.sp"
 #include "mvm/sdkhooks.sp"
+#include "mvm/deploy_bomb.sp"
 
 public Plugin myinfo =
 {

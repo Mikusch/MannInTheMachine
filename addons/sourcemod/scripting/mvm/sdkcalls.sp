@@ -21,6 +21,7 @@ static Handle g_SDKCallWeaponDetach;
 static Handle g_SDKCallGetRefEHandle;
 static Handle g_SDKCallHasTheFlag;
 static Handle g_SDKCallPickUp;
+static Handle g_SDKCallCapture;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
@@ -30,6 +31,7 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallGetRefEHandle = PrepSDKCall_GetRefEHandle(gamedata);
 	g_SDKCallHasTheFlag = PrepSDKCall_HasTheFlag(gamedata);
 	g_SDKCallPickUp = PrepSDKCall_PickUp(gamedata);
+	g_SDKCallCapture = PrepSDKCall_Capture(gamedata);
 }
 
 static Handle PrepSDKCall_PostInventoryApplication(GameData gamedata)
@@ -84,8 +86,10 @@ static Handle PrepSDKCall_GetRefEHandle(GameData gamedata)
 
 static Handle PrepSDKCall_HasTheFlag(GameData gamedata)
 {
-	StartPrepSDKCall(SDKCall_Entity);
+	StartPrepSDKCall(SDKCall_Player);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::HasTheFlag");
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
 	
 	Handle call = EndPrepSDKCall();
@@ -105,6 +109,19 @@ static Handle PrepSDKCall_PickUp(GameData gamedata)
 	Handle call = EndPrepSDKCall();
 	if (!call)
 		LogMessage("Failed to create SDKCall: CTFItem::PickUp");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_Capture(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CCaptureZone::Capture");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CCaptureZone::Capture");
 	
 	return call;
 }
@@ -135,10 +152,10 @@ Address SDKCall_GetRefEHandle(int entity)
 	return Address_Null;
 }
 
-bool SDKCall_HasTheFlag(int player)
+bool SDKCall_HasTheFlag(int player, int exceptionTypes = 0, int nNumExceptions = 0)
 {
 	if (g_SDKCallHasTheFlag)
-		return SDKCall(g_SDKCallHasTheFlag, player);
+		return SDKCall(g_SDKCallHasTheFlag, player, exceptionTypes, nNumExceptions);
 	
 	return false;
 }
@@ -146,4 +163,10 @@ bool SDKCall_HasTheFlag(int player)
 void SDKCall_PickUp(int flag, int player, bool invisible)
 {
 	SDKCall(g_SDKCallPickUp, flag, player, invisible);
+}
+
+void SDKCall_Capture(int zone, int other)
+{
+	if (g_SDKCallCapture)
+		SDKCall(g_SDKCallCapture, zone, other);
 }

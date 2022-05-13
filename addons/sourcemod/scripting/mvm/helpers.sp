@@ -81,6 +81,8 @@ void AddItem(int player, const char[] pszItemName)
 				continue;
 			
 			int wearableDefindex = GetEntProp(pWearable, Prop_Send, "m_iItemDefinitionIndex");
+			if (wearableDefindex == DEFINDEX_UNDEFINED)
+				continue;
 			
 			int wearableRegionMask = TF2Econ_GetItemEquipRegionMask(wearableDefindex);
 			

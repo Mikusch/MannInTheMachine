@@ -34,6 +34,8 @@
 #define VEC_HULL_MIN	{-24.0, -24.0, 0.0}
 #define VEC_HULL_MAX	{24.0, 24.0, 82.0}
 
+#define DEFINDEX_UNDEFINED	65535
+
 #define MVM_CLASS_FLAG_NONE				0
 #define MVM_CLASS_FLAG_NORMAL			(1<<0)
 #define MVM_CLASS_FLAG_SUPPORT			(1<<1)

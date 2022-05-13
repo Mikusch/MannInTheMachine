@@ -51,6 +51,11 @@
 				"linux"		"@_ZN17CMissionPopulator13UpdateMissionEN6CTFBot11MissionTypeE"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x5C\x8B\x15\x2A\x2A\x2A\x2A"
 			}
+			"CMissionPopulator::UpdateMissionDestroySentries"
+			{
+				"linux"		"@_ZN17CMissionPopulator28UpdateMissionDestroySentriesEv"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x88\x00\x00\x00\x8B\x15\x2A\x2A\x2A\x2A"
+			}
 			"CPointPopulatorInterface::InputChangeBotAttributes"
 			{
 				"linux"		"@_ZN24CPointPopulatorInterface24InputChangeBotAttributesER11inputdata_t"
@@ -280,6 +285,13 @@
 						"type"	"int"
 					}
 				}
+			}
+			"CMissionPopulator::UpdateMissionDestroySentries"
+			{
+				"signature"	"CMissionPopulator::UpdateMissionDestroySentries"
+				"callconv"	"thiscall"
+				"return"	"bool"
+				"this"		"address"
 			}
 			"CPointPopulatorInterface::InputChangeBotAttributes"
 			{

@@ -99,6 +99,11 @@
 				"linux"		"294"
 				"windows"	"293"
 			}
+			"CBasePlayer::EntSelectSpawnPoint"
+			{
+				"linux"		"400"
+				"windows"	"399"
+			}
 			"CTFItem::PickUp"
 			{
 				"linux"		"266"
@@ -153,6 +158,11 @@
 			{
 				"linux"		"20"
 				"windows"	"20"
+			}
+			"CTFBotSpawner::m_teleportWhereName"
+			{
+				"linux"		"36"
+				"windows"	"36"
 			}
 			"CTFBotSpawner::m_defaultAttributes"
 			{
@@ -351,6 +361,13 @@
 						"type"	"objectptr"
 					}
 				}
+			}
+			"CBasePlayer::EntSelectSpawnPoint"
+			{
+				"offset"	"CBasePlayer::EntSelectSpawnPoint"
+				"hooktype"	"entity"
+				"return"	"cbaseentity"
+				"this"		"entity"
 			}
 			"CBaseFilter::PassesFilterImpl"
 			{

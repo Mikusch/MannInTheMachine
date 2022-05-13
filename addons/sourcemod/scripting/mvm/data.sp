@@ -695,6 +695,14 @@ methodmap CTFBotSpawner
 		}
 	}
 	
+	property CUtlVector m_teleportWhereName
+	{
+		public get()
+		{
+			return CUtlVector(this._spawner + view_as<Address>(g_OffsetTeleportWhereName));
+		}
+	}
+	
 	property EventChangeAttributes_t m_defaultAttributes
 	{
 		public get()

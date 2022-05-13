@@ -17,6 +17,7 @@
 
 static DynamicHook g_DHookEventKilled;
 static DynamicHook g_DHookShouldGib;
+static DynamicHook g_DHookEntSelectSpawnPoint;
 static DynamicHook g_DHookPassesFilterImpl;
 static DynamicHook g_DHookPickUp;
 
@@ -39,6 +40,7 @@ void DHooks_Initialize(GameData gamedata)
 	
 	g_DHookEventKilled = CreateDynamicHook(gamedata, "CTFPlayer::Event_Killed");
 	g_DHookShouldGib = CreateDynamicHook(gamedata, "CTFPlayer::ShouldGib");
+	g_DHookEntSelectSpawnPoint = CreateDynamicHook(gamedata, "CBasePlayer::EntSelectSpawnPoint");
 	g_DHookPassesFilterImpl = CreateDynamicHook(gamedata, "CBaseFilter::PassesFilterImpl");
 	g_DHookPickUp = CreateDynamicHook(gamedata, "CTFItem::PickUp");
 }
@@ -54,6 +56,11 @@ void DHooks_HookClient(int client)
 	if (g_DHookShouldGib)
 	{
 		g_DHookShouldGib.HookEntity(Hook_Pre, client, DHookCallback_ShouldGib_Pre);
+	}
+	
+	if (g_DHookEntSelectSpawnPoint)
+	{
+		g_DHookEntSelectSpawnPoint.HookEntity(Hook_Pre, client, DHookCallback_EntSelectSpawnPoint_Pre);
 	}
 }
 
@@ -236,6 +243,8 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		{
 			Player(newPlayer).AddEventChangeAttributes(m_spawner.m_eventChangeAttributes.Get(i, 108));
 		}
+		
+		PrintToServer("m_spawner.m_teleportWhereName %d", m_spawner.m_teleportWhereName.Count());
 		
 		// TODO
 		// newBot->SetTeleportWhere( m_teleportWhereName );
@@ -539,6 +548,18 @@ public MRESReturn DHookCallback_ShouldGib_Pre(int player, DHookReturn ret, DHook
 	if (GameRules_IsMannVsMachineMode() && (GetEntProp(player, Prop_Send, "m_bIsMiniBoss") || GetEntPropFloat(player, Prop_Send, "m_flModelScale") > 1.0))
 	{
 		ret.Value = true;
+		return MRES_Supercede;
+	}
+	
+	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_EntSelectSpawnPoint_Pre(int player, DHookReturn ret)
+{
+	// override normal spawn behavior to spawn robots at the right place
+	if (Player(player).m_spawnPointEntity != -1)
+	{
+		ret.Value = Player(player).m_spawnPointEntity;
 		return MRES_Supercede;
 	}
 	

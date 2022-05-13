@@ -54,6 +54,7 @@ int g_OffsetClassIcon;
 int g_OffsetHealth;
 int g_OffsetScale;
 int g_OffsetEventChangeAttributes;
+int g_OffsetTeleportWhereName;
 int g_OffsetDefaultAttributes;
 int g_OffsetLimitedSupport;
 int g_OffsetDefaultEventChangeAttributesName;
@@ -352,6 +353,7 @@ public void OnPluginStart()
 		g_OffsetHealth = gamedata.GetOffset("CTFBotSpawner::m_health");
 		g_OffsetScale = gamedata.GetOffset("CTFBotSpawner::m_scale");
 		g_OffsetEventChangeAttributes = gamedata.GetOffset("CTFBotSpawner::m_eventChangeAttributes");
+		g_OffsetTeleportWhereName = gamedata.GetOffset("CTFBotSpawner::m_teleportWhereName");
 		g_OffsetDefaultAttributes = gamedata.GetOffset("CTFBotSpawner::m_defaultAttributes");
 		g_OffsetLimitedSupport = gamedata.GetOffset("CWaveSpawnPopulator::m_bLimitedSupport");
 		g_OffsetDefaultEventChangeAttributesName = gamedata.GetOffset("CPopulationManager::m_defaultEventChangeAttributesName");

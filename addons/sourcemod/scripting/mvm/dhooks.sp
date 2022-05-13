@@ -338,6 +338,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		
 		if (Player(newPlayer).HasAttribute(SPAWN_WITH_FULL_CHARGE))
 		{
+			// Medigun Ubercharge
 			int weapon = GetPlayerWeaponSlot(newPlayer, TF_WPN_TYPE_SECONDARY);
 			if (weapon != -1 && HasEntProp(weapon, Prop_Send, "m_flChargeLevel"))
 			{
@@ -349,10 +350,15 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		
 		TFClassType nClassIndex = TF2_GetPlayerClass(newPlayer);
 		
-		bool halloweenPopFile = false;
-		if (halloweenPopFile)
+		if (GetEntProp(TFObjectiveResource(), Prop_Send, "m_nMvMEventPopfileType") == MVM_EVENT_POPFILE_HALLOWEEN)
 		{
-			// TODO: Implement Halloween popfile
+			// zombies use the original player models
+			SetEntProp(newPlayer, Prop_Send, "m_nSkin", 4);
+			
+			char item[64];
+			Format(item, sizeof(item), "Zombie %s", g_aRawPlayerClassNamesShort[nClassIndex]);
+			
+			AddItem(newPlayer, item);
 		}
 		else
 		{
@@ -530,15 +536,20 @@ public MRESReturn DHookCallback_GetLoadoutItem_Post(int player, DHookReturn ret,
 
 public MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 {
-	// TODO: Only do this for BLU team
-	SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
+	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
+	{
+		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
+	}
 	
 	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_EventKilled_Post(int player, DHookParam params)
 {
-	SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
+	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
+	{
+		SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
+	}
 	
 	return MRES_Ignored;
 }

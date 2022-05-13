@@ -371,6 +371,7 @@ methodmap Player
 				TF2Attrib_SetByDefIndex(this._client, defIndex, value);
 			}
 			
+			// set health back to what it was before we clear bot's attributes
 			this.ModifyMaxHealth(nMaxHealth);
 			SetEntProp(this._client, Prop_Data, "m_iHealth", nHealth);
 			
@@ -390,7 +391,7 @@ methodmap Player
 				char itemName[64];
 				LoadStringFromAddress(DereferencePointer(itemAttributes), itemName, sizeof(itemName));
 				
-				int itemDef = FindItemByName(itemName);
+				int itemDef = GetItemDefinitionByName(itemName);
 				
 				for (int iItemSlot = LOADOUT_POSITION_PRIMARY; iItemSlot < CLASS_LOADOUT_POSITION_COUNT; iItemSlot++)
 				{

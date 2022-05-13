@@ -149,6 +149,14 @@ enum ETFFlagType
 	TF_FLAGTYPE_PLAYER_DESTRUCTION
 };
 
+enum 
+{
+	MVM_EVENT_POPFILE_NONE = 0,
+	MVM_EVENT_POPFILE_HALLOWEEN,
+
+	MVM_EVENT_POPFILE_MAX_TYPES,
+};
+
 enum BombDeployingState_t
 {
 	TF_BOMB_DEPLOYING_NONE,
@@ -434,6 +442,21 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 	{
 		TF2_StunPlayer(client, TF2Util_GetPlayerConditionDuration(client, TFCond_MVMBotRadiowave), 1.0, TF_STUNFLAG_SLOWDOWN | TF_STUNFLAG_BONKSTUCK | TF_STUNFLAG_NOSOUNDOREFFECT);
 	}
+}
+
+public Action TF2Items_OnGiveNamedItem(int client, char[] classname, int itemDefIndex, Handle &item)
+{
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	{
+		int slot = TF2Econ_GetItemLoadoutSlot(itemDefIndex, TF2_GetPlayerClass(client));
+		if (slot == LOADOUT_POSITION_ACTION)
+		{
+			// Robots aren't allowed to have action items
+			return Plugin_Handled;
+		}
+	}
+	
+	return Plugin_Continue;
 }
 
 any GetOffset(const char[] name)

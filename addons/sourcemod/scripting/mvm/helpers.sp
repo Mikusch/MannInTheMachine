@@ -64,7 +64,7 @@ bool IsWearableSlot(int iSlot)
 
 void AddItem(int player, const char[] pszItemName)
 {
-	int defindex = FindItemByName(pszItemName);
+	int defindex = GetItemDefinitionByName(pszItemName);
 	
 	// If we already have an item in that slot, remove it
 	TFClassType class = TF2_GetPlayerClass(player);
@@ -81,10 +81,6 @@ void AddItem(int player, const char[] pszItemName)
 				continue;
 			
 			int wearableDefindex = GetEntProp(pWearable, Prop_Send, "m_iItemDefinitionIndex");
-			
-			// TODO: What causes this?
-			if (wearableDefindex == 65535)
-				continue;
 			
 			int wearableRegionMask = TF2Econ_GetItemEquipRegionMask(wearableDefindex);
 			
@@ -135,33 +131,29 @@ int CreateAndEquipItem(int player, int defindex)
 	return item;
 }
 
-int FindItemByName(const char[] name)
+int GetItemDefinitionByName(const char[] name)
 {
 	if (!name[0])
 	{
 		return TF_ITEMDEF_DEFAULT;
 	}
 	
-	static StringMap s_ItemDefsByName;
-	if (s_ItemDefsByName)
-	{
-		int value = TF_ITEMDEF_DEFAULT;
-		return s_ItemDefsByName.GetValue(name, value) ? value : TF_ITEMDEF_DEFAULT;
-	}
-	
-	s_ItemDefsByName = new StringMap();
-	
 	ArrayList itemList = TF2Econ_GetItemList();
-	char nameBuffer[64];
 	for (int i, nItems = itemList.Length; i < nItems; i++)
 	{
 		int itemdef = itemList.Get(i);
-		TF2Econ_GetItemName(itemdef, nameBuffer, sizeof(nameBuffer));
-		s_ItemDefsByName.SetValue(nameBuffer, itemdef);
+		
+		char itemName[64];
+		TF2Econ_GetItemName(itemdef, itemName, sizeof(itemName));
+		
+		if (StrEqual(itemName, name, false))
+		{
+			return itemdef;
+		}
 	}
 	delete itemList;
 	
-	return FindItemByName(name);
+	return TF_ITEMDEF_DEFAULT;
 }
 
 int UTIL_StringtToCharArray(Address string_t, char[] buffer, int maxlen)
@@ -175,18 +167,16 @@ int UTIL_StringtToCharArray(Address string_t, char[] buffer, int maxlen)
 	int max = maxlen - 1;
 	int i = 0;
 	for (; i < max; i++)
-	if ((buffer[i] = view_as<char>(LoadFromAddress(string_t + view_as<Address>(i), NumberType_Int8))) == '\0')
+	if ((buffer[i] = view_as<char>(LoadFromAddress(string_t + view_as<Address>(i), NumberType_Int8))) == EOS)
 		return i;
 	
-	buffer[i] = '\0';
+	buffer[i] = EOS;
 	return i;
 }
 
 void IncrementMannVsMachineWaveClassCount(const char[] iszClassIconName, int iFlags)
 {
-	int obj = FindEntityByClassname(MaxClients + 1, "tf_objective_resource");
-	if (obj == -1)
-		return;
+	int obj = TFObjectiveResource();
 	
 	int i = 0;
 	for (i = 0; i < GetEntPropArraySize(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
@@ -224,9 +214,7 @@ void IncrementMannVsMachineWaveClassCount(const char[] iszClassIconName, int iFl
 
 void SetMannVsMachineWaveClassActive(const char[] iszClassIconName, bool bActive = true)
 {
-	int obj = FindEntityByClassname(MaxClients + 1, "tf_objective_resource");
-	if (obj == -1)
-		return;
+	int obj = TFObjectiveResource();
 	
 	for (int i = 0; i < GetEntPropArraySize(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
 	{
@@ -252,6 +240,11 @@ void SetMannVsMachineWaveClassActive(const char[] iszClassIconName, bool bActive
 int GetPopulator()
 {
 	return FindEntityByClassname(MaxClients + 1, "info_populator");
+}
+
+int TFObjectiveResource()
+{
+	return FindEntityByClassname(MaxClients + 1, "tf_objective_resource");
 }
 
 bool IsSpaceToSpawnHere(const float where[3])

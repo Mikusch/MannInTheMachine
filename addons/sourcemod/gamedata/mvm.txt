@@ -31,6 +31,11 @@
 				"linux"		"@_ZN18CPopulationManager12AllocateBotsEv"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x14\x53\x8B\xD9\x80\xBB\x81\x05\x00\x00\x00"
 			}
+			"CPopulationManager::GetHealthMultiplier"
+			{
+				"linux"		"@_ZN18CPopulationManager19GetHealthMultiplierEb"
+				"windows"	"\x55\x8B\xEC\x80\xB9\xE2\x05\x00\x00\x00"
+			}
 			"CTFBotSpawner::Spawn"
 			{
 				"linux"		"@_ZN13CTFBotSpawner5SpawnERK6VectorP10CUtlVectorI7CHandleI11CBaseEntityE10CUtlMemoryIS6_iEE"

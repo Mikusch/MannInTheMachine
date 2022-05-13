@@ -314,8 +314,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 			nHealth = TF2Util_GetEntityMaxHealth(newPlayer);
 		}
 		
-		// TODO: Support populator health multiplier
-		// nHealth *= g_pPopulationManager->GetHealthMultiplier( false );
+		nHealth = RoundToFloor(float(nHealth) * SDKCall_GetHealthMultiplier(false));
 		Player(newPlayer).ModifyMaxHealth(nHealth);
 		
 		Player(newPlayer).StartIdleSound();

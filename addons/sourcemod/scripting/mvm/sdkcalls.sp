@@ -25,6 +25,7 @@ static Handle g_SDKCallGetRefEHandle;
 static Handle g_SDKCallHasTheFlag;
 static Handle g_SDKCallPickUp;
 static Handle g_SDKCallCapture;
+static Handle g_SDKCallGetHealthMultiplier;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
@@ -35,6 +36,7 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallHasTheFlag = PrepSDKCall_HasTheFlag(gamedata);
 	g_SDKCallPickUp = PrepSDKCall_PickUp(gamedata);
 	g_SDKCallCapture = PrepSDKCall_Capture(gamedata);
+	g_SDKCallGetHealthMultiplier = PrepSDKCall_GetHealthMultiplier(gamedata);
 }
 
 static Handle PrepSDKCall_PostInventoryApplication(GameData gamedata)
@@ -129,6 +131,20 @@ static Handle PrepSDKCall_Capture(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_GetHealthMultiplier(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CPopulationManager::GetHealthMultiplier");
+	PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_ByValue);
+	PrepSDKCall_SetReturnInfo(SDKType_Float, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CPopulationManager::GetHealthMultiplier");
+	
+	return call;
+}
+
 void SDKCall_PostInventoryApplication(int player)
 {
 	if (g_SDKCallPostInventoryApplication)
@@ -172,4 +188,12 @@ void SDKCall_Capture(int zone, int other)
 {
 	if (g_SDKCallCapture)
 		SDKCall(g_SDKCallCapture, zone, other);
+}
+
+float SDKCall_GetHealthMultiplier(int populator, bool bIsTank = false)
+{
+	if (g_SDKCallGetHealthMultiplier)
+		return SDKCall(g_SDKCallGetHealthMultiplier, populator, bIsTank);
+	
+	return 0.0;
 }

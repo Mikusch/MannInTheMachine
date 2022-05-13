@@ -14,7 +14,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
+#pragma semicolon 1
+#pragma newdecls required
+
 MvMBombDeploy bombDeploy;
 
 void SDKHooks_HookClient(int client)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021  Mikusch
+ * Copyright (C) 2022  Mikusch
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
+#pragma semicolon 1
+#pragma newdecls required
 
 static DynamicHook g_DHookEventKilled;
 static DynamicHook g_DHookShouldGib;
@@ -134,11 +137,8 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 	
 	int newPlayer = -1;
 	
-	float rawHere[3];
-	params.GetVector(1, rawHere);
-	
 	float here[3];
-	here = Vector(rawHere[0], rawHere[1], rawHere[2]);
+	params.GetVector(1, here);
 	
 	CTFNavArea area = view_as<CTFNavArea>(TheNavMesh.GetNearestNavArea(here, .checkGround = false));
 	if (area && area.HasAttributeTF(NO_SPAWNING))
@@ -160,7 +160,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 	float z;
 	for (z = 0.0; z < sv_stepsize.FloatValue; z += 4.0)
 	{
-		here[2] = rawHere[2] + sv_stepsize.FloatValue;
+		here[2] += sv_stepsize.FloatValue;
 		
 		if (IsSpaceToSpawnHere(here))
 		{

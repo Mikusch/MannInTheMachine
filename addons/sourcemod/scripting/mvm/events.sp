@@ -15,6 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma semicolon 1
+#pragma newdecls required
+
 void Events_Initialize()
 {
 	HookEvent("player_spawn", EventHook_PlayerSpawn);

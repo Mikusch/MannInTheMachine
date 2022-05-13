@@ -15,6 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma semicolon 1
+#pragma newdecls required
+
 static Handle g_SDKCallPostInventoryApplication;
 static Handle g_SDKCallUpdateModelToClass;
 static Handle g_SDKCallWeaponDetach;

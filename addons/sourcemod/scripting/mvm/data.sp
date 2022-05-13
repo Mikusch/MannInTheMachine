@@ -15,6 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma semicolon 1
+#pragma newdecls required
+
 static BombDeployingState_t g_PlayerDeployingBombState[MAXPLAYERS + 1];
 static int g_PlayerFollowingFlagTarget[MAXPLAYERS + 1] = { -1, ... };
 static char g_PlayerIdleSounds[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
@@ -322,7 +325,7 @@ methodmap Player
 	{
 		for (int i = 0; i < this.m_eventChangeAttributes.Length; ++i)
 		{
-			EventChangeAttributes_t attributes = this.m_eventChangeAttributes.Get(i)
+			EventChangeAttributes_t attributes = this.m_eventChangeAttributes.Get(i);
 			
 			char eventName[64];
 			attributes.GetEventName(eventName, sizeof(eventName));
@@ -439,7 +442,7 @@ methodmap Player
 		}
 		
 		// Get the weapon's loadout slot
-		int itemdef = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex")
+		int itemdef = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
 		int iLoadoutSlot = TF2Econ_GetItemLoadoutSlot(itemdef, TF2_GetPlayerClass(this._client));
 		
 		if (this.HasWeaponRestriction(MELEE_ONLY))

@@ -15,6 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma semicolon 1
+#pragma newdecls required
+
 bool GameRules_IsMannVsMachineMode()
 {
 	return view_as<bool>(GameRules_GetProp("m_bPlayingMannVsMachine"));
@@ -104,7 +107,7 @@ void AddItem(int player, const char[] pszItemName)
 	int item = CreateAndEquipItem(player, defindex);
 	
 	if (TF2Util_IsEntityWearable(item))
-		TF2Util_EquipPlayerWearable(player, item)
+		TF2Util_EquipPlayerWearable(player, item);
 	else
 		EquipPlayerWeapon(player, item);
 	
@@ -263,15 +266,6 @@ bool IsSpaceToSpawnHere(const float where[3])
 	TR_TraceHull(where, where, mins, maxs, MASK_SOLID | CONTENTS_PLAYERCLIP);
 	
 	return TR_GetFraction() >= 1.0;
-}
-
-float[] Vector(float x, float y, float z)
-{
-	float vec[3];
-	vec[0] = x;
-	vec[1] = y;
-	vec[2] = z;
-	return vec;
 }
 
 TFTeam GetEnemyTeam(TFTeam team)

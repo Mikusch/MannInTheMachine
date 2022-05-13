@@ -16,7 +16,7 @@
  */
 
 static BombDeployingState_t g_PlayerDeployingBombState[MAXPLAYERS + 1];
-static int g_PlayerFollowingFlagTarget[MAXPLAYERS + 1] = {-1,...};
+static int g_PlayerFollowingFlagTarget[MAXPLAYERS + 1] = { -1, ... };
 static char g_PlayerIdleSounds[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
 static WeaponRestrictionType g_PlayerWeaponRestrictionFlags[MAXPLAYERS + 1];
 static AttributeType g_PlayerAttributeFlags[MAXPLAYERS + 1];
@@ -626,11 +626,19 @@ methodmap EventChangeAttributes_t
 		return view_as<EventChangeAttributes_t>(address);
 	}
 	
+	property Address _address
+	{
+		public get()
+		{
+			return view_as<Address>(this);
+		}
+	}
+	
 	property WeaponRestrictionType m_weaponRestriction
 	{
 		public get()
 		{
-			return LoadFromAddress(view_as<Address>(this) + view_as<Address>(g_OffsetWeaponRestriction), NumberType_Int32);
+			return LoadFromAddress(this._address + GetOffset("EventChangeAttributes_t::m_weaponRestriction"), NumberType_Int32);
 		}
 	}
 	
@@ -638,7 +646,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return LoadFromAddress(view_as<Address>(this) + view_as<Address>(g_OffsetAttributeFlags), NumberType_Int32);
+			return LoadFromAddress(this._address + GetOffset("EventChangeAttributes_t::m_attributeFlags"), NumberType_Int32);
 		}
 	}
 	
@@ -646,7 +654,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return CUtlVector(view_as<Address>(this) + view_as<Address>(g_OffsetItems));
+			return CUtlVector(this._address + GetOffset("EventChangeAttributes_t::m_items"));
 		}
 	}
 	
@@ -654,7 +662,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return CUtlVector(view_as<Address>(this) + view_as<Address>(g_OffsetItemsAttributes));
+			return CUtlVector(this._address + GetOffset("EventChangeAttributes_t::m_itemsAttributes"));
 		}
 	}
 	
@@ -662,7 +670,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return CUtlVector(view_as<Address>(this) + view_as<Address>(g_OffsetCharacterAttributes));
+			return CUtlVector(this._address + GetOffset("EventChangeAttributes_t::m_characterAttributes"));
 		}
 	}
 	
@@ -670,13 +678,13 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return CUtlVector(view_as<Address>(this) + view_as<Address>(g_OffsetTags));
+			return CUtlVector(this._address + GetOffset("EventChangeAttributes_t::m_tags"));
 		}
 	}
 	
 	public void GetEventName(char[] buffer, int maxlen)
 	{
-		LoadStringFromAddress(DereferencePointer(view_as<Address>(this) + view_as<Address>(g_OffsetEventName)), buffer, maxlen);
+		LoadStringFromAddress(DereferencePointer(this._address + GetOffset("EventChangeAttributes_t::m_eventName")), buffer, maxlen);
 	}
 };
 
@@ -687,7 +695,7 @@ methodmap CTFBotSpawner
 		return view_as<CTFBotSpawner>(spawner);
 	}
 	
-	property Address _spawner
+	property Address _address
 	{
 		public get()
 		{
@@ -699,7 +707,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return CUtlVector(this._spawner + view_as<Address>(g_OffsetTeleportWhereName));
+			return CUtlVector(this._address + GetOffset("CTFBotSpawner::m_teleportWhereName"));
 		}
 	}
 	
@@ -707,7 +715,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return view_as<EventChangeAttributes_t>(this._spawner + view_as<Address>(g_OffsetDefaultAttributes));
+			return view_as<EventChangeAttributes_t>(this._address + GetOffset("CTFBotSpawner::m_defaultAttributes"));
 		}
 	}
 	
@@ -715,7 +723,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return CUtlVector(this._spawner + view_as<Address>(g_OffsetEventChangeAttributes));
+			return CUtlVector(this._address + GetOffset("CTFBotSpawner::m_eventChangeAttributes"));
 		}
 	}
 	
@@ -723,7 +731,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return LoadFromAddress(this._spawner + view_as<Address>(g_OffsetHealth), NumberType_Int32);
+			return LoadFromAddress(this._address + GetOffset("CTFBotSpawner::m_health"), NumberType_Int32);
 		}
 	}
 	
@@ -731,7 +739,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return view_as<TFClassType>(LoadFromAddress(this._spawner + view_as<Address>(g_OffsetClass), NumberType_Int32));
+			return view_as<TFClassType>(LoadFromAddress(this._address + GetOffset("CTFBotSpawner::m_class"), NumberType_Int32));
 		}
 	}
 	
@@ -739,21 +747,16 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return view_as<float>(LoadFromAddress(this._spawner + view_as<Address>(g_OffsetScale), NumberType_Int32));
+			return view_as<float>(LoadFromAddress(this._address + GetOffset("CTFBotSpawner::m_scale"), NumberType_Int32));
 		}
-	}
-	
-	public EventChangeAttributes_t GetEventChangeAttributes()
-	{
-		return view_as<EventChangeAttributes_t>(this);
 	}
 	
 	public int GetClassIcon(char[] buffer, int maxlen)
 	{
-		Address string_t = view_as<Address>(LoadFromAddress(this._spawner + view_as<Address>(g_OffsetClassIcon), NumberType_Int32));
+		Address string_t = view_as<Address>(LoadFromAddress(this._address + GetOffset("CTFBotSpawner::m_iszClassIcon"), NumberType_Int32));
 		if (string_t != Address_Null)
 			return UTIL_StringtToCharArray(string_t, buffer, maxlen);
 		
-		return strcopy(buffer, maxlen, g_aRawPlayerClassNamesShort[CTFBotSpawner(this._spawner).m_class]);
+		return strcopy(buffer, maxlen, g_aRawPlayerClassNamesShort[CTFBotSpawner(this._address).m_class]);
 	}
 };

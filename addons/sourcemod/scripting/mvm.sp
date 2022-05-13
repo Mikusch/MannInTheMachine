@@ -49,28 +49,7 @@
 const TFTeam TFTeam_Defenders = TFTeam_Red;
 const TFTeam TFTeam_Invaders = TFTeam_Blue;
 
-int g_OffsetClass;
-int g_OffsetClassIcon;
-int g_OffsetHealth;
-int g_OffsetScale;
-int g_OffsetEventChangeAttributes;
-int g_OffsetTeleportWhereName;
-int g_OffsetDefaultAttributes;
-int g_OffsetLimitedSupport;
-int g_OffsetDefaultEventChangeAttributesName;
-
-int g_OffsetEventName;
-int g_OffsetWeaponRestriction;
-int g_OffsetAttributeFlags;
-int g_OffsetItems;
-int g_OffsetItemsAttributes;
-int g_OffsetCharacterAttributes;
-int g_OffsetTags;
-
-int g_OffsetSpawnTime;
-int g_OffsetIsMissionEnemy;
-int g_OffsetIsLimitedSupportEnemy;
-int g_OffsetWaveSpawnPopulator;
+StringMap g_offsets;
 
 ConVar tf_deploying_bomb_delay_time;
 ConVar tf_deploying_bomb_time;
@@ -335,6 +314,8 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	g_offsets = new StringMap();
+	
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");
 	tf_deploying_bomb_time = FindConVar("tf_deploying_bomb_time");
 	tf_mvm_miniboss_scale = FindConVar("tf_mvm_miniboss_scale");
@@ -348,28 +329,28 @@ public void OnPluginStart()
 		DHooks_Initialize(gamedata);
 		SDKCalls_Initialize(gamedata);
 		
-		g_OffsetClass = gamedata.GetOffset("CTFBotSpawner::m_class");
-		g_OffsetClassIcon = gamedata.GetOffset("CTFBotSpawner::m_iszClassIcon");
-		g_OffsetHealth = gamedata.GetOffset("CTFBotSpawner::m_health");
-		g_OffsetScale = gamedata.GetOffset("CTFBotSpawner::m_scale");
-		g_OffsetEventChangeAttributes = gamedata.GetOffset("CTFBotSpawner::m_eventChangeAttributes");
-		g_OffsetTeleportWhereName = gamedata.GetOffset("CTFBotSpawner::m_teleportWhereName");
-		g_OffsetDefaultAttributes = gamedata.GetOffset("CTFBotSpawner::m_defaultAttributes");
-		g_OffsetLimitedSupport = gamedata.GetOffset("CWaveSpawnPopulator::m_bLimitedSupport");
-		g_OffsetDefaultEventChangeAttributesName = gamedata.GetOffset("CPopulationManager::m_defaultEventChangeAttributesName");
+		SetOffset(gamedata, "CTFBotSpawner::m_class");
+		SetOffset(gamedata, "CTFBotSpawner::m_iszClassIcon");
+		SetOffset(gamedata, "CTFBotSpawner::m_health");
+		SetOffset(gamedata, "CTFBotSpawner::m_scale");
+		SetOffset(gamedata, "CTFBotSpawner::m_eventChangeAttributes");
+		SetOffset(gamedata, "CTFBotSpawner::m_teleportWhereName");
+		SetOffset(gamedata, "CTFBotSpawner::m_defaultAttributes");
+		SetOffset(gamedata, "CWaveSpawnPopulator::m_bLimitedSupport");
+		SetOffset(gamedata, "CPopulationManager::m_defaultEventChangeAttributesName");
 		
-		g_OffsetEventName = gamedata.GetOffset("EventChangeAttributes_t::m_eventName");
-		g_OffsetWeaponRestriction = gamedata.GetOffset("EventChangeAttributes_t::m_weaponRestriction");
-		g_OffsetAttributeFlags = gamedata.GetOffset("EventChangeAttributes_t::m_attributeFlags");
-		g_OffsetItems = gamedata.GetOffset("EventChangeAttributes_t::m_items");
-		g_OffsetItemsAttributes = gamedata.GetOffset("EventChangeAttributes_t::m_itemsAttributes");
-		g_OffsetCharacterAttributes = gamedata.GetOffset("EventChangeAttributes_t::m_characterAttributes");
-		g_OffsetTags = gamedata.GetOffset("EventChangeAttributes_t::m_tags");
+		SetOffset(gamedata, "EventChangeAttributes_t::m_eventName");
+		SetOffset(gamedata, "EventChangeAttributes_t::m_weaponRestriction");
+		SetOffset(gamedata, "EventChangeAttributes_t::m_attributeFlags");
+		SetOffset(gamedata, "EventChangeAttributes_t::m_items");
+		SetOffset(gamedata, "EventChangeAttributes_t::m_itemsAttributes");
+		SetOffset(gamedata, "EventChangeAttributes_t::m_characterAttributes");
+		SetOffset(gamedata, "EventChangeAttributes_t::m_tags");
 		
-		g_OffsetSpawnTime = gamedata.GetOffset("CTFPlayer::m_flSpawnTime");
-		g_OffsetIsMissionEnemy = gamedata.GetOffset("CTFPlayer::m_bIsMissionEnemy");
-		g_OffsetIsLimitedSupportEnemy = gamedata.GetOffset("CTFPlayer::m_bIsLimitedSupportEnemy");
-		g_OffsetWaveSpawnPopulator = gamedata.GetOffset("CTFPlayer::m_pWaveSpawnPopulator");
+		SetOffset(gamedata, "CTFPlayer::m_flSpawnTime");
+		SetOffset(gamedata, "CTFPlayer::m_bIsMissionEnemy");
+		SetOffset(gamedata, "CTFPlayer::m_bIsLimitedSupportEnemy");
+		SetOffset(gamedata, "CTFPlayer::m_pWaveSpawnPopulator");
 		
 		delete gamedata;
 	}
@@ -424,7 +405,7 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 		int flag = Player(client).GetFlagToFetch();
 		if (flag != -1 && GetEntProp(flag, Prop_Send, "m_nFlagStatus") == TF_FLAGINFO_HOME)
 		{
-			if (GetGameTime() - GetEntDataFloat(client, g_OffsetSpawnTime) < 1.0 && TF2_GetClientTeam(client) != TFTeam_Spectator)
+			if (GetGameTime() - GetEntDataFloat(client, GetOffset("CTFPlayer::m_flSpawnTime")) < 1.0 && TF2_GetClientTeam(client) != TFTeam_Spectator)
 			{
 				// we just spawned - give us the flag
 				SDKCall_PickUp(flag, client, true);
@@ -453,4 +434,26 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 	{
 		TF2_StunPlayer(client, TF2Util_GetPlayerConditionDuration(client, TFCond_MVMBotRadiowave), 1.0, TF_STUNFLAG_SLOWDOWN | TF_STUNFLAG_BONKSTUCK | TF_STUNFLAG_NOSOUNDOREFFECT);
 	}
+}
+
+any GetOffset(const char[] name)
+{
+	int offset;
+	if (!g_offsets.GetValue(name, offset))
+	{
+		ThrowError("Offset \"%s\" not found in map", name);
+	}
+	
+	return offset;
+}
+
+void SetOffset(GameData gamedata, const char[] name)
+{
+	int offset = gamedata.GetOffset(name);
+	if (offset == -1)
+	{
+		ThrowError("Offset \"%s\" not found in gamedata", name);
+	}
+	
+	g_offsets.SetValue(name, offset);
 }

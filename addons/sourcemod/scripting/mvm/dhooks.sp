@@ -130,7 +130,7 @@ public MRESReturn DHookCallback_AllocateBots_Pre(int populator)
  */
 public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookParam params)
 {
-	CTFBotSpawner m_spawner = CTFBotSpawner(pThis);
+	CTFBotSpawner m_address = CTFBotSpawner(pThis);
 	
 	int newPlayer = -1;
 	
@@ -232,44 +232,44 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		TF2_ChangeClientTeam(newPlayer, team);
 		
 		char m_iszClassIcon[64];
-		m_spawner.GetClassIcon(m_iszClassIcon, sizeof(m_iszClassIcon));
+		m_address.GetClassIcon(m_iszClassIcon, sizeof(m_iszClassIcon));
 		
 		SetEntProp(newPlayer, Prop_Data, "m_bAllowInstantSpawn", true);
-		FakeClientCommand(newPlayer, "joinclass %s", g_aRawPlayerClassNames[m_spawner.m_class]);
+		FakeClientCommand(newPlayer, "joinclass %s", g_aRawPlayerClassNames[m_address.m_class]);
 		SetEntPropString(newPlayer, Prop_Send, "m_iszClassIcon", m_iszClassIcon);
 		
 		Player(newPlayer).ClearEventChangeAttributes();
-		for (int i = 0; i < m_spawner.m_eventChangeAttributes.Count(); ++i)
+		for (int i = 0; i < m_address.m_eventChangeAttributes.Count(); ++i)
 		{
-			Player(newPlayer).AddEventChangeAttributes(m_spawner.m_eventChangeAttributes.Get(i, 108));
+			Player(newPlayer).AddEventChangeAttributes(m_address.m_eventChangeAttributes.Get(i, 108));
 		}
 		
-		PrintToServer("m_spawner.m_teleportWhereName %d", m_spawner.m_teleportWhereName.Count());
+		PrintToServer("m_address.m_teleportWhereName %d", m_address.m_teleportWhereName.Count());
 		
 		// TODO
 		// newBot->SetTeleportWhere( m_teleportWhereName );
 		
-		if (m_spawner.m_defaultAttributes.m_attributeFlags & MINIBOSS)
+		if (m_address.m_defaultAttributes.m_attributeFlags & MINIBOSS)
 		{
 			SetEntProp(newPlayer, Prop_Send, "m_bIsMiniBoss", true);
 		}
 		
-		if (m_spawner.m_defaultAttributes.m_attributeFlags & USE_BOSS_HEALTH_BAR)
+		if (m_address.m_defaultAttributes.m_attributeFlags & USE_BOSS_HEALTH_BAR)
 		{
 			SetEntProp(newPlayer, Prop_Send, "m_bUseBossHealthBar", true);
 		}
 		
-		if (m_spawner.m_defaultAttributes.m_attributeFlags & BULLET_IMMUNE)
+		if (m_address.m_defaultAttributes.m_attributeFlags & BULLET_IMMUNE)
 		{
 			TF2_AddCondition(newPlayer, TFCond_BulletImmune);
 		}
 		
-		if (m_spawner.m_defaultAttributes.m_attributeFlags & BLAST_IMMUNE)
+		if (m_address.m_defaultAttributes.m_attributeFlags & BLAST_IMMUNE)
 		{
 			TF2_AddCondition(newPlayer, TFCond_BlastImmune);
 		}
 		
-		if (m_spawner.m_defaultAttributes.m_attributeFlags & FIRE_IMMUNE)
+		if (m_address.m_defaultAttributes.m_attributeFlags & FIRE_IMMUNE)
 		{
 			TF2_AddCondition(newPlayer, TFCond_FireImmune);
 		}
@@ -280,7 +280,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 			SetEntProp(newPlayer, Prop_Send, "m_nCurrency", 0);
 			
 			// announce Spies
-			if (m_spawner.m_class == TFClass_Spy)
+			if (m_address.m_class == TFClass_Spy)
 			{
 				int spyCount = 0;
 				for (int client = 1; client <= MaxClients; client++)
@@ -305,9 +305,9 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 			
 		}
 		
-		Player(newPlayer).SetScaleOverride(m_spawner.m_scale);
+		Player(newPlayer).SetScaleOverride(m_address.m_scale);
 		
-		int nHealth = m_spawner.m_health;
+		int nHealth = m_address.m_health;
 		
 		if (nHealth <= 0.0)
 		{
@@ -321,12 +321,12 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		Player(newPlayer).StartIdleSound();
 		
 		char defaultEventChangeAttributesName[64];
-		UTIL_StringtToCharArray(view_as<Address>(GetEntData(GetPopulator(), g_OffsetDefaultEventChangeAttributesName)), defaultEventChangeAttributesName, sizeof(defaultEventChangeAttributesName));
+		UTIL_StringtToCharArray(view_as<Address>(GetEntData(GetPopulator(), GetOffset("CPopulationManager::m_defaultEventChangeAttributesName"))), defaultEventChangeAttributesName, sizeof(defaultEventChangeAttributesName));
 		
 		EventChangeAttributes_t pEventChangeAttributes = Player(newPlayer).GetEventChangeAttributes(defaultEventChangeAttributesName);
 		if (!pEventChangeAttributes)
 		{
-			pEventChangeAttributes = m_spawner.m_defaultAttributes;
+			pEventChangeAttributes = m_address.m_defaultAttributes;
 		}
 		Player(newPlayer).OnEventChangeAttributes(pEventChangeAttributes);
 		
@@ -358,7 +358,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		{
 			if (nClassIndex >= TFClass_Scout && nClassIndex <= TFClass_Engineer)
 			{
-				if (m_spawner.m_scale >= FindConVar("tf_mvm_miniboss_scale").FloatValue || GetEntProp(newPlayer, Prop_Send, "m_bIsMiniBoss") && FileExists(g_szBotBossModels[nClassIndex], true))
+				if (m_address.m_scale >= FindConVar("tf_mvm_miniboss_scale").FloatValue || GetEntProp(newPlayer, Prop_Send, "m_bIsMiniBoss") && FileExists(g_szBotBossModels[nClassIndex], true))
 				{
 					SetVariantString(g_szBotBossModels[nClassIndex]);
 					AcceptEntityInput(newPlayer, "SetCustomModel");
@@ -402,7 +402,7 @@ public MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 		int player = m_justSpawnedVector.Get(i);
 		
 		SetEntProp(player, Prop_Send, "m_nCurrency", 0);
-		SetEntData(player, g_OffsetWaveSpawnPopulator, pThis);
+		SetEntData(player, GetOffset("CTFPlayer::m_pWaveSpawnPopulator"), pThis);
 		
 		char iszClassIconName[64];
 		GetEntPropString(player, Prop_Send, "m_iszClassIcon", iszClassIconName, sizeof(iszClassIconName));
@@ -410,10 +410,10 @@ public MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 		// Allows client UI to know if a specific spawner is active
 		SetMannVsMachineWaveClassActive(iszClassIconName);
 		
-		bool bLimitedSupport = LoadFromAddress(pThis + view_as<Address>(g_OffsetLimitedSupport), NumberType_Int8);
+		bool bLimitedSupport = LoadFromAddress(pThis + GetOffset("CWaveSpawnPopulator::m_bLimitedSupport"), NumberType_Int8);
 		if (bLimitedSupport)
 		{
-			SetEntData(player, g_OffsetIsLimitedSupportEnemy, true);
+			SetEntData(player, GetOffset("CTFPlayer::m_bIsLimitedSupportEnemy"), true);
 		}
 		
 		// TODO
@@ -439,7 +439,7 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 		int player = m_justSpawnedVector.Get(i);
 		
 		Player(player).m_hFollowingFlagTarget = -1;
-		SetEntData(player, g_OffsetIsMissionEnemy, true);
+		SetEntData(player, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true);
 		
 		char iszClassIconName[64];
 		GetEntPropString(player, Prop_Send, "m_iszClassIcon", iszClassIconName, sizeof(iszClassIconName));

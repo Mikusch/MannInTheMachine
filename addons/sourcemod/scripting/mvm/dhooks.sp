@@ -337,6 +337,8 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		
 		if (Player(newPlayer).HasAttribute(SPAWN_WITH_FULL_CHARGE))
 		{
+			// charge up our weapons
+			
 			// Medigun Ubercharge
 			int weapon = GetPlayerWeaponSlot(newPlayer, TF_WPN_TYPE_SECONDARY);
 			if (weapon != -1 && HasEntProp(weapon, Prop_Send, "m_flChargeLevel"))
@@ -361,6 +363,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		}
 		else
 		{
+			// use the nifty new robot model
 			if (nClassIndex >= TFClass_Scout && nClassIndex <= TFClass_Engineer)
 			{
 				if (m_address.m_scale >= FindConVar("tf_mvm_miniboss_scale").FloatValue || GetEntProp(newPlayer, Prop_Send, "m_bIsMiniBoss") && FileExists(g_szBotBossModels[nClassIndex], true))

@@ -313,9 +313,9 @@ enum struct CountdownTimer
 
 public Plugin myinfo =
 {
-	name = "Unnamed Experiment",
+	name = "Mann in the Machine",
 	author = "Mikusch",
-	description = "Will it blend?",
+	description = "Mann vs. Machine but epic",
 	version = "1.0.0",
 	url = "https://github.com/Mikusch"
 }

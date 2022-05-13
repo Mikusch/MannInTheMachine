@@ -761,6 +761,6 @@ methodmap CTFBotSpawner
 		if (string_t != Address_Null)
 			return UTIL_StringtToCharArray(string_t, buffer, maxlen);
 		
-		return strcopy(buffer, maxlen, g_aRawPlayerClassNamesShort[CTFBotSpawner(this._address).m_class]);
+		return strcopy(buffer, maxlen, g_aRawPlayerClassNamesShort[this.m_class]);
 	}
 };

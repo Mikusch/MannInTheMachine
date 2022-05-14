@@ -27,8 +27,7 @@ void SetModelScale(int entity, float scale, float duration = 0.0)
 {
 	float vecScale[3];
 	vecScale[0] = scale;
-	vecScale[1] = scale;
-	vecScale[2] = duration;
+	vecScale[1] = duration;
 	
 	SetVariantVector3D(vecScale);
 	AcceptEntityInput(entity, "SetModelScale");

@@ -769,12 +769,17 @@ methodmap CTFBotSpawner
 		}
 	}
 	
-	public int GetClassIcon(char[] buffer, int maxlen)
+	public void GetName(char[] buffer, int maxlen)
+	{
+		PtrToString(Deref(this._address + GetOffset("CTFBotSpawner::m_name")), buffer, maxlen);
+	}
+	
+	public void GetClassIcon(char[] buffer, int maxlen)
 	{
 		Address string_t = view_as<Address>(LoadFromAddress(this._address + GetOffset("CTFBotSpawner::m_iszClassIcon"), NumberType_Int32));
 		if (string_t != Address_Null)
-			return UTIL_StringtToCharArray(string_t, buffer, maxlen);
+			UTIL_StringtToCharArray(string_t, buffer, maxlen);
 		
-		return strcopy(buffer, maxlen, g_aRawPlayerClassNamesShort[this.m_class]);
+		strcopy(buffer, maxlen, g_aRawPlayerClassNamesShort[this.m_class]);
 	}
 };

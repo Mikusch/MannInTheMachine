@@ -349,6 +349,7 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CTFBotSpawner::m_health");
 		SetOffset(gamedata, "CTFBotSpawner::m_scale");
 		SetOffset(gamedata, "CTFBotSpawner::m_eventChangeAttributes");
+		SetOffset(gamedata, "CTFBotSpawner::m_name");
 		SetOffset(gamedata, "CTFBotSpawner::m_teleportWhereName");
 		SetOffset(gamedata, "CTFBotSpawner::m_defaultAttributes");
 		SetOffset(gamedata, "CWaveSpawnPopulator::m_bLimitedSupport");

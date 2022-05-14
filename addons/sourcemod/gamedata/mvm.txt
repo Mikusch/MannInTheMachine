@@ -169,6 +169,11 @@
 				"linux"		"20"
 				"windows"	"20"
 			}
+			"CTFBotSpawner::m_name"
+			{
+				"linux"		"32"
+				"windows"	"32"
+			}
 			"CTFBotSpawner::m_teleportWhereName"
 			{
 				"linux"		"36"

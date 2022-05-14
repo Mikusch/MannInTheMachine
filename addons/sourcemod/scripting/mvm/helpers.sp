@@ -249,20 +249,6 @@ int TFObjectiveResource()
 	return FindEntityByClassname(MaxClients + 1, "tf_objective_resource");
 }
 
-bool IsSpaceToSpawnHere(const float where[3])
-{
-	// make sure a player will fit here
-	const float bloat = 5.0;
-	
-	float mins[3], maxs[3];
-	SubtractVectors(VEC_HULL_MIN, { bloat, bloat, 0.0 }, mins);
-	AddVectors(VEC_HULL_MAX, { bloat, bloat, bloat }, maxs);
-	
-	TR_TraceHull(where, where, mins, maxs, MASK_SOLID | CONTENTS_PLAYERCLIP);
-	
-	return TR_GetFraction() >= 1.0;
-}
-
 TFTeam GetEnemyTeam(TFTeam team)
 {
 	switch (team)

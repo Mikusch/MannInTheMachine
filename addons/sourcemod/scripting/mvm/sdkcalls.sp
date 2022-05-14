@@ -24,6 +24,7 @@ static Handle g_SDKCallHasTheFlag;
 static Handle g_SDKCallPickUp;
 static Handle g_SDKCallCapture;
 static Handle g_SDKCallGetHealthMultiplier;
+static Handle g_SDKCallIsSpaceToSpawnHere;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
@@ -33,6 +34,7 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallPickUp = PrepSDKCall_PickUp(gamedata);
 	g_SDKCallCapture = PrepSDKCall_Capture(gamedata);
 	g_SDKCallGetHealthMultiplier = PrepSDKCall_GetHealthMultiplier(gamedata);
+	g_SDKCallIsSpaceToSpawnHere = PrepSDKCall_IsSpaceToSpawnHere(gamedata);
 }
 
 static Handle PrepSDKCall_PostInventoryApplication(GameData gamedata)
@@ -115,6 +117,20 @@ static Handle PrepSDKCall_GetHealthMultiplier(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_IsSpaceToSpawnHere(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Static);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "IsSpaceToSpawnHere");
+	PrepSDKCall_AddParameter(SDKType_Vector, SDKPass_ByRef);
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: IsSpaceToSpawnHere");
+	
+	return call;
+}
+
 void SDKCall_PostInventoryApplication(int player)
 {
 	if (g_SDKCallPostInventoryApplication)
@@ -152,4 +168,12 @@ float SDKCall_GetHealthMultiplier(int populator, bool bIsTank = false)
 		return SDKCall(g_SDKCallGetHealthMultiplier, populator, bIsTank);
 	
 	return 0.0;
+}
+
+bool SDKCall_IsSpaceToSpawnHere(const float where[3])
+{
+	if (g_SDKCallIsSpaceToSpawnHere)
+		return SDKCall(g_SDKCallIsSpaceToSpawnHere, where);
+	
+	return false;
 }

@@ -175,7 +175,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 	{
 		here[2] += sv_stepsize.FloatValue;
 		
-		if (IsSpaceToSpawnHere(here))
+		if (SDKCall_IsSpaceToSpawnHere(here))
 		{
 			break;
 		}
@@ -205,6 +205,9 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 	for (int client = 1; client <= MaxClients; client++)
 	{
 		if (!IsClientInGame(client))
+			continue;
+		
+		if (IsFakeClient(client))
 			continue;
 		
 		if (TF2_GetClientTeam(client) != TFTeam_Spectator)

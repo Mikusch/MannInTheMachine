@@ -441,7 +441,7 @@ public MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 		// Allows client UI to know if a specific spawner is active
 		SetMannVsMachineWaveClassActive(iszClassIconName);
 		
-		bool bLimitedSupport = LoadFromAddress(pThis + GetOffset("CWaveSpawnPopulator::m_bLimitedSupport"), NumberType_Int8);
+		bool bLimitedSupport = Deref(pThis + GetOffset("CWaveSpawnPopulator::m_bLimitedSupport"), NumberType_Int8);
 		if (bLimitedSupport)
 		{
 			SetEntData(player, GetOffset("CTFPlayer::m_bIsLimitedSupportEnemy"), true);

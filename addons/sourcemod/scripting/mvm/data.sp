@@ -378,8 +378,8 @@ methodmap Player
 				// static_attrib_t
 				Address pDef = pEvent.m_characterAttributes.Get(i, 8);
 				
-				int defIndex = LoadFromAddress(pDef, NumberType_Int16);
-				float value = LoadFromAddress(pDef + view_as<Address>(0x4), NumberType_Int32);
+				int defIndex = Deref(pDef, NumberType_Int16);
+				float value = Deref(pDef + view_as<Address>(0x4));
 				
 				TF2Attrib_SetByDefIndex(this._client, defIndex, value);
 			}
@@ -418,8 +418,8 @@ methodmap Player
 							// item_attributes_t
 							Address attrib = m_attributes.Get(iAtt, 8);
 							
-							int defIndex = LoadFromAddress(attrib, NumberType_Int16);
-							float value = LoadFromAddress(attrib + view_as<Address>(0x4), NumberType_Int32);
+							int defIndex = Deref(attrib, NumberType_Int16);
+							float value = Deref(attrib + view_as<Address>(0x4));
 							
 							TF2Attrib_SetByDefIndex(entity, defIndex, value);
 						}
@@ -644,19 +644,11 @@ methodmap EventChangeAttributes_t
 		return view_as<EventChangeAttributes_t>(address);
 	}
 	
-	property Address _address
-	{
-		public get()
-		{
-			return view_as<Address>(this);
-		}
-	}
-	
 	property WeaponRestrictionType m_weaponRestriction
 	{
 		public get()
 		{
-			return LoadFromAddress(this._address + GetOffset("EventChangeAttributes_t::m_weaponRestriction"), NumberType_Int32);
+			return Deref(this + GetOffset("EventChangeAttributes_t::m_weaponRestriction"));
 		}
 	}
 	
@@ -664,7 +656,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return LoadFromAddress(this._address + GetOffset("EventChangeAttributes_t::m_attributeFlags"), NumberType_Int32);
+			return Deref(this + GetOffset("EventChangeAttributes_t::m_attributeFlags"));
 		}
 	}
 	
@@ -672,7 +664,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return CUtlVector(this._address + GetOffset("EventChangeAttributes_t::m_items"));
+			return CUtlVector(this + GetOffset("EventChangeAttributes_t::m_items"));
 		}
 	}
 	
@@ -680,7 +672,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return CUtlVector(this._address + GetOffset("EventChangeAttributes_t::m_itemsAttributes"));
+			return CUtlVector(this + GetOffset("EventChangeAttributes_t::m_itemsAttributes"));
 		}
 	}
 	
@@ -688,7 +680,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return CUtlVector(this._address + GetOffset("EventChangeAttributes_t::m_characterAttributes"));
+			return CUtlVector(this + GetOffset("EventChangeAttributes_t::m_characterAttributes"));
 		}
 	}
 	
@@ -696,13 +688,13 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return CUtlVector(this._address + GetOffset("EventChangeAttributes_t::m_tags"));
+			return CUtlVector(this + GetOffset("EventChangeAttributes_t::m_tags"));
 		}
 	}
 	
 	public void GetEventName(char[] buffer, int maxlen)
 	{
-		PtrToString(Deref(this._address + GetOffset("EventChangeAttributes_t::m_eventName")), buffer, maxlen);
+		PtrToString(Deref(this + GetOffset("EventChangeAttributes_t::m_eventName")), buffer, maxlen);
 	}
 };
 
@@ -713,19 +705,11 @@ methodmap CTFBotSpawner
 		return view_as<CTFBotSpawner>(spawner);
 	}
 	
-	property Address _address
-	{
-		public get()
-		{
-			return view_as<Address>(this);
-		}
-	}
-	
 	property CUtlVector m_teleportWhereName
 	{
 		public get()
 		{
-			return CUtlVector(this._address + GetOffset("CTFBotSpawner::m_teleportWhereName"));
+			return CUtlVector(this + GetOffset("CTFBotSpawner::m_teleportWhereName"));
 		}
 	}
 	
@@ -733,7 +717,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return view_as<EventChangeAttributes_t>(this._address + GetOffset("CTFBotSpawner::m_defaultAttributes"));
+			return view_as<EventChangeAttributes_t>(this + GetOffset("CTFBotSpawner::m_defaultAttributes"));
 		}
 	}
 	
@@ -741,7 +725,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return CUtlVector(this._address + GetOffset("CTFBotSpawner::m_eventChangeAttributes"));
+			return CUtlVector(this + GetOffset("CTFBotSpawner::m_eventChangeAttributes"));
 		}
 	}
 	
@@ -749,7 +733,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return LoadFromAddress(this._address + GetOffset("CTFBotSpawner::m_health"), NumberType_Int32);
+			return Deref(this + GetOffset("CTFBotSpawner::m_health"));
 		}
 	}
 	
@@ -757,7 +741,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return view_as<TFClassType>(LoadFromAddress(this._address + GetOffset("CTFBotSpawner::m_class"), NumberType_Int32));
+			return view_as<TFClassType>(Deref(this + GetOffset("CTFBotSpawner::m_class")));
 		}
 	}
 	
@@ -765,18 +749,18 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return view_as<float>(LoadFromAddress(this._address + GetOffset("CTFBotSpawner::m_scale"), NumberType_Int32));
+			return view_as<float>(Deref(this + GetOffset("CTFBotSpawner::m_scale")));
 		}
 	}
 	
 	public void GetName(char[] buffer, int maxlen)
 	{
-		PtrToString(Deref(this._address + GetOffset("CTFBotSpawner::m_name")), buffer, maxlen);
+		PtrToString(Deref(this + GetOffset("CTFBotSpawner::m_name")), buffer, maxlen);
 	}
 	
 	public void GetClassIcon(char[] buffer, int maxlen)
 	{
-		Address string_t = view_as<Address>(LoadFromAddress(this._address + GetOffset("CTFBotSpawner::m_iszClassIcon"), NumberType_Int32));
+		Address string_t = view_as<Address>(Deref(this + GetOffset("CTFBotSpawner::m_iszClassIcon")));
 		if (string_t != Address_Null)
 			UTIL_StringtToCharArray(string_t, buffer, maxlen);
 		

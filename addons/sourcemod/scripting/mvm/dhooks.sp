@@ -23,6 +23,7 @@ static DynamicHook g_DHookShouldGib;
 static DynamicHook g_DHookEntSelectSpawnPoint;
 static DynamicHook g_DHookPassesFilterImpl;
 static DynamicHook g_DHookPickUp;
+static DynamicHook g_DHookClientConnected;
 
 static ArrayList m_justSpawnedVector;
 
@@ -48,6 +49,7 @@ void DHooks_Initialize(GameData gamedata)
 	g_DHookEntSelectSpawnPoint = CreateDynamicHook(gamedata, "CBasePlayer::EntSelectSpawnPoint");
 	g_DHookPassesFilterImpl = CreateDynamicHook(gamedata, "CBaseFilter::PassesFilterImpl");
 	g_DHookPickUp = CreateDynamicHook(gamedata, "CTFItem::PickUp");
+	g_DHookClientConnected = CreateDynamicHook(gamedata, "CTFGameRules::ClientConnected");
 }
 
 void DHooks_HookClient(int client)
@@ -66,6 +68,14 @@ void DHooks_HookClient(int client)
 	if (g_DHookEntSelectSpawnPoint)
 	{
 		g_DHookEntSelectSpawnPoint.HookEntity(Hook_Pre, client, DHookCallback_EntSelectSpawnPoint_Pre);
+	}
+}
+
+void DHooks_HookGamerules()
+{
+	if (g_DHookClientConnected)
+	{
+		g_DHookClientConnected.HookGamerules(Hook_Pre, DHookCallback_ClientConnected_Pre);
 	}
 }
 
@@ -668,4 +678,11 @@ public MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
 	}
 	
 	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_ClientConnected_Pre(DHookReturn ret, DHookParam params)
+{
+	// MvM will start rejecting connections if the server has 10 humans
+	ret.Value = true;
+	return MRES_Supercede;
 }

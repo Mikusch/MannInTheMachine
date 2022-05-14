@@ -379,6 +379,11 @@ public void OnPluginStart()
 	}
 }
 
+public void OnMapStart()
+{
+	DHooks_HookGamerules();
+}
+
 public void OnClientPutInServer(int client)
 {
 	DHooks_HookClient(client);

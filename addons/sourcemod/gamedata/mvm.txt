@@ -124,6 +124,11 @@
 				"linux"		"196"
 				"windows"	"195"
 			}
+			"CTFGameRules::ClientConnected"
+			{
+				"linux"		"60"
+				"windows"	"59"
+			}
 			"CTFPlayer::m_flSpawnTime"
 			{
 				"linux"		"8616"
@@ -405,6 +410,37 @@
 						"type"	"cbaseentity"
 					}
 				}
+			}
+			"CTFGameRules::ClientConnected"
+			{
+				"offset"	"CTFGameRules::ClientConnected"
+				"hooktype"	"gamerules"
+				"return"	"bool"
+				"this"		"ignore"
+				"arguments"
+				{
+					"pEntity"
+					{
+						"type"	"edict"
+					}
+					"pszName"
+					{
+						"type"	"charptr"
+					}
+					"pszAddress"
+					{
+						"type"	"charptr"
+					}
+					"reject"
+					{
+						"type"	"charptr"
+					}
+					"maxrejectlen"
+					{
+						"type"	"int"
+					}
+				}
+				
 			}
 			"CTFItem::PickUp"
 			{

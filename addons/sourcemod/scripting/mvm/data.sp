@@ -763,7 +763,7 @@ methodmap CTFBotSpawner
 		Address string_t = view_as<Address>(Deref(this + GetOffset("CTFBotSpawner::m_iszClassIcon")));
 		if (string_t != Address_Null)
 			UTIL_StringtToCharArray(string_t, buffer, maxlen);
-		
-		strcopy(buffer, maxlen, g_aRawPlayerClassNamesShort[this.m_class]);
+		else
+			strcopy(buffer, maxlen, g_aRawPlayerClassNamesShort[this.m_class]);
 	}
 };

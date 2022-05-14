@@ -405,7 +405,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	// implements many functions from CTFBotMainAction::FireWeaponAtEnemy
 	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
-		if (Player(client).HasAttribute(ALWAYS_FIRE_WEAPON ) )
+		if (Player(client).HasAttribute(ALWAYS_FIRE_WEAPON))
 		{
 			buttons |= IN_ATTACK;
 			return Plugin_Changed;

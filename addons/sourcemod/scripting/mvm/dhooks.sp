@@ -151,6 +151,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 	
 	if (GameRules_IsMannVsMachineMode())
 	{
+		// Only spawn players while the round is running in MVM mode
 		if (GameRules_GetRoundState() != RoundState_RoundRunning)
 		{
 			ret.Value = false;
@@ -567,10 +568,17 @@ public MRESReturn DHookCallback_ShouldForceAutoTeam_Pre(int player, DHookReturn 
 
 public MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 {
+	// Replicate behavior of CTFBot::Event_Killed
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
+		// TODO: Replicate all of CTFBot::Event_Killed
+		//
+		
+		// Enables currency drops from human kills
 		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
 	}
+	
+	Player(player).StopIdleSound();
 	
 	return MRES_Ignored;
 }

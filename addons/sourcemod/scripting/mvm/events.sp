@@ -22,6 +22,7 @@ void Events_Initialize()
 {
 	HookEvent("player_spawn", EventHook_PlayerSpawn);
 	HookEvent("player_death", EventHook_PlayerDeath);
+	HookEvent("player_team", EventHook_PlayerTeam);
 	HookEvent("post_inventory_application", EventHook_PostInventoryApplication);
 }
 
@@ -30,11 +31,19 @@ public void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroad
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	
 	Player(client).Reset();
+}
+
+public void EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
 	
-	TF2Attrib_RemoveAll(client);
-	
-	SetVariantString("");
-	AcceptEntityInput(client, "SetCustomModel");
+	// Replicate behavior of CTFBot::ChangeTeam
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	{
+		TF2Attrib_RemoveAll(client);
+		// Clear Sound
+		Player(client).StopIdleSound();
+	}
 }
 
 public void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
@@ -44,9 +53,7 @@ public void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroad
 	
 	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
 	{
-		Player(victim).StopIdleSound();
-		
-		// CTFBotDead::Update
+		// Replicate behavior of CTFBotDead::Update
 		CreateTimer(5.0, Timer_DeadTimer, userid);
 	}
 }

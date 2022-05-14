@@ -91,11 +91,6 @@
 				"linux"		"@_ZN11CEconEntity18UpdateModelToClassEv"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x0C\x53\x56\x8B\x35\x2A\x2A\x2A\x2A\x8B\xD9"
 			}
-			"CBaseCombatCharacter::Weapon_Detach"
-			{
-				"linux"		"@_ZN20CBaseCombatCharacter13Weapon_DetachEP17CBaseCombatWeapon"
-				"windows"	"\x55\x8B\xEC\x51\x53\x8B\x1D\x2A\x2A\x2A\x2A\x8B\xC1"
-			}
 			"CCaptureZone::Capture"
 			{
 				"linux"		"@_ZN12CCaptureZone7CaptureEP11CBaseEntity"

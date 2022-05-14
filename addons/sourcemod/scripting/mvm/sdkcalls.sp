@@ -20,7 +20,6 @@
 
 static Handle g_SDKCallPostInventoryApplication;
 static Handle g_SDKCallUpdateModelToClass;
-static Handle g_SDKCallWeaponDetach;
 static Handle g_SDKCallGetRefEHandle;
 static Handle g_SDKCallHasTheFlag;
 static Handle g_SDKCallPickUp;
@@ -31,7 +30,6 @@ void SDKCalls_Initialize(GameData gamedata)
 {
 	g_SDKCallPostInventoryApplication = PrepSDKCall_PostInventoryApplication(gamedata);
 	g_SDKCallUpdateModelToClass = PrepSDKCall_UpdateModelToClass(gamedata);
-	g_SDKCallWeaponDetach = PrepSDKCall_WeaponDetach(gamedata);
 	g_SDKCallGetRefEHandle = PrepSDKCall_GetRefEHandle(gamedata);
 	g_SDKCallHasTheFlag = PrepSDKCall_HasTheFlag(gamedata);
 	g_SDKCallPickUp = PrepSDKCall_PickUp(gamedata);
@@ -59,19 +57,6 @@ static Handle PrepSDKCall_UpdateModelToClass(GameData gamedata)
 	Handle call = EndPrepSDKCall();
 	if (!call)
 		LogMessage("Failed to create SDKCall: CEconEntity::UpdateModelToClass");
-	
-	return call;
-}
-
-static Handle PrepSDKCall_WeaponDetach(GameData gamedata)
-{
-	StartPrepSDKCall(SDKCall_Player);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CBaseCombatCharacter::Weapon_Detach");
-	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
-	
-	Handle call = EndPrepSDKCall();
-	if (!call)
-		LogMessage("Failed to create SDKCall: CBaseCombatCharacter::Weapon_Detach");
 	
 	return call;
 }
@@ -155,12 +140,6 @@ void SDKCall_UpdateModelToClass(int entity)
 {
 	if (g_SDKCallUpdateModelToClass)
 		SDKCall(g_SDKCallUpdateModelToClass, entity);
-}
-
-void SDKCall_WeaponDetach(int player, int weapon)
-{
-	if (g_SDKCallWeaponDetach)
-		SDKCall(g_SDKCallWeaponDetach, player, weapon);
 }
 
 Address SDKCall_GetRefEHandle(int entity)

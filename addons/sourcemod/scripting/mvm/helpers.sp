@@ -88,17 +88,17 @@ void AddItem(int player, const char[] pszItemName)
 			
 			if (wearableRegionMask & newItemRegionMask)
 			{
-				TF2_RemoveWeaponSlot(player, pWearable);
+				TF2_RemoveWearable(player, pWearable);
 			}
 		}
 	}
 	else
 	{
-		int entity = TF2Util_GetPlayerLoadoutEntity(player, slot);
-		if (entity != -1)
+		int pEntity = TF2Util_GetPlayerLoadoutEntity(player, slot);
+		if (pEntity != -1)
 		{
-			SDKCall_WeaponDetach(player, entity);
-			RemoveEntity(entity);
+			RemovePlayerItem(player, pEntity);
+			RemoveEntity(pEntity);
 		}
 	}
 	

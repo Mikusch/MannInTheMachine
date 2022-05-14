@@ -482,20 +482,20 @@ methodmap Player
 		if (this.HasWeaponRestriction(MELEE_ONLY))
 		{
 			// force use of melee weapons
-			SetEntPropEnt(this._client, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(this._client, TF_WPN_TYPE_MELEE));
+			SetEntPropEnt(this._client, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(this._client, TFWeaponSlot_Melee));
 			return true;
 		}
 		
 		if (this.HasWeaponRestriction(PRIMARY_ONLY))
 		{
-			SetEntPropEnt(this._client, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(this._client, TF_WPN_TYPE_PRIMARY));
+			SetEntPropEnt(this._client, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(this._client, TFWeaponSlot_Primary));
 			return true;
 		}
 		
 		if (this.HasWeaponRestriction(SECONDARY_ONLY))
 		{
 			
-			SetEntPropEnt(this._client, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(this._client, TF_WPN_TYPE_SECONDARY));
+			SetEntPropEnt(this._client, Prop_Send, "m_hActiveWeapon", GetPlayerWeaponSlot(this._client, TFWeaponSlot_Secondary));
 			return true;
 		}
 		

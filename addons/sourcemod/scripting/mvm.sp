@@ -168,25 +168,6 @@ enum BombDeployingState_t
 	TF_BOMB_DEPLOYING_NOT_COUNT,
 };
 
-enum
-{
-	TF_WPN_TYPE_PRIMARY = 0,
-	TF_WPN_TYPE_SECONDARY,
-	TF_WPN_TYPE_MELEE,
-	TF_WPN_TYPE_GRENADE,
-	TF_WPN_TYPE_BUILDING,
-	TF_WPN_TYPE_PDA,
-	TF_WPN_TYPE_ITEM1,
-	TF_WPN_TYPE_ITEM2,
-	TF_WPN_TYPE_HEAD,
-	TF_WPN_TYPE_MISC,
-	TF_WPN_TYPE_MELEE_ALLCLASS,
-	TF_WPN_TYPE_SECONDARY2,
-	TF_WPN_TYPE_PRIMARY2,
-
-	TF_WPN_TYPE_COUNT,
-};
-
 enum AttributeType
 {
 	REMOVE_ON_DEATH				= 1<<0,					// kick bot from server when killed
@@ -414,8 +395,14 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		int myWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 		if (myWeapon != -1)
 		{
+			if (TF2Util_GetWeaponSlot(myWeapon) == TFWeaponSlot_Melee)
+			{
+				// always allow robots to use their melee
+				return Plugin_Continue;
+			}
+			
 			int weaponID = TF2Util_GetWeaponID(myWeapon);
-			if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_BUFF_ITEM)
+			if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_LUNCHBOX || weaponID == TF_WEAPON_BUFF_ITEM)
 			{
 				// don't interfere with mediguns or buff items
 				return Plugin_Continue;
@@ -425,12 +412,17 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(client).GetLastKnownArea());
 		TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(client) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
 		
+		static bool s_unlockAttack[MAXPLAYERS + 1];
+		
 		if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
 		{
-			// TODO: This sucks
-			buttons &= ~IN_ATTACK;
-			buttons &= ~IN_ATTACK2;
-			return Plugin_Changed;
+			SetEntPropFloat(client, Prop_Send, "m_flNextAttack", float(cellmax));
+			s_unlockAttack[client] = true;
+		}
+		else if (myWeapon != -1 && s_unlockAttack[client])
+		{
+			SetEntPropFloat(client, Prop_Send, "m_flNextAttack", GetGameTime());
+			s_unlockAttack[client] = false;
 		}
 	}
 	

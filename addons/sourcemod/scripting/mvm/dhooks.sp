@@ -372,7 +372,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 			// charge up our weapons
 			
 			// Medigun Ubercharge
-			int weapon = GetPlayerWeaponSlot(newPlayer, TF_WPN_TYPE_SECONDARY);
+			int weapon = GetPlayerWeaponSlot(newPlayer, TFWeaponSlot_Secondary);
 			if (weapon != -1 && HasEntProp(weapon, Prop_Send, "m_flChargeLevel"))
 			{
 				SetEntPropFloat(weapon, Prop_Send, "m_flChargeLevel", 1.0);

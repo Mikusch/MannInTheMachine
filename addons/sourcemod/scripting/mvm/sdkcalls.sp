@@ -20,7 +20,6 @@
 
 static Handle g_SDKCallPostInventoryApplication;
 static Handle g_SDKCallUpdateModelToClass;
-static Handle g_SDKCallGetRefEHandle;
 static Handle g_SDKCallHasTheFlag;
 static Handle g_SDKCallPickUp;
 static Handle g_SDKCallCapture;
@@ -30,7 +29,6 @@ void SDKCalls_Initialize(GameData gamedata)
 {
 	g_SDKCallPostInventoryApplication = PrepSDKCall_PostInventoryApplication(gamedata);
 	g_SDKCallUpdateModelToClass = PrepSDKCall_UpdateModelToClass(gamedata);
-	g_SDKCallGetRefEHandle = PrepSDKCall_GetRefEHandle(gamedata);
 	g_SDKCallHasTheFlag = PrepSDKCall_HasTheFlag(gamedata);
 	g_SDKCallPickUp = PrepSDKCall_PickUp(gamedata);
 	g_SDKCallCapture = PrepSDKCall_Capture(gamedata);
@@ -57,19 +55,6 @@ static Handle PrepSDKCall_UpdateModelToClass(GameData gamedata)
 	Handle call = EndPrepSDKCall();
 	if (!call)
 		LogMessage("Failed to create SDKCall: CEconEntity::UpdateModelToClass");
-	
-	return call;
-}
-
-static Handle PrepSDKCall_GetRefEHandle(GameData gamedata)
-{
-	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CBaseEntity::GetRefEHandle");
-	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
-	
-	Handle call = EndPrepSDKCall();
-	if (!call)
-		LogMessage("Failed to create SDKCall: CBaseEntity::GetRefEHandle");
 	
 	return call;
 }
@@ -140,14 +125,6 @@ void SDKCall_UpdateModelToClass(int entity)
 {
 	if (g_SDKCallUpdateModelToClass)
 		SDKCall(g_SDKCallUpdateModelToClass, entity);
-}
-
-Address SDKCall_GetRefEHandle(int entity)
-{
-	if (g_SDKCallGetRefEHandle)
-		return SDKCall(g_SDKCallGetRefEHandle, entity);
-	
-	return Address_Null;
 }
 
 bool SDKCall_HasTheFlag(int player, int exceptionTypes = 0, int nNumExceptions = 0)

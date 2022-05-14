@@ -119,11 +119,6 @@
 				"linux"		"266"
 				"windows"	"228"
 			}
-			"CBaseEntity::GetRefEHandle"
-			{
-				"linux"		"3"
-				"windows"	"2"
-			}
 			"CBaseFilter::PassesFilterImpl"
 			{
 				"linux"		"196"

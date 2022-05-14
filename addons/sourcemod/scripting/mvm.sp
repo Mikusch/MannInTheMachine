@@ -309,7 +309,6 @@ enum struct CountdownTimer
 #include "mvm/dhooks.sp"
 #include "mvm/events.sp"
 #include "mvm/helpers.sp"
-#include "mvm/memory.sp"
 #include "mvm/sdkcalls.sp"
 #include "mvm/sdkhooks.sp"
 #include "mvm/deploy_bomb.sp"
@@ -392,6 +391,43 @@ public void OnEntityCreated(int entity, const char[] classname)
 {
 	DHooks_OnEntityCreated(entity, classname);
 	SDKHooks_OnEntityCreated(entity, classname);
+}
+
+public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int & subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
+{
+	// implements many functions from CTFBotMainAction::FireWeaponAtEnemy
+	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(client) == TFTeam_Invaders)
+	{
+		if (Player(client).HasAttribute(ALWAYS_FIRE_WEAPON ) )
+		{
+			buttons |= IN_ATTACK;
+			return Plugin_Changed;
+		}
+		
+		int myWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+		if (myWeapon != -1)
+		{
+			int weaponID = TF2Util_GetWeaponID(myWeapon);
+			if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_BUFF_ITEM)
+			{
+				// don't interfere with mediguns or buff items
+				return Plugin_Continue;
+			}
+		}
+		
+		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(client).GetLastKnownArea());
+		TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(client) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
+		
+		if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
+		{
+			// TODO: This sucks
+			buttons &= ~IN_ATTACK;
+			buttons &= ~IN_ATTACK2;
+			return Plugin_Changed;
+		}
+	}
+	
+	return Plugin_Continue;
 }
 
 public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])

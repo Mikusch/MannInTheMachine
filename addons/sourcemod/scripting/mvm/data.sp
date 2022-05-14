@@ -379,7 +379,7 @@ methodmap Player
 			for (int i = 0; i < pEvent.m_items.Count(); i++)
 			{
 				char item[64];
-				LoadStringFromAddress(DereferencePointer(pEvent.m_items.Get(i)), item, sizeof(item));
+				PtrToString(Deref(pEvent.m_items.Get(i)), item, sizeof(item));
 				
 				AddItem(this._client, item);
 			}
@@ -389,7 +389,7 @@ methodmap Player
 				Address itemAttributes = pEvent.m_itemsAttributes.Get(i);
 				
 				char itemName[64];
-				LoadStringFromAddress(DereferencePointer(itemAttributes), itemName, sizeof(itemName));
+				PtrToString(Deref(itemAttributes), itemName, sizeof(itemName));
 				
 				int itemDef = GetItemDefinitionByName(itemName);
 				
@@ -428,7 +428,7 @@ methodmap Player
 			for (int i = 0; i < pEvent.m_tags.Count(); ++i)
 			{
 				char tag[64];
-				LoadStringFromAddress(DereferencePointer(pEvent.m_tags.Get(i)), tag, sizeof(tag));
+				PtrToString(Deref(pEvent.m_tags.Get(i)), tag, sizeof(tag));
 				
 				this.AddTag(tag);
 			}
@@ -688,7 +688,7 @@ methodmap EventChangeAttributes_t
 	
 	public void GetEventName(char[] buffer, int maxlen)
 	{
-		LoadStringFromAddress(DereferencePointer(this._address + GetOffset("EventChangeAttributes_t::m_eventName")), buffer, maxlen);
+		PtrToString(Deref(this._address + GetOffset("EventChangeAttributes_t::m_eventName")), buffer, maxlen);
 	}
 };
 

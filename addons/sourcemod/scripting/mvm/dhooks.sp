@@ -389,7 +389,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		{
 			// EntityHandleVector_t
 			CUtlVector result = CUtlVector(params.Get(2));
-			result.AddToTail(LoadFromAddress(SDKCall_GetRefEHandle(newPlayer), NumberType_Int32));
+			result.AddToTail(GetEntityHandle(newPlayer));
 		}
 		
 		// For easy access in WaveSpawnPopulator::Update()

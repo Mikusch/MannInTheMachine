@@ -36,6 +36,11 @@
 				"linux"		"@_ZN18CPopulationManager19GetHealthMultiplierEb"
 				"windows"	"\x55\x8B\xEC\x80\xB9\xE2\x05\x00\x00\x00"
 			}
+			"CPopulationManager::RestoreCheckpoint"
+			{
+				"linux"		"@_ZN18CPopulationManager17RestoreCheckpointEv"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x2C\x53\x56\x8B\xF1\x57\x89\x75\xFC"
+			}
 			"CTFBotSpawner::Spawn"
 			{
 				"linux"		"@_ZN13CTFBotSpawner5SpawnERK6VectorP10CUtlVectorI7CHandleI11CBaseEntityE10CUtlMemoryIS6_iEE"
@@ -254,7 +259,14 @@
 				"signature"	"CPopulationManager::AllocateBots"
 				"callconv"	"thiscall"
 				"return"	"void"
-				"this"		"ignore"
+				"this"		"entity"
+			}
+			"CPopulationManager::RestoreCheckpoint"
+			{
+				"signature"	"CPopulationManager::RestoreCheckpoint"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
 			}
 			"CTFBotSpawner::Spawn"
 			{

@@ -35,6 +35,7 @@ void DHooks_Initialize(GameData gamedata)
 	
 	CreateDynamicDetour(gamedata, "CTFGCServerSystem::PreClientUpdate", DHookCallback_PreClientUpdate_Pre, DHookCallback_PreClientUpdate_Post);
 	CreateDynamicDetour(gamedata, "CPopulationManager::AllocateBots", DHookCallback_AllocateBots_Pre);
+	CreateDynamicDetour(gamedata, "CPopulationManager::RestoreCheckpoint", _, DHookCallback_RestoreCheckpoint_Post);
 	CreateDynamicDetour(gamedata, "CTFBotSpawner::Spawn", DHookCallback_Spawn_Pre);
 	CreateDynamicDetour(gamedata, "CWaveSpawnPopulator::Update", _, DHookCallback_WaveSpawnPopulatorUpdate_Post);
 	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMission", _, DHookCallback_MissionPopulatorUpdateMission_Post);
@@ -135,8 +136,16 @@ public MRESReturn DHookCallback_PreClientUpdate_Post()
 
 public MRESReturn DHookCallback_AllocateBots_Pre(int populator)
 {
-	// No bots in MY home!
+	// Do not allow the populator to allocate bots
 	return MRES_Supercede;
+}
+
+public MRESReturn DHookCallback_RestoreCheckpoint_Post(int populator)
+{
+	// Hitting this function usually means the wave has been failed.
+	// TODO: Get a new set of defenders.
+	
+	return MRES_Handled;
 }
 
 /*
@@ -542,7 +551,7 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 	if (Player(player).m_bAllowTeamChange)
 	{
 		GameRules_SetProp("m_bPlayingMannVsMachine", false);
-		return MRES_Ignored;
+		return MRES_Handled;
 	}
 	else
 	{
@@ -580,7 +589,7 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Post(DHookReturn ret, 
 		GameRules_SetProp("m_bPlayingMannVsMachine", true);
 	}
 	
-	return MRES_Ignored;
+	return MRES_Handled;
 }
 
 public MRESReturn DHookCallback_GetLoadoutItem_Pre(int player, DHookReturn ret, DHookParam params)
@@ -591,7 +600,7 @@ public MRESReturn DHookCallback_GetLoadoutItem_Pre(int player, DHookReturn ret, 
 		GameRules_SetProp("m_bIsInTraining", true);
 	}
 	
-	return MRES_Ignored;
+	return MRES_Handled;
 }
 
 public MRESReturn DHookCallback_GetLoadoutItem_Post(int player, DHookReturn ret, DHookParam params)
@@ -601,7 +610,7 @@ public MRESReturn DHookCallback_GetLoadoutItem_Post(int player, DHookReturn ret,
 		GameRules_SetProp("m_bIsInTraining", false);
 	}
 	
-	return MRES_Ignored;
+	return MRES_Handled;
 }
 
 public MRESReturn DHookCallback_ShouldForceAutoTeam_Pre(int player, DHookReturn ret)
@@ -625,7 +634,7 @@ public MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 	
 	Player(player).StopIdleSound();
 	
-	return MRES_Ignored;
+	return MRES_Handled;
 }
 
 public MRESReturn DHookCallback_EventKilled_Post(int player, DHookParam params)
@@ -635,7 +644,7 @@ public MRESReturn DHookCallback_EventKilled_Post(int player, DHookParam params)
 		SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
 	}
 	
-	return MRES_Ignored;
+	return MRES_Handled;
 }
 
 public MRESReturn DHookCallback_ShouldGib_Pre(int player, DHookReturn ret, DHookParam params)
@@ -646,7 +655,7 @@ public MRESReturn DHookCallback_ShouldGib_Pre(int player, DHookReturn ret, DHook
 		return MRES_Supercede;
 	}
 	
-	return MRES_Ignored;
+	return MRES_Handled;
 }
 
 public MRESReturn DHookCallback_EntSelectSpawnPoint_Pre(int player, DHookReturn ret)
@@ -658,7 +667,7 @@ public MRESReturn DHookCallback_EntSelectSpawnPoint_Pre(int player, DHookReturn 
 		return MRES_Supercede;
 	}
 	
-	return MRES_Ignored;
+	return MRES_Handled;
 }
 
 public MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret, DHookParam params)
@@ -697,7 +706,7 @@ public MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret
 		return MRES_Supercede;
 	}
 	
-	return MRES_Ignored;
+	return MRES_Handled;
 }
 
 public MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
@@ -712,7 +721,7 @@ public MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
 		Player(pPlayer).m_hFollowingFlagTarget = item;
 	}
 	
-	return MRES_Ignored;
+	return MRES_Handled;
 }
 
 public MRESReturn DHookCallback_ClientConnected_Pre(DHookReturn ret, DHookParam params)

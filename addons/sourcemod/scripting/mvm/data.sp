@@ -342,7 +342,7 @@ methodmap Player
 			
 			char eventName[64];
 			attributes.GetEventName(eventName, sizeof(eventName));
-			if (StrEqual(eventName, pszEventName, false)) // TODO: Why false? Shouldn't they be equal already
+			if (StrEqual(eventName, pszEventName, false))
 			{
 				return attributes;
 			}

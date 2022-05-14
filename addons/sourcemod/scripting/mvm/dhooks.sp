@@ -40,7 +40,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMission", _, DHookCallback_MissionPopulatorUpdateMission_Post);
 	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMissionDestroySentries", DHookCallback_UpdateMissionDestroySentries_Pre);
 	CreateDynamicDetour(gamedata, "CPointPopulatorInterface::InputChangeBotAttributes", DHookCallback_InputChangeBotAttributes_Pre);
-	CreateDynamicDetour(gamedata, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_GetTeamAssignmentOverride_Pre);
+	CreateDynamicDetour(gamedata, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_GetTeamAssignmentOverride_Pre, DHookCallback_GetTeamAssignmentOverride_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::GetLoadoutItem", DHookCallback_GetLoadoutItem_Pre, DHookCallback_GetLoadoutItem_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::ShouldForceAutoTeam", DHookCallback_ShouldForceAutoTeam_Pre);
 	
@@ -217,6 +217,8 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 	
 	if (newPlayer != -1)
 	{
+		Player(newPlayer).m_bAllowTeamChange = true;
+		
 		// Remove any player attributes
 		TF2Attrib_RemoveAll(newPlayer);
 		
@@ -445,6 +447,8 @@ public MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 			OnBotTeleported( bot );
 		}
 		*/
+		
+		Player(player).m_bAllowTeamChange = false;
 	}
 	
 	// After we are done, clear the vector
@@ -475,6 +479,8 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 			iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
 		}
 		IncrementMannVsMachineWaveClassCount(iszClassIconName, iFlags);
+		
+		Player(player).m_bAllowTeamChange = false;
 	}
 	
 	// After we are done, clear the vector
@@ -523,29 +529,50 @@ public MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterf
 
 public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, DHookParam params)
 {
-	int iRedCount = GetTeamPlayerCount(TFTeam_Defenders);
-	int iSpectatorCount = GetTeamPlayerCount(TFTeam_Spectator);
+	int player = params.Get(1);
 	
-	if (iRedCount == 0)
+	if (Player(player).m_bAllowTeamChange)
 	{
-		// first player always gets assigned to RED so we can calculate the ratio
-		ret.Value = TFTeam_Defenders;
+		GameRules_SetProp("m_bPlayingMannVsMachine", false);
+		return MRES_Ignored;
 	}
 	else
 	{
-		// TODO: Configurable ratio
-		float flRatio = float(iSpectatorCount) / float(iRedCount);
-		if (flRatio < 2.2)
+		int iRedCount = GetTeamPlayerCount(TFTeam_Defenders);
+		int iSpectatorCount = GetTeamPlayerCount(TFTeam_Spectator);
+		
+		if (iRedCount == 0)
 		{
-			ret.Value = TFTeam_Spectator;
+			// first player always gets assigned to RED so we can calculate the ratio
+			ret.Value = TFTeam_Defenders;
 		}
 		else
 		{
-			ret.Value = TFTeam_Defenders;
+			float flRatio = float(iSpectatorCount) / float(iRedCount);
+			if (flRatio < mitm_invaders_defenders_ratio.FloatValue)
+			{
+				ret.Value = TFTeam_Spectator;
+			}
+			else
+			{
+				ret.Value = TFTeam_Defenders;
+			}
 		}
+		
+		return MRES_Supercede;
+	}
+}
+
+public MRESReturn DHookCallback_GetTeamAssignmentOverride_Post(DHookReturn ret, DHookParam params)
+{
+	int player = params.Get(1);
+	
+	if (Player(player).m_bAllowTeamChange)
+	{
+		GameRules_SetProp("m_bPlayingMannVsMachine", true);
 	}
 	
-	return MRES_Supercede;
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_GetLoadoutItem_Pre(int player, DHookReturn ret, DHookParam params)

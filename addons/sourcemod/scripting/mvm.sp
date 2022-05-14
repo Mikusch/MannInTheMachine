@@ -53,6 +53,8 @@ const TFTeam TFTeam_Invaders = TFTeam_Blue;
 
 StringMap g_offsets;
 
+ConVar mitm_invaders_defenders_ratio;
+
 ConVar tf_deploying_bomb_delay_time;
 ConVar tf_deploying_bomb_time;
 ConVar tf_mvm_miniboss_scale;
@@ -325,6 +327,8 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	g_offsets = new StringMap();
+	
+	mitm_invaders_defenders_ratio = CreateConVar("mitm_robots_humans_ratio", "4.33", "The ratio of invaders to defenders. Defender slots gets populated first.");
 	
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");
 	tf_deploying_bomb_time = FindConVar("tf_deploying_bomb_time");

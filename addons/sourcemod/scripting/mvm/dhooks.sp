@@ -39,8 +39,9 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMission", _, DHookCallback_MissionPopulatorUpdateMission_Post);
 	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMissionDestroySentries", DHookCallback_UpdateMissionDestroySentries_Pre);
 	CreateDynamicDetour(gamedata, "CPointPopulatorInterface::InputChangeBotAttributes", DHookCallback_InputChangeBotAttributes_Pre);
-	CreateDynamicDetour(gamedata, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_GetTeamAssignmentOverride_Pre, DHookCallback_GetTeamAssignmentOverride_Post);
+	CreateDynamicDetour(gamedata, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_GetTeamAssignmentOverride_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayer::GetLoadoutItem", DHookCallback_GetLoadoutItem_Pre, DHookCallback_GetLoadoutItem_Post);
+	CreateDynamicDetour(gamedata, "CTFPlayer::ShouldForceAutoTeam", DHookCallback_ShouldForceAutoTeam_Pre);
 	
 	g_DHookEventKilled = CreateDynamicHook(gamedata, "CTFPlayer::Event_Killed");
 	g_DHookShouldGib = CreateDynamicHook(gamedata, "CTFPlayer::ShouldGib");
@@ -511,16 +512,29 @@ public MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterf
 
 public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, DHookParam params)
 {
-	GameRules_SetProp("m_bPlayingMannVsMachine", false);
+	int iRedCount = GetTeamPlayerCount(TFTeam_Defenders);
+	int iSpectatorCount = GetTeamPlayerCount(TFTeam_Spectator);
 	
-	return MRES_Ignored;
-}
-
-public MRESReturn DHookCallback_GetTeamAssignmentOverride_Post(DHookReturn ret, DHookParam params)
-{
-	GameRules_SetProp("m_bPlayingMannVsMachine", true);
+	if (iRedCount == 0)
+	{
+		// first player always gets assigned to RED so we can calculate the ratio
+		ret.Value = TFTeam_Defenders;
+	}
+	else
+	{
+		// TODO: Configurable ratio
+		float flRatio = float(iSpectatorCount) / float(iRedCount);
+		if (flRatio < 2.2)
+		{
+			ret.Value = TFTeam_Spectator;
+		}
+		else
+		{
+			ret.Value = TFTeam_Defenders;
+		}
+	}
 	
-	return MRES_Ignored;
+	return MRES_Supercede;
 }
 
 public MRESReturn DHookCallback_GetLoadoutItem_Pre(int player, DHookReturn ret, DHookParam params)
@@ -542,6 +556,13 @@ public MRESReturn DHookCallback_GetLoadoutItem_Post(int player, DHookReturn ret,
 	}
 	
 	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_ShouldForceAutoTeam_Pre(int player, DHookReturn ret)
+{
+	// don't allow game logic to force players on a team
+	ret.Value = false;
+	return MRES_Supercede;
 }
 
 public MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)

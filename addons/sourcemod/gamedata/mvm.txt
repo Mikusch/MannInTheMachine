@@ -76,6 +76,11 @@
 				"linux"		"@_ZN9CTFPlayer14GetLoadoutItemEiib"
 				"windows"	"\x55\x8B\xEC\x51\x53\x56\x8B\xF1\x8B\x0D\x2A\x2A\x2A\x2A\x57\x89\x75\xFC"
 			}
+			"CTFPlayer::ShouldForceAutoTeam"
+			{
+				"linux"		"@_ZN9CTFPlayer19ShouldForceAutoTeamEv"
+				"windows"	"\xA1\x2A\x2A\x2A\x2A\x56\x8B\xF1\x83\x78\x30\x00\x74\x2A\xB0\x01"
+			}
 			"CTFPlayer::HasTheFlag"
 			{
 				"linux"		"@_ZNK9CTFPlayer10HasTheFlagEP11ETFFlagTypei"
@@ -350,6 +355,13 @@
 						"type"	"bool"
 					}
 				}
+			}
+			"CTFPlayer::ShouldForceAutoTeam"
+			{
+				"signature"		"CTFPlayer::ShouldForceAutoTeam"
+				"callconv"		"thiscall"
+				"return"		"bool"
+				"this"			"entity"
 			}
 			"CTFPlayer::Event_Killed"
 			{

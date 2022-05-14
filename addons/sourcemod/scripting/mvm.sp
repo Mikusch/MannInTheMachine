@@ -305,6 +305,7 @@ enum struct CountdownTimer
 
 #include "mvm/data.sp"
 
+#include "mvm/console.sp"
 #include "mvm/dhooks.sp"
 #include "mvm/events.sp"
 #include "mvm/helpers.sp"
@@ -331,6 +332,7 @@ public void OnPluginStart()
 	tf_mvm_miniboss_scale = FindConVar("tf_mvm_miniboss_scale");
 	sv_stepsize = FindConVar("sv_stepsize");
 	
+	Console_Initialize();
 	Events_Initialize();
 	
 	GameData gamedata = new GameData("mvm");

@@ -272,3 +272,18 @@ TFTeam GetEnemyTeam(TFTeam team)
 		default: { return team; }
 	}
 }
+
+int GetTeamPlayerCount(TFTeam team)
+{
+	int count = 0;
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (TF2_GetClientTeam(client) == team)
+			count++;
+	}
+	
+	return count;
+}

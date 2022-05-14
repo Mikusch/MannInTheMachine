@@ -30,6 +30,11 @@ public void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroad
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	
 	Player(client).Reset();
+	
+	TF2Attrib_RemoveAll(client);
+	
+	SetVariantString("");
+	AcceptEntityInput(client, "SetCustomModel");
 }
 
 public void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)

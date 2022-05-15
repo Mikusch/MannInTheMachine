@@ -18,9 +18,8 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static bool g_PlayerAllowTeamChange[MAXPLAYERS + 1];
 static BombDeployingState_t g_PlayerDeployingBombState[MAXPLAYERS + 1];
-static int g_PlayerFollowingFlagTarget[MAXPLAYERS + 1] = { -1, ... };
+static int g_PlayerFollowingFlagTarget[MAXPLAYERS + 1];
 static char g_PlayerIdleSounds[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
 static WeaponRestrictionType g_PlayerWeaponRestrictionFlags[MAXPLAYERS + 1];
 static AttributeType g_PlayerAttributeFlags[MAXPLAYERS + 1];
@@ -44,18 +43,6 @@ methodmap Player
 		public get()
 		{
 			return view_as<int>(this);
-		}
-	}
-	
-	property bool m_bAllowTeamChange
-	{
-		public get()
-		{
-			return g_PlayerAllowTeamChange[this._client];
-		}
-		public set(bool bAllowTeamChange)
-		{
-			g_PlayerAllowTeamChange[this._client] = bAllowTeamChange;
 		}
 	}
 	
@@ -672,7 +659,6 @@ methodmap Player
 	
 	public void Reset()
 	{
-		this.m_bAllowTeamChange = false;
 		this.m_hFollowingFlagTarget = -1;
 		this.m_weaponRestrictionFlags = ANY_WEAPON;
 		this.m_attributeFlags = view_as<AttributeType>(0);

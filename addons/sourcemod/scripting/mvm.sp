@@ -48,15 +48,6 @@
 const TFTeam TFTeam_Defenders = TFTeam_Red;
 const TFTeam TFTeam_Invaders = TFTeam_Blue;
 
-StringMap g_offsets;
-
-ConVar mitm_invaders_defenders_ratio;
-
-ConVar tf_deploying_bomb_delay_time;
-ConVar tf_deploying_bomb_time;
-ConVar tf_mvm_miniboss_scale;
-ConVar sv_stepsize;
-
 char g_aRawPlayerClassNames[][] =
 {
 	"undefined",
@@ -283,6 +274,22 @@ enum struct CountdownTimer
 	}
 }
 
+// Globals
+StringMap g_offsets;
+bool g_bAllowTeamChange;
+bool g_bWaitingForPlayersOver;
+
+// Plugin ConVars
+ConVar mitm_robots_humans_ratio;
+
+// TF ConVars
+ConVar tf_deploying_bomb_delay_time;
+ConVar tf_deploying_bomb_time;
+ConVar tf_mvm_miniboss_scale;
+ConVar tf_mvm_min_players_to_start;
+ConVar mp_waitingforplayers_time;
+ConVar sv_stepsize;
+
 #include "mvm/data.sp"
 
 #include "mvm/console.sp"
@@ -306,11 +313,13 @@ public void OnPluginStart()
 {
 	g_offsets = new StringMap();
 	
-	mitm_invaders_defenders_ratio = CreateConVar("mitm_robots_humans_ratio", "4.33", "The ratio of invaders to defenders. Defender slots gets populated first.");
+	mitm_robots_humans_ratio = CreateConVar("mitm_robots_humans_ratio", "3", "The ratio of invaders to defenders. Defender slots gets populated first.");
 	
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");
 	tf_deploying_bomb_time = FindConVar("tf_deploying_bomb_time");
 	tf_mvm_miniboss_scale = FindConVar("tf_mvm_miniboss_scale");
+	tf_mvm_min_players_to_start = FindConVar("tf_mvm_min_players_to_start");
+	mp_waitingforplayers_time = FindConVar("mp_waitingforplayers_time");
 	sv_stepsize = FindConVar("sv_stepsize");
 	
 	Console_Initialize();
@@ -364,6 +373,8 @@ public void OnPluginStart()
 
 public void OnMapStart()
 {
+	g_bWaitingForPlayersOver = false;
+	
 	DHooks_HookGamerules();
 }
 
@@ -531,4 +542,58 @@ void SetOffset(GameData gamedata, const char[] name)
 	}
 	
 	g_offsets.SetValue(name, offset);
+}
+
+void SelectNewDefenders()
+{
+	ArrayList playerVector = new ArrayList(MaxClients);
+	
+	// collect valid players
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		playerVector.Push(client);
+	}
+	
+	// shuffle the vector to randomize defenders
+	playerVector.Sort(Sort_Random, Sort_Integer);
+	
+	int iDefenderCount = 0, iInvaderCount = 0;
+	
+	for (int i = 0; i < playerVector.Length; i++)
+	{
+		int client = playerVector.Get(i);
+		
+		g_bAllowTeamChange = true;
+		
+		if (iDefenderCount == 0)
+		{
+			// first player always gets defender
+			PrintToServer("(GetTeamAssignmentOverride) Assigning %N to team defenders (first player)", client);
+			TF2_ChangeClientTeam(client, TFTeam_Defenders);
+			iDefenderCount++;
+		}
+		else
+		{
+			float flRatio = float(iInvaderCount) / float(iDefenderCount);
+			if (flRatio < mitm_robots_humans_ratio.FloatValue)
+			{
+				PrintToServer("(SelectNewDefenders) Assigning %N to team invaders", client);
+				TF2_ChangeClientTeam(client, TFTeam_Spectator);
+				iInvaderCount++;
+			}
+			else
+			{
+				PrintToServer("(SelectNewDefenders) Assigning %N to team defenders", client);
+				TF2_ChangeClientTeam(client, TFTeam_Defenders);
+				iDefenderCount++;
+			}
+		}
+		
+		g_bAllowTeamChange = false;
+	}
+	
+	delete playerVector;
 }

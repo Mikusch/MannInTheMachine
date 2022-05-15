@@ -23,6 +23,7 @@ void Events_Initialize()
 	HookEvent("player_death", EventHook_PlayerDeath);
 	HookEvent("player_team", EventHook_PlayerTeam);
 	HookEvent("post_inventory_application", EventHook_PostInventoryApplication);
+	HookEvent("teamplay_round_start", EventHook_TeamplayRoundStart);
 }
 
 public void EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
@@ -67,6 +68,29 @@ public void EventHook_PostInventoryApplication(Event event, const char[] name, b
 	}
 }
 
+public void EventHook_TeamplayRoundStart(Event event, const char[] name, bool dontBroadcast)
+{
+	if (g_bWaitingForPlayersOver)
+		return;
+	
+	// Set to a high value to prevent readying up
+	tf_mvm_min_players_to_start.IntValue = MaxClients + 1;
+	
+	CreateTimer(mp_waitingforplayers_time.FloatValue, Timer_BeginGame);
+}
+
+public Action Timer_BeginGame(Handle timer)
+{
+	g_bWaitingForPlayersOver = true;
+	
+	// Let defenders ready up
+	tf_mvm_min_players_to_start.IntValue = 0;
+	
+	SDKCall_ResetMap(GetPopulator());
+	
+	return Plugin_Continue;
+}
+
 public Action Timer_DeadTimer(Handle timer, int userid)
 {
 	int client = GetClientOfUserId(userid);
@@ -79,9 +103,9 @@ public Action Timer_DeadTimer(Handle timer, int userid)
 		}
 		else if (Player(client).HasAttribute(BECOME_SPECTATOR_ON_DEATH))
 		{
-			Player(client).m_bAllowTeamChange = true;
+			g_bAllowTeamChange = true;
 			TF2_ChangeClientTeam(client, TFTeam_Spectator);
-			Player(client).m_bAllowTeamChange = false;
+			g_bAllowTeamChange = false;
 		}
 	}
 	

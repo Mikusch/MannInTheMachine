@@ -142,8 +142,9 @@ public MRESReturn DHookCallback_AllocateBots_Pre(int populator)
 
 public MRESReturn DHookCallback_RestoreCheckpoint_Post(int populator)
 {
-	// Hitting this function usually means the wave has been failed.
-	// TODO: Get a new set of defenders.
+	PrintToChatAll("Selecting a new set of defenders...");
+	
+	SelectNewDefenders();
 	
 	return MRES_Handled;
 }
@@ -229,8 +230,6 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 	
 	if (newPlayer != -1)
 	{
-		Player(newPlayer).m_bAllowTeamChange = true;
-		
 		// Remove any player attributes
 		TF2Attrib_RemoveAll(newPlayer);
 		
@@ -261,7 +260,9 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		}
 		
 		// TODO: CTFBot::ChangeTeam does a little bit more, like making team switches silent
+		g_bAllowTeamChange = true;
 		TF2_ChangeClientTeam(newPlayer, team);
+		g_bAllowTeamChange = false;
 		
 		char m_iszClassIcon[64];
 		m_spawner.GetClassIcon(m_iszClassIcon, sizeof(m_iszClassIcon));
@@ -470,8 +471,6 @@ public MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 			OnBotTeleported( bot );
 		}
 		*/
-		
-		Player(player).m_bAllowTeamChange = false;
 	}
 	
 	// After we are done, clear the vector
@@ -502,8 +501,6 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 			iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
 		}
 		IncrementMannVsMachineWaveClassCount(iszClassIconName, iFlags);
-		
-		Player(player).m_bAllowTeamChange = false;
 	}
 	
 	// After we are done, clear the vector
@@ -553,9 +550,17 @@ public MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterf
 public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, DHookParam params)
 {
 	int player = params.Get(1);
+	TFTeam desiredTeam = params.Get(2);
 	
-	if (Player(player).m_bAllowTeamChange)
+	if (tf_mvm_min_players_to_start.IntValue != 0)
 	{
+		// funnel players into defender team during waiting for players so they can run around
+		ret.Value = TFTeam_Defenders;
+		return MRES_Supercede;
+	}
+	else if (g_bAllowTeamChange)
+	{
+		// allow player through
 		GameRules_SetProp("m_bPlayingMannVsMachine", false);
 		return MRES_Handled;
 	}
@@ -563,30 +568,38 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 	{
 		if (desiredTeam == TFTeam_Spectator && TF2_GetClientTeam(player) == TFTeam_Invaders)
 		{
-			// Don't allow robots to suicide by attempting to switch to spectator team
+			PrintCenterText(player, "You are not allowed to suicide as a robot.");
 			ret.Value = TFTeam_Invaders;
 			return MRES_Supercede;
 		}
 		
-		int iRedCount = GetTeamPlayerCount(TFTeam_Defenders);
-		int iSpectatorCount = GetTeamPlayerCount(TFTeam_Spectator);
-		
-		if (iRedCount == 0)
+		// determine whether the teams are unbalanced enough to allow switching
+		int iDefenderCount = 0, iInvaderCount = 0;
+		for (int client = 1; client <= MaxClients; client++)
 		{
-			// first player always gets assigned to RED so we can calculate the ratio
-			ret.Value = TFTeam_Defenders;
+			if (!IsClientInGame(client))
+				continue;
+			
+			// do not include ourselves in the ratio calculations
+			if (client == player)
+				continue;
+			
+			if (TF2_GetClientTeam(client) == TFTeam_Defenders)
+				iDefenderCount++;
+			else if (TF2_GetClientTeam(client) == TFTeam_Spectator || TF2_GetClientTeam(client) == TFTeam_Invaders)
+				iInvaderCount++;
+		}
+		
+		float flRatio = float(iInvaderCount) / float(iDefenderCount);
+		if (flRatio < mitm_robots_humans_ratio.FloatValue)
+		{
+			PrintToServer("(GetTeamAssignmentOverride) Assigning %N to team invaders", player);
+			ret.Value = TFTeam_Spectator;
 		}
 		else
 		{
-			float flRatio = float(iSpectatorCount) / float(iRedCount);
-			if (flRatio < mitm_invaders_defenders_ratio.FloatValue)
-			{
-				ret.Value = TFTeam_Spectator;
-			}
-			else
-			{
-				ret.Value = TFTeam_Defenders;
-			}
+			PrintToServer("(GetTeamAssignmentOverride) Assigning %N to team defenders", player);
+			ret.Value = TFTeam_Defenders;
 		}
 		
 		return MRES_Supercede;
@@ -595,9 +608,7 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 
 public MRESReturn DHookCallback_GetTeamAssignmentOverride_Post(DHookReturn ret, DHookParam params)
 {
-	int player = params.Get(1);
-	
-	if (Player(player).m_bAllowTeamChange)
+	if (g_bAllowTeamChange)
 	{
 		GameRules_SetProp("m_bPlayingMannVsMachine", true);
 	}

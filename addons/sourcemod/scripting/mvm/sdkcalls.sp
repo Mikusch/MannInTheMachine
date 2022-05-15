@@ -24,6 +24,7 @@ static Handle g_SDKCallHasTheFlag;
 static Handle g_SDKCallPickUp;
 static Handle g_SDKCallCapture;
 static Handle g_SDKCallGetHealthMultiplier;
+static Handle g_SDKCallResetMap;
 static Handle g_SDKCallIsSpaceToSpawnHere;
 
 void SDKCalls_Initialize(GameData gamedata)
@@ -34,6 +35,7 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallPickUp = PrepSDKCall_PickUp(gamedata);
 	g_SDKCallCapture = PrepSDKCall_Capture(gamedata);
 	g_SDKCallGetHealthMultiplier = PrepSDKCall_GetHealthMultiplier(gamedata);
+	g_SDKCallResetMap = PrepSDKCall_ResetMap(gamedata);
 	g_SDKCallIsSpaceToSpawnHere = PrepSDKCall_IsSpaceToSpawnHere(gamedata);
 }
 
@@ -117,6 +119,18 @@ static Handle PrepSDKCall_GetHealthMultiplier(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_ResetMap(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CPopulationManager::ResetMap");
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CPopulationManager::ResetMap");
+	
+	return call;
+}
+
 static Handle PrepSDKCall_IsSpaceToSpawnHere(GameData gamedata)
 {
 	StartPrepSDKCall(SDKCall_Static);
@@ -168,6 +182,12 @@ float SDKCall_GetHealthMultiplier(int populator, bool bIsTank = false)
 		return SDKCall(g_SDKCallGetHealthMultiplier, populator, bIsTank);
 	
 	return 0.0;
+}
+
+void SDKCall_ResetMap(int populator)
+{
+	if (g_SDKCallResetMap)
+		SDKCall(g_SDKCallResetMap, populator);
 }
 
 bool SDKCall_IsSpaceToSpawnHere(const float where[3])

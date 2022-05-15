@@ -287,6 +287,7 @@ ConVar tf_deploying_bomb_delay_time;
 ConVar tf_deploying_bomb_time;
 ConVar tf_mvm_miniboss_scale;
 ConVar tf_mvm_min_players_to_start;
+ConVar tf_bot_taunt_victim_chance;
 ConVar mp_waitingforplayers_time;
 ConVar sv_stepsize;
 
@@ -319,6 +320,7 @@ public void OnPluginStart()
 	tf_deploying_bomb_time = FindConVar("tf_deploying_bomb_time");
 	tf_mvm_miniboss_scale = FindConVar("tf_mvm_miniboss_scale");
 	tf_mvm_min_players_to_start = FindConVar("tf_mvm_min_players_to_start");
+	tf_bot_taunt_victim_chance = FindConVar("tf_bot_taunt_victim_chance");
 	mp_waitingforplayers_time = FindConVar("mp_waitingforplayers_time");
 	sv_stepsize = FindConVar("sv_stepsize");
 	

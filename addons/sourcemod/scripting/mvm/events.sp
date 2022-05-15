@@ -50,11 +50,28 @@ public void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroad
 {
 	int userid = event.GetInt("userid");
 	int victim = GetClientOfUserId(userid);
+	int attacker = GetClientOfUserId(event.GetInt("attacker"));
 	
 	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
 	{
 		// Replicate behavior of CTFBotDead::Update
 		CreateTimer(5.0, Timer_DeadTimer, userid);
+	}
+	else if (0 < attacker <= MaxClients && TF2_GetClientTeam(victim) == TFTeam_Defenders && TF2_GetClientTeam(attacker) == TFTeam_Invaders)
+	{
+		bool isTaunting = !SDKCall_HasTheFlag(attacker) && GetRandomFloat(0.0, 100.0) <= tf_bot_taunt_victim_chance.FloatValue;
+		
+		if (GetEntProp(attacker, Prop_Send, "m_bIsMiniBoss"))
+		{
+			// Bosses don't taunt puny humans
+			isTaunting = false;
+		}
+		
+		if (isTaunting)
+		{
+			// we just killed a human - taunt!
+			FakeClientCommand(attacker, "taunt");
+		}
 	}
 }
 

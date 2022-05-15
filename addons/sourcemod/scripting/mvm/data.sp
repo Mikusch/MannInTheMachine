@@ -28,6 +28,9 @@ static int g_PlayerSpawnPointEntity[MAXPLAYERS + 1];
 static float g_PlayerModelScaleOverride[MAXPLAYERS + 1];
 static ArrayList g_PlayerTags[MAXPLAYERS + 1];
 static ArrayList g_PlayerEventChangeAttributes[MAXPLAYERS + 1];
+static CountdownTimer g_PlayerAutoJumpTimer[MAXPLAYERS + 1];
+static float g_PlayerAutoJumpMin[MAXPLAYERS + 1];
+static float g_PlayerAutoJumpMax[MAXPLAYERS + 1];
 
 methodmap Player
 {
@@ -149,6 +152,30 @@ methodmap Player
 		public set(float fScale)
 		{
 			g_PlayerModelScaleOverride[this._client] = fScale;
+		}
+	}
+	
+	property float m_flAutoJumpMin
+	{
+		public get()
+		{
+			return g_PlayerAutoJumpMin[this._client];
+		}
+		public set(float flAutoJumpMin)
+		{
+			g_PlayerAutoJumpMin[this._client] = flAutoJumpMin;
+		}
+	}
+	
+	property float m_flAutoJumpMax
+	{
+		public get()
+		{
+			return g_PlayerAutoJumpMax[this._client];
+		}
+		public set(float flAutoJumpMax)
+		{
+			g_PlayerAutoJumpMax[this._client] = flAutoJumpMax;
 		}
 	}
 	
@@ -618,6 +645,25 @@ methodmap Player
 		return pClosestFlag;
 	}
 	
+	public bool ShouldAutoJump()
+	{
+		if (!this.HasAttribute(AUTO_JUMP))
+			return false;
+		
+		if (!g_PlayerAutoJumpTimer[this._client].HasStarted())
+		{
+			g_PlayerAutoJumpTimer[this._client].Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
+			return true;
+		}
+		else if (g_PlayerAutoJumpTimer[this._client].IsElapsed())
+		{
+			g_PlayerAutoJumpTimer[this._client].Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
+			return true;
+		}
+		
+		return false;
+	}
+	
 	public void Initialize()
 	{
 		this.m_tags = new ArrayList(64);
@@ -741,7 +787,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return view_as<TFClassType>(Deref(this + GetOffset("CTFBotSpawner::m_class")));
+			return Deref(this + GetOffset("CTFBotSpawner::m_class"));
 		}
 	}
 	
@@ -749,7 +795,23 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return view_as<float>(Deref(this + GetOffset("CTFBotSpawner::m_scale")));
+			return Deref(this + GetOffset("CTFBotSpawner::m_scale"));
+		}
+	}
+	
+	property float m_flAutoJumpMin
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CTFBotSpawner::m_flAutoJumpMin"));
+		}
+	}
+	
+	property float m_flAutoJumpMax
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CTFBotSpawner::m_flAutoJumpMax"));
 		}
 	}
 	
@@ -760,7 +822,7 @@ methodmap CTFBotSpawner
 	
 	public void GetClassIcon(char[] buffer, int maxlen)
 	{
-		Address string_t = view_as<Address>(Deref(this + GetOffset("CTFBotSpawner::m_iszClassIcon")));
+		Address string_t = Deref(this + GetOffset("CTFBotSpawner::m_iszClassIcon"));
 		if (string_t != Address_Null)
 			UTIL_StringtToCharArray(string_t, buffer, maxlen);
 		else

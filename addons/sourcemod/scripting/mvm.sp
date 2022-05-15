@@ -383,12 +383,25 @@ public void OnEntityCreated(int entity, const char[] classname)
 
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int & subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
 {
+	bool changed = false;
+	
 	// implements many functions from CTFBotMainAction::FireWeaponAtEnemy
 	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
 		if (Player(client).HasAttribute(ALWAYS_FIRE_WEAPON))
 		{
 			buttons |= IN_ATTACK;
+			changed = true;
+		}
+		
+		if (Player(client).ShouldAutoJump())
+		{
+			buttons |= IN_JUMP;
+			changed = true;
+		}
+		
+		if (changed)
+		{
 			return Plugin_Changed;
 		}
 		

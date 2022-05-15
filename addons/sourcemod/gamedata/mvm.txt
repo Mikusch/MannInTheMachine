@@ -179,6 +179,16 @@
 				"linux"		"20"
 				"windows"	"20"
 			}
+			"CTFBotSpawner::m_flAutoJumpMin"
+			{
+				"linux"		"24"
+				"windows"	"24"
+			}
+			"CTFBotSpawner::m_flAutoJumpMax"
+			{
+				"linux"		"28"
+				"windows"	"28"
+			}
 			"CTFBotSpawner::m_name"
 			{
 				"linux"		"32"

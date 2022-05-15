@@ -291,6 +291,12 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 			SetEntProp(newPlayer, Prop_Send, "m_bUseBossHealthBar", true);
 		}
 		
+		if (m_spawner.m_defaultAttributes.m_attributeFlags & AUTO_JUMP)
+		{
+			Player(newPlayer).m_flAutoJumpMin = m_spawner.m_flAutoJumpMin;
+			Player(newPlayer).m_flAutoJumpMax = m_spawner.m_flAutoJumpMax;
+		}
+		
 		if (m_spawner.m_defaultAttributes.m_attributeFlags & BULLET_IMMUNE)
 		{
 			TF2_AddCondition(newPlayer, TFCond_BulletImmune);

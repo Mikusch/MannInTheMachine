@@ -18,6 +18,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+static int g_PlayerPriority[MAXPLAYERS + 1];
 static BombDeployingState_t g_PlayerDeployingBombState[MAXPLAYERS + 1];
 static int g_PlayerFollowingFlagTarget[MAXPLAYERS + 1];
 static char g_PlayerIdleSounds[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
@@ -43,6 +44,18 @@ methodmap Player
 		public get()
 		{
 			return view_as<int>(this);
+		}
+	}
+	
+	property int m_iPriority
+	{
+		public get()
+		{
+			return g_PlayerPriority[this._client];
+		}
+		public set(int iPriority)
+		{
+			g_PlayerPriority[this._client] = iPriority;
 		}
 	}
 	

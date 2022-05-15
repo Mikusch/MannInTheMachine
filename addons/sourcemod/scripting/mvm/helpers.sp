@@ -257,3 +257,65 @@ TFTeam GetEnemyTeam(TFTeam team)
 		default: { return team; }
 	}
 }
+
+int GetRobotToSpawn()
+{
+	ArrayList players = new ArrayList(MaxClients);
+	
+	// collect valid players
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (IsFakeClient(client))
+			continue;
+		
+		if (TF2_GetClientTeam(client) != TFTeam_Spectator)
+			continue;
+		
+		players.Push(client);
+	}
+	
+	// sort players by priority
+	players.SortCustom(SortPlayersByPriority);
+	
+	int priorityClient = -1;
+	for (int i = 0; i < players.Length; i++)
+	{
+		int client = players.Get(i);
+		if (i == 0)
+		{
+			// store the player and reset priority
+			priorityClient = client;
+			Player(client).m_iPriority = 0;
+		}
+		else
+		{
+			// every player who didn't get picked gets a priority point
+			Player(client).m_iPriority++;
+		}
+	}
+	
+	delete players;
+	return priorityClient;
+}
+
+int Compare(any val1, any val2)
+{
+	if (val1 > val2)
+		return 1;
+	else if (val1 < val2)
+		return -1;
+	
+	return 0;
+}
+
+public int SortPlayersByPriority(int index1, int index2, Handle array, Handle hndl)
+{
+	ArrayList list = view_as<ArrayList>(array);
+	int client1 = list.Get(index1);
+	int client2 = list.Get(index2);
+	
+	return Compare(Player(client2).m_iPriority, Player(client1).m_iPriority);
+}

@@ -157,8 +157,6 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 {
 	CTFBotSpawner m_spawner = CTFBotSpawner(pThis);
 	
-	int newPlayer = -1;
-	
 	float here[3];
 	params.GetVector(1, here);
 	
@@ -212,24 +210,12 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 	}*/
 	
 	// find dead player we can re-use
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		if (IsFakeClient(client))
-			continue;
-		
-		if (TF2_GetClientTeam(client) != TFTeam_Spectator)
-			continue;
-		
-		newPlayer = client;
-		Player(newPlayer).ClearAllAttributes();
-		break;
-	}
+	int newPlayer = GetRobotToSpawn();
 	
 	if (newPlayer != -1)
 	{
+		Player(newPlayer).ClearAllAttributes();
+		
 		// Remove any player attributes
 		TF2Attrib_RemoveAll(newPlayer);
 		

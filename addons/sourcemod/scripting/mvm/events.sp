@@ -79,7 +79,9 @@ public Action Timer_DeadTimer(Handle timer, int userid)
 		}
 		else if (Player(client).HasAttribute(BECOME_SPECTATOR_ON_DEATH))
 		{
+			Player(client).m_bAllowTeamChange = true;
 			TF2_ChangeClientTeam(client, TFTeam_Spectator);
+			Player(client).m_bAllowTeamChange = false;
 		}
 	}
 	

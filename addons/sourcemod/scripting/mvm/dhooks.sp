@@ -561,6 +561,13 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 	}
 	else
 	{
+		if (desiredTeam == TFTeam_Spectator && TF2_GetClientTeam(player) == TFTeam_Invaders)
+		{
+			// Don't allow robots to suicide by attempting to switch to spectator team
+			ret.Value = TFTeam_Invaders;
+			return MRES_Supercede;
+		}
+		
 		int iRedCount = GetTeamPlayerCount(TFTeam_Defenders);
 		int iSpectatorCount = GetTeamPlayerCount(TFTeam_Spectator);
 		

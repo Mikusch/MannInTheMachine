@@ -592,6 +592,10 @@ void SelectNewDefenders()
 			}
 		}
 		
+		// Defenders get stuck if the map resets without having picked a class
+		if (TF2_GetPlayerClass(client) == TFClass_Unknown)
+			TF2_SetPlayerClass(client, view_as<TFClassType>(GetRandomInt(view_as<int>(TFClass_Scout), view_as<int>(TFClass_Engineer))));
+		
 		g_bAllowTeamChange = false;
 	}
 	

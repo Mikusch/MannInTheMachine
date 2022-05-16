@@ -403,6 +403,8 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CTFBotSpawner::m_iszClassIcon");
 		SetOffset(gamedata, "CTFBotSpawner::m_health");
 		SetOffset(gamedata, "CTFBotSpawner::m_scale");
+		SetOffset(gamedata, "CTFBotSpawner::m_flAutoJumpMin");
+		SetOffset(gamedata, "CTFBotSpawner::m_flAutoJumpMax");
 		SetOffset(gamedata, "CTFBotSpawner::m_eventChangeAttributes");
 		SetOffset(gamedata, "CTFBotSpawner::m_name");
 		SetOffset(gamedata, "CTFBotSpawner::m_teleportWhereName");

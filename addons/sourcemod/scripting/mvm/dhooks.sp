@@ -252,6 +252,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		
 		char m_iszClassIcon[64];
 		m_spawner.GetClassIcon(m_iszClassIcon, sizeof(m_iszClassIcon));
+		LogMessage("m_iszClassIcon: %s", m_iszClassIcon);
 		
 		SetEntProp(newPlayer, Prop_Data, "m_bAllowInstantSpawn", true);
 		FakeClientCommand(newPlayer, "joinclass %s", g_aRawPlayerClassNames[m_spawner.m_class]);

@@ -168,8 +168,10 @@ int UTIL_StringtToCharArray(Address string_t, char[] buffer, int maxlen)
 	int max = maxlen - 1;
 	int i = 0;
 	for (; i < max; i++)
-	if ((buffer[i] = view_as<char>(LoadFromAddress(string_t + view_as<Address>(i), NumberType_Int8))) == EOS)
-		return i;
+	{
+		if ((buffer[i] = Deref(string_t + view_as<Address>(i), NumberType_Int8)) == EOS)
+			return i;
+	}
 	
 	buffer[i] = EOS;
 	return i;
@@ -179,8 +181,7 @@ void IncrementMannVsMachineWaveClassCount(const char[] iszClassIconName, int iFl
 {
 	int obj = TFObjectiveResource();
 	
-	int i = 0;
-	for (i = 0; i < GetEntPropArraySize(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
+	for (int i = 0; i < GetEntPropArraySize(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
 	{
 		char waveClassName[64];
 		if (GetEntPropString(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames", waveClassName, sizeof(waveClassName), i) && StrEqual(waveClassName, iszClassIconName) && (GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassFlags", _, i) & iFlags))
@@ -196,7 +197,7 @@ void IncrementMannVsMachineWaveClassCount(const char[] iszClassIconName, int iFl
 		}
 	}
 	
-	for (i = 0; i < GetEntPropArraySize(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames2"); ++i)
+	for (int i = 0; i < GetEntPropArraySize(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames2"); ++i)
 	{
 		char waveClassName[64];
 		if (GetEntPropString(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames2", waveClassName, sizeof(waveClassName), i) && StrEqual(waveClassName, iszClassIconName) && (GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassFlags2", _, i) & iFlags))

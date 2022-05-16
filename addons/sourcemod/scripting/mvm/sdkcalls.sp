@@ -23,6 +23,8 @@ static Handle g_SDKCallUpdateModelToClass;
 static Handle g_SDKCallHasTheFlag;
 static Handle g_SDKCallPickUp;
 static Handle g_SDKCallCapture;
+static Handle g_SDKCallDoAnimationEvent;
+static Handle g_SDKCallPlaySpecificSequence;
 static Handle g_SDKCallGetHealthMultiplier;
 static Handle g_SDKCallResetMap;
 static Handle g_SDKCallIsSpaceToSpawnHere;
@@ -34,6 +36,8 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallHasTheFlag = PrepSDKCall_HasTheFlag(gamedata);
 	g_SDKCallPickUp = PrepSDKCall_PickUp(gamedata);
 	g_SDKCallCapture = PrepSDKCall_Capture(gamedata);
+	g_SDKCallDoAnimationEvent = PrepSDKCall_DoAnimationEvent(gamedata);
+	g_SDKCallPlaySpecificSequence = PrepSDKCall_PlaySpecificSequence(gamedata);
 	g_SDKCallGetHealthMultiplier = PrepSDKCall_GetHealthMultiplier(gamedata);
 	g_SDKCallResetMap = PrepSDKCall_ResetMap(gamedata);
 	g_SDKCallIsSpaceToSpawnHere = PrepSDKCall_IsSpaceToSpawnHere(gamedata);
@@ -101,6 +105,34 @@ static Handle PrepSDKCall_Capture(GameData gamedata)
 	Handle call = EndPrepSDKCall();
 	if (!call)
 		LogMessage("Failed to create SDKCall: CCaptureZone::Capture");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_DoAnimationEvent(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::DoAnimationEvent");
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFPlayer::DoAnimationEvent");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_PlaySpecificSequence(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::PlaySpecificSequence");
+	PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFPlayer::PlaySpecificSequence");
 	
 	return call;
 }
@@ -174,6 +206,18 @@ void SDKCall_Capture(int zone, int other)
 {
 	if (g_SDKCallCapture)
 		SDKCall(g_SDKCallCapture, zone, other);
+}
+
+void SDKCall_DoAnimationEvent(int player, PlayerAnimEvent_t event, int mData = 0)
+{
+	if (g_SDKCallDoAnimationEvent)
+		SDKCall(g_SDKCallDoAnimationEvent, player, event, mData);
+}
+
+void SDKCall_PlaySpecificSequence(int player, const char[] sequenceName)
+{
+	if (g_SDKCallPlaySpecificSequence)
+		SDKCall(g_SDKCallPlaySpecificSequence, player, sequenceName);
 }
 
 float SDKCall_GetHealthMultiplier(int populator, bool bIsTank = false)

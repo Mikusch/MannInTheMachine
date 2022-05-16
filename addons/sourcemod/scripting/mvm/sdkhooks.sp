@@ -30,6 +30,7 @@ void SDKHooks_OnEntityCreated(int entity, const char[] classname)
 	if (StrEqual(classname, "func_capturezone"))
 	{
 		SDKHook(entity, SDKHook_StartTouch, SDKHookCB_CaptureZone_StartTouch);
+		SDKHook(entity, SDKHook_EndTouch, SDKHookCB_CaptureZone_EndTouch);
 		SDKHook(entity, SDKHook_Touch, SDKHookCB_CaptureZone_Touch);
 	}
 }
@@ -50,6 +51,16 @@ public Action SDKHookCB_CaptureZone_StartTouch(int zone, int other)
 	{
 		bombDeploy.Reset();
 		bombDeploy.Start(other);
+	}
+	
+	return Plugin_Continue;
+}
+
+public Action SDKHookCB_CaptureZone_EndTouch(int zone, int other)
+{
+	if (GameRules_IsMannVsMachineMode() && 0 < other <= MaxClients && SDKCall_HasTheFlag(other))
+	{
+		bombDeploy.End(other);
 	}
 	
 	return Plugin_Continue;

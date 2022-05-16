@@ -30,7 +30,7 @@ enum struct MvMBombDeploy
 		
 		// remember where we start deploying
 		GetClientAbsOrigin(me, this.m_anchorPos);
-		
+		TF2_AddCondition(me, TFCond_FreezeInput);
 		SetEntPropVector(me, Prop_Data, "m_vecAbsVelocity", { 0.0, 0.0, 0.0 } );
 		
 		if (GetEntProp(me, Prop_Send, "m_bIsMiniBoss"))
@@ -82,9 +82,12 @@ enum struct MvMBombDeploy
 		{
 			case TF_BOMB_DEPLOYING_DELAY:
 			{
-				PrintToServer("TF_BOMB_DEPLOYING_DELAY");
 				if (this.m_timer.IsElapsed())
 				{
+					SetVariantInt(1);
+					AcceptEntityInput(me, "SetForcedTauntCam");
+					
+					SDKCall_PlaySpecificSequence(me, "primary_deploybomb");
 					this.m_timer.Start(tf_deploying_bomb_time.FloatValue);
 					Player(me).m_nDeployingBombState = TF_BOMB_DEPLOYING_ANIMATING;
 					
@@ -93,7 +96,6 @@ enum struct MvMBombDeploy
 			}
 			case TF_BOMB_DEPLOYING_ANIMATING:
 			{
-				PrintToServer("TF_BOMB_DEPLOYING_ANIMATING %f", this.m_timer.GetRemainingTime());
 				if (this.m_timer.IsElapsed())
 				{
 					if (areaTrigger != -1)
@@ -102,6 +104,7 @@ enum struct MvMBombDeploy
 					}
 					
 					this.m_timer.Start(2.0);
+					EmitGameSoundToAll("Announcer.MVM_Robots_Planted");
 					Player(me).m_nDeployingBombState = TF_BOMB_DEPLOYING_COMPLETE;
 					SetEntProp(me, Prop_Data, "m_takedamage", DAMAGE_NO);
 					SetEntProp(me, Prop_Data, "m_fEffects", GetEntProp(me, Prop_Data, "m_fEffects") | EF_NODRAW);
@@ -110,7 +113,6 @@ enum struct MvMBombDeploy
 			}
 			case TF_BOMB_DEPLOYING_COMPLETE:
 			{
-				PrintToServer("TF_BOMB_DEPLOYING_COMPLETE");
 				if (this.m_timer.IsElapsed())
 				{
 					Player(me).m_nDeployingBombState = TF_BOMB_DEPLOYING_NONE;
@@ -125,12 +127,22 @@ enum struct MvMBombDeploy
 	
 	void End(int me)
 	{
-		Player(me).m_nDeployingBombState = TF_BOMB_DEPLOYING_NONE;
-		PrintToServer("End");
+		SetVariantInt(0);
+		AcceptEntityInput(me, "SetForcedTauntCam");
+		
+		TF2_RemoveCondition(me, TFCond_FreezeInput);
+		
+		if (Player(me).m_nDeployingBombState == TF_BOMB_DEPLOYING_ANIMATING)
+		{
+			SDKCall_DoAnimationEvent(me, PLAYERANIMEVENT_SPAWN);
+		}
+		
 		if (GetEntProp(me, Prop_Send, "m_bIsMiniBoss"))
 		{
 			TF2Attrib_RemoveByName(me, "airblast vertical vulnerability multiplier");
 		}
+		
+		Player(me).m_nDeployingBombState = TF_BOMB_DEPLOYING_NONE;
 	}
 	
 	void Reset()

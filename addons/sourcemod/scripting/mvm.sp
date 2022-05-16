@@ -651,7 +651,6 @@ void SelectNewDefenders()
 		if (iDefenderCount == 0)
 		{
 			// first player always gets defender
-			PrintToServer("(GetTeamAssignmentOverride) Assigning %N to team defenders (first player)", client);
 			TF2_ChangeClientTeam(client, TFTeam_Defenders);
 			iDefenderCount++;
 		}
@@ -660,13 +659,11 @@ void SelectNewDefenders()
 			float flRatio = float(iInvaderCount) / float(iDefenderCount);
 			if (flRatio < mitm_robots_humans_ratio.FloatValue)
 			{
-				PrintToServer("(SelectNewDefenders) Assigning %N to team invaders", client);
 				TF2_ChangeClientTeam(client, TFTeam_Spectator);
 				iInvaderCount++;
 			}
 			else
 			{
-				PrintToServer("(SelectNewDefenders) Assigning %N to team defenders", client);
 				TF2_ChangeClientTeam(client, TFTeam_Defenders);
 				iDefenderCount++;
 			}

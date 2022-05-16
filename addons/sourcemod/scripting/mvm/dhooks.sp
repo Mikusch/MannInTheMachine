@@ -577,12 +577,10 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 		float flRatio = float(iInvaderCount) / float(iDefenderCount);
 		if (flRatio < mitm_robots_humans_ratio.FloatValue)
 		{
-			PrintToServer("(GetTeamAssignmentOverride) Assigning %N to team invaders", player);
 			ret.Value = TFTeam_Spectator;
 		}
 		else
 		{
-			PrintToServer("(GetTeamAssignmentOverride) Assigning %N to team defenders", player);
 			ret.Value = TFTeam_Defenders;
 		}
 		

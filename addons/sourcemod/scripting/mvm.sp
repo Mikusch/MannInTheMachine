@@ -283,6 +283,7 @@ bool g_bWaitingForPlayersOver;
 ConVar mitm_robots_humans_ratio;
 
 // TF ConVars
+ConVar tf_avoidteammates_pushaway;
 ConVar tf_deploying_bomb_delay_time;
 ConVar tf_deploying_bomb_time;
 ConVar tf_mvm_miniboss_scale;
@@ -316,6 +317,7 @@ public void OnPluginStart()
 	
 	mitm_robots_humans_ratio = CreateConVar("mitm_robots_humans_ratio", "3", "The ratio of invaders to defenders. Defender slots gets populated first.");
 	
+	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");
 	tf_deploying_bomb_time = FindConVar("tf_deploying_bomb_time");
 	tf_mvm_miniboss_scale = FindConVar("tf_mvm_miniboss_scale");
@@ -401,6 +403,12 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	// implements many functions from CTFBotMainAction::FireWeaponAtEnemy
 	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
+		if (!IsFakeClient(client))
+		{
+			// Prevent the bomb carrier from being pushed around
+			tf_avoidteammates_pushaway.ReplicateToClient(client, SDKCall_HasTheFlag(client) ? "0" : "1");
+		}
+		
 		if (Player(client).HasAttribute(ALWAYS_FIRE_WEAPON))
 		{
 			buttons |= IN_ATTACK;

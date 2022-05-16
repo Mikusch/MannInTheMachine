@@ -34,12 +34,10 @@ public void EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadc
 	// Clear Sound
 	Player(client).StopIdleSound();
 	
-	if (team == TFTeam_Spectator)
+	if (team == TFTeam_Spectator || team == TFTeam_Red)
 	{
 		Player(client).Reset();
-	}
-	else if (team == TFTeam_Red)
-	{
+		
 		SetVariantString("");
 		AcceptEntityInput(client, "SetCustomModel");
 	}

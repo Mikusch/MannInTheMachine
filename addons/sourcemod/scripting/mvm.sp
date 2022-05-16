@@ -381,6 +381,7 @@ public void OnPluginStart()
 	
 	Console_Initialize();
 	Events_Initialize();
+	SDKHooks_Initialize();
 	
 	GameData gamedata = new GameData("mvm");
 	if (gamedata)

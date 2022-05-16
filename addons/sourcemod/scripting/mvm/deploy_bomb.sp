@@ -20,53 +20,56 @@
 
 enum struct MvMBombDeploy
 {
+	int player;
 	CountdownTimer m_timer;
 	float m_anchorPos[3];
 	
-	void Start(int me)
+	void Start()
 	{
-		Player(me).m_nDeployingBombState = TF_BOMB_DEPLOYING_DELAY;
+		this.Reset();
+		
+		Player(this.player).m_nDeployingBombState = TF_BOMB_DEPLOYING_DELAY;
 		this.m_timer.Start(tf_deploying_bomb_delay_time.FloatValue);
 		
 		// remember where we start deploying
-		GetClientAbsOrigin(me, this.m_anchorPos);
-		TF2_AddCondition(me, TFCond_FreezeInput);
-		SetEntPropVector(me, Prop_Data, "m_vecAbsVelocity", { 0.0, 0.0, 0.0 } );
+		GetClientAbsOrigin(this.player, this.m_anchorPos);
+		TF2_AddCondition(this.player, TFCond_FreezeInput);
+		SetEntPropVector(this.player, Prop_Data, "m_vecAbsVelocity", { 0.0, 0.0, 0.0 } );
 		
-		if (GetEntProp(me, Prop_Send, "m_bIsMiniBoss"))
+		if (GetEntProp(this.player, Prop_Send, "m_bIsMiniBoss"))
 		{
-			TF2Attrib_SetByName(me, "airblast vertical vulnerability multiplier", 0.0);
+			TF2Attrib_SetByName(this.player, "airblast vertical vulnerability multiplier", 0.0);
 		}
 	}
 	
-	void Update(int me)
+	void Update()
 	{
 		int areaTrigger = -1;
 		
-		if (Player(me).m_nDeployingBombState != TF_BOMB_DEPLOYING_COMPLETE)
+		if (Player(this.player).m_nDeployingBombState != TF_BOMB_DEPLOYING_COMPLETE)
 		{
-			areaTrigger = GetClosestCaptureZone(me);
+			areaTrigger = GetClosestCaptureZone(this.player);
 			if (areaTrigger == -1)
 			{
-				this.End(me);
+				this.End();
 				return;
 			}
 			
 			const float movedRange = 20.0;
 			
 			float meOrigin[3];
-			GetClientAbsOrigin(me, meOrigin);
+			GetClientAbsOrigin(this.player, meOrigin);
 			
 			if (GetVectorDistance(this.m_anchorPos, meOrigin) > movedRange)
 			{
-				this.End(me);
+				this.End();
 				return;
 			}
 			
 			// slam facing towards bomb hole
 			float areaCenter[3], meCenter[3];
 			CBaseEntity(areaTrigger).WorldSpaceCenter(areaCenter);
-			CBaseEntity(me).WorldSpaceCenter(meCenter);
+			CBaseEntity(this.player).WorldSpaceCenter(meCenter);
 			
 			float to[3];
 			SubtractVectors(areaCenter, meCenter, to);
@@ -75,23 +78,23 @@ enum struct MvMBombDeploy
 			float desiredAngles[3];
 			GetVectorAngles(to, desiredAngles);
 			
-			TeleportEntity(me, .angles = desiredAngles);
+			TeleportEntity(this.player, .angles = desiredAngles);
 		}
 		
-		switch (Player(me).m_nDeployingBombState)
+		switch (Player(this.player).m_nDeployingBombState)
 		{
 			case TF_BOMB_DEPLOYING_DELAY:
 			{
 				if (this.m_timer.IsElapsed())
 				{
 					SetVariantInt(1);
-					AcceptEntityInput(me, "SetForcedTauntCam");
+					AcceptEntityInput(this.player, "SetForcedTauntCam");
 					
-					SDKCall_PlaySpecificSequence(me, "primary_deploybomb");
+					SDKCall_PlaySpecificSequence(this.player, "primary_deploybomb");
 					this.m_timer.Start(tf_deploying_bomb_time.FloatValue);
-					Player(me).m_nDeployingBombState = TF_BOMB_DEPLOYING_ANIMATING;
+					Player(this.player).m_nDeployingBombState = TF_BOMB_DEPLOYING_ANIMATING;
 					
-					EmitGameSoundToAll(GetEntProp(me, Prop_Send, "m_bIsMiniBoss") ? "MVM.DeployBombGiant" : "MVM.DeployBombSmall", me);
+					EmitGameSoundToAll(GetEntProp(this.player, Prop_Send, "m_bIsMiniBoss") ? "MVM.DeployBombGiant" : "MVM.DeployBombSmall", this.player);
 				}
 			}
 			case TF_BOMB_DEPLOYING_ANIMATING:
@@ -100,49 +103,49 @@ enum struct MvMBombDeploy
 				{
 					if (areaTrigger != -1)
 					{
-						SDKCall_Capture(areaTrigger, me);
+						SDKCall_Capture(areaTrigger, this.player);
 					}
 					
 					this.m_timer.Start(2.0);
 					EmitGameSoundToAll("Announcer.MVM_Robots_Planted");
-					Player(me).m_nDeployingBombState = TF_BOMB_DEPLOYING_COMPLETE;
-					SetEntProp(me, Prop_Data, "m_takedamage", DAMAGE_NO);
-					SetEntProp(me, Prop_Data, "m_fEffects", GetEntProp(me, Prop_Data, "m_fEffects") | EF_NODRAW);
-					TF2_RemoveAllWeapons(me);
+					Player(this.player).m_nDeployingBombState = TF_BOMB_DEPLOYING_COMPLETE;
+					SetEntProp(this.player, Prop_Data, "m_takedamage", DAMAGE_NO);
+					SetEntProp(this.player, Prop_Data, "m_fEffects", GetEntProp(this.player, Prop_Data, "m_fEffects") | EF_NODRAW);
+					TF2_RemoveAllWeapons(this.player);
 				}
 			}
 			case TF_BOMB_DEPLOYING_COMPLETE:
 			{
 				if (this.m_timer.IsElapsed())
 				{
-					Player(me).m_nDeployingBombState = TF_BOMB_DEPLOYING_NONE;
-					SetEntProp(me, Prop_Data, "m_takedamage", DAMAGE_YES);
-					SDKHooks_TakeDamage(me, me, me, 99999.9, DMG_CRUSH);
-					this.End(me);
+					Player(this.player).m_nDeployingBombState = TF_BOMB_DEPLOYING_NONE;
+					SetEntProp(this.player, Prop_Data, "m_takedamage", DAMAGE_YES);
+					SDKHooks_TakeDamage(this.player, this.player, this.player, 99999.9, DMG_CRUSH);
+					this.End();
 					return;
 				}
 			}
 		}
 	}
 	
-	void End(int me)
+	void End()
 	{
 		SetVariantInt(0);
-		AcceptEntityInput(me, "SetForcedTauntCam");
+		AcceptEntityInput(this.player, "SetForcedTauntCam");
 		
-		TF2_RemoveCondition(me, TFCond_FreezeInput);
+		TF2_RemoveCondition(this.player, TFCond_FreezeInput);
 		
-		if (Player(me).m_nDeployingBombState == TF_BOMB_DEPLOYING_ANIMATING)
+		if (Player(this.player).m_nDeployingBombState == TF_BOMB_DEPLOYING_ANIMATING)
 		{
-			SDKCall_DoAnimationEvent(me, PLAYERANIMEVENT_SPAWN);
+			SDKCall_DoAnimationEvent(this.player, PLAYERANIMEVENT_SPAWN);
 		}
 		
-		if (GetEntProp(me, Prop_Send, "m_bIsMiniBoss"))
+		if (GetEntProp(this.player, Prop_Send, "m_bIsMiniBoss"))
 		{
-			TF2Attrib_RemoveByName(me, "airblast vertical vulnerability multiplier");
+			TF2Attrib_RemoveByName(this.player, "airblast vertical vulnerability multiplier");
 		}
 		
-		Player(me).m_nDeployingBombState = TF_BOMB_DEPLOYING_NONE;
+		Player(this.player).m_nDeployingBombState = TF_BOMB_DEPLOYING_NONE;
 	}
 	
 	void Reset()

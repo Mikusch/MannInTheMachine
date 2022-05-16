@@ -18,7 +18,15 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-MvMBombDeploy bombDeploy;
+static MvMBombDeploy g_bombDeploy[MAXPLAYERS + 1];
+
+void SDKHooks_Initialize()
+{
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		g_bombDeploy[client].player = client;
+	}
+}
 
 void SDKHooks_HookClient(int client)
 {
@@ -47,10 +55,9 @@ public Action SDKHookCB_Client_WeaponCanSwitchTo(int client, int weapon)
 
 public Action SDKHookCB_CaptureZone_StartTouch(int zone, int other)
 {
-	if (GameRules_IsMannVsMachineMode() && 0 < other <= MaxClients && SDKCall_HasTheFlag(other))
+	if (0 < other <= MaxClients && SDKCall_HasTheFlag(other))
 	{
-		bombDeploy.Reset();
-		bombDeploy.Start(other);
+		g_bombDeploy[other].Start();
 	}
 	
 	return Plugin_Continue;
@@ -58,9 +65,9 @@ public Action SDKHookCB_CaptureZone_StartTouch(int zone, int other)
 
 public Action SDKHookCB_CaptureZone_EndTouch(int zone, int other)
 {
-	if (GameRules_IsMannVsMachineMode() && 0 < other <= MaxClients && SDKCall_HasTheFlag(other))
+	if (0 < other <= MaxClients && SDKCall_HasTheFlag(other))
 	{
-		bombDeploy.End(other);
+		g_bombDeploy[other].End();
 	}
 	
 	return Plugin_Continue;
@@ -68,9 +75,9 @@ public Action SDKHookCB_CaptureZone_EndTouch(int zone, int other)
 
 public Action SDKHookCB_CaptureZone_Touch(int zone, int other)
 {
-	if (GameRules_IsMannVsMachineMode() && 0 < other <= MaxClients && SDKCall_HasTheFlag(other))
+	if (0 < other <= MaxClients && SDKCall_HasTheFlag(other))
 	{
-		bombDeploy.Update(other);
+		g_bombDeploy[other].Update();
 	}
 	
 	return Plugin_Continue;

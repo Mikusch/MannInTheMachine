@@ -97,7 +97,7 @@ char g_szBotModels[][] =
 	"models/bots/engineer/bot_engineer.mdl",
 };
 
-char g_szBotBossModels[][] = 
+char g_szBotBossModels[][] =
 {
 	"", //TF_CLASS_UNDEFINED
 	
@@ -110,6 +110,37 @@ char g_szBotBossModels[][] =
 	"models/bots/pyro_boss/bot_pyro_boss.mdl",
 	"models/bots/spy/bot_spy.mdl",
 	"models/bots/engineer/bot_engineer.mdl",
+};
+
+// Rome 2 promo models
+char g_szRomePromoItems_Hat[][] =
+{
+	"", //TF_CLASS_UNDEFINED
+
+	"tw_scoutbot_hat",
+	"tw_sniperbot_helmet",
+	"tw_soldierbot_helmet",
+	"tw_demobot_helmet",
+	"tw_medibot_hat",
+	"tw_heavybot_helmet",
+	"tw_pyrobot_helmet",
+	"tw_spybot_hood",
+	"tw_engineerbot_helmet",
+};
+
+char g_szRomePromoItems_Misc[][] =
+{
+	"", //TF_CLASS_UNDEFINED
+
+	"tw_scoutbot_armor",
+	"tw_sniperbot_armor",
+	"tw_soldierbot_armor",
+	"tw_demobot_armor",
+	"tw_medibot_chariot",
+	"tw_heavybot_armor",
+	"tw_pyrobot_armor",
+	"tw_spybot_armor",
+	"tw_engineerbot_armor",
 };
 
 enum

@@ -343,6 +343,15 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		
 		Player(newPlayer).StartIdleSound();
 		
+		// Add our items first, they'll get replaced below by the normal MvM items if any are needed
+		if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(newPlayer) == TFTeam_Invaders)
+		{
+			// Apply the Rome 2 promo items to each player. They'll be 
+			// filtered out for clients that do not have Romevision.
+			AddItem(newPlayer, g_szRomePromoItems_Hat[m_spawner.m_class]);
+			AddItem(newPlayer, g_szRomePromoItems_Misc[m_spawner.m_class]);
+		}
+		
 		char defaultEventChangeAttributesName[64];
 		UTIL_StringtToCharArray(view_as<Address>(GetEntData(GetPopulator(), GetOffset("CPopulationManager::m_defaultEventChangeAttributesName"))), defaultEventChangeAttributesName, sizeof(defaultEventChangeAttributesName));
 		

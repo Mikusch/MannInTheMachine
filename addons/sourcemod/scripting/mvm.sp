@@ -564,6 +564,8 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 			// Taunting for our new upgrade
 			FakeClientCommand(client, "taunt");
 		}
+		
+		Player(client).EquipRequiredWeapon();
 	}
 }
 

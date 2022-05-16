@@ -134,6 +134,11 @@
 				"linux"		"294"
 				"windows"	"293"
 			}
+			"CTFPlayer::Weapon_Switch"
+			{
+				"linux"		"272"
+				"windows"	"271"
+			}
 			"CBasePlayer::EntSelectSpawnPoint"
 			{
 				"linux"		"400"

@@ -28,6 +28,7 @@ static Handle g_SDKCallPlaySpecificSequence;
 static Handle g_SDKCallGetHealthMultiplier;
 static Handle g_SDKCallResetMap;
 static Handle g_SDKCallIsSpaceToSpawnHere;
+static Handle g_SDKCallWeaponSwitch;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
@@ -41,6 +42,7 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallGetHealthMultiplier = PrepSDKCall_GetHealthMultiplier(gamedata);
 	g_SDKCallResetMap = PrepSDKCall_ResetMap(gamedata);
 	g_SDKCallIsSpaceToSpawnHere = PrepSDKCall_IsSpaceToSpawnHere(gamedata);
+	g_SDKCallWeaponSwitch = PrepSDKCall_WeaponSwitch(gamedata);
 }
 
 static Handle PrepSDKCall_PostInventoryApplication(GameData gamedata)
@@ -177,6 +179,21 @@ static Handle PrepSDKCall_IsSpaceToSpawnHere(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_WeaponSwitch(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTFPlayer::Weapon_Switch");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFPlayer::Weapon_Switch");
+	
+	return call;
+}
+
 void SDKCall_PostInventoryApplication(int player)
 {
 	if (g_SDKCallPostInventoryApplication)
@@ -238,6 +255,14 @@ bool SDKCall_IsSpaceToSpawnHere(const float where[3])
 {
 	if (g_SDKCallIsSpaceToSpawnHere)
 		return SDKCall(g_SDKCallIsSpaceToSpawnHere, where);
+	
+	return false;
+}
+
+bool SDKCall_WeaponSwitch(int player, int weapon, int viewmodelindex = 0)
+{
+	if (g_SDKCallWeaponSwitch)
+		return SDKCall(g_SDKCallWeaponSwitch, player, weapon, viewmodelindex);
 	
 	return false;
 }

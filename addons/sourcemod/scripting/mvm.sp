@@ -341,6 +341,11 @@ ConVar tf_deploying_bomb_delay_time;
 ConVar tf_deploying_bomb_time;
 ConVar tf_mvm_miniboss_scale;
 ConVar tf_mvm_min_players_to_start;
+ConVar tf_mvm_bot_allow_flag_carrier_to_fight;
+ConVar tf_mvm_bot_flag_carrier_health_regen;
+ConVar tf_mvm_bot_flag_carrier_interval_to_1st_upgrade;
+ConVar tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade;
+ConVar tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade;
 ConVar tf_bot_taunt_victim_chance;
 ConVar mp_waitingforplayers_time;
 ConVar sv_stepsize;
@@ -375,6 +380,11 @@ public void OnPluginStart()
 	tf_deploying_bomb_time = FindConVar("tf_deploying_bomb_time");
 	tf_mvm_miniboss_scale = FindConVar("tf_mvm_miniboss_scale");
 	tf_mvm_min_players_to_start = FindConVar("tf_mvm_min_players_to_start");
+	tf_mvm_bot_allow_flag_carrier_to_fight = FindConVar("tf_mvm_bot_allow_flag_carrier_to_fight");
+	tf_mvm_bot_flag_carrier_health_regen = FindConVar("tf_mvm_bot_flag_carrier_health_regen");
+	tf_mvm_bot_flag_carrier_interval_to_1st_upgrade = FindConVar("tf_mvm_bot_flag_carrier_interval_to_1st_upgrade");
+	tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade = FindConVar("tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade");
+	tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade = FindConVar("tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade");
 	tf_bot_taunt_victim_chance = FindConVar("tf_bot_taunt_victim_chance");
 	mp_waitingforplayers_time = FindConVar("mp_waitingforplayers_time");
 	sv_stepsize = FindConVar("sv_stepsize");
@@ -545,6 +555,12 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 				// we just spawned - give us the flag
 				SDKCall_PickUp(flag, client, true);
 			}
+		}
+		
+		if (SDKCall_HasTheFlag(client) && Player(client).UpgradeOverTime())
+		{
+			// Taunting for our new upgrade
+			FakeClientCommand(client, "taunt");
 		}
 	}
 }

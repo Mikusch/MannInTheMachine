@@ -263,8 +263,6 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 			Player(newPlayer).AddEventChangeAttributes(m_spawner.m_eventChangeAttributes.Get(i, 108));
 		}
 		
-		PrintToServer("m_spawner.m_teleportWhereName %d", m_spawner.m_teleportWhereName.Count());
-		
 		// TODO
 		// newBot->SetTeleportWhere( m_teleportWhereName );
 		
@@ -725,6 +723,8 @@ public MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
 	
 	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(pPlayer) == TFTeam_Invaders)
 	{
+		Player(pPlayer).UpgradeStart();
+		
 		if (Player(pPlayer).HasAttribute(IGNORE_FLAG))
 			return MRES_Supercede;
 		

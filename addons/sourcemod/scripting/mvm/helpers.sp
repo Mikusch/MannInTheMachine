@@ -319,3 +319,11 @@ public int SortPlayersByPriority(int index1, int index2, Handle array, Handle hn
 	
 	return Compare(Player(client2).m_iPriority, Player(client1).m_iPriority);
 }
+
+bool IsRangeLessThan(int client1, int client2, float range)
+{
+	float origin1[3], origin2[3];
+	GetClientAbsOrigin(client1, origin1);
+	GetClientAbsOrigin(client2, origin2);
+	return GetVectorDistance(origin1, origin2) < range;
+}

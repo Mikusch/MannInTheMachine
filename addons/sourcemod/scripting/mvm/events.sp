@@ -22,7 +22,6 @@ void Events_Initialize()
 {
 	HookEvent("player_death", EventHook_PlayerDeath);
 	HookEvent("player_team", EventHook_PlayerTeam);
-	HookEvent("post_inventory_application", EventHook_PostInventoryApplication);
 	HookEvent("teamplay_round_start", EventHook_TeamplayRoundStart);
 }
 
@@ -72,16 +71,6 @@ public void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroad
 			// we just killed a human - taunt!
 			FakeClientCommand(attacker, "taunt");
 		}
-	}
-}
-
-public void EventHook_PostInventoryApplication(Event event, const char[] name, bool dontBroadcast)
-{
-	int client = GetClientOfUserId(event.GetInt("userid"));
-	
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
-	{
-		Player(client).EquipRequiredWeapon();
 	}
 }
 

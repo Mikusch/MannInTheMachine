@@ -18,6 +18,18 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+#define DONT_UPGRADE	-1
+
+// Bomb Upgrade
+static int g_PlayerUpgradeLevel[MAXPLAYERS + 1];
+static CountdownTimer m_upgradeTimer[MAXPLAYERS + 1];
+static CountdownTimer m_buffPulseTimer[MAXPLAYERS + 1];
+
+// Autojump
+static float g_PlayerAutoJumpMin[MAXPLAYERS + 1];
+static float g_PlayerAutoJumpMax[MAXPLAYERS + 1];
+static CountdownTimer m_autoJumpTimer[MAXPLAYERS + 1];
+
 static int g_PlayerPriority[MAXPLAYERS + 1];
 static BombDeployingState_t g_PlayerDeployingBombState[MAXPLAYERS + 1];
 static int g_PlayerFollowingFlagTarget[MAXPLAYERS + 1];
@@ -28,9 +40,6 @@ static int g_PlayerSpawnPointEntity[MAXPLAYERS + 1];
 static float g_PlayerModelScaleOverride[MAXPLAYERS + 1];
 static ArrayList g_PlayerTags[MAXPLAYERS + 1];
 static ArrayList g_PlayerEventChangeAttributes[MAXPLAYERS + 1];
-static CountdownTimer g_PlayerAutoJumpTimer[MAXPLAYERS + 1];
-static float g_PlayerAutoJumpMin[MAXPLAYERS + 1];
-static float g_PlayerAutoJumpMax[MAXPLAYERS + 1];
 
 methodmap Player
 {
@@ -44,6 +53,18 @@ methodmap Player
 		public get()
 		{
 			return view_as<int>(this);
+		}
+	}
+	
+	property int m_upgradeLevel
+	{
+		public get()
+		{
+			return g_PlayerUpgradeLevel[this._client];
+		}
+		public set(int upgradeLevel)
+		{
+			g_PlayerUpgradeLevel[this._client] = upgradeLevel;
 		}
 	}
 	
@@ -650,15 +671,147 @@ methodmap Player
 		if (!this.HasAttribute(AUTO_JUMP))
 			return false;
 		
-		if (!g_PlayerAutoJumpTimer[this._client].HasStarted())
+		if (!m_autoJumpTimer[this._client].HasStarted())
 		{
-			g_PlayerAutoJumpTimer[this._client].Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
+			m_autoJumpTimer[this._client].Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
 			return true;
 		}
-		else if (g_PlayerAutoJumpTimer[this._client].IsElapsed())
+		else if (m_autoJumpTimer[this._client].IsElapsed())
 		{
-			g_PlayerAutoJumpTimer[this._client].Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
+			m_autoJumpTimer[this._client].Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
 			return true;
+		}
+		
+		return false;
+	}
+	
+	public bool UpgradeStart()
+	{
+		if (!tf_mvm_bot_allow_flag_carrier_to_fight.BoolValue)
+		{
+			this.SetAttribute(SUPPRESS_FIRE);
+		}
+		
+		// mini-bosses don't upgrade - they are already tough
+		if (GetEntProp(this._client, Prop_Send, "m_bIsMiniBoss"))
+		{
+			// Set threat level to max
+			this.m_upgradeLevel = DONT_UPGRADE;
+			SetEntProp(TFObjectiveResource(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 4);
+			SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", -1.0);
+			SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", -1.0);
+		}
+		else
+		{
+			this.m_upgradeLevel = 0;
+			m_upgradeTimer[this._client].Start(tf_mvm_bot_flag_carrier_interval_to_1st_upgrade.FloatValue);
+			SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
+			SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[this._client].GetRemainingTime());
+		}
+	}
+	
+	public bool UpgradeOverTime()
+	{
+		if (this.m_upgradeLevel != DONT_UPGRADE)
+		{
+			CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(this._client).GetLastKnownArea());
+			TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(this._client) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
+			
+			if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
+			{
+				// don't start counting down until we leave the spawn
+				m_upgradeTimer[this._client].Start(tf_mvm_bot_flag_carrier_interval_to_1st_upgrade.FloatValue);
+				SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
+				SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[this._client].GetRemainingTime());
+			}
+			
+			// do defensive buff effect ourselves (since we're not a soldier)
+			if (this.m_upgradeLevel > 0 && m_buffPulseTimer[this._client].IsElapsed())
+			{
+				m_buffPulseTimer[this._client].Start(1.0);
+				
+				const float buffRadius = 450.0;
+				
+				for (int client = 1; client <= MaxClients; client++)
+				{
+					if (!IsClientInGame(client))
+						continue;
+					
+					if (TF2_GetClientTeam(client) != TF2_GetClientTeam(this._client))
+						continue;
+					
+					if (!IsPlayerAlive(client))
+						continue;
+					
+					if (IsRangeLessThan(this._client, client, buffRadius))
+					{
+						TF2_AddCondition(client, TFCond_DefenseBuffNoCritBlock, 1.2);
+					}
+				}
+			}
+			
+			// the flag carrier gets stronger the longer he holds the flag
+			if (m_upgradeTimer[this._client].IsElapsed())
+			{
+				const int maxLevel = 3;
+				
+				if (this.m_upgradeLevel < maxLevel)
+				{
+					++this.m_upgradeLevel;
+					
+					EmitGameSoundToAll("MVM.Warning");
+					
+					switch (this.m_upgradeLevel)
+					{
+						//---------------------------------------
+						case 1:
+						{
+							m_upgradeTimer[this._client].Start(tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade.FloatValue);
+							
+							// permanent buff banner effect (handled above)
+							
+							// update the objective resource so clients have the information
+							SetEntProp(TFObjectiveResource(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 1);
+							SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
+							SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[this._client].GetRemainingTime());
+							//TFGameRules()->HaveAllPlayersSpeakConceptIfAllowed( MP_CONCEPT_MVM_BOMB_CARRIER_UPGRADE1, TF_TEAM_PVE_DEFENDERS );
+							//DispatchParticleEffect( "mvm_levelup1", PATTACH_POINT_FOLLOW, me, "head" );
+							return true;
+						}
+						
+						//---------------------------------------
+						case 2:
+						{
+							m_upgradeTimer[this._client].Start(tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade.FloatValue);
+							
+							TF2Attrib_SetByName(this._client, "health regen", tf_mvm_bot_flag_carrier_health_regen.FloatValue);
+							
+							// update the objective resource so clients have the information
+							SetEntProp(TFObjectiveResource(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 2);
+							SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
+							SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[this._client].GetRemainingTime());
+							//TFGameRules()- > HaveAllPlayersSpeakConceptIfAllowed(MP_CONCEPT_MVM_BOMB_CARRIER_UPGRADE2, TF_TEAM_PVE_DEFENDERS);
+							//DispatchParticleEffect("mvm_levelup2", PATTACH_POINT_FOLLOW, me, "head");
+							return true;
+						}
+						
+						//---------------------------------------
+						case 3:
+						{
+							// add critz
+							TF2_AddCondition(this._client, TFCond_Kritzkrieged);
+							
+							// update the objective resource so clients have the information
+							SetEntProp(TFObjectiveResource(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 3);
+							SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", -1.0);
+							SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", -1.0);
+							//TFGameRules()->HaveAllPlayersSpeakConceptIfAllowed( MP_CONCEPT_MVM_BOMB_CARRIER_UPGRADE3, TF_TEAM_PVE_DEFENDERS );
+							//DispatchParticleEffect( "mvm_levelup3", PATTACH_POINT_FOLLOW, me, "head" );
+							return true;
+						}
+					}
+				}
+			}
 		}
 		
 		return false;
@@ -672,6 +825,14 @@ methodmap Player
 	
 	public void Reset()
 	{
+		this.m_upgradeLevel = DONT_UPGRADE;
+		m_upgradeTimer[this._client].Invalidate();
+		m_buffPulseTimer[this._client].Invalidate();
+		
+		this.m_flAutoJumpMin = 0.0;
+		this.m_flAutoJumpMax = 0.0;
+		m_autoJumpTimer[this._client].Invalidate();
+		
 		this.m_hFollowingFlagTarget = -1;
 		this.m_weaponRestrictionFlags = ANY_WEAPON;
 		this.m_attributeFlags = view_as<AttributeType>(0);

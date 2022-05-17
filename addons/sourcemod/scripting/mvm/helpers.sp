@@ -328,3 +328,50 @@ bool IsRangeLessThan(int client1, int client2, float range)
 	GetClientAbsOrigin(client2, origin2);
 	return GetVectorDistance(origin1, origin2) < range;
 }
+
+int GetParticleSystemIndex(const char[] szParticleSystemName)
+{
+	int tableidx = FindStringTable("ParticleEffectNames");
+	int numstrings = GetStringTableNumStrings(tableidx);
+	
+	for (int stringidx = 0; stringidx < numstrings; stringidx++)
+	{
+		char str[64];
+		ReadStringTable(tableidx, stringidx, str, sizeof(str));
+		
+		if (StrEqual(str, szParticleSystemName))
+		{
+			return stringidx;
+		}
+	}
+	
+	// This is the invalid string index
+	return 0;
+}
+
+void DispatchParticleEffect(const char[] name, ParticleAttachment_t attachType, int entity, const char[] attachmentName, bool resetAllParticlesOnEntity = false)
+{
+	TE_Start("TFParticleEffect");
+	TE_WriteNum("m_iParticleSystemIndex", GetParticleSystemIndex(name));
+	TE_WriteNum("m_iAttachType", view_as<int>(attachType));
+	TE_WriteNum("entindex", entity);
+	TE_WriteNum("m_iAttachmentPointIndex", LookupEntityAttachment(entity, attachmentName));
+	TE_WriteNum("m_bResetParticles", resetAllParticlesOnEntity);
+	TE_SendToAll();
+}
+
+void HaveAllPlayersSpeakConceptIfAllowed(const char[] concept, TFTeam team)
+{
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (TF2_GetClientTeam(client) != team)
+			continue;
+		
+		SetVariantString(concept);
+		AcceptEntityInput(client, "SpeakResponseConcept");
+		AcceptEntityInput(client, "ClearContext");
+	}
+}

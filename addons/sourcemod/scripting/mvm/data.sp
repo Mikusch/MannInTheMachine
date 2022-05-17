@@ -1290,7 +1290,6 @@ methodmap CObjectTeleporter
 			char name[64];
 			teleportWhereName.GetString(i, name, sizeof(name));
 			
-			PrintToChatAll(name);
 			this.m_teleportWhereName.AddToTail(StringToPtr(name, sizeof(name)));
 		}
 	}

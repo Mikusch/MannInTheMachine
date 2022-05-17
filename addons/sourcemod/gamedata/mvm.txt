@@ -196,7 +196,7 @@
 			}
 			"CObjectTeleporter::m_teleportWhereName"
 			{
-				"linux"		"2828"
+				"linux"		"2776"
 				"windows"	"2796"
 			}
 			"CTFBotSpawner::m_class"

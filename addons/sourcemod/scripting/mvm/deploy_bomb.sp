@@ -34,7 +34,7 @@ enum struct MvMBombDeploy
 		// remember where we start deploying
 		GetClientAbsOrigin(this.player, this.m_anchorPos);
 		TF2_AddCondition(this.player, TFCond_FreezeInput);
-		SetEntPropVector(this.player, Prop_Data, "m_vecAbsVelocity", { 0.0, 0.0, 0.0 } );
+		SetEntPropVector(this.player, Prop_Data, "m_vecAbsVelocity", ZERO_VECTOR);
 		
 		if (GetEntProp(this.player, Prop_Send, "m_bIsMiniBoss"))
 		{

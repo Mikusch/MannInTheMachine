@@ -25,6 +25,7 @@ static Handle g_SDKCallPickUp;
 static Handle g_SDKCallCapture;
 static Handle g_SDKCallDoAnimationEvent;
 static Handle g_SDKCallPlaySpecificSequence;
+static Handle g_SDKCallDoClassSpecialSkill;
 static Handle g_SDKCallGetHealthMultiplier;
 static Handle g_SDKCallResetMap;
 static Handle g_SDKCallIsSpaceToSpawnHere;
@@ -39,6 +40,7 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallCapture = PrepSDKCall_Capture(gamedata);
 	g_SDKCallDoAnimationEvent = PrepSDKCall_DoAnimationEvent(gamedata);
 	g_SDKCallPlaySpecificSequence = PrepSDKCall_PlaySpecificSequence(gamedata);
+	g_SDKCallDoClassSpecialSkill = PrepSDKCall_DoClassSpecialSkill(gamedata);
 	g_SDKCallGetHealthMultiplier = PrepSDKCall_GetHealthMultiplier(gamedata);
 	g_SDKCallResetMap = PrepSDKCall_ResetMap(gamedata);
 	g_SDKCallIsSpaceToSpawnHere = PrepSDKCall_IsSpaceToSpawnHere(gamedata);
@@ -139,6 +141,19 @@ static Handle PrepSDKCall_PlaySpecificSequence(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_DoClassSpecialSkill(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::DoClassSpecialSkill");
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFPlayer::DoClassSpecialSkill");
+	
+	return call;
+}
+
 static Handle PrepSDKCall_GetHealthMultiplier(GameData gamedata)
 {
 	StartPrepSDKCall(SDKCall_Entity);
@@ -235,6 +250,14 @@ void SDKCall_PlaySpecificSequence(int player, const char[] sequenceName)
 {
 	if (g_SDKCallPlaySpecificSequence)
 		SDKCall(g_SDKCallPlaySpecificSequence, player, sequenceName);
+}
+
+bool SDKCall_DoClassSpecialSkill(int player)
+{
+	if (g_SDKCallDoClassSpecialSkill)
+		return SDKCall(g_SDKCallDoClassSpecialSkill, player);
+	
+	return false;
 }
 
 float SDKCall_GetHealthMultiplier(int populator, bool bIsTank = false)

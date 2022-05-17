@@ -31,6 +31,8 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+#define ZERO_VECTOR	{ 0.0, 0.0, 0.0 }
+
 #define DEFINDEX_UNDEFINED	65535
 
 #define MVM_CLASS_FLAG_NONE				0
@@ -612,6 +614,11 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 		{
 			// Taunting for our new upgrade
 			FakeClientCommand(client, "taunt");
+		}
+		
+		if (TF2_GetPlayerClass(client) == TFClass_Spy)
+		{
+			Player(client).SpyLeaveSpawnRoomUpdate();
 		}
 		
 		Player(client).EquipRequiredWeapon();

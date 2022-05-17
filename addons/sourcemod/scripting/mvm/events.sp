@@ -20,26 +20,19 @@
 
 void Events_Initialize()
 {
+	HookEvent("player_spawn", EventHook_PlayerSpawn);
 	HookEvent("player_death", EventHook_PlayerDeath);
 	HookEvent("player_team", EventHook_PlayerTeam);
 	HookEvent("teamplay_round_start", EventHook_TeamplayRoundStart);
 }
 
-public void EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
+public void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
-	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
 	
-	TF2Attrib_RemoveAll(client);
-	// Clear Sound
-	Player(client).StopIdleSound();
-	
-	if (team == TFTeam_Spectator || team == TFTeam_Red)
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders && TF2_GetPlayerClass(client) == TFClass_Spy)
 	{
-		Player(client).Reset();
-		
-		SetVariantString("");
-		AcceptEntityInput(client, "SetCustomModel");
+		Player(client).SpyLeaveSpawnRoomStart();
 	}
 }
 
@@ -69,6 +62,24 @@ public void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroad
 			// we just killed a human - taunt!
 			FakeClientCommand(attacker, "taunt");
 		}
+	}
+}
+
+public void EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
+	
+	TF2Attrib_RemoveAll(client);
+	// Clear Sound
+	Player(client).StopIdleSound();
+	
+	if (team == TFTeam_Spectator || team == TFTeam_Red)
+	{
+		Player(client).Reset();
+		
+		SetVariantString("");
+		AcceptEntityInput(client, "SetCustomModel");
 	}
 }
 

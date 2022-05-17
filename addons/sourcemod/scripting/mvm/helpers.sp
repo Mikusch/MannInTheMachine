@@ -375,3 +375,49 @@ void HaveAllPlayersSpeakConceptIfAllowed(const char[] concept, TFTeam team)
 		AcceptEntityInput(client, "ClearContext");
 	}
 }
+
+bool IsAreaValidForWanderingPopulation(CTFNavArea area)
+{
+	if (area.HasAttributeTF(BLOCKED | RED_SPAWN_ROOM | BLUE_SPAWN_ROOM | NO_SPAWNING | RESCUE_CLOSET))
+		return false;
+	
+	return true;
+}
+
+bool IsAreaPotentiallyVisibleToTeam(CNavArea area, TFTeam team)
+{
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (TF2_GetClientTeam(client) != team)
+			continue;
+		
+		if (!IsPlayerAlive(client))
+			continue;
+		
+		CNavArea from = CBaseCombatCharacter(client).GetLastKnownArea();
+		
+		if (from && from.IsPotentiallyVisible(area))
+		{
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+float[] Vector(float x, float y, float z)
+{
+	float vec[3];
+	vec[0] = x;
+	vec[1] = y;
+	vec[2] = z;
+	return vec;
+}
+
+any Min(any a, any b)
+{
+	return a <= b ? a : b;
+}

@@ -641,8 +641,39 @@ public MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 	// Replicate behavior of CTFBot::Event_Killed
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
-		// TODO: Replicate all of CTFBot::Event_Killed
-		//
+		// announce Spies
+		if (TF2_GetPlayerClass(player) == TFClass_Spy)
+		{
+			int spyCount = 0;
+			for (int client = 1; client <= MaxClients; client++)
+			{
+				if (!IsClientInGame(client))
+					continue;
+				
+				if (TF2_GetClientTeam(client) != TFTeam_Invaders)
+					continue;
+				
+				if (!IsPlayerAlive(client))
+					continue;
+				
+				if (TF2_GetPlayerClass(client) == TFClass_Spy)
+				{
+					++spyCount;
+				}
+			}
+			
+			Event event = CreateEvent("mvm_mission_update");
+			if (event)
+			{
+				event.SetInt("class", view_as<int>(TFClass_Spy));
+				event.SetInt("count", spyCount);
+				event.Fire();
+			}
+		}
+		else if (TF2_GetPlayerClass(player) == TFClass_Engineer)
+		{
+			// TODO: Engineer Behavior
+		}
 		
 		// Enables currency drops from human kills
 		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);

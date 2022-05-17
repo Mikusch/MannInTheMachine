@@ -650,6 +650,11 @@ public MRESReturn DHookCallback_FindSnapToBuildPos_Pre(int obj, DHookReturn ret,
 {
 	int builder = GetEntPropEnt(obj, Prop_Send, "m_hBuilder");
 	
+	if (TF2_GetClientTeam(builder) != TFTeam_Defenders)
+	{
+		return MRES_Ignored;
+	}
+	
 	for (int client = 1; client <= MaxClients; client++)
 	{
 		if (!IsClientInGame(client))
@@ -671,6 +676,11 @@ public MRESReturn DHookCallback_FindSnapToBuildPos_Pre(int obj, DHookReturn ret,
 public MRESReturn DHookCallback_FindSnapToBuildPos_Post(int obj, DHookReturn ret, DHookParam params)
 {
 	int builder = GetEntPropEnt(obj, Prop_Send, "m_hBuilder");
+	
+	if (TF2_GetClientTeam(builder) != TFTeam_Defenders)
+	{
+		return MRES_Ignored;
+	}
 	
 	for (int client = 1; client <= MaxClients; client++)
 	{

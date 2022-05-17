@@ -44,6 +44,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_GetTeamAssignmentOverride_Pre, DHookCallback_GetTeamAssignmentOverride_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::GetLoadoutItem", DHookCallback_GetLoadoutItem_Pre, DHookCallback_GetLoadoutItem_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::ShouldForceAutoTeam", DHookCallback_ShouldForceAutoTeam_Pre);
+	CreateDynamicDetour(gamedata, "CBaseObject::FindSnapToBuildPos", DHookCallback_FindSnapToBuildPos_Pre, DHookCallback_FindSnapToBuildPos_Post);
 	
 	g_DHookEventKilled = CreateDynamicHook(gamedata, "CTFPlayer::Event_Killed");
 	g_DHookShouldGib = CreateDynamicHook(gamedata, "CTFPlayer::ShouldGib");
@@ -634,6 +635,49 @@ public MRESReturn DHookCallback_ShouldForceAutoTeam_Pre(int player, DHookReturn 
 	// don't allow game logic to force players on a team
 	ret.Value = false;
 	return MRES_Supercede;
+}
+
+public MRESReturn DHookCallback_FindSnapToBuildPos_Pre(int obj, DHookReturn ret, DHookParam params)
+{
+	int builder = GetEntPropEnt(obj, Prop_Send, "m_hBuilder");
+	
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (TF2_GetClientTeam(client) != GetEnemyTeam(TF2_GetClientTeam(builder)))
+			continue;
+		
+		if (!IsPlayerAlive(client))
+			continue;
+		
+		// The robot sapper only works on bots so we make every invader a fake client
+		SetEntityFlags(client, GetEntityFlags(client) | FL_FAKECLIENT);
+	}
+	
+	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_FindSnapToBuildPos_Post(int obj, DHookReturn ret, DHookParam params)
+{
+	int builder = GetEntPropEnt(obj, Prop_Send, "m_hBuilder");
+	
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (TF2_GetClientTeam(client) != GetEnemyTeam(TF2_GetClientTeam(builder)))
+			continue;
+		
+		if (!IsPlayerAlive(client))
+			continue;
+		
+		SetEntityFlags(client, GetEntityFlags(client) & ~FL_FAKECLIENT);
+	}
+	
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)

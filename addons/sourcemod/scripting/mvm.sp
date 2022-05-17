@@ -404,6 +404,7 @@ ConVar tf_mvm_bot_flag_carrier_health_regen;
 ConVar tf_mvm_bot_flag_carrier_interval_to_1st_upgrade;
 ConVar tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade;
 ConVar tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade;
+ConVar tf_mvm_engineer_teleporter_uber_duration;
 ConVar tf_bot_taunt_victim_chance;
 ConVar mp_waitingforplayers_time;
 ConVar sv_stepsize;
@@ -443,6 +444,7 @@ public void OnPluginStart()
 	tf_mvm_bot_flag_carrier_interval_to_1st_upgrade = FindConVar("tf_mvm_bot_flag_carrier_interval_to_1st_upgrade");
 	tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade = FindConVar("tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade");
 	tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade = FindConVar("tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade");
+	tf_mvm_engineer_teleporter_uber_duration = FindConVar("tf_mvm_engineer_teleporter_uber_duration");
 	tf_bot_taunt_victim_chance = FindConVar("tf_bot_taunt_victim_chance");
 	mp_waitingforplayers_time = FindConVar("mp_waitingforplayers_time");
 	sv_stepsize = FindConVar("sv_stepsize");
@@ -747,7 +749,29 @@ void SelectNewDefenders()
 	delete playerVector;
 }
 
+// TODO: This is missing some stuff.
+// We need to override DoTeleporterOverride to have access to the
+// teleporter itself and complete the function.
 void OnBotTeleported(int bot)
 {
-	// TODO
+	static float s_flLastTeleportTime;
+	
+	// don't too many sound and effect when lots of bots teleporting in short time.
+	if (GetGameTime() - s_flLastTeleportTime > 0.1)
+	{
+		EmitGameSoundToAll("MVM.Robot_Teleporter_Deliver", bot);
+		
+		s_flLastTeleportTime = GetGameTime();
+	}
+	
+	// spy shouldn't get any effect from the teleporter
+	if (TF2_GetPlayerClass(bot) != TFClass_Spy)
+	{
+		TF2_AddCondition(bot, TFCond_TeleportedGlow, 30.0);
+		
+		// invading bots get uber while they leave their spawn so they don't drop their cash where players can't pick it up
+		float flUberTime = tf_mvm_engineer_teleporter_uber_duration.FloatValue;
+		TF2_AddCondition(bot, TFCond_Ubercharged, flUberTime);
+		TF2_AddCondition(bot, TFCond_UberchargeFading, flUberTime);
+	}
 }

@@ -61,56 +61,6 @@ bool IsWearableSlot(int iSlot)
 		|| IsTauntSlot(iSlot);
 }
 
-void AddItem(int player, const char[] pszItemName)
-{
-	int defindex = GetItemDefinitionByName(pszItemName);
-	
-	// If we already have an item in that slot, remove it
-	TFClassType class = TF2_GetPlayerClass(player);
-	int slot = TF2Econ_GetItemLoadoutSlot(defindex, class);
-	int newItemRegionMask = TF2Econ_GetItemEquipRegionMask(defindex);
-	
-	if (IsWearableSlot(slot))
-	{
-		// Remove any wearable that has a conflicting equip_region
-		for (int wbl = 0; wbl < TF2Util_GetPlayerWearableCount(player); wbl++)
-		{
-			int pWearable = TF2Util_GetPlayerWearable(player, wbl);
-			if (pWearable == -1)
-				continue;
-			
-			int wearableDefindex = GetEntProp(pWearable, Prop_Send, "m_iItemDefinitionIndex");
-			if (wearableDefindex == DEFINDEX_UNDEFINED)
-				continue;
-			
-			int wearableRegionMask = TF2Econ_GetItemEquipRegionMask(wearableDefindex);
-			
-			if (wearableRegionMask & newItemRegionMask)
-			{
-				TF2_RemoveWearable(player, pWearable);
-			}
-		}
-	}
-	else
-	{
-		int pEntity = TF2Util_GetPlayerLoadoutEntity(player, slot);
-		if (pEntity != -1)
-		{
-			RemovePlayerItem(player, pEntity);
-			RemoveEntity(pEntity);
-		}
-	}
-	
-	int item = CreateAndEquipItem(player, defindex);
-	
-	if (TF2Util_IsEntityWearable(item))
-		TF2Util_EquipPlayerWearable(player, item);
-	else
-		EquipPlayerWeapon(player, item);
-	
-	SDKCall_PostInventoryApplication(player);
-}
-
 int CreateAndEquipItem(int player, int defindex)
 {
 	Handle hItem = TF2Items_CreateItem(PRESERVE_ATTRIBUTES | FORCE_GENERATION);

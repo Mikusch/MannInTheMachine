@@ -458,7 +458,7 @@ methodmap Player
 				char item[64];
 				PtrToString(Deref(pEvent.m_items.Get(i)), item, sizeof(item));
 				
-				AddItem(this._client, item);
+				this.AddItem(item);
 			}
 			
 			for (int i = 0; i < pEvent.m_itemsAttributes.Count(); i++)
@@ -510,6 +510,56 @@ methodmap Player
 				this.AddTag(tag);
 			}
 		}
+	}
+	
+	public void AddItem(const char[] pszItemName)
+	{
+		int defindex = GetItemDefinitionByName(pszItemName);
+		
+		// If we already have an item in that slot, remove it
+		TFClassType class = TF2_GetPlayerClass(this._client);
+		int slot = TF2Econ_GetItemLoadoutSlot(defindex, class);
+		int newItemRegionMask = TF2Econ_GetItemEquipRegionMask(defindex);
+		
+		if (IsWearableSlot(slot))
+		{
+			// Remove any wearable that has a conflicting equip_region
+			for (int wbl = 0; wbl < TF2Util_GetPlayerWearableCount(this._client); wbl++)
+			{
+				int pWearable = TF2Util_GetPlayerWearable(this._client, wbl);
+				if (pWearable == -1)
+					continue;
+				
+				int wearableDefindex = GetEntProp(pWearable, Prop_Send, "m_iItemDefinitionIndex");
+				if (wearableDefindex == DEFINDEX_UNDEFINED)
+					continue;
+				
+				int wearableRegionMask = TF2Econ_GetItemEquipRegionMask(wearableDefindex);
+				
+				if (wearableRegionMask & newItemRegionMask)
+				{
+					TF2_RemoveWearable(this._client, pWearable);
+				}
+			}
+		}
+		else
+		{
+			int pEntity = TF2Util_GetPlayerLoadoutEntity(this._client, slot);
+			if (pEntity != -1)
+			{
+				RemovePlayerItem(this._client, pEntity);
+				RemoveEntity(pEntity);
+			}
+		}
+		
+		int item = CreateAndEquipItem(this._client, defindex);
+		
+		if (TF2Util_IsEntityWearable(item))
+			TF2Util_EquipPlayerWearable(this._client, item);
+		else
+			EquipPlayerWeapon(this._client, item);
+		
+		SDKCall_PostInventoryApplication(this._client);
 	}
 	
 	public bool IsWeaponRestricted(int weapon)

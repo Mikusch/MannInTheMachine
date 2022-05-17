@@ -348,8 +348,8 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		{
 			// Apply the Rome 2 promo items to each player. They'll be 
 			// filtered out for clients that do not have Romevision.
-			AddItem(newPlayer, g_szRomePromoItems_Hat[m_spawner.m_class]);
-			AddItem(newPlayer, g_szRomePromoItems_Misc[m_spawner.m_class]);
+			Player(newPlayer).AddItem(g_szRomePromoItems_Hat[m_spawner.m_class]);
+			Player(newPlayer).AddItem(g_szRomePromoItems_Misc[m_spawner.m_class]);
 		}
 		
 		char defaultEventChangeAttributesName[64];
@@ -392,7 +392,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 			char item[64];
 			Format(item, sizeof(item), "Zombie %s", g_aRawPlayerClassNamesShort[nClassIndex]);
 			
-			AddItem(newPlayer, item);
+			Player(newPlayer).AddItem(item);
 		}
 		else
 		{

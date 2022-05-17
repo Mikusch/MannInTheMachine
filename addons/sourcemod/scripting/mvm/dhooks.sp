@@ -28,6 +28,7 @@ static DynamicHook g_DHookClientConnected;
 static ArrayList m_justSpawnedVector;
 
 static int g_InternalSpawnPoint = INVALID_ENT_REFERENCE;
+static SpawnLocationResult s_spawnLocationResult = SPAWN_LOCATION_NOT_FOUND;
 
 void DHooks_Initialize(GameData gamedata)
 {
@@ -45,6 +46,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CTFPlayer::GetLoadoutItem", DHookCallback_GetLoadoutItem_Pre, DHookCallback_GetLoadoutItem_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::ShouldForceAutoTeam", DHookCallback_ShouldForceAutoTeam_Pre);
 	CreateDynamicDetour(gamedata, "CBaseObject::FindSnapToBuildPos", DHookCallback_FindSnapToBuildPos_Pre, DHookCallback_FindSnapToBuildPos_Post);
+	CreateDynamicDetour(gamedata, "CSpawnLocation::FindSpawnLocation", _, DHookCallback_FindSpawnLocation_Post);
 	
 	g_DHookEventKilled = CreateDynamicHook(gamedata, "CTFPlayer::Event_Killed");
 	g_DHookShouldGib = CreateDynamicHook(gamedata, "CTFPlayer::ShouldGib");
@@ -158,8 +160,11 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 {
 	CTFBotSpawner m_spawner = CTFBotSpawner(pThis);
 	
+	float rawHere[3];
+	params.GetVector(1, rawHere);
+	
 	float here[3];
-	params.GetVector(1, here);
+	here = Vector(rawHere[0], rawHere[1], rawHere[2]);
 	
 	CTFNavArea area = view_as<CTFNavArea>(TheNavMesh.GetNearestNavArea(here, .checkGround = false));
 	if (area && area.HasAttributeTF(NO_SPAWNING))
@@ -182,7 +187,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 	float z;
 	for (z = 0.0; z < sv_stepsize.FloatValue; z += 4.0)
 	{
-		here[2] += sv_stepsize.FloatValue;
+		here[2] = rawHere[2] + sv_stepsize.FloatValue;
 		
 		if (SDKCall_IsSpaceToSpawnHere(here))
 		{
@@ -220,10 +225,8 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		// Remove any player attributes
 		TF2Attrib_RemoveAll(newPlayer);
 		
-		/*
 		// clear any old TeleportWhere settings 
-		newBot->ClearTeleportWhere();
-		*/
+		Player(newPlayer).ClearTeleportWhere();
 		
 		if (g_InternalSpawnPoint == INVALID_ENT_REFERENCE || EntRefToEntIndex(g_InternalSpawnPoint) == -1)
 		{
@@ -265,8 +268,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 			Player(newPlayer).AddEventChangeAttributes(m_spawner.m_eventChangeAttributes.Get(i, 108));
 		}
 		
-		// TODO
-		// newBot->SetTeleportWhere( m_teleportWhereName );
+		Player(newPlayer).SetTeleportWhere(m_spawner.m_teleportWhereName);
 		
 		if (m_spawner.m_defaultAttributes.m_attributeFlags & MINIBOSS)
 		{
@@ -422,6 +424,13 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 			// EntityHandleVector_t
 			CUtlVector result = CUtlVector(params.Get(2));
 			result.AddToTail(GetEntityHandle(newPlayer));
+		}
+		
+		// Populated from CSpawnLocation::FindSpawnLocation detour.
+		// We can't use CWaveSpawnPopulator::m_spawnLocationResult because it gets overridden in some cases.
+		if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
+		{
+			OnBotTeleported(newPlayer);
 		}
 		
 		// For easy access in WaveSpawnPopulator::Update()
@@ -678,6 +687,14 @@ public MRESReturn DHookCallback_FindSnapToBuildPos_Post(int obj, DHookReturn ret
 	}
 	
 	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_FindSpawnLocation_Post(Address populator, DHookReturn ret, DHookParam params)
+{
+	// store for use in CTFBotSpawner::Spawn detour
+	s_spawnLocationResult = ret.Value;
+	
+	return MRES_Handled;
 }
 
 public MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)

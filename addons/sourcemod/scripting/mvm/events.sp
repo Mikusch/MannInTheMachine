@@ -23,6 +23,7 @@ void Events_Initialize()
 	HookEvent("player_spawn", EventHook_PlayerSpawn);
 	HookEvent("player_death", EventHook_PlayerDeath);
 	HookEvent("player_team", EventHook_PlayerTeam);
+	HookEvent("player_builtobject", EventHook_PlayerBuiltObject);
 	HookEvent("teamplay_round_start", EventHook_TeamplayRoundStart);
 }
 
@@ -80,6 +81,21 @@ public void EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadc
 		
 		SetVariantString("");
 		AcceptEntityInput(client, "SetCustomModel");
+	}
+}
+
+public void EventHook_PlayerBuiltObject(Event event, const char[] name, bool dontBroadcast)
+{
+	int builder = GetClientOfUserId(event.GetInt("userid"));
+	TFObjectType type = view_as<TFObjectType>(event.GetInt("object"));
+	int index = event.GetInt("index");
+	
+	if (TF2_GetClientTeam(builder) == TFTeam_Invaders)
+	{
+		if (type == TFObject_Teleporter && TF2_GetObjectMode(index) == TFObjectMode_Exit)
+		{
+			CObjectTeleporter(index).SetTeleportWhere(Player(builder).m_teleportWhereName);
+		}
 	}
 }
 

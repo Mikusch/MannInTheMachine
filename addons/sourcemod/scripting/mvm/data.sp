@@ -34,6 +34,9 @@ static CountdownTimer m_autoJumpTimer[MAXPLAYERS + 1];
 static CountdownTimer m_waitTimer[MAXPLAYERS + 1];
 static int g_PlayerAttempt[MAXPLAYERS + 1];
 
+// Engineer Bots
+static ArrayList g_TeleportWhereNames[MAXPLAYERS + 1];
+
 static int g_PlayerPriority[MAXPLAYERS + 1];
 static BombDeployingState_t g_PlayerDeployingBombState[MAXPLAYERS + 1];
 static int g_PlayerFollowingFlagTarget[MAXPLAYERS + 1];
@@ -204,6 +207,18 @@ methodmap Player
 		}
 	}
 	
+	property ArrayList m_teleportWhereName
+	{
+		public get()
+		{
+			return g_TeleportWhereNames[this._client];
+		}
+		public set(ArrayList teleportWhereName)
+		{
+			g_TeleportWhereNames[this._client] = teleportWhereName;
+		}
+	}
+	
 	property int m_attempt
 	{
 		public get()
@@ -310,6 +325,27 @@ methodmap Player
 		this.m_fModelScaleOverride = fScale;
 		
 		SetModelScale(this._client, this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : 1.0);
+	}
+	
+	public void SetTeleportWhere(CUtlVector teleportWhereName)
+	{
+		for (int i = 0; i < teleportWhereName.Count(); ++i)
+		{
+			char name[64];
+			PtrToString(Deref(teleportWhereName.Get(i)), name, sizeof(name));
+			
+			this.m_teleportWhereName.PushString(name);
+		}
+	}
+	
+	public ArrayList GetTeleportWhere()
+	{
+		return this.m_teleportWhereName;
+	}
+	
+	public void ClearTeleportWhere()
+	{
+		this.m_teleportWhereName.Clear();
 	}
 	
 	public void StartIdleSound()
@@ -1058,6 +1094,7 @@ methodmap Player
 	
 	public void Initialize()
 	{
+		this.m_teleportWhereName = new ArrayList(64);
 		this.m_tags = new ArrayList(64);
 		this.m_eventChangeAttributes = new ArrayList();
 	}
@@ -1077,6 +1114,7 @@ methodmap Player
 		this.m_attributeFlags = view_as<AttributeType>(0);
 		this.m_spawnPointEntity = -1;
 		this.m_fModelScaleOverride = 0.0;
+		this.m_teleportWhereName.Clear();
 		this.m_tags.Clear();
 		this.m_eventChangeAttributes.Clear();
 	}
@@ -1150,14 +1188,6 @@ methodmap CTFBotSpawner
 		return view_as<CTFBotSpawner>(spawner);
 	}
 	
-	property CUtlVector m_teleportWhereName
-	{
-		public get()
-		{
-			return CUtlVector(this + GetOffset("CTFBotSpawner::m_teleportWhereName"));
-		}
-	}
-	
 	property EventChangeAttributes_t m_defaultAttributes
 	{
 		public get()
@@ -1214,6 +1244,14 @@ methodmap CTFBotSpawner
 		}
 	}
 	
+	property CUtlVector m_teleportWhereName
+	{
+		public get()
+		{
+			return CUtlVector(this + GetOffset("CTFBotSpawner::m_teleportWhereName"));
+		}
+	}
+	
 	public void GetName(char[] buffer, int maxlen)
 	{
 		PtrToString(Deref(this + GetOffset("CTFBotSpawner::m_name")), buffer, maxlen);
@@ -1228,3 +1266,32 @@ methodmap CTFBotSpawner
 			strcopy(buffer, maxlen, g_aRawPlayerClassNamesShort[this.m_class]);
 	}
 };
+
+methodmap CObjectTeleporter
+{
+	public CObjectTeleporter(int entity)
+	{
+		return view_as<CObjectTeleporter>(entity);
+	}
+	
+	property CUtlVector m_teleportWhereName
+	{
+		public get()
+		{
+			return CUtlVector(GetEntityAddress(view_as<int>(this)) + GetOffset("CObjectTeleporter::m_teleportWhereName"));
+		}
+	}
+	
+	public void SetTeleportWhere(ArrayList teleportWhereName)
+	{
+		// deep copy strings
+		for (int i = 0; i < teleportWhereName.Length; ++i)
+		{
+			char name[64];
+			teleportWhereName.GetString(i, name, sizeof(name));
+			
+			PrintToChatAll(name);
+			this.m_teleportWhereName.AddToTail(StringToPtr(name, sizeof(name)));
+		}
+	}
+}

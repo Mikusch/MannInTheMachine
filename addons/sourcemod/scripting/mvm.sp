@@ -155,6 +155,13 @@ enum
 	BLOOD_COLOR_MECH,
 };
 
+enum SpawnLocationResult
+{
+	SPAWN_LOCATION_NOT_FOUND = 0,
+	SPAWN_LOCATION_NAV,
+	SPAWN_LOCATION_TELEPORTER
+};
+
 //-----------------------------------------------------------------------------
 // Particle attachment methods
 //-----------------------------------------------------------------------------
@@ -475,6 +482,7 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CTFPlayer::m_bIsMissionEnemy");
 		SetOffset(gamedata, "CTFPlayer::m_bIsLimitedSupportEnemy");
 		SetOffset(gamedata, "CTFPlayer::m_pWaveSpawnPopulator");
+		SetOffset(gamedata, "CObjectTeleporter::m_teleportWhereName");
 		
 		delete gamedata;
 	}
@@ -737,4 +745,9 @@ void SelectNewDefenders()
 	}
 	
 	delete playerVector;
+}
+
+void OnBotTeleported(int bot)
+{
+	// TODO
 }

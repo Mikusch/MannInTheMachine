@@ -126,6 +126,11 @@
 				"linux"		"@_ZN18CPopulationManager8ResetMapEv"
 				"windows"	"\x55\x8B\xEC\x51\xA1\x2A\x2A\x2A\x2A\x53\x56\x57\xBF\x01\x00\x00\x00"
 			}
+			"CSpawnLocation::FindSpawnLocation"
+			{
+				"linux"		"@_ZN14CSpawnLocation17FindSpawnLocationER6Vector"
+				"windows"	"\x55\x8B\xEC\x81\xEC\xB4\x00\x00\x00\x53\x8B\xC1"
+			}
 			"IsSpaceToSpawnHere"
 			{
 				"linux"		"@_Z18IsSpaceToSpawnHereRK6Vector"
@@ -188,6 +193,11 @@
 			{
 				"linux"		"8848"
 				"windows"	"8844"
+			}
+			"CObjectTeleporter::m_teleportWhereName"
+			{
+				"linux"		"2828"
+				"windows"	"2796"
 			}
 			"CTFBotSpawner::m_class"
 			{
@@ -431,6 +441,21 @@
 					"pObjectOverride"
 					{
 						"type"	"cbaseentity"
+					}
+				}
+			}
+			"CSpawnLocation::FindSpawnLocation"
+			{
+				"signature"		"CSpawnLocation::FindSpawnLocation"
+				"callconv"		"thiscall"
+				"return"		"int"
+				"this"			"address"
+				"arguments"
+				{
+					"vSpawnPosition"
+					{
+						"type"	"vectorptr"
+						"flags"	"byref"
 					}
 				}
 			}

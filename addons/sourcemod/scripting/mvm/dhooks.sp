@@ -145,9 +145,6 @@ public MRESReturn DHookCallback_AllocateBots_Pre(int populator)
 
 public MRESReturn DHookCallback_RestoreCheckpoint_Post(int populator)
 {
-	PrintToChatAll("Selecting a new set of defenders...");
-	
-	SelectNewDefenders();
 	
 	return MRES_Handled;
 }
@@ -556,7 +553,7 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 	int player = params.Get(1);
 	TFTeam desiredTeam = params.Get(2);
 	
-	if (tf_mvm_min_players_to_start.IntValue != 0)
+	if (g_bInWaitingForPlayers)
 	{
 		// funnel players into defender team during waiting for players so they can run around
 		ret.Value = TFTeam_Defenders;

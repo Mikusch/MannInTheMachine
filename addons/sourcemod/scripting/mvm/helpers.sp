@@ -371,3 +371,9 @@ any Min(any a, any b)
 {
 	return a <= b ? a : b;
 }
+
+int GetCurrentWaveIndex()
+{
+	int stats = FindEntityByClassname(MaxClients + 1, "tf_mann_vs_machine_stats");
+	return GetEntProp(stats, Prop_Send, "m_iCurrentWaveIdx");
+}

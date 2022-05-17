@@ -101,20 +101,31 @@ public void EventHook_PlayerBuiltObject(Event event, const char[] name, bool don
 
 public void EventHook_TeamplayRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
-	if (g_bWaitingForPlayersOver)
-		return;
-	
-	// Set to a high value to prevent readying up
-	tf_mvm_min_players_to_start.IntValue = MaxClients + 1;
-	
-	CreateTimer(mp_waitingforplayers_time.FloatValue, Timer_BeginGame);
+	if (GetCurrentWaveIndex() == 0 && !g_hWaitingForPlayersTimer)
+	{
+		g_bInWaitingForPlayers = true;
+		
+		// Show the "Waiting For Players" text
+		tf_mvm_min_players_to_start.IntValue = MaxClients + 1;
+		
+		g_hWaitingForPlayersTimer = CreateTimer(mp_waitingforplayers_time.FloatValue, Timer_OnWaitingForPlayersEnd);
+	}
+	else
+	{
+		g_bInWaitingForPlayers = false;
+		
+		tf_mvm_min_players_to_start.IntValue = 0;
+		
+		PrintToChatAll("Selecting a new set of defenders...");
+		SelectNewDefenders();
+	}
 }
 
-public Action Timer_BeginGame(Handle timer)
+public Action Timer_OnWaitingForPlayersEnd(Handle timer)
 {
-	g_bWaitingForPlayersOver = true;
+	if (!g_bInWaitingForPlayers)
+		return Plugin_Continue;
 	
-	// Let defenders ready up
 	tf_mvm_min_players_to_start.IntValue = 0;
 	
 	SDKCall_ResetMap(GetPopulator());

@@ -386,9 +386,10 @@ enum struct CountdownTimer
 }
 
 // Globals
+Handle g_hWaitingForPlayersTimer;
+bool g_bInWaitingForPlayers;
 StringMap g_offsets;
 bool g_bAllowTeamChange;
-bool g_bWaitingForPlayersOver;
 
 // Plugin ConVars
 ConVar mitm_robots_humans_ratio;
@@ -504,7 +505,8 @@ public void OnPluginStart()
 
 public void OnMapStart()
 {
-	g_bWaitingForPlayersOver = false;
+	g_hWaitingForPlayersTimer = null;
+	g_bInWaitingForPlayers = true;
 	
 	DHooks_HookGamerules();
 }

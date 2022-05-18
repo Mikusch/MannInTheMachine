@@ -22,7 +22,7 @@ void Events_Initialize()
 {
 	HookEvent("player_spawn", EventHook_PlayerSpawn);
 	HookEvent("player_death", EventHook_PlayerDeath);
-	HookEvent("player_team", EventHook_PlayerTeam);
+	HookEvent("player_team", EventHook_PlayerTeam, EventHookMode_Pre);
 	HookEvent("post_inventory_application", EventHook_PostInventoryApplication);
 	HookEvent("player_builtobject", EventHook_PlayerBuiltObject);
 	HookEvent("teamplay_round_start", EventHook_TeamplayRoundStart);
@@ -67,10 +67,14 @@ public void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroad
 	}
 }
 
-public void EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
+public Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
+	
+	// Only show when a new defender joins
+	bool bSilent = (team == TFTeam_Spectator) || (team == TFTeam_Invaders);
+	event.SetInt("silent", bSilent);
 	
 	TF2Attrib_RemoveAll(client);
 	// Clear Sound
@@ -83,6 +87,8 @@ public void EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadc
 		SetVariantString("");
 		AcceptEntityInput(client, "SetCustomModel");
 	}
+	
+	return Plugin_Changed;
 }
 
 public void EventHook_PostInventoryApplication(Event event, const char[] name, bool dontBroadcast)

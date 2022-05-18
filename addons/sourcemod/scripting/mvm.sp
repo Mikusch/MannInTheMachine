@@ -829,7 +829,7 @@ Action FireWeaponAtEnemy(int client, int &buttons)
 	CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(client).GetLastKnownArea());
 	TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(client) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
 	
-	static bool s_unlockAttack[MAXPLAYERS + 1];
+	static bool m_isInSpawn[MAXPLAYERS + 1];
 	
 	if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
 	{
@@ -839,9 +839,11 @@ Action FireWeaponAtEnemy(int client, int &buttons)
 		buttons &= ~IN_ATTACK;
 		buttons &= ~IN_ATTACK2;
 		
-		s_unlockAttack[client] = true;
+		m_isInSpawn[client] = true;
+		return Plugin_Changed;
 	}
-	else if (s_unlockAttack[client])
+	
+	if (m_isInSpawn[client])
 	{
 		// the active weapon might have switched, remove attributes from all
 		int numWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
@@ -855,7 +857,8 @@ Action FireWeaponAtEnemy(int client, int &buttons)
 			TF2Attrib_RemoveByName(weapon, "provide on active");
 		}
 		
-		s_unlockAttack[client] = false;
+		// we have left the spawn
+		m_isInSpawn[client] = false;
 	}
 	
 	return Plugin_Continue;

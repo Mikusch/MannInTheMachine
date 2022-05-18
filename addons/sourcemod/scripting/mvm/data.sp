@@ -616,7 +616,7 @@ methodmap Player
 			}
 		}
 		
-		int item = CreateAndEquipItem(this._client, defindex);
+		int item = CreateRobotItem(this._client, defindex);
 		
 		if (TF2Util_IsEntityWearable(item))
 			TF2Util_EquipPlayerWearable(this._client, item);

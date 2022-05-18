@@ -86,6 +86,11 @@
 				"linux"		"@_ZN9CTFPlayer14GetLoadoutItemEiib"
 				"windows"	"\x55\x8B\xEC\x51\x53\x56\x8B\xF1\x8B\x0D\x2A\x2A\x2A\x2A\x57\x89\x75\xFC"
 			}
+			"CTFPlayer::CheckInstantLoadoutRespawn"
+			{
+				"linux"		"@_ZN9CTFPlayer26CheckInstantLoadoutRespawnEv"
+				"windows"	"\x57\x8B\xF9\x8B\x07\x8B\x80\x04\x01\x00\x00\xFF\xD0\x84\xC0\x0F\x84\x2A\x2A\x2A\x2A\x8B\x07"
+			}
 			"CTFPlayer::ShouldForceAutoTeam"
 			{
 				"linux"		"@_ZN9CTFPlayer19ShouldForceAutoTeamEv"
@@ -440,6 +445,13 @@
 				"signature"		"CTFPlayer::ShouldForceAutoTeam"
 				"callconv"		"thiscall"
 				"return"		"bool"
+				"this"			"entity"
+			}
+			"CTFPlayer::CheckInstantLoadoutRespawn"
+			{
+				"signature"		"CTFPlayer::CheckInstantLoadoutRespawn"
+				"callconv"		"thiscall"
+				"return"		"void"
 				"this"			"entity"
 			}
 			"CBaseObject::FindSnapToBuildPos"

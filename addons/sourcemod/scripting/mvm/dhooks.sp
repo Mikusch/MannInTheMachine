@@ -45,6 +45,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CPointPopulatorInterface::InputChangeBotAttributes", DHookCallback_InputChangeBotAttributes_Pre);
 	CreateDynamicDetour(gamedata, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_GetTeamAssignmentOverride_Pre, DHookCallback_GetTeamAssignmentOverride_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::GetLoadoutItem", DHookCallback_GetLoadoutItem_Pre, DHookCallback_GetLoadoutItem_Post);
+	CreateDynamicDetour(gamedata, "CTFPlayer::CheckInstantLoadoutRespawn", DHookCallback_CheckInstantLoadoutRespawn_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayer::ShouldForceAutoTeam", DHookCallback_ShouldForceAutoTeam_Pre);
 	CreateDynamicDetour(gamedata, "CBaseObject::FindSnapToBuildPos", DHookCallback_FindSnapToBuildPos_Pre, DHookCallback_FindSnapToBuildPos_Post);
 	CreateDynamicDetour(gamedata, "CSpawnLocation::FindSpawnLocation", _, DHookCallback_FindSpawnLocation_Post);
@@ -631,9 +632,9 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Post(DHookReturn ret, 
 
 public MRESReturn DHookCallback_GetLoadoutItem_Pre(int player, DHookReturn ret, DHookParam params)
 {
-	// Generate base items for robot players
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
+		// Generate base items for robot players
 		GameRules_SetProp("m_bIsInTraining", true);
 	}
 	
@@ -648,6 +649,17 @@ public MRESReturn DHookCallback_GetLoadoutItem_Post(int player, DHookReturn ret,
 	}
 	
 	return MRES_Handled;
+}
+
+public MRESReturn DHookCallback_CheckInstantLoadoutRespawn_Pre(int player)
+{
+	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
+	{
+		// Never allow invaders to respawn with a new loadout, this breaks spawners
+		return MRES_Supercede;
+	}
+	
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_ShouldForceAutoTeam_Pre(int player, DHookReturn ret)

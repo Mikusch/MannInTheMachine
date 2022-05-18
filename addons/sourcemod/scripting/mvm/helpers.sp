@@ -61,7 +61,7 @@ bool IsWearableSlot(int iSlot)
 		|| IsTauntSlot(iSlot);
 }
 
-int CreateAndEquipItem(int player, int defindex)
+int CreateRobotItem(int player, int defindex)
 {
 	Handle hItem = TF2Items_CreateItem(PRESERVE_ATTRIBUTES | FORCE_GENERATION);
 	
@@ -70,7 +70,7 @@ int CreateAndEquipItem(int player, int defindex)
 	
 	TF2Items_SetClassname(hItem, classname);
 	TF2Items_SetItemIndex(hItem, defindex);
-	TF2Items_SetQuality(hItem, 1);
+	TF2Items_SetQuality(hItem, 0);
 	TF2Items_SetLevel(hItem, 1);
 	
 	int item = TF2Items_GiveNamedItem(player, hItem);

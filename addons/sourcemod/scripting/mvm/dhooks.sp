@@ -38,6 +38,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CPopulationManager::AllocateBots", DHookCallback_AllocateBots_Pre);
 	CreateDynamicDetour(gamedata, "CPopulationManager::RestoreCheckpoint", _, DHookCallback_RestoreCheckpoint_Post);
 	CreateDynamicDetour(gamedata, "CTFBotSpawner::Spawn", DHookCallback_Spawn_Pre);
+	CreateDynamicDetour(gamedata, "CPopulationManager::Update", DHookCallback_PopulationManagerUpdate_Pre, DHookCallback_PopulationManagerUpdate_Post);
 	CreateDynamicDetour(gamedata, "CWaveSpawnPopulator::Update", _, DHookCallback_WaveSpawnPopulatorUpdate_Post);
 	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMission", _, DHookCallback_MissionPopulatorUpdateMission_Post);
 	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMissionDestroySentries", DHookCallback_UpdateMissionDestroySentries_Pre);
@@ -247,9 +248,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		}
 		
 		// TODO: CTFBot::ChangeTeam does a little bit more, like making team switches silent
-		g_bAllowTeamChange = true;
 		TF2_ChangeClientTeam(newPlayer, team);
-		g_bAllowTeamChange = false;
 		
 		char m_iszClassIcon[64];
 		m_spawner.GetClassIcon(m_iszClassIcon, sizeof(m_iszClassIcon));
@@ -440,6 +439,21 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 	
 	ret.Value = true;
 	return MRES_Supercede;
+}
+
+public MRESReturn DHookCallback_PopulationManagerUpdate_Pre(int populator)
+{
+	// allows spawners to freely switch teams of players
+	g_bAllowTeamChange = true;
+	
+	return MRES_Handled;
+}
+
+public MRESReturn DHookCallback_PopulationManagerUpdate_Post(int populator)
+{
+	g_bAllowTeamChange = false;
+	
+	return MRES_Handled;
 }
 
 public MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)

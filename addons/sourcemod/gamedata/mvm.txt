@@ -46,6 +46,11 @@
 				"linux"		"@_ZN13CTFBotSpawner5SpawnERK6VectorP10CUtlVectorI7CHandleI11CBaseEntityE10CUtlMemoryIS6_iEE"
 				"windows"	"\x55\x8B\xEC\x81\xEC\x70\x01\x00\x00"
 			}
+			"CPopulationManager::Update"
+			{
+				"linux"		"@_ZN18CPopulationManager6UpdateEv"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x18\x53\x56\x57\x8B\xF9\x33\xF6"
+			}
 			"CWaveSpawnPopulator::Update"
 			{
 				"linux"		"@_ZN19CWaveSpawnPopulator6UpdateEv"
@@ -336,6 +341,13 @@
 						"type"	"int"
 					}
 				}
+			}
+			"CPopulationManager::Update"
+			{
+				"signature"	"CPopulationManager::Update"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
 			}
 			"CWaveSpawnPopulator::Update"
 			{

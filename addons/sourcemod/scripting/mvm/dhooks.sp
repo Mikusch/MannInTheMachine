@@ -36,7 +36,7 @@ void DHooks_Initialize(GameData gamedata)
 	
 	CreateDynamicDetour(gamedata, "CTFGCServerSystem::PreClientUpdate", DHookCallback_PreClientUpdate_Pre, DHookCallback_PreClientUpdate_Post);
 	CreateDynamicDetour(gamedata, "CPopulationManager::AllocateBots", DHookCallback_AllocateBots_Pre);
-	CreateDynamicDetour(gamedata, "CPopulationManager::RestoreCheckpoint", _, DHookCallback_RestoreCheckpoint_Post);
+	CreateDynamicDetour(gamedata, "CPopulationManager::RestoreCheckpoint", DHookCallback_RestoreCheckpoint_Pre);
 	CreateDynamicDetour(gamedata, "CTFBotSpawner::Spawn", DHookCallback_Spawn_Pre);
 	CreateDynamicDetour(gamedata, "CPopulationManager::Update", DHookCallback_PopulationManagerUpdate_Pre, DHookCallback_PopulationManagerUpdate_Post);
 	CreateDynamicDetour(gamedata, "CWaveSpawnPopulator::Update", _, DHookCallback_WaveSpawnPopulatorUpdate_Post);
@@ -144,8 +144,9 @@ public MRESReturn DHookCallback_AllocateBots_Pre(int populator)
 	return MRES_Supercede;
 }
 
-public MRESReturn DHookCallback_RestoreCheckpoint_Post(int populator)
+public MRESReturn DHookCallback_RestoreCheckpoint_Pre(int populator)
 {
+	SelectNewDefenders();
 	
 	return MRES_Handled;
 }

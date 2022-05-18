@@ -435,7 +435,7 @@ public void OnPluginStart()
 	g_WarningHudSync = CreateHudSynchronizer();
 	g_offsets = new StringMap();
 	
-	mitm_robots_humans_ratio = CreateConVar("mitm_robots_humans_ratio", "3", "The ratio of invaders to defenders. Defender slots gets populated first.");
+	mitm_robots_humans_ratio = CreateConVar("mitm_robots_humans_ratio", "4.33", "The ratio of invaders to defenders. Defender slots gets populated first.");
 	
 	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");

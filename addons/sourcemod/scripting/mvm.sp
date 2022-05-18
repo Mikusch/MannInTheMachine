@@ -386,6 +386,7 @@ enum struct CountdownTimer
 }
 
 // Globals
+Handle g_WarningHudSync;
 Handle g_hWaitingForPlayersTimer;
 bool g_bInWaitingForPlayers;
 StringMap g_offsets;
@@ -431,6 +432,7 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	g_WarningHudSync = CreateHudSynchronizer();
 	g_offsets = new StringMap();
 	
 	mitm_robots_humans_ratio = CreateConVar("mitm_robots_humans_ratio", "3", "The ratio of invaders to defenders. Defender slots gets populated first.");
@@ -530,7 +532,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	bool changed = false;
 	
 	// implements many functions from CTFBotMainAction::FireWeaponAtEnemy
-	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(client) == TFTeam_Invaders)
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders && IsPlayerAlive(client))
 	{
 		if (!IsFakeClient(client))
 		{
@@ -594,7 +596,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 
 public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
 {
-	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(client) == TFTeam_Invaders)
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders && IsPlayerAlive(client))
 	{
 		if (Player(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
 		{
@@ -610,6 +612,32 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 			TF2_AddCondition(client, TFCond_Ubercharged, 0.5);
 			TF2_AddCondition(client, TFCond_UberchargedHidden, 0.5);
 			TF2_AddCondition(client, TFCond_UberchargeFading, 0.5);
+			
+			if (!Player(client).m_flRequiredSpawnLeaveTime)
+			{
+				// minibosses and bomb carriers are slow and get more time to leave
+				float flTime = (GetEntProp(client, Prop_Send, "m_bIsMiniBoss") || SDKCall_HasTheFlag(client)) ? 45.0 : 30.0;
+				Player(client).m_flRequiredSpawnLeaveTime = GetGameTime() + flTime;
+			}
+			else
+			{
+				float flTimeLeft = Player(client).m_flRequiredSpawnLeaveTime - GetGameTime();
+				if (flTimeLeft <= 0.0)
+				{
+					ForcePlayerSuicide(client);
+				}
+				else if (flTimeLeft <= 15.0)
+				{
+					// motivate them to leave their spawn
+					SetHudTextParams(-1.0, 0.7, 0.1, 255, 255, 255, 255, _, 0.0, 0.0, 0.0);
+					ShowSyncHudText(client, g_WarningHudSync, "You have %1.2f seconds to leave the spawn area.", flTimeLeft);
+				}
+			}
+		}
+		else
+		{
+			// not in spawn, reset their time
+			Player(client).m_flRequiredSpawnLeaveTime = 0.0;
 		}
 		
 		int flag = Player(client).GetFlagToFetch();
@@ -631,6 +659,10 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 		if (TF2_GetPlayerClass(client) == TFClass_Spy)
 		{
 			Player(client).SpyLeaveSpawnRoomUpdate();
+		}
+		else if (TF2_GetPlayerClass(client) == TFClass_Engineer)
+		{
+			//Player(client).EngineerIdleUpdate();
 		}
 		
 		Player(client).EquipRequiredWeapon();

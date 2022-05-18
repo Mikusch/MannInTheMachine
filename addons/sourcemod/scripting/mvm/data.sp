@@ -45,6 +45,7 @@ static AttributeType m_attributeFlags[MAXPLAYERS + 1];
 static BombDeployingState_t m_nDeployingBombState[MAXPLAYERS + 1];
 static char m_szIdleSound[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
 static float m_fModelScaleOverride[MAXPLAYERS + 1];
+static float m_flRequiredSpawnLeaveTime[MAXPLAYERS + 1];
 static int m_spawnPointEntity[MAXPLAYERS + 1];
 static int m_hFollowingFlagTarget[MAXPLAYERS + 1];
 
@@ -171,6 +172,18 @@ methodmap Player
 		public set(float fScale)
 		{
 			m_fModelScaleOverride[this._client] = fScale;
+		}
+	}
+	
+	property float m_flRequiredSpawnLeaveTime
+	{
+		public get()
+		{
+			return m_flRequiredSpawnLeaveTime[this._client];
+		}
+		public set(float flSpawnEnterTime)
+		{
+			m_flRequiredSpawnLeaveTime[this._client] = flSpawnEnterTime;
 		}
 	}
 	
@@ -321,7 +334,7 @@ methodmap Player
 	
 	public void GetIdleSound(char[] buffer, int maxlen)
 	{
-		 strcopy(buffer, maxlen, m_szIdleSound[this._client]);
+		strcopy(buffer, maxlen, m_szIdleSound[this._client]);
 	}
 	
 	public void SetIdleSound(const char[] soundName)
@@ -1134,6 +1147,7 @@ methodmap Player
 		this.ClearIdleSound();
 		this.m_nDeployingBombState = TF_BOMB_DEPLOYING_NONE;
 		this.m_fModelScaleOverride = 0.0;
+		this.m_flRequiredSpawnLeaveTime = 0.0;
 		this.m_spawnPointEntity = -1;
 		this.m_hFollowingFlagTarget = -1;
 	}

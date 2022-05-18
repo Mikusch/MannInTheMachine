@@ -137,7 +137,7 @@ public Action Timer_DeadTimer(Handle timer, int userid)
 {
 	int client = GetClientOfUserId(userid);
 	
-	if (client != 0 && !IsPlayerAlive(client))
+	if (client != 0 && IsClientInGame(client) && !IsPlayerAlive(client))
 	{
 		if (Player(client).HasAttribute(REMOVE_ON_DEATH))
 		{

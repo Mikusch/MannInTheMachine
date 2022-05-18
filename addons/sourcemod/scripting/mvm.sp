@@ -252,7 +252,7 @@ enum ETFFlagType
 	TF_FLAGTYPE_PLAYER_DESTRUCTION
 };
 
-enum 
+enum
 {
 	MVM_EVENT_POPFILE_NONE = 0,
 	MVM_EVENT_POPFILE_HALLOWEEN,
@@ -528,7 +528,7 @@ public void OnEntityCreated(int entity, const char[] classname)
 
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int & subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
 {
-	bool changed = false;
+	Action action = Plugin_Continue;
 	
 	// implements many functions from CTFBotMainAction::FireWeaponAtEnemy
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders && IsPlayerAlive(client))
@@ -539,58 +539,15 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 			tf_avoidteammates_pushaway.ReplicateToClient(client, SDKCall_HasTheFlag(client) ? "0" : "1");
 		}
 		
-		if (Player(client).HasAttribute(ALWAYS_FIRE_WEAPON))
-		{
-			buttons |= IN_ATTACK;
-			changed = true;
-		}
-		
 		if (Player(client).ShouldAutoJump())
 		{
 			buttons |= IN_JUMP;
-			changed = true;
 		}
 		
-		if (changed)
-		{
-			return Plugin_Changed;
-		}
-		
-		int myWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
-		if (myWeapon != -1)
-		{
-			if (TF2Util_GetWeaponSlot(myWeapon) == TFWeaponSlot_Melee)
-			{
-				// always allow robots to use their melee
-				return Plugin_Continue;
-			}
-			
-			int weaponID = TF2Util_GetWeaponID(myWeapon);
-			if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_LUNCHBOX || weaponID == TF_WEAPON_BUFF_ITEM)
-			{
-				// don't interfere with mediguns or buff items
-				return Plugin_Continue;
-			}
-		}
-		
-		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(client).GetLastKnownArea());
-		TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(client) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
-		
-		static bool s_unlockAttack[MAXPLAYERS + 1];
-		
-		if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
-		{
-			SetEntPropFloat(client, Prop_Send, "m_flNextAttack", float(cellmax));
-			s_unlockAttack[client] = true;
-		}
-		else if (myWeapon != -1 && s_unlockAttack[client])
-		{
-			SetEntPropFloat(client, Prop_Send, "m_flNextAttack", GetGameTime());
-			s_unlockAttack[client] = false;
-		}
+		action = FireWeaponAtEnemy(client, buttons);
 	}
 	
-	return Plugin_Continue;
+	return action;
 }
 
 public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
@@ -805,4 +762,101 @@ void OnBotTeleported(int bot)
 		TF2_AddCondition(bot, TFCond_Ubercharged, flUberTime);
 		TF2_AddCondition(bot, TFCond_UberchargeFading, flUberTime);
 	}
+}
+
+Action FireWeaponAtEnemy(int client, int &buttons)
+{
+	if (Player(client).HasAttribute(SUPPRESS_FIRE))
+		return Plugin_Continue;
+	
+	if (Player(client).HasAttribute(IGNORE_ENEMIES))
+		return Plugin_Continue;
+	
+	int myWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
+	if (myWeapon == -1)
+		return Plugin_Continue;
+	
+	if (Player(client).IsBarrageAndReloadWeapon(myWeapon))
+	{
+		if (Player(client).HasAttribute(HOLD_FIRE_UNTIL_FULL_RELOAD))
+		{
+			static int m_isWaitingForFullReload[MAXPLAYERS + 1];
+			
+			if (GetEntProp(myWeapon, Prop_Send, "m_iClip1") <= 0)
+			{
+				m_isWaitingForFullReload[client] = true;
+			}
+			
+			if (m_isWaitingForFullReload[client])
+			{
+				if (GetEntProp(myWeapon, Prop_Send, "m_iClip1") < TF2Util_GetWeaponMaxClip(myWeapon))
+				{
+					TF2Attrib_SetByName(myWeapon, "no_attack", 1.0);
+					TF2Attrib_SetByName(myWeapon, "provide on active", 1.0);
+					buttons &= ~IN_ATTACK;
+					buttons &= ~IN_ATTACK2;
+					return Plugin_Changed;
+				}
+				
+				TF2Attrib_RemoveByName(myWeapon, "no_attack");
+				TF2Attrib_RemoveByName(myWeapon, "provide on active");
+				
+				// we are fully reloaded
+				m_isWaitingForFullReload[client] = false;
+			}
+		}
+	}
+	
+	if (Player(client).HasAttribute(ALWAYS_FIRE_WEAPON))
+	{
+		buttons |= IN_ATTACK;
+		return Plugin_Changed;
+	}
+	
+	if (TF2Util_GetWeaponSlot(myWeapon) == TFWeaponSlot_Melee)
+	{
+		// always allow robots to use their melee
+		return Plugin_Continue;
+	}
+	
+	int weaponID = TF2Util_GetWeaponID(myWeapon);
+	if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_BUFF_ITEM)
+	{
+		// don't interfere with medic healing behaviors
+		return Plugin_Continue;
+	}
+	
+	CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(client).GetLastKnownArea());
+	TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(client) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
+	
+	static bool s_unlockAttack[MAXPLAYERS + 1];
+	
+	if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
+	{
+		// disable attack for this weapon
+		TF2Attrib_SetByName(myWeapon, "no_attack", 1.0);
+		TF2Attrib_SetByName(myWeapon, "provide on active", 1.0);
+		buttons &= ~IN_ATTACK;
+		buttons &= ~IN_ATTACK2;
+		
+		s_unlockAttack[client] = true;
+	}
+	else if (s_unlockAttack[client])
+	{
+		// the active weapon might have switched, remove attributes from all
+		int numWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
+		for (int i = 0; i < numWeapons; i++)
+		{
+			int weapon = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i);
+			if (weapon == -1)
+				continue;
+			
+			TF2Attrib_RemoveByName(weapon, "no_attack");
+			TF2Attrib_RemoveByName(weapon, "provide on active");
+		}
+		
+		s_unlockAttack[client] = false;
+	}
+	
+	return Plugin_Continue;
 }

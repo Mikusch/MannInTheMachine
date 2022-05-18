@@ -19,6 +19,7 @@
 #pragma newdecls required
 
 #define DONT_UPGRADE	-1
+#define MY_CURRENT_GUN	0
 
 // Bomb Upgrade
 static CountdownTimer m_upgradeTimer[MAXPLAYERS + 1];
@@ -679,6 +680,27 @@ methodmap Player
 		{
 			SDKCall_WeaponSwitch(this._client, GetPlayerWeaponSlot(this._client, TFWeaponSlot_Secondary));
 			return true;
+		}
+		
+		return false;
+	}
+	
+	public bool IsBarrageAndReloadWeapon(int weapon)
+	{
+		if (weapon == MY_CURRENT_GUN)
+		{
+			weapon = GetEntPropEnt(this._client, Prop_Send, "m_hActiveWeapon");
+		}
+		
+		if (weapon)
+		{
+			switch (TF2Util_GetWeaponID(weapon))
+			{
+				case TF_WEAPON_ROCKETLAUNCHER, TF_WEAPON_DIRECTHIT, TF_WEAPON_GRENADELAUNCHER, TF_WEAPON_PIPEBOMBLAUNCHER, TF_WEAPON_SCATTERGUN:
+				{
+					return true;
+				}
+			}
 		}
 		
 		return false;

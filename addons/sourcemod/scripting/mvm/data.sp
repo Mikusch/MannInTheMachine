@@ -633,9 +633,9 @@ methodmap Player
 			return false;
 		}
 		
-		if (TF2Util_IsEntityWearable(weapon))
+		if (TF2Util_IsEntityWearable(weapon) || TF2Util_GetWeaponID(weapon) == TF_WEAPON_LUNCHBOX)
 		{
-			// Always allow wearable weapons
+			// Always allow wearable weapons and lunchbox items
 			return false;
 		}
 		

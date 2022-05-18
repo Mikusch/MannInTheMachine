@@ -813,16 +813,16 @@ Action FireWeaponAtEnemy(int client, int &buttons)
 		return Plugin_Changed;
 	}
 	
-	if (TF2Util_GetWeaponSlot(myWeapon) == TFWeaponSlot_Melee)
+	if (TF2Util_GetWeaponSlot(myWeapon) == TFWeaponSlot_Melee || TF2Util_IsEntityWearable(myWeapon))
 	{
-		// always allow robots to use their melee
+		// always allow robots to use their melee or wearable items
 		return Plugin_Continue;
 	}
 	
 	int weaponID = TF2Util_GetWeaponID(myWeapon);
-	if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_BUFF_ITEM)
+	if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_LUNCHBOX)
 	{
-		// don't interfere with medic healing behaviors
+		// allow robots to use certain weapons in spawn
 		return Plugin_Continue;
 	}
 	

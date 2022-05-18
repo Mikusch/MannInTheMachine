@@ -279,8 +279,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		
 		if (m_spawner.m_defaultAttributes.m_attributeFlags & AUTO_JUMP)
 		{
-			Player(newPlayer).m_flAutoJumpMin = m_spawner.m_flAutoJumpMin;
-			Player(newPlayer).m_flAutoJumpMax = m_spawner.m_flAutoJumpMax;
+			Player(newPlayer).SetAutoJump(m_spawner.m_flAutoJumpMin, m_spawner.m_flAutoJumpMax);
 		}
 		
 		if (m_spawner.m_defaultAttributes.m_attributeFlags & BULLET_IMMUNE)

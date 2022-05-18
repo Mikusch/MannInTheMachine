@@ -239,12 +239,12 @@ int GetRobotToSpawn()
 		{
 			// store the player and reset priority
 			priorityClient = client;
-			Player(client).m_iPriority = 0;
+			Player(client).m_invaderPriority = 0;
 		}
 		else
 		{
 			// every player who didn't get picked gets a priority point
-			Player(client).m_iPriority++;
+			Player(client).m_invaderPriority++;
 		}
 	}
 	
@@ -268,7 +268,7 @@ public int SortPlayersByPriority(int index1, int index2, Handle array, Handle hn
 	int client1 = list.Get(index1);
 	int client2 = list.Get(index2);
 	
-	return Compare(Player(client2).m_iPriority, Player(client1).m_iPriority);
+	return Compare(Player(client2).m_invaderPriority, Player(client1).m_invaderPriority);
 }
 
 bool IsRangeLessThan(int client1, int client2, float range)

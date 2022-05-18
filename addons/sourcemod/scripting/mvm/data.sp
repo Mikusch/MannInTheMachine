@@ -21,32 +21,35 @@
 #define DONT_UPGRADE	-1
 
 // Bomb Upgrade
-static int g_PlayerUpgradeLevel[MAXPLAYERS + 1];
 static CountdownTimer m_upgradeTimer[MAXPLAYERS + 1];
 static CountdownTimer m_buffPulseTimer[MAXPLAYERS + 1];
+static int m_upgradeLevel[MAXPLAYERS + 1];
 
-// Autojump
-static float g_PlayerAutoJumpMin[MAXPLAYERS + 1];
-static float g_PlayerAutoJumpMax[MAXPLAYERS + 1];
+// Auto Jump
 static CountdownTimer m_autoJumpTimer[MAXPLAYERS + 1];
+static float m_flAutoJumpMin[MAXPLAYERS + 1];
+static float m_flAutoJumpMax[MAXPLAYERS + 1];
 
-// Spy Bots
+// Spy Robots
 static CountdownTimer m_waitTimer[MAXPLAYERS + 1];
-static int g_PlayerAttempt[MAXPLAYERS + 1];
+static int m_attempt[MAXPLAYERS + 1];
 
-// Engineer Bots
-static ArrayList g_TeleportWhereNames[MAXPLAYERS + 1];
+// Engineer Robots
+static ArrayList m_teleportWhereName[MAXPLAYERS + 1];
 
-static int g_PlayerPriority[MAXPLAYERS + 1];
-static BombDeployingState_t g_PlayerDeployingBombState[MAXPLAYERS + 1];
-static int g_PlayerFollowingFlagTarget[MAXPLAYERS + 1];
-static char g_PlayerIdleSounds[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
-static WeaponRestrictionType g_PlayerWeaponRestrictionFlags[MAXPLAYERS + 1];
-static AttributeType g_PlayerAttributeFlags[MAXPLAYERS + 1];
-static int g_PlayerSpawnPointEntity[MAXPLAYERS + 1];
-static float g_PlayerModelScaleOverride[MAXPLAYERS + 1];
-static ArrayList g_PlayerTags[MAXPLAYERS + 1];
-static ArrayList g_PlayerEventChangeAttributes[MAXPLAYERS + 1];
+// Bot Spawner
+static ArrayList m_eventChangeAttributes[MAXPLAYERS + 1];
+static ArrayList m_tags[MAXPLAYERS + 1];
+static WeaponRestrictionType m_weaponRestrictionFlags[MAXPLAYERS + 1];
+static AttributeType m_attributeFlags[MAXPLAYERS + 1];
+static BombDeployingState_t m_nDeployingBombState[MAXPLAYERS + 1];
+static char m_szIdleSound[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
+static float m_fModelScaleOverride[MAXPLAYERS + 1];
+static int m_spawnPointEntity[MAXPLAYERS + 1];
+static int m_hFollowingFlagTarget[MAXPLAYERS + 1];
+
+// Non-resetting Properties
+static int m_invaderPriority[MAXPLAYERS + 1];
 
 methodmap Player
 {
@@ -67,119 +70,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return g_PlayerUpgradeLevel[this._client];
+			return m_upgradeLevel[this._client];
 		}
 		public set(int upgradeLevel)
 		{
-			g_PlayerUpgradeLevel[this._client] = upgradeLevel;
-		}
-	}
-	
-	property int m_iPriority
-	{
-		public get()
-		{
-			return g_PlayerPriority[this._client];
-		}
-		public set(int iPriority)
-		{
-			g_PlayerPriority[this._client] = iPriority;
-		}
-	}
-	
-	property BombDeployingState_t m_nDeployingBombState
-	{
-		public get()
-		{
-			return g_PlayerDeployingBombState[this._client];
-		}
-		public set(BombDeployingState_t nDeployingBombState)
-		{
-			g_PlayerDeployingBombState[this._client] = nDeployingBombState;
-		}
-	}
-	
-	property int m_hFollowingFlagTarget
-	{
-		public get()
-		{
-			return g_PlayerFollowingFlagTarget[this._client];
-		}
-		public set(int pFlag)
-		{
-			g_PlayerFollowingFlagTarget[this._client] = pFlag;
-		}
-	}
-	
-	property WeaponRestrictionType m_weaponRestrictionFlags
-	{
-		public get()
-		{
-			return g_PlayerWeaponRestrictionFlags[this._client];
-		}
-		public set(WeaponRestrictionType restrictionFlags)
-		{
-			g_PlayerWeaponRestrictionFlags[this._client] = restrictionFlags;
-		}
-	}
-	
-	property AttributeType m_attributeFlags
-	{
-		public get()
-		{
-			return g_PlayerAttributeFlags[this._client];
-		}
-		public set(AttributeType attributeFlag)
-		{
-			g_PlayerAttributeFlags[this._client] = attributeFlag;
-		}
-	}
-	
-	property ArrayList m_tags
-	{
-		public get()
-		{
-			return g_PlayerTags[this._client];
-		}
-		public set(ArrayList tags)
-		{
-			g_PlayerTags[this._client] = tags;
-		}
-	}
-	
-	property ArrayList m_eventChangeAttributes
-	{
-		public get()
-		{
-			return g_PlayerEventChangeAttributes[this._client];
-		}
-		public set(ArrayList attributes)
-		{
-			g_PlayerEventChangeAttributes[this._client] = attributes;
-		}
-	}
-	
-	property int m_spawnPointEntity
-	{
-		public get()
-		{
-			return g_PlayerSpawnPointEntity[this._client];
-		}
-		public set(int spawnPoint)
-		{
-			g_PlayerSpawnPointEntity[this._client] = spawnPoint;
-		}
-	}
-	
-	property float m_fModelScaleOverride
-	{
-		public get()
-		{
-			return g_PlayerModelScaleOverride[this._client];
-		}
-		public set(float fScale)
-		{
-			g_PlayerModelScaleOverride[this._client] = fScale;
+			m_upgradeLevel[this._client] = upgradeLevel;
 		}
 	}
 	
@@ -187,11 +82,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return g_PlayerAutoJumpMin[this._client];
+			return m_flAutoJumpMin[this._client];
 		}
 		public set(float flAutoJumpMin)
 		{
-			g_PlayerAutoJumpMin[this._client] = flAutoJumpMin;
+			m_flAutoJumpMin[this._client] = flAutoJumpMin;
 		}
 	}
 	
@@ -199,23 +94,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return g_PlayerAutoJumpMax[this._client];
+			return m_flAutoJumpMax[this._client];
 		}
 		public set(float flAutoJumpMax)
 		{
-			g_PlayerAutoJumpMax[this._client] = flAutoJumpMax;
-		}
-	}
-	
-	property ArrayList m_teleportWhereName
-	{
-		public get()
-		{
-			return g_TeleportWhereNames[this._client];
-		}
-		public set(ArrayList teleportWhereName)
-		{
-			g_TeleportWhereNames[this._client] = teleportWhereName;
+			m_flAutoJumpMax[this._client] = flAutoJumpMax;
 		}
 	}
 	
@@ -223,12 +106,138 @@ methodmap Player
 	{
 		public get()
 		{
-			return g_PlayerAttempt[this._client];
+			return m_attempt[this._client];
 		}
 		public set(int attempt)
 		{
-			g_PlayerAttempt[this._client] = attempt;
+			m_attempt[this._client] = attempt;
 		}
+	}
+	
+	property ArrayList m_eventChangeAttributes
+	{
+		public get()
+		{
+			return m_eventChangeAttributes[this._client];
+		}
+		public set(ArrayList attributes)
+		{
+			m_eventChangeAttributes[this._client] = attributes;
+		}
+	}
+	
+	property ArrayList m_tags
+	{
+		public get()
+		{
+			return m_tags[this._client];
+		}
+		public set(ArrayList tags)
+		{
+			m_tags[this._client] = tags;
+		}
+	}
+	
+	property WeaponRestrictionType m_weaponRestrictionFlags
+	{
+		public get()
+		{
+			return m_weaponRestrictionFlags[this._client];
+		}
+		public set(WeaponRestrictionType restrictionFlags)
+		{
+			m_weaponRestrictionFlags[this._client] = restrictionFlags;
+		}
+	}
+	
+	property AttributeType m_attributeFlags
+	{
+		public get()
+		{
+			return m_attributeFlags[this._client];
+		}
+		public set(AttributeType attributeFlag)
+		{
+			m_attributeFlags[this._client] = attributeFlag;
+		}
+	}
+	
+	property float m_fModelScaleOverride
+	{
+		public get()
+		{
+			return m_fModelScaleOverride[this._client];
+		}
+		public set(float fScale)
+		{
+			m_fModelScaleOverride[this._client] = fScale;
+		}
+	}
+	
+	property int m_spawnPointEntity
+	{
+		public get()
+		{
+			return m_spawnPointEntity[this._client];
+		}
+		public set(int spawnPoint)
+		{
+			m_spawnPointEntity[this._client] = spawnPoint;
+		}
+	}
+	
+	property int m_invaderPriority
+	{
+		public get()
+		{
+			return m_invaderPriority[this._client];
+		}
+		public set(int iPriority)
+		{
+			m_invaderPriority[this._client] = iPriority;
+		}
+	}
+	
+	property BombDeployingState_t m_nDeployingBombState
+	{
+		public get()
+		{
+			return m_nDeployingBombState[this._client];
+		}
+		public set(BombDeployingState_t nDeployingBombState)
+		{
+			m_nDeployingBombState[this._client] = nDeployingBombState;
+		}
+	}
+	
+	property int m_hFollowingFlagTarget
+	{
+		public get()
+		{
+			return m_hFollowingFlagTarget[this._client];
+		}
+		public set(int pFlag)
+		{
+			m_hFollowingFlagTarget[this._client] = pFlag;
+		}
+	}
+	
+	property ArrayList m_teleportWhereName
+	{
+		public get()
+		{
+			return m_teleportWhereName[this._client];
+		}
+		public set(ArrayList teleportWhereName)
+		{
+			m_teleportWhereName[this._client] = teleportWhereName;
+		}
+	}
+	
+	public void SetAutoJump(float flAutoJumpMin, float flAutoJumpMax)
+	{
+		this.m_flAutoJumpMin = flAutoJumpMin;
+		this.m_flAutoJumpMax = flAutoJumpMax;
 	}
 	
 	public void ClearWeaponRestrictions()
@@ -310,14 +319,19 @@ methodmap Player
 		return false;
 	}
 	
-	public int GetIdleSound(char[] buffer, int maxlen)
+	public void GetIdleSound(char[] buffer, int maxlen)
 	{
-		return strcopy(buffer, maxlen, g_PlayerIdleSounds[this._client]);
+		 strcopy(buffer, maxlen, m_szIdleSound[this._client]);
 	}
 	
-	public int SetIdleSound(const char[] soundName)
+	public void SetIdleSound(const char[] soundName)
 	{
-		return strcopy(g_PlayerIdleSounds[this._client], sizeof(g_PlayerIdleSounds[]), soundName);
+		strcopy(m_szIdleSound[this._client], sizeof(m_szIdleSound[]), soundName);
+	}
+	
+	public void ClearIdleSound()
+	{
+		strcopy(m_szIdleSound[this._client], sizeof(m_szIdleSound[]), "");
 	}
 	
 	public void SetScaleOverride(float fScale)
@@ -401,7 +415,7 @@ methodmap Player
 		if (idleSound[0])
 		{
 			StopGameSound(this._client, idleSound);
-			this.SetIdleSound("");
+			this.ClearIdleSound();
 		}
 	}
 	
@@ -1095,28 +1109,33 @@ methodmap Player
 	public void Initialize()
 	{
 		this.m_teleportWhereName = new ArrayList(64);
-		this.m_tags = new ArrayList(64);
 		this.m_eventChangeAttributes = new ArrayList();
+		this.m_tags = new ArrayList(64);
 	}
 	
 	public void Reset()
 	{
-		this.m_upgradeLevel = DONT_UPGRADE;
 		m_upgradeTimer[this._client].Invalidate();
 		m_buffPulseTimer[this._client].Invalidate();
+		this.m_upgradeLevel = DONT_UPGRADE;
 		
-		this.m_flAutoJumpMin = 0.0;
-		this.m_flAutoJumpMax = 0.0;
+		this.SetAutoJump(0.0, 0.0);
 		m_autoJumpTimer[this._client].Invalidate();
 		
-		this.m_hFollowingFlagTarget = -1;
-		this.m_weaponRestrictionFlags = ANY_WEAPON;
-		this.m_attributeFlags = view_as<AttributeType>(0);
-		this.m_spawnPointEntity = -1;
+		m_waitTimer[this._client].Invalidate();
+		this.m_attempt = 0;
+		
+		this.ClearTeleportWhere();
+		
+		this.ClearEventChangeAttributes();
+		this.ClearTags();
+		this.ClearWeaponRestrictions();
+		this.ClearAllAttributes();
+		this.ClearIdleSound();
+		this.m_nDeployingBombState = TF_BOMB_DEPLOYING_NONE;
 		this.m_fModelScaleOverride = 0.0;
-		this.m_teleportWhereName.Clear();
-		this.m_tags.Clear();
-		this.m_eventChangeAttributes.Clear();
+		this.m_spawnPointEntity = -1;
+		this.m_hFollowingFlagTarget = -1;
 	}
 }
 

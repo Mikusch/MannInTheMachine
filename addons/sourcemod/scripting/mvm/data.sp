@@ -632,6 +632,12 @@ methodmap Player
 			return false;
 		}
 		
+		if (TF2Util_IsEntityWearable(weapon))
+		{
+			// Always allow wearable weapons
+			return false;
+		}
+		
 		// Get the weapon's loadout slot
 		int itemdef = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
 		int iLoadoutSlot = TF2Econ_GetItemLoadoutSlot(itemdef, TF2_GetPlayerClass(this._client));

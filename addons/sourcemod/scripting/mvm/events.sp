@@ -23,6 +23,7 @@ void Events_Initialize()
 	HookEvent("player_spawn", EventHook_PlayerSpawn);
 	HookEvent("player_death", EventHook_PlayerDeath);
 	HookEvent("player_team", EventHook_PlayerTeam);
+	HookEvent("post_inventory_application", EventHook_PostInventoryApplication);
 	HookEvent("player_builtobject", EventHook_PlayerBuiltObject);
 	HookEvent("teamplay_round_start", EventHook_TeamplayRoundStart);
 }
@@ -82,6 +83,28 @@ public void EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadc
 		SetVariantString("");
 		AcceptEntityInput(client, "SetCustomModel");
 	}
+}
+
+public void EventHook_PostInventoryApplication(Event event, const char[] name, bool dontBroadcast)
+{
+	int client = GetClientOfUserId(event.GetInt("userid"));
+	
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	{
+		// remove any weapons we aren't supposed to have
+		for (int iItemSlot = LOADOUT_POSITION_PRIMARY; iItemSlot < CLASS_LOADOUT_POSITION_COUNT; iItemSlot++)
+		{
+			int entity = TF2Util_GetPlayerLoadoutEntity(client, iItemSlot);
+			if (Player(client).IsWeaponRestricted(entity))
+			{
+				RemovePlayerItem(client, entity);
+				RemoveEntity(entity);
+			}
+		}
+	}
+	
+	// equip our required weapon
+	Player(client).EquipRequiredWeapon();
 }
 
 public void EventHook_PlayerBuiltObject(Event event, const char[] name, bool dontBroadcast)

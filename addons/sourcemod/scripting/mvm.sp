@@ -516,7 +516,6 @@ public void OnMapStart()
 public void OnClientPutInServer(int client)
 {
 	DHooks_HookClient(client);
-	SDKHooks_HookClient(client);
 	
 	Player(client).Reset();
 }
@@ -664,8 +663,6 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 		{
 			//Player(client).EngineerIdleUpdate();
 		}
-		
-		Player(client).EquipRequiredWeapon();
 	}
 }
 

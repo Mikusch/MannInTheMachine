@@ -955,7 +955,7 @@ methodmap Player
 						case 3:
 						{
 							// add critz
-							TF2_AddCondition(this._client, TFCond_Kritzkrieged);
+							TF2_AddCondition(this._client, TFCond_CritCanteen);
 							
 							// update the objective resource so clients have the information
 							SetEntProp(TFObjectiveResource(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 3);

@@ -201,19 +201,14 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		return MRES_Supercede;
 	}
 	
-	// TODO: Engineer hints
-	/*if (TFGameRules() && TFGameRules()- > GameRules_IsMannVsMachineMode())
+	if (GameRules_IsMannVsMachineMode())
 	{
-		if (m_class == TF_CLASS_ENGINEER && m_defaultAttributes.m_attributeFlags & CTFBot::TELEPORT_TO_HINT && CTFBotMvMEngineerHintFinder::FindHint(true, false) == false)
+		if (m_spawner.m_class == TFClass_Engineer && m_spawner.m_defaultAttributes.m_attributeFlags & TELEPORT_TO_HINT && SDKCall_FindHint(true, false) == false)
 		{
-			if (tf_populator_debug.GetBool())
-			{
-				DevMsg("CTFBotSpawner: %3.2f: *** No teleporter hint for engineer\n", gpGlobals- > curtime);
-			}
-			
-			return false;
+			ret.Value = false;
+			return MRES_Supercede;
 		}
-	}*/
+	}
 	
 	// find dead player we can re-use
 	int newPlayer = GetRobotToSpawn();

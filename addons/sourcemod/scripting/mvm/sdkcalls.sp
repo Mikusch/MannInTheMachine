@@ -30,6 +30,7 @@ static Handle g_SDKCallGetHealthMultiplier;
 static Handle g_SDKCallResetMap;
 static Handle g_SDKCallIsSpaceToSpawnHere;
 static Handle g_SDKCallWeaponSwitch;
+static Handle g_SDKCallFindHint;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
@@ -45,6 +46,7 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallResetMap = PrepSDKCall_ResetMap(gamedata);
 	g_SDKCallIsSpaceToSpawnHere = PrepSDKCall_IsSpaceToSpawnHere(gamedata);
 	g_SDKCallWeaponSwitch = PrepSDKCall_WeaponSwitch(gamedata);
+	g_SDKCallFindHint = PrepSDKCall_FindHint(gamedata);
 }
 
 static Handle PrepSDKCall_PostInventoryApplication(GameData gamedata)
@@ -194,6 +196,22 @@ static Handle PrepSDKCall_IsSpaceToSpawnHere(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_FindHint(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Static);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFBotMvMEngineerHintFinder::FindHint");
+	PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_ByValue);
+	PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_ByValue);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_ByRef, _, VENCODE_FLAG_COPYBACK);
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFBotMvMEngineerHintFinder::FindHint");
+	
+	return call;
+}
+
 static Handle PrepSDKCall_WeaponSwitch(GameData gamedata)
 {
 	StartPrepSDKCall(SDKCall_Entity);
@@ -278,6 +296,14 @@ bool SDKCall_IsSpaceToSpawnHere(const float where[3])
 {
 	if (g_SDKCallIsSpaceToSpawnHere)
 		return SDKCall(g_SDKCallIsSpaceToSpawnHere, where);
+	
+	return false;
+}
+
+bool SDKCall_FindHint(bool bShouldCheckForBlockingObjects, bool bAllowOutOfRangeNest, int& pFoundNest = -1)
+{
+	if (g_SDKCallFindHint)
+		return SDKCall(g_SDKCallFindHint, bShouldCheckForBlockingObjects, bAllowOutOfRangeNest, pFoundNest);
 	
 	return false;
 }

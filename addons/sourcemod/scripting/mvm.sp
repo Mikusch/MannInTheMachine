@@ -821,14 +821,8 @@ Action FireWeaponAtEnemy(int client, int &buttons)
 		return Plugin_Changed;
 	}
 	
-	if (TF2Util_GetWeaponSlot(myWeapon) == TFWeaponSlot_Melee || TF2Util_IsEntityWearable(myWeapon))
-	{
-		// always allow robots to use their melee or wearable items
-		return Plugin_Continue;
-	}
-	
 	int weaponID = TF2Util_GetWeaponID(myWeapon);
-	if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_LUNCHBOX)
+	if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_LUNCHBOX || weaponID == TF_WEAPON_BUFF_ITEM || weaponID == TF_WEAPON_BAT_WOOD || GetEntProp(client, Prop_Send, "m_bShieldEquipped"))
 	{
 		// allow robots to use certain weapons in spawn
 		return Plugin_Continue;

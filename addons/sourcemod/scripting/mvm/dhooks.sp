@@ -354,7 +354,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		}
 		
 		char defaultEventChangeAttributesName[64];
-		UTIL_StringtToCharArray(view_as<Address>(GetEntData(GetPopulator(), GetOffset("CPopulationManager::m_defaultEventChangeAttributesName"))), defaultEventChangeAttributesName, sizeof(defaultEventChangeAttributesName));
+		PtrToString(GetEntData(GetPopulator(), GetOffset("CPopulationManager::m_defaultEventChangeAttributesName")), defaultEventChangeAttributesName, sizeof(defaultEventChangeAttributesName));
 		
 		EventChangeAttributes_t pEventChangeAttributes = Player(newPlayer).GetEventChangeAttributes(defaultEventChangeAttributesName);
 		if (!pEventChangeAttributes)
@@ -531,7 +531,7 @@ public MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterf
 	Address iszVal = params.GetObjectVar(1, 0x8, ObjectValueType_Int);
 	
 	char pszEventName[64];
-	UTIL_StringtToCharArray(iszVal, pszEventName, sizeof(pszEventName));
+	PtrToString(iszVal, pszEventName, sizeof(pszEventName));
 	
 	if (GameRules_IsMannVsMachineMode())
 	{

@@ -108,26 +108,6 @@ int GetItemDefinitionByName(const char[] name)
 	return TF_ITEMDEF_DEFAULT;
 }
 
-int UTIL_StringtToCharArray(Address string_t, char[] buffer, int maxlen)
-{
-	if (string_t == Address_Null)
-		ThrowError("string_t address is null");
-	
-	if (maxlen <= 0)
-		ThrowError("Buffer size is negative or zero");
-	
-	int max = maxlen - 1;
-	int i = 0;
-	for (; i < max; i++)
-	{
-		if ((buffer[i] = Deref(string_t + view_as<Address>(i), NumberType_Int8)) == EOS)
-			return i;
-	}
-	
-	buffer[i] = EOS;
-	return i;
-}
-
 void IncrementMannVsMachineWaveClassCount(const char[] iszClassIconName, int iFlags)
 {
 	int obj = TFObjectiveResource();

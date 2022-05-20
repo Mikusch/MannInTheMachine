@@ -1136,7 +1136,7 @@ methodmap CTFBotSpawner
 	{
 		Address string_t = Deref(this + GetOffset("CTFBotSpawner::m_iszClassIcon"));
 		if (string_t != Address_Null)
-			UTIL_StringtToCharArray(string_t, buffer, maxlen);
+			PtrToString(string_t, buffer, maxlen);
 		else
 			strcopy(buffer, maxlen, g_aRawPlayerClassNamesShort[this.m_class]);
 	}

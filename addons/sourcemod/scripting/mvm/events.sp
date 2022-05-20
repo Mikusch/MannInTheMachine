@@ -32,9 +32,12 @@ public void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroad
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders && TF2_GetPlayerClass(client) == TFClass_Spy)
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
-		Player(client).SpyLeaveSpawnRoomStart();
+		if (TF2_GetPlayerClass(client) == TFClass_Spy)
+		{
+			SpyLeaveSpawnRoomStart(client);
+		}
 	}
 }
 

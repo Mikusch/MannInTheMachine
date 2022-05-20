@@ -31,10 +31,6 @@ static CountdownTimer m_autoJumpTimer[MAXPLAYERS + 1];
 static float m_flAutoJumpMin[MAXPLAYERS + 1];
 static float m_flAutoJumpMax[MAXPLAYERS + 1];
 
-// Spy Robots
-static CountdownTimer m_waitTimer[MAXPLAYERS + 1];
-static int m_attempt[MAXPLAYERS + 1];
-
 // Engineer Robots
 static ArrayList m_teleportWhereName[MAXPLAYERS + 1];
 
@@ -101,18 +97,6 @@ methodmap Player
 		public set(float flAutoJumpMax)
 		{
 			m_flAutoJumpMax[this._client] = flAutoJumpMax;
-		}
-	}
-	
-	property int m_attempt
-	{
-		public get()
-		{
-			return m_attempt[this._client];
-		}
-		public set(int attempt)
-		{
-			m_attempt[this._client] = attempt;
 		}
 	}
 	
@@ -973,154 +957,6 @@ methodmap Player
 		return false;
 	}
 	
-	public void SpyLeaveSpawnRoomStart()
-	{
-		// disguise as enemy team
-		this.DisguiseAsMemberOfEnemyTeam();
-		
-		// cloak
-		SDKCall_DoClassSpecialSkill(this._client);
-		
-		// wait a few moments to guarantee a minimum time between announcing Spies and their attack
-		m_waitTimer[this._client].Start(2.0 + GetRandomFloat(0.0, 1.0));
-		
-		this.m_attempt = 0;
-	}
-	
-	public void SpyLeaveSpawnRoomUpdate()
-	{
-		if (m_waitTimer[this._client].HasStarted() && m_waitTimer[this._client].IsElapsed())
-		{
-			int victim = -1;
-			
-			ArrayList enemyVector = new ArrayList(MaxClients);
-			
-			for (int client = 1; client <= MaxClients; client++)
-			{
-				if (!IsClientInGame(client))
-					continue;
-				
-				if (TF2_GetClientTeam(client) == TF2_GetClientTeam(this._client))
-					continue;
-				
-				if (!IsPlayerAlive(client))
-					continue;
-				
-				enemyVector.Push(client);
-			}
-			
-			// randomly shuffle our enemies
-			enemyVector.Sort(Sort_Random, Sort_Integer);
-			
-			int n = enemyVector.Length;
-			while (n > 1)
-			{
-				int k = GetRandomInt(0, n - 1);
-				n--;
-				
-				int tmp = enemyVector.Get(n);
-				enemyVector.Set(n, enemyVector.Get(k));
-				enemyVector.Set(k, tmp);
-			}
-			
-			for (int i = 0; i < enemyVector.Length; ++i)
-			{
-				if (this.TeleportNearVictim(enemyVector.Get(i), this.m_attempt))
-				{
-					victim = enemyVector.Get(i);
-					break;
-				}
-			}
-			
-			// if we didn't find a victim, try again in a bit
-			if (victim == -1)
-			{
-				m_waitTimer[this._client].Start(1.0);
-				
-				++this.m_attempt;
-				
-				delete enemyVector;
-				return;
-			}
-			
-			m_waitTimer[this._client].Invalidate();
-			delete enemyVector;
-			return;
-		}
-	}
-	
-	public bool TeleportNearVictim(int victim, int attempt)
-	{
-		if (victim == -1)
-		{
-			return false;
-		}
-		
-		if (!CBaseCombatCharacter(victim).GetLastKnownArea())
-		{
-			return false;
-		}
-		
-		ArrayList ambushVector = new ArrayList(); // vector of hidden but near-to-victim areas
-		
-		const float maxSurroundTravelRange = 6000.0;
-		
-		float surroundTravelRange = 1500.0 + 500.0 * attempt;
-		if (surroundTravelRange > maxSurroundTravelRange)
-		{
-			surroundTravelRange = maxSurroundTravelRange;
-		}
-		
-		// collect walkable areas surrounding this victim
-		SurroundingAreasCollector areaVector;
-		areaVector = TheNavMesh.CollectSurroundingAreas(CBaseCombatCharacter(victim).GetLastKnownArea(), surroundTravelRange, sv_stepsize.FloatValue, sv_stepsize.FloatValue);
-		
-		// keep subset that isn't visible to the victim's team
-		for (int i = 0; i < areaVector.Count(); i++)
-		{
-			CTFNavArea area = view_as<CTFNavArea>(areaVector.Get(i));
-			
-			if (!IsAreaValidForWanderingPopulation(area))
-			{
-				continue;
-			}
-			
-			if (IsAreaPotentiallyVisibleToTeam(area, TF2_GetClientTeam(victim)))
-			{
-				continue;
-			}
-			
-			ambushVector.Push(area);
-		}
-		
-		if (ambushVector.Length == 0)
-		{
-			delete ambushVector;
-			return false;
-		}
-		
-		int maxTries = Min(10, ambushVector.Length);
-		
-		for (int retry = 0; retry < maxTries; ++retry)
-		{
-			int which = GetRandomInt(0, ambushVector.Length - 1);
-			CNavArea area = ambushVector.Get(which);
-			float where[3];
-			area.GetCenter(where);
-			AddVectors(where, Vector(0.0, 0.0, sv_stepsize.FloatValue), where);
-			
-			if (SDKCall_IsSpaceToSpawnHere(where))
-			{
-				TeleportEntity(this._client, where, ZERO_VECTOR, ZERO_VECTOR);
-				delete ambushVector;
-				return true;
-			}
-		}
-		
-		delete ambushVector;
-		return false;
-	}
-	
 	public void DisguiseAsMemberOfEnemyTeam()
 	{
 		ArrayList enemyVector = new ArrayList(MaxClients);
@@ -1162,9 +998,6 @@ methodmap Player
 		
 		this.SetAutoJump(0.0, 0.0);
 		m_autoJumpTimer[this._client].Invalidate();
-		
-		m_waitTimer[this._client].Invalidate();
-		this.m_attempt = 0;
 		
 		this.ClearTeleportWhere();
 		

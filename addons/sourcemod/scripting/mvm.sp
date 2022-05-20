@@ -420,6 +420,7 @@ ConVar sv_stepsize;
 #include "mvm/sdkcalls.sp"
 #include "mvm/sdkhooks.sp"
 #include "mvm/deploy_bomb.sp"
+#include "mvm/spy.sp"
 
 public Plugin myinfo =
 {
@@ -614,7 +615,7 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 		
 		if (TF2_GetPlayerClass(client) == TFClass_Spy)
 		{
-			Player(client).SpyLeaveSpawnRoomUpdate();
+			SpyLeaveSpawnRoomUpdate(client);
 		}
 		else if (TF2_GetPlayerClass(client) == TFClass_Engineer)
 		{

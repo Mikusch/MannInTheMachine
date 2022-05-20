@@ -394,6 +394,7 @@ bool g_bAllowTeamChange;
 
 // Plugin ConVars
 ConVar mitm_robots_humans_ratio;
+ConVar mitm_spawn_hurry_time;
 
 // TF ConVars
 ConVar tf_avoidteammates_pushaway;
@@ -437,6 +438,7 @@ public void OnPluginStart()
 	g_offsets = new StringMap();
 	
 	mitm_robots_humans_ratio = CreateConVar("mitm_robots_humans_ratio", "4.33", "The ratio of invaders to defenders. Defender slots gets populated first.");
+	mitm_spawn_hurry_time = CreateConVar("mitm_spawn_hurry_time", "30.0", "Time that invaders have to leave their spawn.");
 	
 	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");
@@ -577,24 +579,27 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 			TF2_AddCondition(client, TFCond_UberchargedHidden, 0.5);
 			TF2_AddCondition(client, TFCond_UberchargeFading, 0.5);
 			
-			if (!Player(client).m_flRequiredSpawnLeaveTime)
+			if (mitm_spawn_hurry_time.FloatValue)
 			{
-				// minibosses and bomb carriers are slow and get more time to leave
-				float flTime = (GetEntProp(client, Prop_Send, "m_bIsMiniBoss") || SDKCall_HasTheFlag(client)) ? 45.0 : 30.0;
-				Player(client).m_flRequiredSpawnLeaveTime = GetGameTime() + flTime;
-			}
-			else
-			{
-				float flTimeLeft = Player(client).m_flRequiredSpawnLeaveTime - GetGameTime();
-				if (flTimeLeft <= 0.0)
+				if (!Player(client).m_flRequiredSpawnLeaveTime)
 				{
-					ForcePlayerSuicide(client);
+					// minibosses and bomb carriers are slow and get more time to leave
+					float flTime = (GetEntProp(client, Prop_Send, "m_bIsMiniBoss") || SDKCall_HasTheFlag(client)) ? mitm_spawn_hurry_time.FloatValue * 1.5 : mitm_spawn_hurry_time.FloatValue;
+					Player(client).m_flRequiredSpawnLeaveTime = GetGameTime() + flTime;
 				}
-				else if (flTimeLeft <= 15.0)
+				else
 				{
-					// motivate them to leave their spawn
-					SetHudTextParams(-1.0, 0.7, 0.1, 255, 255, 255, 255, _, 0.0, 0.0, 0.0);
-					ShowSyncHudText(client, g_WarningHudSync, "You have %1.2f seconds to leave the spawn area.", flTimeLeft);
+					float flTimeLeft = Player(client).m_flRequiredSpawnLeaveTime - GetGameTime();
+					if (flTimeLeft <= 0.0)
+					{
+						//ForcePlayerSuicide(client);
+					}
+					else if (flTimeLeft <= 15.0)
+					{
+						// motivate them to leave their spawn
+						SetHudTextParams(-1.0, 0.7, 0.1, 255, 255, 255, 255, _, 0.0, 0.0, 0.0);
+						ShowSyncHudText(client, g_WarningHudSync, "You have %1.2f seconds to leave the spawn area.", flTimeLeft);
+					}
 				}
 			}
 		}

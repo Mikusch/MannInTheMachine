@@ -22,6 +22,7 @@ void Console_Initialize()
 {
 	AddCommandListener(CommandListener_Suicide, "explode");
 	AddCommandListener(CommandListener_Suicide, "kill");
+	AddCommandListener(CommandListener_Build, "build");
 }
 
 public Action CommandListener_Suicide(int client, const char[] command, int argc)
@@ -31,6 +32,21 @@ public Action CommandListener_Suicide(int client, const char[] command, int argc
 		// invaders may not suicide
 		PrintCenterText(client, "You are not allowed to suicide as a robot.");
 		return Plugin_Handled;
+	}
+	
+	return Plugin_Continue;
+}
+
+public Action CommandListener_Build(int client, const char[] command, int argc)
+{
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	{
+		TFObjectType type = view_as<TFObjectType>(GetCmdArgInt(1));
+		TFObjectMode mode = view_as<TFObjectMode>(GetCmdArgInt(2));
+		
+		// invaders may not build teleporter entrances
+		if (type == TFObject_Teleporter && mode == TFObjectMode_Entrance)
+			return Plugin_Handled;
 	}
 	
 	return Plugin_Continue;

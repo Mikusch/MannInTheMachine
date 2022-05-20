@@ -89,11 +89,17 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 {
 	if (StrEqual(classname, "filter_tf_bot_has_tag"))
 	{
-		g_DHookPassesFilterImpl.HookEntity(Hook_Pre, entity, DHookCallback_PassesFilterImpl_Pre);
+		if (g_DHookPassesFilterImpl)
+		{
+			g_DHookPassesFilterImpl.HookEntity(Hook_Pre, entity, DHookCallback_PassesFilterImpl_Pre);
+		}
 	}
 	else if (StrEqual(classname, "item_teamflag"))
 	{
-		g_DHookPickUp.HookEntity(Hook_Pre, entity, DHookCallback_PickUp_Pre);
+		if (g_DHookPickUp)
+		{
+			g_DHookPickUp.HookEntity(Hook_Pre, entity, DHookCallback_PickUp_Pre);
+		}
 	}
 }
 
@@ -357,12 +363,6 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		}
 		Player(newPlayer).OnEventChangeAttributes(pEventChangeAttributes);
 		
-		int pFlag = Player(newPlayer).GetFlagToFetch();
-		if (pFlag != -1)
-		{
-			Player(newPlayer).m_hFollowingFlagTarget = pFlag;
-		}
-		
 		if (Player(newPlayer).HasAttribute(SPAWN_WITH_FULL_CHARGE))
 		{
 			// charge up our weapons
@@ -496,7 +496,6 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 	{
 		int player = m_justSpawnedVector.Get(i);
 		
-		Player(player).m_hFollowingFlagTarget = -1;
 		SetEntData(player, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true);
 		
 		char iszClassIconName[64];
@@ -808,8 +807,9 @@ public MRESReturn DHookCallback_EntSelectSpawnPoint_Pre(int player, DHookReturn 
 
 public MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret, DHookParam params)
 {
-	int pEntity = params.Get(2);
-	if (0 < pEntity < MaxClients && TF2_GetClientTeam(pEntity) == TFTeam_Invaders)
+	int entity = params.Get(2);
+	
+	if (0 < entity < MaxClients && TF2_GetClientTeam(entity) == TFTeam_Invaders)
 	{
 		bool m_bRequireAllTags = GetEntProp(filter, Prop_Data, "m_bRequireAllTags") != 0;
 		
@@ -823,7 +823,7 @@ public MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret
 		bool bPasses = false;
 		for (int i = 0; i < count; ++i)
 		{
-			if (Player(pEntity).HasTag(tags[i]))
+			if (Player(entity).HasTag(tags[i]))
 			{
 				bPasses = true;
 				if (!m_bRequireAllTags)
@@ -847,16 +847,14 @@ public MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret
 
 public MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
 {
-	int pPlayer = params.Get(1);
+	int player = params.Get(1);
 	
-	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(pPlayer) == TFTeam_Invaders)
+	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
-		Player(pPlayer).UpgradeStart();
-		
-		if (Player(pPlayer).HasAttribute(IGNORE_FLAG))
+		if (Player(player).HasAttribute(IGNORE_FLAG))
+		{
 			return MRES_Supercede;
-		
-		Player(pPlayer).m_hFollowingFlagTarget = item;
+		}
 	}
 	
 	return MRES_Handled;

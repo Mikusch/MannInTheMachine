@@ -26,6 +26,7 @@ void Events_Initialize()
 	HookEvent("post_inventory_application", EventHook_PostInventoryApplication);
 	HookEvent("player_builtobject", EventHook_PlayerBuiltObject);
 	HookEvent("teamplay_round_start", EventHook_TeamplayRoundStart);
+	HookEvent("teamplay_flag_event", EventHook_TeamplayFlagEvent);
 }
 
 public void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
@@ -149,6 +150,33 @@ public void EventHook_TeamplayRoundStart(Event event, const char[] name, bool do
 		tf_mvm_min_players_to_start.IntValue = 0;
 		
 		PrintToChatAll("Selecting a new set of defenders...");
+	}
+}
+
+public void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool dontBroadcast)
+{
+	int player = event.GetInt("player");
+	int eventtype = event.GetInt("eventtype");
+	
+	switch (eventtype)
+	{
+		case TF_FLAGEVENT_PICKEDUP:
+		{
+			if (!IsFakeClient(player))
+			{
+				// Prevent the bomb carrier from being pushed around
+				tf_avoidteammates_pushaway.ReplicateToClient(player, "1");
+			}
+			
+			Player(player).UpgradeStart();
+		}
+		case TF_FLAGEVENT_DROPPED:
+		{
+			if (!IsFakeClient(player))
+			{
+				tf_avoidteammates_pushaway.ReplicateToClient(player, "0");
+			}
+		}
 	}
 }
 

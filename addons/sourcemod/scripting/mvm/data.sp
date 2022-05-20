@@ -44,7 +44,6 @@ static char m_szIdleSound[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
 static float m_fModelScaleOverride[MAXPLAYERS + 1];
 static float m_flRequiredSpawnLeaveTime[MAXPLAYERS + 1];
 static int m_spawnPointEntity[MAXPLAYERS + 1];
-static int m_hFollowingFlagTarget[MAXPLAYERS + 1];
 
 // Non-resetting Properties
 static int m_invaderPriority[MAXPLAYERS + 1];
@@ -205,18 +204,6 @@ methodmap Player
 		public set(BombDeployingState_t nDeployingBombState)
 		{
 			m_nDeployingBombState[this._client] = nDeployingBombState;
-		}
-	}
-	
-	property int m_hFollowingFlagTarget
-	{
-		public get()
-		{
-			return m_hFollowingFlagTarget[this._client];
-		}
-		public set(int pFlag)
-		{
-			m_hFollowingFlagTarget[this._client] = pFlag;
 		}
 	}
 	
@@ -706,11 +693,6 @@ methodmap Player
 			{
 				return -1;
 			}
-			
-			if (this.m_hFollowingFlagTarget != -1)
-			{
-				return this.m_hFollowingFlagTarget;
-			}
 		}
 		
 		ArrayList flagsVector = new ArrayList();
@@ -1010,7 +992,6 @@ methodmap Player
 		this.m_fModelScaleOverride = 0.0;
 		this.m_flRequiredSpawnLeaveTime = 0.0;
 		this.m_spawnPointEntity = -1;
-		this.m_hFollowingFlagTarget = -1;
 	}
 }
 

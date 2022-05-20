@@ -531,15 +531,8 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 {
 	Action action = Plugin_Continue;
 	
-	// implements many functions from CTFBotMainAction::FireWeaponAtEnemy
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders && IsPlayerAlive(client))
 	{
-		if (!IsFakeClient(client))
-		{
-			// Prevent the bomb carrier from being pushed around
-			tf_avoidteammates_pushaway.ReplicateToClient(client, SDKCall_HasTheFlag(client) ? "0" : "1");
-		}
-		
 		if (Player(client).ShouldAutoJump())
 		{
 			buttons |= IN_JUMP;
@@ -619,7 +612,7 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 		}
 		else if (TF2_GetPlayerClass(client) == TFClass_Engineer)
 		{
-			//Player(client).EngineerIdleUpdate();
+			// TODO: Engineer Bot Idle
 		}
 	}
 }

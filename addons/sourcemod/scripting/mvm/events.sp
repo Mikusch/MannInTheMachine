@@ -164,7 +164,7 @@ public void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool don
 			if (!IsFakeClient(player))
 			{
 				// Prevent the bomb carrier from being pushed around
-				tf_avoidteammates_pushaway.ReplicateToClient(player, "1");
+				tf_avoidteammates_pushaway.ReplicateToClient(player, "0");
 			}
 			
 			Player(player).UpgradeStart();
@@ -173,7 +173,7 @@ public void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool don
 		{
 			if (!IsFakeClient(player))
 			{
-				tf_avoidteammates_pushaway.ReplicateToClient(player, "0");
+				tf_avoidteammates_pushaway.ReplicateToClient(player, "1");
 			}
 		}
 	}

@@ -67,6 +67,7 @@ int CreateRobotItem(int player, int defindex)
 	
 	char classname[64];
 	TF2Econ_GetItemClassName(defindex, classname, sizeof(classname));
+	TF2Econ_TranslateWeaponEntForClass(classname, sizeof(classname), TF2_GetPlayerClass(player));
 	
 	TF2Items_SetClassname(hItem, classname);
 	TF2Items_SetItemIndex(hItem, defindex);

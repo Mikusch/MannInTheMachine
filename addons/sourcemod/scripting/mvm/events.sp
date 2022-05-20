@@ -145,9 +145,8 @@ public void EventHook_TeamplayRoundStart(Event event, const char[] name, bool do
 	}
 	else
 	{
-		g_bInWaitingForPlayers = false;
-		
 		tf_mvm_min_players_to_start.IntValue = 0;
+		g_bInWaitingForPlayers = false;
 		
 		PrintToChatAll("Selecting a new set of defenders...");
 	}
@@ -186,6 +185,7 @@ public Action Timer_OnWaitingForPlayersEnd(Handle timer)
 		return Plugin_Continue;
 	
 	tf_mvm_min_players_to_start.IntValue = 0;
+	g_bInWaitingForPlayers = false;
 	
 	SDKCall_ResetMap(GetPopulator());
 	

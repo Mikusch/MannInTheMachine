@@ -338,6 +338,27 @@ enum
 	CLASS_LOADOUT_POSITION_COUNT,
 };
 
+enum medigun_weapontypes_t
+{
+	MEDIGUN_STANDARD = 0,
+	MEDIGUN_UBER,
+	MEDIGUN_QUICKFIX,
+	MEDIGUN_RESIST,
+};
+
+enum medigun_charge_types
+{
+	MEDIGUN_CHARGE_INVALID = -1,
+	MEDIGUN_CHARGE_INVULN = 0,
+	MEDIGUN_CHARGE_CRITICALBOOST,
+	MEDIGUN_CHARGE_MEGAHEAL,
+	MEDIGUN_CHARGE_BULLET_RESIST,
+	MEDIGUN_CHARGE_BLAST_RESIST,
+	MEDIGUN_CHARGE_FIRE_RESIST,
+
+	MEDIGUN_NUM_CHARGE_TYPES,
+};
+
 enum struct CountdownTimer
 {
 	float timestamp;
@@ -827,6 +848,42 @@ Action FireWeaponAtEnemy(int client, int &buttons)
 	}
 	
 	int weaponID = TF2Util_GetWeaponID(myWeapon);
+	
+	// vaccinator resistance preference for robot medics
+	if (weaponID == TF_WEAPON_MEDIGUN)
+	{
+		ArrayList attribs = TF2Econ_GetItemStaticAttributes(GetEntProp(myWeapon, Prop_Send, "m_iItemDefinitionIndex"));
+		int index = attribs.FindValue(144); // set_weapon_mode
+		if (index != -1 && attribs.Get(index, 1) == float(MEDIGUN_RESIST))
+		{
+			bool preferBullets = Player(client).HasAttribute(PREFER_VACCINATOR_BULLETS);
+			bool preferBlast = Player(client).HasAttribute(PREFER_VACCINATOR_BLAST);
+			bool preferFire = Player(client).HasAttribute(PREFER_VACCINATOR_FIRE);
+			
+			if (preferBullets)
+			{
+				SetEntProp(myWeapon, Prop_Send, "m_nChargeResistType", MEDIGUN_CHARGE_BULLET_RESIST + MEDIGUN_CHARGE_BULLET_RESIST);
+			}
+			else if (preferBlast)
+			{
+				SetEntProp(myWeapon, Prop_Send, "m_nChargeResistType", MEDIGUN_CHARGE_BLAST_RESIST + MEDIGUN_CHARGE_BULLET_RESIST);
+			}
+			else if (preferFire)
+			{
+				SetEntProp(myWeapon, Prop_Send, "m_nChargeResistType", MEDIGUN_CHARGE_FIRE_RESIST + MEDIGUN_CHARGE_BULLET_RESIST);
+			}
+			
+			if (preferBullets || preferBlast || preferFire)
+			{
+				delete attribs;
+				
+				buttons &= ~IN_RELOAD;
+				return Plugin_Changed;
+			}
+		}
+		delete attribs;
+	}
+	
 	if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_LUNCHBOX || weaponID == TF_WEAPON_BUFF_ITEM || weaponID == TF_WEAPON_BAT_WOOD || GetEntProp(client, Prop_Send, "m_bShieldEquipped"))
 	{
 		// allow robots to use certain weapons in spawn

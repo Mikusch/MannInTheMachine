@@ -418,6 +418,14 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 			result.AddToTail(GetEntityHandle(newPlayer));
 		}
 		
+		if (GameRules_IsMannVsMachineMode())
+		{
+			if (GetEntProp(newPlayer, Prop_Send, "m_bIsMiniBoss"))
+			{
+				HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_GIANT_CALLOUT", TFTeam_Defenders);
+			}
+		}
+		
 		// Populated from CSpawnLocation::FindSpawnLocation detour.
 		// We can't use CWaveSpawnPopulator::m_spawnLocationResult because it gets overridden in some cases.
 		if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)

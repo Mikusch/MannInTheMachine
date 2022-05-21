@@ -260,7 +260,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		
 		char m_iszClassIcon[64];
 		m_spawner.GetClassIcon(m_iszClassIcon, sizeof(m_iszClassIcon));
-		LogMessage("m_iszClassIcon: %s", m_iszClassIcon);
+		Player(newPlayer).SetClassIcon(m_iszClassIcon);
 		
 		SetEntProp(newPlayer, Prop_Data, "m_bAllowInstantSpawn", true);
 		FakeClientCommand(newPlayer, "joinclass %s", g_aRawPlayerClassNames[m_spawner.m_class]);
@@ -476,7 +476,7 @@ public MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 		SetEntData(player, GetOffset("CTFPlayer::m_pWaveSpawnPopulator"), pThis);
 		
 		char iszClassIconName[64];
-		GetEntPropString(player, Prop_Send, "m_iszClassIcon", iszClassIconName, sizeof(iszClassIconName));
+		Player(player).GetClassIcon(iszClassIconName, sizeof(iszClassIconName));
 		
 		// Allows client UI to know if a specific spawner is active
 		SetMannVsMachineWaveClassActive(iszClassIconName);
@@ -579,7 +579,7 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 		SetEntData(player, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true);
 		
 		char iszClassIconName[64];
-		GetEntPropString(player, Prop_Send, "m_iszClassIcon", iszClassIconName, sizeof(iszClassIconName));
+		Player(player).GetClassIcon(iszClassIconName, sizeof(iszClassIconName));
 		
 		int iFlags = MVM_CLASS_FLAG_MISSION;
 		if (GetEntProp(player, Prop_Send, "m_bIsMiniBoss"))

@@ -612,6 +612,9 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 			TF2_AddCondition(client, TFCond_UberchargedHidden, 0.5);
 			TF2_AddCondition(client, TFCond_UberchargeFading, 0.5);
 			
+			// force bots to walk out of spawn
+			TF2Attrib_SetByName(client, "no_jump", 1.0);
+			
 			if (mitm_spawn_hurry_time.FloatValue)
 			{
 				if (!Player(client).m_flRequiredSpawnLeaveTime)
@@ -625,7 +628,7 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 					float flTimeLeft = Player(client).m_flRequiredSpawnLeaveTime - GetGameTime();
 					if (flTimeLeft <= 0.0)
 					{
-						//ForcePlayerSuicide(client);
+						ForcePlayerSuicide(client);
 					}
 					else if (flTimeLeft <= 15.0)
 					{
@@ -640,6 +643,8 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 		{
 			// not in spawn, reset their time
 			Player(client).m_flRequiredSpawnLeaveTime = 0.0;
+			
+			TF2Attrib_RemoveByName(client, "no_jump");
 		}
 		
 		int flag = Player(client).GetFlagToFetch();
@@ -864,9 +869,9 @@ Action FireWeaponAtEnemy(int client, int &buttons)
 	// vaccinator resistance preference for robot medics
 	if (weaponID == TF_WEAPON_MEDIGUN)
 	{
-		ArrayList attribs = TF2Econ_GetItemStaticAttributes(GetEntProp(myWeapon, Prop_Send, "m_iItemDefinitionIndex"));
-		int index = attribs.FindValue(144); // set_weapon_mode
-		if (index != -1 && attribs.Get(index, 1) == float(MEDIGUN_RESIST))
+		ArrayList attributes = TF2Econ_GetItemStaticAttributes(GetEntProp(myWeapon, Prop_Send, "m_iItemDefinitionIndex"));
+		int index = attributes.FindValue(144); // set_weapon_mode
+		if (index != -1 && attributes.Get(index, 1) == float(MEDIGUN_RESIST))
 		{
 			bool preferBullets = Player(client).HasAttribute(PREFER_VACCINATOR_BULLETS);
 			bool preferBlast = Player(client).HasAttribute(PREFER_VACCINATOR_BLAST);
@@ -887,40 +892,43 @@ Action FireWeaponAtEnemy(int client, int &buttons)
 			
 			if (preferBullets || preferBlast || preferFire)
 			{
-				delete attribs;
+				delete attributes;
 				
+				// prevent switching resistance types
 				buttons &= ~IN_RELOAD;
 				return Plugin_Changed;
 			}
 		}
-		delete attribs;
+		delete attributes;
 	}
 	
 	if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_LUNCHBOX || weaponID == TF_WEAPON_BUFF_ITEM || weaponID == TF_WEAPON_BAT_WOOD || GetEntProp(client, Prop_Send, "m_bShieldEquipped"))
 	{
-		// allow robots to use certain weapons in spawn
+		// allow robots to use certain weapons at all time
 		return Plugin_Continue;
 	}
 	
 	CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(client).GetLastKnownArea());
 	TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(client) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
 	
-	static bool m_isInSpawn[MAXPLAYERS + 1];
+	static bool s_isInSpawn[MAXPLAYERS + 1];
 	
 	if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
 	{
-		// disable attack for this weapon
+		s_isInSpawn[client] = true;
+		
+		// disable attacking
 		TF2Attrib_SetByName(myWeapon, "no_attack", 1.0);
 		TF2Attrib_SetByName(myWeapon, "provide on active", 1.0);
+		
 		buttons &= ~IN_ATTACK;
 		buttons &= ~IN_ATTACK2;
-		
-		m_isInSpawn[client] = true;
 		return Plugin_Changed;
 	}
-	
-	if (m_isInSpawn[client])
+	else if (s_isInSpawn[client])
 	{
+		s_isInSpawn[client] = false;
+		
 		// the active weapon might have switched, remove attributes from all
 		int numWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
 		for (int i = 0; i < numWeapons; i++)
@@ -932,9 +940,6 @@ Action FireWeaponAtEnemy(int client, int &buttons)
 			TF2Attrib_RemoveByName(weapon, "no_attack");
 			TF2Attrib_RemoveByName(weapon, "provide on active");
 		}
-		
-		// we have left the spawn
-		m_isInSpawn[client] = false;
 	}
 	
 	return Plugin_Continue;

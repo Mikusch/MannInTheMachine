@@ -627,9 +627,10 @@ methodmap Player
 			return false;
 		}
 		
-		if (TF2Util_IsEntityWearable(weapon) || TF2Util_GetWeaponID(weapon) == TF_WEAPON_LUNCHBOX)
+		int weaponID = TF2Util_GetWeaponID(weapon);
+		if (TF2Util_IsEntityWearable(weapon) || weaponID == TF_WEAPON_BUFF_ITEM || weaponID == TF_WEAPON_LUNCHBOX)
 		{
-			// Always allow wearable weapons and lunchbox items
+			// Always allow wearable weapons and buff/lunchbox items
 			return false;
 		}
 		

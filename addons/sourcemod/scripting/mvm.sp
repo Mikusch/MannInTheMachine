@@ -359,6 +359,17 @@ enum medigun_charge_types
 	MEDIGUN_NUM_CHARGE_TYPES,
 };
 
+enum MissionType
+{
+	NO_MISSION = 0,
+	MISSION_SEEK_AND_DESTROY,		// focus on finding and killing enemy players
+	MISSION_DESTROY_SENTRIES,		// focus on finding and destroying enemy sentry guns (and buildings)
+	MISSION_SNIPER,					// maintain teams of snipers harassing the enemy
+	MISSION_SPY,					// maintain teams of spies harassing the enemy
+	MISSION_ENGINEER,				// maintain engineer nests for harassing the enemy
+	MISSION_REPROGRAMMED,			// MvM: robot has been hacked and will do bad things to their team
+};
+
 enum struct CountdownTimer
 {
 	float timestamp;
@@ -496,6 +507,7 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CTFBotSpawner::m_name");
 		SetOffset(gamedata, "CTFBotSpawner::m_teleportWhereName");
 		SetOffset(gamedata, "CTFBotSpawner::m_defaultAttributes");
+		SetOffset(gamedata, "CMissionPopulator::m_cooldownDuration");
 		SetOffset(gamedata, "CWaveSpawnPopulator::m_bLimitedSupport");
 		SetOffset(gamedata, "CPopulationManager::m_defaultEventChangeAttributesName");
 		

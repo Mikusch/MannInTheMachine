@@ -42,6 +42,7 @@ static AttributeType m_attributeFlags[MAXPLAYERS + 1];
 static BombDeployingState_t m_nDeployingBombState[MAXPLAYERS + 1];
 static char m_szIdleSound[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
 static float m_fModelScaleOverride[MAXPLAYERS + 1];
+static MissionType m_mission[MAXPLAYERS + 1];
 static float m_flRequiredSpawnLeaveTime[MAXPLAYERS + 1];
 static int m_spawnPointEntity[MAXPLAYERS + 1];
 
@@ -156,6 +157,18 @@ methodmap Player
 		public set(float fScale)
 		{
 			m_fModelScaleOverride[this._client] = fScale;
+		}
+	}
+	
+	property MissionType m_mission
+	{
+		public get()
+		{
+			return m_mission[this._client];
+		}
+		public set(MissionType mission)
+		{
+			m_mission[this._client] = mission;
 		}
 	}
 	
@@ -324,6 +337,16 @@ methodmap Player
 		this.m_fModelScaleOverride = fScale;
 		
 		SetModelScale(this._client, this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : 1.0);
+	}
+	
+	public bool HasMission(MissionType mission)
+	{
+		return this.m_mission == mission ? true : false;
+	}
+	
+	public void SetMission(MissionType mission)
+	{
+		this.m_mission = mission;
 	}
 	
 	public void SetTeleportWhere(CUtlVector teleportWhereName)
@@ -1141,6 +1164,22 @@ methodmap CTFBotSpawner
 			strcopy(buffer, maxlen, g_aRawPlayerClassNamesShort[this.m_class]);
 	}
 };
+
+methodmap CMissionPopulator
+{
+	public CMissionPopulator(Address address)
+	{
+		return view_as<CMissionPopulator>(address);
+	}
+	
+	property float m_cooldownDuration
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CMissionPopulator::m_cooldownDuration"));
+		}
+	}
+}
 
 methodmap CObjectTeleporter
 {

@@ -30,6 +30,11 @@ static ArrayList m_justSpawnedVector;
 static int g_InternalSpawnPoint = INVALID_ENT_REFERENCE;
 static SpawnLocationResult s_spawnLocationResult = SPAWN_LOCATION_NOT_FOUND;
 
+// CMissionPopulator
+static CountdownTimer m_cooldownTimer;
+static int s_activeMissionMembers;
+static int s_nSniperCount;
+
 void DHooks_Initialize(GameData gamedata)
 {
 	m_justSpawnedVector = new ArrayList(MaxClients);
@@ -40,7 +45,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CTFBotSpawner::Spawn", DHookCallback_Spawn_Pre);
 	CreateDynamicDetour(gamedata, "CPopulationManager::Update", DHookCallback_PopulationManagerUpdate_Pre, DHookCallback_PopulationManagerUpdate_Post);
 	CreateDynamicDetour(gamedata, "CWaveSpawnPopulator::Update", _, DHookCallback_WaveSpawnPopulatorUpdate_Post);
-	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMission", _, DHookCallback_MissionPopulatorUpdateMission_Post);
+	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMission", DHookCallback_MissionPopulatorUpdateMission_Pre, DHookCallback_MissionPopulatorUpdateMission_Post);
 	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMissionDestroySentries", DHookCallback_UpdateMissionDestroySentries_Pre);
 	CreateDynamicDetour(gamedata, "CPointPopulatorInterface::InputChangeBotAttributes", DHookCallback_InputChangeBotAttributes_Pre);
 	CreateDynamicDetour(gamedata, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_GetTeamAssignmentOverride_Pre, DHookCallback_GetTeamAssignmentOverride_Post);
@@ -498,12 +503,79 @@ public MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 	return MRES_Supercede;
 }
 
+public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Pre(Address pThis, DHookReturn ret, DHookParam params)
+{
+	MissionType mission = params.Get(1);
+	
+	ArrayList livePlayerVector = new ArrayList(MaxClients);
+	
+	for (int client = 1; client <= MaxClients; ++client)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (TF2_GetClientTeam(client) != TFTeam_Invaders)
+			continue;
+		
+		if (!IsPlayerAlive(client))
+			continue;
+		
+		livePlayerVector.Push(client);
+	}
+	
+	s_activeMissionMembers = 0;
+	
+	for (int i = 0; i < livePlayerVector.Length; i++)
+	{
+		int player = livePlayerVector.Get(i);
+		if (Player(player).HasMission(mission))
+		{
+			++s_activeMissionMembers;
+		}
+	}
+	
+	if (s_activeMissionMembers > 0)
+	{
+		// wait until prior mission is dead
+		
+		// cooldown is time after death of last mission member
+		m_cooldownTimer.Start(CMissionPopulator(pThis).m_cooldownDuration);
+		
+		delete livePlayerVector;
+		ret.Value = false;
+		return MRES_Supercede;
+	}
+	
+	if (!m_cooldownTimer.IsElapsed())
+	{
+		delete livePlayerVector;
+		ret.Value = false;
+		return MRES_Supercede;
+	}
+	
+	s_nSniperCount = 0;
+	for (int i = 0; i < livePlayerVector.Length; i++)
+	{
+		int liveBot = livePlayerVector.Get(i);
+		if (TF2_GetPlayerClass(liveBot) == TFClass_Sniper)
+		{
+			s_nSniperCount++;
+		}
+	}
+	
+	delete livePlayerVector;
+	return MRES_Handled;
+}
+
 public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis, DHookReturn ret, DHookParam params)
 {
+	MissionType mission = params.Get(1);
+	
 	for (int i = 0; i < m_justSpawnedVector.Length; i++)
 	{
 		int player = m_justSpawnedVector.Get(i);
 		
+		Player(player).SetMission(mission);
 		SetEntData(player, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true);
 		
 		char iszClassIconName[64];
@@ -519,6 +591,21 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 			iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
 		}
 		IncrementMannVsMachineWaveClassCount(iszClassIconName, iFlags);
+		
+		// Response rules stuff for MvM
+		if (GameRules_IsMannVsMachineMode())
+		{
+			// Only have defenders announce the arrival of the first enemy Sniper
+			if (Player(player).HasMission(MISSION_SNIPER))
+			{
+				s_nSniperCount++;
+				
+				if (s_nSniperCount == 1)
+				{
+					HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_SNIPER_CALLOUT", TFTeam_Defenders);
+				}
+			}
+		}
 	}
 	
 	// After we are done, clear the vector

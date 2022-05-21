@@ -570,6 +570,15 @@ public void OnClientPutInServer(int client)
 	Player(client).Reset();
 }
 
+public void OnClientDisconnect(int client)
+{
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	{
+		// progress the wave and drop their cash before disconnect
+		ForcePlayerSuicide(client);
+	}
+}
+
 public void OnEntityCreated(int entity, const char[] classname)
 {
 	DHooks_OnEntityCreated(entity, classname);

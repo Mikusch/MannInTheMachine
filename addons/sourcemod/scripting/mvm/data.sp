@@ -629,10 +629,19 @@ methodmap Player
 			return false;
 		}
 		
-		if (TF2Util_IsEntityWearable(weapon) || TF2Util_GetWeaponID(weapon) == TF_WEAPON_BUFF_ITEM || TF2Util_GetWeaponID(weapon) == TF_WEAPON_LUNCHBOX)
+		if (TF2Util_IsEntityWearable(weapon))
 		{
-			// Always allow wearable weapons and buff/lunchbox items
+			// Always allow wearable weapons
 			return false;
+		}
+		else
+		{
+			int weaponId = TF2Util_GetWeaponID(weapon);
+			if (weaponId == TF_WEAPON_BUFF_ITEM || weaponId == TF_WEAPON_LUNCHBOX || weaponId == TF_WEAPON_PARACHUTE)
+			{
+				// Always allow specific passive weapons
+				return false;
+			}
 		}
 		
 		// Get the weapon's loadout slot

@@ -598,8 +598,6 @@ public void OnEntityCreated(int entity, const char[] classname)
 
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int & subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
 {
-	Action action = Plugin_Continue;
-	
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders && IsPlayerAlive(client))
 	{
 		if (Player(client).ShouldAutoJump())
@@ -607,10 +605,12 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 			buttons |= IN_JUMP;
 		}
 		
-		action = FireWeaponAtEnemy(client, buttons);
+		FireWeaponAtEnemy(client, buttons);
+		
+		return Plugin_Changed;
 	}
 	
-	return action;
+	return Plugin_Continue;
 }
 
 public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
@@ -667,6 +667,41 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 			TF2Attrib_RemoveByName(client, "no_jump");
 		}
 		
+		// Everything below is similar to code in CTFBotScenarioMonitor::DesiredScenarioAndClassAction
+		
+		if (TF2_GetPlayerClass(client) == TFClass_Spy)
+		{
+			SpyLeaveSpawnRoomUpdate(client);
+			return;
+		}
+		
+		if (TF2_GetPlayerClass(client) == TFClass_Medic)
+		{
+			// if I'm being healed by another medic, I should do something else other than healing
+			bool bIsBeingHealedByAMedic = false;
+			int nNumHealers = GetEntProp(client, Prop_Send, "m_nNumHealers");
+			for (int i = 0; i < nNumHealers; ++i)
+			{
+				int healer = TF2Util_GetPlayerHealer(client, i);
+				if (0 < healer < MaxClients)
+				{
+					bIsBeingHealedByAMedic = true;
+					break;
+				}
+			}
+			
+			if (!bIsBeingHealedByAMedic)
+			{
+				return;
+			}
+		}
+		
+		if (TF2_GetPlayerClass(client) == TFClass_Engineer)
+		{
+			// TODO: Engineer Bot Idle
+			return;
+		}
+		
 		int flag = Player(client).GetFlagToFetch();
 		if (flag != -1 && GetEntProp(flag, Prop_Send, "m_nFlagStatus") == TF_FLAGINFO_HOME)
 		{
@@ -681,15 +716,6 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 		{
 			// Taunting for our new upgrade
 			FakeClientCommand(client, "taunt");
-		}
-		
-		if (TF2_GetPlayerClass(client) == TFClass_Spy)
-		{
-			SpyLeaveSpawnRoomUpdate(client);
-		}
-		else if (TF2_GetPlayerClass(client) == TFClass_Engineer)
-		{
-			// TODO: Engineer Bot Idle
 		}
 	}
 }
@@ -835,17 +861,17 @@ void OnBotTeleported(int bot)
 	}
 }
 
-Action FireWeaponAtEnemy(int client, int &buttons)
+void FireWeaponAtEnemy(int client, int &buttons)
 {
 	if (Player(client).HasAttribute(SUPPRESS_FIRE))
-		return Plugin_Continue;
+		return;
 	
 	if (Player(client).HasAttribute(IGNORE_ENEMIES))
-		return Plugin_Continue;
+		return;
 	
 	int myWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 	if (myWeapon == -1)
-		return Plugin_Continue;
+		return;
 	
 	if (Player(client).IsBarrageAndReloadWeapon(myWeapon))
 	{
@@ -867,7 +893,7 @@ Action FireWeaponAtEnemy(int client, int &buttons)
 					
 					buttons &= ~IN_ATTACK;
 					buttons &= ~IN_ATTACK2;
-					return Plugin_Changed;
+					return;
 				}
 				
 				TF2Attrib_RemoveByName(myWeapon, "no_attack");
@@ -882,7 +908,7 @@ Action FireWeaponAtEnemy(int client, int &buttons)
 	if (Player(client).HasAttribute(ALWAYS_FIRE_WEAPON))
 	{
 		buttons |= IN_ATTACK;
-		return Plugin_Changed;
+		return;
 	}
 	
 	int weaponID = TF2Util_GetWeaponID(myWeapon);
@@ -917,7 +943,7 @@ Action FireWeaponAtEnemy(int client, int &buttons)
 				
 				// prevent switching resistance types
 				buttons &= ~IN_RELOAD;
-				return Plugin_Changed;
+				return;
 			}
 		}
 		delete attributes;
@@ -926,7 +952,7 @@ Action FireWeaponAtEnemy(int client, int &buttons)
 	if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_LUNCHBOX || weaponID == TF_WEAPON_BUFF_ITEM || weaponID == TF_WEAPON_BAT_WOOD || GetEntProp(client, Prop_Send, "m_bShieldEquipped"))
 	{
 		// allow robots to use certain weapons at all time
-		return Plugin_Continue;
+		return;
 	}
 	
 	CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(client).GetLastKnownArea());
@@ -944,7 +970,7 @@ Action FireWeaponAtEnemy(int client, int &buttons)
 		
 		buttons &= ~IN_ATTACK;
 		buttons &= ~IN_ATTACK2;
-		return Plugin_Changed;
+		return;
 	}
 	else if (s_isInSpawn[client])
 	{
@@ -962,6 +988,4 @@ Action FireWeaponAtEnemy(int client, int &buttons)
 			TF2Attrib_RemoveByName(weapon, "provide on active");
 		}
 	}
-	
-	return Plugin_Continue;
 }

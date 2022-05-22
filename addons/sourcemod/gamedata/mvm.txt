@@ -21,6 +21,11 @@
 	{
 		"Signatures"
 		{
+			"CTFBotSpawner::GetClassIcon"
+			{
+				"linux"		"@_ZN13CTFBotSpawner12GetClassIconEi"
+				// "windows"	"\x55\x8B\xEC\x8B\x51\x0C\x85\xD2"
+			}
 			"CTFGCServerSystem::PreClientUpdate"
 			{
 				"linux"		"@_ZN17CTFGCServerSystem15PreClientUpdateEv"
@@ -154,6 +159,11 @@
 		}
 		"Offsets"
 		{
+			"CTFBotSpawner::GetClassIcon"
+			{
+				// "linux"		"7"
+				"windows"	"6"
+			}
 			"CTFPlayer::Event_Killed"
 			{
 				"linux"		"67"
@@ -218,11 +228,6 @@
 			{
 				"linux"		"8"
 				"windows"	"8"
-			}
-			"CTFBotSpawner::m_iszClassIcon"
-			{
-				"linux"		"12"
-				"windows"	"12"
 			}
 			"CTFBotSpawner::m_health"
 			{

@@ -18,6 +18,8 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+static Handle g_SDKCallGetClassIconLinux;
+static Handle g_SDKCallGetClassIconWindows;
 static Handle g_SDKCallPostInventoryApplication;
 static Handle g_SDKCallUpdateModelToClass;
 static Handle g_SDKCallHasTheFlag;
@@ -34,6 +36,17 @@ static Handle g_SDKCallFindHint;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
+	g_SDKCallGetClassIconLinux = PrepSDKCall_GetClassIcon_Linux(gamedata);
+	if (!g_SDKCallGetClassIconLinux)
+	{
+		g_SDKCallGetClassIconWindows = PrepSDKCall_GetClassIcon_Windows(gamedata);
+	}
+	
+	if (!g_SDKCallGetClassIconLinux && !g_SDKCallGetClassIconWindows)
+	{
+		LogMessage("Failed to create SDKCall: CTFBotSpawner::GetClassIcon");
+	}
+	
 	g_SDKCallPostInventoryApplication = PrepSDKCall_PostInventoryApplication(gamedata);
 	g_SDKCallUpdateModelToClass = PrepSDKCall_UpdateModelToClass(gamedata);
 	g_SDKCallHasTheFlag = PrepSDKCall_HasTheFlag(gamedata);
@@ -47,6 +60,34 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallIsSpaceToSpawnHere = PrepSDKCall_IsSpaceToSpawnHere(gamedata);
 	g_SDKCallWeaponSwitch = PrepSDKCall_WeaponSwitch(gamedata);
 	g_SDKCallFindHint = PrepSDKCall_FindHint(gamedata);
+}
+
+static Handle PrepSDKCall_GetClassIcon_Linux(GameData gamedata)
+{
+	// linux signature. this uses a hidden pointer passed in before `this` on the stack
+	// so we'll do our best with static since SM doesn't support that calling convention
+	// no subclasses override this virtual function so we'll just call it directly
+	StartPrepSDKCall(SDKCall_Static);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFBotSpawner::GetClassIcon");
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Pointer); // return value
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // thisptr
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // nSpawnNum
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain); // return string_t
+	
+	return EndPrepSDKCall();
+}
+
+static Handle PrepSDKCall_GetClassIcon_Windows(GameData gamedata)
+{
+	// windows vcall. this one also uses a hidden pointer, but it's passed as the first param
+	// `this` remains unchanged so we can still use a vcall
+	StartPrepSDKCall(SDKCall_Raw);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTFBotSpawner::GetClassIcon");
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Pointer); // return value
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // nSpawnNum
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain); // return string_t
+	
+	return EndPrepSDKCall();
 }
 
 static Handle PrepSDKCall_PostInventoryApplication(GameData gamedata)
@@ -225,6 +266,24 @@ static Handle PrepSDKCall_WeaponSwitch(GameData gamedata)
 		LogMessage("Failed to create SDKCall: CTFPlayer::Weapon_Switch");
 	
 	return call;
+}
+
+Address SDKCall_GetClassIcon(any spawner, int nSpawnNum = -1)
+{
+	Address result;
+	
+	if (g_SDKCallGetClassIconWindows)
+	{
+		// windows version; hidden ptr pushes params, `this` still in correct register
+		return SDKCall(g_SDKCallGetClassIconWindows, spawner, result, nSpawnNum);
+	}
+	else if (g_SDKCallGetClassIconLinux)
+	{
+		// linux version; hidden ptr moves the stack and this forward
+		return SDKCall(g_SDKCallGetClassIconLinux, result, spawner, nSpawnNum);
+	}
+	
+	return Address_Null;
 }
 
 void SDKCall_PostInventoryApplication(int player)

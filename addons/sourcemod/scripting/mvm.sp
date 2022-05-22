@@ -498,7 +498,6 @@ public void OnPluginStart()
 		SDKCalls_Initialize(gamedata);
 		
 		SetOffset(gamedata, "CTFBotSpawner::m_class");
-		SetOffset(gamedata, "CTFBotSpawner::m_iszClassIcon");
 		SetOffset(gamedata, "CTFBotSpawner::m_health");
 		SetOffset(gamedata, "CTFBotSpawner::m_scale");
 		SetOffset(gamedata, "CTFBotSpawner::m_flAutoJumpMin");

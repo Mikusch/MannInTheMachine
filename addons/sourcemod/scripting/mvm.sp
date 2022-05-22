@@ -665,7 +665,7 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 			}
 		}
 		
-		if (SDKCall_HasTheFlag(client) && Player(client).UpgradeOverTime())
+		if (SDKCall_HasTheFlag(client) && Player(client).m_nDeployingBombState == TF_BOMB_DEPLOYING_NONE && Player(client).UpgradeOverTime())
 		{
 			// Taunting for our new upgrade
 			FakeClientCommand(client, "taunt");

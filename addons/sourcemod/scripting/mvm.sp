@@ -853,6 +853,7 @@ Action FireWeaponAtEnemy(int client, int &buttons)
 				{
 					TF2Attrib_SetByName(myWeapon, "no_attack", 1.0);
 					TF2Attrib_SetByName(myWeapon, "provide on active", 1.0);
+					
 					buttons &= ~IN_ATTACK;
 					buttons &= ~IN_ATTACK2;
 					return Plugin_Changed;

@@ -41,7 +41,6 @@ static WeaponRestrictionType m_weaponRestrictionFlags[MAXPLAYERS + 1];
 static AttributeType m_attributeFlags[MAXPLAYERS + 1];
 static BombDeployingState_t m_nDeployingBombState[MAXPLAYERS + 1];
 static char m_szIdleSound[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
-static char m_szClassIcon[MAXPLAYERS + 1][64];
 static float m_fModelScaleOverride[MAXPLAYERS + 1];
 static MissionType m_mission[MAXPLAYERS + 1];
 static float m_flRequiredSpawnLeaveTime[MAXPLAYERS + 1];
@@ -326,16 +325,6 @@ methodmap Player
 	public void SetIdleSound(const char[] soundName)
 	{
 		strcopy(m_szIdleSound[this._client], sizeof(m_szIdleSound[]), soundName);
-	}
-	
-	public void GetClassIcon(char[] buffer, int maxlen)
-	{
-		strcopy(buffer, maxlen, m_szClassIcon[this._client]);
-	}
-	
-	public void SetClassIcon(const char[] icon)
-	{
-		strcopy(m_szClassIcon[this._client], sizeof(m_szClassIcon[]), icon);
 	}
 	
 	public void ClearIdleSound()

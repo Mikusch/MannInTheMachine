@@ -258,13 +258,11 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		// TODO: CTFBot::ChangeTeam does a little bit more, like making team switches silent
 		TF2_ChangeClientTeam(newPlayer, team);
 		
-		char m_iszClassIcon[64];
-		m_spawner.GetClassIcon(m_iszClassIcon, sizeof(m_iszClassIcon));
-		LogMessage("m_iszClassIcon: %s", m_iszClassIcon);
-		
 		SetEntProp(newPlayer, Prop_Data, "m_bAllowInstantSpawn", true);
 		FakeClientCommand(newPlayer, "joinclass %s", g_aRawPlayerClassNames[m_spawner.m_class]);
-		SetEntPropString(newPlayer, Prop_Send, "m_iszClassIcon", m_iszClassIcon);
+		
+		int offset = FindSendPropInfo("CTFPlayer", "m_iszClassIcon");
+		SetEntData(newPlayer, offset, m_spawner.GetClassIcon());
 		
 		Player(newPlayer).ClearEventChangeAttributes();
 		for (int i = 0; i < m_spawner.m_eventChangeAttributes.Count(); ++i)

@@ -1155,10 +1155,9 @@ methodmap CTFBotSpawner
 		PtrToString(Deref(this + GetOffset("CTFBotSpawner::m_name")), buffer, maxlen);
 	}
 	
-	public void GetClassIcon(char[] buffer, int maxlen)
+	public Address GetClassIcon(int nSpawnNum = -1)
 	{
-		Address string_t = Deref(SDKCall_GetClassIcon(this));
-		PtrToString(string_t, buffer, maxlen);
+		return Deref(SDKCall_GetClassIcon(this, nSpawnNum));
 	}
 };
 

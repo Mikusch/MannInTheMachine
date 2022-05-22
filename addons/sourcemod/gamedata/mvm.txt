@@ -289,6 +289,11 @@
 				"linux"		"0"
 				"windows"	"0"
 			}
+			"EventChangeAttributes_t::m_skill"
+			{
+				"linux"		"4"
+				"windows"	"4"
+			}
 			"EventChangeAttributes_t::m_weaponRestriction"
 			{
 				"linux"		"8"

@@ -476,6 +476,8 @@ methodmap Player
 	{
 		if (pEvent)
 		{
+			SetEntProp(this._client, Prop_Send, "m_nBotSkill", pEvent.m_skill);
+			
 			this.ClearWeaponRestrictions();
 			this.SetWeaponRestriction(pEvent.m_weaponRestriction);
 			
@@ -1023,6 +1025,14 @@ methodmap EventChangeAttributes_t
 	public EventChangeAttributes_t(Address address)
 	{
 		return view_as<EventChangeAttributes_t>(address);
+	}
+	
+	property DifficultyType m_skill
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("EventChangeAttributes_t::m_skill"));
+		}
 	}
 	
 	property WeaponRestrictionType m_weaponRestriction

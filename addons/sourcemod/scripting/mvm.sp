@@ -370,6 +370,17 @@ enum MissionType
 	MISSION_REPROGRAMMED,			// MvM: robot has been hacked and will do bad things to their team
 };
 
+enum DifficultyType
+{
+	UNDEFINED = -1, 
+	EASY = 0, 
+	NORMAL = 1, 
+	HARD = 2, 
+	EXPERT = 3, 
+	
+	NUM_DIFFICULTY_LEVELS
+};
+
 enum struct CountdownTimer
 {
 	float timestamp;
@@ -511,6 +522,7 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CPopulationManager::m_defaultEventChangeAttributesName");
 		
 		SetOffset(gamedata, "EventChangeAttributes_t::m_eventName");
+		SetOffset(gamedata, "EventChangeAttributes_t::m_skill");
 		SetOffset(gamedata, "EventChangeAttributes_t::m_weaponRestriction");
 		SetOffset(gamedata, "EventChangeAttributes_t::m_attributeFlags");
 		SetOffset(gamedata, "EventChangeAttributes_t::m_items");

@@ -377,7 +377,10 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 				SetEntPropFloat(weapon, Prop_Send, "m_flChargeLevel", 1.0);
 			}
 			
-			SetEntPropFloat(newPlayer, Prop_Send, "m_flRageMeter", 100.0);
+			if (TF2_GetPlayerClass(newPlayer) != TFClass_Medic || Player(newPlayer).HasAttribute(PROJECTILE_SHIELD))
+			{
+				SetEntPropFloat(newPlayer, Prop_Send, "m_flRageMeter", 100.0);
+			}
 		}
 		
 		TFClassType nClassIndex = TF2_GetPlayerClass(newPlayer);

@@ -15,9 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-static char g_PreferenceNames[][] = 
+static char g_PreferenceNames[][] =
 {
-	"Preference_DontBeDefender", 
+	"Preference_DontBeDefender",
+	"Preference_NoSpawning",
 }
 
 void Menus_DisplayMainMenu(int client)

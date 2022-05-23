@@ -37,6 +37,10 @@
 	{
 		"en"		"Don't select me as a Defender"
 	}
+	"Preference_NoSpawning"
+	{
+		"en"		"No Spawning (Spectator Mode)"
+	}
 	"Preferences_Enabled"
 	{
 		"#format"	"{1:s}"

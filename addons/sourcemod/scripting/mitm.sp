@@ -821,6 +821,9 @@ void SelectNewDefenders()
 		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
 			continue;
 		
+		if (Player(client).HasPreference(PREF_NO_SPAWNING))
+			continue;
+		
 		playerList.Push(client);
 	}
 	
@@ -888,7 +891,7 @@ void SelectNewDefenders()
 		
 		TF2_ChangeClientTeam(invader, TFTeam_Spectator);
 		
-		if (Player(invader).HasPreference(DontBeDefender))
+		if (Player(invader).HasPreference(PREF_DONT_BE_DEFENDER))
 		{
 			PrintToChat(invader, "You have not earned any queue points based on your preferences.");
 		}

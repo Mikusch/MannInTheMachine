@@ -17,7 +17,8 @@
 
 enum PreferenceType
 {
-	DontBeDefender = (1 << 0), 
+	PREF_DONT_BE_DEFENDER = (1 << 0),
+	PREF_NO_SPAWNING = (1 << 1),
 }
 
 static Cookie g_cookieQueuePoints;

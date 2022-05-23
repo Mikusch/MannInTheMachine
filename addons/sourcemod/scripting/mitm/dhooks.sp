@@ -698,8 +698,9 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 				iInvaderCount++;
 		}
 		
-		float flRatio = float(iInvaderCount) / float(iDefenderCount);
-		if (flRatio < mitm_robots_humans_ratio.FloatValue)
+		float flReqRatio = float(MaxClients) / mitm_defender_max_count.FloatValue;
+		float flCurRatio = float(iInvaderCount) / float(iDefenderCount);
+		if (flCurRatio < flReqRatio)
 		{
 			ret.Value = TFTeam_Spectator;
 		}

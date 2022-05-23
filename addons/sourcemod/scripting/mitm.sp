@@ -18,6 +18,7 @@
 #include <sourcemod>
 #include <tf2_stocks>
 #include <sdkhooks>
+#include <clientprefs>
 #include <dhooks>
 #include <tf2attributes>
 #include <smmem/vec>
@@ -436,7 +437,7 @@ StringMap g_offsets;
 bool g_bAllowTeamChange;
 
 // Plugin ConVars
-ConVar mitm_robots_humans_ratio;
+ConVar mitm_defender_max_count;
 ConVar mitm_spawn_hurry_time;
 
 // TF ConVars
@@ -480,7 +481,7 @@ public void OnPluginStart()
 	g_WarningHudSync = CreateHudSynchronizer();
 	g_offsets = new StringMap();
 	
-	mitm_robots_humans_ratio = CreateConVar("mitm_robots_humans_ratio", "4.33", "The ratio of invaders to defenders. Defender slots gets populated first.");
+	mitm_defender_max_count = CreateConVar("mitm_defender_max_count", "8", "Maximum amount of defenders on a full server.");
 	mitm_spawn_hurry_time = CreateConVar("mitm_spawn_hurry_time", "30.0", "Time that invaders have to leave their spawn.");
 	
 	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
@@ -549,6 +550,9 @@ public void OnPluginStart()
 		
 		if (IsClientInGame(client))
 			OnClientPutInServer(client);
+		
+		if (AreClientCookiesCached(client))
+			OnClientCookiesCached(client);
 	}
 }
 
@@ -588,6 +592,11 @@ public void OnClientDisconnect(int client)
 		// progress the wave and drop their cash before disconnect
 		ForcePlayerSuicide(client);
 	}
+}
+
+public void OnClientCookiesCached(int client)
+{
+	// TODO
 }
 
 public void OnEntityCreated(int entity, const char[] classname)
@@ -819,8 +828,9 @@ void SelectNewDefenders()
 		}
 		else
 		{
-			float flRatio = float(iInvaderCount) / float(iDefenderCount);
-			if (flRatio < mitm_robots_humans_ratio.FloatValue)
+			float flReqRatio = float(MaxClients) / mitm_defender_max_count.FloatValue;
+			float flCurRatio = float(iInvaderCount) / float(iDefenderCount);
+			if (flCurRatio < flReqRatio)
 			{
 				TF2_ChangeClientTeam(client, TFTeam_Spectator);
 				iInvaderCount++;

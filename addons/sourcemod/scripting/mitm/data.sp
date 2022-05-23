@@ -1040,7 +1040,7 @@ methodmap Player
 	
 	public bool HasPreference(PreferenceType preference)
 	{
-		return this.m_preferences != -1 && this.m_preferences & view_as<int>(this.m_preferences) != 0;
+		return this.m_preferences != -1 && this.m_preferences & view_as<int>(preference) != 0;
 	}
 	
 	public bool SetPreference(PreferenceType preference, bool enable)

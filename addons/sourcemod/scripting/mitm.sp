@@ -557,9 +557,6 @@ public void OnPluginStart()
 		
 		if (IsClientInGame(client))
 			OnClientPutInServer(client);
-		
-		if (AreClientCookiesCached(client))
-			OnClientCookiesCached(client);
 	}
 }
 
@@ -590,6 +587,11 @@ public void OnClientPutInServer(int client)
 	DHooks_HookClient(client);
 	
 	Player(client).Reset();
+	
+	if (AreClientCookiesCached(client))
+	{
+		OnClientCookiesCached(client);
+	}
 }
 
 public void OnClientDisconnect(int client)

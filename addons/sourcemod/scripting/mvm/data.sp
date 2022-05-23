@@ -48,6 +48,7 @@ static int m_spawnPointEntity[MAXPLAYERS + 1];
 
 // Non-resetting Properties
 static int m_invaderPriority[MAXPLAYERS + 1];
+static bool m_bWasMiniBoss[MAXPLAYERS + 1];
 
 methodmap Player
 {
@@ -205,6 +206,18 @@ methodmap Player
 		public set(int iPriority)
 		{
 			m_invaderPriority[this._client] = iPriority;
+		}
+	}
+	
+	property bool m_bWasMiniBoss
+	{
+		public get()
+		{
+			return m_bWasMiniBoss[this._client];
+		}
+		public set(bool bWasMiniBoss)
+		{
+			m_bWasMiniBoss[this._client] = bWasMiniBoss;
 		}
 	}
 	

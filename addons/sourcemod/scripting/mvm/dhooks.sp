@@ -222,7 +222,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 	}
 	
 	// find dead player we can re-use
-	int newPlayer = GetRobotToSpawn();
+	int newPlayer = GetRobotToSpawn(m_spawner.m_defaultAttributes.m_attributeFlags & MINIBOSS);
 	
 	if (newPlayer != -1)
 	{

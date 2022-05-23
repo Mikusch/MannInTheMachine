@@ -190,7 +190,7 @@ TFTeam GetEnemyTeam(TFTeam team)
 	}
 }
 
-int GetRobotToSpawn()
+int GetRobotToSpawn(bool bMiniBoss)
 {
 	ArrayList players = new ArrayList(MaxClients);
 	
@@ -221,6 +221,12 @@ int GetRobotToSpawn()
 			// store the player and reset priority
 			priorityClient = client;
 			Player(client).m_invaderPriority = 0;
+			
+			// this player is becoming a miniboss
+			if (bMiniBoss)
+			{
+				Player(client).m_bWasMiniBoss = true;
+			}
 		}
 		else
 		{
@@ -230,6 +236,41 @@ int GetRobotToSpawn()
 	}
 	
 	delete players;
+	
+	// check whether every invader has been a miniboss at least once, then reset everyone
+	int playerCount = 0, miniBossCount = 0;
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		// check active and waiting invaders
+		if (TF2_GetClientTeam(client) != TFTeam_Spectator || TF2_GetClientTeam(client) != TFTeam_Invaders)
+			continue;
+		
+		playerCount++;
+		
+		if (Player(client).m_bWasMiniBoss)
+		{
+			miniBossCount++;
+		}
+	}
+	
+	// every client has been miniboss at least once, reset everyone
+	if (playerCount == miniBossCount)
+	{
+		for (int client = 1; client <= MaxClients; client++)
+		{
+			if (!IsClientInGame(client))
+				continue;
+			
+			if (TF2_GetClientTeam(client) != TFTeam_Spectator || TF2_GetClientTeam(client) != TFTeam_Invaders)
+				continue;
+			
+			Player(client).m_bWasMiniBoss = false;
+		}
+	}
+	
 	return priorityClient;
 }
 
@@ -249,7 +290,21 @@ public int SortPlayersByPriority(int index1, int index2, Handle array, Handle hn
 	int client1 = list.Get(index1);
 	int client2 = list.Get(index2);
 	
-	return Compare(Player(client2).m_invaderPriority, Player(client1).m_invaderPriority);
+	int c = 0;
+	
+	// sort by players who have not been miniboss yet
+	if (c == 0)
+	{
+		c = Compare(Player(client1).m_bWasMiniBoss, Player(client2).m_bWasMiniBoss);
+	}
+	
+	// sort by priority
+	if (c == 0)
+	{
+		c = Compare(Player(client2).m_invaderPriority, Player(client1).m_invaderPriority);
+	}
+	
+	return c;
 }
 
 bool IsRangeLessThan(int client1, int client2, float range)

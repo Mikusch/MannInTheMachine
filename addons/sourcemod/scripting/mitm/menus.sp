@@ -15,12 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-static char g_PreferenceNames[][] =
-{
-	"Preference_DontBeDefender",
-	"Preference_NoSpawning",
-}
-
 void Menus_DisplayMainMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_MainMenu, MenuAction_Select | MenuAction_End | MenuAction_DrawItem | MenuAction_DisplayItem);

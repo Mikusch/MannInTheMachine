@@ -35,11 +35,15 @@
 	}
 	"Preference_DontBeDefender"
 	{
-		"en"		"Don't select me as a Defender"
+		"en"		"Don't select me as Defender"
 	}
 	"Preference_NoSpawning"
 	{
 		"en"		"No Spawning (Spectator Mode)"
+	}
+	"Preference_NoGiant"
+	{
+		"en"		"Don't spawn me as Giant Robot"
 	}
 	"Preferences_Enabled"
 	{

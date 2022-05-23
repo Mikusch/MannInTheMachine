@@ -206,6 +206,12 @@ int GetRobotToSpawn(bool bMiniBoss)
 		if (TF2_GetClientTeam(client) != TFTeam_Spectator)
 			continue;
 		
+		if (Player(client).HasPreference(PREF_NO_SPAWNING))
+			continue;
+		
+		if (bMiniBoss && Player(client).HasPreference(PREF_NO_GIANT))
+			continue;
+		
 		players.Push(client);
 	}
 	

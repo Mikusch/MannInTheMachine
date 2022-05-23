@@ -821,9 +821,6 @@ void SelectNewDefenders()
 		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
 			continue;
 		
-		if (Player(client).HasPreference(PREF_NO_SPAWNING))
-			continue;
-		
 		playerList.Push(client);
 	}
 	

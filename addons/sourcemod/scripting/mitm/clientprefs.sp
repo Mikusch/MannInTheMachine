@@ -19,6 +19,14 @@ enum PreferenceType
 {
 	PREF_DONT_BE_DEFENDER = (1 << 0),
 	PREF_NO_SPAWNING = (1 << 1),
+	PREF_NO_GIANT = (1 << 2),
+}
+
+char g_PreferenceNames[][] =
+{
+	"Preference_DontBeDefender",
+	"Preference_NoSpawning",
+	"Preference_NoGiant",
 }
 
 static Cookie g_cookieQueuePoints;

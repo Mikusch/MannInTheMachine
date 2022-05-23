@@ -86,7 +86,7 @@ public Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroa
 	
 	if (team == TFTeam_Spectator || team == TFTeam_Red)
 	{
-		Player(client).Reset();
+		Player(client).ResetOnTeamChange();
 		
 		SetVariantString("");
 		AcceptEntityInput(client, "SetCustomModel");

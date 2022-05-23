@@ -1019,7 +1019,7 @@ methodmap Player
 		this.m_tags = new ArrayList(64);
 	}
 	
-	public void Reset()
+	public void ResetOnTeamChange()
 	{
 		m_upgradeTimer[this._client].Invalidate();
 		m_buffPulseTimer[this._client].Invalidate();
@@ -1039,6 +1039,14 @@ methodmap Player
 		this.m_fModelScaleOverride = 0.0;
 		this.m_flRequiredSpawnLeaveTime = 0.0;
 		this.m_spawnPointEntity = -1;
+	}
+	
+	public void Reset()
+	{
+		this.ResetOnTeamChange();
+		
+		this.m_invaderPriority = 0;
+		this.m_bWasMiniBoss = false;
 	}
 }
 

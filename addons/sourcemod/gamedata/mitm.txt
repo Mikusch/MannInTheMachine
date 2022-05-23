@@ -23,8 +23,8 @@
 		{
 			"CTFBotSpawner::GetClassIcon"
 			{
+				// Windows uses virtual CTFBotSpawner::GetClassIcon
 				"linux"		"@_ZN13CTFBotSpawner12GetClassIconEi"
-				// "windows"	"\x55\x8B\xEC\x8B\x51\x0C\x85\xD2"
 			}
 			"CTFGCServerSystem::PreClientUpdate"
 			{
@@ -161,7 +161,7 @@
 		{
 			"CTFBotSpawner::GetClassIcon"
 			{
-				// "linux"		"7"
+				// Linux uses signature call CTFBotSpawner::GetClassIcon
 				"windows"	"6"
 			}
 			"CTFPlayer::Event_Killed"

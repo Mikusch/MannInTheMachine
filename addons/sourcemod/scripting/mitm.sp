@@ -455,16 +455,16 @@ ConVar tf_bot_taunt_victim_chance;
 ConVar mp_waitingforplayers_time;
 ConVar sv_stepsize;
 
-#include "mvm/data.sp"
+#include "mitm/data.sp"
 
-#include "mvm/console.sp"
-#include "mvm/dhooks.sp"
-#include "mvm/events.sp"
-#include "mvm/helpers.sp"
-#include "mvm/sdkcalls.sp"
-#include "mvm/sdkhooks.sp"
-#include "mvm/deploy_bomb.sp"
-#include "mvm/spy.sp"
+#include "mitm/console.sp"
+#include "mitm/dhooks.sp"
+#include "mitm/events.sp"
+#include "mitm/helpers.sp"
+#include "mitm/sdkcalls.sp"
+#include "mitm/sdkhooks.sp"
+#include "mitm/deploy_bomb.sp"
+#include "mitm/spy.sp"
 
 public Plugin myinfo =
 {
@@ -502,7 +502,7 @@ public void OnPluginStart()
 	Events_Initialize();
 	SDKHooks_Initialize();
 	
-	GameData gamedata = new GameData("mvm");
+	GameData gamedata = new GameData("mitm");
 	if (gamedata)
 	{
 		DHooks_Initialize(gamedata);
@@ -540,7 +540,7 @@ public void OnPluginStart()
 	}
 	else
 	{
-		SetFailState("Could not find mvm gamedata");
+		SetFailState("Could not find mitm gamedata");
 	}
 	
 	for (int client = 1; client <= MaxClients; client++)

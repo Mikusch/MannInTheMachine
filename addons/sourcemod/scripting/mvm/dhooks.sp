@@ -261,6 +261,8 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		SetEntProp(newPlayer, Prop_Data, "m_bAllowInstantSpawn", true);
 		FakeClientCommand(newPlayer, "joinclass %s", g_aRawPlayerClassNames[m_spawner.m_class]);
 		
+		// Set the address of CTFPlayer::m_iszClassIcon from the return value of CTFBotSpawner::GetClassIcon.
+		// Simply setting the value using SetEntPropString leads to segfaults, don't do that!
 		int offset = FindSendPropInfo("CTFPlayer", "m_iszClassIcon");
 		SetEntData(newPlayer, offset, m_spawner.GetClassIcon());
 		

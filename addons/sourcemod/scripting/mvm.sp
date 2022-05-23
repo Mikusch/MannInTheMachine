@@ -667,7 +667,7 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 			TF2Attrib_RemoveByName(client, "no_jump");
 		}
 		
-		// Everything below is similar to code in CTFBotScenarioMonitor::DesiredScenarioAndClassAction
+		// CTFBotScenarioMonitor::DesiredScenarioAndClassAction
 		
 		if (TF2_GetPlayerClass(client) == TFClass_Spy)
 		{
@@ -702,16 +702,24 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 			return;
 		}
 		
+		// CTFBotFetchFlag
 		int flag = Player(client).GetFlagToFetch();
-		if (flag != -1 && GetEntProp(flag, Prop_Send, "m_nFlagStatus") == TF_FLAGINFO_HOME)
+		if (flag != -1)
 		{
-			if (GetGameTime() - GetEntDataFloat(client, GetOffset("CTFPlayer::m_flSpawnTime")) < 1.0 && TF2_GetClientTeam(client) != TFTeam_Spectator)
+			if (GetEntProp(flag, Prop_Send, "m_nFlagStatus") == TF_FLAGINFO_HOME)
 			{
-				// we just spawned - give us the flag
-				SDKCall_PickUp(flag, client, true);
+				if (GetGameTime() - GetEntDataFloat(client, GetOffset("CTFPlayer::m_flSpawnTime")) < 1.0 && TF2_GetClientTeam(client) != TFTeam_Spectator)
+				{
+					// we just spawned - give us the flag
+					SDKCall_PickUp(flag, client, true);
+				}
 			}
 		}
 		
+		// CTFBotMvMDeployBomb
+		// TODO: Check contact with func_capturezone here and do deployment stuff, then remove deploying check below
+		
+		// CTFBotDeliverFlag
 		if (SDKCall_HasTheFlag(client) && Player(client).m_nDeployingBombState == TF_BOMB_DEPLOYING_NONE && Player(client).UpgradeOverTime())
 		{
 			// Taunting for our new upgrade

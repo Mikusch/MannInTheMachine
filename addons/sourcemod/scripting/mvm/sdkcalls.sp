@@ -71,7 +71,7 @@ static Handle PrepSDKCall_GetClassIcon_Linux(GameData gamedata)
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFBotSpawner::GetClassIcon");
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Pointer); // return value
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // thisptr
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // nSpawnNum
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // int nSpawnNum
 	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain); // return string_t
 	
 	return EndPrepSDKCall();
@@ -84,7 +84,7 @@ static Handle PrepSDKCall_GetClassIcon_Windows(GameData gamedata)
 	StartPrepSDKCall(SDKCall_Raw);
 	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTFBotSpawner::GetClassIcon");
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Pointer); // return value
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // nSpawnNum
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // int nSpawnNum
 	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain); // return string_t
 	
 	return EndPrepSDKCall();

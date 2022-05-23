@@ -1,0 +1,50 @@
+"Phrases"
+{
+	"Menu_Main_Title"
+	{
+		"en"		"Welcome to Mann in the Machine made by Mikusch!\nThis mode is currently in BETA, so expect bugs!"
+	}
+	"Menu_Main_Queue"
+	{
+		"en"		"View Defender Queue"
+	}
+	"Menu_Main_Preferences"
+	{
+		"en"		"Change Preferences"
+	}
+	"Menu_Queue_Title"
+	{
+		"en"		"Defender Queue"
+	}
+	"Menu_Queue_Title_QueuePoints"
+	{
+		"#format"	"{1:d}"
+		"en"		"Your queue points: {1}"
+	}
+	"Menu_Queue_NotLoaded"
+	{
+		"en"		"Your queue points are still loading, please wait a moment."
+	}
+	"Menu_Preferences_Title"
+	{
+		"en"		"User Preferences"
+	}
+	"Menu_Preferences_NotLoaded"
+	{
+		"en"		"Your preferences are still loading, please wait a moment."
+	}
+	"Preference_DontBeDefender"
+	{
+		"en"		"Don't select me as a Defender"
+	}
+	"Preferences_Enabled"
+	{
+		"#format"	"{1:s}"
+		"en"		"You have enabled the preference {1}."
+	}
+	"Preferences_Disabled"
+	{
+		"#format"	"{1:s}"
+		"en"		"You have disabled the preference {1}."
+	}
+}

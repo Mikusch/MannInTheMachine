@@ -20,9 +20,49 @@
 
 void Console_Initialize()
 {
+	RegConsoleCmd("mitm", ConCmd_OpenMainMenu, "Opens the main menu.");
+	RegConsoleCmd("queue", ConCmd_OpenQueueMenu, "Opens the queue menu.");
+	RegConsoleCmd("preferences", ConCmd_OpenPreferencesMenu, "Opens the preferences menu.");
+	
 	AddCommandListener(CommandListener_Suicide, "explode");
 	AddCommandListener(CommandListener_Suicide, "kill");
 	AddCommandListener(CommandListener_Build, "build");
+}
+
+public Action ConCmd_OpenMainMenu(int client, int args)
+{
+	if (client == 0)
+	{
+		ReplyToCommand(client, "%t", "Command is in-game only");
+		return Plugin_Handled;
+	}
+	
+	Menus_DisplayMainMenu(client);
+	return Plugin_Handled;
+}
+
+public Action ConCmd_OpenQueueMenu(int client, int args)
+{
+	if (client == 0)
+	{
+		ReplyToCommand(client, "%t", "Command is in-game only");
+		return Plugin_Handled;
+	}
+	
+	Menus_DisplayQueueMenu(client);
+	return Plugin_Handled;
+}
+
+public Action ConCmd_OpenPreferencesMenu(int client, int args)
+{
+	if (client == 0)
+	{
+		ReplyToCommand(client, "%t", "Command is in-game only");
+		return Plugin_Handled;
+	}
+	
+	Menus_DisplayPreferencesMenu(client);
+	return Plugin_Handled;
 }
 
 public Action CommandListener_Suicide(int client, const char[] command, int argc)

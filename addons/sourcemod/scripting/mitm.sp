@@ -458,10 +458,13 @@ ConVar sv_stepsize;
 
 #include "mitm/data.sp"
 
+#include "mitm/clientprefs.sp"
 #include "mitm/console.sp"
 #include "mitm/dhooks.sp"
 #include "mitm/events.sp"
 #include "mitm/helpers.sp"
+#include "mitm/queue.sp"
+#include "mitm/menus.sp"
 #include "mitm/sdkcalls.sp"
 #include "mitm/sdkhooks.sp"
 #include "mitm/deploy_bomb.sp"
@@ -478,10 +481,13 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	LoadTranslations("common.phrases");
+	LoadTranslations("mitm.phrases");
+	
 	g_WarningHudSync = CreateHudSynchronizer();
 	g_offsets = new StringMap();
 	
-	mitm_defender_max_count = CreateConVar("mitm_defender_max_count", "8", "Maximum amount of defenders on a full server.");
+	mitm_defender_max_count = CreateConVar("mitm_defender_max_count", "8", "Maximum amount of defenders on a full server.", _, true, 6.0, true, 10.0);
 	mitm_spawn_hurry_time = CreateConVar("mitm_spawn_hurry_time", "30.0", "Time that invaders have to leave their spawn.");
 	
 	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
@@ -501,6 +507,7 @@ public void OnPluginStart()
 	
 	Console_Initialize();
 	Events_Initialize();
+	ClientPrefs_Initialize();
 	SDKHooks_Initialize();
 	
 	GameData gamedata = new GameData("mitm");
@@ -596,7 +603,8 @@ public void OnClientDisconnect(int client)
 
 public void OnClientCookiesCached(int client)
 {
-	// TODO
+	ClientPrefs_RefreshQueue(client);
+	ClientPrefs_RefreshPreferences(client);
 }
 
 public void OnEntityCreated(int entity, const char[] classname)
@@ -798,7 +806,9 @@ void SetOffset(GameData gamedata, const char[] name)
 
 void SelectNewDefenders()
 {
-	ArrayList playerVector = new ArrayList(MaxClients);
+	g_bAllowTeamChange = true;
+	
+	ArrayList playerList = new ArrayList(MaxClients);
 	
 	// collect valid players
 	for (int client = 1; client <= MaxClients; client++)
@@ -806,50 +816,92 @@ void SelectNewDefenders()
 		if (!IsClientInGame(client))
 			continue;
 		
-		playerVector.Push(client);
+		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
+			continue;
+		
+		playerList.Push(client);
 	}
 	
-	// shuffle the vector to randomize defenders
-	playerVector.Sort(Sort_Random, Sort_Integer);
+	ArrayList defenderList = Queue_GetDefenderQueue();
+	int iDefenderCount = 0;
+	int iReqDefenderCount = RoundToNearest((float(playerList.Length) / float(MaxClients)) * mitm_defender_max_count.IntValue);
 	
-	int iDefenderCount = 0, iInvaderCount = 0;
-	
-	for (int i = 0; i < playerVector.Length; i++)
+	// select our defenders
+	for (int i = 0; i < defenderList.Length; i++)
 	{
-		int client = playerVector.Get(i);
+		int defender = defenderList.Get(i, QueueData::m_client);
 		
-		g_bAllowTeamChange = true;
+		TF2_ChangeClientTeam(defender, TFTeam_Defenders);
+		Queue_SetPoints(defender, 0);
 		
-		if (iDefenderCount == 0)
+		// defenders get stuck if the map resets without having picked a class
+		if (TF2_GetPlayerClass(defender) == TFClass_Unknown)
+			TF2_SetPlayerClass(defender, view_as<TFClassType>(GetRandomInt(view_as<int>(TFClass_Scout), view_as<int>(TFClass_Engineer))));
+		
+		PrintToChat(defender, "Your queue points have been reset.");
+		
+		playerList.Erase(playerList.FindValue(defender));
+		
+		// If we have enough defenders, early out
+		if (iReqDefenderCount == ++iDefenderCount)
 		{
-			// first player always gets defender
-			TF2_ChangeClientTeam(client, TFTeam_Defenders);
-			iDefenderCount++;
+			break;
+		}
+	}
+	
+	if (iDefenderCount < iReqDefenderCount)
+	{
+		// we have less defenders than we wanted...
+		// let's just pick some random people, regardless of their defender preference
+		
+		playerList.Sort(Sort_Random, Sort_Integer);
+		
+		for (int i = 0; i < playerList.Length; i++)
+		{
+			int defender = playerList.Get(i);
+			
+			// we only want people who are not in the defender vector
+			if (defenderList.FindValue(defender, QueueData::m_client) != -1)
+				continue;
+			
+			if (iDefenderCount++ < iReqDefenderCount)
+			{
+				TF2_ChangeClientTeam(defender, TFTeam_Defenders);
+				
+				// defenders get stuck if the map resets without having picked a class
+				if (TF2_GetPlayerClass(defender) == TFClass_Unknown)
+					TF2_SetPlayerClass(defender, view_as<TFClassType>(GetRandomInt(view_as<int>(TFClass_Scout), view_as<int>(TFClass_Engineer))));
+				
+				PrintToChat(defender, "You have been forced on the defender team.");
+				
+				playerList.Erase(i);
+			}
+		}
+	}
+	
+	// move everyone else to the spectator team
+	for (int i = 0; i < playerList.Length; i++)
+	{
+		int invader = playerList.Get(i);
+		
+		TF2_ChangeClientTeam(invader, TFTeam_Spectator);
+		
+		if (Player(invader).HasPreference(DontBeDefender))
+		{
+			PrintToChat(invader, "You have not earned any queue points based on your preferences.");
 		}
 		else
 		{
-			float flReqRatio = float(MaxClients) / mitm_defender_max_count.FloatValue;
-			float flCurRatio = float(iInvaderCount) / float(iDefenderCount);
-			if (flCurRatio < flReqRatio)
-			{
-				TF2_ChangeClientTeam(client, TFTeam_Spectator);
-				iInvaderCount++;
-			}
-			else
-			{
-				TF2_ChangeClientTeam(client, TFTeam_Defenders);
-				iDefenderCount++;
-			}
+			Queue_AddPoints(invader, 5);
+			PrintToChat(invader, "You have earned 5 defender queue points (Total: %d)", Player(invader).m_defenderQueuePoints);
 		}
-		
-		// Defenders get stuck if the map resets without having picked a class
-		if (TF2_GetPlayerClass(client) == TFClass_Unknown)
-			TF2_SetPlayerClass(client, view_as<TFClassType>(GetRandomInt(view_as<int>(TFClass_Scout), view_as<int>(TFClass_Engineer))));
-		
-		g_bAllowTeamChange = false;
 	}
 	
-	delete playerVector;
+	g_bAllowTeamChange = false;
+	
+	// free the memory
+	delete playerList;
+	delete defenderList;
 }
 
 // TODO: This is missing some stuff.

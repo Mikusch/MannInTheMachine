@@ -49,6 +49,8 @@ static int m_spawnPointEntity[MAXPLAYERS + 1];
 // Non-resetting Properties
 static int m_invaderPriority[MAXPLAYERS + 1];
 static bool m_bWasMiniBoss[MAXPLAYERS + 1];
+static int m_defenderQueuePoints[MAXPLAYERS + 1];
+static int m_preferences[MAXPLAYERS + 1];
 
 methodmap Player
 {
@@ -218,6 +220,30 @@ methodmap Player
 		public set(bool bWasMiniBoss)
 		{
 			m_bWasMiniBoss[this._client] = bWasMiniBoss;
+		}
+	}
+	
+	property int m_defenderQueuePoints
+	{
+		public get()
+		{
+			return m_defenderQueuePoints[this._client];
+		}
+		public set(int defenderQueuePoints)
+		{
+			m_defenderQueuePoints[this._client] = defenderQueuePoints;
+		}
+	}
+	
+	property int m_preferences
+	{
+		public get()
+		{
+			return m_preferences[this._client];
+		}
+		public set(int preferences)
+		{
+			m_preferences[this._client] = preferences;
 		}
 	}
 	
@@ -1012,6 +1038,26 @@ methodmap Player
 		delete enemyVector;
 	}
 	
+	public bool HasPreference(PreferenceType preference)
+	{
+		return this.m_preferences != -1 && this.m_preferences & view_as<int>(this.m_preferences) != 0;
+	}
+	
+	public bool SetPreference(PreferenceType preference, bool enable)
+	{
+		if (this.m_preferences == -1)
+			return false;
+		
+		if (enable)
+			this.m_preferences |= view_as<int>(preference);
+		else
+			this.m_preferences &= ~view_as<int>(preference);
+		
+		ClientPrefs_SavePreferences(this._client, this.m_preferences);
+		
+		return true;
+	}
+	
 	public void Initialize()
 	{
 		this.m_teleportWhereName = new ArrayList(64);
@@ -1047,6 +1093,8 @@ methodmap Player
 		
 		this.m_invaderPriority = 0;
 		this.m_bWasMiniBoss = false;
+		this.m_defenderQueuePoints = -1;
+		this.m_preferences = -1;
 	}
 }
 

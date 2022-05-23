@@ -698,7 +698,7 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 				iInvaderCount++;
 		}
 		
-		float flReqRatio = float(MaxClients) / mitm_defender_max_count.FloatValue;
+		float flReqRatio = float(MaxClients - mitm_defender_max_count.IntValue) / mitm_defender_max_count.FloatValue;
 		float flCurRatio = float(iInvaderCount) / float(iDefenderCount);
 		if (flCurRatio < flReqRatio)
 		{

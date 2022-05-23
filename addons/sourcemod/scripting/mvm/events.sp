@@ -180,7 +180,7 @@ public void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool don
 			
 			Player(player).UpgradeStart();
 		}
-		case TF_FLAGEVENT_DROPPED:
+		case TF_FLAGEVENT_DROPPED, TF_FLAGEVENT_CAPTURED:
 		{
 			if (!IsFakeClient(player))
 			{

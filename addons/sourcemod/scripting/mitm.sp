@@ -834,6 +834,8 @@ void SelectNewDefenders()
 		int defender = defenderList.Get(i, QueueData::m_client);
 		
 		TF2_ChangeClientTeam(defender, TFTeam_Defenders);
+		LogMessage("Assigned %N to team DEFENDERS (Queue Points: %d)", defender, Player(defender).m_defenderQueuePoints);
+		
 		Queue_SetPoints(defender, 0);
 		
 		// defenders get stuck if the map resets without having picked a class
@@ -875,6 +877,7 @@ void SelectNewDefenders()
 					TF2_SetPlayerClass(defender, view_as<TFClassType>(GetRandomInt(view_as<int>(TFClass_Scout), view_as<int>(TFClass_Engineer))));
 				
 				PrintToChat(defender, "You have been forced on the defender team.");
+				LogMessage("Forced %N to team DEFENDERS", defender);
 				
 				playerList.Erase(i);
 			}
@@ -887,6 +890,7 @@ void SelectNewDefenders()
 		int invader = playerList.Get(i);
 		
 		TF2_ChangeClientTeam(invader, TFTeam_Spectator);
+		LogMessage("Assigned %N to team ROBOTS (Queue Points: %d)", invader, Player(invader).m_defenderQueuePoints);
 		
 		if (Player(invader).HasPreference(PREF_DONT_BE_DEFENDER))
 		{

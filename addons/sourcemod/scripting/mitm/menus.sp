@@ -157,9 +157,9 @@ public int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 			Format(name, sizeof(name), "%T", g_PreferenceNames[i], param1);
 			
 			if (Player(param1).HasPreference(preference))
-				PrintToChat(param1, "Preferences_Enabled", name);
+				PrintToChat(param1, "%t", "Preferences_Enabled", name);
 			else
-				PrintToChat(param1, "Preferences_Disabled", name);
+				PrintToChat(param1, "%t", "Preferences_Disabled", name);
 			
 			Menus_DisplayPreferencesMenu(param1);
 		}

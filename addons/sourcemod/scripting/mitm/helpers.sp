@@ -298,16 +298,16 @@ public int SortPlayersByPriority(int index1, int index2, Handle array, Handle hn
 	
 	int c = 0;
 	
-	// sort by players who have not been miniboss yet
-	if (c == 0)
-	{
-		c = Compare(Player(client1).m_bWasMiniBoss, Player(client2).m_bWasMiniBoss);
-	}
-	
 	// sort by priority
 	if (c == 0)
 	{
 		c = Compare(Player(client2).m_invaderPriority, Player(client1).m_invaderPriority);
+	}
+	
+	// sort by players who have not been miniboss yet
+	if (c == 0)
+	{
+		c = Compare(Player(client1).m_bWasMiniBoss, Player(client2).m_bWasMiniBoss);
 	}
 	
 	return c;

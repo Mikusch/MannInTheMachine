@@ -49,7 +49,7 @@
 #define TF_FLAGINFO_STOLEN		(1<<0)
 #define TF_FLAGINFO_DROPPED		(1<<1)
 
-#define PLUGIN_TAG	"[{green}MitM{default}]"
+#define PLUGIN_TAG	"[{orange}MitM{default}]"
 
 const TFTeam TFTeam_Defenders = TFTeam_Red;
 const TFTeam TFTeam_Invaders = TFTeam_Blue;
@@ -922,9 +922,9 @@ void SelectNewDefenders()
 		if (TF2_GetClientTeam(client) != TFTeam_Defenders)
 			continue;
 		
-		// defenders get stuck if the map resets without having picked a class
+		// make sure the defender has a class
 		if (TF2_GetPlayerClass(client) == TFClass_Unknown)
-			TF2_SetPlayerClass(client, view_as<TFClassType>(GetRandomInt(view_as<int>(TFClass_Scout), view_as<int>(TFClass_Engineer))));
+			ShowVGUIPanel(client, "class_red");
 	}
 	
 	// free the memory

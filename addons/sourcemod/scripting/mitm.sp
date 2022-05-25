@@ -28,6 +28,7 @@
 #include <loadsoundscript>
 #include <cbasenpc>
 #include <cbasenpc/tf/nav>
+#include <morecolors>
 
 #pragma semicolon 1
 #pragma newdecls required
@@ -47,6 +48,8 @@
 #define TF_FLAGINFO_HOME		0
 #define TF_FLAGINFO_STOLEN		(1<<0)
 #define TF_FLAGINFO_DROPPED		(1<<1)
+
+#define PLUGIN_TAG	"[{green}MitM{default}]"
 
 const TFTeam TFTeam_Defenders = TFTeam_Red;
 const TFTeam TFTeam_Invaders = TFTeam_Blue;
@@ -435,6 +438,7 @@ Handle g_hWaitingForPlayersTimer;
 bool g_bInWaitingForPlayers;
 StringMap g_offsets;
 bool g_bAllowTeamChange;
+float g_restoreCheckpointTime;
 
 // Plugin ConVars
 ConVar mitm_defender_max_count;
@@ -453,6 +457,8 @@ ConVar tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade;
 ConVar tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade;
 ConVar tf_mvm_engineer_teleporter_uber_duration;
 ConVar tf_bot_taunt_victim_chance;
+ConVar mp_tournament_redteamname;
+ConVar mp_tournament_blueteamname;
 ConVar mp_waitingforplayers_time;
 ConVar sv_stepsize;
 
@@ -502,6 +508,8 @@ public void OnPluginStart()
 	tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade = FindConVar("tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade");
 	tf_mvm_engineer_teleporter_uber_duration = FindConVar("tf_mvm_engineer_teleporter_uber_duration");
 	tf_bot_taunt_victim_chance = FindConVar("tf_bot_taunt_victim_chance");
+	mp_tournament_redteamname = FindConVar("mp_tournament_redteamname");
+	mp_tournament_blueteamname = FindConVar("mp_tournament_blueteamname");
 	mp_waitingforplayers_time = FindConVar("mp_waitingforplayers_time");
 	sv_stepsize = FindConVar("sv_stepsize");
 	
@@ -564,6 +572,7 @@ public void OnMapStart()
 {
 	g_hWaitingForPlayersTimer = null;
 	g_bInWaitingForPlayers = true;
+	g_restoreCheckpointTime = 0.0;
 	
 	DHooks_HookGamerules();
 	
@@ -808,7 +817,12 @@ void SetOffset(GameData gamedata, const char[] name)
 
 void SelectNewDefenders()
 {
-	PrintToChatAll("Selecting a new set of defenders...");
+	CPrintToChatAll("%s %t", PLUGIN_TAG, "Queue_NewDefenders");
+	
+	// grab team names
+	char redTeamname[64], blueTeamname[64];
+	mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
+	mp_tournament_blueteamname.GetString(blueTeamname, sizeof(blueTeamname));
 	
 	g_bAllowTeamChange = true;
 	
@@ -839,12 +853,7 @@ void SelectNewDefenders()
 		LogMessage("Assigned %N to team DEFENDERS (Queue Points: %d)", defender, Player(defender).m_defenderQueuePoints);
 		
 		Queue_SetPoints(defender, 0);
-		
-		// defenders get stuck if the map resets without having picked a class
-		if (TF2_GetPlayerClass(defender) == TFClass_Unknown)
-			TF2_SetPlayerClass(defender, view_as<TFClassType>(GetRandomInt(view_as<int>(TFClass_Scout), view_as<int>(TFClass_Engineer))));
-		
-		PrintToChat(defender, "Your queue points have been reset.");
+		CPrintToChat(defender, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
 		
 		playerList.Erase(playerList.FindValue(defender));
 		
@@ -874,11 +883,7 @@ void SelectNewDefenders()
 			{
 				TF2_ChangeClientTeam(defender, TFTeam_Defenders);
 				
-				// defenders get stuck if the map resets without having picked a class
-				if (TF2_GetPlayerClass(defender) == TFClass_Unknown)
-					TF2_SetPlayerClass(defender, view_as<TFClassType>(GetRandomInt(view_as<int>(TFClass_Scout), view_as<int>(TFClass_Engineer))));
-				
-				PrintToChat(defender, "You have been forced on the defender team.");
+				CPrintToChat(defender, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender_Forced", redTeamname);
 				LogMessage("Forced %N to team DEFENDERS", defender);
 				
 				playerList.Erase(i);
@@ -896,16 +901,29 @@ void SelectNewDefenders()
 		
 		if (Player(invader).HasPreference(PREF_DONT_BE_DEFENDER))
 		{
-			PrintToChat(invader, "You have not earned any queue points based on your preferences.");
+			CPrintToChat(invader, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader_NoQueue", blueTeamname);
 		}
-		else
+		else if (!Player(invader).HasPreference(PREF_NO_SPAWNING))
 		{
 			Queue_AddPoints(invader, 5);
-			PrintToChat(invader, "You have earned 5 defender queue points (Total: %d)", Player(invader).m_defenderQueuePoints);
+			CPrintToChat(invader, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname, 5, Player(invader).m_defenderQueuePoints);
 		}
 	}
 	
 	g_bAllowTeamChange = false;
+	
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (TF2_GetClientTeam(client) != TFTeam_Defenders)
+			continue;
+		
+		// defenders get stuck if the map resets without having picked a class
+		if (TF2_GetPlayerClass(client) == TFClass_Unknown)
+			TF2_SetPlayerClass(client, view_as<TFClassType>(GetRandomInt(view_as<int>(TFClass_Scout), view_as<int>(TFClass_Engineer))));
+	}
 	
 	// free the memory
 	delete playerList;

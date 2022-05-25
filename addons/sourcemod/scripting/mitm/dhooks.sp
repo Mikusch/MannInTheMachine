@@ -158,13 +158,14 @@ public MRESReturn DHookCallback_AllocateBots_Pre(int populator)
 
 public MRESReturn DHookCallback_RestoreCheckpoint_Pre(int populator)
 {
-	static float s_restoreCheckpointTime;
-	
-	// Unfortunately, the populator calls this multiple times...
-	if ((s_restoreCheckpointTime + 0.1) < GetGameTime())
+	if (GameRules_GetRoundState() == RoundState_BetweenRounds)
 	{
-		s_restoreCheckpointTime = GetGameTime();
-		SelectNewDefenders();
+		// The populator calls this multiple times, but we only want it once...
+		if ((g_restoreCheckpointTime + 0.1) < GetGameTime())
+		{
+			g_restoreCheckpointTime = GetGameTime();
+			SelectNewDefenders();
+		}
 	}
 	
 	return MRES_Handled;

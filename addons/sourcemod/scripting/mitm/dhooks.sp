@@ -158,7 +158,15 @@ public MRESReturn DHookCallback_AllocateBots_Pre(int populator)
 
 public MRESReturn DHookCallback_RestoreCheckpoint_Pre(int populator)
 {
-	SelectNewDefenders();
+	if (GameRules_GetRoundState() == RoundState_BetweenRounds)
+	{
+		// The populator calls this multiple times, but we only want it once...
+		if ((g_restoreCheckpointTime + 0.1) < GetGameTime())
+		{
+			g_restoreCheckpointTime = GetGameTime();
+			SelectNewDefenders();
+		}
+	}
 	
 	return MRES_Handled;
 }
@@ -698,7 +706,7 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 				iInvaderCount++;
 		}
 		
-		float flReqRatio = float(MaxClients) / mitm_defender_max_count.FloatValue;
+		float flReqRatio = float(MaxClients - mitm_defender_max_count.IntValue) / mitm_defender_max_count.FloatValue;
 		float flCurRatio = float(iInvaderCount) / float(iDefenderCount);
 		if (flCurRatio < flReqRatio)
 		{

@@ -28,6 +28,7 @@
 #include <loadsoundscript>
 #include <cbasenpc>
 #include <cbasenpc/tf/nav>
+#include <morecolors>
 
 #pragma semicolon 1
 #pragma newdecls required
@@ -47,6 +48,8 @@
 #define TF_FLAGINFO_HOME		0
 #define TF_FLAGINFO_STOLEN		(1<<0)
 #define TF_FLAGINFO_DROPPED		(1<<1)
+
+#define PLUGIN_TAG	"[{orange}MitM{default}]"
 
 const TFTeam TFTeam_Defenders = TFTeam_Red;
 const TFTeam TFTeam_Invaders = TFTeam_Blue;
@@ -435,10 +438,12 @@ Handle g_hWaitingForPlayersTimer;
 bool g_bInWaitingForPlayers;
 StringMap g_offsets;
 bool g_bAllowTeamChange;
+float g_restoreCheckpointTime;
 
 // Plugin ConVars
 ConVar mitm_defender_max_count;
 ConVar mitm_spawn_hurry_time;
+ConVar mitm_queue_points;
 
 // TF ConVars
 ConVar tf_avoidteammates_pushaway;
@@ -453,15 +458,20 @@ ConVar tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade;
 ConVar tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade;
 ConVar tf_mvm_engineer_teleporter_uber_duration;
 ConVar tf_bot_taunt_victim_chance;
+ConVar mp_tournament_redteamname;
+ConVar mp_tournament_blueteamname;
 ConVar mp_waitingforplayers_time;
 ConVar sv_stepsize;
 
 #include "mitm/data.sp"
 
+#include "mitm/clientprefs.sp"
 #include "mitm/console.sp"
 #include "mitm/dhooks.sp"
 #include "mitm/events.sp"
 #include "mitm/helpers.sp"
+#include "mitm/queue.sp"
+#include "mitm/menus.sp"
 #include "mitm/sdkcalls.sp"
 #include "mitm/sdkhooks.sp"
 #include "mitm/deploy_bomb.sp"
@@ -478,11 +488,15 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	LoadTranslations("common.phrases");
+	LoadTranslations("mitm.phrases");
+	
 	g_WarningHudSync = CreateHudSynchronizer();
 	g_offsets = new StringMap();
 	
-	mitm_defender_max_count = CreateConVar("mitm_defender_max_count", "8", "Maximum amount of defenders on a full server.");
+	mitm_defender_max_count = CreateConVar("mitm_defender_max_count", "8", "Maximum amount of defenders on a full server.", _, true, 6.0, true, 10.0);
 	mitm_spawn_hurry_time = CreateConVar("mitm_spawn_hurry_time", "30.0", "Time that invaders have to leave their spawn.");
+	mitm_queue_points = CreateConVar("mitm_queue_points", "5", "Amount of queue points awarded to players that did not become defenders.", _, true, 1.0);
 	
 	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");
@@ -496,11 +510,14 @@ public void OnPluginStart()
 	tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade = FindConVar("tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade");
 	tf_mvm_engineer_teleporter_uber_duration = FindConVar("tf_mvm_engineer_teleporter_uber_duration");
 	tf_bot_taunt_victim_chance = FindConVar("tf_bot_taunt_victim_chance");
+	mp_tournament_redteamname = FindConVar("mp_tournament_redteamname");
+	mp_tournament_blueteamname = FindConVar("mp_tournament_blueteamname");
 	mp_waitingforplayers_time = FindConVar("mp_waitingforplayers_time");
 	sv_stepsize = FindConVar("sv_stepsize");
 	
 	Console_Initialize();
 	Events_Initialize();
+	ClientPrefs_Initialize();
 	SDKHooks_Initialize();
 	
 	GameData gamedata = new GameData("mitm");
@@ -550,9 +567,6 @@ public void OnPluginStart()
 		
 		if (IsClientInGame(client))
 			OnClientPutInServer(client);
-		
-		if (AreClientCookiesCached(client))
-			OnClientCookiesCached(client);
 	}
 }
 
@@ -560,6 +574,7 @@ public void OnMapStart()
 {
 	g_hWaitingForPlayersTimer = null;
 	g_bInWaitingForPlayers = true;
+	g_restoreCheckpointTime = 0.0;
 	
 	DHooks_HookGamerules();
 	
@@ -583,6 +598,11 @@ public void OnClientPutInServer(int client)
 	DHooks_HookClient(client);
 	
 	Player(client).Reset();
+	
+	if (AreClientCookiesCached(client))
+	{
+		OnClientCookiesCached(client);
+	}
 }
 
 public void OnClientDisconnect(int client)
@@ -596,7 +616,8 @@ public void OnClientDisconnect(int client)
 
 public void OnClientCookiesCached(int client)
 {
-	// TODO
+	ClientPrefs_RefreshQueue(client);
+	ClientPrefs_RefreshPreferences(client);
 }
 
 public void OnEntityCreated(int entity, const char[] classname)
@@ -798,7 +819,16 @@ void SetOffset(GameData gamedata, const char[] name)
 
 void SelectNewDefenders()
 {
-	ArrayList playerVector = new ArrayList(MaxClients);
+	CPrintToChatAll("%s %t", PLUGIN_TAG, "Queue_NewDefenders");
+	
+	// grab team names
+	char redTeamname[64], blueTeamname[64];
+	mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
+	mp_tournament_blueteamname.GetString(blueTeamname, sizeof(blueTeamname));
+	
+	g_bAllowTeamChange = true;
+	
+	ArrayList playerList = new ArrayList(MaxClients);
 	
 	// collect valid players
 	for (int client = 1; client <= MaxClients; client++)
@@ -806,50 +836,100 @@ void SelectNewDefenders()
 		if (!IsClientInGame(client))
 			continue;
 		
-		playerVector.Push(client);
+		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
+			continue;
+		
+		playerList.Push(client);
 	}
 	
-	// shuffle the vector to randomize defenders
-	playerVector.Sort(Sort_Random, Sort_Integer);
+	ArrayList defenderList = Queue_GetDefenderQueue();
+	int iDefenderCount = 0;
+	int iReqDefenderCount = RoundToNearest((float(playerList.Length) / float(MaxClients)) * mitm_defender_max_count.IntValue);
 	
-	int iDefenderCount = 0, iInvaderCount = 0;
-	
-	for (int i = 0; i < playerVector.Length; i++)
+	// select our defenders
+	for (int i = 0; i < defenderList.Length; i++)
 	{
-		int client = playerVector.Get(i);
+		int defender = defenderList.Get(i, QueueData::m_client);
 		
-		g_bAllowTeamChange = true;
+		TF2_ChangeClientTeam(defender, TFTeam_Defenders);
+		LogMessage("Assigned %N to team DEFENDERS (Queue Points: %d)", defender, Player(defender).m_defenderQueuePoints);
 		
-		if (iDefenderCount == 0)
+		Queue_SetPoints(defender, 0);
+		CPrintToChat(defender, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
+		
+		playerList.Erase(playerList.FindValue(defender));
+		
+		// If we have enough defenders, early out
+		if (iReqDefenderCount == ++iDefenderCount)
 		{
-			// first player always gets defender
-			TF2_ChangeClientTeam(client, TFTeam_Defenders);
-			iDefenderCount++;
+			break;
 		}
-		else
-		{
-			float flReqRatio = float(MaxClients) / mitm_defender_max_count.FloatValue;
-			float flCurRatio = float(iInvaderCount) / float(iDefenderCount);
-			if (flCurRatio < flReqRatio)
-			{
-				TF2_ChangeClientTeam(client, TFTeam_Spectator);
-				iInvaderCount++;
-			}
-			else
-			{
-				TF2_ChangeClientTeam(client, TFTeam_Defenders);
-				iDefenderCount++;
-			}
-		}
-		
-		// Defenders get stuck if the map resets without having picked a class
-		if (TF2_GetPlayerClass(client) == TFClass_Unknown)
-			TF2_SetPlayerClass(client, view_as<TFClassType>(GetRandomInt(view_as<int>(TFClass_Scout), view_as<int>(TFClass_Engineer))));
-		
-		g_bAllowTeamChange = false;
 	}
 	
-	delete playerVector;
+	if (iDefenderCount < iReqDefenderCount)
+	{
+		// we have less defenders than we wanted...
+		// let's just pick some random people, regardless of their defender preference
+		
+		playerList.Sort(Sort_Random, Sort_Integer);
+		
+		for (int i = 0; i < playerList.Length; i++)
+		{
+			int defender = playerList.Get(i);
+			
+			// we only want people who are not in the defender vector
+			if (defenderList.FindValue(defender, QueueData::m_client) != -1)
+				continue;
+			
+			if (iDefenderCount++ < iReqDefenderCount)
+			{
+				TF2_ChangeClientTeam(defender, TFTeam_Defenders);
+				
+				CPrintToChat(defender, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender_Forced", redTeamname);
+				LogMessage("Forced %N to team DEFENDERS", defender);
+				
+				playerList.Erase(i);
+			}
+		}
+	}
+	
+	// move everyone else to the spectator team
+	for (int i = 0; i < playerList.Length; i++)
+	{
+		int invader = playerList.Get(i);
+		
+		TF2_ChangeClientTeam(invader, TFTeam_Spectator);
+		LogMessage("Assigned %N to team ROBOTS (Queue Points: %d)", invader, Player(invader).m_defenderQueuePoints);
+		
+		if (Player(invader).HasPreference(PREF_DONT_BE_DEFENDER))
+		{
+			CPrintToChat(invader, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader_NoQueue", blueTeamname);
+		}
+		else if (!Player(invader).HasPreference(PREF_NO_SPAWNING))
+		{
+			Queue_AddPoints(invader, mitm_queue_points.IntValue);
+			CPrintToChat(invader, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname, mitm_queue_points.IntValue, Player(invader).m_defenderQueuePoints);
+		}
+	}
+	
+	g_bAllowTeamChange = false;
+	
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (TF2_GetClientTeam(client) != TFTeam_Defenders)
+			continue;
+		
+		// make sure the defender has a class
+		if (TF2_GetPlayerClass(client) == TFClass_Unknown)
+			ShowVGUIPanel(client, "class_red");
+	}
+	
+	// free the memory
+	delete playerList;
+	delete defenderList;
 }
 
 // TODO: This is missing some stuff.

@@ -158,8 +158,6 @@ public void EventHook_TeamplayRoundStart(Event event, const char[] name, bool do
 	{
 		tf_mvm_min_players_to_start.IntValue = 0;
 		g_bInWaitingForPlayers = false;
-		
-		PrintToChatAll("Selecting a new set of defenders...");
 	}
 }
 

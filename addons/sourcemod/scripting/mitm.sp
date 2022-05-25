@@ -808,6 +808,8 @@ void SetOffset(GameData gamedata, const char[] name)
 
 void SelectNewDefenders()
 {
+	PrintToChatAll("Selecting a new set of defenders...");
+	
 	g_bAllowTeamChange = true;
 	
 	ArrayList playerList = new ArrayList(MaxClients);

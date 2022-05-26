@@ -158,7 +158,7 @@ public MRESReturn DHookCallback_AllocateBots_Pre(int populator)
 
 public MRESReturn DHookCallback_RestoreCheckpoint_Pre(int populator)
 {
-	if (GameRules_GetRoundState() == RoundState_BetweenRounds)
+	if (!g_bInWaitingForPlayers)
 	{
 		// The populator calls this multiple times, but we only want it once...
 		if ((g_restoreCheckpointTime + 0.1) < GetGameTime())
@@ -903,7 +903,7 @@ public MRESReturn DHookCallback_ShouldGib_Pre(int player, DHookReturn ret, DHook
 public MRESReturn DHookCallback_EntSelectSpawnPoint_Pre(int player, DHookReturn ret)
 {
 	// override normal spawn behavior to spawn robots at the right place
-	if (Player(player).m_spawnPointEntity != -1)
+	if (IsValidEntity(Player(player).m_spawnPointEntity))
 	{
 		ret.Value = Player(player).m_spawnPointEntity;
 		return MRES_Supercede;

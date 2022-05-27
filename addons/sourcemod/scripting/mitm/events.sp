@@ -138,7 +138,7 @@ public void EventHook_PlayerBuiltObject(Event event, const char[] name, bool don
 	{
 		if (type == TFObject_Teleporter && TF2_GetObjectMode(index) == TFObjectMode_Exit)
 		{
-			CObjectTeleporter(index).SetTeleportWhere(Player(builder).m_teleportWhereName);
+			Entity(index).SetTeleportWhere(Player(builder).m_teleportWhereName);
 		}
 	}
 }

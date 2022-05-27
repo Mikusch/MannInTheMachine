@@ -1264,31 +1264,3 @@ methodmap CMissionPopulator
 		}
 	}
 }
-
-methodmap CObjectTeleporter
-{
-	public CObjectTeleporter(int entity)
-	{
-		return view_as<CObjectTeleporter>(entity);
-	}
-	
-	property CUtlVector m_teleportWhereName
-	{
-		public get()
-		{
-			return CUtlVector(GetEntityAddress(view_as<int>(this)) + GetOffset("CObjectTeleporter::m_teleportWhereName"));
-		}
-	}
-	
-	public void SetTeleportWhere(ArrayList teleportWhereName)
-	{
-		// deep copy strings
-		for (int i = 0; i < teleportWhereName.Length; ++i)
-		{
-			char name[64];
-			teleportWhereName.GetString(i, name, sizeof(name));
-			
-			this.m_teleportWhereName.AddToTail(StringToPtr(name, sizeof(name)));
-		}
-	}
-}

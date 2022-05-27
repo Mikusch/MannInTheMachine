@@ -35,6 +35,10 @@ static CountdownTimer m_cooldownTimer;
 static int s_activeMissionMembers;
 static int s_nSniperCount;
 
+// Engineer Teleporter
+static CBaseEntity s_lastTeleporter;
+static float s_flLastTeleportTime;
+
 void DHooks_Initialize(GameData gamedata)
 {
 	m_justSpawnedVector = new ArrayList(MaxClients);
@@ -54,6 +58,8 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CTFPlayer::ShouldForceAutoTeam", DHookCallback_ShouldForceAutoTeam_Pre);
 	CreateDynamicDetour(gamedata, "CBaseObject::FindSnapToBuildPos", DHookCallback_FindSnapToBuildPos_Pre, DHookCallback_FindSnapToBuildPos_Post);
 	CreateDynamicDetour(gamedata, "CSpawnLocation::FindSpawnLocation", _, DHookCallback_FindSpawnLocation_Post);
+	CreateDynamicDetour(gamedata, "DoTeleporterOverride", _, DHookCallback_DoTeleporterOverride_Post);
+	CreateDynamicDetour(gamedata, "OnBotTeleported", DHookCallback_OnBotTeleported_Pre);
 	
 	g_DHookEventKilled = CreateDynamicHook(gamedata, "CTFPlayer::Event_Killed");
 	g_DHookShouldGib = CreateDynamicHook(gamedata, "CTFPlayer::ShouldGib");
@@ -829,6 +835,134 @@ public MRESReturn DHookCallback_FindSpawnLocation_Post(Address populator, DHookR
 	s_spawnLocationResult = ret.Value;
 	
 	return MRES_Handled;
+}
+
+public MRESReturn DHookCallback_DoTeleporterOverride_Post(DHookReturn ret, DHookParam params)
+{
+	CBaseEntity spawnEnt = CBaseEntity(params.Get(1));
+	
+	float vSpawnPosition[3];
+	params.GetVector(2, vSpawnPosition);
+	
+	bool bClosestPointOnNav = params.Get(3);
+	
+	ArrayList teleporterList = new ArrayList();
+	
+	int obj = MaxClients + 1;
+	while ((obj = FindEntityByClassname(obj, "obj_*")) != -1)
+	{
+		if (TF2_GetObjectType(obj) != TFObject_Teleporter)
+			continue;
+		
+		if (view_as<TFTeam>(GetEntProp(obj, Prop_Data, "m_iTeamNum")) != TFTeam_Invaders)
+			continue;
+		
+		if (GetEntProp(obj, Prop_Send, "m_bBuilding"))
+			continue;
+		
+		if (GetEntProp(obj, Prop_Send, "m_bHasSapper"))
+			continue;
+		
+		if (GetEntProp(obj, Prop_Send, "m_bPlasmaDisable"))
+			continue;
+		
+		char szSpawnPointName[64];
+		spawnEnt.GetPropString(Prop_Data, "m_iName", szSpawnPointName, sizeof(szSpawnPointName));
+		
+		for (int iTelePoints = 0; iTelePoints < Entity(obj).m_teleportWhereName.Length; ++iTelePoints)
+		{
+			char teleportWhereName[64];
+			Entity(obj).m_teleportWhereName.GetString(iTelePoints, teleportWhereName, sizeof(teleportWhereName));
+			
+			if (StrEqual(teleportWhereName, szSpawnPointName, false))
+			{
+				teleporterList.Push(obj);
+				break;
+			}
+		}
+	}
+	
+	if (teleporterList.Length > 0)
+	{
+		int which = GetRandomInt(0, teleporterList.Length - 1);
+		CBaseEntity teleporter = CBaseEntity(teleporterList.Get(which));
+		teleporter.WorldSpaceCenter(vSpawnPosition);
+		s_lastTeleporter = teleporter;
+		
+		delete teleporterList;
+		params.SetVector(2, vSpawnPosition);
+		ret.Value = SPAWN_LOCATION_TELEPORTER;
+		return MRES_Supercede;
+	}
+	
+	float spawnEntCenter[3];
+	spawnEnt.WorldSpaceCenter(spawnEntCenter);
+	
+	CNavArea nav = TheNavMesh.GetNearestNavArea(spawnEntCenter);
+	if (!nav)
+	{
+		delete teleporterList;
+		ret.Value = SPAWN_LOCATION_NOT_FOUND;
+		return MRES_Supercede;
+	}
+	
+	nav.GetCenter(vSpawnPosition);
+	
+	if (bClosestPointOnNav)
+	{
+		nav.GetClosestPointOnArea(spawnEntCenter, vSpawnPosition);
+	}
+	else
+	{
+		nav.GetCenter(vSpawnPosition);
+	}
+	
+	delete teleporterList;
+	params.SetVector(2, vSpawnPosition);
+	ret.Value = SPAWN_LOCATION_NAV;
+	return MRES_Supercede;
+}
+
+public MRESReturn DHookCallback_OnBotTeleported_Pre(DHookParam params)
+{
+	// This crashes our server in local testing due to s_lastTeleporter being null
+	return MRES_Supercede;
+}
+
+void OnBotTeleported(int bot)
+{
+	float origin[3], angles[3];
+	s_lastTeleporter.GetAbsOrigin(origin);
+	s_lastTeleporter.GetAbsAngles(angles);
+	
+	// don't too many sound and effect when lots of bots teleporting in short time.
+	if (GetGameTime() - s_flLastTeleportTime > 0.1)
+	{
+		EmitGameSoundToAll("MVM.Robot_Teleporter_Deliver", s_lastTeleporter.index, .origin = origin);
+		
+		s_flLastTeleportTime = GetGameTime();
+	}
+	
+	// force bot to face in the direction specified by the teleporter
+	float vForward[3], botOrigin[3];
+	GetAngleVectors(angles, vForward, NULL_VECTOR, NULL_VECTOR);
+	GetClientAbsOrigin(bot, botOrigin);
+	
+	ScaleVector(vForward, 50.0);
+	AddVectors(botOrigin, vForward, vForward);
+	
+	TeleportEntity(bot, .angles = vForward);
+	
+	// spy shouldn't get any effect from the teleporter
+	if (TF2_GetPlayerClass(bot) != TFClass_Spy)
+	{
+		TF2_AddCondition(bot, TFCond_TeleportedGlow, 30.0);
+		
+		// invading bots get uber while they leave their spawn so they don't drop their cash where players can't pick it up
+		float flUberTime = tf_mvm_engineer_teleporter_uber_duration.FloatValue;
+		TF2_AddCondition(bot, TFCond_Ubercharged, flUberTime);
+		TF2_AddCondition(bot, TFCond_UberchargeFading, flUberTime);
+	}
 }
 
 public MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)

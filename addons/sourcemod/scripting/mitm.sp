@@ -464,6 +464,7 @@ ConVar mp_waitingforplayers_time;
 ConVar sv_stepsize;
 
 #include "mitm/data.sp"
+#include "mitm/entity.sp"
 
 #include "mitm/clientprefs.sp"
 #include "mitm/console.sp"
@@ -490,6 +491,8 @@ public void OnPluginStart()
 {
 	LoadTranslations("common.phrases");
 	LoadTranslations("mitm.phrases");
+	
+	Entity.InitializePropertyList();
 	
 	g_WarningHudSync = CreateHudSynchronizer();
 	g_offsets = new StringMap();
@@ -552,7 +555,6 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CTFPlayer::m_bIsMissionEnemy");
 		SetOffset(gamedata, "CTFPlayer::m_bIsLimitedSupportEnemy");
 		SetOffset(gamedata, "CTFPlayer::m_pWaveSpawnPopulator");
-		SetOffset(gamedata, "CObjectTeleporter::m_teleportWhereName");
 		
 		delete gamedata;
 	}
@@ -591,6 +593,11 @@ public void OnMapStart()
 		}
 	}
 	delete directory;
+}
+
+public void OnEntityDestroyed(int entity)
+{
+	Entity(entity).Destroy();
 }
 
 public void OnClientPutInServer(int client)
@@ -930,33 +937,6 @@ void SelectNewDefenders()
 	// free the memory
 	delete playerList;
 	delete defenderList;
-}
-
-// TODO: This is missing some stuff.
-// We need to override DoTeleporterOverride to have access to the
-// teleporter itself and complete the function.
-void OnBotTeleported(int bot)
-{
-	static float s_flLastTeleportTime;
-	
-	// don't too many sound and effect when lots of bots teleporting in short time.
-	if (GetGameTime() - s_flLastTeleportTime > 0.1)
-	{
-		EmitGameSoundToAll("MVM.Robot_Teleporter_Deliver", bot);
-		
-		s_flLastTeleportTime = GetGameTime();
-	}
-	
-	// spy shouldn't get any effect from the teleporter
-	if (TF2_GetPlayerClass(bot) != TFClass_Spy)
-	{
-		TF2_AddCondition(bot, TFCond_TeleportedGlow, 30.0);
-		
-		// invading bots get uber while they leave their spawn so they don't drop their cash where players can't pick it up
-		float flUberTime = tf_mvm_engineer_teleporter_uber_duration.FloatValue;
-		TF2_AddCondition(bot, TFCond_Ubercharged, flUberTime);
-		TF2_AddCondition(bot, TFCond_UberchargeFading, flUberTime);
-	}
 }
 
 void FireWeaponAtEnemy(int client, int &buttons)

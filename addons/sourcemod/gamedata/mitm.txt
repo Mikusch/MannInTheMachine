@@ -156,6 +156,16 @@
 				"linux"		"@_ZN27CTFBotMvMEngineerHintFinder8FindHintEbbP7CHandleI22CTFBotHintEngineerNestE"
 				"windows"	"\x55\x8B\xEC\x81\xEC\xCC\x04\x00\x00"
 			}
+			"DoTeleporterOverride"
+			{
+				"linux"		"@_Z20DoTeleporterOverrideP11CBaseEntityR6Vectorb"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x1C\x53\x56\x33\xC9"
+			}
+			"OnBotTeleported"
+			{
+				"linux"		"@_Z15OnBotTeleportedP6CTFBot"
+				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x83\xEC\x40\x56\x83\xF8\xFF"
+			}
 		}
 		"Offsets"
 		{
@@ -218,11 +228,6 @@
 			{
 				"linux"		"8848"
 				"windows"	"8844"
-			}
-			"CObjectTeleporter::m_teleportWhereName"
-			{
-				"linux"		"2776"
-				"windows"	"2796"
 			}
 			"CTFBotSpawner::m_class"
 			{
@@ -500,6 +505,43 @@
 					{
 						"type"	"vectorptr"
 						"flags"	"byref"
+					}
+				}
+			}
+			"DoTeleporterOverride"
+			{
+				"signature"		"DoTeleporterOverride"
+				"callconv"		"cdecl"
+				"return"		"int"
+				"this"			"ignore"
+				"arguments"
+				{
+					"spawnEnt"
+					{
+						"type"	"cbaseentity"
+					}
+					"vSpawnPosition"
+					{
+						"type"	"vectorptr"
+						"flags"	"byref"
+					}
+					"bClosestPointOnNav"
+					{
+						"type"	"bool"
+					}
+				}
+			}
+			"OnBotTeleported"
+			{
+				"signature"		"OnBotTeleported"
+				"callconv"		"cdecl"
+				"return"		"void"
+				"this"			"ignore"
+				"arguments"
+				{
+					"bot"
+					{
+						"type"	"cbaseentity"
 					}
 				}
 			}

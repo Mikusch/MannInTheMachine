@@ -670,7 +670,10 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 			TF2_AddCondition(client, TFCond_UberchargeFading, 0.5);
 			
 			// force bots to walk out of spawn
-			TF2Attrib_SetByName(client, "no_jump", 1.0);
+			if (!Player(client).ShouldAutoJump())
+			{
+				TF2Attrib_SetByName(client, "no_jump", 1.0);
+			}
 			
 			if (mitm_spawn_hurry_time.FloatValue)
 			{

@@ -364,7 +364,6 @@
 					"rawHere"
 					{
 						"type"	"vectorptr"
-						"flags"	"byref"
 					}
 					"result"
 					{
@@ -504,7 +503,6 @@
 					"vSpawnPosition"
 					{
 						"type"	"vectorptr"
-						"flags"	"byref"
 					}
 				}
 			}
@@ -523,7 +521,6 @@
 					"vSpawnPosition"
 					{
 						"type"	"vectorptr"
-						"flags"	"byref"
 					}
 					"bClosestPointOnNav"
 					{

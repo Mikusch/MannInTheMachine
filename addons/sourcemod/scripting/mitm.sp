@@ -650,7 +650,18 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	return Plugin_Continue;
 }
 
-public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
+public void OnGameFrame()
+{
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		OnClientGameFrame(client);
+	}
+}
+
+public void OnClientGameFrame(int client)
 {
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders && IsPlayerAlive(client))
 	{
@@ -685,6 +696,12 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 				}
 				else
 				{
+					if (TF2_IsPlayerInCondition(client, TFCond_Dazed))
+					{
+						// If we are stunned in our spawn, extend the time
+						Player(client).m_flRequiredSpawnLeaveTime += GetGameFrameTime();
+					}
+					
 					float flTimeLeft = Player(client).m_flRequiredSpawnLeaveTime - GetGameTime();
 					if (flTimeLeft <= 0.0)
 					{
@@ -697,6 +714,10 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 						ShowSyncHudText(client, g_WarningHudSync, "You have %1.2f seconds to leave the spawn area.", flTimeLeft);
 					}
 				}
+			}
+			else
+			{
+				Player(client).m_flRequiredSpawnLeaveTime = 0.0;
 			}
 		}
 		else

@@ -48,6 +48,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CPopulationManager::RestoreCheckpoint", DHookCallback_RestoreCheckpoint_Pre);
 	CreateDynamicDetour(gamedata, "CTFBotSpawner::Spawn", DHookCallback_Spawn_Pre);
 	CreateDynamicDetour(gamedata, "CPopulationManager::Update", DHookCallback_PopulationManagerUpdate_Pre, DHookCallback_PopulationManagerUpdate_Post);
+	CreateDynamicDetour(gamedata, "CPeriodicSpawnPopulator::Update", _, DHookCallback_PeriodicSpawnPopulatorUpdate_Post);
 	CreateDynamicDetour(gamedata, "CWaveSpawnPopulator::Update", _, DHookCallback_WaveSpawnPopulatorUpdate_Post);
 	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMission", DHookCallback_MissionPopulatorUpdateMission_Pre, DHookCallback_MissionPopulatorUpdateMission_Post);
 	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMissionDestroySentries", DHookCallback_UpdateMissionDestroySentries_Pre);
@@ -477,6 +478,25 @@ public MRESReturn DHookCallback_PopulationManagerUpdate_Post(int populator)
 	return MRES_Handled;
 }
 
+public MRESReturn DHookCallback_PeriodicSpawnPopulatorUpdate_Post(Address pThis)
+{
+	for (int i = 0; i < m_justSpawnedVector.Length; i++)
+	{
+		int player = m_justSpawnedVector.Get(i);
+		
+		// what bot should do after spawning at teleporter exit
+		if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
+		{
+			OnBotTeleported(player);
+		}
+	}
+	
+	// After we are done, clear the vector
+	m_justSpawnedVector.Clear();
+	
+	return MRES_Handled;
+}
+
 public MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 {
 	for (int i = 0; i < m_justSpawnedVector.Length; i++)
@@ -508,7 +528,7 @@ public MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 	// After we are done, clear the vector
 	m_justSpawnedVector.Clear();
 	
-	return MRES_Supercede;
+	return MRES_Handled;
 }
 
 public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Pre(Address pThis, DHookReturn ret, DHookParam params)

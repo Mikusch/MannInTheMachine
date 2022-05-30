@@ -56,6 +56,11 @@
 				"linux"		"@_ZN18CPopulationManager6UpdateEv"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x18\x53\x56\x57\x8B\xF9\x33\xF6"
 			}
+			"CPeriodicSpawnPopulator::Update"
+			{
+				"linux"		"@_ZN23CPeriodicSpawnPopulator6UpdateEv"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x24\x53\x8B\xD9\x56\x8B\x43\x38"
+			}
 			"CWaveSpawnPopulator::Update"
 			{
 				"linux"		"@_ZN19CWaveSpawnPopulator6UpdateEv"
@@ -377,6 +382,13 @@
 				"callconv"	"thiscall"
 				"return"	"void"
 				"this"		"entity"
+			}
+			"CPeriodicSpawnPopulator::Update"
+			{
+				"signature"	"CPeriodicSpawnPopulator::Update"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"address"
 			}
 			"CWaveSpawnPopulator::Update"
 			{

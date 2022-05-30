@@ -449,14 +449,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 			}
 		}
 		
-		// Populated from CSpawnLocation::FindSpawnLocation detour.
-		// We can't use CWaveSpawnPopulator::m_spawnLocationResult because it gets overridden in some cases.
-		if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
-		{
-			OnBotTeleported(newPlayer);
-		}
-		
-		// For easy access in WaveSpawnPopulator::Update()
+		// For easy access in populator callbacks
 		m_justSpawnedVector.Push(newPlayer);
 	}
 	else
@@ -505,14 +498,11 @@ public MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 			SetEntData(player, GetOffset("CTFPlayer::m_bIsLimitedSupportEnemy"), true);
 		}
 		
-		// TODO
-		/*
 		// what bot should do after spawning at teleporter exit
-		if ( bTeleported )
+		if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
 		{
-			OnBotTeleported( bot );
+			OnBotTeleported(player);
 		}
-		*/
 	}
 	
 	// After we are done, clear the vector
@@ -623,6 +613,11 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 					HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_SNIPER_CALLOUT", TFTeam_Defenders);
 				}
 			}
+		}
+		
+		if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
+		{
+			OnBotTeleported(player);
 		}
 	}
 	
@@ -849,7 +844,8 @@ public MRESReturn DHookCallback_FindSnapToBuildPos_Post(int obj, DHookReturn ret
 
 public MRESReturn DHookCallback_FindSpawnLocation_Post(Address populator, DHookReturn ret, DHookParam params)
 {
-	// store for use in CTFBotSpawner::Spawn detour
+	// Store for use in populator callbacks.
+	// We can't use CWaveSpawnPopulator::m_spawnLocationResult because it gets overridden in some cases.
 	s_spawnLocationResult = ret.Value;
 	
 	return MRES_Handled;

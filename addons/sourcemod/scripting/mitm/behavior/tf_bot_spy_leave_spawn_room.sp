@@ -18,7 +18,7 @@
 static CountdownTimer m_waitTimer[MAXPLAYERS + 1];
 static int m_attempt[MAXPLAYERS + 1];
 
-void SpyLeaveSpawnRoomStart(int me)
+void CTFBotSpyLeaveSpawnRoom_OnStart(int me)
 {
 	// disguise as enemy team
 	Player(me).DisguiseAsMemberOfEnemyTeam();
@@ -32,7 +32,7 @@ void SpyLeaveSpawnRoomStart(int me)
 	m_attempt[me] = 0;
 }
 
-void SpyLeaveSpawnRoomUpdate(int me)
+void CTFBotSpyLeaveSpawnRoom_Update(int me)
 {
 	if (m_waitTimer[me].HasStarted() && m_waitTimer[me].IsElapsed())
 	{
@@ -94,7 +94,7 @@ void SpyLeaveSpawnRoomUpdate(int me)
 	}
 }
 
-bool TeleportNearVictim(int me, int victim, int attempt)
+static bool TeleportNearVictim(int me, int victim, int attempt)
 {
 	if (victim == -1)
 	{

@@ -466,6 +466,11 @@ ConVar sv_stepsize;
 #include "mitm/data.sp"
 #include "mitm/entity.sp"
 
+#include "mitm/behavior/tf_bot_deliver_flag.sp"
+#include "mitm/behavior/tf_bot_fetch_flag.sp"
+#include "mitm/behavior/tf_bot_spy_leave_spawn_room.sp"
+#include "mitm/behavior/tf_bot_mvm_deploy_bomb.sp"
+
 #include "mitm/clientprefs.sp"
 #include "mitm/console.sp"
 #include "mitm/dhooks.sp"
@@ -475,8 +480,6 @@ ConVar sv_stepsize;
 #include "mitm/menus.sp"
 #include "mitm/sdkcalls.sp"
 #include "mitm/sdkhooks.sp"
-#include "mitm/deploy_bomb.sp"
-#include "mitm/spy.sp"
 
 public Plugin myinfo =
 {
@@ -521,7 +524,6 @@ public void OnPluginStart()
 	Console_Initialize();
 	Events_Initialize();
 	ClientPrefs_Initialize();
-	SDKHooks_Initialize();
 	
 	GameData gamedata = new GameData("mitm");
 	if (gamedata)
@@ -728,11 +730,15 @@ public void OnClientGameFrame(int client)
 			TF2Attrib_RemoveByName(client, "no_jump");
 		}
 		
-		// CTFBotScenarioMonitor::DesiredScenarioAndClassAction
+		if (SDKCall_HasTheFlag(client))
+		{
+			CTFBotDeliverFlag_Update(client);
+			return;
+		}
 		
 		if (TF2_GetPlayerClass(client) == TFClass_Spy)
 		{
-			SpyLeaveSpawnRoomUpdate(client);
+			CTFBotSpyLeaveSpawnRoom_Update(client);
 			return;
 		}
 		
@@ -763,29 +769,7 @@ public void OnClientGameFrame(int client)
 			return;
 		}
 		
-		// CTFBotFetchFlag
-		int flag = Player(client).GetFlagToFetch();
-		if (flag != -1)
-		{
-			if (GetEntProp(flag, Prop_Send, "m_nFlagStatus") == TF_FLAGINFO_HOME)
-			{
-				if (GetGameTime() - GetEntDataFloat(client, GetOffset("CTFPlayer::m_flSpawnTime")) < 1.0 && TF2_GetClientTeam(client) != TFTeam_Spectator)
-				{
-					// we just spawned - give us the flag
-					SDKCall_PickUp(flag, client, true);
-				}
-			}
-		}
-		
-		// CTFBotMvMDeployBomb
-		// TODO: Check contact with func_capturezone here and do deployment stuff, then remove deploying check below
-		
-		// CTFBotDeliverFlag
-		if (SDKCall_HasTheFlag(client) && Player(client).m_nDeployingBombState == TF_BOMB_DEPLOYING_NONE && Player(client).UpgradeOverTime())
-		{
-			// Taunting for our new upgrade
-			FakeClientCommand(client, "taunt");
-		}
+		CTFBotFetchFlag_Update(client);
 	}
 }
 

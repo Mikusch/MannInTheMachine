@@ -18,23 +18,13 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static MvMBombDeploy g_bombDeploy[MAXPLAYERS + 1];
-
-void SDKHooks_Initialize()
-{
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		g_bombDeploy[client].player = client;
-	}
-}
-
 void SDKHooks_OnEntityCreated(int entity, const char[] classname)
 {
 	if (StrEqual(classname, "func_capturezone"))
 	{
 		SDKHook(entity, SDKHook_StartTouch, SDKHookCB_CaptureZone_StartTouch);
-		SDKHook(entity, SDKHook_EndTouch, SDKHookCB_CaptureZone_EndTouch);
 		SDKHook(entity, SDKHook_Touch, SDKHookCB_CaptureZone_Touch);
+		SDKHook(entity, SDKHook_EndTouch, SDKHookCB_CaptureZone_EndTouch);
 	}
 }
 
@@ -42,17 +32,7 @@ public Action SDKHookCB_CaptureZone_StartTouch(int zone, int other)
 {
 	if (0 < other <= MaxClients && SDKCall_HasTheFlag(other))
 	{
-		g_bombDeploy[other].Start();
-	}
-	
-	return Plugin_Continue;
-}
-
-public Action SDKHookCB_CaptureZone_EndTouch(int zone, int other)
-{
-	if (0 < other <= MaxClients && SDKCall_HasTheFlag(other))
-	{
-		g_bombDeploy[other].End();
+		CTFBotMvMDeployBomb_OnStart(other);
 	}
 	
 	return Plugin_Continue;
@@ -62,7 +42,17 @@ public Action SDKHookCB_CaptureZone_Touch(int zone, int other)
 {
 	if (0 < other <= MaxClients && SDKCall_HasTheFlag(other))
 	{
-		g_bombDeploy[other].Update();
+		CTFBotMvMDeployBomb_Update(other);
+	}
+	
+	return Plugin_Continue;
+}
+
+public Action SDKHookCB_CaptureZone_EndTouch(int zone, int other)
+{
+	if (0 < other <= MaxClients && SDKCall_HasTheFlag(other))
+	{
+		CTFBotMvMDeployBomb_OnEnd(other);
 	}
 	
 	return Plugin_Continue;

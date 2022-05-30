@@ -37,7 +37,7 @@ public void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroad
 	{
 		if (TF2_GetPlayerClass(client) == TFClass_Spy)
 		{
-			SpyLeaveSpawnRoomStart(client);
+			CTFBotSpyLeaveSpawnRoom_OnStart(client);
 		}
 	}
 }
@@ -176,7 +176,7 @@ public void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool don
 				tf_avoidteammates_pushaway.ReplicateToClient(player, "0");
 			}
 			
-			Player(player).UpgradeStart();
+			CTFBotDeliverFlag_OnStart(player);
 		}
 		case TF_FLAGEVENT_DROPPED, TF_FLAGEVENT_CAPTURED:
 		{
@@ -184,6 +184,8 @@ public void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool don
 			{
 				tf_avoidteammates_pushaway.ReplicateToClient(player, "1");
 			}
+			
+			CTFBotDeliverFlag_OnEnd(player);
 		}
 	}
 }

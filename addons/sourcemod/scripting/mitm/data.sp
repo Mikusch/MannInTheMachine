@@ -21,11 +21,6 @@
 #define DONT_UPGRADE	-1
 #define MY_CURRENT_GUN	0
 
-// Bomb Upgrade
-static CountdownTimer m_upgradeTimer[MAXPLAYERS + 1];
-static CountdownTimer m_buffPulseTimer[MAXPLAYERS + 1];
-static int m_upgradeLevel[MAXPLAYERS + 1];
-
 // Auto Jump
 static CountdownTimer m_autoJumpTimer[MAXPLAYERS + 1];
 static float m_flAutoJumpMin[MAXPLAYERS + 1];
@@ -39,7 +34,6 @@ static ArrayList m_eventChangeAttributes[MAXPLAYERS + 1];
 static ArrayList m_tags[MAXPLAYERS + 1];
 static WeaponRestrictionType m_weaponRestrictionFlags[MAXPLAYERS + 1];
 static AttributeType m_attributeFlags[MAXPLAYERS + 1];
-static BombDeployingState_t m_nDeployingBombState[MAXPLAYERS + 1];
 static char m_szIdleSound[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
 static float m_fModelScaleOverride[MAXPLAYERS + 1];
 static MissionType m_mission[MAXPLAYERS + 1];
@@ -64,18 +58,6 @@ methodmap Player
 		public get()
 		{
 			return view_as<int>(this);
-		}
-	}
-	
-	property int m_upgradeLevel
-	{
-		public get()
-		{
-			return m_upgradeLevel[this._client];
-		}
-		public set(int upgradeLevel)
-		{
-			m_upgradeLevel[this._client] = upgradeLevel;
 		}
 	}
 	
@@ -244,18 +226,6 @@ methodmap Player
 		public set(int preferences)
 		{
 			m_preferences[this._client] = preferences;
-		}
-	}
-	
-	property BombDeployingState_t m_nDeployingBombState
-	{
-		public get()
-		{
-			return m_nDeployingBombState[this._client];
-		}
-		public set(BombDeployingState_t nDeployingBombState)
-		{
-			m_nDeployingBombState[this._client] = nDeployingBombState;
 		}
 	}
 	
@@ -880,136 +850,30 @@ methodmap Player
 		return false;
 	}
 	
-	public bool UpgradeStart()
+	public int GetClosestCaptureZone()
 	{
-		if (!tf_mvm_bot_allow_flag_carrier_to_fight.BoolValue)
-		{
-			this.SetAttribute(SUPPRESS_FIRE);
-		}
+		int captureZone = -1;
+		float flClosestDistance = float(cellmax);
 		
-		// mini-bosses don't upgrade - they are already tough
-		if (GetEntProp(this._client, Prop_Send, "m_bIsMiniBoss"))
+		int tempCaptureZone = MaxClients + 1;
+		while ((tempCaptureZone = FindEntityByClassname(tempCaptureZone, "func_capturezone")) != -1)
 		{
-			// Set threat level to max
-			this.m_upgradeLevel = DONT_UPGRADE;
-			SetEntProp(TFObjectiveResource(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 4);
-			SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", -1.0);
-			SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", -1.0);
-		}
-		else
-		{
-			this.m_upgradeLevel = 0;
-			m_upgradeTimer[this._client].Start(tf_mvm_bot_flag_carrier_interval_to_1st_upgrade.FloatValue);
-			SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
-			SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[this._client].GetRemainingTime());
-		}
-	}
-	
-	public bool UpgradeOverTime()
-	{
-		if (this.m_upgradeLevel != DONT_UPGRADE)
-		{
-			CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(this._client).GetLastKnownArea());
-			TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(this._client) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
-			
-			if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
+			if (!GetEntProp(tempCaptureZone, Prop_Data, "m_bDisabled") && GetEntProp(tempCaptureZone, Prop_Data, "m_iTeamNum") == GetClientTeam(this._client))
 			{
-				// don't start counting down until we leave the spawn
-				m_upgradeTimer[this._client].Start(tf_mvm_bot_flag_carrier_interval_to_1st_upgrade.FloatValue);
-				SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
-				SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[this._client].GetRemainingTime());
-			}
-			
-			// do defensive buff effect ourselves (since we're not a soldier)
-			if (this.m_upgradeLevel > 0 && m_buffPulseTimer[this._client].IsElapsed())
-			{
-				m_buffPulseTimer[this._client].Start(1.0);
+				float origin[3], center[3];
+				GetClientAbsOrigin(this._client, origin);
+				CBaseEntity(tempCaptureZone).WorldSpaceCenter(center);
 				
-				const float buffRadius = 450.0;
-				
-				for (int client = 1; client <= MaxClients; client++)
+				float fCurrentDistance = GetVectorDistance(origin, center);
+				if (flClosestDistance > fCurrentDistance)
 				{
-					if (!IsClientInGame(client))
-						continue;
-					
-					if (TF2_GetClientTeam(client) != TF2_GetClientTeam(this._client))
-						continue;
-					
-					if (!IsPlayerAlive(client))
-						continue;
-					
-					if (IsRangeLessThan(this._client, client, buffRadius))
-					{
-						TF2_AddCondition(client, TFCond_DefenseBuffNoCritBlock, 1.2);
-					}
-				}
-			}
-			
-			// the flag carrier gets stronger the longer he holds the flag
-			if (m_upgradeTimer[this._client].IsElapsed())
-			{
-				const int maxLevel = 3;
-				
-				if (this.m_upgradeLevel < maxLevel)
-				{
-					++this.m_upgradeLevel;
-					
-					EmitGameSoundToAll("MVM.Warning");
-					
-					switch (this.m_upgradeLevel)
-					{
-						//---------------------------------------
-						case 1:
-						{
-							m_upgradeTimer[this._client].Start(tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade.FloatValue);
-							
-							// permanent buff banner effect (handled above)
-							
-							// update the objective resource so clients have the information
-							SetEntProp(TFObjectiveResource(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 1);
-							SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
-							SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[this._client].GetRemainingTime());
-							HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE1", TFTeam_Defenders);
-							DispatchParticleEffect("mvm_levelup1", PATTACH_POINT_FOLLOW, this._client, "head");
-							return true;
-						}
-						
-						//---------------------------------------
-						case 2:
-						{
-							m_upgradeTimer[this._client].Start(tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade.FloatValue);
-							
-							TF2Attrib_SetByName(this._client, "health regen", tf_mvm_bot_flag_carrier_health_regen.FloatValue);
-							
-							// update the objective resource so clients have the information
-							SetEntProp(TFObjectiveResource(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 2);
-							SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
-							SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[this._client].GetRemainingTime());
-							HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE2", TFTeam_Defenders);
-							DispatchParticleEffect("mvm_levelup2", PATTACH_POINT_FOLLOW, this._client, "head");
-							return true;
-						}
-						
-						//---------------------------------------
-						case 3:
-						{
-							// add critz
-							TF2_AddCondition(this._client, TFCond_CritCanteen);
-							
-							// update the objective resource so clients have the information
-							SetEntProp(TFObjectiveResource(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 3);
-							SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", -1.0);
-							SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", -1.0);
-							HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE3", TFTeam_Defenders);
-							DispatchParticleEffect("mvm_levelup3", PATTACH_POINT_FOLLOW, this._client, "head");
-							return true;
-						}
-					}
+					captureZone = tempCaptureZone;
+					flClosestDistance = fCurrentDistance;
 				}
 			}
 		}
 		
-		return false;
+		return captureZone;
 	}
 	
 	public void DisguiseAsMemberOfEnemyTeam()
@@ -1067,10 +931,6 @@ methodmap Player
 	
 	public void ResetOnTeamChange()
 	{
-		m_upgradeTimer[this._client].Invalidate();
-		m_buffPulseTimer[this._client].Invalidate();
-		this.m_upgradeLevel = DONT_UPGRADE;
-		
 		this.SetAutoJump(0.0, 0.0);
 		m_autoJumpTimer[this._client].Invalidate();
 		
@@ -1081,7 +941,6 @@ methodmap Player
 		this.ClearWeaponRestrictions();
 		this.ClearAllAttributes();
 		this.ClearIdleSound();
-		this.m_nDeployingBombState = TF_BOMB_DEPLOYING_NONE;
 		this.m_fModelScaleOverride = 0.0;
 		this.m_flRequiredSpawnLeaveTime = 0.0;
 		this.m_spawnPointEntity = -1;

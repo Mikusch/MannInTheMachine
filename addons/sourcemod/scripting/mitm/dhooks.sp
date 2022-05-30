@@ -58,6 +58,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CTFPlayer::CheckInstantLoadoutRespawn", DHookCallback_CheckInstantLoadoutRespawn_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayer::ShouldForceAutoTeam", DHookCallback_ShouldForceAutoTeam_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayer::DoClassSpecialSkill", DHookCallback_DoClassSpecialSkill_Pre);
+	CreateDynamicDetour(gamedata, "CTFPlayer::RemoveAllOwnedEntitiesFromWorld", DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre);
 	CreateDynamicDetour(gamedata, "CBaseObject::FindSnapToBuildPos", DHookCallback_FindSnapToBuildPos_Pre, DHookCallback_FindSnapToBuildPos_Post);
 	CreateDynamicDetour(gamedata, "CSpawnLocation::FindSpawnLocation", _, DHookCallback_FindSpawnLocation_Post);
 	CreateDynamicDetour(gamedata, "DoTeleporterOverride", _, DHookCallback_DoTeleporterOverride_Post);
@@ -804,6 +805,17 @@ public MRESReturn DHookCallback_DoClassSpecialSkill_Pre(int player, DHookReturn 
 			ret.Value = false;
 			return MRES_Supercede;
 		}
+	}
+	
+	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre(int player, DHookParam params)
+{
+	if (Player(player).HasAttribute(RETAIN_BUILDINGS))
+	{
+		// keep this bot's buildings
+		return MRES_Supercede;
 	}
 	
 	return MRES_Ignored;

@@ -450,7 +450,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 			}
 		}
 		
-		// For easy access in populator callbacks
+		// For easy access in populator spawner callbacks
 		m_justSpawnedVector.Push(newPlayer);
 	}
 	else
@@ -978,14 +978,7 @@ void OnBotTeleported(int bot)
 	}
 	
 	// force bot to face in the direction specified by the teleporter
-	float vForward[3], botOrigin[3];
-	GetAngleVectors(angles, vForward, NULL_VECTOR, NULL_VECTOR);
-	GetClientAbsOrigin(bot, botOrigin);
-	
-	ScaleVector(vForward, 50.0);
-	AddVectors(botOrigin, vForward, vForward);
-	
-	TeleportEntity(bot, .angles = vForward);
+	TeleportEntity(bot, .angles = angles);
 	
 	// spy shouldn't get any effect from the teleporter
 	if (TF2_GetPlayerClass(bot) != TFClass_Spy)

@@ -35,7 +35,7 @@ void CTFBotMvMDeployBomb_OnStart(int me)
 	}
 }
 
-void CTFBotMvMDeployBomb_Update(int me)
+bool CTFBotMvMDeployBomb_Update(int me)
 {
 	int areaTrigger = -1;
 	
@@ -44,19 +44,17 @@ void CTFBotMvMDeployBomb_Update(int me)
 		areaTrigger = Player(me).GetClosestCaptureZone();
 		if (areaTrigger == -1)
 		{
-			CTFBotMvMDeployBomb_OnEnd(me);
-			return;
+			return false;
 		}
-		
-		const float movedRange = 20.0;
 		
 		float meOrigin[3];
 		GetClientAbsOrigin(me, meOrigin);
 		
+		// if we've been moved, give up and go back to normal behavior
+		const float movedRange = 20.0;
 		if (GetVectorDistance(m_anchorPos[me], meOrigin) > movedRange)
 		{
-			CTFBotMvMDeployBomb_OnEnd(me);
-			return;
+			return false;
 		}
 		
 		// slam facing towards bomb hole
@@ -114,11 +112,12 @@ void CTFBotMvMDeployBomb_Update(int me)
 				m_nDeployingBombState[me] = TF_BOMB_DEPLOYING_NONE;
 				SetEntProp(me, Prop_Data, "m_takedamage", DAMAGE_YES);
 				SDKHooks_TakeDamage(me, me, me, 99999.9, DMG_CRUSH);
-				CTFBotMvMDeployBomb_OnEnd(me);
-				return;
+				return false;
 			}
 		}
 	}
+	
+	return true;
 }
 
 void CTFBotMvMDeployBomb_OnEnd(int me)
@@ -139,9 +138,4 @@ void CTFBotMvMDeployBomb_OnEnd(int me)
 	}
 	
 	m_nDeployingBombState[me] = TF_BOMB_DEPLOYING_NONE;
-}
-
-bool IsDeployingBomb(int client)
-{
-	return m_nDeployingBombState[client] != TF_BOMB_DEPLOYING_NONE;
 }

@@ -15,9 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+static bool g_bInCaptureZone;
+
 static CountdownTimer m_upgradeTimer[MAXPLAYERS + 1];
 static CountdownTimer m_buffPulseTimer[MAXPLAYERS + 1];
 static int m_upgradeLevel[MAXPLAYERS + 1];
+static bool m_bIsDeploying[MAXPLAYERS + 1];
 
 void CTFBotDeliverFlag_OnStart(int me)
 {
@@ -46,10 +49,35 @@ void CTFBotDeliverFlag_OnStart(int me)
 
 void CTFBotDeliverFlag_Update(int me)
 {
-	if (IsDeployingBomb(me))
+	// like a crappy version of CTFBotDeliverFlag::OnContact, but good enough
+	if (m_bIsDeploying[me])
 	{
-		// Only abort here, bomb deployment logic is done in sdkhooks.sp
-		return;
+		if (CTFBotMvMDeployBomb_Update(me))
+		{
+			// currently deploying
+			return;
+		}
+		
+		// end deploying
+		m_bIsDeploying[me] = false;
+		CTFBotMvMDeployBomb_OnEnd(me);
+	}
+	else
+	{
+		g_bInCaptureZone = false;
+		
+		// check if the player is in a capture zone
+		float origin[3];
+		GetClientAbsOrigin(me, origin);
+		TR_EnumerateEntities(origin, origin, PARTITION_TRIGGER_EDICTS, RayType_EndPoint, EnumerateEntities);
+		
+		if (g_bInCaptureZone)
+		{
+			// begin deploying
+			m_bIsDeploying[me] = true;
+			CTFBotMvMDeployBomb_OnStart(me);
+			return;
+		}
 	}
 	
 	if (SDKCall_HasTheFlag(me) && UpgradeOverTime(me))
@@ -65,7 +93,7 @@ void CTFBotDeliverFlag_OnEnd(int me)
 	
 	if (GameRules_IsMannVsMachineMode())
 	{
-		// ResetRageBuffs
+		SDKCall_ResetRageBuffs(GetPlayerShared(me));
 	}
 }
 
@@ -174,4 +202,20 @@ static bool UpgradeOverTime(int me)
 	}
 	
 	return false;
+}
+
+static bool EnumerateEntities(int entity)
+{
+	char classname[64];
+	if (GetEntityClassname(entity, classname, sizeof(classname)) && StrEqual(classname, "func_capturezone"))
+	{
+		Handle trace = TR_ClipCurrentRayToEntityEx(MASK_ALL, entity);
+		bool didHit = TR_DidHit(trace);
+		delete trace;
+		
+		g_bInCaptureZone = didHit;
+		return !didHit;
+	}
+	
+	return true;
 }

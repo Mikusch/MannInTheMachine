@@ -419,3 +419,9 @@ int GetCurrentWaveIndex()
 	int stats = FindEntityByClassname(MaxClients + 1, "tf_mann_vs_machine_stats");
 	return GetEntProp(stats, Prop_Send, "m_iCurrentWaveIdx");
 }
+
+Address GetPlayerShared(int client)
+{
+	Address offset = view_as<Address>(GetEntSendPropOffs(client, "m_Shared", true));
+	return GetEntityAddress(client) + offset;
+}

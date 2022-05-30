@@ -28,6 +28,7 @@ static Handle g_SDKCallCapture;
 static Handle g_SDKCallDoAnimationEvent;
 static Handle g_SDKCallPlaySpecificSequence;
 static Handle g_SDKCallDoClassSpecialSkill;
+static Handle g_SDKCallResetRageBuffs;
 static Handle g_SDKCallGetHealthMultiplier;
 static Handle g_SDKCallResetMap;
 static Handle g_SDKCallIsSpaceToSpawnHere;
@@ -55,6 +56,7 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallDoAnimationEvent = PrepSDKCall_DoAnimationEvent(gamedata);
 	g_SDKCallPlaySpecificSequence = PrepSDKCall_PlaySpecificSequence(gamedata);
 	g_SDKCallDoClassSpecialSkill = PrepSDKCall_DoClassSpecialSkill(gamedata);
+	g_SDKCallResetRageBuffs = PrepSDKCall_ResetRageBuffs(gamedata);
 	g_SDKCallGetHealthMultiplier = PrepSDKCall_GetHealthMultiplier(gamedata);
 	g_SDKCallResetMap = PrepSDKCall_ResetMap(gamedata);
 	g_SDKCallIsSpaceToSpawnHere = PrepSDKCall_IsSpaceToSpawnHere(gamedata);
@@ -197,6 +199,18 @@ static Handle PrepSDKCall_DoClassSpecialSkill(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_ResetRageBuffs(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Raw);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayerShared::ResetRageBuffs");
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFPlayerShared::ResetRageBuffs");
+	
+	return call;
+}
+
 static Handle PrepSDKCall_GetHealthMultiplier(GameData gamedata)
 {
 	StartPrepSDKCall(SDKCall_Entity);
@@ -335,6 +349,12 @@ bool SDKCall_DoClassSpecialSkill(int player)
 		return SDKCall(g_SDKCallDoClassSpecialSkill, player);
 	
 	return false;
+}
+
+void SDKCall_ResetRageBuffs(any m_Shared)
+{
+	if (g_SDKCallResetRageBuffs)
+		SDKCall(g_SDKCallResetRageBuffs, m_Shared);
 }
 
 float SDKCall_GetHealthMultiplier(int populator, bool bIsTank = false)

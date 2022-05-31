@@ -19,7 +19,7 @@ void CTFBotFetchFlag_Update(int me)
 {
 	int flag = Player(me).GetFlagToFetch();
 	
-	if (flag != -1)
+	if (flag == -1)
 	{
 		// no flag
 		return;

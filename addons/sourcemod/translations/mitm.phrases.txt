@@ -79,4 +79,8 @@
 		"#format"	"{1:s}"
 		"en"		"You have been assigned to {blue}{1}{default}. You have not been awarded any queue points based on your preferences."
 	}
+	"Engineer_NotAllowedToBuild"
+	{
+		"en"		"Engineer Robots may not place this building type!"
+	}
 }

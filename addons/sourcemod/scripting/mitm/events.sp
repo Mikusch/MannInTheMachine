@@ -136,9 +136,29 @@ public void EventHook_PlayerBuiltObject(Event event, const char[] name, bool don
 	
 	if (TF2_GetClientTeam(builder) == TFTeam_Invaders)
 	{
+		float origin[3];
+		GetEntPropVector(index, Prop_Data, "m_vecAbsOrigin", origin);
+		
+		// CTFBotMvMEngineerBuildTeleportExit
 		if (type == TFObject_Teleporter && TF2_GetObjectMode(index) == TFObjectMode_Exit)
 		{
+			SDKCall_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Red);
+			
 			Entity(index).SetTeleportWhere(Player(builder).m_teleportWhereName);
+			
+			// Engineer bots create level 1 teleporters with increased health
+			// TODO: Prevent upgrading teleporters
+			int iHealth = RoundToFloor(SDKCall_GetMaxHealthForCurrentLevel(index) * tf_bot_engineer_building_health_multiplier.FloatValue);
+			SetEntProp(index, Prop_Data, "m_iMaxHealth", iHealth);
+			SetEntProp(index, Prop_Data, "m_iHealth", iHealth);
+		}
+		// CTFBotMvMEngineerBuildSentryGun
+		else if (type == TFObject_Sentry)
+		{
+			SDKCall_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Red);
+			
+			// Engineer bots create pre-built level 3 sentry guns
+			SetEntProp(index, Prop_Data, "m_nDefaultUpgradeLevel", 2);
 		}
 	}
 }

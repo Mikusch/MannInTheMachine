@@ -449,6 +449,7 @@ ConVar mitm_queue_points;
 ConVar tf_avoidteammates_pushaway;
 ConVar tf_deploying_bomb_delay_time;
 ConVar tf_deploying_bomb_time;
+ConVar tf_bot_engineer_building_health_multiplier;
 ConVar tf_mvm_miniboss_scale;
 ConVar tf_mvm_min_players_to_start;
 ConVar tf_mvm_bot_allow_flag_carrier_to_fight;
@@ -508,6 +509,7 @@ public void OnPluginStart()
 	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");
 	tf_deploying_bomb_time = FindConVar("tf_deploying_bomb_time");
+	tf_bot_engineer_building_health_multiplier = FindConVar("tf_bot_engineer_building_health_multiplier");
 	tf_mvm_miniboss_scale = FindConVar("tf_mvm_miniboss_scale");
 	tf_mvm_min_players_to_start = FindConVar("tf_mvm_min_players_to_start");
 	tf_mvm_bot_allow_flag_carrier_to_fight = FindConVar("tf_mvm_bot_allow_flag_carrier_to_fight");

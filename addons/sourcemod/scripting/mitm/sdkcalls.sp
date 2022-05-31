@@ -37,6 +37,7 @@ static Handle g_SDKCallRemoveObject;
 static Handle g_SDKCallFindHint;
 static Handle g_SDKCallPushAllPlayersAway;
 static Handle g_SDKCallGetCurrentWave;
+static Handle g_SDKCallGetMaxHealthForCurrentLevel;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
@@ -68,6 +69,7 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallFindHint = PrepSDKCall_FindHint(gamedata);
 	g_SDKCallPushAllPlayersAway = PrepSDKCall_PushAllPlayersAway(gamedata);
 	g_SDKCallGetCurrentWave = PrepSDKCall_GetCurrentWave(gamedata);
+	g_SDKCallGetMaxHealthForCurrentLevel = PrepSDKCall_GetMaxHealthForCurrentLevel(gamedata);
 }
 
 static Handle PrepSDKCall_GetClassIcon_Linux(GameData gamedata)
@@ -303,6 +305,19 @@ static Handle PrepSDKCall_GetCurrentWave(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_GetMaxHealthForCurrentLevel(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CBaseObject::GetMaxHealthForCurrentLevel");
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CBaseObject::GetMaxHealthForCurrentLevel");
+	
+	return call;
+}
+
 static Handle PrepSDKCall_WeaponSwitch(GameData gamedata)
 {
 	StartPrepSDKCall(SDKCall_Entity);
@@ -458,6 +473,14 @@ Address SDKCall_GetCurrentWave(int populator)
 		return SDKCall(g_SDKCallGetCurrentWave, populator);
 	
 	return Address_Null;
+}
+
+int SDKCall_GetMaxHealthForCurrentLevel(int obj)
+{
+	if (g_SDKCallGetMaxHealthForCurrentLevel)
+		return SDKCall(g_SDKCallGetMaxHealthForCurrentLevel, obj);
+	
+	return 0;
 }
 
 bool SDKCall_WeaponSwitch(int player, int weapon, int viewmodelindex = 0)

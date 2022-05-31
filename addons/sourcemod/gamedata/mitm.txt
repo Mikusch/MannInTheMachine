@@ -199,6 +199,11 @@
 		}
 		"Offsets"
 		{
+			"CBaseObject::GetMaxHealthForCurrentLevel"
+			{
+				"linux"		"389"
+				"windows"	"387"
+			}
 			"CTFBotSpawner::GetClassIcon"
 			{
 				// Linux uses signature call CTFBotSpawner::GetClassIcon

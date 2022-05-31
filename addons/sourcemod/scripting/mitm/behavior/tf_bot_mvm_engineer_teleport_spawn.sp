@@ -51,7 +51,7 @@ bool CTFBotMvMEngineerTeleportSpawn_Update(int me)
 			float origin[3];
 			GetEntPropVector(m_hintEntity[me], Prop_Data, "m_vecAbsOrigin", origin);
 			
-			SDKCall_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Red);
+			SDKCall_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Defenders);
 		}
 	}
 	else if (m_teleportDelay[me].IsElapsed())

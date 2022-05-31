@@ -84,9 +84,26 @@ public Action CommandListener_Build(int client, const char[] command, int argc)
 		TFObjectType type = view_as<TFObjectType>(GetCmdArgInt(1));
 		TFObjectMode mode = view_as<TFObjectMode>(GetCmdArgInt(2));
 		
+		bool bDisallowedBuilding = false;
+		
 		// invaders may not build teleporter entrances
-		if (type == TFObject_Teleporter && mode == TFObjectMode_Entrance)
+		if (type == TFObject_Teleporter)
+		{
+			if (mode == TFObjectMode_Entrance)
+			{
+				bDisallowedBuilding = true;
+			}
+		}
+		else if (type == TFObject_Dispenser)
+		{
+			bDisallowedBuilding = true;
+		}
+		
+		if (bDisallowedBuilding)
+		{
+			PrintCenterText(client, "%t", "Engineer_NotAllowedToBuild");
 			return Plugin_Handled;
+		}
 	}
 	
 	return Plugin_Continue;

@@ -18,15 +18,19 @@
 void CTFBotFetchFlag_Update(int me)
 {
 	int flag = Player(me).GetFlagToFetch();
+	
 	if (flag != -1)
 	{
-		if (GameRules_IsMannVsMachineMode() && GetEntProp(flag, Prop_Send, "m_nFlagStatus") == TF_FLAGINFO_HOME)
+		// no flag
+		return;
+	}
+	
+	if (GameRules_IsMannVsMachineMode() && GetEntProp(flag, Prop_Send, "m_nFlagStatus") == TF_FLAGINFO_HOME)
+	{
+		if (GetGameTime() - GetEntDataFloat(me, GetOffset("CTFPlayer::m_flSpawnTime")) < 1.0 && TF2_GetClientTeam(me) != TFTeam_Spectator)
 		{
-			if (GetGameTime() - GetEntDataFloat(me, GetOffset("CTFPlayer::m_flSpawnTime")) < 1.0 && TF2_GetClientTeam(me) != TFTeam_Spectator)
-			{
-				// we just spawned - give us the flag
-				SDKCall_PickUp(flag, me, true);
-			}
+			// we just spawned - give us the flag
+			SDKCall_PickUp(flag, me, true);
 		}
 	}
 }

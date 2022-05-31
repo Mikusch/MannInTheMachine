@@ -776,6 +776,7 @@ public void OnClientGameFrame(int client)
 			return;
 		}
 		
+		// capture the flag
 		CTFBotFetchFlag_Update(client);
 	}
 }

@@ -1040,7 +1040,72 @@ public MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 		}
 		else if (TF2_GetPlayerClass(player) == TFClass_Engineer)
 		{
-			// TODO: Engineer Behavior
+			// in MVM, when an engineer dies, we need to decouple his objects so they stay alive when his bot slot gets recycled
+			while (TF2Util_GetPlayerObjectCount(player) > 0)
+			{
+				// set to not have owner
+				int obj = TF2Util_GetPlayerObject(player, 0);
+				if (obj != -1)
+				{
+					SetEntityOwner(obj, -1);
+					SetEntPropEnt(obj, Prop_Send, "m_hBuilder", -1);
+				}
+				SDKCall_RemoveObject(player, obj);
+			}
+			
+			// unown engineer nest if owned any
+			int hint = MaxClients + 1;
+			while ((hint = FindEntityByClassname(hint, "bot_hint_engineer_nest")) != -1)
+			{
+				if (GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity") == player)
+				{
+					SetEntityOwner(hint, -1);
+				}
+			}
+			
+			bool bShouldAnnounceLastEngineerBotDeath = Player(player).HasAttribute(TELEPORT_TO_HINT);
+			if (bShouldAnnounceLastEngineerBotDeath)
+			{
+				for (int client = 1; client <= MaxClients; client++)
+				{
+					if (!IsClientInGame(client))
+						continue;
+					
+					if (TF2_GetClientTeam(client) != TFTeam_Invaders)
+						continue;
+					
+					if (!IsPlayerAlive(client))
+						continue;
+					
+					if (client != player && TF2_GetPlayerClass(client) == TFClass_Engineer)
+					{
+						bShouldAnnounceLastEngineerBotDeath = false;
+						break;
+					}
+				}
+			}
+			
+			if (bShouldAnnounceLastEngineerBotDeath)
+			{
+				bool bEngineerTeleporterInTheWorld = false;
+				int obj = MaxClients + 1;
+				while ((obj = FindEntityByClassname(obj, "obj_teleporter")) != -1)
+				{
+					if (TF2_GetObjectType(obj) == TFObject_Teleporter && view_as<TFTeam>(GetEntProp(obj, Prop_Data, "m_iTeamNum")) == TFTeam_Invaders)
+					{
+						bEngineerTeleporterInTheWorld = true;
+					}
+				}
+				
+				if (bEngineerTeleporterInTheWorld)
+				{
+					EmitGameSoundToAll("Announcer.MVM_An_Engineer_Bot_Is_Dead_But_Not_Teleporter");
+				}
+				else
+				{
+					EmitGameSoundToAll("Announcer.MVM_An_Engineer_Bot_Is_Dead");
+				}
+			}
 		}
 		
 		// Enables currency drops from human kills

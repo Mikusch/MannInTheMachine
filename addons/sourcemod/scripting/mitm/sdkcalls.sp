@@ -33,6 +33,7 @@ static Handle g_SDKCallGetHealthMultiplier;
 static Handle g_SDKCallResetMap;
 static Handle g_SDKCallIsSpaceToSpawnHere;
 static Handle g_SDKCallWeaponSwitch;
+static Handle g_SDKCallRemoveObject;
 static Handle g_SDKCallFindHint;
 
 void SDKCalls_Initialize(GameData gamedata)
@@ -61,6 +62,7 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallResetMap = PrepSDKCall_ResetMap(gamedata);
 	g_SDKCallIsSpaceToSpawnHere = PrepSDKCall_IsSpaceToSpawnHere(gamedata);
 	g_SDKCallWeaponSwitch = PrepSDKCall_WeaponSwitch(gamedata);
+	g_SDKCallRemoveObject =  PrepSDKCall_RemoveObject(gamedata);
 	g_SDKCallFindHint = PrepSDKCall_FindHint(gamedata);
 }
 
@@ -282,6 +284,19 @@ static Handle PrepSDKCall_WeaponSwitch(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_RemoveObject(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::RemoveObject");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFPlayer::RemoveObject");
+	
+	return call;
+}
+
 Address SDKCall_GetClassIcon(any spawner, int nSpawnNum = -1)
 {
 	Address result;
@@ -379,11 +394,21 @@ bool SDKCall_IsSpaceToSpawnHere(const float where[3])
 	return false;
 }
 
-bool SDKCall_FindHint(bool bShouldCheckForBlockingObjects, bool bAllowOutOfRangeNest, int& pFoundNest = -1)
+bool SDKCall_FindHint(bool bShouldCheckForBlockingObjects, bool bAllowOutOfRangeNest, int& foundNest = -1)
 {
 	if (g_SDKCallFindHint)
-		return SDKCall(g_SDKCallFindHint, bShouldCheckForBlockingObjects, bAllowOutOfRangeNest, pFoundNest);
-	
+	{
+		int pFoundNest;
+		bool result = SDKCall(g_SDKCallFindHint, bShouldCheckForBlockingObjects, bAllowOutOfRangeNest, pFoundNest);
+		
+		if (pFoundNest)
+		{
+			foundNest = GetEntityFromHandle(pFoundNest);
+		}
+		
+		return result;
+	}
+
 	return false;
 }
 
@@ -393,4 +418,10 @@ bool SDKCall_WeaponSwitch(int player, int weapon, int viewmodelindex = 0)
 		return SDKCall(g_SDKCallWeaponSwitch, player, weapon, viewmodelindex);
 	
 	return false;
+}
+
+void SDKCall_RemoveObject(int player, int obj)
+{
+	if (g_SDKCallRemoveObject)
+		SDKCall(g_SDKCallRemoveObject, player, obj);
 }

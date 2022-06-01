@@ -90,11 +90,11 @@ bool CTFBotMvMEngineerTeleportSpawn_Update(int me)
 				{
 					if (pWave.m_nNumEngineersTeleportSpawned == 0)
 					{
-						EmitGameSoundToAll("Announcer.MVM_First_Engineer_Teleport_Spawned");
+						TFGameRules_BroadcastSound(255, "Announcer.MVM_First_Engineer_Teleport_Spawned");
 					}
 					else
 					{
-						EmitGameSoundToAll("Announcer.MVM_Another_Engineer_Teleport_Spawned");
+						TFGameRules_BroadcastSound(255, "Announcer.MVM_Another_Engineer_Teleport_Spawned");
 					}
 					
 					pWave.m_nNumEngineersTeleportSpawned++;

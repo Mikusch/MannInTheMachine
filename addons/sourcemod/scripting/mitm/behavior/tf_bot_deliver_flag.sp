@@ -149,7 +149,7 @@ static bool UpgradeOverTime(int me)
 			{
 				++m_upgradeLevel[me];
 				
-				EmitGameSoundToAll("MVM.Warning");
+				TFGameRules_BroadcastSound(255, "MVM.Warning");
 				
 				switch (m_upgradeLevel[me])
 				{

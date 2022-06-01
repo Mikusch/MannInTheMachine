@@ -1099,11 +1099,11 @@ public MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 				
 				if (bEngineerTeleporterInTheWorld)
 				{
-					EmitGameSoundToAll("Announcer.MVM_An_Engineer_Bot_Is_Dead_But_Not_Teleporter");
+					TFGameRules_BroadcastSound(255, "Announcer.MVM_An_Engineer_Bot_Is_Dead_But_Not_Teleporter");
 				}
 				else
 				{
-					EmitGameSoundToAll("Announcer.MVM_An_Engineer_Bot_Is_Dead");
+					TFGameRules_BroadcastSound(255, "Announcer.MVM_An_Engineer_Bot_Is_Dead");
 				}
 			}
 		}

@@ -23,6 +23,32 @@ bool GameRules_IsMannVsMachineMode()
 	return view_as<bool>(GameRules_GetProp("m_bPlayingMannVsMachine"));
 }
 
+void TFGameRules_BroadcastSound(int iTeam, const char[] sound, int iAdditionalSoundFlags = 0)
+{
+	Event event = CreateEvent("teamplay_broadcast_audio");
+	if (event)
+	{
+		event.SetInt("team", iTeam);
+		event.SetString("sound", sound);
+		event.SetInt("additional_flags", iAdditionalSoundFlags);
+		event.Fire();
+	}
+}
+
+bool TFGameRules_PlayThrottledAlert(int iTeam, const char[] sound, float fDelayBeforeNext)
+{
+	static float m_flNewThrottledAlertTime = 0.0;
+	
+	if (m_flNewThrottledAlertTime <= GetGameTime())
+	{
+		TFGameRules_BroadcastSound(iTeam, sound);
+		m_flNewThrottledAlertTime = GetGameTime() + fDelayBeforeNext;
+		return true;
+	}
+	
+	return false;
+}
+
 void SetModelScale(int entity, float scale, float duration = 0.0)
 {
 	float vecScale[3];

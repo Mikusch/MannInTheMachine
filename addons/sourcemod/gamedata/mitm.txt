@@ -209,6 +209,11 @@
 		}
 		"Offsets"
 		{
+			"CBaseObject::CanBeUpgraded"
+			{
+				"linux"		"380"
+				"windows"	"379"
+			}
 			"CBaseObject::GetMaxHealthForCurrentLevel"
 			{
 				"linux"		"389"
@@ -615,6 +620,20 @@
 				"arguments"
 				{
 					"bot"
+					{
+						"type"	"cbaseentity"
+					}
+				}
+			}
+			"CBaseObject::CanBeUpgraded"
+			{
+				"offset"	"CBaseObject::CanBeUpgraded"
+				"hooktype"	"entity"
+				"return"	"bool"
+				"this"		"entity"
+				"arguments"
+				{
+					"pPlayer"
 					{
 						"type"	"cbaseentity"
 					}

@@ -18,6 +18,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+static DynamicHook g_DHookCanBeUpgraded;
 static DynamicHook g_DHookEventKilled;
 static DynamicHook g_DHookShouldGib;
 static DynamicHook g_DHookEntSelectSpawnPoint;
@@ -64,6 +65,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "DoTeleporterOverride", _, DHookCallback_DoTeleporterOverride_Post);
 	CreateDynamicDetour(gamedata, "OnBotTeleported", DHookCallback_OnBotTeleported_Pre);
 	
+	g_DHookCanBeUpgraded = CreateDynamicHook(gamedata, "CBaseObject::CanBeUpgraded");
 	g_DHookEventKilled = CreateDynamicHook(gamedata, "CTFPlayer::Event_Killed");
 	g_DHookShouldGib = CreateDynamicHook(gamedata, "CTFPlayer::ShouldGib");
 	g_DHookEntSelectSpawnPoint = CreateDynamicHook(gamedata, "CBasePlayer::EntSelectSpawnPoint");
@@ -113,6 +115,13 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 		if (g_DHookPickUp)
 		{
 			g_DHookPickUp.HookEntity(Hook_Pre, entity, DHookCallback_PickUp_Pre);
+		}
+	}
+	else if (StrEqual(classname, "obj_teleporter"))
+	{
+		if (g_DHookCanBeUpgraded)
+		{
+			g_DHookCanBeUpgraded.HookEntity(Hook_Pre, entity, DHookCallback_CanBeUpgraded_Pre);
 		}
 	}
 }
@@ -1187,7 +1196,7 @@ public MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret
 		return MRES_Supercede;
 	}
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
@@ -1202,7 +1211,23 @@ public MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
 		}
 	}
 	
-	return MRES_Handled;
+	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_CanBeUpgraded_Pre(int obj, DHookReturn ret, DHookParam params)
+{
+	int player = params.Get(1);
+	
+	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
+	{
+		if (TF2_GetObjectType(obj) == TFObject_Teleporter)
+		{
+			ret.Value = false;
+			return MRES_Supercede;
+		}
+	}
+	
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_ClientConnected_Pre(DHookReturn ret, DHookParam params)

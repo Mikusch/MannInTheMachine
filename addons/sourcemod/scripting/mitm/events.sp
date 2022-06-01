@@ -147,7 +147,6 @@ public void EventHook_PlayerBuiltObject(Event event, const char[] name, bool don
 			Entity(index).SetTeleportWhere(Player(builder).m_teleportWhereName);
 			
 			// engineer bots create level 1 teleporters with increased health
-			// TODO: Prevent upgrading teleporters
 			int iHealth = RoundToFloor(SDKCall_GetMaxHealthForCurrentLevel(index) * tf_bot_engineer_building_health_multiplier.FloatValue);
 			SetEntProp(index, Prop_Data, "m_iMaxHealth", iHealth);
 			SetEntProp(index, Prop_Data, "m_iHealth", iHealth);

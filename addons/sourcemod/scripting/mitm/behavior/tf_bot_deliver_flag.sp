@@ -165,7 +165,7 @@ static bool UpgradeOverTime(int me)
 						SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
 						SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[me].GetRemainingTime());
 						HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE1", TFTeam_Defenders);
-						DispatchParticleEffect("mvm_levelup1", PATTACH_POINT_FOLLOW, me, "head");
+						TE_TFParticleEffect("mvm_levelup1", .attachType = PATTACH_POINT_FOLLOW, .entity = me, .attachPoint = LookupEntityAttachment(me, "head"));
 						return true;
 					}
 					
@@ -181,7 +181,7 @@ static bool UpgradeOverTime(int me)
 						SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
 						SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[me].GetRemainingTime());
 						HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE2", TFTeam_Defenders);
-						DispatchParticleEffect("mvm_levelup2", PATTACH_POINT_FOLLOW, me, "head");
+						TE_TFParticleEffect("mvm_levelup2", .attachType = PATTACH_POINT_FOLLOW, .entity = me, .attachPoint = LookupEntityAttachment(me, "head"));
 						return true;
 					}
 					
@@ -196,7 +196,7 @@ static bool UpgradeOverTime(int me)
 						SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", -1.0);
 						SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", -1.0);
 						HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE3", TFTeam_Defenders);
-						DispatchParticleEffect("mvm_levelup3", PATTACH_POINT_FOLLOW, me, "head");
+						TE_TFParticleEffect("mvm_levelup3", .attachType = PATTACH_POINT_FOLLOW, .entity = me, .attachPoint = LookupEntityAttachment(me, "head"));
 						return true;
 					}
 				}

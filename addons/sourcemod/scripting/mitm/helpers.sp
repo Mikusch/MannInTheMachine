@@ -347,38 +347,7 @@ bool IsRangeLessThan(int client1, int client2, float range)
 	return GetVectorDistance(origin1, origin2) < range;
 }
 
-int GetParticleSystemIndex(const char[] szParticleSystemName)
-{
-	int tableidx = FindStringTable("ParticleEffectNames");
-	int numstrings = GetStringTableNumStrings(tableidx);
-	
-	for (int stringidx = 0; stringidx < numstrings; stringidx++)
-	{
-		char str[64];
-		ReadStringTable(tableidx, stringidx, str, sizeof(str));
-		
-		if (StrEqual(str, szParticleSystemName))
-		{
-			return stringidx;
-		}
-	}
-	
-	// This is the invalid string index
-	return 0;
-}
-
-void DispatchParticleEffect(const char[] name, ParticleAttachment_t attachType, int entity, const char[] attachmentName, bool resetAllParticlesOnEntity = false)
-{
-	TE_Start("TFParticleEffect");
-	TE_WriteNum("m_iParticleSystemIndex", GetParticleSystemIndex(name));
-	TE_WriteNum("m_iAttachType", view_as<int>(attachType));
-	TE_WriteNum("entindex", entity);
-	TE_WriteNum("m_iAttachmentPointIndex", LookupEntityAttachment(entity, attachmentName));
-	TE_WriteNum("m_bResetParticles", resetAllParticlesOnEntity);
-	TE_SendToAll();
-}
-
-void TE_TFParticleEffect(const char[] name, const float vecOrigin[3],
+void TE_TFParticleEffect(const char[] name, const float vecOrigin[3] = NULL_VECTOR,
 	const float vecStart[3] = NULL_VECTOR, const float vecAngles[3] = NULL_VECTOR,
 	int entity = -1, ParticleAttachment_t attachType = PATTACH_ABSORIGIN,
 	int attachPoint = -1, bool bResetParticles = false)

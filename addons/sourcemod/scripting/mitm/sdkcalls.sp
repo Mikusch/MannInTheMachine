@@ -489,7 +489,7 @@ bool SDKCall_IsSpaceToSpawnHere(const float where[3])
 	return false;
 }
 
-bool SDKCall_FindHint(bool bShouldCheckForBlockingObjects, bool bAllowOutOfRangeNest, int & foundNest = -1)
+bool SDKCall_FindHint(bool bShouldCheckForBlockingObjects, bool bAllowOutOfRangeNest, int &foundNest = -1)
 {
 	if (g_SDKCallFindHint)
 	{

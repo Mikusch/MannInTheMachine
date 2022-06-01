@@ -36,6 +36,8 @@ static Handle g_SDKCallWeaponSwitch;
 static Handle g_SDKCallRemoveObject;
 static Handle g_SDKCallFindHint;
 static Handle g_SDKCallPushAllPlayersAway;
+static Handle g_SDKCallGetSentryHint;
+static Handle g_SDKCallGetTeleporterHint;
 static Handle g_SDKCallGetCurrentWave;
 static Handle g_SDKCallGetMaxHealthForCurrentLevel;
 
@@ -68,6 +70,8 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallRemoveObject = PrepSDKCall_RemoveObject(gamedata);
 	g_SDKCallFindHint = PrepSDKCall_FindHint(gamedata);
 	g_SDKCallPushAllPlayersAway = PrepSDKCall_PushAllPlayersAway(gamedata);
+	g_SDKCallGetSentryHint = PrepSDKCall_GetSentryHint(gamedata);
+	g_SDKCallGetTeleporterHint = PrepSDKCall_GetTeleporterHint(gamedata);
 	g_SDKCallGetCurrentWave = PrepSDKCall_GetCurrentWave(gamedata);
 	g_SDKCallGetMaxHealthForCurrentLevel = PrepSDKCall_GetMaxHealthForCurrentLevel(gamedata);
 }
@@ -290,6 +294,48 @@ static Handle PrepSDKCall_PushAllPlayersAway(GameData gamedata)
 		LogMessage("Failed to create SDKCall: CTFGameRules::PushAllPlayersAway");
 	
 	return call;
+}
+
+static Handle PrepSDKCall_GetSentryHint(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFBotHintEngineerNest::GetSentryHint");
+	PrepSDKCall_SetReturnInfo(SDKType_CBaseEntity, SDKPass_Pointer);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFBotHintEngineerNest::GetSentryHint");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_GetTeleporterHint(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFBotHintEngineerNest::GetTeleporterHint");
+	PrepSDKCall_SetReturnInfo(SDKType_CBaseEntity, SDKPass_Pointer);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFBotHintEngineerNest::GetTeleporterHint");
+	
+	return call;
+}
+
+int SDKCall_GetSentryHint(int hint)
+{
+	if (g_SDKCallGetSentryHint)
+		return SDKCall(g_SDKCallGetSentryHint, hint);
+	
+	return -1;
+}
+
+int SDKCall_GetTeleporterHint(int hint)
+{
+	if (g_SDKCallGetTeleporterHint)
+		return SDKCall(g_SDKCallGetTeleporterHint, hint);
+	
+	return -1;
 }
 
 static Handle PrepSDKCall_GetCurrentWave(GameData gamedata)

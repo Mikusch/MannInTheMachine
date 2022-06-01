@@ -15,6 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma semicolon 1
+#pragma newdecls required
+
 // public
 bool m_bIsTeleportingIn[MAXPLAYERS + 1];
 
@@ -24,10 +27,13 @@ static CountdownTimer m_teleportDelay[MAXPLAYERS + 1];
 
 void CTFBotMvMEngineerTeleportSpawn_Create(int player, int hint, bool bFirstTeleportSpawn)
 {
-	m_bIsTeleportingIn[player] = true;
-	
 	m_hintEntity[player] = hint;
 	m_bFirstTeleportSpawn[player] = bFirstTeleportSpawn;
+	
+	if (CTFBotMvMEngineerTeleportSpawn_OnStart(player))
+	{
+		m_bIsTeleportingIn[player] = true;
+	}
 }
 
 bool CTFBotMvMEngineerTeleportSpawn_OnStart(int me)

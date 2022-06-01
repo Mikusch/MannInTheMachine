@@ -15,6 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma semicolon 1
+#pragma newdecls required
+
 static float m_anchorPos[MAXPLAYERS + 1][3];
 static CountdownTimer m_timer[MAXPLAYERS + 1];
 static BombDeployingState_t m_nDeployingBombState[MAXPLAYERS + 1];

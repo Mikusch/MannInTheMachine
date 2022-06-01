@@ -146,19 +146,33 @@ public void EventHook_PlayerBuiltObject(Event event, const char[] name, bool don
 			
 			Entity(index).SetTeleportWhere(Player(builder).m_teleportWhereName);
 			
-			// Engineer bots create level 1 teleporters with increased health
+			// engineer bots create level 1 teleporters with increased health
 			// TODO: Prevent upgrading teleporters
 			int iHealth = RoundToFloor(SDKCall_GetMaxHealthForCurrentLevel(index) * tf_bot_engineer_building_health_multiplier.FloatValue);
 			SetEntProp(index, Prop_Data, "m_iMaxHealth", iHealth);
 			SetEntProp(index, Prop_Data, "m_iHealth", iHealth);
+			
+			// the teleporter owns this hint now
+			int hint = GetNestTeleporterHint(builder);
+			if (hint != -1)
+			{
+				SetEntityOwner(hint, index);
+			}
 		}
 		// CTFBotMvMEngineerBuildSentryGun
 		else if (type == TFObject_Sentry)
 		{
 			SDKCall_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Red);
 			
-			// Engineer bots create pre-built level 3 sentry guns
+			// engineer bots create pre-built level 3 sentry guns
 			SetEntProp(index, Prop_Data, "m_nDefaultUpgradeLevel", 2);
+			
+			// the sentry owns this hint now
+			int hint = GetNestSentryHint(builder);
+			if (hint != -1)
+			{
+				SetEntityOwner(hint, index);
+			}
 		}
 	}
 }

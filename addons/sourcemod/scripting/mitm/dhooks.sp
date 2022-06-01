@@ -1055,7 +1055,7 @@ public MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 			
 			// unown engineer nest if owned any
 			int hint = MaxClients + 1;
-			while ((hint = FindEntityByClassname(hint, "bot_hint_engineer_nest")) != -1)
+			while ((hint = FindEntityByClassname(hint, "bot_hint_*")) != -1)
 			{
 				if (GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity") == player)
 				{

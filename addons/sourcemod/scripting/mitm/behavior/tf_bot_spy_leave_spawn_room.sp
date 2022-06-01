@@ -15,6 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma semicolon 1
+#pragma newdecls required
+
 static CountdownTimer m_waitTimer[MAXPLAYERS + 1];
 static int m_attempt[MAXPLAYERS + 1];
 

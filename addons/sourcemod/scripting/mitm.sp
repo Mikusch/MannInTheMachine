@@ -751,7 +751,7 @@ public void OnClientGameFrame(int client)
 			{
 				if (CTFBotMvMEngineerTeleportSpawn_Update(client))
 				{
-					// prevent CTFBotMvMEngineerIdle
+					// this takes precedence over CTFBotMvMEngineerIdle
 					return;
 				}
 				

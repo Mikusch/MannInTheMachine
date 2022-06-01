@@ -15,6 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma semicolon 1
+#pragma newdecls required
+
 static int m_sentryHint[MAXPLAYERS + 1];
 static int m_teleporterHint[MAXPLAYERS + 1];
 static int m_nestHint[MAXPLAYERS + 1];
@@ -41,7 +44,7 @@ bool CTFBotMvMEngineerIdle_Update(int me)
 		return false;
 	}
 	
-	if (m_sentryHint[me] == -1 || ShouldAdvanceNestSpot(me))
+	if (m_sentryHint[me] == -1)
 	{
 		if (m_findHintTimer[me].HasStarted() && !m_findHintTimer[me].IsElapsed())
 		{
@@ -61,6 +64,7 @@ bool CTFBotMvMEngineerIdle_Update(int me)
 			return true;
 		}
 		
+		// unown the old nest
 		if (m_nestHint[me] != -1)
 		{
 			SetEntityOwner(m_nestHint[me], -1);
@@ -68,13 +72,13 @@ bool CTFBotMvMEngineerIdle_Update(int me)
 		
 		m_nestHint[me] = newNest;
 		SetEntityOwner(m_nestHint[me], me);
-		//m_sentryHint = m_nestHint->GetSentryHint();
-		//TakeOverStaleNest( m_sentryHint, me );
+		m_sentryHint[me] = SDKCall_GetSentryHint(m_nestHint[me]);
+		TakeOverStaleNest(m_sentryHint[me], me);
 		
 		if (Player(me).m_teleportWhereName.Length > 0)
 		{
-			//m_teleporterHint = m_nestHint->GetTeleporterHint();
-			//TakeOverStaleNest( m_teleporterHint, me );
+			m_teleporterHint[me] = SDKCall_GetTeleporterHint(m_nestHint[me]);
+			TakeOverStaleNest(m_teleporterHint[me], me);
 		}
 		
 		if (!m_bTeleportedToHint[me] && Player(me).HasAttribute(TELEPORT_TO_HINT))
@@ -91,13 +95,42 @@ bool CTFBotMvMEngineerIdle_Update(int me)
 	return true;
 }
 
-static bool ShouldAdvanceNestSpot(int me)
+static void TakeOverStaleNest(int hint, int me)
 {
-	// TODO
+	if (hint != -1 && OwnerObjectHasNoOwner(hint))
+	{
+		int obj = GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity");
+		SetEntityOwner(obj, me);
+		AcceptEntityInput(obj, "SetBuilder", me);
+	}
+}
+
+static bool OwnerObjectHasNoOwner(int hint)
+{
+	int owner = GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity");
+	if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
+	{
+		if (GetEntPropEnt(owner, Prop_Send, "m_hBuilder") == -1)
+		{
+			return true;
+		}
+		else
+		{
+			if (TF2_GetPlayerClass(GetEntPropEnt(owner, Prop_Send, "m_hBuilder")) != TFClass_Engineer)
+			{
+				LogError("Object has an owner that's not engineer.");
+			}
+		}
+	}
 	return false;
 }
 
-static void TakeOverStaleNest(int hint, int me)
+int GetNestSentryHint(int player)
 {
-	// TODO
+	return m_sentryHint[player];
+}
+
+int GetNestTeleporterHint(int player)
+{
+	return m_teleporterHint[player];
 }

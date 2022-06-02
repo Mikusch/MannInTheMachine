@@ -449,6 +449,7 @@ ConVar mitm_queue_points;
 ConVar tf_avoidteammates_pushaway;
 ConVar tf_deploying_bomb_delay_time;
 ConVar tf_deploying_bomb_time;
+ConVar tf_bot_engineer_building_health_multiplier;
 ConVar tf_mvm_miniboss_scale;
 ConVar tf_mvm_min_players_to_start;
 ConVar tf_mvm_bot_allow_flag_carrier_to_fight;
@@ -470,6 +471,8 @@ ConVar sv_stepsize;
 #include "mitm/behavior/tf_bot_fetch_flag.sp"
 #include "mitm/behavior/tf_bot_spy_leave_spawn_room.sp"
 #include "mitm/behavior/tf_bot_mvm_deploy_bomb.sp"
+#include "mitm/behavior/tf_bot_mvm_engineer_idle.sp"
+#include "mitm/behavior/tf_bot_mvm_engineer_teleport_spawn.sp"
 
 #include "mitm/clientprefs.sp"
 #include "mitm/console.sp"
@@ -506,6 +509,7 @@ public void OnPluginStart()
 	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");
 	tf_deploying_bomb_time = FindConVar("tf_deploying_bomb_time");
+	tf_bot_engineer_building_health_multiplier = FindConVar("tf_bot_engineer_building_health_multiplier");
 	tf_mvm_miniboss_scale = FindConVar("tf_mvm_miniboss_scale");
 	tf_mvm_min_players_to_start = FindConVar("tf_mvm_min_players_to_start");
 	tf_mvm_bot_allow_flag_carrier_to_fight = FindConVar("tf_mvm_bot_allow_flag_carrier_to_fight");
@@ -542,6 +546,7 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CMissionPopulator::m_cooldownDuration");
 		SetOffset(gamedata, "CWaveSpawnPopulator::m_bLimitedSupport");
 		SetOffset(gamedata, "CPopulationManager::m_defaultEventChangeAttributesName");
+		SetOffset(gamedata, "CWave::m_nNumEngineersTeleportSpawned");
 		
 		SetOffset(gamedata, "EventChangeAttributes_t::m_eventName");
 		SetOffset(gamedata, "EventChangeAttributes_t::m_skill");
@@ -663,7 +668,7 @@ public void OnGameFrame()
 
 public void OnClientGameFrame(int client)
 {
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders && IsPlayerAlive(client))
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
 		if (Player(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
 		{
@@ -740,33 +745,38 @@ public void OnClientGameFrame(int client)
 			return;
 		}
 		
-		if (TF2_GetPlayerClass(client) == TFClass_Medic)
-		{
-			// if I'm being healed by another medic, I should do something else other than healing
-			bool bIsBeingHealedByAMedic = false;
-			int nNumHealers = GetEntProp(client, Prop_Send, "m_nNumHealers");
-			for (int i = 0; i < nNumHealers; ++i)
-			{
-				int healer = TF2Util_GetPlayerHealer(client, i);
-				if (0 < healer < MaxClients)
-				{
-					bIsBeingHealedByAMedic = true;
-					break;
-				}
-			}
-			
-			if (!bIsBeingHealedByAMedic)
-			{
-				return;
-			}
-		}
-		
 		if (TF2_GetPlayerClass(client) == TFClass_Engineer)
 		{
-			// TODO: Engineer Bot Idle
+			if (m_bIsTeleportingIn[client])
+			{
+				if (CTFBotMvMEngineerTeleportSpawn_Update(client))
+				{
+					// this takes precedence over CTFBotMvMEngineerIdle
+					return;
+				}
+				
+				m_bIsTeleportingIn[client] = false;
+			}
+			
+			static bool s_inEngineerIdle[MAXPLAYERS + 1];
+			
+			if (s_inEngineerIdle[client])
+			{
+				if (!CTFBotMvMEngineerIdle_Update(client))
+				{
+					s_inEngineerIdle[client] = false;
+				}
+			}
+			else
+			{
+				s_inEngineerIdle[client] = true;
+				CTFBotMvMEngineerIdle_OnStart(client);
+			}
+			
 			return;
 		}
 		
+		// capture the flag
 		CTFBotFetchFlag_Update(client);
 	}
 }

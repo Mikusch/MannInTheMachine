@@ -1123,3 +1123,23 @@ methodmap CMissionPopulator
 		}
 	}
 }
+
+methodmap CWave
+{
+	public CWave(Address address)
+	{
+		return view_as<CWave>(address);
+	}
+	
+	property int m_nNumEngineersTeleportSpawned
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CWave::m_nNumEngineersTeleportSpawned"));
+		}
+		public set(int nNumEngineersTeleportSpawned)
+		{
+			WriteVal(this + GetOffset("CWave::m_nNumEngineersTeleportSpawned"), nNumEngineersTeleportSpawned);
+		}
+	}
+}

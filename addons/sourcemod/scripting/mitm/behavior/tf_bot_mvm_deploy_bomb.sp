@@ -15,6 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma semicolon 1
+#pragma newdecls required
+
 static float m_anchorPos[MAXPLAYERS + 1][3];
 static CountdownTimer m_timer[MAXPLAYERS + 1];
 static BombDeployingState_t m_nDeployingBombState[MAXPLAYERS + 1];
@@ -86,6 +89,8 @@ bool CTFBotMvMDeployBomb_Update(int me)
 				m_nDeployingBombState[me] = TF_BOMB_DEPLOYING_ANIMATING;
 				
 				EmitGameSoundToAll(GetEntProp(me, Prop_Send, "m_bIsMiniBoss") ? "MVM.DeployBombGiant" : "MVM.DeployBombSmall", me);
+				
+				TFGameRules_PlayThrottledAlert(255, "Announcer.MVM_Bomb_Alert_Deploying", 5.0);
 			}
 		}
 		case TF_BOMB_DEPLOYING_ANIMATING:
@@ -98,7 +103,7 @@ bool CTFBotMvMDeployBomb_Update(int me)
 				}
 				
 				m_timer[me].Start(2.0);
-				EmitGameSoundToAll("Announcer.MVM_Robots_Planted");
+				TFGameRules_BroadcastSound(255, "Announcer.MVM_Robots_Planted");
 				m_nDeployingBombState[me] = TF_BOMB_DEPLOYING_COMPLETE;
 				SetEntProp(me, Prop_Data, "m_takedamage", DAMAGE_NO);
 				SetEntProp(me, Prop_Data, "m_fEffects", GetEntProp(me, Prop_Data, "m_fEffects") | EF_NODRAW);

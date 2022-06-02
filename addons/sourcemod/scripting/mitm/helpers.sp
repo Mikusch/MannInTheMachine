@@ -23,6 +23,32 @@ bool GameRules_IsMannVsMachineMode()
 	return view_as<bool>(GameRules_GetProp("m_bPlayingMannVsMachine"));
 }
 
+void TFGameRules_BroadcastSound(int iTeam, const char[] sound, int iAdditionalSoundFlags = 0)
+{
+	Event event = CreateEvent("teamplay_broadcast_audio");
+	if (event)
+	{
+		event.SetInt("team", iTeam);
+		event.SetString("sound", sound);
+		event.SetInt("additional_flags", iAdditionalSoundFlags);
+		event.Fire();
+	}
+}
+
+bool TFGameRules_PlayThrottledAlert(int iTeam, const char[] sound, float fDelayBeforeNext)
+{
+	static float m_flNewThrottledAlertTime = 0.0;
+	
+	if (m_flNewThrottledAlertTime <= GetGameTime())
+	{
+		TFGameRules_BroadcastSound(iTeam, sound);
+		m_flNewThrottledAlertTime = GetGameTime() + fDelayBeforeNext;
+		return true;
+	}
+	
+	return false;
+}
+
 void SetModelScale(int entity, float scale, float duration = 0.0)
 {
 	float vecScale[3];
@@ -321,34 +347,50 @@ bool IsRangeLessThan(int client1, int client2, float range)
 	return GetVectorDistance(origin1, origin2) < range;
 }
 
-int GetParticleSystemIndex(const char[] szParticleSystemName)
+void TE_TFParticleEffect(const char[] name, const float vecOrigin[3] = NULL_VECTOR,
+	const float vecStart[3] = NULL_VECTOR, const float vecAngles[3] = NULL_VECTOR,
+	int entity = -1, ParticleAttachment_t attachType = PATTACH_ABSORIGIN,
+	int attachPoint = -1, bool bResetParticles = false)
 {
-	int tableidx = FindStringTable("ParticleEffectNames");
-	int numstrings = GetStringTableNumStrings(tableidx);
+	int particleTable, particleIndex;
 	
-	for (int stringidx = 0; stringidx < numstrings; stringidx++)
+	if ((particleTable = FindStringTable("ParticleEffectNames")) == INVALID_STRING_TABLE)
 	{
-		char str[64];
-		ReadStringTable(tableidx, stringidx, str, sizeof(str));
-		
-		if (StrEqual(str, szParticleSystemName))
-		{
-			return stringidx;
-		}
+		ThrowError("Could not find string table: ParticleEffectNames");
 	}
 	
-	// This is the invalid string index
-	return 0;
-}
-
-void DispatchParticleEffect(const char[] name, ParticleAttachment_t attachType, int entity, const char[] attachmentName, bool resetAllParticlesOnEntity = false)
-{
+	if ((particleIndex = FindStringIndex(particleTable, name)) == INVALID_STRING_INDEX)
+	{
+		ThrowError("Could not find particle index: %s", name);
+	}
+	
 	TE_Start("TFParticleEffect");
-	TE_WriteNum("m_iParticleSystemIndex", GetParticleSystemIndex(name));
-	TE_WriteNum("m_iAttachType", view_as<int>(attachType));
-	TE_WriteNum("entindex", entity);
-	TE_WriteNum("m_iAttachmentPointIndex", LookupEntityAttachment(entity, attachmentName));
-	TE_WriteNum("m_bResetParticles", resetAllParticlesOnEntity);
+	TE_WriteFloat("m_vecOrigin[0]", vecOrigin[0]);
+	TE_WriteFloat("m_vecOrigin[1]", vecOrigin[1]);
+	TE_WriteFloat("m_vecOrigin[2]", vecOrigin[2]);
+	TE_WriteFloat("m_vecStart[0]", vecStart[0]);
+	TE_WriteFloat("m_vecStart[1]", vecStart[1]);
+	TE_WriteFloat("m_vecStart[2]", vecStart[2]);
+	TE_WriteVector("m_vecAngles", vecAngles);
+	TE_WriteNum("m_iParticleSystemIndex", particleIndex);
+	
+	if (entity != -1)
+	{
+		TE_WriteNum("entindex", entity);
+	}
+	
+	if (attachType != PATTACH_ABSORIGIN)
+	{
+		TE_WriteNum("m_iAttachType", view_as<int>(attachType));
+	}
+	
+	if (attachPoint != -1)
+	{
+		TE_WriteNum("m_iAttachmentPointIndex", attachPoint);
+	}
+	
+	TE_WriteNum("m_bResetParticles", bResetParticles ? 1 : 0);
+	
 	TE_SendToAll();
 }
 

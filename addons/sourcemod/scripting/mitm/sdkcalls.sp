@@ -33,7 +33,13 @@ static Handle g_SDKCallGetHealthMultiplier;
 static Handle g_SDKCallResetMap;
 static Handle g_SDKCallIsSpaceToSpawnHere;
 static Handle g_SDKCallWeaponSwitch;
+static Handle g_SDKCallRemoveObject;
 static Handle g_SDKCallFindHint;
+static Handle g_SDKCallPushAllPlayersAway;
+static Handle g_SDKCallGetSentryHint;
+static Handle g_SDKCallGetTeleporterHint;
+static Handle g_SDKCallGetCurrentWave;
+static Handle g_SDKCallGetMaxHealthForCurrentLevel;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
@@ -61,7 +67,13 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallResetMap = PrepSDKCall_ResetMap(gamedata);
 	g_SDKCallIsSpaceToSpawnHere = PrepSDKCall_IsSpaceToSpawnHere(gamedata);
 	g_SDKCallWeaponSwitch = PrepSDKCall_WeaponSwitch(gamedata);
+	g_SDKCallRemoveObject = PrepSDKCall_RemoveObject(gamedata);
 	g_SDKCallFindHint = PrepSDKCall_FindHint(gamedata);
+	g_SDKCallPushAllPlayersAway = PrepSDKCall_PushAllPlayersAway(gamedata);
+	g_SDKCallGetSentryHint = PrepSDKCall_GetSentryHint(gamedata);
+	g_SDKCallGetTeleporterHint = PrepSDKCall_GetTeleporterHint(gamedata);
+	g_SDKCallGetCurrentWave = PrepSDKCall_GetCurrentWave(gamedata);
+	g_SDKCallGetMaxHealthForCurrentLevel = PrepSDKCall_GetMaxHealthForCurrentLevel(gamedata);
 }
 
 static Handle PrepSDKCall_GetClassIcon_Linux(GameData gamedata)
@@ -267,6 +279,91 @@ static Handle PrepSDKCall_FindHint(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_PushAllPlayersAway(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_GameRules);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFGameRules::PushAllPlayersAway");
+	PrepSDKCall_AddParameter(SDKType_Vector, SDKPass_ByRef);
+	PrepSDKCall_AddParameter(SDKType_Float, SDKPass_ByValue);
+	PrepSDKCall_AddParameter(SDKType_Float, SDKPass_ByValue);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFGameRules::PushAllPlayersAway");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_GetSentryHint(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFBotHintEngineerNest::GetSentryHint");
+	PrepSDKCall_SetReturnInfo(SDKType_CBaseEntity, SDKPass_Pointer);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFBotHintEngineerNest::GetSentryHint");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_GetTeleporterHint(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFBotHintEngineerNest::GetTeleporterHint");
+	PrepSDKCall_SetReturnInfo(SDKType_CBaseEntity, SDKPass_Pointer);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFBotHintEngineerNest::GetTeleporterHint");
+	
+	return call;
+}
+
+int SDKCall_GetSentryHint(int hint)
+{
+	if (g_SDKCallGetSentryHint)
+		return SDKCall(g_SDKCallGetSentryHint, hint);
+	
+	return -1;
+}
+
+int SDKCall_GetTeleporterHint(int hint)
+{
+	if (g_SDKCallGetTeleporterHint)
+		return SDKCall(g_SDKCallGetTeleporterHint, hint);
+	
+	return -1;
+}
+
+static Handle PrepSDKCall_GetCurrentWave(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CPopulationManager::GetCurrentWave");
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CPopulationManager::GetCurrentWave");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_GetMaxHealthForCurrentLevel(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CBaseObject::GetMaxHealthForCurrentLevel");
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CBaseObject::GetMaxHealthForCurrentLevel");
+	
+	return call;
+}
+
 static Handle PrepSDKCall_WeaponSwitch(GameData gamedata)
 {
 	StartPrepSDKCall(SDKCall_Entity);
@@ -278,6 +375,19 @@ static Handle PrepSDKCall_WeaponSwitch(GameData gamedata)
 	Handle call = EndPrepSDKCall();
 	if (!call)
 		LogMessage("Failed to create SDKCall: CTFPlayer::Weapon_Switch");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_RemoveObject(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::RemoveObject");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFPlayer::RemoveObject");
 	
 	return call;
 }
@@ -379,12 +489,44 @@ bool SDKCall_IsSpaceToSpawnHere(const float where[3])
 	return false;
 }
 
-bool SDKCall_FindHint(bool bShouldCheckForBlockingObjects, bool bAllowOutOfRangeNest, int& pFoundNest = -1)
+bool SDKCall_FindHint(bool bShouldCheckForBlockingObjects, bool bAllowOutOfRangeNest, int &foundNest = -1)
 {
 	if (g_SDKCallFindHint)
-		return SDKCall(g_SDKCallFindHint, bShouldCheckForBlockingObjects, bAllowOutOfRangeNest, pFoundNest);
+	{
+		int pFoundNest;
+		bool result = SDKCall(g_SDKCallFindHint, bShouldCheckForBlockingObjects, bAllowOutOfRangeNest, pFoundNest);
+		
+		if (pFoundNest)
+		{
+			foundNest = GetEntityFromHandle(pFoundNest);
+		}
+		
+		return result;
+	}
 	
 	return false;
+}
+
+void SDKCall_PushAllPlayersAway(const float vFromThisPoint[3], float flRange, float flForce, TFTeam nTeam, int pPushedPlayers = 0)
+{
+	if (g_SDKCallPushAllPlayersAway)
+		SDKCall(g_SDKCallPushAllPlayersAway, vFromThisPoint, flRange, flForce, nTeam, pPushedPlayers);
+}
+
+Address SDKCall_GetCurrentWave(int populator)
+{
+	if (g_SDKCallGetCurrentWave)
+		return SDKCall(g_SDKCallGetCurrentWave, populator);
+	
+	return Address_Null;
+}
+
+int SDKCall_GetMaxHealthForCurrentLevel(int obj)
+{
+	if (g_SDKCallGetMaxHealthForCurrentLevel)
+		return SDKCall(g_SDKCallGetMaxHealthForCurrentLevel, obj);
+	
+	return 0;
 }
 
 bool SDKCall_WeaponSwitch(int player, int weapon, int viewmodelindex = 0)
@@ -393,4 +535,10 @@ bool SDKCall_WeaponSwitch(int player, int weapon, int viewmodelindex = 0)
 		return SDKCall(g_SDKCallWeaponSwitch, player, weapon, viewmodelindex);
 	
 	return false;
+}
+
+void SDKCall_RemoveObject(int player, int obj)
+{
+	if (g_SDKCallRemoveObject)
+		SDKCall(g_SDKCallRemoveObject, player, obj);
 }

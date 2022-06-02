@@ -79,4 +79,12 @@
 		"#format"	"{1:s}"
 		"en"		"You have been assigned to {blue}{1}{default}. You have not been awarded any queue points based on your preferences."
 	}
+	"Engineer_NotAllowedToBuild"
+	{
+		"en"		"You are not allowed to build this."
+	}
+	"Engineer_NotAllowedToBuild_NoHint"
+	{
+		"en"		"You are not allowed to build this right now."
+	}
 }

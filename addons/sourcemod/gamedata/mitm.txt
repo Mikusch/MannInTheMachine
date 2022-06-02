@@ -46,6 +46,11 @@
 				"linux"		"@_ZN18CPopulationManager17RestoreCheckpointEv"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x2C\x53\x56\x8B\xF1\x57\x89\x75\xFC"
 			}
+			"CPopulationManager::GetCurrentWave"
+			{
+				"linux"		"@_ZN18CPopulationManager14GetCurrentWaveEv"
+				"windows"	"\x80\xB9\x80\x05\x00\x00\x00"
+			}
 			"CTFBotSpawner::Spawn"
 			{
 				"linux"		"@_ZN13CTFBotSpawner5SpawnERK6VectorP10CUtlVectorI7CHandleI11CBaseEntityE10CUtlMemoryIS6_iEE"
@@ -131,6 +136,11 @@
 				"linux"		"@_ZN9CTFPlayer20PlaySpecificSequenceEPKc"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x30\x53\x56\x8B\x75\x08\x57\x56\x8B\xF9\xE8\x2A\x2A\x2A\x2A\x8B\xD8\x83\xFB\xFF\x74\x2A\x8B\x35\x2A\x2A\x2A\x2A\x8B\xCE\x8B\x16\xFF\x52\x2A\x8B\x8F\x2A\x2A\x2A\x2A\x53\x6A\x13\x8B\x01\xFF\x50"
 			}
+			"CTFPlayer::RemoveObject"
+			{
+				"linux"		"@_ZN9CTFPlayer12RemoveObjectEP11CBaseObject"
+				"windows"	"\x55\x8B\xEC\x8B\xD1\x56\x8B\xB2\x8C\x21\x00\x00"
+			}
 			"CTFPlayer::RemoveAllOwnedEntitiesFromWorld"
 			{
 				"linux"		"@_ZN9CTFPlayer31RemoveAllOwnedEntitiesFromWorldEb"
@@ -171,6 +181,21 @@
 				"linux"		"@_ZN27CTFBotMvMEngineerHintFinder8FindHintEbbP7CHandleI22CTFBotHintEngineerNestE"
 				"windows"	"\x55\x8B\xEC\x81\xEC\xCC\x04\x00\x00"
 			}
+			"CTFGameRules::PushAllPlayersAway"
+			{
+				"linux"		"@_ZN12CTFGameRules18PushAllPlayersAwayERK6VectorffiP10CUtlVectorIP9CTFPlayer10CUtlMemoryIS5_iEE"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x2C\x6A\x00"
+			}
+			"CTFBotHintEngineerNest::GetSentryHint"
+			{
+				"linux"		"@_ZNK22CTFBotHintEngineerNest13GetSentryHintEv"
+				"windows"	"\x8D\x81\x64\x03\x00\x00"
+			}
+			"CTFBotHintEngineerNest::GetTeleporterHint"
+			{
+				"linux"		"@_ZNK22CTFBotHintEngineerNest17GetTeleporterHintEv"
+				"windows"	"\x8D\x81\x78\x03\x00\x00"
+			}
 			"DoTeleporterOverride"
 			{
 				"linux"		"@_Z20DoTeleporterOverrideP11CBaseEntityR6Vectorb"
@@ -184,6 +209,16 @@
 		}
 		"Offsets"
 		{
+			"CBaseObject::CanBeUpgraded"
+			{
+				"linux"		"380"
+				"windows"	"379"
+			}
+			"CBaseObject::GetMaxHealthForCurrentLevel"
+			{
+				"linux"		"389"
+				"windows"	"387"
+			}
 			"CTFBotSpawner::GetClassIcon"
 			{
 				// Linux uses signature call CTFBotSpawner::GetClassIcon
@@ -303,6 +338,11 @@
 			{
 				"linux"		"1760"
 				"windows"	"1740"
+			}
+			"CWave::m_nNumEngineersTeleportSpawned"
+			{
+				"linux"		"48"
+				"windows"	"48"
 			}
 			"EventChangeAttributes_t::m_eventName"
 			{
@@ -580,6 +620,20 @@
 				"arguments"
 				{
 					"bot"
+					{
+						"type"	"cbaseentity"
+					}
+				}
+			}
+			"CBaseObject::CanBeUpgraded"
+			{
+				"offset"	"CBaseObject::CanBeUpgraded"
+				"hooktype"	"entity"
+				"return"	"bool"
+				"this"		"entity"
+				"arguments"
+				{
+					"pPlayer"
 					{
 						"type"	"cbaseentity"
 					}

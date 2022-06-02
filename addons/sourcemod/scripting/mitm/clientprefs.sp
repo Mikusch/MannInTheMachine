@@ -14,6 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+ 
+#pragma semicolon 1
+#pragma newdecls required
 
 enum PreferenceType
 {
@@ -27,7 +30,7 @@ char g_PreferenceNames[][] =
 	"Preference_DontBeDefender",
 	"Preference_NoSpawning",
 	"Preference_NoGiant",
-}
+};
 
 static Cookie g_cookieQueuePoints;
 static Cookie g_cookiePreferences;

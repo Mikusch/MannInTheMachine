@@ -18,6 +18,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+static DynamicHook g_DHookCanBeUpgraded;
 static DynamicHook g_DHookEventKilled;
 static DynamicHook g_DHookShouldGib;
 static DynamicHook g_DHookEntSelectSpawnPoint;
@@ -64,6 +65,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "DoTeleporterOverride", _, DHookCallback_DoTeleporterOverride_Post);
 	CreateDynamicDetour(gamedata, "OnBotTeleported", DHookCallback_OnBotTeleported_Pre);
 	
+	g_DHookCanBeUpgraded = CreateDynamicHook(gamedata, "CBaseObject::CanBeUpgraded");
 	g_DHookEventKilled = CreateDynamicHook(gamedata, "CTFPlayer::Event_Killed");
 	g_DHookShouldGib = CreateDynamicHook(gamedata, "CTFPlayer::ShouldGib");
 	g_DHookEntSelectSpawnPoint = CreateDynamicHook(gamedata, "CBasePlayer::EntSelectSpawnPoint");
@@ -113,6 +115,13 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 		if (g_DHookPickUp)
 		{
 			g_DHookPickUp.HookEntity(Hook_Pre, entity, DHookCallback_PickUp_Pre);
+		}
+	}
+	else if (StrEqual(classname, "obj_teleporter"))
+	{
+		if (g_DHookCanBeUpgraded)
+		{
+			g_DHookCanBeUpgraded.HookEntity(Hook_Pre, entity, DHookCallback_CanBeUpgraded_Pre);
 		}
 	}
 }
@@ -1040,7 +1049,72 @@ public MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 		}
 		else if (TF2_GetPlayerClass(player) == TFClass_Engineer)
 		{
-			// TODO: Engineer Behavior
+			// in MVM, when an engineer dies, we need to decouple his objects so they stay alive when his bot slot gets recycled
+			while (TF2Util_GetPlayerObjectCount(player) > 0)
+			{
+				// set to not have owner
+				int obj = TF2Util_GetPlayerObject(player, 0);
+				if (obj != -1)
+				{
+					SetEntityOwner(obj, -1);
+					SetEntPropEnt(obj, Prop_Send, "m_hBuilder", -1);
+				}
+				SDKCall_RemoveObject(player, obj);
+			}
+			
+			// unown engineer nest if owned any
+			int hint = MaxClients + 1;
+			while ((hint = FindEntityByClassname(hint, "bot_hint_*")) != -1)
+			{
+				if (GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity") == player)
+				{
+					SetEntityOwner(hint, -1);
+				}
+			}
+			
+			bool bShouldAnnounceLastEngineerBotDeath = Player(player).HasAttribute(TELEPORT_TO_HINT);
+			if (bShouldAnnounceLastEngineerBotDeath)
+			{
+				for (int client = 1; client <= MaxClients; client++)
+				{
+					if (!IsClientInGame(client))
+						continue;
+					
+					if (TF2_GetClientTeam(client) != TFTeam_Invaders)
+						continue;
+					
+					if (!IsPlayerAlive(client))
+						continue;
+					
+					if (client != player && TF2_GetPlayerClass(client) == TFClass_Engineer)
+					{
+						bShouldAnnounceLastEngineerBotDeath = false;
+						break;
+					}
+				}
+			}
+			
+			if (bShouldAnnounceLastEngineerBotDeath)
+			{
+				bool bEngineerTeleporterInTheWorld = false;
+				int obj = MaxClients + 1;
+				while ((obj = FindEntityByClassname(obj, "obj_teleporter")) != -1)
+				{
+					if (TF2_GetObjectType(obj) == TFObject_Teleporter && view_as<TFTeam>(GetEntProp(obj, Prop_Data, "m_iTeamNum")) == TFTeam_Invaders)
+					{
+						bEngineerTeleporterInTheWorld = true;
+					}
+				}
+				
+				if (bEngineerTeleporterInTheWorld)
+				{
+					TFGameRules_BroadcastSound(255, "Announcer.MVM_An_Engineer_Bot_Is_Dead_But_Not_Teleporter");
+				}
+				else
+				{
+					TFGameRules_BroadcastSound(255, "Announcer.MVM_An_Engineer_Bot_Is_Dead");
+				}
+			}
 		}
 		
 		// Enables currency drops from human kills
@@ -1122,7 +1196,7 @@ public MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret
 		return MRES_Supercede;
 	}
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
@@ -1137,7 +1211,23 @@ public MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
 		}
 	}
 	
-	return MRES_Handled;
+	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_CanBeUpgraded_Pre(int obj, DHookReturn ret, DHookParam params)
+{
+	int player = params.Get(1);
+	
+	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
+	{
+		if (TF2_GetObjectType(obj) == TFObject_Teleporter)
+		{
+			ret.Value = false;
+			return MRES_Supercede;
+		}
+	}
+	
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_ClientConnected_Pre(DHookReturn ret, DHookParam params)

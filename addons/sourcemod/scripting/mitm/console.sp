@@ -86,10 +86,10 @@ public Action CommandListener_Build(int client, const char[] command, int argc)
 		
 		bool bDisallowedBuilding = false;
 		
-		// invaders may not build teleporter entrances
+		// restrict which type of buildings invaders may build
 		if (type == TFObject_Teleporter)
 		{
-			if (mode == TFObjectMode_Entrance)
+			if (mode == TFObjectMode_Entrance || Player(me).m_teleportWhereName.Length == 0)
 			{
 				bDisallowedBuilding = true;
 			}

@@ -84,25 +84,38 @@ public Action CommandListener_Build(int client, const char[] command, int argc)
 		TFObjectType type = view_as<TFObjectType>(GetCmdArgInt(1));
 		TFObjectMode mode = view_as<TFObjectMode>(GetCmdArgInt(2));
 		
-		bool bDisallowedBuilding = false;
-		
-		// restrict which type of buildings invaders may build
-		if (type == TFObject_Teleporter)
+		switch (type)
 		{
-			if (mode == TFObjectMode_Entrance || Player(me).m_teleportWhereName.Length == 0)
+			// Dispenser: Never allow for Engineer Bots
+			case TFObject_Dispenser:
 			{
-				bDisallowedBuilding = true;
+				PrintCenterText(client, "%t", "Engineer_NotAllowedToBuild");
+				return Plugin_Handled;
 			}
-		}
-		else if (type == TFObject_Dispenser)
-		{
-			bDisallowedBuilding = true;
-		}
-		
-		if (bDisallowedBuilding)
-		{
-			PrintCenterText(client, "%t", "Engineer_NotAllowedToBuild");
-			return Plugin_Handled;
+			// Teleporter: Never allow entrances, and only allow exits if we have a teleporter hint
+			case TFObject_Teleporter:
+			{
+				if (mode == TFObjectMode_Entrance)
+				{
+					PrintCenterText(client, "%t", "Engineer_NotAllowedToBuild");
+					return Plugin_Handled;
+				}
+				
+				if (GetNestTeleporterHint(client) == -1)
+				{
+					PrintCenterText(client, "%t", "Engineer_NotAllowedToBuild_NoHint");
+					return Plugin_Handled;
+				}
+			}
+			// Sentry Gun: Only allow if we have a sentry hint
+			case TFObject_Sentry:
+			{
+				if (GetNestSentryHint(client) == -1)
+				{
+					PrintCenterText(client, "%t", "Engineer_NotAllowedToBuild_NoHint");
+					return Plugin_Handled;
+				}
+			}
 		}
 	}
 	

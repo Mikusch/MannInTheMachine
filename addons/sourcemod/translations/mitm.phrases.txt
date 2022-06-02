@@ -81,6 +81,10 @@
 	}
 	"Engineer_NotAllowedToBuild"
 	{
-		"en"		"Engineer Robots may not place this building type!"
+		"en"		"You are not allowed to build this."
+	}
+	"Engineer_NotAllowedToBuild_NoHint"
+	{
+		"en"		"You are not allowed to build this right now."
 	}
 }

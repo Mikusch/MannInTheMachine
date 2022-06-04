@@ -267,9 +267,9 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		}
 		
 		// print name
-		char name[64];
-		m_spawner.GetName(name, sizeof(name));
-		PrintCenterText(newPlayer, "You have spawned as: %s.", name);
+		char m_name[64];
+		m_spawner.GetName(m_name, sizeof(m_name));
+		PrintCenterText(newPlayer, "You have spawned as: %s.", m_name[0] == EOS ? "TFBot" : m_name);
 		
 		DispatchKeyValueVector(g_InternalSpawnPoint, "origin", here);
 		Player(newPlayer).m_spawnPointEntity = g_InternalSpawnPoint;

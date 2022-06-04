@@ -1099,7 +1099,11 @@ methodmap CTFBotSpawner
 	
 	public void GetName(char[] buffer, int maxlen)
 	{
-		PtrToString(Deref(this + GetOffset("CTFBotSpawner::m_name")), buffer, maxlen);
+		Address m_name = Deref(this + GetOffset("CTFBotSpawner::m_name"));
+		if (m_name)
+		{
+			PtrToString(m_name, buffer, maxlen);
+		}
 	}
 	
 	public Address GetClassIcon(int nSpawnNum = -1)

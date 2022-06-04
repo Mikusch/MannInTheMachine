@@ -271,8 +271,8 @@
 			}
 			"CTFPlayer::m_bIsLimitedSupportEnemy"
 			{
-				"linux"		"8828"
-				"windows"	"8824"
+				"linux"		"8822"
+				"windows"	"8818"
 			}
 			"CTFPlayer::m_pWaveSpawnPopulator"
 			{

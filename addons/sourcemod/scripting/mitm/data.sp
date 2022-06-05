@@ -646,7 +646,7 @@ methodmap Player
 		else
 		{
 			int weaponId = TF2Util_GetWeaponID(weapon);
-			if (weaponId == TF_WEAPON_BUFF_ITEM || weaponId == TF_WEAPON_LUNCHBOX || weaponId == TF_WEAPON_PARACHUTE)
+			if (weaponId == TF_WEAPON_BUFF_ITEM || weaponId == TF_WEAPON_LUNCHBOX || weaponId == TF_WEAPON_PARACHUTE || weaponId == TF_WEAPON_GRAPPLINGHOOK)
 			{
 				// Always allow specific passive weapons
 				return false;

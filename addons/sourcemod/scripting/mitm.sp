@@ -567,6 +567,7 @@ public void OnPluginStart()
 		SetOffset(gamedata, "EventChangeAttributes_t::m_eventName");
 		SetOffset(gamedata, "EventChangeAttributes_t::m_skill");
 		SetOffset(gamedata, "EventChangeAttributes_t::m_weaponRestriction");
+		SetOffset(gamedata, "EventChangeAttributes_t::m_mission");
 		SetOffset(gamedata, "EventChangeAttributes_t::m_attributeFlags");
 		SetOffset(gamedata, "EventChangeAttributes_t::m_items");
 		SetOffset(gamedata, "EventChangeAttributes_t::m_itemsAttributes");

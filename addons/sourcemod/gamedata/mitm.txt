@@ -429,6 +429,11 @@
 				"linux"		"8"
 				"windows"	"8"
 			}
+			"EventChangeAttributes_t::m_mission"
+			{
+				"linux"		"12"
+				"windows"	"12"
+			}
 			"EventChangeAttributes_t::m_attributeFlags"
 			{
 				"linux"		"20"

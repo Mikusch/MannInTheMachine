@@ -535,6 +535,8 @@ methodmap Player
 			this.ClearWeaponRestrictions();
 			this.SetWeaponRestriction(pEvent.m_weaponRestriction);
 			
+			this.SetMission(pEvent.m_mission);
+			
 			this.ClearAllAttributes();
 			this.SetAttribute(pEvent.m_attributeFlags);
 			
@@ -1022,6 +1024,14 @@ methodmap EventChangeAttributes_t
 		public get()
 		{
 			return Deref(this + GetOffset("EventChangeAttributes_t::m_weaponRestriction"));
+		}
+	}
+	
+	property MissionType m_mission
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("EventChangeAttributes_t::m_mission"));
 		}
 	}
 	

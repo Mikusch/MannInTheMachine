@@ -36,6 +36,7 @@ static Handle g_SDKCallWeaponSwitch;
 static Handle g_SDKCallRemoveObject;
 static Handle g_SDKCallFindHint;
 static Handle g_SDKCallPushAllPlayersAway;
+static Handle g_SDKCallDistributeCurrencyAmount;
 static Handle g_SDKCallGetSentryHint;
 static Handle g_SDKCallGetTeleporterHint;
 static Handle g_SDKCallGetCurrentWave;
@@ -70,6 +71,7 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallRemoveObject = PrepSDKCall_RemoveObject(gamedata);
 	g_SDKCallFindHint = PrepSDKCall_FindHint(gamedata);
 	g_SDKCallPushAllPlayersAway = PrepSDKCall_PushAllPlayersAway(gamedata);
+	g_SDKCallDistributeCurrencyAmount = PrepSDKCall_DistributeCurrencyAmount(gamedata);
 	g_SDKCallGetSentryHint = PrepSDKCall_GetSentryHint(gamedata);
 	g_SDKCallGetTeleporterHint = PrepSDKCall_GetTeleporterHint(gamedata);
 	g_SDKCallGetCurrentWave = PrepSDKCall_GetCurrentWave(gamedata);
@@ -296,6 +298,26 @@ static Handle PrepSDKCall_PushAllPlayersAway(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_DistributeCurrencyAmount(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_GameRules);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFGameRules::DistributeCurrencyAmount");
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL);
+	PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_ByValue);
+	PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_ByValue);
+	PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_ByValue);
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+	{
+		LogMessage("Failed to create SDKCall: CTFGameRules::DistributeCurrencyAmount");
+	}
+	
+	return call;
+}
+
 static Handle PrepSDKCall_GetSentryHint(GameData gamedata)
 {
 	StartPrepSDKCall(SDKCall_Entity);
@@ -511,6 +533,14 @@ void SDKCall_PushAllPlayersAway(const float vFromThisPoint[3], float flRange, fl
 {
 	if (g_SDKCallPushAllPlayersAway)
 		SDKCall(g_SDKCallPushAllPlayersAway, vFromThisPoint, flRange, flForce, nTeam, pPushedPlayers);
+}
+
+int SDKCall_DistributeCurrencyAmount(int amount, int player = -1, bool shared = true, bool countAsDropped = false, bool isBonus = false)
+{
+	if (g_SDKCallDistributeCurrencyAmount)
+		return SDKCall(g_SDKCallDistributeCurrencyAmount, amount, player, shared, countAsDropped, isBonus);
+	
+	return 0;
 }
 
 Address SDKCall_GetCurrentWave(int populator)

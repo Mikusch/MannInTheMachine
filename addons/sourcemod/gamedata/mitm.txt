@@ -186,6 +186,11 @@
 				"linux"		"@_ZN12CTFGameRules18PushAllPlayersAwayERK6VectorffiP10CUtlVectorIP9CTFPlayer10CUtlMemoryIS5_iEE"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x2C\x6A\x00"
 			}
+			"CTFGameRules::DistributeCurrencyAmount"
+			{
+				"linux"		"@_ZN12CTFGameRules24DistributeCurrencyAmountEiP9CTFPlayerbbb"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x18\x80\x7D\x10\x00"
+			}
 			"CTFBotHintEngineerNest::GetSentryHint"
 			{
 				"linux"		"@_ZNK22CTFBotHintEngineerNest13GetSentryHintEv"
@@ -218,6 +223,11 @@
 			{
 				"linux"		"389"
 				"windows"	"387"
+			}
+			"CItem::ComeToRest"
+			{
+				"linux"		"230"
+				"windows"	"227"
 			}
 			"CTFBotSpawner::GetClassIcon"
 			{
@@ -278,6 +288,16 @@
 			{
 				"linux"		"8848"
 				"windows"	"8844"
+			}
+			"CCurrencyPack::m_nAmount"
+			{
+				"linux"		"1276"
+				"windows"	"1256"
+			}
+			"CCurrencyPack::m_bTouched"
+			{
+				"linux"		"1300"
+				"windows"	"1280"
 			}
 			"CTFBotSpawner::m_class"
 			{
@@ -589,6 +609,36 @@
 					}
 				}
 			}
+			"CTFGameRules::DistributeCurrencyAmount"
+			{
+				"signature"	"CTFGameRules::DistributeCurrencyAmount"
+				"callconv"	"thiscall"
+				"return"	"int"
+				"this"		"ignore"
+				"arguments"
+				{
+					"nAmount"
+					{
+						"type"	"int"
+					}
+					"pTFPlayer"
+					{
+						"type"	"cbaseentity"
+					}
+					"bShared"
+					{
+						"type"	"bool"
+					}
+					"bCountAsDropped"
+					{
+						"type"	"bool"
+					}
+					"bIsBonus"
+					{
+						"type"	"bool"
+					}
+				}
+			}
 			"DoTeleporterOverride"
 			{
 				"signature"		"DoTeleporterOverride"
@@ -638,6 +688,13 @@
 						"type"	"cbaseentity"
 					}
 				}
+			}
+			"CItem::ComeToRest"
+			{
+				"offset"	"CItem::ComeToRest"
+				"hooktype"	"entity"
+				"return"	"void"
+				"this"		"entity"
 			}
 			"CTFPlayer::Event_Killed"
 			{

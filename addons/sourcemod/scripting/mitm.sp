@@ -562,6 +562,9 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CTFPlayer::m_bIsLimitedSupportEnemy");
 		SetOffset(gamedata, "CTFPlayer::m_pWaveSpawnPopulator");
 		
+		SetOffset(gamedata, "CCurrencyPack::m_nAmount");
+		SetOffset(gamedata, "CCurrencyPack::m_bTouched");
+		
 		delete gamedata;
 	}
 	else

@@ -19,6 +19,7 @@
 #pragma newdecls required
 
 static DynamicHook g_DHookCanBeUpgraded;
+static DynamicHook g_DHookComeToRest;
 static DynamicHook g_DHookEventKilled;
 static DynamicHook g_DHookShouldGib;
 static DynamicHook g_DHookEntSelectSpawnPoint;
@@ -66,6 +67,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "OnBotTeleported", DHookCallback_OnBotTeleported_Pre);
 	
 	g_DHookCanBeUpgraded = CreateDynamicHook(gamedata, "CBaseObject::CanBeUpgraded");
+	g_DHookComeToRest = CreateDynamicHook(gamedata, "CItem::ComeToRest");
 	g_DHookEventKilled = CreateDynamicHook(gamedata, "CTFPlayer::Event_Killed");
 	g_DHookShouldGib = CreateDynamicHook(gamedata, "CTFPlayer::ShouldGib");
 	g_DHookEntSelectSpawnPoint = CreateDynamicHook(gamedata, "CBasePlayer::EntSelectSpawnPoint");
@@ -122,6 +124,13 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 		if (g_DHookCanBeUpgraded)
 		{
 			g_DHookCanBeUpgraded.HookEntity(Hook_Pre, entity, DHookCallback_CanBeUpgraded_Pre);
+		}
+	}
+	else if (strncmp(classname, "item_currencypack_", 18) == 0)
+	{
+		if (g_DHookComeToRest)
+		{
+			g_DHookComeToRest.HookEntity(Hook_Pre, entity, DHookCallback_ComeToRest_Pre);
 		}
 	}
 }
@@ -203,7 +212,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 	float here[3];
 	here = Vector(rawHere[0], rawHere[1], rawHere[2]);
 	
-	CTFNavArea area = view_as<CTFNavArea>(TheNavMesh.GetNearestNavArea(here, .checkGround = false));
+	CTFNavArea area = view_as<CTFNavArea>(TheNavMesh.GetNavArea(here));
 	if (area && area.HasAttributeTF(NO_SPAWNING))
 	{
 		ret.Value = false;
@@ -450,6 +459,9 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 			// EntityHandleVector_t
 			CUtlVector result = CUtlVector(params.Get(2));
 			result.AddToTail(GetEntityHandle(newPlayer));
+			
+			// For easy access in populator spawner callbacks
+			m_justSpawnedVector.Push(newPlayer);
 		}
 		
 		if (GameRules_IsMannVsMachineMode())
@@ -459,9 +471,6 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 				HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_GIANT_CALLOUT", TFTeam_Defenders);
 			}
 		}
-		
-		// For easy access in populator spawner callbacks
-		m_justSpawnedVector.Push(newPlayer);
 	}
 	else
 	{
@@ -883,7 +892,7 @@ public MRESReturn DHookCallback_FindSnapToBuildPos_Post(int obj, DHookReturn ret
 	return MRES_Ignored;
 }
 
-public MRESReturn DHookCallback_FindSpawnLocation_Post(Address populator, DHookReturn ret, DHookParam params)
+public MRESReturn DHookCallback_FindSpawnLocation_Post(Address where, DHookReturn ret, DHookParam params)
 {
 	// Store for use in populator callbacks.
 	// We can't use CWaveSpawnPopulator::m_spawnLocationResult because it gets overridden in some cases.
@@ -1225,6 +1234,26 @@ public MRESReturn DHookCallback_CanBeUpgraded_Pre(int obj, DHookReturn ret, DHoo
 			ret.Value = false;
 			return MRES_Supercede;
 		}
+	}
+	
+	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_ComeToRest_Pre(int item)
+{
+	float origin[3];
+	GetEntPropVector(item, Prop_Data, "m_vecAbsOrigin", origin);
+	
+	// if we've come to rest in the enemy spawn, just grant the money to the player
+	CTFNavArea area = view_as<CTFNavArea>(TheNavMesh.GetNavArea(origin));
+	
+	if (area && (area.HasAttributeTF(BLUE_SPAWN_ROOM) || area.HasAttributeTF(RED_SPAWN_ROOM)))
+	{
+		SDKCall_DistributeCurrencyAmount(GetEntData(item, GetOffset("CCurrencyPack::m_nAmount")));
+		SetEntData(item, GetOffset("CCurrencyPack::m_bTouched"), true);
+		RemoveEntity(item);
+		
+		return MRES_Supercede;
 	}
 	
 	return MRES_Ignored;

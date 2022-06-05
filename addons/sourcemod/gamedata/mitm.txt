@@ -386,7 +386,7 @@
 			}
 			"CMissionPopulator::m_cooldownDuration"
 			{
-				"linux"		"64"
+				"linux"		"60"
 				"windows"	"60"
 			}
 			"CWaveSpawnPopulator::m_bLimitedSupport"

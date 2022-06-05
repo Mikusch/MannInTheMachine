@@ -43,6 +43,7 @@ static Handle g_SDKCallGetCurrentWave;
 static Handle g_SDKCallIsCombatItem;
 static Handle g_SDKCallGetMaxHealthForCurrentLevel;
 static Handle g_SDKCallFindSpawnLocation;
+static Handle g_SDKCallGetSentryBusterDamageAndKillThreshold;
 static Handle g_SDKCallCTFBotSpawnerSpawn;
 
 void SDKCalls_Initialize(GameData gamedata)
@@ -81,6 +82,7 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallIsCombatItem = PrepSDKCall_IsCombatItem(gamedata);
 	g_SDKCallGetMaxHealthForCurrentLevel = PrepSDKCall_GetMaxHealthForCurrentLevel(gamedata);
 	g_SDKCallFindSpawnLocation = PrepSDKCall_FindSpawnLocation(gamedata);
+	g_SDKCallGetSentryBusterDamageAndKillThreshold = PrepSDKCall_GetSentryBusterDamageAndKillThreshold(gamedata);
 	g_SDKCallCTFBotSpawnerSpawn = PrepSDKCall_IPopulationSpawnerSpawn(gamedata);
 }
 
@@ -419,6 +421,20 @@ static Handle PrepSDKCall_FindSpawnLocation(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_GetSentryBusterDamageAndKillThreshold(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CPopulationManager::GetSentryBusterDamageAndKillThreshold");
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_ByRef, VDECODE_FLAG_BYREF, VENCODE_FLAG_COPYBACK);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_ByRef, VDECODE_FLAG_BYREF, VENCODE_FLAG_COPYBACK);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CPopulationManager::GetSentryBusterDamageAndKillThreshold");
+	
+	return call;
+}
+
 static Handle PrepSDKCall_IPopulationSpawnerSpawn(GameData gamedata)
 {
 	StartPrepSDKCall(SDKCall_Raw);
@@ -621,6 +637,12 @@ SpawnLocationResult SDKCall_FindSpawnLocation(Address pSpawnLocation, float vSpa
 		return SDKCall(g_SDKCallFindSpawnLocation, pSpawnLocation, vSpawnPosition);
 	
 	return SPAWN_LOCATION_NOT_FOUND;
+}
+
+void SDKCall_GetSentryBusterDamageAndKillThreshold(CPopulationManager populator, int &nDamage, int &nKills)
+{
+	if (g_SDKCallGetSentryBusterDamageAndKillThreshold)
+		SDKCall(g_SDKCallGetSentryBusterDamageAndKillThreshold, populator, nDamage, nKills);
 }
 
 bool SDKCall_IPopulationSpawnerSpawn(Address pSpawner, const float vSpawnPosition[3], CUtlVector &spawnVector = view_as<CUtlVector>(0))

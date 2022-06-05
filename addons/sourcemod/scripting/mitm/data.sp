@@ -1188,6 +1188,18 @@ methodmap CWave
 			WriteVal(this + GetOffset("CWave::m_nNumEngineersTeleportSpawned"), nNumEngineersTeleportSpawned);
 		}
 	}
+	
+	property int m_nSentryBustersSpawned
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CWave::m_nSentryBustersSpawned"));
+		}
+		public set(int nSentryBustersSpawned)
+		{
+			WriteVal(this + GetOffset("CWave::m_nSentryBustersSpawned"), nSentryBustersSpawned);
+		}
+	}
 }
 
 methodmap CPopulationManager
@@ -1218,14 +1230,6 @@ methodmap CPopulationManager
 	public CWave GetCurrentWave()
 	{
 		return CWave(SDKCall_GetCurrentWave(this._index));
-	}
-	
-	public void GetSentryBusterDamageAndKillThreshold(float &flDamage, int &nKills)
-	{
-		// TODO:
-		flDamage = 1.0;
-		nKills = 0;
-		/*SDKCall_GetSentryBusterDamageAndKillThreshold(flDamage, nKills);*/
 	}
 	
 	public float GetHealthMultiplier(bool bIsTank = false)

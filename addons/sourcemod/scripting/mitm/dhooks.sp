@@ -683,24 +683,20 @@ public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 		return MRES_Supercede;
 	}
 	
-	// TODO
-	/*if (GetPopulationManager().IsSpawningPaused())
+	if (GetPopulationManager().IsSpawningPaused())
 	{
-		PrintToChatAll("spawning is paused");
 		ret.Value = false;
 		return MRES_Supercede;
-	}*/
+	}
 	
-	PrintToConsoleAll("aaaa");
 	m_checkForDangerousSentriesTimer.Start(GetRandomFloat(5.0, 10.0));
 	
 	// collect all of the dangerous sentries
 	ArrayList dangerousSentryVector = new ArrayList();
 	
-	// TODO:
-	float nDmgLimit = 0.0;
+	int nDmgLimit = 0;
 	int nKillLimit = 0;
-	//GetPopulationManager().GetSentryBusterDamageAndKillThreshold(nDmgLimit, nKillLimit);
+	SDKCall_GetSentryBusterDamageAndKillThreshold(GetPopulationManager(), nDmgLimit, nKillLimit);
 	
 	int obj = MaxClients + 1;
 	while ((obj = FindEntityByClassname(obj, "obj_*")) != -1)
@@ -716,7 +712,7 @@ public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 				int sentryOwner = GetEntPropEnt(obj, Prop_Send, "m_hBuilder");
 				if (sentryOwner != -1)
 				{
-					float nDmgDone = GetEntDataFloat(sentryOwner, GetOffset("CTFPlayer::m_accumulatedSentryGunDamageDealt"));
+					int nDmgDone = RoundToFloor(GetEntDataFloat(sentryOwner, GetOffset("CTFPlayer::m_accumulatedSentryGunDamageDealt")));
 					int nKillsMade = GetEntData(sentryOwner, GetOffset("CTFPlayer::m_accumulatedSentryGunKillCount"));
 					
 					if (nDmgDone >= nDmgLimit || nKillsMade >= nKillLimit)
@@ -801,7 +797,10 @@ public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 					{
 						iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
 					}
-					//IncrementMannVsMachineWaveClassCount( SDKCall_GetClassIcon(populator.m_spawner, k ), iFlags );
+					
+					char iszClassIcon[64];
+					PtrToString(CTFBotSpawner(populator.m_spawner).GetClassIcon(k), iszClassIcon, sizeof(iszClassIcon));
+					IncrementMannVsMachineWaveClassCount(iszClassIcon, iFlags);
 					
 					HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_SENTRY_BUSTER", TFTeam_Defenders);
 					
@@ -823,23 +822,22 @@ public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 		float flCoolDown = populator.m_cooldownDuration;
 		
 		CWave wave = GetPopulationManager().GetCurrentWave();
-		if ( wave )
+		if (wave)
 		{
-			//TODO:
-			/*pWave->IncrementSentryBustersSpawned();
+			wave.m_nSentryBustersSpawned++;
 			
-				if ( pWave->NumSentryBustersSpawned() > 1 )
-				{
-					TFGameRules_BroadcastSound( 255, "Announcer.MVM_Sentry_Buster_Alert_Another" );
-				}
-				else
-				{
-					TFGameRules_BroadcastSound( 255, "Announcer.MVM_Sentry_Buster_Alert" );
-				}
-
-			flCoolDown = populator.m_cooldownDuration + pWave->NumSentryBustersKilled() * populator.m_cooldownDuration;
-
-			pWave->ResetSentryBustersKilled();*/
+			if (wave.m_nSentryBustersSpawned > 1)
+			{
+				TFGameRules_BroadcastSound(255, "Announcer.MVM_Sentry_Buster_Alert_Another");
+			}
+			else
+			{
+				TFGameRules_BroadcastSound(255, "Announcer.MVM_Sentry_Buster_Alert");
+			}
+			
+			flCoolDown = populator.m_cooldownDuration + wave.m_nSentryBustersSpawned * populator.m_cooldownDuration;
+			
+			wave.m_nSentryBustersSpawned = 0;
 		}
 		
 		m_cooldownTimer.Start(flCoolDown);

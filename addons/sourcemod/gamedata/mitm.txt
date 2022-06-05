@@ -171,6 +171,11 @@
 				"linux"		"@_ZN14CSpawnLocation17FindSpawnLocationER6Vector"
 				"windows"	"\x55\x8B\xEC\x81\xEC\xB4\x00\x00\x00\x53\x8B\xC1"
 			}
+			"CPopulationManager::GetSentryBusterDamageAndKillThreshold"
+			{
+				"linux"		"@_ZNK18CPopulationManager37GetSentryBusterDamageAndKillThresholdERiS0_"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x08\x56\x33\xD2"
+			}
 			"IsSpaceToSpawnHere"
 			{
 				"linux"		"@_Z18IsSpaceToSpawnHereRK6Vector"
@@ -304,11 +309,6 @@
 				"linux"		"8822"
 				"windows"	"8818"
 			}
-			"CPopulationManager::m_bSpawningPaused"
-			{
-				"linux"		"1528"
-				"windows"	"1524"
-			}
 			"CTFPlayer::m_pWaveSpawnPopulator"
 			{
 				"linux"		"8848"
@@ -389,10 +389,20 @@
 				"linux"		"1229"
 				"windows"	"1229"
 			}
+			"CPopulationManager::m_bSpawningPaused"
+			{
+				"linux"		"1524"
+				"windows"	"1504"
+			}
 			"CPopulationManager::m_defaultEventChangeAttributesName"
 			{
 				"linux"		"1760"
 				"windows"	"1740"
+			}
+			"CWave::m_nSentryBustersSpawned"
+			{
+				"linux"		"44"
+				"windows"	"44"
 			}
 			"CWave::m_nNumEngineersTeleportSpawned"
 			{

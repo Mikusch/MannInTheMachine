@@ -559,6 +559,7 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CWaveSpawnPopulator::m_bLimitedSupport");
 		SetOffset(gamedata, "CPopulationManager::m_bSpawningPaused");
 		SetOffset(gamedata, "CPopulationManager::m_defaultEventChangeAttributesName");
+		SetOffset(gamedata, "CWave::m_nSentryBustersSpawned");
 		SetOffset(gamedata, "CWave::m_nNumEngineersTeleportSpawned");
 		SetOffset(gamedata, "IPopulationSpawner::m_spawner");
 		SetOffset(gamedata, "IPopulationSpawner::m_where");

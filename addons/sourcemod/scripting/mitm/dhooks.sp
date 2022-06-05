@@ -22,6 +22,7 @@ static DynamicHook g_DHookCanBeUpgraded;
 static DynamicHook g_DHookComeToRest;
 static DynamicHook g_DHookEventKilled;
 static DynamicHook g_DHookShouldGib;
+static DynamicHook g_DHookIsAllowedToPickUpFlag;
 static DynamicHook g_DHookEntSelectSpawnPoint;
 static DynamicHook g_DHookPassesFilterImpl;
 static DynamicHook g_DHookPickUp;
@@ -71,6 +72,7 @@ void DHooks_Initialize(GameData gamedata)
 	g_DHookComeToRest = CreateDynamicHook(gamedata, "CItem::ComeToRest");
 	g_DHookEventKilled = CreateDynamicHook(gamedata, "CTFPlayer::Event_Killed");
 	g_DHookShouldGib = CreateDynamicHook(gamedata, "CTFPlayer::ShouldGib");
+	g_DHookIsAllowedToPickUpFlag = CreateDynamicHook(gamedata, "CTFPlayer::IsAllowedToPickUpFlag");
 	g_DHookEntSelectSpawnPoint = CreateDynamicHook(gamedata, "CBasePlayer::EntSelectSpawnPoint");
 	g_DHookPassesFilterImpl = CreateDynamicHook(gamedata, "CBaseFilter::PassesFilterImpl");
 	g_DHookPickUp = CreateDynamicHook(gamedata, "CTFItem::PickUp");
@@ -88,6 +90,11 @@ void DHooks_HookClient(int client)
 	if (g_DHookShouldGib)
 	{
 		g_DHookShouldGib.HookEntity(Hook_Pre, client, DHookCallback_ShouldGib_Pre);
+	}
+	
+	if (g_DHookIsAllowedToPickUpFlag)
+	{
+		g_DHookIsAllowedToPickUpFlag.HookEntity(Hook_Pre, client, DHookCallback_IsAllowedToPickUpFlag_Post);
 	}
 	
 	if (g_DHookEntSelectSpawnPoint)
@@ -788,6 +795,11 @@ public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 					SetEntProp(bot, Prop_Send, "m_bUseClassAnimations", true);
 					SetEntProp(bot, Prop_Data, "m_bloodColor", DONT_BLEED);
 					
+					SetVariantInt(1);
+					AcceptEntityInput(bot, "SetForcedTauntCam");
+					
+					TF2Attrib_SetByName(bot, "no_attack", 1.0);
+					
 					int iFlags = MVM_CLASS_FLAG_MISSION;
 					if (GetEntProp(bot, Prop_Send, "m_bIsMiniBoss"))
 					{
@@ -1331,6 +1343,13 @@ public MRESReturn DHookCallback_ShouldGib_Pre(int player, DHookReturn ret, DHook
 	}
 	
 	return MRES_Handled;
+}
+
+public MRESReturn DHookCallback_IsAllowedToPickUpFlag_Post(int player, DHookReturn ret)
+{
+	// mission bots can't pick up the flag
+	ret.Value = ret.Value && !Player(player).IsOnAnyMission();
+	return MRES_Supercede;
 }
 
 public MRESReturn DHookCallback_EntSelectSpawnPoint_Pre(int player, DHookReturn ret)

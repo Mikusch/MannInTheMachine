@@ -37,6 +37,7 @@ static AttributeType m_attributeFlags[MAXPLAYERS + 1];
 static char m_szIdleSound[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
 static float m_fModelScaleOverride[MAXPLAYERS + 1];
 static MissionType m_mission[MAXPLAYERS + 1];
+static MissionType m_prevMission[MAXPLAYERS + 1];
 static int m_missionTarget[MAXPLAYERS + 1];
 static float m_flRequiredSpawnLeaveTime[MAXPLAYERS + 1];
 static int m_spawnPointEntity[MAXPLAYERS + 1];
@@ -155,6 +156,18 @@ methodmap Player
 		public set(MissionType mission)
 		{
 			m_mission[this._client] = mission;
+		}
+	}
+	
+	property MissionType m_prevMission
+	{
+		public get()
+		{
+			return m_prevMission[this._client];
+		}
+		public set(MissionType mission)
+		{
+			m_prevMission[this._client] = mission;
 		}
 	}
 	
@@ -366,8 +379,14 @@ methodmap Player
 		return this.m_mission == mission ? true : false;
 	}
 	
+	public bool IsOnAnyMission()
+	{
+		return this.m_mission == NO_MISSION ? false : true;
+	}
+	
 	public void SetMission(MissionType mission)
 	{
+		this.m_prevMission = this.m_mission;
 		this.m_mission = mission;
 		
 		// Temp hack - some missions play an idle loop

@@ -37,9 +37,9 @@ void CTFBotMissionSuicideBomber_OnStart(int me)
 	m_bWasSuccessful[me] = false;
 	m_bWasKilled[me] = false;
 	
-	m_victim[me] = Player(me).m_missionTarget;
+	m_victim[me] = EntIndexToEntRef(Player(me).m_missionTarget);
 	
-	if (m_victim[me] != -1)
+	if (IsValidEntity(m_victim[me]))
 	{
 		GetEntPropVector(m_victim[me], Prop_Data, "m_vecAbsOrigin", m_lastKnownVictimPosition[me]);
 	}
@@ -56,7 +56,7 @@ bool CTFBotMissionSuicideBomber_Update(int me)
 			Detonate(me);
 			
 			// Send out an event
-			if (m_bWasSuccessful[me] && m_victim[me] && HasEntProp(m_victim[me], Prop_Send, "m_hBuilder"))
+			if (m_bWasSuccessful[me] && IsValidEntity(m_victim[me]) && HasEntProp(m_victim[me], Prop_Send, "m_hBuilder"))
 			{
 				if (GetEntPropEnt(m_victim[me], Prop_Send, "m_hBuilder") != -1)
 				{
@@ -124,6 +124,30 @@ bool CTFBotMissionSuicideBomber_Update(int me)
 	}
 	
 	return true;
+}
+
+void CTFBotMissionSuicideBomber_OnKilled(int me)
+{
+	if (!m_bHasDetonated[me])
+	{
+		if (!m_detonateTimer[me].HasStarted())
+		{
+			StartDetonate(me);
+		}
+		else if (m_detonateTimer[me].IsElapsed())
+		{
+			Detonate(me);
+		}
+		else
+		{
+			// We're in detonate mode, and something's trying to kill us.  Prevent it.
+			if (TF2_GetClientTeam(me) != TFTeam_Spectator)
+			{
+				SetEntProp(me, Prop_Data, "m_lifeState", LIFE_ALIVE);
+				SetEntProp(me, Prop_Data, "m_iHealth", 1);
+			}
+		}
+	}
 }
 
 static void StartDetonate(int me, bool bWasSuccessful = false, bool bWasKilled = false)
@@ -243,7 +267,7 @@ static void Detonate(int me)
 
 			CalculateMeleeDamageForce( &info, toVictim, me->WorldSpaceCenter(), 1.0f );
 			victim->TakeDamage( info );*/
-			SDKHooks_TakeDamage(victim, me, me, float(4 * damage), DMG_BLAST);
+			SDKHooks_TakeDamage(victim, me, me, float(4 * damage), DMG_BLAST, .bypassHooks = false);
 		}
 	}
 	
@@ -257,10 +281,10 @@ static void Detonate(int me)
 	if (m_bWasKilled[me])
 	{
 		// increment num sentry killed this wave
-		/*	CWave *pWave = g_pPopulationManager ? g_pPopulationManager->GetCurrentWave() : NULL;
-		if ( pWave )
+		CWave wave = GetPopulationManager().GetCurrentWave();
+		if (wave)
 		{
-			pWave->IncrementSentryBustersKilled();
-		}*/
+			wave.m_nSentryBustersSpawned++;
+		}
 	}
 }

@@ -274,6 +274,11 @@
 				"linux"		"272"
 				"windows"	"271"
 			}
+			"CTFPlayer::IsAllowedToPickUpFlag"
+			{
+				"linux"		"480"
+				"windows"	"479"
+			}
 			"CBasePlayer::EntSelectSpawnPoint"
 			{
 				"linux"		"400"
@@ -768,6 +773,13 @@
 						"type"	"objectptr"
 					}
 				}
+			}
+			"CTFPlayer::IsAllowedToPickUpFlag"
+			{
+				"offset"	"CTFPlayer::IsAllowedToPickUpFlag"
+				"hooktype"	"entity"
+				"return"	"bool"
+				"this"		"entity"
 			}
 			"CBasePlayer::EntSelectSpawnPoint"
 			{

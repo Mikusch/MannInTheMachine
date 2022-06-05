@@ -633,6 +633,8 @@ public void OnClientPutInServer(int client)
 	
 	Player(client).Reset();
 	
+	SDKHook(client, SDKHook_OnTakeDamage, OnClientTakeDamage);
+	
 	if (AreClientCookiesCached(client))
 	{
 		OnClientCookiesCached(client);
@@ -1124,4 +1126,38 @@ void FireWeaponAtEnemy(int client, int &buttons)
 			TF2Attrib_RemoveByName(weapon, "provide on active");
 		}
 	}
+}
+
+Action OnClientTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
+	{
+		// Don't let Sentry Busters die until they've done their spin-up
+		if (Player(victim).HasMission(MISSION_DESTROY_SENTRIES))
+		{
+			if ((float(GetEntProp(victim, Prop_Data, "m_iHealth")) - damage) <= 0.0)
+			{
+				CTFBotMissionSuicideBomber_OnKilled(victim);
+				
+				SetEntityHealth(victim, 1);
+				return Plugin_Handled;
+			}
+		}
+		
+		// Sentry Busters hurt teammates when they explode.
+		// Force damage value when the victim is a giant.
+		if (0 < attacker <= MaxClients && TF2_GetClientTeam(attacker) == TFTeam_Invaders)
+		{
+			if ((attacker != victim) && 
+				Player(attacker).m_prevMission == MISSION_DESTROY_SENTRIES && 
+				TF2_GetClientTeam(victim) == TF2_GetClientTeam(attacker) && 
+				GetEntProp(victim, Prop_Send, "m_bIsMiniBoss"))
+			{
+				damage = 600.0;
+				return Plugin_Changed;
+			}
+		}
+	}
+	
+	return Plugin_Continue;
 }

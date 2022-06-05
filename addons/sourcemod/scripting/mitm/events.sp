@@ -231,7 +231,7 @@ public Action Timer_OnWaitingForPlayersEnd(Handle timer)
 	tf_mvm_min_players_to_start.IntValue = 0;
 	g_bInWaitingForPlayers = false;
 	
-	SDKCall_ResetMap(GetPopulator());
+	GetPopulationManager().ResetMap();
 	
 	return Plugin_Continue;
 }

@@ -83,9 +83,9 @@ bool CTFBotMvMEngineerTeleportSpawn_Update(int me)
 			EmitGameSoundToAll("Engineer.MVM_BattleCry07", me);
 			EmitGameSoundToAll("MVM.Robot_Engineer_Spawn", m_hintEntity[me]);
 			
-			if (GetPopulator())
+			if (GetPopulationManager())
 			{
-				CWave pWave = CWave(SDKCall_GetCurrentWave(GetPopulator()));
+				CWave pWave = GetPopulationManager().GetCurrentWave();
 				if (pWave)
 				{
 					if (pWave.m_nNumEngineersTeleportSpawned == 0)

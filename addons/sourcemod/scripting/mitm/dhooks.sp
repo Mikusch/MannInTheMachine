@@ -34,6 +34,7 @@ static SpawnLocationResult s_spawnLocationResult = SPAWN_LOCATION_NOT_FOUND;
 
 // CMissionPopulator
 static CountdownTimer m_cooldownTimer;
+static CountdownTimer m_checkForDangerousSentriesTimer;
 static int s_activeMissionMembers;
 static int s_nSniperCount;
 
@@ -379,7 +380,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 			nHealth = TF2Util_GetEntityMaxHealth(newPlayer);
 		}
 		
-		nHealth = RoundToFloor(float(nHealth) * SDKCall_GetHealthMultiplier(false));
+		nHealth = RoundToFloor(float(nHealth) * GetPopulationManager().GetHealthMultiplier(false));
 		Player(newPlayer).ModifyMaxHealth(nHealth);
 		
 		Player(newPlayer).StartIdleSound();
@@ -394,7 +395,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		}
 		
 		char defaultEventChangeAttributesName[64];
-		PtrToString(GetEntData(GetPopulator(), GetOffset("CPopulationManager::m_defaultEventChangeAttributesName")), defaultEventChangeAttributesName, sizeof(defaultEventChangeAttributesName));
+		GetPopulationManager().GetDefaultEventChangeAttributesName(defaultEventChangeAttributesName, sizeof(defaultEventChangeAttributesName));
 		
 		EventChangeAttributes_t pEventChangeAttributes = Player(newPlayer).GetEventChangeAttributes(defaultEventChangeAttributesName);
 		if (!pEventChangeAttributes)
@@ -459,10 +460,10 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 			// EntityHandleVector_t
 			CUtlVector result = CUtlVector(params.Get(2));
 			result.AddToTail(GetEntityHandle(newPlayer));
-			
-			// For easy access in populator spawner callbacks
-			m_justSpawnedVector.Push(newPlayer);
 		}
+		
+		// For easy access in populator spawner callbacks
+		m_justSpawnedVector.Push(newPlayer);
 		
 		if (GameRules_IsMannVsMachineMode())
 		{
@@ -668,8 +669,186 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 
 public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, DHookReturn ret)
 {
-	// Disable sentry buster spawns for the time being
-	ret.Value = false;
+	CMissionPopulator populator = CMissionPopulator(pThis);
+	
+	if (!m_cooldownTimer.IsElapsed())
+	{
+		ret.Value = false;
+		return MRES_Supercede;
+	}
+	
+	if (!m_checkForDangerousSentriesTimer.IsElapsed())
+	{
+		ret.Value = false;
+		return MRES_Supercede;
+	}
+	
+	// TODO
+	/*if (GetPopulationManager().IsSpawningPaused())
+	{
+		PrintToChatAll("spawning is paused");
+		ret.Value = false;
+		return MRES_Supercede;
+	}*/
+	
+	PrintToConsoleAll("aaaa");
+	m_checkForDangerousSentriesTimer.Start(GetRandomFloat(5.0, 10.0));
+	
+	// collect all of the dangerous sentries
+	ArrayList dangerousSentryVector = new ArrayList();
+	
+	// TODO:
+	float nDmgLimit = 0.0;
+	int nKillLimit = 0;
+	//GetPopulationManager().GetSentryBusterDamageAndKillThreshold(nDmgLimit, nKillLimit);
+	
+	int obj = MaxClients + 1;
+	while ((obj = FindEntityByClassname(obj, "obj_*")) != -1)
+	{
+		if (TF2_GetObjectType(obj) == TFObject_Sentry)
+		{
+			// Disposable sentries are not valid targets
+			if (GetEntProp(obj, Prop_Send, "m_bDisposableBuilding"))
+				continue;
+			
+			if (view_as<TFTeam>(GetEntProp(obj, Prop_Data, "m_iTeamNum")) == TFTeam_Defenders)
+			{
+				int sentryOwner = GetEntPropEnt(obj, Prop_Send, "m_hBuilder");
+				if (sentryOwner != -1)
+				{
+					float nDmgDone = GetEntDataFloat(sentryOwner, GetOffset("CTFPlayer::m_accumulatedSentryGunDamageDealt"));
+					int nKillsMade = GetEntData(sentryOwner, GetOffset("CTFPlayer::m_accumulatedSentryGunKillCount"));
+					
+					if (nDmgDone >= nDmgLimit || nKillsMade >= nKillLimit)
+					{
+						dangerousSentryVector.Push(obj);
+					}
+				}
+			}
+		}
+	}
+	
+	ArrayList livePlayerVector = new ArrayList();
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (TF2_GetClientTeam(client) != TFTeam_Invaders)
+			continue;
+		
+		if (!IsPlayerAlive(client))
+			continue;
+		
+		livePlayerVector.Push(client);
+	}
+	
+	// dispatch a sentry busting squad for each dangerous sentry
+	bool didSpawn = false;
+	
+	for (int i = 0; i < dangerousSentryVector.Length; ++i)
+	{
+		int targetSentry = dangerousSentryVector.Get(i);
+		
+		// if there is already a squad out there destroying this sentry, don't spawn another one
+		int j;
+		for (j = 0; j < livePlayerVector.Length; ++j)
+		{
+			int bot = livePlayerVector.Get(j);
+			if (Player(bot).HasMission(MISSION_DESTROY_SENTRIES) && Player(bot).m_missionTarget == targetSentry)
+			{
+				// there is already a sentry busting squad active for this sentry
+				break;
+			}
+		}
+		
+		if (j < livePlayerVector.Length)
+		{
+			continue;
+		}
+		
+		// spawn a sentry buster squad to destroy this sentry
+		float vSpawnPosition[3];
+		SpawnLocationResult spawnLocationResult = SDKCall_FindSpawnLocation(populator.m_where, vSpawnPosition);
+		if (spawnLocationResult != SPAWN_LOCATION_NOT_FOUND)
+		{
+			// We don't actually pass a CUtlVector because it would require fetching or creating one in memory.
+			// This is very tedious, so we just use our temporary list hack.
+			if (populator.m_spawner && SDKCall_IPopulationSpawnerSpawn(populator.m_spawner, vSpawnPosition))
+			{
+				for (int k = 0; k < m_justSpawnedVector.Length; ++k)
+				{
+					int bot = m_justSpawnedVector.Get(k);
+					
+					Player(bot).SetMission(MISSION_DESTROY_SENTRIES);
+					Player(bot).m_missionTarget = targetSentry;
+					
+					SetEntData(bot, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true);
+					
+					didSpawn = true;
+					
+					SetVariantString(g_szBotBossSentryBusterModel);
+					AcceptEntityInput(bot, "SetCustomModel");
+					SetEntProp(bot, Prop_Send, "m_bUseClassAnimations", true);
+					SetEntProp(bot, Prop_Data, "m_bloodColor", DONT_BLEED);
+					
+					int iFlags = MVM_CLASS_FLAG_MISSION;
+					if (GetEntProp(bot, Prop_Send, "m_bIsMiniBoss"))
+					{
+						iFlags |= MVM_CLASS_FLAG_MINIBOSS;
+					}
+					if (Player(bot).HasAttribute(ALWAYS_CRIT))
+					{
+						iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
+					}
+					//IncrementMannVsMachineWaveClassCount( SDKCall_GetClassIcon(populator.m_spawner, k ), iFlags );
+					
+					HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_SENTRY_BUSTER", TFTeam_Defenders);
+					
+					// what bot should do after spawning at teleporter exit
+					if (spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
+					{
+						OnBotTeleported(bot);
+					}
+				}
+				
+				// After we are done, clear the vector
+				m_justSpawnedVector.Clear();
+			}
+		}
+	}
+	
+	if (didSpawn)
+	{
+		float flCoolDown = populator.m_cooldownDuration;
+		
+		CWave wave = GetPopulationManager().GetCurrentWave();
+		if ( wave )
+		{
+			//TODO:
+			/*pWave->IncrementSentryBustersSpawned();
+			
+				if ( pWave->NumSentryBustersSpawned() > 1 )
+				{
+					TFGameRules_BroadcastSound( 255, "Announcer.MVM_Sentry_Buster_Alert_Another" );
+				}
+				else
+				{
+					TFGameRules_BroadcastSound( 255, "Announcer.MVM_Sentry_Buster_Alert" );
+				}
+
+			flCoolDown = populator.m_cooldownDuration + pWave->NumSentryBustersKilled() * populator.m_cooldownDuration;
+
+			pWave->ResetSentryBustersKilled();*/
+		}
+		
+		m_cooldownTimer.Start(flCoolDown);
+	}
+	
+	delete dangerousSentryVector;
+	delete livePlayerVector;
+	
+	ret.Value = didSpawn;
 	return MRES_Supercede;
 }
 

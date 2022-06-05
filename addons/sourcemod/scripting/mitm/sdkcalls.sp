@@ -40,7 +40,10 @@ static Handle g_SDKCallDistributeCurrencyAmount;
 static Handle g_SDKCallGetSentryHint;
 static Handle g_SDKCallGetTeleporterHint;
 static Handle g_SDKCallGetCurrentWave;
+static Handle g_SDKCallIsCombatItem;
 static Handle g_SDKCallGetMaxHealthForCurrentLevel;
+static Handle g_SDKCallFindSpawnLocation;
+static Handle g_SDKCallCTFBotSpawnerSpawn;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
@@ -75,7 +78,10 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallGetSentryHint = PrepSDKCall_GetSentryHint(gamedata);
 	g_SDKCallGetTeleporterHint = PrepSDKCall_GetTeleporterHint(gamedata);
 	g_SDKCallGetCurrentWave = PrepSDKCall_GetCurrentWave(gamedata);
+	g_SDKCallIsCombatItem = PrepSDKCall_IsCombatItem(gamedata);
 	g_SDKCallGetMaxHealthForCurrentLevel = PrepSDKCall_GetMaxHealthForCurrentLevel(gamedata);
+	g_SDKCallFindSpawnLocation = PrepSDKCall_FindSpawnLocation(gamedata);
+	g_SDKCallCTFBotSpawnerSpawn = PrepSDKCall_IPopulationSpawnerSpawn(gamedata);
 }
 
 static Handle PrepSDKCall_GetClassIcon_Linux(GameData gamedata)
@@ -373,6 +379,19 @@ static Handle PrepSDKCall_GetCurrentWave(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_IsCombatItem(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CBaseEntity::IsCombatItem");
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CBaseEntity::IsCombatItem");
+	
+	return call;
+}
+
 static Handle PrepSDKCall_GetMaxHealthForCurrentLevel(GameData gamedata)
 {
 	StartPrepSDKCall(SDKCall_Entity);
@@ -382,6 +401,35 @@ static Handle PrepSDKCall_GetMaxHealthForCurrentLevel(GameData gamedata)
 	Handle call = EndPrepSDKCall();
 	if (!call)
 		LogMessage("Failed to create SDKCall: CBaseObject::GetMaxHealthForCurrentLevel");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_FindSpawnLocation(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Raw);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CSpawnLocation::FindSpawnLocation");
+	PrepSDKCall_AddParameter(SDKType_Vector, SDKPass_ByRef, _, VENCODE_FLAG_COPYBACK);
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CSpawnLocation::FindSpawnLocation");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_IPopulationSpawnerSpawn(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Raw);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "IPopulationSpawner::Spawn");
+	PrepSDKCall_AddParameter(SDKType_Vector, SDKPass_ByRef);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: IPopulationSpawner::Spawn");
 	
 	return call;
 }
@@ -551,12 +599,36 @@ Address SDKCall_GetCurrentWave(int populator)
 	return Address_Null;
 }
 
+bool SDKCall_IsCombatItem(int entity)
+{
+	if (g_SDKCallIsCombatItem)
+		return SDKCall(g_SDKCallIsCombatItem, entity);
+	
+	return false;
+}
+
 int SDKCall_GetMaxHealthForCurrentLevel(int obj)
 {
 	if (g_SDKCallGetMaxHealthForCurrentLevel)
 		return SDKCall(g_SDKCallGetMaxHealthForCurrentLevel, obj);
 	
 	return 0;
+}
+
+SpawnLocationResult SDKCall_FindSpawnLocation(Address pSpawnLocation, float vSpawnPosition[3])
+{
+	if (g_SDKCallFindSpawnLocation)
+		return SDKCall(g_SDKCallFindSpawnLocation, pSpawnLocation, vSpawnPosition);
+	
+	return SPAWN_LOCATION_NOT_FOUND;
+}
+
+bool SDKCall_IPopulationSpawnerSpawn(Address pSpawner, const float vSpawnPosition[3], CUtlVector &spawnVector = view_as<CUtlVector>(0))
+{
+	if (g_SDKCallCTFBotSpawnerSpawn)
+		return SDKCall(g_SDKCallCTFBotSpawnerSpawn, pSpawner, vSpawnPosition, spawnVector);
+	
+	return false;
 }
 
 bool SDKCall_WeaponSwitch(int player, int weapon, int viewmodelindex = 0)

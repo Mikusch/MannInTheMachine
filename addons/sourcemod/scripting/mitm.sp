@@ -37,6 +37,13 @@
 
 #define DEFINDEX_UNDEFINED	65535
 
+// m_lifeState values
+#define LIFE_ALIVE				0 // alive
+#define LIFE_DYING				1 // playing death animation or still falling off of a ledge waiting to hit ground
+#define LIFE_DEAD				2 // dead. lying still.
+#define LIFE_RESPAWNABLE		3
+#define LIFE_DISCARDBODY		4
+
 #define MVM_CLASS_FLAG_NONE				0
 #define MVM_CLASS_FLAG_NORMAL			(1<<0)
 #define MVM_CLASS_FLAG_SUPPORT			(1<<1)
@@ -117,6 +124,8 @@ char g_szBotBossModels[][] =
 	"models/bots/spy/bot_spy.mdl",
 	"models/bots/engineer/bot_engineer.mdl",
 };
+
+char g_szBotBossSentryBusterModel[] = "models/bots/demo/bot_sentry_buster.mdl";
 
 // Rome 2 promo models
 char g_szRomePromoItems_Hat[][] =
@@ -458,6 +467,7 @@ ConVar tf_mvm_bot_flag_carrier_interval_to_1st_upgrade;
 ConVar tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade;
 ConVar tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade;
 ConVar tf_mvm_engineer_teleporter_uber_duration;
+ConVar tf_bot_suicide_bomb_range;
 ConVar tf_bot_taunt_victim_chance;
 ConVar mp_tournament_redteamname;
 ConVar mp_tournament_blueteamname;
@@ -473,6 +483,7 @@ ConVar sv_stepsize;
 #include "mitm/behavior/tf_bot_mvm_deploy_bomb.sp"
 #include "mitm/behavior/tf_bot_mvm_engineer_idle.sp"
 #include "mitm/behavior/tf_bot_mvm_engineer_teleport_spawn.sp"
+#include "mitm/behavior/tf_bot_mission_suicide_bomber.sp"
 
 #include "mitm/clientprefs.sp"
 #include "mitm/console.sp"
@@ -518,6 +529,7 @@ public void OnPluginStart()
 	tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade = FindConVar("tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade");
 	tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade = FindConVar("tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade");
 	tf_mvm_engineer_teleporter_uber_duration = FindConVar("tf_mvm_engineer_teleporter_uber_duration");
+	tf_bot_suicide_bomb_range = FindConVar("tf_bot_suicide_bomb_range");
 	tf_bot_taunt_victim_chance = FindConVar("tf_bot_taunt_victim_chance");
 	mp_tournament_redteamname = FindConVar("mp_tournament_redteamname");
 	mp_tournament_blueteamname = FindConVar("mp_tournament_blueteamname");
@@ -545,8 +557,11 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CTFBotSpawner::m_defaultAttributes");
 		SetOffset(gamedata, "CMissionPopulator::m_cooldownDuration");
 		SetOffset(gamedata, "CWaveSpawnPopulator::m_bLimitedSupport");
+		SetOffset(gamedata, "CPopulationManager::m_bSpawningPaused");
 		SetOffset(gamedata, "CPopulationManager::m_defaultEventChangeAttributesName");
 		SetOffset(gamedata, "CWave::m_nNumEngineersTeleportSpawned");
+		SetOffset(gamedata, "IPopulationSpawner::m_spawner");
+		SetOffset(gamedata, "IPopulationSpawner::m_where");
 		
 		SetOffset(gamedata, "EventChangeAttributes_t::m_eventName");
 		SetOffset(gamedata, "EventChangeAttributes_t::m_skill");
@@ -561,6 +576,8 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CTFPlayer::m_bIsMissionEnemy");
 		SetOffset(gamedata, "CTFPlayer::m_bIsLimitedSupportEnemy");
 		SetOffset(gamedata, "CTFPlayer::m_pWaveSpawnPopulator");
+		SetOffset(gamedata, "CTFPlayer::m_accumulatedSentryGunDamageDealt");
+		SetOffset(gamedata, "CTFPlayer::m_accumulatedSentryGunKillCount");
 		
 		SetOffset(gamedata, "CCurrencyPack::m_nAmount");
 		SetOffset(gamedata, "CCurrencyPack::m_bTouched");
@@ -740,6 +757,27 @@ public void OnClientGameFrame(int client)
 		{
 			CTFBotDeliverFlag_Update(client);
 			return;
+		}
+		
+		switch (Player(client).m_mission)
+		{
+			case MISSION_DESTROY_SENTRIES:
+			{
+				static bool s_inMissionSuicideBomber[MAXPLAYERS + 1];
+				
+				if (s_inMissionSuicideBomber[client])
+				{
+					if (!CTFBotMissionSuicideBomber_Update(client))
+					{
+						s_inMissionSuicideBomber[client] = false;
+					}
+				}
+				else
+				{
+					s_inMissionSuicideBomber[client] = true;
+					CTFBotMissionSuicideBomber_OnStart(client);
+				}
+			}
 		}
 		
 		if (TF2_GetPlayerClass(client) == TFClass_Spy)

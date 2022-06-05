@@ -18,6 +18,11 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+any Max(any a, any b)
+{
+	return a >= b ? a : b;
+}
+
 bool GameRules_IsMannVsMachineMode()
 {
 	return view_as<bool>(GameRules_GetProp("m_bPlayingMannVsMachine"));
@@ -196,11 +201,6 @@ void SetMannVsMachineWaveClassActive(const char[] iszClassIconName, bool bActive
 	}
 }
 
-int GetPopulator()
-{
-	return FindEntityByClassname(MaxClients + 1, "info_populator");
-}
-
 int TFObjectiveResource()
 {
 	return FindEntityByClassname(MaxClients + 1, "tf_objective_resource");
@@ -345,6 +345,66 @@ bool IsRangeLessThan(int client1, int client2, float range)
 	GetClientAbsOrigin(client1, origin1);
 	GetClientAbsOrigin(client2, origin2);
 	return GetVectorDistance(origin1, origin2) < range;
+}
+
+bool IsDistanceBetweenLessThan(int client, const float target[3], float range)
+{
+	float origin[3];
+	GetClientAbsOrigin(client, origin);
+	
+	SubtractVectors(origin, target, origin);
+	
+	return GetVectorLength(origin) < range;
+}
+
+// Return true if a weapon has no obstructions along the line between the given points
+bool IsLineOfFireClear2(int client, const float from[3], const float to[3])
+{
+	TR_TraceRayFilter(from, to, MASK_SOLID_BRUSHONLY, RayType_EndPoint, TraceEntityFilter_IgnoreActorsAndFriendlyCombatItems, GetClientTeam(client));
+	return !TR_DidHit();
+}
+
+// Return true if a weapon has no obstructions along the line from our eye to the given position
+bool IsLineOfFireClear(int client, const float where[3])
+{
+	float pos[3];
+	GetClientEyePosition(client, pos);
+	
+	return IsLineOfFireClear2(client, pos, where);
+}
+
+// Return true if a weapon has no obstructions along the line between the given point and entity
+bool IsLineOfFireClear4(int client, const float from[3], int who)
+{
+	float center[3];
+	CBaseEntity(who).WorldSpaceCenter(center);
+	
+	TR_TraceRayFilter(from, center, MASK_SOLID_BRUSHONLY, RayType_EndPoint, TraceEntityFilter_IgnoreActorsAndFriendlyCombatItems, GetClientTeam(client));
+	
+	return !TR_DidHit() || TR_GetEntityIndex() == who;
+}
+
+// Return true if a weapon has no obstructions along the line from our eye to the given entity
+bool IsLineOfFireClear3(int client, int who)
+{
+	float pos[3];
+	GetClientEyePosition(client, pos);
+	
+	return IsLineOfFireClear4(client, pos, who);
+}
+
+bool TraceEntityFilter_IgnoreActorsAndFriendlyCombatItems(int entity, int contentsMask, int m_iIgnoreTeam)
+{
+	if (CBaseEntity(entity).MyCombatCharacterPointer())
+		return false;
+	
+	if (SDKCall_IsCombatItem(entity))
+	{
+		if (GetEntProp(entity, Prop_Data, "m_iTeamNum") == m_iIgnoreTeam)
+			return false;
+	}
+	
+	return true;
 }
 
 void TE_TFParticleEffect(const char[] name, const float vecOrigin[3] = NULL_VECTOR,

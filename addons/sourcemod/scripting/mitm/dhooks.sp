@@ -1348,8 +1348,13 @@ public MRESReturn DHookCallback_ShouldGib_Pre(int player, DHookReturn ret, DHook
 public MRESReturn DHookCallback_IsAllowedToPickUpFlag_Post(int player, DHookReturn ret)
 {
 	// mission bots can't pick up the flag
-	ret.Value = ret.Value && !Player(player).IsOnAnyMission();
-	return MRES_Supercede;
+	if (Player(player).IsOnAnyMission())
+	{
+		ret.Value = false;
+		return MRES_Supercede;
+	}
+	
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_EntSelectSpawnPoint_Pre(int player, DHookReturn ret)

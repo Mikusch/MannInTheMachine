@@ -37,6 +37,8 @@ static AttributeType m_attributeFlags[MAXPLAYERS + 1];
 static char m_szIdleSound[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
 static float m_fModelScaleOverride[MAXPLAYERS + 1];
 static MissionType m_mission[MAXPLAYERS + 1];
+static MissionType m_prevMission[MAXPLAYERS + 1];
+static int m_missionTarget[MAXPLAYERS + 1];
 static float m_flRequiredSpawnLeaveTime[MAXPLAYERS + 1];
 static int m_spawnPointEntity[MAXPLAYERS + 1];
 
@@ -154,6 +156,30 @@ methodmap Player
 		public set(MissionType mission)
 		{
 			m_mission[this._client] = mission;
+		}
+	}
+	
+	property MissionType m_prevMission
+	{
+		public get()
+		{
+			return m_prevMission[this._client];
+		}
+		public set(MissionType mission)
+		{
+			m_prevMission[this._client] = mission;
+		}
+	}
+	
+	property int m_missionTarget
+	{
+		public get()
+		{
+			return m_missionTarget[this._client];
+		}
+		public set(int missionTarget)
+		{
+			m_missionTarget[this._client] = missionTarget;
 		}
 	}
 	
@@ -353,9 +379,21 @@ methodmap Player
 		return this.m_mission == mission ? true : false;
 	}
 	
+	public bool IsOnAnyMission()
+	{
+		return this.m_mission == NO_MISSION ? false : true;
+	}
+	
 	public void SetMission(MissionType mission)
 	{
+		this.m_prevMission = this.m_mission;
 		this.m_mission = mission;
+		
+		// Temp hack - some missions play an idle loop
+		if (this.m_mission > NO_MISSION)
+		{
+			this.StartIdleSound();
+		}
 	}
 	
 	public void SetTeleportWhere(CUtlVector teleportWhereName)
@@ -404,7 +442,14 @@ methodmap Player
 				
 				case TFClass_DemoMan:
 				{
-					strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantDemomanLoop");
+					if (this.m_mission == MISSION_DESTROY_SENTRIES)
+					{
+						strcopy(pszSoundName, sizeof(pszSoundName), "MVM.SentryBusterLoop");
+					}
+					else
+					{
+						strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantDemomanLoop");
+					}
 				}
 				case TFClass_Scout:
 				{
@@ -489,6 +534,8 @@ methodmap Player
 			
 			this.ClearWeaponRestrictions();
 			this.SetWeaponRestriction(pEvent.m_weaponRestriction);
+			
+			this.SetMission(pEvent.m_mission);
 			
 			this.ClearAllAttributes();
 			this.SetAttribute(pEvent.m_attributeFlags);
@@ -980,6 +1027,14 @@ methodmap EventChangeAttributes_t
 		}
 	}
 	
+	property MissionType m_mission
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("EventChangeAttributes_t::m_mission"));
+		}
+	}
+	
 	property any m_attributeFlags
 	{
 		public get()
@@ -1119,11 +1174,35 @@ methodmap CMissionPopulator
 		return view_as<CMissionPopulator>(address);
 	}
 	
+	property MissionType m_mission
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CMissionPopulator::m_mission"));
+		}
+	}
+	
 	property float m_cooldownDuration
 	{
 		public get()
 		{
 			return Deref(this + GetOffset("CMissionPopulator::m_cooldownDuration"));
+		}
+	}
+	
+	property Address m_spawner
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("IPopulationSpawner::m_spawner"));
+		}
+	}
+	
+	property Address m_where
+	{
+		public get()
+		{
+			return view_as<Address>(this) + GetOffset("IPopulationSpawner::m_where");
 		}
 	}
 }
@@ -1146,4 +1225,68 @@ methodmap CWave
 			WriteVal(this + GetOffset("CWave::m_nNumEngineersTeleportSpawned"), nNumEngineersTeleportSpawned);
 		}
 	}
+	
+	property int m_nSentryBustersSpawned
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CWave::m_nSentryBustersSpawned"));
+		}
+		public set(int nSentryBustersSpawned)
+		{
+			WriteVal(this + GetOffset("CWave::m_nSentryBustersSpawned"), nSentryBustersSpawned);
+		}
+	}
+}
+
+methodmap CPopulationManager
+{
+	public CPopulationManager(int entity)
+	{
+		return view_as<CPopulationManager>(entity);
+	}
+	
+	property int _index
+	{
+		public get()
+		{
+			return view_as<int>(this);
+		}
+	}
+	
+	public void ResetMap()
+	{
+		SDKCall_ResetMap(this._index);
+	}
+	
+	public bool IsSpawningPaused()
+	{
+		return view_as<bool>(GetEntData(this._index, GetOffset("CPopulationManager::m_bSpawningPaused")));
+	}
+	
+	public CWave GetCurrentWave()
+	{
+		return CWave(SDKCall_GetCurrentWave(this._index));
+	}
+	
+	public float GetHealthMultiplier(bool bIsTank = false)
+	{
+		return SDKCall_GetHealthMultiplier(this._index, bIsTank);
+	}
+	
+	public void GetSentryBusterDamageAndKillThreshold(int& nDamage, int& nKills)
+	{
+		SDKCall_GetSentryBusterDamageAndKillThreshold(this._index, nDamage, nKills);
+	}
+	
+	public void GetDefaultEventChangeAttributesName(char[] buffer, int maxlen)
+	{
+		PtrToString(GetEntData(this._index, GetOffset("CPopulationManager::m_defaultEventChangeAttributesName")), buffer, maxlen);
+	}
+}
+
+CPopulationManager GetPopulationManager()
+{
+	// There is only ever one population manager, so this should be safe...
+	return CPopulationManager(FindEntityByClassname(MaxClients + 1, "info_populator"));
 }

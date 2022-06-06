@@ -37,6 +37,13 @@
 
 #define DEFINDEX_UNDEFINED	65535
 
+// m_lifeState values
+#define LIFE_ALIVE				0 // alive
+#define LIFE_DYING				1 // playing death animation or still falling off of a ledge waiting to hit ground
+#define LIFE_DEAD				2 // dead. lying still.
+#define LIFE_RESPAWNABLE		3
+#define LIFE_DISCARDBODY		4
+
 #define MVM_CLASS_FLAG_NONE				0
 #define MVM_CLASS_FLAG_NORMAL			(1<<0)
 #define MVM_CLASS_FLAG_SUPPORT			(1<<1)
@@ -45,9 +52,19 @@
 #define MVM_CLASS_FLAG_ALWAYSCRIT		(1<<4)
 #define MVM_CLASS_FLAG_SUPPORT_LIMITED	(1<<5)
 
+// TF FlagInfo State
 #define TF_FLAGINFO_HOME		0
 #define TF_FLAGINFO_STOLEN		(1<<0)
 #define TF_FLAGINFO_DROPPED		(1<<1)
+
+// Fade in/out
+#define FFADE_IN			0x0001		// Just here so we don't pass 0 into the function
+#define FFADE_OUT			0x0002		// Fade out (not in)
+#define FFADE_MODULATE		0x0004		// Modulate (don't blend)
+#define FFADE_STAYOUT		0x0008		// ignores the duration, stays faded out until new ScreenFade message received
+#define FFADE_PURGE			0x0010		// Purges all other fades, replacing them with this one
+
+#define SCREENFADE_FRACBITS		9		// which leaves 16-this for the integer part
 
 #define PLUGIN_TAG	"[{orange}MitM{default}]"
 
@@ -117,6 +134,8 @@ char g_szBotBossModels[][] =
 	"models/bots/spy/bot_spy.mdl",
 	"models/bots/engineer/bot_engineer.mdl",
 };
+
+char g_szBotBossSentryBusterModel[] = "models/bots/demo/bot_sentry_buster.mdl";
 
 // Rome 2 promo models
 char g_szRomePromoItems_Hat[][] =
@@ -235,6 +254,16 @@ enum PlayerAnimEvent_t
 	PLAYERANIMEVENT_ATTACK_PRIMARY_SUPER,
 
 	PLAYERANIMEVENT_COUNT
+};
+
+enum ShakeCommand_t
+{
+	SHAKE_START = 0,		// Starts the screen shake for all players within the radius.
+	SHAKE_STOP,				// Stops the screen shake for all players within the radius.
+	SHAKE_AMPLITUDE,		// Modifies the amplitude of an active screen shake for all players within the radius.
+	SHAKE_FREQUENCY,		// Modifies the frequency of an active screen shake for all players within the radius.
+	SHAKE_START_RUMBLEONLY,	// Starts a shake effect that only rumbles the controller, no screen effect.
+	SHAKE_START_NORUMBLE,	// Starts a shake that does NOT rumble the controller.
 };
 
 enum WeaponRestrictionType
@@ -438,6 +467,7 @@ Handle g_hWaitingForPlayersTimer;
 bool g_bInWaitingForPlayers;
 StringMap g_offsets;
 bool g_bAllowTeamChange;
+bool g_bForceFriendlyFire;
 float g_restoreCheckpointTime;
 
 // Plugin ConVars
@@ -458,11 +488,14 @@ ConVar tf_mvm_bot_flag_carrier_interval_to_1st_upgrade;
 ConVar tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade;
 ConVar tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade;
 ConVar tf_mvm_engineer_teleporter_uber_duration;
+ConVar tf_bot_suicide_bomb_range;
+ConVar tf_bot_suicide_bomb_friendly_fire;
 ConVar tf_bot_taunt_victim_chance;
 ConVar mp_tournament_redteamname;
 ConVar mp_tournament_blueteamname;
 ConVar mp_waitingforplayers_time;
 ConVar sv_stepsize;
+ConVar phys_pushscale;
 
 #include "mitm/data.sp"
 #include "mitm/entity.sp"
@@ -473,6 +506,7 @@ ConVar sv_stepsize;
 #include "mitm/behavior/tf_bot_mvm_deploy_bomb.sp"
 #include "mitm/behavior/tf_bot_mvm_engineer_idle.sp"
 #include "mitm/behavior/tf_bot_mvm_engineer_teleport_spawn.sp"
+#include "mitm/behavior/tf_bot_mission_suicide_bomber.sp"
 
 #include "mitm/clientprefs.sp"
 #include "mitm/console.sp"
@@ -518,11 +552,14 @@ public void OnPluginStart()
 	tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade = FindConVar("tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade");
 	tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade = FindConVar("tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade");
 	tf_mvm_engineer_teleporter_uber_duration = FindConVar("tf_mvm_engineer_teleporter_uber_duration");
+	tf_bot_suicide_bomb_range = FindConVar("tf_bot_suicide_bomb_range");
+	tf_bot_suicide_bomb_friendly_fire = FindConVar("tf_bot_suicide_bomb_friendly_fire");
 	tf_bot_taunt_victim_chance = FindConVar("tf_bot_taunt_victim_chance");
 	mp_tournament_redteamname = FindConVar("mp_tournament_redteamname");
 	mp_tournament_blueteamname = FindConVar("mp_tournament_blueteamname");
 	mp_waitingforplayers_time = FindConVar("mp_waitingforplayers_time");
 	sv_stepsize = FindConVar("sv_stepsize");
+	phys_pushscale = FindConVar("phys_pushscale");
 	
 	Console_Initialize();
 	Events_Initialize();
@@ -543,14 +580,20 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CTFBotSpawner::m_name");
 		SetOffset(gamedata, "CTFBotSpawner::m_teleportWhereName");
 		SetOffset(gamedata, "CTFBotSpawner::m_defaultAttributes");
+		SetOffset(gamedata, "CMissionPopulator::m_mission");
 		SetOffset(gamedata, "CMissionPopulator::m_cooldownDuration");
 		SetOffset(gamedata, "CWaveSpawnPopulator::m_bLimitedSupport");
+		SetOffset(gamedata, "CPopulationManager::m_bSpawningPaused");
 		SetOffset(gamedata, "CPopulationManager::m_defaultEventChangeAttributesName");
+		SetOffset(gamedata, "CWave::m_nSentryBustersSpawned");
 		SetOffset(gamedata, "CWave::m_nNumEngineersTeleportSpawned");
+		SetOffset(gamedata, "IPopulationSpawner::m_spawner");
+		SetOffset(gamedata, "IPopulationSpawner::m_where");
 		
 		SetOffset(gamedata, "EventChangeAttributes_t::m_eventName");
 		SetOffset(gamedata, "EventChangeAttributes_t::m_skill");
 		SetOffset(gamedata, "EventChangeAttributes_t::m_weaponRestriction");
+		SetOffset(gamedata, "EventChangeAttributes_t::m_mission");
 		SetOffset(gamedata, "EventChangeAttributes_t::m_attributeFlags");
 		SetOffset(gamedata, "EventChangeAttributes_t::m_items");
 		SetOffset(gamedata, "EventChangeAttributes_t::m_itemsAttributes");
@@ -561,9 +604,13 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CTFPlayer::m_bIsMissionEnemy");
 		SetOffset(gamedata, "CTFPlayer::m_bIsLimitedSupportEnemy");
 		SetOffset(gamedata, "CTFPlayer::m_pWaveSpawnPopulator");
+		SetOffset(gamedata, "CTFPlayer::m_accumulatedSentryGunDamageDealt");
+		SetOffset(gamedata, "CTFPlayer::m_accumulatedSentryGunKillCount");
 		
 		SetOffset(gamedata, "CCurrencyPack::m_nAmount");
 		SetOffset(gamedata, "CCurrencyPack::m_bTouched");
+		
+		SetOffset(gamedata, "CTakeDamageInfo::m_bForceFriendlyFire");
 		
 		delete gamedata;
 	}
@@ -614,6 +661,8 @@ public void OnClientPutInServer(int client)
 	DHooks_HookClient(client);
 	
 	Player(client).Reset();
+	
+	SDKHook(client, SDKHook_OnTakeDamage, OnClientTakeDamage);
 	
 	if (AreClientCookiesCached(client))
 	{
@@ -740,6 +789,29 @@ public void OnClientGameFrame(int client)
 		{
 			CTFBotDeliverFlag_Update(client);
 			return;
+		}
+		
+		switch (Player(client).m_mission)
+		{
+			case MISSION_DESTROY_SENTRIES:
+			{
+				static bool s_inMissionSuicideBomber[MAXPLAYERS + 1];
+				
+				if (s_inMissionSuicideBomber[client])
+				{
+					if (!CTFBotMissionSuicideBomber_Update(client))
+					{
+						s_inMissionSuicideBomber[client] = false;
+					}
+				}
+				else
+				{
+					s_inMissionSuicideBomber[client] = true;
+					CTFBotMissionSuicideBomber_OnStart(client);
+				}
+				
+				return;
+			}
 		}
 		
 		if (TF2_GetPlayerClass(client) == TFClass_Spy)
@@ -1085,4 +1157,39 @@ void FireWeaponAtEnemy(int client, int &buttons)
 			TF2Attrib_RemoveByName(weapon, "provide on active");
 		}
 	}
+}
+
+Action OnClientTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
+	{
+		// Don't let Sentry Busters die until they've done their spin-up
+		if (Player(victim).HasMission(MISSION_DESTROY_SENTRIES))
+		{
+			if ((float(GetEntProp(victim, Prop_Data, "m_iHealth")) - damage) <= 0.0)
+			{
+				CTFBotMissionSuicideBomber_OnKilled(victim);
+				
+				SetEntityHealth(victim, 1);
+				return Plugin_Handled;
+			}
+		}
+		
+		// Sentry Busters hurt teammates when they explode.
+		// Force damage value when the victim is a giant.
+		if (0 < attacker <= MaxClients && TF2_GetClientTeam(attacker) == TFTeam_Invaders)
+		{
+			if ((attacker != victim) &&
+				Player(attacker).m_prevMission == MISSION_DESTROY_SENTRIES &&
+				g_bForceFriendlyFire &&
+				TF2_GetClientTeam(victim) == TF2_GetClientTeam(attacker) &&
+				GetEntProp(victim, Prop_Send, "m_bIsMiniBoss"))
+			{
+				damage = 600.0;
+				return Plugin_Changed;
+			}
+		}
+	}
+	
+	return Plugin_Continue;
 }

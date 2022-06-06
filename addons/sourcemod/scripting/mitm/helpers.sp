@@ -18,6 +18,11 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+any Max(any a, any b)
+{
+	return a >= b ? a : b;
+}
+
 bool GameRules_IsMannVsMachineMode()
 {
 	return view_as<bool>(GameRules_GetProp("m_bPlayingMannVsMachine"));
@@ -134,36 +139,34 @@ int GetItemDefinitionByName(const char[] name)
 	return TF_ITEMDEF_DEFAULT;
 }
 
-void IncrementMannVsMachineWaveClassCount(const char[] iszClassIconName, int iFlags)
+void IncrementMannVsMachineWaveClassCount(any pClassIcon, int iFlags)
 {
-	int obj = TFObjectiveResource();
+	int objective = TFObjectiveResource();
 	
-	for (int i = 0; i < GetEntPropArraySize(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
+	for (int i = 0; i < GetEntPropArraySize(objective, Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
 	{
-		char waveClassName[64];
-		if (GetEntPropString(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames", waveClassName, sizeof(waveClassName), i) && StrEqual(waveClassName, iszClassIconName) && (GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassFlags", _, i) & iFlags))
+		if (GetEntData(objective, FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames") + (i * 4)) == pClassIcon && (GetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassFlags", _, i) & iFlags))
 		{
-			SetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts", GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts", _, i) + 1, _, i);
+			SetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts", GetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts", _, i) + 1, _, i);
 			
-			if (GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts", _, i) <= 0)
+			if (GetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts", _, i) <= 0)
 			{
-				SetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts", 1, _, i);
+				SetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts", 1, _, i);
 			}
 			
 			return;
 		}
 	}
 	
-	for (int i = 0; i < GetEntPropArraySize(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames2"); ++i)
+	for (int i = 0; i < GetEntPropArraySize(objective, Prop_Send, "m_iszMannVsMachineWaveClassNames2"); ++i)
 	{
-		char waveClassName[64];
-		if (GetEntPropString(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames2", waveClassName, sizeof(waveClassName), i) && StrEqual(waveClassName, iszClassIconName) && (GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassFlags2", _, i) & iFlags))
+		if (GetEntData(objective, FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames2") + (i * 4)) == pClassIcon && (GetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassFlags2", _, i) & iFlags))
 		{
-			SetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts2", GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts2", _, i) + 1, _, i);
+			SetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts2", GetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts2", _, i) + 1, _, i);
 			
-			if (GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts2", _, i) <= 0)
+			if (GetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts2", _, i) <= 0)
 			{
-				SetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts2", 1, _, i);
+				SetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts2", 1, _, i);
 			}
 			
 			return;
@@ -171,34 +174,27 @@ void IncrementMannVsMachineWaveClassCount(const char[] iszClassIconName, int iFl
 	}
 }
 
-void SetMannVsMachineWaveClassActive(const char[] iszClassIconName, bool bActive = true)
+void SetMannVsMachineWaveClassActive(any pClassIcon, bool bActive = true)
 {
-	int obj = TFObjectiveResource();
+	int objective = TFObjectiveResource();
 	
-	for (int i = 0; i < GetEntPropArraySize(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
+	for (int i = 0; i < GetEntPropArraySize(objective, Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
 	{
-		char waveClassName[64];
-		if (GetEntPropString(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames", waveClassName, sizeof(waveClassName), i) && StrEqual(waveClassName, iszClassIconName))
+		if (GetEntData(objective, FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames") + (i * 4)) == pClassIcon)
 		{
-			SetEntProp(obj, Prop_Send, "m_bMannVsMachineWaveClassActive", bActive, _, i);
+			SetEntProp(objective, Prop_Send, "m_bMannVsMachineWaveClassActive", bActive, _, i);
 			return;
 		}
 	}
 	
-	for (int i = 0; i < GetEntPropArraySize(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames2"); ++i)
+	for (int i = 0; i < GetEntPropArraySize(objective, Prop_Send, "m_iszMannVsMachineWaveClassNames2"); ++i)
 	{
-		char waveClassName[64];
-		if (GetEntPropString(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames2", waveClassName, sizeof(waveClassName), i) && StrEqual(waveClassName, iszClassIconName))
+		if (GetEntData(objective, FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames2") + (i * 4)) == pClassIcon)
 		{
-			SetEntProp(obj, Prop_Send, "m_bMannVsMachineWaveClassActive2", bActive, _, i);
+			SetEntProp(objective, Prop_Send, "m_bMannVsMachineWaveClassActive2", bActive, _, i);
 			return;
 		}
 	}
-}
-
-int GetPopulator()
-{
-	return FindEntityByClassname(MaxClients + 1, "info_populator");
 }
 
 int TFObjectiveResource()
@@ -347,6 +343,66 @@ bool IsRangeLessThan(int client1, int client2, float range)
 	return GetVectorDistance(origin1, origin2) < range;
 }
 
+bool IsDistanceBetweenLessThan(int client, const float target[3], float range)
+{
+	float origin[3];
+	GetClientAbsOrigin(client, origin);
+	
+	SubtractVectors(origin, target, origin);
+	
+	return GetVectorLength(origin) < range;
+}
+
+// Return true if a weapon has no obstructions along the line between the given points
+bool IsLineOfFireClear2(int client, const float from[3], const float to[3])
+{
+	TR_TraceRayFilter(from, to, MASK_SOLID_BRUSHONLY, RayType_EndPoint, TraceEntityFilter_IgnoreActorsAndFriendlyCombatItems, GetClientTeam(client));
+	return !TR_DidHit();
+}
+
+// Return true if a weapon has no obstructions along the line from our eye to the given position
+bool IsLineOfFireClear(int client, const float where[3])
+{
+	float pos[3];
+	GetClientEyePosition(client, pos);
+	
+	return IsLineOfFireClear2(client, pos, where);
+}
+
+// Return true if a weapon has no obstructions along the line between the given point and entity
+bool IsLineOfFireClear4(int client, const float from[3], int who)
+{
+	float center[3];
+	CBaseEntity(who).WorldSpaceCenter(center);
+	
+	TR_TraceRayFilter(from, center, MASK_SOLID_BRUSHONLY, RayType_EndPoint, TraceEntityFilter_IgnoreActorsAndFriendlyCombatItems, GetClientTeam(client));
+	
+	return !TR_DidHit() || TR_GetEntityIndex() == who;
+}
+
+// Return true if a weapon has no obstructions along the line from our eye to the given entity
+bool IsLineOfFireClear3(int client, int who)
+{
+	float pos[3];
+	GetClientEyePosition(client, pos);
+	
+	return IsLineOfFireClear4(client, pos, who);
+}
+
+bool TraceEntityFilter_IgnoreActorsAndFriendlyCombatItems(int entity, int contentsMask, int m_iIgnoreTeam)
+{
+	if (CBaseEntity(entity).MyCombatCharacterPointer())
+		return false;
+	
+	if (SDKCall_IsCombatItem(entity))
+	{
+		if (GetEntProp(entity, Prop_Data, "m_iTeamNum") == m_iIgnoreTeam)
+			return false;
+	}
+	
+	return true;
+}
+
 void TE_TFParticleEffect(const char[] name, const float vecOrigin[3] = NULL_VECTOR,
 	const float vecStart[3] = NULL_VECTOR, const float vecAngles[3] = NULL_VECTOR,
 	int entity = -1, ParticleAttachment_t attachType = PATTACH_ABSORIGIN,
@@ -466,4 +522,126 @@ Address GetPlayerShared(int client)
 {
 	Address offset = view_as<Address>(GetEntSendPropOffs(client, "m_Shared", true));
 	return GetEntityAddress(client) + offset;
+}
+
+void CalculateMeleeDamageForce(const float vecMeleeDir[3], float flDamage, float flScale, float vecForce[3])
+{
+	// Calculate an impulse large enough to push a 75kg man 4 in/sec per point of damage
+	float flForceScale = flDamage * (75 * 4);
+	NormalizeVector(vecMeleeDir, vecForce);
+	ScaleVector(vecForce, flForceScale);
+	ScaleVector(vecForce, phys_pushscale.FloatValue);
+	ScaleVector(vecForce, flScale);
+}
+
+int FixedUnsigned16(float value, int scale)
+{
+	int output;
+	
+	output = RoundToFloor(value * float(scale));
+	if (output < 0)
+	{
+		output = 0;
+	}
+	if (output > 0xFFFF)
+	{
+		output = 0xFFFF;
+	}
+	
+	return output;
+}
+
+void UTIL_ScreenFade(int player, const int color[4], float fadeTime, float fadeHold, int flags)
+{
+	BfWrite bf = UserMessageToBfWrite(StartMessageOne("Fade", player, USERMSG_RELIABLE));
+	if (bf != null)
+	{
+		bf.WriteShort(FixedUnsigned16(fadeTime, 1 << SCREENFADE_FRACBITS));
+		bf.WriteShort(FixedUnsigned16(fadeHold, 1 << SCREENFADE_FRACBITS));
+		bf.WriteShort(flags);
+		bf.WriteByte(color[0]);
+		bf.WriteByte(color[1]);
+		bf.WriteByte(color[2]);
+		bf.WriteByte(color[3]);
+		
+		EndMessage();
+	}
+}
+
+const float MAX_SHAKE_AMPLITUDE = 16.0;
+void UTIL_ScreenShake(const float center[3], float amplitude, float frequency, float duration, float radius, ShakeCommand_t eCommand, bool bAirShake = false)
+{
+	float localAmplitude;
+	
+	if (amplitude > MAX_SHAKE_AMPLITUDE)
+	{
+		amplitude = MAX_SHAKE_AMPLITUDE;
+	}
+	
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i) || (!bAirShake && (eCommand == SHAKE_START) && !(GetEntityFlags(i) & FL_ONGROUND)))
+		{
+			continue;
+		}
+		
+		CBaseCombatCharacter cb = CBaseCombatCharacter(i);
+		float playerCenter[3];
+		cb.WorldSpaceCenter(playerCenter);
+		
+		localAmplitude = ComputeShakeAmplitude(center, playerCenter, amplitude, radius);
+		
+		// This happens if the player is outside the radius, in which case we should ignore 
+		// all commands
+		if (localAmplitude < 0)
+		{
+			continue;
+		}
+		
+		TransmitShakeEvent(i, localAmplitude, frequency, duration, eCommand);
+	}
+}
+
+float ComputeShakeAmplitude(const float center[3], const float shake[3], float amplitude, float radius)
+{
+	if (radius <= 0)
+	{
+		return amplitude;
+	}
+	
+	float localAmplitude = -1.0;
+	float delta[3];
+	SubtractVectors(center, shake, delta);
+	float distance = GetVectorLength(delta);
+	
+	if (distance <= radius)
+	{
+		// Make the amplitude fall off over distance
+		float perc = 1.0 - (distance / radius);
+		localAmplitude = amplitude * perc;
+	}
+	
+	return localAmplitude;
+}
+
+void TransmitShakeEvent(int player, float localAmplitude, float frequency, float duration, ShakeCommand_t eCommand)
+{
+	if ((localAmplitude > 0.0) || (eCommand == SHAKE_STOP))
+	{
+		if (eCommand == SHAKE_STOP)
+		{
+			localAmplitude = 0.0;
+		}
+		
+		BfWrite msg = UserMessageToBfWrite(StartMessageOne("Shake", player, USERMSG_RELIABLE));
+		if (msg != null)
+		{
+			msg.WriteByte(view_as<int>(eCommand));
+			msg.WriteFloat(localAmplitude);
+			msg.WriteFloat(frequency);
+			msg.WriteFloat(duration);
+			
+			EndMessage();
+		}
+	}
 }

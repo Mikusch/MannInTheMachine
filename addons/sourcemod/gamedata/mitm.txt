@@ -171,6 +171,11 @@
 				"linux"		"@_ZN14CSpawnLocation17FindSpawnLocationER6Vector"
 				"windows"	"\x55\x8B\xEC\x81\xEC\xB4\x00\x00\x00\x53\x8B\xC1"
 			}
+			"CPopulationManager::GetSentryBusterDamageAndKillThreshold"
+			{
+				"linux"		"@_ZNK18CPopulationManager37GetSentryBusterDamageAndKillThresholdERiS0_"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x08\x56\x33\xD2"
+			}
 			"IsSpaceToSpawnHere"
 			{
 				"linux"		"@_Z18IsSpaceToSpawnHereRK6Vector"
@@ -214,6 +219,26 @@
 		}
 		"Offsets"
 		{
+			"IPopulationSpawner::Spawn"
+			{
+				"linux"		"3"
+				"windows"	"2"
+			}
+			"IPopulationSpawner::m_spawner"
+			{
+				"linux"		"4"
+				"windows"	"4"
+			}
+			"IPopulationSpawner::m_where"
+			{
+				"linux"		"16"
+				"windows"	"16"
+			}
+			"CBaseEntity::IsCombatItem"
+			{
+				"linux"		"86"
+				"windows"	"85"
+			}
 			"CBaseObject::CanBeUpgraded"
 			{
 				"linux"		"380"
@@ -249,6 +274,11 @@
 				"linux"		"272"
 				"windows"	"271"
 			}
+			"CTFPlayer::IsAllowedToPickUpFlag"
+			{
+				"linux"		"480"
+				"windows"	"479"
+			}
 			"CBasePlayer::EntSelectSpawnPoint"
 			{
 				"linux"		"400"
@@ -269,6 +299,11 @@
 				"linux"		"60"
 				"windows"	"59"
 			}
+			"CTFGameRules::FPlayerCanTakeDamage"
+			{
+				"linux"		"64"
+				"windows"	"63"
+			}
 			"CTFPlayer::m_flSpawnTime"
 			{
 				"linux"		"8616"
@@ -288,6 +323,16 @@
 			{
 				"linux"		"8848"
 				"windows"	"8844"
+			}
+			"CTFPlayer::m_accumulatedSentryGunDamageDealt"
+			{
+				"linux"		"9060"
+				"windows"	"9056"
+			}
+			"CTFPlayer::m_accumulatedSentryGunKillCount"
+			{
+				"linux"		"9064"
+				"windows"	"9060"
 			}
 			"CCurrencyPack::m_nAmount"
 			{
@@ -344,9 +389,14 @@
 				"linux"		"164"
 				"windows"	"164"
 			}
+			"CMissionPopulator::m_mission"
+			{
+				"linux"		"12"
+				"windows"	"12"
+			}
 			"CMissionPopulator::m_cooldownDuration"
 			{
-				"linux"		"64"
+				"linux"		"60"
 				"windows"	"60"
 			}
 			"CWaveSpawnPopulator::m_bLimitedSupport"
@@ -354,10 +404,20 @@
 				"linux"		"1229"
 				"windows"	"1229"
 			}
+			"CPopulationManager::m_bSpawningPaused"
+			{
+				"linux"		"1524"
+				"windows"	"1504"
+			}
 			"CPopulationManager::m_defaultEventChangeAttributesName"
 			{
 				"linux"		"1760"
 				"windows"	"1740"
+			}
+			"CWave::m_nSentryBustersSpawned"
+			{
+				"linux"		"44"
+				"windows"	"44"
 			}
 			"CWave::m_nNumEngineersTeleportSpawned"
 			{
@@ -378,6 +438,11 @@
 			{
 				"linux"		"8"
 				"windows"	"8"
+			}
+			"EventChangeAttributes_t::m_mission"
+			{
+				"linux"		"12"
+				"windows"	"12"
 			}
 			"EventChangeAttributes_t::m_attributeFlags"
 			{
@@ -403,6 +468,11 @@
 			{
 				"linux"		"88"
 				"windows"	"88"
+			}
+			"CTakeDamageInfo::m_bForceFriendlyFire"
+			{
+				"linux"		"52"
+				"windows"	"52"
 			}
 		}
 		"Functions"
@@ -724,6 +794,13 @@
 					}
 				}
 			}
+			"CTFPlayer::IsAllowedToPickUpFlag"
+			{
+				"offset"	"CTFPlayer::IsAllowedToPickUpFlag"
+				"hooktype"	"entity"
+				"return"	"bool"
+				"this"		"entity"
+			}
 			"CBasePlayer::EntSelectSpawnPoint"
 			{
 				"offset"	"CBasePlayer::EntSelectSpawnPoint"
@@ -779,6 +856,28 @@
 					}
 				}
 				
+			}
+			"CTFGameRules::FPlayerCanTakeDamage"
+			{
+				"offset"	"CTFGameRules::FPlayerCanTakeDamage"
+				"hooktype"	"gamerules"
+				"return"	"bool"
+				"this"		"ignore"
+				"arguments"
+				{
+					"pPlayer"
+					{
+						"type"	"cbaseentity"
+					}
+					"pAttacker"
+					{
+						"type"	"cbaseentity"
+					}
+					"info"
+					{
+						"type"	"objectptr"
+					}
+				}
 			}
 			"CTFItem::PickUp"
 			{

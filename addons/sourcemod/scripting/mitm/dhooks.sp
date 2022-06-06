@@ -549,11 +549,8 @@ public MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 		SetEntProp(player, Prop_Send, "m_nCurrency", 0);
 		SetEntData(player, GetOffset("CTFPlayer::m_pWaveSpawnPopulator"), pThis);
 		
-		char iszClassIconName[64];
-		GetEntPropString(player, Prop_Send, "m_iszClassIcon", iszClassIconName, sizeof(iszClassIconName));
-		
 		// Allows client UI to know if a specific spawner is active
-		SetMannVsMachineWaveClassActive(iszClassIconName);
+		SetMannVsMachineWaveClassActive(GetEntData(player, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")));
 		
 		bool bLimitedSupport = Deref(pThis + GetOffset("CWaveSpawnPopulator::m_bLimitedSupport"), NumberType_Int8);
 		if (bLimitedSupport)
@@ -650,9 +647,6 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 		Player(player).SetMission(mission);
 		SetEntData(player, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true);
 		
-		char iszClassIconName[64];
-		GetEntPropString(player, Prop_Send, "m_iszClassIcon", iszClassIconName, sizeof(iszClassIconName));
-		
 		int iFlags = MVM_CLASS_FLAG_MISSION;
 		if (GetEntProp(player, Prop_Send, "m_bIsMiniBoss"))
 		{
@@ -662,7 +656,7 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 		{
 			iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
 		}
-		IncrementMannVsMachineWaveClassCount(iszClassIconName, iFlags);
+		IncrementMannVsMachineWaveClassCount(GetEntData(player, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")), iFlags);
 		
 		// Response rules stuff for MvM
 		if (GameRules_IsMannVsMachineMode())
@@ -827,10 +821,7 @@ public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 					{
 						iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
 					}
-					
-					char iszClassIcon[64];
-					PtrToString(CTFBotSpawner(populator.m_spawner).GetClassIcon(k), iszClassIcon, sizeof(iszClassIcon));
-					IncrementMannVsMachineWaveClassCount(iszClassIcon, iFlags);
+					IncrementMannVsMachineWaveClassCount(CTFBotSpawner(populator.m_spawner).GetClassIcon(k), iFlags);
 					
 					HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_SENTRY_BUSTER", TFTeam_Defenders);
 					

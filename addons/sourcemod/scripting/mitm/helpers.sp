@@ -139,36 +139,34 @@ int GetItemDefinitionByName(const char[] name)
 	return TF_ITEMDEF_DEFAULT;
 }
 
-void IncrementMannVsMachineWaveClassCount(const char[] iszClassIconName, int iFlags)
+void IncrementMannVsMachineWaveClassCount(any pClassIcon, int iFlags)
 {
-	int obj = TFObjectiveResource();
+	int objective = TFObjectiveResource();
 	
-	for (int i = 0; i < GetEntPropArraySize(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
+	for (int i = 0; i < GetEntPropArraySize(objective, Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
 	{
-		char waveClassName[64];
-		if (GetEntPropString(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames", waveClassName, sizeof(waveClassName), i) && StrEqual(waveClassName, iszClassIconName) && (GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassFlags", _, i) & iFlags))
+		if (GetEntData(objective, FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames") + (i * 4)) == pClassIcon && (GetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassFlags", _, i) & iFlags))
 		{
-			SetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts", GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts", _, i) + 1, _, i);
+			SetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts", GetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts", _, i) + 1, _, i);
 			
-			if (GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts", _, i) <= 0)
+			if (GetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts", _, i) <= 0)
 			{
-				SetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts", 1, _, i);
+				SetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts", 1, _, i);
 			}
 			
 			return;
 		}
 	}
 	
-	for (int i = 0; i < GetEntPropArraySize(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames2"); ++i)
+	for (int i = 0; i < GetEntPropArraySize(objective, Prop_Send, "m_iszMannVsMachineWaveClassNames2"); ++i)
 	{
-		char waveClassName[64];
-		if (GetEntPropString(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames2", waveClassName, sizeof(waveClassName), i) && StrEqual(waveClassName, iszClassIconName) && (GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassFlags2", _, i) & iFlags))
+		if (GetEntData(objective, FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames2") + (i * 4)) == pClassIcon && (GetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassFlags2", _, i) & iFlags))
 		{
-			SetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts2", GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts2", _, i) + 1, _, i);
+			SetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts2", GetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts2", _, i) + 1, _, i);
 			
-			if (GetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts2", _, i) <= 0)
+			if (GetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts2", _, i) <= 0)
 			{
-				SetEntProp(obj, Prop_Send, "m_nMannVsMachineWaveClassCounts2", 1, _, i);
+				SetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts2", 1, _, i);
 			}
 			
 			return;
@@ -176,26 +174,24 @@ void IncrementMannVsMachineWaveClassCount(const char[] iszClassIconName, int iFl
 	}
 }
 
-void SetMannVsMachineWaveClassActive(const char[] iszClassIconName, bool bActive = true)
+void SetMannVsMachineWaveClassActive(any pClassIcon, bool bActive = true)
 {
-	int obj = TFObjectiveResource();
+	int objective = TFObjectiveResource();
 	
-	for (int i = 0; i < GetEntPropArraySize(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
+	for (int i = 0; i < GetEntPropArraySize(objective, Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
 	{
-		char waveClassName[64];
-		if (GetEntPropString(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames", waveClassName, sizeof(waveClassName), i) && StrEqual(waveClassName, iszClassIconName))
+		if (GetEntData(objective, FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames") + (i * 4)) == pClassIcon)
 		{
-			SetEntProp(obj, Prop_Send, "m_bMannVsMachineWaveClassActive", bActive, _, i);
+			SetEntProp(objective, Prop_Send, "m_bMannVsMachineWaveClassActive", bActive, _, i);
 			return;
 		}
 	}
 	
-	for (int i = 0; i < GetEntPropArraySize(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames2"); ++i)
+	for (int i = 0; i < GetEntPropArraySize(objective, Prop_Send, "m_iszMannVsMachineWaveClassNames2"); ++i)
 	{
-		char waveClassName[64];
-		if (GetEntPropString(obj, Prop_Send, "m_iszMannVsMachineWaveClassNames2", waveClassName, sizeof(waveClassName), i) && StrEqual(waveClassName, iszClassIconName))
+		if (GetEntData(objective, FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames2") + (i * 4)) == pClassIcon)
 		{
-			SetEntProp(obj, Prop_Send, "m_bMannVsMachineWaveClassActive2", bActive, _, i);
+			SetEntProp(objective, Prop_Send, "m_bMannVsMachineWaveClassActive2", bActive, _, i);
 			return;
 		}
 	}

@@ -1174,6 +1174,14 @@ methodmap CMissionPopulator
 		return view_as<CMissionPopulator>(address);
 	}
 	
+	property MissionType m_mission
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CMissionPopulator::m_mission"));
+		}
+	}
+	
 	property float m_cooldownDuration
 	{
 		public get()

@@ -384,6 +384,11 @@
 				"linux"		"164"
 				"windows"	"164"
 			}
+			"CMissionPopulator::m_mission"
+			{
+				"linux"		"12"
+				"windows"	"12"
+			}
 			"CMissionPopulator::m_cooldownDuration"
 			{
 				"linux"		"60"

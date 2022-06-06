@@ -36,6 +36,7 @@ static SpawnLocationResult s_spawnLocationResult = SPAWN_LOCATION_NOT_FOUND;
 // CMissionPopulator
 static CountdownTimer m_cooldownTimer;
 static CountdownTimer m_checkForDangerousSentriesTimer;
+static CMissionPopulator s_MissionPopulator;
 static int s_activeMissionMembers;
 static int s_nSniperCount;
 
@@ -55,7 +56,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CPeriodicSpawnPopulator::Update", _, DHookCallback_PeriodicSpawnPopulatorUpdate_Post);
 	CreateDynamicDetour(gamedata, "CWaveSpawnPopulator::Update", _, DHookCallback_WaveSpawnPopulatorUpdate_Post);
 	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMission", DHookCallback_MissionPopulatorUpdateMission_Pre, DHookCallback_MissionPopulatorUpdateMission_Post);
-	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMissionDestroySentries", DHookCallback_UpdateMissionDestroySentries_Pre);
+	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMissionDestroySentries", DHookCallback_UpdateMissionDestroySentries_Pre, DHookCallback_UpdateMissionDestroySentries_Post);
 	CreateDynamicDetour(gamedata, "CPointPopulatorInterface::InputChangeBotAttributes", DHookCallback_InputChangeBotAttributes_Pre);
 	CreateDynamicDetour(gamedata, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_GetTeamAssignmentOverride_Pre, DHookCallback_GetTeamAssignmentOverride_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::GetLoadoutItem", DHookCallback_GetLoadoutItem_Pre, DHookCallback_GetLoadoutItem_Post);
@@ -397,8 +398,16 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		{
 			// Apply the Rome 2 promo items to each player. They'll be 
 			// filtered out for clients that do not have Romevision.
-			Player(newPlayer).AddItem(g_szRomePromoItems_Hat[m_spawner.m_class]);
-			Player(newPlayer).AddItem(g_szRomePromoItems_Misc[m_spawner.m_class]);
+			CMissionPopulator pMission = s_MissionPopulator;
+			if (pMission && pMission.m_mission == MISSION_DESTROY_SENTRIES)
+			{
+				Player(newPlayer).AddItem("tw_sentrybuster");
+			}
+			else
+			{
+				Player(newPlayer).AddItem(g_szRomePromoItems_Hat[m_spawner.m_class]);
+				Player(newPlayer).AddItem(g_szRomePromoItems_Misc[m_spawner.m_class]);
+			}
 		}
 		
 		char defaultEventChangeAttributesName[64];
@@ -560,6 +569,7 @@ public MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 
 public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Pre(Address pThis, DHookReturn ret, DHookParam params)
 {
+	CMissionPopulator populator = CMissionPopulator(pThis);
 	MissionType mission = params.Get(1);
 	
 	ArrayList livePlayerVector = new ArrayList(MaxClients);
@@ -594,7 +604,7 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Pre(Address pThis,
 		// wait until prior mission is dead
 		
 		// cooldown is time after death of last mission member
-		m_cooldownTimer.Start(CMissionPopulator(pThis).m_cooldownDuration);
+		m_cooldownTimer.Start(populator.m_cooldownDuration);
 		
 		delete livePlayerVector;
 		ret.Value = false;
@@ -677,6 +687,7 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, DHookReturn ret)
 {
 	CMissionPopulator populator = CMissionPopulator(pThis);
+	s_MissionPopulator = populator;
 	
 	if (!m_cooldownTimer.IsElapsed())
 	{
@@ -860,6 +871,13 @@ public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 	
 	ret.Value = didSpawn;
 	return MRES_Supercede;
+}
+
+public MRESReturn DHookCallback_UpdateMissionDestroySentries_Post(Address pThis, DHookReturn ret)
+{
+	s_MissionPopulator = CMissionPopulator(Address_Null);
+	
+	return MRES_Handled;
 }
 
 public MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterface, DHookParam params)

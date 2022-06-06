@@ -555,6 +555,7 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CTFBotSpawner::m_name");
 		SetOffset(gamedata, "CTFBotSpawner::m_teleportWhereName");
 		SetOffset(gamedata, "CTFBotSpawner::m_defaultAttributes");
+		SetOffset(gamedata, "CMissionPopulator::m_mission");
 		SetOffset(gamedata, "CMissionPopulator::m_cooldownDuration");
 		SetOffset(gamedata, "CWaveSpawnPopulator::m_bLimitedSupport");
 		SetOffset(gamedata, "CPopulationManager::m_bSpawningPaused");

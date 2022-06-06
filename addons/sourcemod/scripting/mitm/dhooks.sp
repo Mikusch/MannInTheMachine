@@ -314,8 +314,7 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		
 		// Set the address of CTFPlayer::m_iszClassIcon from the return value of CTFBotSpawner::GetClassIcon.
 		// Simply setting the value using SetEntPropString leads to segfaults, don't do that!
-		int offset = FindSendPropInfo("CTFPlayer", "m_iszClassIcon");
-		SetEntData(newPlayer, offset, m_spawner.GetClassIcon());
+		SetEntData(newPlayer, FindSendPropInfo("CTFPlayer", "m_iszClassIcon"), m_spawner.GetClassIcon());
 		
 		Player(newPlayer).ClearEventChangeAttributes();
 		for (int i = 0; i < m_spawner.m_eventChangeAttributes.Count(); ++i)

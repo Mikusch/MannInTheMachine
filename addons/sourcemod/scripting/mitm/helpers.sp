@@ -527,3 +527,125 @@ Address GetPlayerShared(int client)
 	Address offset = view_as<Address>(GetEntSendPropOffs(client, "m_Shared", true));
 	return GetEntityAddress(client) + offset;
 }
+
+void CalculateMeleeDamageForce(const float vecMeleeDir[3], float flDamage, float flScale, float vecForce[3])
+{
+	// Calculate an impulse large enough to push a 75kg man 4 in/sec per point of damage
+	float flForceScale = flDamage * (75 * 4);
+	NormalizeVector(vecMeleeDir, vecForce);
+	ScaleVector(vecForce, flForceScale);
+	ScaleVector(vecForce, phys_pushscale.FloatValue);
+	ScaleVector(vecForce, flScale);
+}
+
+int FixedUnsigned16(float value, int scale)
+{
+	int output;
+	
+	output = RoundToFloor(value * float(scale));
+	if (output < 0)
+	{
+		output = 0;
+	}
+	if (output > 0xFFFF)
+	{
+		output = 0xFFFF;
+	}
+	
+	return output;
+}
+
+void UTIL_ScreenFade(int player, const int color[4], float fadeTime, float fadeHold, int flags)
+{
+	BfWrite bf = UserMessageToBfWrite(StartMessageOne("Fade", player, USERMSG_RELIABLE));
+	if (bf != null)
+	{
+		bf.WriteShort(FixedUnsigned16(fadeTime, 1 << SCREENFADE_FRACBITS));
+		bf.WriteShort(FixedUnsigned16(fadeHold, 1 << SCREENFADE_FRACBITS));
+		bf.WriteShort(flags);
+		bf.WriteByte(color[0]);
+		bf.WriteByte(color[1]);
+		bf.WriteByte(color[2]);
+		bf.WriteByte(color[3]);
+		
+		EndMessage();
+	}
+}
+
+const float MAX_SHAKE_AMPLITUDE = 16.0;
+void UTIL_ScreenShake(const float center[3], float amplitude, float frequency, float duration, float radius, ShakeCommand_t eCommand, bool bAirShake = false)
+{
+	float localAmplitude;
+	
+	if (amplitude > MAX_SHAKE_AMPLITUDE)
+	{
+		amplitude = MAX_SHAKE_AMPLITUDE;
+	}
+	
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		if (!IsClientInGame(i) || (!bAirShake && (eCommand == SHAKE_START) && !(GetEntityFlags(i) & FL_ONGROUND)))
+		{
+			continue;
+		}
+		
+		CBaseCombatCharacter cb = CBaseCombatCharacter(i);
+		float playerCenter[3];
+		cb.WorldSpaceCenter(playerCenter);
+		
+		localAmplitude = ComputeShakeAmplitude(center, playerCenter, amplitude, radius);
+		
+		// This happens if the player is outside the radius, in which case we should ignore 
+		// all commands
+		if (localAmplitude < 0)
+		{
+			continue;
+		}
+		
+		TransmitShakeEvent(i, localAmplitude, frequency, duration, eCommand);
+	}
+}
+
+float ComputeShakeAmplitude(const float center[3], const float shake[3], float amplitude, float radius)
+{
+	if (radius <= 0)
+	{
+		return amplitude;
+	}
+	
+	float localAmplitude = -1.0;
+	float delta[3];
+	SubtractVectors(center, shake, delta);
+	float distance = GetVectorLength(delta);
+	
+	if (distance <= radius)
+	{
+		// Make the amplitude fall off over distance
+		float perc = 1.0 - (distance / radius);
+		localAmplitude = amplitude * perc;
+	}
+	
+	return localAmplitude;
+}
+
+void TransmitShakeEvent(int player, float localAmplitude, float frequency, float duration, ShakeCommand_t eCommand)
+{
+	if ((localAmplitude > 0.0) || (eCommand == SHAKE_STOP))
+	{
+		if (eCommand == SHAKE_STOP)
+		{
+			localAmplitude = 0.0;
+		}
+		
+		BfWrite msg = UserMessageToBfWrite(StartMessageOne("Shake", player, USERMSG_RELIABLE));
+		if (msg != null)
+		{
+			msg.WriteByte(view_as<int>(eCommand));
+			msg.WriteFloat(localAmplitude);
+			msg.WriteFloat(frequency);
+			msg.WriteFloat(duration);
+			
+			EndMessage();
+		}
+	}
+}

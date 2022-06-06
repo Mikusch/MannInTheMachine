@@ -52,9 +52,19 @@
 #define MVM_CLASS_FLAG_ALWAYSCRIT		(1<<4)
 #define MVM_CLASS_FLAG_SUPPORT_LIMITED	(1<<5)
 
+// TF FlagInfo State
 #define TF_FLAGINFO_HOME		0
 #define TF_FLAGINFO_STOLEN		(1<<0)
 #define TF_FLAGINFO_DROPPED		(1<<1)
+
+// Fade in/out
+#define FFADE_IN			0x0001		// Just here so we don't pass 0 into the function
+#define FFADE_OUT			0x0002		// Fade out (not in)
+#define FFADE_MODULATE		0x0004		// Modulate (don't blend)
+#define FFADE_STAYOUT		0x0008		// ignores the duration, stays faded out until new ScreenFade message received
+#define FFADE_PURGE			0x0010		// Purges all other fades, replacing them with this one
+
+#define SCREENFADE_FRACBITS		9		// which leaves 16-this for the integer part
 
 #define PLUGIN_TAG	"[{orange}MitM{default}]"
 
@@ -244,6 +254,16 @@ enum PlayerAnimEvent_t
 	PLAYERANIMEVENT_ATTACK_PRIMARY_SUPER,
 
 	PLAYERANIMEVENT_COUNT
+};
+
+enum ShakeCommand_t
+{
+	SHAKE_START = 0,		// Starts the screen shake for all players within the radius.
+	SHAKE_STOP,				// Stops the screen shake for all players within the radius.
+	SHAKE_AMPLITUDE,		// Modifies the amplitude of an active screen shake for all players within the radius.
+	SHAKE_FREQUENCY,		// Modifies the frequency of an active screen shake for all players within the radius.
+	SHAKE_START_RUMBLEONLY,	// Starts a shake effect that only rumbles the controller, no screen effect.
+	SHAKE_START_NORUMBLE,	// Starts a shake that does NOT rumble the controller.
 };
 
 enum WeaponRestrictionType
@@ -475,6 +495,7 @@ ConVar mp_tournament_redteamname;
 ConVar mp_tournament_blueteamname;
 ConVar mp_waitingforplayers_time;
 ConVar sv_stepsize;
+ConVar phys_pushscale;
 
 #include "mitm/data.sp"
 #include "mitm/entity.sp"
@@ -538,6 +559,7 @@ public void OnPluginStart()
 	mp_tournament_blueteamname = FindConVar("mp_tournament_blueteamname");
 	mp_waitingforplayers_time = FindConVar("mp_waitingforplayers_time");
 	sv_stepsize = FindConVar("sv_stepsize");
+	phys_pushscale = FindConVar("phys_pushscale");
 	
 	Console_Initialize();
 	Events_Initialize();

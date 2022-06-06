@@ -188,8 +188,7 @@ static void Detonate(int me)
 	
 	EmitGameSoundToAll("MVM.SentryBusterExplode", me);
 	
-	// TODO
-	//UTIL_ScreenShake( me->GetAbsOrigin(), 25.0f, 5.0f, 5.0f, 1000.0f, SHAKE_START );
+	UTIL_ScreenShake(origin, 25.0, 5.0, 5.0, 1000.0, SHAKE_START);
 	
 	ArrayList victimList = new ArrayList();
 	
@@ -250,25 +249,25 @@ static void Detonate(int me)
 		
 		if (0 < victim <= MaxClients)
 		{
-			// TODO
-			//color32 colorHit = { 255, 255, 255, 255 };
-			//UTIL_ScreenFade( victim, colorHit, 1.0f, 0.1f, FFADE_IN );
+			int colorHit[4] = { 255, 255, 255, 255 };
+			UTIL_ScreenFade(victim, colorHit, 1.0, 0.1, FFADE_IN);
 		}
 		
 		if (IsLineOfFireClear3(me, victim))
 		{
 			NormalizeVector(toVictim, toVictim);
 			
-			int damage = Max(TF2Util_GetEntityMaxHealth(victim), GetEntProp(victim, Prop_Data, "m_iHealth"));
+			int nDamage = Max(TF2Util_GetEntityMaxHealth(victim), GetEntProp(victim, Prop_Data, "m_iHealth"));
 			
+			float flDamage = float(4 * nDamage);
 			if (tf_bot_suicide_bomb_friendly_fire.BoolValue)
 			{
 				g_bForceFriendlyFire = true;
 			}
 			
-			// TODO
-			//CalculateMeleeDamageForce( &info, toVictim, me->WorldSpaceCenter(), 1.0f );
-			SDKHooks_TakeDamage(victim, me, me, float(4 * damage), DMG_BLAST, .bypassHooks = false);
+			float vecForce[3];
+			CalculateMeleeDamageForce(toVictim, flDamage, 1.0, vecForce);
+			SDKHooks_TakeDamage(victim, me, me, flDamage, DMG_BLAST, .damageForce = vecForce, .damagePosition = meCenter, .bypassHooks = false);
 			
 			g_bForceFriendlyFire = false;
 		}

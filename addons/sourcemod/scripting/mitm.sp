@@ -447,6 +447,7 @@ Handle g_hWaitingForPlayersTimer;
 bool g_bInWaitingForPlayers;
 StringMap g_offsets;
 bool g_bAllowTeamChange;
+bool g_bForceFriendlyFire;
 float g_restoreCheckpointTime;
 
 // Plugin ConVars
@@ -468,6 +469,7 @@ ConVar tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade;
 ConVar tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade;
 ConVar tf_mvm_engineer_teleporter_uber_duration;
 ConVar tf_bot_suicide_bomb_range;
+ConVar tf_bot_suicide_bomb_friendly_fire;
 ConVar tf_bot_taunt_victim_chance;
 ConVar mp_tournament_redteamname;
 ConVar mp_tournament_blueteamname;
@@ -530,6 +532,7 @@ public void OnPluginStart()
 	tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade = FindConVar("tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade");
 	tf_mvm_engineer_teleporter_uber_duration = FindConVar("tf_mvm_engineer_teleporter_uber_duration");
 	tf_bot_suicide_bomb_range = FindConVar("tf_bot_suicide_bomb_range");
+	tf_bot_suicide_bomb_friendly_fire = FindConVar("tf_bot_suicide_bomb_friendly_fire");
 	tf_bot_taunt_victim_chance = FindConVar("tf_bot_taunt_victim_chance");
 	mp_tournament_redteamname = FindConVar("mp_tournament_redteamname");
 	mp_tournament_blueteamname = FindConVar("mp_tournament_blueteamname");
@@ -584,6 +587,8 @@ public void OnPluginStart()
 		
 		SetOffset(gamedata, "CCurrencyPack::m_nAmount");
 		SetOffset(gamedata, "CCurrencyPack::m_bTouched");
+		
+		SetOffset(gamedata, "CTakeDamageInfo::m_bForceFriendlyFire");
 		
 		delete gamedata;
 	}
@@ -1150,9 +1155,10 @@ Action OnClientTakeDamage(int victim, int &attacker, int &inflictor, float &dama
 		// Force damage value when the victim is a giant.
 		if (0 < attacker <= MaxClients && TF2_GetClientTeam(attacker) == TFTeam_Invaders)
 		{
-			if ((attacker != victim) && 
-				Player(attacker).m_prevMission == MISSION_DESTROY_SENTRIES && 
-				TF2_GetClientTeam(victim) == TF2_GetClientTeam(attacker) && 
+			if ((attacker != victim) &&
+				Player(attacker).m_prevMission == MISSION_DESTROY_SENTRIES &&
+				g_bForceFriendlyFire &&
+				TF2_GetClientTeam(victim) == TF2_GetClientTeam(attacker) &&
 				GetEntProp(victim, Prop_Send, "m_bIsMiniBoss"))
 			{
 				damage = 600.0;

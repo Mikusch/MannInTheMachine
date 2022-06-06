@@ -299,6 +299,11 @@
 				"linux"		"60"
 				"windows"	"59"
 			}
+			"CTFGameRules::FPlayerCanTakeDamage"
+			{
+				"linux"		"64"
+				"windows"	"63"
+			}
 			"CTFPlayer::m_flSpawnTime"
 			{
 				"linux"		"8616"
@@ -463,6 +468,11 @@
 			{
 				"linux"		"88"
 				"windows"	"88"
+			}
+			"CTakeDamageInfo::m_bForceFriendlyFire"
+			{
+				"linux"		"52"
+				"windows"	"52"
 			}
 		}
 		"Functions"
@@ -846,6 +856,28 @@
 					}
 				}
 				
+			}
+			"CTFGameRules::FPlayerCanTakeDamage"
+			{
+				"offset"	"CTFGameRules::FPlayerCanTakeDamage"
+				"hooktype"	"gamerules"
+				"return"	"bool"
+				"this"		"ignore"
+				"arguments"
+				{
+					"pPlayer"
+					{
+						"type"	"cbaseentity"
+					}
+					"pAttacker"
+					{
+						"type"	"cbaseentity"
+					}
+					"info"
+					{
+						"type"	"objectptr"
+					}
+				}
 			}
 			"CTFItem::PickUp"
 			{

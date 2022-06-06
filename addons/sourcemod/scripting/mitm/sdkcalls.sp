@@ -639,7 +639,7 @@ SpawnLocationResult SDKCall_FindSpawnLocation(Address pSpawnLocation, float vSpa
 	return SPAWN_LOCATION_NOT_FOUND;
 }
 
-void SDKCall_GetSentryBusterDamageAndKillThreshold(CPopulationManager populator, int &nDamage, int &nKills)
+void SDKCall_GetSentryBusterDamageAndKillThreshold(int populator, int &nDamage, int &nKills)
 {
 	if (g_SDKCallGetSentryBusterDamageAndKillThreshold)
 		SDKCall(g_SDKCallGetSentryBusterDamageAndKillThreshold, populator, nDamage, nKills);

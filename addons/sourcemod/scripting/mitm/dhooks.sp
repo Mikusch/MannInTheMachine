@@ -721,7 +721,7 @@ public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 	
 	int nDmgLimit = 0;
 	int nKillLimit = 0;
-	SDKCall_GetSentryBusterDamageAndKillThreshold(GetPopulationManager(), nDmgLimit, nKillLimit);
+	GetPopulationManager().GetSentryBusterDamageAndKillThreshold(nDmgLimit, nKillLimit);
 	
 	int obj = MaxClients + 1;
 	while ((obj = FindEntityByClassname(obj, "obj_*")) != -1)

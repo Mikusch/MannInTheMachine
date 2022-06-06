@@ -809,6 +809,8 @@ public void OnClientGameFrame(int client)
 					s_inMissionSuicideBomber[client] = true;
 					CTFBotMissionSuicideBomber_OnStart(client);
 				}
+				
+				return;
 			}
 		}
 		

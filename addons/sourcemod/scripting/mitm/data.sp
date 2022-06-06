@@ -1274,6 +1274,11 @@ methodmap CPopulationManager
 		return SDKCall_GetHealthMultiplier(this._index, bIsTank);
 	}
 	
+	public void GetSentryBusterDamageAndKillThreshold(int& nDamage, int& nKills)
+	{
+		SDKCall_GetSentryBusterDamageAndKillThreshold(this._index, nDamage, nKills);
+	}
+	
 	public void GetDefaultEventChangeAttributesName(char[] buffer, int maxlen)
 	{
 		PtrToString(GetEntData(this._index, GetOffset("CPopulationManager::m_defaultEventChangeAttributesName")), buffer, maxlen);

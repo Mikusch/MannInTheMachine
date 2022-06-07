@@ -305,7 +305,7 @@ methodmap Player
 	
 	public bool HasFlagTarget()
 	{
-		this.m_hFollowingFlagTarget != -1;
+		return this.m_hFollowingFlagTarget != -1;
 	}
 	
 	public void SetAutoJump(float flAutoJumpMin, float flAutoJumpMax)

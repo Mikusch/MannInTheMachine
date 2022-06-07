@@ -1428,6 +1428,13 @@ public MRESReturn DHookCallback_ShouldGib_Pre(int player, DHookReturn ret, DHook
 
 public MRESReturn DHookCallback_IsAllowedToPickUpFlag_Post(int player, DHookReturn ret)
 {
+	// only the leader of a squad can pick up the flag
+	if (Player(player).IsInASquad() && !Player(player).GetSquad().IsLeader(player))
+	{
+		ret.Value = false;
+		return MRES_Supercede;
+	}
+	
 	// mission bots can't pick up the flag
 	if (Player(player).IsOnAnyMission())
 	{

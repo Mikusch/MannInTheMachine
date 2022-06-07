@@ -157,7 +157,7 @@ methodmap CTFBotSquad
 		}
 		else if (GameRules_IsMannVsMachineMode())
 		{
-			if (!Player(bot).HasFlagTarget())
+			if (Player(bot).HasFlagTarget())
 			{
 				ThrowError("Squad member shouldn't have a flag target. Always follow the leader.");
 			}
@@ -180,6 +180,11 @@ methodmap CTFBotSquad
 	public int GetLeader()
 	{
 		return this.m_leader;
+	}
+	
+	public bool IsLeader(int bot)
+	{
+		return this.m_leader == bot;
 	}
 	
 	public void CollectMembers(ArrayList &memberList)

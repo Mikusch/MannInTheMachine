@@ -508,6 +508,8 @@ ConVar phys_pushscale;
 #include "mitm/behavior/tf_bot_mvm_engineer_teleport_spawn.sp"
 #include "mitm/behavior/tf_bot_mission_suicide_bomber.sp"
 
+#include "mitm/tf_bot_squad.sp"
+
 #include "mitm/clientprefs.sp"
 #include "mitm/console.sp"
 #include "mitm/dhooks.sp"

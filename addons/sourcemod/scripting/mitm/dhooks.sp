@@ -1077,18 +1077,18 @@ public MRESReturn DHookCallback_AllowedToHealTarget_Pre(int medigun, DHookReturn
 	int target = params.Get(1);
 	int owner = GetEntPropEnt(medigun, Prop_Send, "m_hOwnerEntity");
 	
-	if (TF2_GetClientTeam(owner) == TFTeam_Invaders)
+	// medics in a squad should only ever heal their squad leader
+	if (TF2_GetClientTeam(owner) == TFTeam_Invaders && Player(owner).IsInASquad() && 0 < target <= MaxClients)
 	{
-		if (Player(owner).IsInASquad() && 0 < target <= MaxClients)
+		CTFBotSquad squad = Player(owner).GetSquad();
+		if (squad.IsLeader(target))
 		{
-			CTFBotSquad squad = Player(owner).GetSquad();
-			if (squad.IsLeader(target))
-			{
-				// Only allow healing our squad leader
-				return MRES_Ignored;
-			}
+			// always allow healing our squad leader
+			return MRES_Ignored;
 		}
 		
+		// disallow healing everyone else
+		PrintCenterText(owner, "You are only allowed to heal your squad leader %N.", squad.GetLeader());
 		ret.Value = false;
 		return MRES_Supercede;
 	}

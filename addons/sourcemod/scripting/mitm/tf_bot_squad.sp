@@ -20,8 +20,8 @@
 
 static ArrayList g_squads;
 
-// Container struct for our values
-enum struct CTFBotSquadProperties
+// container struct for our values
+enum struct CTFBotSquadInfo
 {
 	int m_id;
 	
@@ -31,7 +31,7 @@ enum struct CTFBotSquadProperties
 	float m_formationSize;
 	bool m_bShouldPreserveSquad;
 	
-	void Init(int id)
+	void Initialize(int id)
 	{
 		this.m_id = id;
 		this.m_leader = -1;
@@ -64,7 +64,7 @@ methodmap CTFBotSquad
 	{
 		public get()
 		{
-			return g_squads.FindValue(this._id, CTFBotSquadProperties::m_id);
+			return g_squads.FindValue(this._id, CTFBotSquadInfo::m_id);
 		}
 	}
 	
@@ -72,11 +72,11 @@ methodmap CTFBotSquad
 	{
 		public get()
 		{
-			return g_squads.Get(this._listIndex, CTFBotSquadProperties::m_roster);
+			return g_squads.Get(this._listIndex, CTFBotSquadInfo::m_roster);
 		}
 		public set(ArrayList roster)
 		{
-			g_squads.Set(this._listIndex, roster, CTFBotSquadProperties::m_roster);
+			g_squads.Set(this._listIndex, roster, CTFBotSquadInfo::m_roster);
 		}
 	}
 	
@@ -84,11 +84,11 @@ methodmap CTFBotSquad
 	{
 		public get()
 		{
-			return g_squads.Get(this._listIndex, CTFBotSquadProperties::m_leader);
+			return g_squads.Get(this._listIndex, CTFBotSquadInfo::m_leader);
 		}
 		public set(int leader)
 		{
-			g_squads.Set(this._listIndex, leader, CTFBotSquadProperties::m_leader);
+			g_squads.Set(this._listIndex, leader, CTFBotSquadInfo::m_leader);
 		}
 	}
 	
@@ -96,11 +96,11 @@ methodmap CTFBotSquad
 	{
 		public get()
 		{
-			return g_squads.Get(this._listIndex, CTFBotSquadProperties::m_formationSize);
+			return g_squads.Get(this._listIndex, CTFBotSquadInfo::m_formationSize);
 		}
 		public set(float formationSize)
 		{
-			g_squads.Set(this._listIndex, formationSize, CTFBotSquadProperties::m_formationSize);
+			g_squads.Set(this._listIndex, formationSize, CTFBotSquadInfo::m_formationSize);
 		}
 	}
 	
@@ -108,11 +108,11 @@ methodmap CTFBotSquad
 	{
 		public get()
 		{
-			return g_squads.Get(this._listIndex, CTFBotSquadProperties::m_bShouldPreserveSquad);
+			return g_squads.Get(this._listIndex, CTFBotSquadInfo::m_bShouldPreserveSquad);
 		}
 		public set(bool bShouldPreserveSquad)
 		{
-			g_squads.Set(this._listIndex, bShouldPreserveSquad, CTFBotSquadProperties::m_bShouldPreserveSquad);
+			g_squads.Set(this._listIndex, bShouldPreserveSquad, CTFBotSquadInfo::m_bShouldPreserveSquad);
 		}
 	}
 	
@@ -202,11 +202,6 @@ methodmap CTFBotSquad
 		return count;
 	}
 	
-	public bool IsLeader(int bot)
-	{
-		return this.m_leader == bot;
-	}
-	
 	public void DisbandAndDeleteSquad()
 	{
 		// Tell each member of the squad to remove this reference
@@ -229,34 +224,34 @@ methodmap CTFBotSquad
 			ThrowError("Failed to delete squad because it wasn't in our list, wtf?");
 		}
 		
-		CTFBotSquadProperties properties;
-		g_squads.GetArray(this._listIndex, properties);
+		CTFBotSquadInfo info;
+		g_squads.GetArray(this._listIndex, info);
 		
-		properties.Delete();
+		// free up memory and delete it from our internal list
+		info.Delete();
 		g_squads.Erase(this._listIndex);
 	}
-}
-
-void Squads_Initialize()
-{
-	g_squads = new ArrayList(sizeof(CTFBotSquadProperties));
-}
-
-CTFBotSquad Squads_Create()
-{
-	// find lowest unused id to assign
-	int id = 1;
-	while (g_squads.FindValue(id, CTFBotSquadProperties::m_id) != -1)
+	
+	public static CTFBotSquad Create()
 	{
-		id++;
+		// find lowest unused id to assign
+		int id = 1;
+		while (g_squads.FindValue(id, CTFBotSquadInfo::m_id) != -1)
+		{
+			id++;
+		}
+		
+		// fill basic properties
+		CTFBotSquadInfo properties;
+		properties.Initialize(id);
+		
+		g_squads.PushArray(properties);
+		
+		return CTFBotSquad(id);
 	}
-	
-	// fill basic properties
-	CTFBotSquadProperties properties;
-	properties.Init(id);
-	
-	// store it internally
-	g_squads.PushArray(properties);
-	
-	return CTFBotSquad(id);
+}
+
+void CTFBotSquad_Initialize()
+{
+	g_squads = new ArrayList(sizeof(CTFBotSquadInfo));
 }

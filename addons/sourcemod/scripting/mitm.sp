@@ -35,6 +35,8 @@
 
 #define ZERO_VECTOR	{ 0.0, 0.0, 0.0 }
 
+#define NULL_SQUAD	CTFBotSquad(0)
+
 #define DEFINDEX_UNDEFINED	65535
 
 // m_lifeState values
@@ -566,7 +568,7 @@ public void OnPluginStart()
 	Console_Initialize();
 	Events_Initialize();
 	ClientPrefs_Initialize();
-	Squads_Initialize();
+	CTFBotSquad_Initialize();
 	
 	GameData gamedata = new GameData("mitm");
 	if (gamedata)

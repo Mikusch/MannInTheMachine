@@ -513,7 +513,7 @@ public MRESReturn DHookCallback_CSquadSpawner_Post(Address pThis, DHookReturn re
 	
 	if (ret.Value)
 	{
-		CTFBotSquad squad = Squads_Create();
+		CTFBotSquad squad = CTFBotSquad.Create();
 		if (squad)
 		{
 			squad.m_formationSize = spawner.m_formationSize;
@@ -1081,7 +1081,7 @@ public MRESReturn DHookCallback_AllowedToHealTarget_Pre(int medigun, DHookReturn
 	if (TF2_GetClientTeam(owner) == TFTeam_Invaders && Player(owner).IsInASquad() && 0 < target <= MaxClients)
 	{
 		CTFBotSquad squad = Player(owner).GetSquad();
-		if (squad.IsLeader(target))
+		if (squad.GetLeader() == target)
 		{
 			// always allow healing our squad leader
 			return MRES_Ignored;

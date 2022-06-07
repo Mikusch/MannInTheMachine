@@ -1001,20 +1001,20 @@ methodmap Player
 		if (this.m_squad)
 		{
 			this.m_squad.Leave(this._client);
-			this.m_squad = CTFBotSquad(0);
+			this.m_squad = NULL_SQUAD;
 		}
 	}
 	
 	public bool IsInASquad()
 	{
-		return this.m_squad == CTFBotSquad(0) ? false : true;
+		return this.m_squad == NULL_SQUAD ? false : true;
 	}
 	
 	public void DeleteSquad()
 	{
 		if (this.m_squad)
 		{
-			this.m_squad = CTFBotSquad(0);
+			this.m_squad = NULL_SQUAD;
 		}
 	}
 	

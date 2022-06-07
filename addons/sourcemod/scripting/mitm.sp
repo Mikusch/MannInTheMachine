@@ -564,6 +564,7 @@ public void OnPluginStart()
 	Console_Initialize();
 	Events_Initialize();
 	ClientPrefs_Initialize();
+	Squads_Initialize();
 	
 	GameData gamedata = new GameData("mitm");
 	if (gamedata)
@@ -580,6 +581,8 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CTFBotSpawner::m_name");
 		SetOffset(gamedata, "CTFBotSpawner::m_teleportWhereName");
 		SetOffset(gamedata, "CTFBotSpawner::m_defaultAttributes");
+		SetOffset(gamedata, "CSquadSpawner::m_formationSize");
+		SetOffset(gamedata, "CSquadSpawner::m_bShouldPreserveSquad");
 		SetOffset(gamedata, "CMissionPopulator::m_mission");
 		SetOffset(gamedata, "CMissionPopulator::m_cooldownDuration");
 		SetOffset(gamedata, "CWaveSpawnPopulator::m_bLimitedSupport");
@@ -725,6 +728,15 @@ public void OnClientGameFrame(int client)
 		if (Player(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
 		{
 			TF2_AddCondition(client, TFCond_CritCanteen);
+		}
+		
+		if (Player(client).IsInASquad())
+		{
+			if (Player(client).GetSquad().GetMemberCount() <= 1 || Player(client).GetSquad().GetLeader() == -1)
+			{
+				// squad has collapsed - disband it
+				Player(client).LeaveSquad();
+			}
 		}
 		
 		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(client).GetLastKnownArea());

@@ -41,6 +41,7 @@ static MissionType m_prevMission[MAXPLAYERS + 1];
 static int m_missionTarget[MAXPLAYERS + 1];
 static float m_flRequiredSpawnLeaveTime[MAXPLAYERS + 1];
 static int m_spawnPointEntity[MAXPLAYERS + 1];
+static CTFBotSquad m_squad[MAXPLAYERS + 1];
 
 // Non-resetting Properties
 static int m_invaderPriority[MAXPLAYERS + 1];
@@ -264,6 +265,18 @@ methodmap Player
 		public set(ArrayList teleportWhereName)
 		{
 			m_teleportWhereName[this._client] = teleportWhereName;
+		}
+	}
+	
+	property CTFBotSquad m_squad
+	{
+		public get()
+		{
+			return m_squad[this._client];
+		}
+		public set(CTFBotSquad squad)
+		{
+			m_squad[this._client] = squad;
 		}
 	}
 	
@@ -969,6 +982,42 @@ methodmap Player
 		return true;
 	}
 	
+	public CTFBotSquad GetSquad()
+	{
+		return this.m_squad;
+	}
+	
+	public void JoinSquad(CTFBotSquad squad)
+	{
+		if (squad)
+		{
+			squad.Join(this._client);
+			this.m_squad = squad;
+		}
+	}
+	
+	public void LeaveSquad()
+	{
+		if (this.m_squad)
+		{
+			this.m_squad.Leave(this._client);
+			this.m_squad = CTFBotSquad(0);
+		}
+	}
+	
+	public bool IsInASquad()
+	{
+		return this.m_squad == CTFBotSquad(0) ? false : true;
+	}
+	
+	public void DeleteSquad()
+	{
+		if (this.m_squad)
+		{
+			this.m_squad = CTFBotSquad(0);
+		}
+	}
+	
 	public void Initialize()
 	{
 		this.m_teleportWhereName = new ArrayList(64);
@@ -1167,6 +1216,30 @@ methodmap CTFBotSpawner
 	}
 };
 
+methodmap CSquadSpawner
+{
+	public CSquadSpawner(Address address)
+	{
+		return view_as<CSquadSpawner>(address);
+	}
+	
+	property float m_formationSize
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CSquadSpawner::m_formationSize"));
+		}
+	}
+	
+	property bool m_bShouldPreserveSquad
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CSquadSpawner::m_bShouldPreserveSquad"));
+		}
+	}
+}
+
 methodmap CMissionPopulator
 {
 	public CMissionPopulator(Address address)
@@ -1274,7 +1347,7 @@ methodmap CPopulationManager
 		return SDKCall_GetHealthMultiplier(this._index, bIsTank);
 	}
 	
-	public void GetSentryBusterDamageAndKillThreshold(int& nDamage, int& nKills)
+	public void GetSentryBusterDamageAndKillThreshold(int & nDamage, int & nKills)
 	{
 		SDKCall_GetSentryBusterDamageAndKillThreshold(this._index, nDamage, nKills);
 	}

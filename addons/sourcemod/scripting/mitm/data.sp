@@ -42,6 +42,7 @@ static int m_missionTarget[MAXPLAYERS + 1];
 static float m_flRequiredSpawnLeaveTime[MAXPLAYERS + 1];
 static int m_spawnPointEntity[MAXPLAYERS + 1];
 static CTFBotSquad m_squad[MAXPLAYERS + 1];
+static int m_hFollowingFlagTarget[MAXPLAYERS + 1];
 
 // Non-resetting Properties
 static int m_invaderPriority[MAXPLAYERS + 1];
@@ -278,6 +279,33 @@ methodmap Player
 		{
 			m_squad[this._client] = squad;
 		}
+	}
+	
+	property int m_hFollowingFlagTarget
+	{
+		public get()
+		{
+			return m_hFollowingFlagTarget[this._client];
+		}
+		public set(int hFollowingFlagTarget)
+		{
+			m_hFollowingFlagTarget[this._client] = hFollowingFlagTarget;
+		}
+	}
+	
+	public int GetFlagTarget()
+	{
+		return this.m_hFollowingFlagTarget;
+	}
+	
+	public void SetFlagTarget(int flag)
+	{
+		this.m_hFollowingFlagTarget = flag;
+	}
+	
+	public bool HasFlagTarget()
+	{
+		this.m_hFollowingFlagTarget != -1;
 	}
 	
 	public void SetAutoJump(float flAutoJumpMin, float flAutoJumpMax)
@@ -796,6 +824,11 @@ methodmap Player
 			{
 				return -1;
 			}
+			
+			if (this.HasFlagTarget())
+			{
+				return this.GetFlagTarget();
+			}
 		}
 		
 		ArrayList flagsVector = new ArrayList();
@@ -1040,6 +1073,7 @@ methodmap Player
 		this.m_fModelScaleOverride = 0.0;
 		this.m_flRequiredSpawnLeaveTime = 0.0;
 		this.m_spawnPointEntity = -1;
+		this.m_hFollowingFlagTarget = -1;
 	}
 	
 	public void Reset()

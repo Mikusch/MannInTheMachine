@@ -125,7 +125,7 @@ methodmap CTFBotSquad
 		}
 		else if (GameRules_IsMannVsMachineMode())
 		{
-			//bot->SetFlagTarget( NULL );
+			Player(bot).SetFlagTarget(-1);
 		}
 		
 		this.m_roster.Push(bot);
@@ -157,12 +157,16 @@ methodmap CTFBotSquad
 		}
 		else if (GameRules_IsMannVsMachineMode())
 		{
-			/*AssertMsg( !bot->HasFlagTaget(), "Squad member shouldn't have a flag target. Always follow the leader." );
-		CCaptureFlag *pFlag = bot->GetFlagToFetch();
-		if ( pFlag )
-		{
-			bot->SetFlagTarget( pFlag );
-		}*/
+			if (!Player(bot).HasFlagTarget())
+			{
+				ThrowError("Squad member shouldn't have a flag target. Always follow the leader.");
+			}
+			
+			int flag = Player(bot).GetFlagToFetch();
+			if (flag != -1)
+			{
+				Player(bot).SetFlagTarget(flag);
+			}
 		}
 		
 		if (this.GetMemberCount() == 0)

@@ -428,6 +428,12 @@ public MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		}
 		Player(newPlayer).OnEventChangeAttributes(pEventChangeAttributes);
 		
+		int flag = Player(newPlayer).GetFlagToFetch();
+		if (flag != -1)
+		{
+			Player(newPlayer).SetFlagTarget(flag);
+		}
+		
 		if (Player(newPlayer).HasAttribute(SPAWN_WITH_FULL_CHARGE))
 		{
 			// charge up our weapons
@@ -672,6 +678,7 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 	{
 		int player = m_justSpawnedVector.Get(i);
 		
+		Player(player).SetFlagTarget(-1);
 		Player(player).SetMission(mission);
 		SetEntData(player, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true);
 		
@@ -823,6 +830,7 @@ public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 				{
 					int bot = m_justSpawnedVector.Get(k);
 					
+					Player(bot).SetFlagTarget(-1);
 					Player(bot).SetMission(MISSION_DESTROY_SENTRIES);
 					Player(bot).m_missionTarget = targetSentry;
 					
@@ -1486,12 +1494,12 @@ public MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
 {
 	int player = params.Get(1);
 	
-	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
+	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
 		if (Player(player).HasAttribute(IGNORE_FLAG))
-		{
 			return MRES_Supercede;
-		}
+		
+		Player(player).SetFlagTarget(item);
 	}
 	
 	return MRES_Ignored;

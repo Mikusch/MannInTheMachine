@@ -35,8 +35,6 @@
 
 #define ZERO_VECTOR	{ 0.0, 0.0, 0.0 }
 
-#define NULL_SQUAD	CTFBotSquad(0)
-
 #define DEFINDEX_UNDEFINED	65535
 
 // m_lifeState values
@@ -499,6 +497,7 @@ ConVar mp_waitingforplayers_time;
 ConVar sv_stepsize;
 ConVar phys_pushscale;
 
+#include "mitm/tf_bot_squad.sp"
 #include "mitm/data.sp"
 #include "mitm/entity.sp"
 
@@ -509,8 +508,6 @@ ConVar phys_pushscale;
 #include "mitm/behavior/tf_bot_mvm_engineer_idle.sp"
 #include "mitm/behavior/tf_bot_mvm_engineer_teleport_spawn.sp"
 #include "mitm/behavior/tf_bot_mission_suicide_bomber.sp"
-
-#include "mitm/tf_bot_squad.sp"
 
 #include "mitm/clientprefs.sp"
 #include "mitm/console.sp"
@@ -568,7 +565,6 @@ public void OnPluginStart()
 	Console_Initialize();
 	Events_Initialize();
 	ClientPrefs_Initialize();
-	CTFBotSquad_Initialize();
 	
 	GameData gamedata = new GameData("mitm");
 	if (gamedata)

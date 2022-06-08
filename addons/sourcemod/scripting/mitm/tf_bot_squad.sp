@@ -171,8 +171,6 @@ methodmap CTFBotSquad
 		}
 		
 		this.m_roster.Push(bot);
-		
-		LogMessage("%N has joined bot squad %d.", bot, this);
 	}
 	
 	public void Leave(int bot)
@@ -192,7 +190,6 @@ methodmap CTFBotSquad
 				if (members.Length)
 				{
 					this.m_leader = members.Get(0);
-					LogMessage("%N is the new leader of squad %d.", this.m_leader, this);
 				}
 				delete members;
 			}
@@ -215,8 +212,6 @@ methodmap CTFBotSquad
 		{
 			this.DisbandAndDeleteSquad();
 		}
-		
-		LogMessage("%N has left bot squad %d.", bot, this);
 	}
 	
 	public void CollectMembers(ArrayList &memberList)
@@ -254,7 +249,6 @@ methodmap CTFBotSquad
 			}
 		}
 		
-		LogMessage("Disbanding squad %d.", this);
 		this.Delete();
 	}
 	

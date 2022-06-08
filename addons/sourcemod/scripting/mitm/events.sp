@@ -39,7 +39,24 @@ public void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroad
 		{
 			CTFBotSpyLeaveSpawnRoom_OnStart(client);
 		}
+		
+		CreateTimer(0.1, Timer_UpdatePlayerGlow, GetClientUserId(client));
 	}
+}
+
+Action Timer_UpdatePlayerGlow(Handle timer, int userid)
+{
+	int client = GetClientOfUserId(userid);
+	if (client != 0)
+	{
+		if (TF2_GetClientTeam(client) == TFTeam_Invaders && IsPlayerAlive(client))
+		{
+			// Create a new glow
+			CreatePlayerGlow(client);
+		}
+	}
+	
+	return Plugin_Continue;
 }
 
 public void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
@@ -52,6 +69,16 @@ public void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroad
 	{
 		// Replicate behavior of CTFBotDead::Update
 		CreateTimer(5.0, Timer_DeadTimer, userid);
+		
+		// Remove any glows attached to us
+		int prop = MaxClients + 1;
+		while ((prop = FindEntityByClassname(prop, "tf_taunt_prop")) != -1)
+		{
+			if (GetEntPropEnt(prop, Prop_Data, "m_hEffectEntity") == victim)
+			{
+				RemoveEntity(prop);
+			}
+		}
 	}
 	else if (0 < attacker <= MaxClients && TF2_GetClientTeam(victim) == TFTeam_Defenders && TF2_GetClientTeam(attacker) == TFTeam_Invaders)
 	{

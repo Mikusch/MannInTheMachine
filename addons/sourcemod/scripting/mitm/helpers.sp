@@ -302,6 +302,61 @@ int GetRobotToSpawn(bool bMiniBoss)
 	return priorityClient;
 }
 
+int CreatePlayerGlow(int client)
+{
+	int glow = CreateEntityByName("tf_taunt_prop");
+	if (glow != -1)
+	{
+		char iszModel[PLATFORM_MAX_PATH];
+		GetEntPropString(client, Prop_Send, "m_iszCustomModel", iszModel, sizeof(iszModel));
+		
+		if (iszModel[0] == EOS)
+		{
+			// fall back to default model
+			GetEntPropString(client, Prop_Data, "m_ModelName", iszModel, sizeof(iszModel));
+		}
+		
+		SetEntityModel(glow, iszModel);
+		
+		if (DispatchSpawn(glow))
+		{
+			SetEntPropEnt(glow, Prop_Data, "m_hEffectEntity", client);
+			SetEntProp(glow, Prop_Send, "m_bGlowEnabled", true);
+			
+			int fEffects = GetEntProp(glow, Prop_Send, "m_fEffects");
+			SetEntProp(glow, Prop_Send, "m_fEffects", fEffects | EF_BONEMERGE | EF_NOSHADOW | EF_NORECEIVESHADOW);
+			
+			SetVariantString("!activator");
+			AcceptEntityInput(glow, "SetParent", client);
+			
+			SDKHook(glow, SDKHook_SetTransmit, SDKHookCB_PlayerGlow_SetTransmit);
+			
+			return glow;
+		}
+		else
+		{
+			RemoveEntity(glow);
+		}
+	}
+	
+	return -1;
+}
+
+Action SDKHookCB_PlayerGlow_SetTransmit(int entity, int client)
+{
+	if (Player(client).IsInASquad())
+	{
+		int target = GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity");
+		if (client != target && Player(client).GetSquad().IsLeader(target))
+		{
+			// show the glow of our squad leader
+			return Plugin_Continue;
+		}
+	}
+	
+	return Plugin_Handled;
+}
+
 int Compare(any val1, any val2)
 {
 	if (val1 > val2)

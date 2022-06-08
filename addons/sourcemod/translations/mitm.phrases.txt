@@ -87,4 +87,9 @@
 	{
 		"en"		"You are not allowed to build this right now."
 	}
+	"Medic_Squad_NotAllowedToHeal"
+	{
+		"#format"	"{1:N}"
+		"en"		"You are only allowed to heal your squad leader ({1})."
+	}
 }

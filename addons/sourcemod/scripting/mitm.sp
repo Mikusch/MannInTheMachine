@@ -884,9 +884,22 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 
 public void TF2_OnConditionAdded(int client, TFCond condition)
 {
-	if (condition == TFCond_MVMBotRadiowave)
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
-		TF2_StunPlayer(client, TF2Util_GetPlayerConditionDuration(client, TFCond_MVMBotRadiowave), 1.0, TF_STUNFLAG_SLOWDOWN | TF_STUNFLAG_BONKSTUCK | TF_STUNFLAG_NOSOUNDOREFFECT);
+		switch (condition)
+		{
+			case TFCond_MVMBotRadiowave:
+			{
+				// apply gatebot stun
+				float flDuration = TF2Util_GetPlayerConditionDuration(client, TFCond_MVMBotRadiowave);
+				TF2_StunPlayer(client, flDuration, 1.0, TF_STUNFLAG_SLOWDOWN | TF_STUNFLAG_BONKSTUCK | TF_STUNFLAG_NOSOUNDOREFFECT);
+			}
+			case TFCond_SpawnOutline:
+			{
+				// no spawn outline for robots
+				TF2_RemoveCondition(client, condition);
+			}
+		}
 	}
 }
 

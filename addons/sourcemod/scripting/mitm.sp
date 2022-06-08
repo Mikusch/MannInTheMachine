@@ -508,6 +508,7 @@ ConVar phys_pushscale;
 #include "mitm/behavior/tf_bot_mvm_engineer_idle.sp"
 #include "mitm/behavior/tf_bot_mvm_engineer_teleport_spawn.sp"
 #include "mitm/behavior/tf_bot_mission_suicide_bomber.sp"
+#include "mitm/behavior/tf_bot_medic_heal.sp"
 
 #include "mitm/clientprefs.sp"
 #include "mitm/console.sp"
@@ -803,6 +804,7 @@ public void OnClientGameFrame(int client)
 			return;
 		}
 		
+		// from CTFBotScenarioMonitor::DesiredScenarioAndClassAction
 		switch (Player(client).m_mission)
 		{
 			case MISSION_DESTROY_SENTRIES:
@@ -830,6 +832,28 @@ public void OnClientGameFrame(int client)
 		{
 			CTFBotSpyLeaveSpawnRoom_Update(client);
 			return;
+		}
+		
+		if (TF2_GetPlayerClass(client) == TFClass_Medic)
+		{
+			// if I'm being healed by another medic, I should do something else other than healing
+			bool bIsBeingHealedByAMedic = false;
+			int nNumHealers = GetEntProp(client, Prop_Send, "m_nNumHealers");
+			for (int i = 0; i < nNumHealers; ++i)
+			{
+				int healer = TF2Util_GetPlayerHealer(client, i);
+				if (0 < healer <= MaxClients)
+				{
+					bIsBeingHealedByAMedic = true;
+					break;
+				}
+			}
+			
+			if (!bIsBeingHealedByAMedic)
+			{
+				CTFBotMedicHeal_Update(client);
+				return;
+			}
 		}
 		
 		if (TF2_GetPlayerClass(client) == TFClass_Engineer)

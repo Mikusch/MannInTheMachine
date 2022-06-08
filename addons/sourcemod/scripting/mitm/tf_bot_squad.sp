@@ -223,6 +223,11 @@ methodmap CTFBotSquad
 		return count;
 	}
 	
+	public bool ShouldPreserveSquad()
+	{
+		return this.m_bShouldPreserveSquad;
+	}
+	
 	public void DisbandAndDeleteSquad()
 	{
 		// Tell each member of the squad to remove this reference

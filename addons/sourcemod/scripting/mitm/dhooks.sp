@@ -519,11 +519,12 @@ public MRESReturn DHookCallback_CSquadSpawner_Post(Address pThis, DHookReturn re
 	
 	if (ret.Value)
 	{
+		// create the squad
 		CTFBotSquad squad = CTFBotSquad.Create();
 		if (squad)
 		{
-			squad.m_formationSize = spawner.m_formationSize;
-			squad.m_bShouldPreserveSquad = spawner.m_bShouldPreserveSquad;
+			squad.SetFormationSize(spawner.m_formationSize);
+			squad.SetShouldPreserveSquad(spawner.m_bShouldPreserveSquad);
 			
 			for (int i = 0; i < m_justSpawnedVector.Length; ++i)
 			{

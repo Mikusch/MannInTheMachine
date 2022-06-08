@@ -128,6 +128,36 @@ methodmap CTFBotSquad
 		}
 	}
 	
+	public int GetLeader()
+	{
+		return this.m_leader;
+	}
+	
+	public bool IsLeader(int bot)
+	{
+		return this.m_leader == bot;
+	}
+	
+	public float GetFormationSize()
+	{
+		return this.m_formationSize;
+	}
+	
+	public void SetFormationSize(float formationSize)
+	{
+		this.m_formationSize = formationSize;
+	}
+	
+	public bool ShouldPreserveSquad()
+	{
+		return this.m_bShouldPreserveSquad;
+	}
+	
+	public void SetShouldPreserveSquad(bool bShouldPreserveSquad)
+	{
+		this.m_bShouldPreserveSquad = bShouldPreserveSquad;
+	}
+	
 	public void Join(int bot)
 	{
 		// first member is the leader
@@ -189,16 +219,6 @@ methodmap CTFBotSquad
 		LogMessage("%N has left bot squad %d.", bot, this);
 	}
 	
-	public int GetLeader()
-	{
-		return this.m_leader;
-	}
-	
-	public bool IsLeader(int bot)
-	{
-		return this.m_leader == bot;
-	}
-	
 	public void CollectMembers(ArrayList &memberList)
 	{
 		for (int i = 0; i < this.m_roster.Length; ++i)
@@ -221,11 +241,6 @@ methodmap CTFBotSquad
 		}
 		
 		return count;
-	}
-	
-	public bool ShouldPreserveSquad()
-	{
-		return this.m_bShouldPreserveSquad;
 	}
 	
 	public void DisbandAndDeleteSquad()

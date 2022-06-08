@@ -1381,7 +1381,7 @@ methodmap CPopulationManager
 		return SDKCall_GetHealthMultiplier(this._index, bIsTank);
 	}
 	
-	public void GetSentryBusterDamageAndKillThreshold(int & nDamage, int & nKills)
+	public void GetSentryBusterDamageAndKillThreshold(int &nDamage, int &nKills)
 	{
 		SDKCall_GetSentryBusterDamageAndKillThreshold(this._index, nDamage, nKills);
 	}

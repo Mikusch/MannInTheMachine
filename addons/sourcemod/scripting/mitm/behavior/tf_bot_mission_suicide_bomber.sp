@@ -107,7 +107,7 @@ bool CTFBotMissionSuicideBomber_Update(int me)
 	
 	// Get to a third of the damage range before detonating
 	float detonateRange = tf_bot_suicide_bomb_range.FloatValue / 3.0;
-	if (IsDistanceBetweenLessThan(me, m_lastKnownVictimPosition[me], detonateRange))
+	if (IsDistanceBetweenLessThan(me, m_lastKnownVictimPosition[me], detonateRange) && GetEntProp(me, Prop_Send, "m_hGroundEntity") != -1)
 	{
 		float where[3];
 		AddVectors(m_lastKnownVictimPosition[me], Vector(0.0, 0.0, sv_stepsize.FloatValue), where);
@@ -170,6 +170,7 @@ static void StartDetonate(int me, bool bWasSuccessful = false, bool bWasKilled =
 	SetEntProp(me, Prop_Data, "m_takedamage", DAMAGE_NO);
 	
 	FakeClientCommand(me, "taunt");
+	TF2_AddCondition(me, TFCond_FreezeInput);
 	m_detonateTimer[me].Start(2.0);
 	EmitGameSoundToAll("MvM.SentryBusterSpin", me);
 }

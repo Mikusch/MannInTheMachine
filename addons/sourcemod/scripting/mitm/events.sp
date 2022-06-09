@@ -152,6 +152,16 @@ public void RequestFrameCallback_ApplyWeaponRestrictions(int userid)
 		
 		// equip our required weapon
 		Player(client).EquipRequiredWeapon();
+		
+		// medics switch to their medi gun
+		if (TF2_GetPlayerClass(client) == TFClass_Medic)
+		{
+			int medigun = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
+			if (medigun != -1)
+			{
+				SDKCall_WeaponSwitch(client, medigun);
+			}
+		}
 	}
 }
 

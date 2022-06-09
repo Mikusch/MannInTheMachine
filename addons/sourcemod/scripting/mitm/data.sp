@@ -41,6 +41,8 @@ static MissionType m_prevMission[MAXPLAYERS + 1];
 static int m_missionTarget[MAXPLAYERS + 1];
 static float m_flRequiredSpawnLeaveTime[MAXPLAYERS + 1];
 static int m_spawnPointEntity[MAXPLAYERS + 1];
+static CTFBotSquad m_squad[MAXPLAYERS + 1];
+static int m_hFollowingFlagTarget[MAXPLAYERS + 1];
 
 // Non-resetting Properties
 static int m_invaderPriority[MAXPLAYERS + 1];
@@ -265,6 +267,45 @@ methodmap Player
 		{
 			m_teleportWhereName[this._client] = teleportWhereName;
 		}
+	}
+	
+	property CTFBotSquad m_squad
+	{
+		public get()
+		{
+			return m_squad[this._client];
+		}
+		public set(CTFBotSquad squad)
+		{
+			m_squad[this._client] = squad;
+		}
+	}
+	
+	property int m_hFollowingFlagTarget
+	{
+		public get()
+		{
+			return m_hFollowingFlagTarget[this._client];
+		}
+		public set(int hFollowingFlagTarget)
+		{
+			m_hFollowingFlagTarget[this._client] = hFollowingFlagTarget;
+		}
+	}
+	
+	public int GetFlagTarget()
+	{
+		return this.m_hFollowingFlagTarget;
+	}
+	
+	public void SetFlagTarget(int flag)
+	{
+		this.m_hFollowingFlagTarget = flag;
+	}
+	
+	public bool HasFlagTarget()
+	{
+		return this.m_hFollowingFlagTarget != -1;
 	}
 	
 	public void SetAutoJump(float flAutoJumpMin, float flAutoJumpMax)
@@ -783,6 +824,11 @@ methodmap Player
 			{
 				return -1;
 			}
+			
+			if (this.HasFlagTarget())
+			{
+				return this.GetFlagTarget();
+			}
 		}
 		
 		ArrayList flagsVector = new ArrayList();
@@ -969,6 +1015,42 @@ methodmap Player
 		return true;
 	}
 	
+	public CTFBotSquad GetSquad()
+	{
+		return this.m_squad;
+	}
+	
+	public void JoinSquad(CTFBotSquad squad)
+	{
+		if (squad)
+		{
+			squad.Join(this._client);
+			this.m_squad = squad;
+		}
+	}
+	
+	public void LeaveSquad()
+	{
+		if (this.m_squad)
+		{
+			this.m_squad.Leave(this._client);
+			this.m_squad = NULL_SQUAD;
+		}
+	}
+	
+	public bool IsInASquad()
+	{
+		return this.m_squad == NULL_SQUAD ? false : true;
+	}
+	
+	public void DeleteSquad()
+	{
+		if (this.m_squad)
+		{
+			this.m_squad = NULL_SQUAD;
+		}
+	}
+	
 	public void Initialize()
 	{
 		this.m_teleportWhereName = new ArrayList(64);
@@ -991,6 +1073,7 @@ methodmap Player
 		this.m_fModelScaleOverride = 0.0;
 		this.m_flRequiredSpawnLeaveTime = 0.0;
 		this.m_spawnPointEntity = -1;
+		this.m_hFollowingFlagTarget = -1;
 	}
 	
 	public void Reset()
@@ -1167,6 +1250,30 @@ methodmap CTFBotSpawner
 	}
 };
 
+methodmap CSquadSpawner
+{
+	public CSquadSpawner(Address address)
+	{
+		return view_as<CSquadSpawner>(address);
+	}
+	
+	property float m_formationSize
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CSquadSpawner::m_formationSize"));
+		}
+	}
+	
+	property bool m_bShouldPreserveSquad
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CSquadSpawner::m_bShouldPreserveSquad"));
+		}
+	}
+}
+
 methodmap CMissionPopulator
 {
 	public CMissionPopulator(Address address)
@@ -1274,7 +1381,7 @@ methodmap CPopulationManager
 		return SDKCall_GetHealthMultiplier(this._index, bIsTank);
 	}
 	
-	public void GetSentryBusterDamageAndKillThreshold(int& nDamage, int& nKills)
+	public void GetSentryBusterDamageAndKillThreshold(int &nDamage, int &nKills)
 	{
 		SDKCall_GetSentryBusterDamageAndKillThreshold(this._index, nDamage, nKills);
 	}

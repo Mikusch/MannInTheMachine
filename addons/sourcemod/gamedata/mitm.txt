@@ -56,6 +56,11 @@
 				"linux"		"@_ZN13CTFBotSpawner5SpawnERK6VectorP10CUtlVectorI7CHandleI11CBaseEntityE10CUtlMemoryIS6_iEE"
 				"windows"	"\x55\x8B\xEC\x81\xEC\x70\x01\x00\x00"
 			}
+			"CSquadSpawner::Spawn"
+			{
+				"linux"		"@_ZN13CSquadSpawner5SpawnERK6VectorP10CUtlVectorI7CHandleI11CBaseEntityE10CUtlMemoryIS6_iEE"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x2C\x53\x57\x33\xDB"
+			}
 			"CPopulationManager::Update"
 			{
 				"linux"		"@_ZN18CPopulationManager6UpdateEv"
@@ -160,6 +165,11 @@
 			{
 				"linux"		"@_ZN12CCaptureZone7CaptureEP11CBaseEntity"
 				"windows"	"\x55\x8B\xEC\x51\x53\x57\x8B\x7D\x08\x8B\xD9\x85\xFF\x0F\x84\x2A\x2A\x2A\x2A\x8B\x07\x8B\xCF\x8B\x80\x40\x01\x00\x00\xFF\xD0\x84\xC0\x0F\x84\x2A\x2A\x2A\x2A\x8B\xCF"
+			}
+			"CWeaponMedigun::AllowedToHealTarget"
+			{
+				"linux"		"@_ZN14CWeaponMedigun19AllowedToHealTargetEP11CBaseEntity"
+				"windows"	"\x55\x8B\xEC\x53\x8B\xD9\x56\x57\x8B\xB3\xE8\x01\x00\x00\x83\xFE\xFF\x0F\x84\x2A\x2A\x2A\x2A\xA1\x2A\x2A\x2A\x2A\x8B\xD6\x81\xE2\xFF\x0F\x00\x00\xC1\xE2\x04\x8D\x78\x04\x03\xFA\x0F\x84\x2A\x2A\x2A\x2A\xC1\xEE\x0C\x39\x77\x04\x0F\x85\x2A\x2A\x2A\x2A\x8B\x3F\x85\xFF\x0F\x84\x2A\x2A\x2A\x2A\x8B\x07\x8B\xCF\x8B\x80\x40\x01\x00\x00\xFF\xD0\x84\xC0\x0F\x84\x2A\x2A\x2A\x2A\x8B\x75\x08\x85\xF6\x0F\x84\x2A\x2A\x2A\x2A\x8B\x06"
 			}
 			"CPopulationManager::ResetMap"
 			{
@@ -389,6 +399,16 @@
 				"linux"		"164"
 				"windows"	"164"
 			}
+			"CSquadSpawner::m_formationSize"
+			{
+				"linux"		"28"
+				"windows"	"28"
+			}
+			"CSquadSpawner::m_bShouldPreserveSquad"
+			{
+				"linux"		"32"
+				"windows"	"32"
+			}
 			"CMissionPopulator::m_mission"
 			{
 				"linux"		"12"
@@ -507,6 +527,24 @@
 				"arguments"
 				{
 					"rawHere"
+					{
+						"type"	"vectorptr"
+					}
+					"result"
+					{
+						"type"	"int"
+					}
+				}
+			}
+			"CSquadSpawner::Spawn"
+			{
+				"signature"	"CSquadSpawner::Spawn"
+				"callconv"	"thiscall"
+				"return"	"bool"
+				"this"		"address"
+				"arguments"
+				{
+					"here"
 					{
 						"type"	"vectorptr"
 					}
@@ -648,6 +686,20 @@
 					"bExplodeBuildings"
 					{
 						"type"	"bool"
+					}
+				}
+			}
+			"CWeaponMedigun::AllowedToHealTarget"
+			{
+				"signature"	"CWeaponMedigun::AllowedToHealTarget"
+				"callconv"	"thiscall"
+				"return"	"bool"
+				"this"		"entity"
+				"arguments"
+				{
+					"pTarget"
+					{
+						"type"	"cbaseentity"
 					}
 				}
 			}

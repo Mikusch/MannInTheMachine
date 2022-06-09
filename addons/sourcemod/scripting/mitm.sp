@@ -497,6 +497,7 @@ ConVar mp_waitingforplayers_time;
 ConVar sv_stepsize;
 ConVar phys_pushscale;
 
+#include "mitm/tf_bot_squad.sp"
 #include "mitm/data.sp"
 #include "mitm/entity.sp"
 
@@ -507,6 +508,7 @@ ConVar phys_pushscale;
 #include "mitm/behavior/tf_bot_mvm_engineer_idle.sp"
 #include "mitm/behavior/tf_bot_mvm_engineer_teleport_spawn.sp"
 #include "mitm/behavior/tf_bot_mission_suicide_bomber.sp"
+#include "mitm/behavior/tf_bot_medic_heal.sp"
 
 #include "mitm/clientprefs.sp"
 #include "mitm/console.sp"
@@ -580,6 +582,8 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CTFBotSpawner::m_name");
 		SetOffset(gamedata, "CTFBotSpawner::m_teleportWhereName");
 		SetOffset(gamedata, "CTFBotSpawner::m_defaultAttributes");
+		SetOffset(gamedata, "CSquadSpawner::m_formationSize");
+		SetOffset(gamedata, "CSquadSpawner::m_bShouldPreserveSquad");
 		SetOffset(gamedata, "CMissionPopulator::m_mission");
 		SetOffset(gamedata, "CMissionPopulator::m_cooldownDuration");
 		SetOffset(gamedata, "CWaveSpawnPopulator::m_bLimitedSupport");
@@ -727,6 +731,15 @@ public void OnClientGameFrame(int client)
 			TF2_AddCondition(client, TFCond_CritCanteen);
 		}
 		
+		if (Player(client).IsInASquad())
+		{
+			if (Player(client).GetSquad().GetMemberCount() <= 1 || Player(client).GetSquad().GetLeader() == -1)
+			{
+				// squad has collapsed - disband it
+				Player(client).LeaveSquad();
+			}
+		}
+		
 		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(client).GetLastKnownArea());
 		TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(client) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
 		
@@ -791,6 +804,7 @@ public void OnClientGameFrame(int client)
 			return;
 		}
 		
+		// from CTFBotScenarioMonitor::DesiredScenarioAndClassAction
 		switch (Player(client).m_mission)
 		{
 			case MISSION_DESTROY_SENTRIES:
@@ -818,6 +832,28 @@ public void OnClientGameFrame(int client)
 		{
 			CTFBotSpyLeaveSpawnRoom_Update(client);
 			return;
+		}
+		
+		if (TF2_GetPlayerClass(client) == TFClass_Medic)
+		{
+			// if I'm being healed by another medic, I should do something else other than healing
+			bool bIsBeingHealedByAMedic = false;
+			int nNumHealers = GetEntProp(client, Prop_Send, "m_nNumHealers");
+			for (int i = 0; i < nNumHealers; ++i)
+			{
+				int healer = TF2Util_GetPlayerHealer(client, i);
+				if (0 < healer <= MaxClients)
+				{
+					bIsBeingHealedByAMedic = true;
+					break;
+				}
+			}
+			
+			if (!bIsBeingHealedByAMedic)
+			{
+				CTFBotMedicHeal_Update(client);
+				return;
+			}
 		}
 		
 		if (TF2_GetPlayerClass(client) == TFClass_Engineer)
@@ -872,9 +908,22 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 
 public void TF2_OnConditionAdded(int client, TFCond condition)
 {
-	if (condition == TFCond_MVMBotRadiowave)
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
-		TF2_StunPlayer(client, TF2Util_GetPlayerConditionDuration(client, TFCond_MVMBotRadiowave), 1.0, TF_STUNFLAG_SLOWDOWN | TF_STUNFLAG_BONKSTUCK | TF_STUNFLAG_NOSOUNDOREFFECT);
+		switch (condition)
+		{
+			case TFCond_MVMBotRadiowave:
+			{
+				// apply gatebot stun
+				float flDuration = TF2Util_GetPlayerConditionDuration(client, TFCond_MVMBotRadiowave);
+				TF2_StunPlayer(client, flDuration, 1.0, TF_STUNFLAG_SLOWDOWN | TF_STUNFLAG_BONKSTUCK | TF_STUNFLAG_NOSOUNDOREFFECT);
+			}
+			case TFCond_SpawnOutline:
+			{
+				// no spawn outline for robots
+				TF2_RemoveCondition(client, condition);
+			}
+		}
 	}
 }
 

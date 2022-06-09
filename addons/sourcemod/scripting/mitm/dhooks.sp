@@ -52,7 +52,8 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CTFGCServerSystem::PreClientUpdate", DHookCallback_PreClientUpdate_Pre, DHookCallback_PreClientUpdate_Post);
 	CreateDynamicDetour(gamedata, "CPopulationManager::AllocateBots", DHookCallback_AllocateBots_Pre);
 	CreateDynamicDetour(gamedata, "CPopulationManager::RestoreCheckpoint", DHookCallback_RestoreCheckpoint_Pre);
-	CreateDynamicDetour(gamedata, "CTFBotSpawner::Spawn", DHookCallback_Spawn_Pre);
+	CreateDynamicDetour(gamedata, "CTFBotSpawner::Spawn", DHookCallback_CTFBotSpawnerSpawn_Pre);
+	CreateDynamicDetour(gamedata, "CSquadSpawner::Spawn", _, DHookCallback_CSquadSpawner_Post);
 	CreateDynamicDetour(gamedata, "CPopulationManager::Update", DHookCallback_PopulationManagerUpdate_Pre, DHookCallback_PopulationManagerUpdate_Post);
 	CreateDynamicDetour(gamedata, "CPeriodicSpawnPopulator::Update", _, DHookCallback_PeriodicSpawnPopulatorUpdate_Post);
 	CreateDynamicDetour(gamedata, "CWaveSpawnPopulator::Update", _, DHookCallback_WaveSpawnPopulatorUpdate_Post);
@@ -65,6 +66,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CTFPlayer::ShouldForceAutoTeam", DHookCallback_ShouldForceAutoTeam_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayer::DoClassSpecialSkill", DHookCallback_DoClassSpecialSkill_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayer::RemoveAllOwnedEntitiesFromWorld", DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre);
+	CreateDynamicDetour(gamedata, "CWeaponMedigun::AllowedToHealTarget", DHookCallback_AllowedToHealTarget_Pre);
 	CreateDynamicDetour(gamedata, "CBaseObject::FindSnapToBuildPos", DHookCallback_FindSnapToBuildPos_Pre, DHookCallback_FindSnapToBuildPos_Post);
 	CreateDynamicDetour(gamedata, "CSpawnLocation::FindSpawnLocation", _, DHookCallback_FindSpawnLocation_Post);
 	CreateDynamicDetour(gamedata, "DoTeleporterOverride", _, DHookCallback_DoTeleporterOverride_Post);
@@ -218,7 +220,7 @@ public MRESReturn DHookCallback_RestoreCheckpoint_Pre(int populator)
  * This detour supercedes the original function and recreates it
  * as accurately as possible to spawn players instead of bots.
  */
-public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookParam params)
+public MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookReturn ret, DHookParam params)
 {
 	CTFBotSpawner m_spawner = CTFBotSpawner(pThis);
 	
@@ -426,6 +428,12 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 		}
 		Player(newPlayer).OnEventChangeAttributes(pEventChangeAttributes);
 		
+		int flag = Player(newPlayer).GetFlagToFetch();
+		if (flag != -1)
+		{
+			Player(newPlayer).SetFlagTarget(flag);
+		}
+		
 		if (Player(newPlayer).HasAttribute(SPAWN_WITH_FULL_CHARGE))
 		{
 			// charge up our weapons
@@ -505,6 +513,34 @@ public MRESReturn DHookCallback_Spawn_Pre(Address pThis, DHookReturn ret, DHookP
 	return MRES_Supercede;
 }
 
+public MRESReturn DHookCallback_CSquadSpawner_Post(Address pThis, DHookReturn ret, DHookParam params)
+{
+	CSquadSpawner spawner = CSquadSpawner(pThis);
+	
+	if (ret.Value)
+	{
+		// create the squad
+		CTFBotSquad squad = CTFBotSquad.Create();
+		if (squad)
+		{
+			squad.SetFormationSize(spawner.m_formationSize);
+			squad.SetShouldPreserveSquad(spawner.m_bShouldPreserveSquad);
+			
+			for (int i = 0; i < m_justSpawnedVector.Length; ++i)
+			{
+				int bot = m_justSpawnedVector.Get(i);
+				if (bot != -1)
+				{
+					Player(bot).JoinSquad(squad);
+				}
+			}
+		}
+	}
+	
+	// do not clear m_justSpawnedVector here, populators will handle that
+	return MRES_Ignored;
+}
+
 public MRESReturn DHookCallback_PopulationManagerUpdate_Pre(int populator)
 {
 	// allows spawners to freely switch teams of players
@@ -533,7 +569,7 @@ public MRESReturn DHookCallback_PeriodicSpawnPopulatorUpdate_Post(Address pThis)
 		}
 	}
 	
-	// After we are done, clear the vector
+	// after we are done, clear the vector
 	m_justSpawnedVector.Clear();
 	
 	return MRES_Handled;
@@ -564,7 +600,7 @@ public MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 		}
 	}
 	
-	// After we are done, clear the vector
+	// after we are done, clear the vector
 	m_justSpawnedVector.Clear();
 	
 	return MRES_Handled;
@@ -643,6 +679,7 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 	{
 		int player = m_justSpawnedVector.Get(i);
 		
+		Player(player).SetFlagTarget(-1);
 		Player(player).SetMission(mission);
 		SetEntData(player, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true);
 		
@@ -678,7 +715,7 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 		}
 	}
 	
-	// After we are done, clear the vector
+	// after we are done, clear the vector
 	m_justSpawnedVector.Clear();
 	
 	return MRES_Handled;
@@ -794,6 +831,7 @@ public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 				{
 					int bot = m_justSpawnedVector.Get(k);
 					
+					Player(bot).SetFlagTarget(-1);
 					Player(bot).SetMission(MISSION_DESTROY_SENTRIES);
 					Player(bot).m_missionTarget = targetSentry;
 					
@@ -831,7 +869,7 @@ public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 					}
 				}
 				
-				// After we are done, clear the vector
+				// after we are done, clear the vector
 				m_justSpawnedVector.Clear();
 			}
 		}
@@ -1038,6 +1076,34 @@ public MRESReturn DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre(int player, 
 	{
 		// keep this bot's buildings
 		return MRES_Supercede;
+	}
+	
+	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_AllowedToHealTarget_Pre(int medigun, DHookReturn ret, DHookParam params)
+{
+	int target = params.Get(1);
+	int owner = GetEntPropEnt(medigun, Prop_Send, "m_hOwnerEntity");
+	
+	if (TF2_GetClientTeam(owner) == TFTeam_Invaders)
+	{
+		// medics in a squad should only ever heal their squad leader
+		if (Player(owner).IsInASquad() && Player(owner).GetSquad().GetLeader() != -1)
+		{
+			CTFBotSquad squad = Player(owner).GetSquad();
+			if (squad.IsLeader(owner) || squad.IsLeader(target))
+			{
+				// allow healing the squad leader, or everyone if we are the leader
+				return MRES_Ignored;
+			}
+			
+			PrintCenterText(owner, "%t", "Medic_Squad_NotAllowedToHeal", squad.GetLeader());
+			
+			// disallow healing everyone else
+			ret.Value = false;
+			return MRES_Supercede;
+		}
 	}
 	
 	return MRES_Ignored;
@@ -1334,6 +1400,11 @@ public MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
 	}
 	
+	if (Player(player).IsInASquad())
+	{
+		Player(player).LeaveSquad();
+	}
+	
 	Player(player).StopIdleSound();
 	
 	return MRES_Handled;
@@ -1362,6 +1433,13 @@ public MRESReturn DHookCallback_ShouldGib_Pre(int player, DHookReturn ret, DHook
 
 public MRESReturn DHookCallback_IsAllowedToPickUpFlag_Post(int player, DHookReturn ret)
 {
+	// only the leader of a squad can pick up the flag
+	if (Player(player).IsInASquad() && !Player(player).GetSquad().IsLeader(player))
+	{
+		ret.Value = false;
+		return MRES_Supercede;
+	}
+	
 	// mission bots can't pick up the flag
 	if (Player(player).IsOnAnyMission())
 	{
@@ -1428,12 +1506,12 @@ public MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
 {
 	int player = params.Get(1);
 	
-	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
+	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
 		if (Player(player).HasAttribute(IGNORE_FLAG))
-		{
 			return MRES_Supercede;
-		}
+		
+		Player(player).SetFlagTarget(item);
 	}
 	
 	return MRES_Ignored;

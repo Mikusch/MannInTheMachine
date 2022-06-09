@@ -52,6 +52,8 @@ void CTFBotMedicHeal_Update(int me)
 					Player(memberList.Get(i)).LeaveSquad();
 				}
 			}
+			
+			delete memberList;
 		}
 	}
 	else

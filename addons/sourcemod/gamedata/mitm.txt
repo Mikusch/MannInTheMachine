@@ -264,6 +264,11 @@
 				"linux"		"389"
 				"windows"	"387"
 			}
+			"CTFWeaponBase::Clip1"
+			{
+				"linux"		"347"
+				"windows"	"341"
+			}
 			"CItem::ComeToRest"
 			{
 				"linux"		"230"

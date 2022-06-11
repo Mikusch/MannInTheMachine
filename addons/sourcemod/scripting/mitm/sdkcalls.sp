@@ -42,6 +42,7 @@ static Handle g_SDKCallGetTeleporterHint;
 static Handle g_SDKCallGetCurrentWave;
 static Handle g_SDKCallIsCombatItem;
 static Handle g_SDKCallGetMaxHealthForCurrentLevel;
+static Handle g_SDKCallClip1;
 static Handle g_SDKCallFindSpawnLocation;
 static Handle g_SDKCallGetSentryBusterDamageAndKillThreshold;
 static Handle g_SDKCallCTFBotSpawnerSpawn;
@@ -81,6 +82,7 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallGetCurrentWave = PrepSDKCall_GetCurrentWave(gamedata);
 	g_SDKCallIsCombatItem = PrepSDKCall_IsCombatItem(gamedata);
 	g_SDKCallGetMaxHealthForCurrentLevel = PrepSDKCall_GetMaxHealthForCurrentLevel(gamedata);
+	g_SDKCallClip1 = PrepSDKCall_Clip1(gamedata);
 	g_SDKCallFindSpawnLocation = PrepSDKCall_FindSpawnLocation(gamedata);
 	g_SDKCallGetSentryBusterDamageAndKillThreshold = PrepSDKCall_GetSentryBusterDamageAndKillThreshold(gamedata);
 	g_SDKCallCTFBotSpawnerSpawn = PrepSDKCall_IPopulationSpawnerSpawn(gamedata);
@@ -407,6 +409,19 @@ static Handle PrepSDKCall_GetMaxHealthForCurrentLevel(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_Clip1(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTFWeaponBase::Clip1");
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFWeaponBase::Clip1");
+	
+	return call;
+}
+
 static Handle PrepSDKCall_FindSpawnLocation(GameData gamedata)
 {
 	StartPrepSDKCall(SDKCall_Raw);
@@ -627,6 +642,14 @@ int SDKCall_GetMaxHealthForCurrentLevel(int obj)
 {
 	if (g_SDKCallGetMaxHealthForCurrentLevel)
 		return SDKCall(g_SDKCallGetMaxHealthForCurrentLevel, obj);
+	
+	return 0;
+}
+
+int SDKCall_Clip1(int weapon)
+{
+	if (g_SDKCallClip1)
+		return SDKCall(g_SDKCallClip1, weapon);
 	
 	return 0;
 }

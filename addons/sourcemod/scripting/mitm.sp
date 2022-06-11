@@ -492,6 +492,7 @@ ConVar tf_mvm_engineer_teleporter_uber_duration;
 ConVar tf_bot_suicide_bomb_range;
 ConVar tf_bot_suicide_bomb_friendly_fire;
 ConVar tf_bot_taunt_victim_chance;
+ConVar tf_bot_always_full_reload;
 ConVar mp_tournament_redteamname;
 ConVar mp_tournament_blueteamname;
 ConVar mp_waitingforplayers_time;
@@ -559,6 +560,7 @@ public void OnPluginStart()
 	tf_bot_suicide_bomb_range = FindConVar("tf_bot_suicide_bomb_range");
 	tf_bot_suicide_bomb_friendly_fire = FindConVar("tf_bot_suicide_bomb_friendly_fire");
 	tf_bot_taunt_victim_chance = FindConVar("tf_bot_taunt_victim_chance");
+	tf_bot_always_full_reload = FindConVar("tf_bot_always_full_reload");
 	mp_tournament_redteamname = FindConVar("mp_tournament_redteamname");
 	mp_tournament_blueteamname = FindConVar("mp_tournament_blueteamname");
 	mp_waitingforplayers_time = FindConVar("mp_waitingforplayers_time");
@@ -1098,18 +1100,18 @@ void FireWeaponAtEnemy(int client, int &buttons)
 	
 	if (Player(client).IsBarrageAndReloadWeapon(myWeapon))
 	{
-		if (Player(client).HasAttribute(HOLD_FIRE_UNTIL_FULL_RELOAD))
+		if (Player(client).HasAttribute(HOLD_FIRE_UNTIL_FULL_RELOAD) || tf_bot_always_full_reload.BoolValue)
 		{
 			static int m_isWaitingForFullReload[MAXPLAYERS + 1];
 			
-			if (GetEntProp(myWeapon, Prop_Send, "m_iClip1") <= 0)
+			if (SDKCall_Clip1(myWeapon) <= 0)
 			{
 				m_isWaitingForFullReload[client] = true;
 			}
 			
 			if (m_isWaitingForFullReload[client])
 			{
-				if (GetEntProp(myWeapon, Prop_Send, "m_iClip1") < TF2Util_GetWeaponMaxClip(myWeapon))
+				if (SDKCall_Clip1(myWeapon) < TF2Util_GetWeaponMaxClip(myWeapon))
 				{
 					TF2Attrib_SetByName(myWeapon, "no_attack", 1.0);
 					TF2Attrib_SetByName(myWeapon, "provide on active", 1.0);

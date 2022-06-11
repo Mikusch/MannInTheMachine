@@ -58,12 +58,13 @@ bool CTFBotMissionSuicideBomber_Update(int me)
 			// Send out an event
 			if (m_bWasSuccessful[me] && IsValidEntity(m_victim[me]) && HasEntProp(m_victim[me], Prop_Send, "m_hBuilder"))
 			{
-				if (GetEntPropEnt(m_victim[me], Prop_Send, "m_hBuilder") != -1)
+				int owner = GetEntPropEnt(m_victim[me], Prop_Send, "m_hBuilder");
+				if (owner != -1)
 				{
 					Event event = CreateEvent("mvm_sentrybuster_detonate");
 					if (event)
 					{
-						event.SetInt("player", GetEntPropEnt(m_victim[me], Prop_Send, "m_hBuilder"));
+						event.SetInt("player", owner);
 						event.SetFloat("det_x", m_vecDetLocation[me][0]);
 						event.SetFloat("det_y", m_vecDetLocation[me][1]);
 						event.SetFloat("det_z", m_vecDetLocation[me][2]);
@@ -72,6 +73,7 @@ bool CTFBotMissionSuicideBomber_Update(int me)
 				}
 			}
 			
+			// KABOOM!
 			return false;
 		}
 		
@@ -190,6 +192,14 @@ static void Detonate(int me)
 	EmitGameSoundToAll("MVM.SentryBusterExplode", me);
 	
 	UTIL_ScreenShake(origin, 25.0, 5.0, 5.0, 1000.0, SHAKE_START);
+	
+	if (!m_bWasSuccessful[me])
+	{
+		if (GameRules_IsMannVsMachineMode())
+		{
+			HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_SENTRY_BUSTER_DOWN", TFTeam_Defenders);
+		}
+	}
 	
 	ArrayList victimList = new ArrayList();
 	

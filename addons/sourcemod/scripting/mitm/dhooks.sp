@@ -848,6 +848,7 @@ public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 					SetVariantInt(1);
 					AcceptEntityInput(bot, "SetForcedTauntCam");
 					
+					// buster never "attacks", just approaches and self-detonates
 					TF2Attrib_SetByName(bot, "no_attack", 1.0);
 					
 					int iFlags = MVM_CLASS_FLAG_MISSION;
@@ -958,7 +959,7 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 		ret.Value = TFTeam_Defenders;
 		return MRES_Supercede;
 	}
-	else if (mitm_developer.BoolValue || g_bAllowTeamChange)
+	else if (g_bAllowTeamChange || (mitm_developer.BoolValue && !IsFakeClient(player)))
 	{
 		// allow player through
 		GameRules_SetProp("m_bPlayingMannVsMachine", false);

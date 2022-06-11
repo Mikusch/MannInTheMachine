@@ -698,7 +698,7 @@ public void OnEntityCreated(int entity, const char[] classname)
 
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int & subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
 {
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders && IsPlayerAlive(client))
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
 		if (Player(client).ShouldAutoJump())
 		{
@@ -1083,6 +1083,9 @@ void SelectNewDefenders()
 
 void FireWeaponAtEnemy(int client, int &buttons)
 {
+	if (!IsPlayerAlive(client))
+		return;
+	
 	if (Player(client).HasAttribute(SUPPRESS_FIRE))
 		return;
 	

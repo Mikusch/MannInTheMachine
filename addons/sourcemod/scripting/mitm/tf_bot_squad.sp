@@ -175,8 +175,9 @@ methodmap CTFBotSquad
 	
 	public void Leave(int bot)
 	{
-		if (this.m_roster.FindValue(bot) != -1)
-			this.m_roster.Erase(this.m_roster.FindValue(bot));
+		int index = this.m_roster.FindValue(bot);
+		if (index != -1)
+			this.m_roster.Erase(index);
 		
 		if (bot == this.m_leader)
 		{
@@ -218,9 +219,10 @@ methodmap CTFBotSquad
 	{
 		for (int i = 0; i < this.m_roster.Length; ++i)
 		{
-			if (this.m_roster.Get(i) != -1 && IsPlayerAlive(this.m_roster.Get(i)))
+			int member = this.m_roster.Get(i);
+			if (IsValidEntity(member) && IsPlayerAlive(member))
 			{
-				memberList.Push(this.m_roster.Get(i));
+				memberList.Push(member);
 			}
 		}
 	}
@@ -231,7 +233,8 @@ methodmap CTFBotSquad
 		int count = 0;
 		for (int i = 0; i < this.m_roster.Length; ++i)
 		{
-			if (this.m_roster.Get(i) != -1 && IsPlayerAlive(this.m_roster.Get(i)))
+			int member = this.m_roster.Get(i);
+			if (IsValidEntity(member) && IsPlayerAlive(member))
 				++count;
 		}
 		
@@ -243,9 +246,10 @@ methodmap CTFBotSquad
 		// Tell each member of the squad to remove this reference
 		for (int i = 0; i < this.m_roster.Length; ++i)
 		{
-			if (this.m_roster.Get(i) != -1)
+			int member = this.m_roster.Get(i);
+			if (IsValidEntity(member))
 			{
-				Player(this.m_roster.Get(i)).DeleteSquad();
+				Player(member).DeleteSquad();
 			}
 		}
 		

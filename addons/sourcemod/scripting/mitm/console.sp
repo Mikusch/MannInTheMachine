@@ -27,6 +27,7 @@ void Console_Initialize()
 	AddCommandListener(CommandListener_Suicide, "explode");
 	AddCommandListener(CommandListener_Suicide, "kill");
 	AddCommandListener(CommandListener_Build, "build");
+	AddCommandListener(CommandListener_DropItem, "dropitem");
 }
 
 public Action ConCmd_OpenMainMenu(int client, int args)
@@ -117,6 +118,17 @@ public Action CommandListener_Build(int client, const char[] command, int argc)
 				}
 			}
 		}
+	}
+	
+	return Plugin_Continue;
+}
+
+public Action CommandListener_DropItem(int client, const char[] command, int argc)
+{
+	if (IsDeployingBomb(client))
+	{
+		// do not allow dropping the bomb while deploying
+		return Plugin_Handled;
 	}
 	
 	return Plugin_Continue;

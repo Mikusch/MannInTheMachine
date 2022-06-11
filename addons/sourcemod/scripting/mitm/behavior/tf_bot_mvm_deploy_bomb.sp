@@ -144,3 +144,8 @@ void CTFBotMvMDeployBomb_OnEnd(int me)
 	
 	m_nDeployingBombState[me] = TF_BOMB_DEPLOYING_NONE;
 }
+
+bool IsDeployingBomb(int client)
+{
+	return m_nDeployingBombState[client] != TF_BOMB_DEPLOYING_NONE;
+}

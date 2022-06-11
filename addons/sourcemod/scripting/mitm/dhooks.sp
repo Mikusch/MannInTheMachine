@@ -958,7 +958,7 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 		ret.Value = TFTeam_Defenders;
 		return MRES_Supercede;
 	}
-	else if (g_bAllowTeamChange)
+	else if (mitm_developer.BoolValue || g_bAllowTeamChange)
 	{
 		// allow player through
 		GameRules_SetProp("m_bPlayingMannVsMachine", false);

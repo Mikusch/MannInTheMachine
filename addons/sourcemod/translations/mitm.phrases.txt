@@ -92,4 +92,18 @@
 		"#format"	"{1:N}"
 		"en"		"You are only allowed to heal your squad leader ({1})."
 	}
+	"Invader_NotAllowedToSuicide"
+	{
+		"en"		"You are not allowed to suicide as a robot."
+	}
+	"Invader_Spawned"
+	{
+		"#format"	"{1:s}"
+		"en"		"You have spawned as: {1}"
+	}
+	"Invader_HurryOutOfSpawn"
+	{
+		"#format"	"{1:1.2f}"
+		"en"		"You have {1} seconds to leave the spawn area."
+	}
 }

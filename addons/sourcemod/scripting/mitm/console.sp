@@ -70,7 +70,7 @@ public Action CommandListener_Suicide(int client, const char[] command, int argc
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
 		// invaders may not suicide
-		PrintCenterText(client, "You are not allowed to suicide as a robot.");
+		PrintCenterText(client, "%t", "Invader_NotAllowedToSuicide");
 		return Plugin_Handled;
 	}
 	

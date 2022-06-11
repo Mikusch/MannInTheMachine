@@ -297,7 +297,7 @@ public MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		// print name
 		char m_name[64];
 		m_spawner.GetName(m_name, sizeof(m_name));
-		PrintCenterText(newPlayer, "You have spawned as: %s.", m_name[0] == EOS ? "TFBot" : m_name);
+		PrintCenterText(newPlayer, "%t", "Invader_Spawned", m_name[0] == EOS ? "TFBot" : m_name);
 		
 		DispatchKeyValueVector(g_InternalSpawnPoint, "origin", here);
 		Player(newPlayer).m_spawnPointEntity = g_InternalSpawnPoint;
@@ -950,7 +950,7 @@ public MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterf
 public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, DHookParam params)
 {
 	int player = params.Get(1);
-	TFTeam desiredTeam = params.Get(2);
+	TFTeam nDesiredTeam = params.Get(2);
 	
 	if (g_bInWaitingForPlayers)
 	{
@@ -966,9 +966,9 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 	}
 	else
 	{
-		if (desiredTeam == TFTeam_Spectator && TF2_GetClientTeam(player) == TFTeam_Invaders)
+		if (nDesiredTeam == TFTeam_Spectator && TF2_GetClientTeam(player) == TFTeam_Invaders)
 		{
-			PrintCenterText(player, "You are not allowed to suicide as a robot.");
+			PrintCenterText(player, "%t", "Invader_NotAllowedToSuicide");
 			ret.Value = TFTeam_Invaders;
 			return MRES_Supercede;
 		}

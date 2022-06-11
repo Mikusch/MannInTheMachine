@@ -69,6 +69,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CWeaponMedigun::AllowedToHealTarget", DHookCallback_AllowedToHealTarget_Pre);
 	CreateDynamicDetour(gamedata, "CBaseObject::FindSnapToBuildPos", DHookCallback_FindSnapToBuildPos_Pre, DHookCallback_FindSnapToBuildPos_Post);
 	CreateDynamicDetour(gamedata, "CSpawnLocation::FindSpawnLocation", _, DHookCallback_FindSpawnLocation_Post);
+	CreateDynamicDetour(gamedata, "CTraceFilterObject::ShouldHitEntity", _, DHookCallback_ShouldHitEntity_Post);
 	CreateDynamicDetour(gamedata, "DoTeleporterOverride", _, DHookCallback_DoTeleporterOverride_Post);
 	CreateDynamicDetour(gamedata, "OnBotTeleported", DHookCallback_OnBotTeleported_Pre);
 	
@@ -1169,6 +1170,34 @@ public MRESReturn DHookCallback_FindSpawnLocation_Post(Address where, DHookRetur
 	s_spawnLocationResult = ret.Value;
 	
 	return MRES_Handled;
+}
+
+public MRESReturn DHookCallback_ShouldHitEntity_Post(Address pFilter, DHookReturn ret, DHookParam params)
+{
+	int me = GetEntityFromAddress(Deref(pFilter + view_as<Address>(0x4)));
+	int entity = GetEntityFromAddress(params.Get(1));
+	
+	if (0 < entity <= MaxClients)
+	{
+		if (GameRules_IsMannVsMachineMode())
+		{
+			if (Player(entity).HasMission(MISSION_DESTROY_SENTRIES))
+			{
+				// Don't collide with sentry busters since they don't collide with us
+				ret.Value = false;
+				return MRES_Supercede;
+			}
+			
+			if (Player(me).HasMission(MISSION_DESTROY_SENTRIES))
+			{
+				// Sentry Busters don't collide with enemies (so they can't be body-blocked)
+				ret.Value = false;
+				return MRES_Supercede;
+			}
+		}
+	}
+	
+	return MRES_Ignored;
 }
 
 public MRESReturn DHookCallback_DoTeleporterOverride_Post(DHookReturn ret, DHookParam params)

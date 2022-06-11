@@ -216,6 +216,11 @@
 				"linux"		"@_ZNK22CTFBotHintEngineerNest17GetTeleporterHintEv"
 				"windows"	"\x8D\x81\x78\x03\x00\x00"
 			}
+			"CTraceFilterObject::ShouldHitEntity"
+			{
+				"linux"		"@_ZN18CTraceFilterObject15ShouldHitEntityEP13IHandleEntityi"
+				"windows"	"\x55\x8B\xEC\x51\x8B\xC1\x8B\x0D\x2A\x2A\x2A\x2A"
+			}
 			"DoTeleporterOverride"
 			{
 				"linux"		"@_Z20DoTeleporterOverrideP11CBaseEntityR6Vectorb"
@@ -758,6 +763,24 @@
 					"bIsBonus"
 					{
 						"type"	"bool"
+					}
+				}
+			}
+			"CTraceFilterObject::ShouldHitEntity"
+			{
+				"signature"		"CTraceFilterObject::ShouldHitEntity"
+				"callconv"		"thiscall"
+				"return"		"bool"
+				"this"			"address"
+				"arguments"
+				{
+					"pHandleEntity"
+					{
+						"type"	"int"
+					}
+					"contentsMask"
+					{
+						"type"	"int"
 					}
 				}
 			}

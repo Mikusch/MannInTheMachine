@@ -463,6 +463,7 @@ enum struct CountdownTimer
 
 // Globals
 Handle g_WarningHudSync;
+Handle g_InfoHudSync;
 Handle g_hWaitingForPlayersTimer;
 bool g_bInWaitingForPlayers;
 StringMap g_offsets;
@@ -538,6 +539,7 @@ public void OnPluginStart()
 	Entity.InitializePropertyList();
 	
 	g_WarningHudSync = CreateHudSynchronizer();
+	g_InfoHudSync = CreateHudSynchronizer();
 	g_offsets = new StringMap();
 	
 	mitm_developer = CreateConVar("mitm_developer", "0", "Toggle plugin developer mode.");
@@ -730,6 +732,12 @@ public void OnClientGameFrame(int client)
 {
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
+		if (Player(client).HasTag("bot_gatebot"))
+		{
+			SetHudTextParams(0.05, 0.05, 0.1, 255, 255, 255, 255, _, 0.0, 0.0, 0.0);
+			ShowSyncHudText(client, g_InfoHudSync, "%t", "Invader_GateBot");
+		}
+		
 		if (Player(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
 		{
 			TF2_AddCondition(client, TFCond_CritCanteen);
@@ -785,7 +793,7 @@ public void OnClientGameFrame(int client)
 					{
 						// motivate them to leave their spawn
 						SetHudTextParams(-1.0, 0.7, 0.1, 255, 255, 255, 255, _, 0.0, 0.0, 0.0);
-						ShowSyncHudText(client, g_WarningHudSync, "You have %1.2f seconds to leave the spawn area.", flTimeLeft);
+						ShowSyncHudText(client, g_WarningHudSync, "%t", "Invader_HurryOutOfSpawn", flTimeLeft);
 					}
 				}
 			}

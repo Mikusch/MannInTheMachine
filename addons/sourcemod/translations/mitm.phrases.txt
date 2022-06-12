@@ -106,4 +106,8 @@
 		"#format"	"{1:1.2f}"
 		"en"		"You have {1} seconds to leave the spawn area."
 	}
+	"Invader_GateBot"
+	{
+		"en"		"OBJECTIVE: Capture the Gate"
+	}
 }

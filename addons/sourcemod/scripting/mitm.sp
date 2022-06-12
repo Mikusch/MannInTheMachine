@@ -672,7 +672,7 @@ public void OnClientPutInServer(int client)
 	
 	Player(client).Reset();
 	
-	SDKHook(client, SDKHook_OnTakeDamage, OnClientTakeDamage);
+	SDKHook(client, SDKHook_OnTakeDamageAlive, OnClientTakeDamageAlive);
 	
 	if (AreClientCookiesCached(client))
 	{
@@ -1223,7 +1223,7 @@ void FireWeaponAtEnemy(int client, int &buttons)
 	}
 }
 
-Action OnClientTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+Action OnClientTakeDamageAlive(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
 	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
 	{

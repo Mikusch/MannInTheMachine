@@ -640,6 +640,8 @@ public void OnPluginStart()
 
 public void OnMapStart()
 {
+	PrecacheSound("ui/system_message_alert.wav");
+	
 	g_hWaitingForPlayersTimer = null;
 	g_bInWaitingForPlayers = true;
 	g_restoreCheckpointTime = 0.0;

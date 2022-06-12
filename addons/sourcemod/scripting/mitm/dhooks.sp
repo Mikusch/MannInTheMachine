@@ -493,13 +493,16 @@ public MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 			result.AddToTail(GetEntityHandle(newPlayer));
 		}
 		
-		// For easy access in populator spawner callbacks
+		// for easy access in populator spawner callbacks
 		m_justSpawnedVector.Push(newPlayer);
 		
 		if (GameRules_IsMannVsMachineMode())
 		{
 			if (GetEntProp(newPlayer, Prop_Send, "m_bIsMiniBoss"))
 			{
+				// wake up
+				EmitSoundToClient(newPlayer, "ui/system_message_alert.wav", .channel = SNDCHAN_STATIC);
+				
 				HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_GIANT_CALLOUT", TFTeam_Defenders);
 			}
 		}

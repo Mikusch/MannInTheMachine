@@ -1361,14 +1361,35 @@ methodmap CPopulationManager
 		}
 	}
 	
-	public void ResetMap()
+	property bool m_canBotsAttackWhileInSpawnRoom
 	{
-		SDKCall_ResetMap(this._index);
+		public get()
+		{
+			return GetEntData(this._index, GetOffset("CPopulationManager::m_canBotsAttackWhileInSpawnRoom")) != 0;
+		}
+	}
+	
+	property bool m_bSpawningPaused
+	{
+		public get()
+		{
+			return GetEntData(this._index, GetOffset("CPopulationManager::m_bSpawningPaused")) != 0;
+		}
+	}
+	
+	public bool CanBotsAttackWhileInSpawnRoom()
+	{
+		return this.m_canBotsAttackWhileInSpawnRoom;
 	}
 	
 	public bool IsSpawningPaused()
 	{
-		return view_as<bool>(GetEntData(this._index, GetOffset("CPopulationManager::m_bSpawningPaused")));
+		return this.m_bSpawningPaused;
+	}
+	
+	public void ResetMap()
+	{
+		SDKCall_ResetMap(this._index);
 	}
 	
 	public CWave GetCurrentWave()

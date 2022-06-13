@@ -593,6 +593,7 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CMissionPopulator::m_mission");
 		SetOffset(gamedata, "CMissionPopulator::m_cooldownDuration");
 		SetOffset(gamedata, "CWaveSpawnPopulator::m_bLimitedSupport");
+		SetOffset(gamedata, "CPopulationManager::m_canBotsAttackWhileInSpawnRoom");
 		SetOffset(gamedata, "CPopulationManager::m_bSpawningPaused");
 		SetOffset(gamedata, "CPopulationManager::m_defaultEventChangeAttributesName");
 		SetOffset(gamedata, "CWave::m_nSentryBustersSpawned");
@@ -1197,15 +1198,19 @@ void FireWeaponAtEnemy(int client, int &buttons)
 	
 	if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
 	{
-		s_isInSpawn[client] = true;
-		
-		// disable attacking
-		TF2Attrib_SetByName(myWeapon, "no_attack", 1.0);
-		TF2Attrib_SetByName(myWeapon, "provide on active", 1.0);
-		
-		buttons &= ~IN_ATTACK;
-		buttons &= ~IN_ATTACK2;
-		return;
+		// if I'm in my spawn room, obey the population manager's attack restrictions
+		if (!GetPopulationManager().CanBotsAttackWhileInSpawnRoom())
+		{
+			s_isInSpawn[client] = true;
+			
+			// disable attacking
+			TF2Attrib_SetByName(myWeapon, "no_attack", 1.0);
+			TF2Attrib_SetByName(myWeapon, "provide on active", 1.0);
+			
+			buttons &= ~IN_ATTACK;
+			buttons &= ~IN_ATTACK2;
+			return;
+		}
 	}
 	else if (s_isInSpawn[client])
 	{

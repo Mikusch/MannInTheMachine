@@ -141,6 +141,8 @@ static bool TeleportNearVictim(int me, int victim, int attempt)
 		ambushVector.Push(area);
 	}
 	
+	delete areaVector;
+	
 	if (ambushVector.Length == 0)
 	{
 		delete ambushVector;

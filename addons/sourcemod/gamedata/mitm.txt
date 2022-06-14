@@ -436,7 +436,7 @@
 			}
 			"CPopulationManager::m_canBotsAttackWhileInSpawnRoom"
 			{
-				"linux"		"1453"
+				"linux"		"1452"
 				"windows"	"1432"
 			}
 			"CPopulationManager::m_bSpawningPaused"

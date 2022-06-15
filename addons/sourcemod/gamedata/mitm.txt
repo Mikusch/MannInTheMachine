@@ -96,6 +96,11 @@
 				"linux"		"@_ZN12CTFGameRules25GetTeamAssignmentOverrideEP9CTFPlayerib"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x10\x81\x65\xF4\xFF\xFF\x0F\xFF\x8D\x45\xF0\x53"
 			}
+			"CTeamplayRoundBasedRules::PlayThrottledAlert"
+			{
+				"linux"		"@_ZN24CTeamplayRoundBasedRules18PlayThrottledAlertEiPKcf"
+				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x56\x8B\xF1\xF3\x0F\x10\x40\x0C"
+			}
 			"CTFPlayer::PostInventoryApplication"
 			{
 				"linux"		"@_ZN9CTFPlayer24PostInventoryApplicationEv"

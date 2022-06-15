@@ -20,6 +20,7 @@
 
 static Handle g_SDKCallGetClassIconLinux;
 static Handle g_SDKCallGetClassIconWindows;
+static Handle g_SDKCallPlayThrottledAlert;
 static Handle g_SDKCallPostInventoryApplication;
 static Handle g_SDKCallUpdateModelToClass;
 static Handle g_SDKCallHasTheFlag;
@@ -60,6 +61,7 @@ void SDKCalls_Initialize(GameData gamedata)
 		LogMessage("Failed to create SDKCall: CTFBotSpawner::GetClassIcon");
 	}
 	
+	g_SDKCallPlayThrottledAlert = PrepSDKCall_PlayThrottledAlert(gamedata);
 	g_SDKCallPostInventoryApplication = PrepSDKCall_PostInventoryApplication(gamedata);
 	g_SDKCallUpdateModelToClass = PrepSDKCall_UpdateModelToClass(gamedata);
 	g_SDKCallHasTheFlag = PrepSDKCall_HasTheFlag(gamedata);
@@ -114,6 +116,22 @@ static Handle PrepSDKCall_GetClassIcon_Windows(GameData gamedata)
 	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain); // return string_t
 	
 	return EndPrepSDKCall();
+}
+
+static Handle PrepSDKCall_PlayThrottledAlert(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_GameRules);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTeamplayRoundBasedRules::PlayThrottledAlert");
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
+	PrepSDKCall_AddParameter(SDKType_Float, SDKPass_ByValue);
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTeamplayRoundBasedRules::PlayThrottledAlert");
+	
+	return call;
 }
 
 static Handle PrepSDKCall_PostInventoryApplication(GameData gamedata)
@@ -509,6 +527,14 @@ Address SDKCall_GetClassIcon(any spawner, int nSpawnNum = -1)
 	}
 	
 	return Address_Null;
+}
+
+bool SDKCall_PlayThrottledAlert(int iTeam, const char[] sound, float fDelayBeforeNext)
+{
+	if (g_SDKCallPlayThrottledAlert)
+		return SDKCall(g_SDKCallPlayThrottledAlert, iTeam, sound, fDelayBeforeNext);
+	
+	return false;
 }
 
 void SDKCall_PostInventoryApplication(int player)

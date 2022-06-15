@@ -40,20 +40,6 @@ void TFGameRules_BroadcastSound(int iTeam, const char[] sound, int iAdditionalSo
 	}
 }
 
-bool TFGameRules_PlayThrottledAlert(int iTeam, const char[] sound, float fDelayBeforeNext)
-{
-	static float m_flNewThrottledAlertTime = 0.0;
-	
-	if (m_flNewThrottledAlertTime <= GetGameTime())
-	{
-		TFGameRules_BroadcastSound(iTeam, sound);
-		m_flNewThrottledAlertTime = GetGameTime() + fDelayBeforeNext;
-		return true;
-	}
-	
-	return false;
-}
-
 void SetModelScale(int entity, float scale, float duration = 0.0)
 {
 	float vecScale[3];

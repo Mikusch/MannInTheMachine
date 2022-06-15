@@ -90,7 +90,7 @@ bool CTFBotMvMDeployBomb_Update(int me)
 				
 				EmitGameSoundToAll(GetEntProp(me, Prop_Send, "m_bIsMiniBoss") ? "MVM.DeployBombGiant" : "MVM.DeployBombSmall", me);
 				
-				TFGameRules_PlayThrottledAlert(255, "Announcer.MVM_Bomb_Alert_Deploying", 5.0);
+				SDKCall_PlayThrottledAlert(255, "Announcer.MVM_Bomb_Alert_Deploying", 5.0);
 			}
 		}
 		case TF_BOMB_DEPLOYING_ANIMATING:

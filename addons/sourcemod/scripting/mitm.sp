@@ -536,8 +536,6 @@ public void OnPluginStart()
 	LoadTranslations("common.phrases");
 	LoadTranslations("mitm.phrases");
 	
-	Entity.InitializePropertyList();
-	
 	g_WarningHudSync = CreateHudSynchronizer();
 	g_InfoHudSync = CreateHudSynchronizer();
 	g_offsets = new StringMap();
@@ -666,7 +664,7 @@ public void OnMapStart()
 
 public void OnEntityDestroyed(int entity)
 {
-	Entity(entity).Destroy();
+	Entity(entity).Delete();
 }
 
 public void OnClientPutInServer(int client)

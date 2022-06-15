@@ -17,13 +17,13 @@
 
 enum struct EntityProperties
 {
-	int m_hEntity;
+	int m_index;
 	
 	ArrayList m_teleportWhereName;
 	
 	void Initialize(int entity)
 	{
-		this.m_hEntity = entity;
+		this.m_index = entity;
 		this.m_teleportWhereName = new ArrayList();
 	}
 	
@@ -35,18 +35,32 @@ enum struct EntityProperties
 
 static ArrayList g_EntityProperties;
 
+/**
+ * A methodmap that holds entity data.
+ * Calling the constructor will create a list index for the entity and reuse it until the entity is deleted.
+ * The data is stored in the associated EntityProperties enum struct.
+ *
+ */
 methodmap Entity
 {
 	public Entity(int entity)
 	{
 		if (!IsValidEntity(entity))
+		{
 			return view_as<Entity>(INVALID_ENT_REFERENCE);
+		}
 		
-		//Doubly convert it to ensure it is an entity reference
+		if (!g_EntityProperties)
+		{
+			g_EntityProperties = new ArrayList(sizeof(EntityProperties));
+		}
+		
+		// doubly convert it to ensure it's a reference
 		entity = EntIndexToEntRef(EntRefToEntIndex(entity));
 		
-		if (g_EntityProperties.FindValue(entity, EntityProperties::m_hEntity) == -1)
+		if (g_EntityProperties.FindValue(entity, EntityProperties::m_index) == -1)
 		{
+			// fill basic properties
 			EntityProperties properties;
 			properties.Initialize(entity);
 			
@@ -56,11 +70,11 @@ methodmap Entity
 		return view_as<Entity>(entity);
 	}
 	
-	property int _listIndex
+	property int m_listIndex
 	{
 		public get()
 		{
-			return g_EntityProperties.FindValue(view_as<int>(this), EntityProperties::m_hEntity);
+			return g_EntityProperties.FindValue(view_as<int>(this), EntityProperties::m_index);
 		}
 	}
 	
@@ -68,11 +82,11 @@ methodmap Entity
 	{
 		public get()
 		{
-			return g_EntityProperties.Get(this._listIndex, EntityProperties::m_teleportWhereName);
+			return g_EntityProperties.Get(this.m_listIndex, EntityProperties::m_teleportWhereName);
 		}
 		public set(ArrayList teleportWhereName)
 		{
-			g_EntityProperties.Set(this._listIndex, teleportWhereName, EntityProperties::m_teleportWhereName);
+			g_EntityProperties.Set(this.m_listIndex, teleportWhereName, EntityProperties::m_teleportWhereName);
 		}
 	}
 	
@@ -81,13 +95,11 @@ methodmap Entity
 		this.m_teleportWhereName = teleportWhereName.Clone();
 	}
 	
-	public void Destroy()
+	public void Delete()
 	{
-		g_EntityProperties.Erase(this._listIndex);
-	}
-	
-	public static void InitializePropertyList()
-	{
-		g_EntityProperties = new ArrayList(sizeof(EntityProperties));
+		if (this.m_listIndex == -1)
+			return;
+		
+		g_EntityProperties.Erase(this.m_listIndex);
 	}
 }

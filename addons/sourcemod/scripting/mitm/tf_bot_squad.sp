@@ -260,7 +260,7 @@ methodmap CTFBotSquad
 	{
 		if (this.m_listIndex == -1)
 		{
-			ThrowError("Failed to delete squad because it wasn't in our list, wtf?");
+			ThrowError("Failed to delete squad because it wasn't in our list");
 		}
 		
 		CTFBotSquadInfo info;

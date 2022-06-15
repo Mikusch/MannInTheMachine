@@ -254,6 +254,11 @@
 				"linux"		"16"
 				"windows"	"16"
 			}
+			"CBaseEntity::SetModel"
+			{
+				"linux"		"25"
+				"windows"	"24"
+			}
 			"CBaseEntity::IsCombatItem"
 			{
 				"linux"		"86"
@@ -832,6 +837,20 @@
 					"bot"
 					{
 						"type"	"cbaseentity"
+					}
+				}
+			}
+			"CBaseEntity::SetModel"
+			{
+				"offset"	"CBaseEntity::SetModel"
+				"hooktype"	"entity"
+				"return"	"void"
+				"this"		"entity"
+				"arguments"
+				{
+					"szModelName"
+					{
+						"type"	"charptr"
 					}
 				}
 			}

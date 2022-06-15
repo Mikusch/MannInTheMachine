@@ -319,8 +319,6 @@ int CreateEntityGlow(int entity)
 			int fEffects = GetEntProp(glow, Prop_Send, "m_fEffects");
 			SetEntProp(glow, Prop_Send, "m_fEffects", fEffects | EF_BONEMERGE | EF_NOSHADOW | EF_NORECEIVESHADOW);
 			
-			SetEntityFlags(glow, (GetEntityFlags(glow) | FL_EDICT_ALWAYS));
-			
 			SetVariantString("!activator");
 			AcceptEntityInput(glow, "SetParent", entity);
 			
@@ -352,9 +350,16 @@ void RemoveEntityGlow(int entity)
 
 Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)
 {
+	int target = GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity");
+	
+	if (Player(client).HasMission(MISSION_DESTROY_SENTRIES) && target == Player(client).GetMissionTarget())
+	{
+		// show the glow of our target sentry
+		return Plugin_Continue;
+	}
+	
 	if (Player(client).IsInASquad())
 	{
-		int target = GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity");
 		if (client != target && Player(client).GetSquad().IsLeader(target))
 		{
 			// show the glow of our squad leader

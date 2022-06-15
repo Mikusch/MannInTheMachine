@@ -37,7 +37,7 @@ void CTFBotMissionSuicideBomber_OnStart(int me)
 	m_bWasSuccessful[me] = false;
 	m_bWasKilled[me] = false;
 	
-	m_victim[me] = EntIndexToEntRef(Player(me).m_missionTarget);
+	m_victim[me] = EntIndexToEntRef(Player(me).GetMissionTarget());
 	
 	if (IsValidEntity(m_victim[me]))
 	{

@@ -437,6 +437,16 @@ methodmap Player
 		}
 	}
 	
+	public int GetMissionTarget()
+	{
+		return this.m_missionTarget;
+	}
+	
+	public void SetMissionTarget(int missionTarget)
+	{
+		this.m_missionTarget = missionTarget;
+	}
+	
 	public void SetTeleportWhere(CUtlVector teleportWhereName)
 	{
 		for (int i = 0; i < teleportWhereName.Count(); ++i)

@@ -20,11 +20,13 @@ enum struct EntityProperties
 	int m_index;
 	
 	ArrayList m_teleportWhereName;
+	int m_glowEntity;
 	
 	void Initialize(int entity)
 	{
 		this.m_index = entity;
 		this.m_teleportWhereName = new ArrayList();
+		this.m_glowEntity = INVALID_ENT_REFERENCE;
 	}
 	
 	void Destroy()
@@ -87,6 +89,18 @@ methodmap Entity
 		public set(ArrayList teleportWhereName)
 		{
 			g_EntityProperties.Set(this.m_listIndex, teleportWhereName, EntityProperties::m_teleportWhereName);
+		}
+	}
+	
+	property int m_glowEntity
+	{
+		public get()
+		{
+			return g_EntityProperties.Get(this.m_listIndex, EntityProperties::m_glowEntity);
+		}
+		public set(int glowEntity)
+		{
+			g_EntityProperties.Set(this.m_listIndex, glowEntity, EntityProperties::m_glowEntity);
 		}
 	}
 	

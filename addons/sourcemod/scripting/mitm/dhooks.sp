@@ -18,6 +18,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+static DynamicHook g_DHookSetModel;
 static DynamicHook g_DHookCanBeUpgraded;
 static DynamicHook g_DHookComeToRest;
 static DynamicHook g_DHookEventKilled;
@@ -73,6 +74,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "DoTeleporterOverride", _, DHookCallback_DoTeleporterOverride_Post);
 	CreateDynamicDetour(gamedata, "OnBotTeleported", DHookCallback_OnBotTeleported_Pre);
 	
+	g_DHookSetModel = CreateDynamicHook(gamedata, "CBaseEntity::SetModel");
 	g_DHookCanBeUpgraded = CreateDynamicHook(gamedata, "CBaseObject::CanBeUpgraded");
 	g_DHookComeToRest = CreateDynamicHook(gamedata, "CItem::ComeToRest");
 	g_DHookEventKilled = CreateDynamicHook(gamedata, "CTFPlayer::Event_Killed");
@@ -150,6 +152,13 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 		if (g_DHookComeToRest)
 		{
 			g_DHookComeToRest.HookEntity(Hook_Pre, entity, DHookCallback_ComeToRest_Pre);
+		}
+	}
+	else if (StrEqual(classname, "obj_sentrygun"))
+	{
+		if (g_DHookSetModel)
+		{
+			g_DHookSetModel.HookEntity(Hook_Post, entity, DHookCallback_SetModel_Post);
 		}
 	}
 }
@@ -810,7 +819,7 @@ public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 		for (j = 0; j < livePlayerVector.Length; ++j)
 		{
 			int bot = livePlayerVector.Get(j);
-			if (Player(bot).HasMission(MISSION_DESTROY_SENTRIES) && Player(bot).m_missionTarget == targetSentry)
+			if (Player(bot).HasMission(MISSION_DESTROY_SENTRIES) && Player(bot).GetMissionTarget() == targetSentry)
 			{
 				// there is already a sentry busting squad active for this sentry
 				break;
@@ -837,7 +846,7 @@ public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 					
 					Player(bot).SetFlagTarget(-1);
 					Player(bot).SetMission(MISSION_DESTROY_SENTRIES);
-					Player(bot).m_missionTarget = targetSentry;
+					Player(bot).SetMissionTarget(targetSentry);
 					
 					SetEntData(bot, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true);
 					
@@ -1548,6 +1557,26 @@ public MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
 	}
 	
 	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_SetModel_Post(int entity, DHookParam params)
+{
+	char szModelName[PLATFORM_MAX_PATH];
+	params.GetString(1, szModelName, sizeof(szModelName));
+	
+	int glow = Entity(entity).m_glowEntity;
+	if (IsValidEntity(glow))
+	{
+		// existing glow, update the model
+		SetEntityModel(glow, szModelName);
+	}
+	else
+	{
+		// no existing glow, create one!
+		Entity(entity).m_glowEntity = EntRefToEntIndex(CreateEntityGlow(entity));
+	}
+	
+	return MRES_Handled;
 }
 
 public MRESReturn DHookCallback_CanBeUpgraded_Pre(int obj, DHookReturn ret, DHookParam params)

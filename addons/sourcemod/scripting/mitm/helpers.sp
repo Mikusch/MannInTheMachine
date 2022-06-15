@@ -288,34 +288,43 @@ int GetRobotToSpawn(bool bMiniBoss)
 	return priorityClient;
 }
 
-int CreatePlayerGlow(int client)
+int CreateEntityGlow(int entity)
 {
 	int glow = CreateEntityByName("tf_taunt_prop");
 	if (glow != -1)
 	{
 		char iszModel[PLATFORM_MAX_PATH];
-		GetEntPropString(client, Prop_Send, "m_iszCustomModel", iszModel, sizeof(iszModel));
+		
+		if (HasEntProp(entity, Prop_Send, "m_iszCustomModel"))
+		{
+			GetEntPropString(entity, Prop_Send, "m_iszCustomModel", iszModel, sizeof(iszModel));
+		}
 		
 		if (iszModel[0] == EOS)
 		{
 			// fall back to default model
-			GetEntPropString(client, Prop_Data, "m_ModelName", iszModel, sizeof(iszModel));
+			GetEntPropString(entity, Prop_Data, "m_ModelName", iszModel, sizeof(iszModel));
 		}
 		
 		SetEntityModel(glow, iszModel);
 		
 		if (DispatchSpawn(glow))
 		{
-			SetEntPropEnt(glow, Prop_Data, "m_hEffectEntity", client);
+			SetEntPropEnt(glow, Prop_Data, "m_hEffectEntity", entity);
 			SetEntProp(glow, Prop_Send, "m_bGlowEnabled", true);
+			
+			SetEntityRenderMode(glow, RENDER_TRANSCOLOR);
+			SetEntityRenderColor(glow, 0, 0, 0, 0);
 			
 			int fEffects = GetEntProp(glow, Prop_Send, "m_fEffects");
 			SetEntProp(glow, Prop_Send, "m_fEffects", fEffects | EF_BONEMERGE | EF_NOSHADOW | EF_NORECEIVESHADOW);
 			
-			SetVariantString("!activator");
-			AcceptEntityInput(glow, "SetParent", client);
+			SetEntityFlags(glow, (GetEntityFlags(glow) | FL_EDICT_ALWAYS));
 			
-			SDKHook(glow, SDKHook_SetTransmit, SDKHookCB_PlayerGlow_SetTransmit);
+			SetVariantString("!activator");
+			AcceptEntityInput(glow, "SetParent", entity);
+			
+			SDKHook(glow, SDKHook_SetTransmit, SDKHookCB_EntityGlow_SetTransmit);
 			
 			return glow;
 		}
@@ -328,7 +337,20 @@ int CreatePlayerGlow(int client)
 	return -1;
 }
 
-Action SDKHookCB_PlayerGlow_SetTransmit(int entity, int client)
+void RemoveEntityGlow(int entity)
+{
+	// Remove any glows attached to us
+	int prop = MaxClients + 1;
+	while ((prop = FindEntityByClassname(prop, "tf_taunt_prop")) != -1)
+	{
+		if (GetEntPropEnt(prop, Prop_Data, "m_hEffectEntity") == entity)
+		{
+			RemoveEntity(prop);
+		}
+	}
+}
+
+Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)
 {
 	if (Player(client).IsInASquad())
 	{

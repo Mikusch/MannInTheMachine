@@ -52,7 +52,7 @@ Action Timer_UpdatePlayerGlow(Handle timer, int userid)
 		if (TF2_GetClientTeam(client) == TFTeam_Invaders && IsPlayerAlive(client))
 		{
 			// Create a new glow
-			CreatePlayerGlow(client);
+			CreateEntityGlow(client);
 		}
 	}
 	
@@ -71,14 +71,7 @@ public void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroad
 		CreateTimer(5.0, Timer_DeadTimer, userid);
 		
 		// Remove any glows attached to us
-		int prop = MaxClients + 1;
-		while ((prop = FindEntityByClassname(prop, "tf_taunt_prop")) != -1)
-		{
-			if (GetEntPropEnt(prop, Prop_Data, "m_hEffectEntity") == victim)
-			{
-				RemoveEntity(prop);
-			}
-		}
+		RemoveEntityGlow(victim);
 	}
 	else if (0 < attacker <= MaxClients && TF2_GetClientTeam(victim) == TFTeam_Defenders && TF2_GetClientTeam(attacker) == TFTeam_Invaders)
 	{

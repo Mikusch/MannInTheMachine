@@ -825,7 +825,7 @@ methodmap Player
 				return -1;
 			}
 			
-			if (this.HasFlagTarget())
+			if (GameRules_IsMannVsMachineMode() && this.HasFlagTarget())
 			{
 				return this.GetFlagTarget();
 			}

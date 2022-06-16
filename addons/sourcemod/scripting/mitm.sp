@@ -764,7 +764,7 @@ public void OnClientGameFrame(int client)
 			TF2_AddCondition(client, TFCond_UberchargeFading, 0.5);
 			
 			// force bots to walk out of spawn
-			if (!Player(client).ShouldAutoJump())
+			if (!Player(client).HasAttribute(AUTO_JUMP))
 			{
 				TF2Attrib_SetByName(client, "no_jump", 1.0);
 			}

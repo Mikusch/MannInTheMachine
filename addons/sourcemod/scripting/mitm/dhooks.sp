@@ -1236,6 +1236,9 @@ public MRESReturn DHookCallback_DoTeleporterOverride_Post(DHookReturn ret, DHook
 		if (GetEntProp(obj, Prop_Send, "m_bBuilding"))
 			continue;
 		
+		if (GetEntProp(obj, Prop_Send, "m_bCarried"))
+			continue;
+		
 		if (GetEntProp(obj, Prop_Send, "m_bHasSapper"))
 			continue;
 		

@@ -603,7 +603,7 @@ public MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 		bool bLimitedSupport = Deref(pThis + GetOffset("CWaveSpawnPopulator::m_bLimitedSupport"), NumberType_Int8);
 		if (bLimitedSupport)
 		{
-			SetEntData(player, GetOffset("CTFPlayer::m_bIsLimitedSupportEnemy"), true);
+			SetEntData(player, GetOffset("CTFPlayer::m_bIsLimitedSupportEnemy"), true, 1);
 		}
 		
 		// what bot should do after spawning at teleporter exit
@@ -694,7 +694,7 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 		
 		Player(player).SetFlagTarget(-1);
 		Player(player).SetMission(mission);
-		SetEntData(player, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true);
+		SetEntData(player, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true, 1);
 		
 		int iFlags = MVM_CLASS_FLAG_MISSION;
 		if (GetEntProp(player, Prop_Send, "m_bIsMiniBoss"))
@@ -848,7 +848,7 @@ public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 					Player(bot).SetMission(MISSION_DESTROY_SENTRIES);
 					Player(bot).SetMissionTarget(targetSentry);
 					
-					SetEntData(bot, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true);
+					SetEntData(bot, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true, 1);
 					
 					didSpawn = true;
 					
@@ -1609,7 +1609,7 @@ public MRESReturn DHookCallback_ComeToRest_Pre(int item)
 	if (area && (area.HasAttributeTF(BLUE_SPAWN_ROOM) || area.HasAttributeTF(RED_SPAWN_ROOM)))
 	{
 		SDKCall_DistributeCurrencyAmount(GetEntData(item, GetOffset("CCurrencyPack::m_nAmount")));
-		SetEntData(item, GetOffset("CCurrencyPack::m_bTouched"), true);
+		SetEntData(item, GetOffset("CCurrencyPack::m_bTouched"), true, 1);
 		RemoveEntity(item);
 		
 		return MRES_Supercede;

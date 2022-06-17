@@ -1375,7 +1375,7 @@ methodmap CPopulationManager
 	{
 		public get()
 		{
-			return GetEntData(this._index, GetOffset("CPopulationManager::m_canBotsAttackWhileInSpawnRoom")) != 0;
+			return GetEntData(this._index, GetOffset("CPopulationManager::m_canBotsAttackWhileInSpawnRoom"), 1) != 0;
 		}
 	}
 	
@@ -1383,7 +1383,7 @@ methodmap CPopulationManager
 	{
 		public get()
 		{
-			return GetEntData(this._index, GetOffset("CPopulationManager::m_bSpawningPaused")) != 0;
+			return GetEntData(this._index, GetOffset("CPopulationManager::m_bSpawningPaused"), 1) != 0;
 		}
 	}
 	

@@ -490,6 +490,7 @@ ConVar tf_mvm_bot_flag_carrier_interval_to_1st_upgrade;
 ConVar tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade;
 ConVar tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade;
 ConVar tf_mvm_engineer_teleporter_uber_duration;
+ConVar tf_populator_debug;
 ConVar tf_bot_suicide_bomb_range;
 ConVar tf_bot_suicide_bomb_friendly_fire;
 ConVar tf_bot_taunt_victim_chance;
@@ -557,6 +558,7 @@ public void OnPluginStart()
 	tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade = FindConVar("tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade");
 	tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade = FindConVar("tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade");
 	tf_mvm_engineer_teleporter_uber_duration = FindConVar("tf_mvm_engineer_teleporter_uber_duration");
+	tf_populator_debug = FindConVar("tf_populator_debug");
 	tf_bot_suicide_bomb_range = FindConVar("tf_bot_suicide_bomb_range");
 	tf_bot_suicide_bomb_friendly_fire = FindConVar("tf_bot_suicide_bomb_friendly_fire");
 	tf_bot_taunt_victim_chance = FindConVar("tf_bot_taunt_victim_chance");

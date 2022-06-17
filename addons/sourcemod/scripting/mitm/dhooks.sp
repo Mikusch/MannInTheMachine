@@ -243,6 +243,11 @@ public MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 	CTFNavArea area = view_as<CTFNavArea>(TheNavMesh.GetNavArea(here));
 	if (area && area.HasAttributeTF(NO_SPAWNING))
 	{
+		if (tf_populator_debug.BoolValue)
+		{
+			LogMessage("CTFBotSpawner: %3.2f: *** Tried to spawn in a NO_SPAWNING area at (%f, %f, %f)", GetGameTime(), here[0], here[1], here[2]);
+		}
+		
 		ret.Value = false;
 		return MRES_Supercede;
 	}
@@ -271,6 +276,11 @@ public MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 	
 	if (z >= sv_stepsize.FloatValue)
 	{
+		if (tf_populator_debug.BoolValue)
+		{
+			LogMessage("CTFBotSpawner: %3.2f: *** No space to spawn at (%f, %f, %f)", GetGameTime(), here[0], here[1], here[2]);
+		}
+		
 		ret.Value = false;
 		return MRES_Supercede;
 	}
@@ -279,6 +289,11 @@ public MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 	{
 		if (m_spawner.m_class == TFClass_Engineer && m_spawner.m_defaultAttributes.m_attributeFlags & TELEPORT_TO_HINT && SDKCall_FindHint(true, false) == false)
 		{
+			if (tf_populator_debug.BoolValue)
+			{
+				LogMessage("CTFBotSpawner: %3.2f: *** No teleporter hint for engineer", GetGameTime());
+			}
+			
 			ret.Value = false;
 			return MRES_Supercede;
 		}
@@ -304,7 +319,7 @@ public MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		}
 		
 		// print name
-		char m_name[64];
+		char m_name[MAX_NAME_LENGTH];
 		m_spawner.GetName(m_name, sizeof(m_name));
 		PrintCenterText(newPlayer, "%t", "Invader_Spawned", m_name[0] == EOS ? "TFBot" : m_name);
 		
@@ -515,9 +530,19 @@ public MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 				HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_GIANT_CALLOUT", TFTeam_Defenders);
 			}
 		}
+		
+		if (tf_populator_debug.BoolValue)
+		{
+			LogMessage("%3.2f: Spawned player '%N'", GetGameTime(), newPlayer);
+		}
 	}
 	else
 	{
+		if (tf_populator_debug.BoolValue)
+		{
+			LogMessage("CTFBotSpawner: %3.2f: *** Can't find player to spawn.", GetGameTime());
+		}
+		
 		ret.Value = false;
 		return MRES_Supercede;
 	}
@@ -840,6 +865,12 @@ public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 			// This is very tedious, so we just use our temporary list hack.
 			if (populator.m_spawner && SDKCall_IPopulationSpawnerSpawn(populator.m_spawner, vSpawnPosition))
 			{
+				// success
+				if (tf_populator_debug.BoolValue)
+				{
+					LogMessage("MANN VS MACHINE: %3.2f: <<<< Spawning Sentry Busting Mission >>>>", GetGameTime());
+				}
+				
 				for (int k = 0; k < m_justSpawnedVector.Length; ++k)
 				{
 					int bot = m_justSpawnedVector.Get(k);
@@ -886,6 +917,10 @@ public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 				// after we are done, clear the vector
 				m_justSpawnedVector.Clear();
 			}
+		}
+		else if (tf_populator_debug.BoolValue)
+		{
+			LogError("MissionPopulator: %3.2f: Can't find a place to spawn a sentry destroying squad", GetGameTime());
 		}
 	}
 	

@@ -891,9 +891,6 @@ public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 					SetVariantInt(1);
 					AcceptEntityInput(bot, "SetForcedTauntCam");
 					
-					// buster never "attacks", just approaches and self-detonates
-					TF2Attrib_SetByName(bot, "no_attack", 1.0);
-					
 					int iFlags = MVM_CLASS_FLAG_MISSION;
 					if (GetEntProp(bot, Prop_Send, "m_bIsMiniBoss"))
 					{

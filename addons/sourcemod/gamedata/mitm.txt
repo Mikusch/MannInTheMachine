@@ -521,8 +521,8 @@
 			}
 			"CTakeDamageInfo::m_bForceFriendlyFire"
 			{
-				"linux"		"52"
-				"windows"	"52"
+				"linux"		"92"
+				"windows"	"92"
 			}
 		}
 		"Functions"

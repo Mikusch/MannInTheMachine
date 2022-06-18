@@ -30,6 +30,7 @@ static Handle g_SDKCallDoAnimationEvent;
 static Handle g_SDKCallPlaySpecificSequence;
 static Handle g_SDKCallDoClassSpecialSkill;
 static Handle g_SDKCallResetRageBuffs;
+static Handle g_SDKCallIsAllowedToTaunt;
 static Handle g_SDKCallGetHealthMultiplier;
 static Handle g_SDKCallResetMap;
 static Handle g_SDKCallIsSpaceToSpawnHere;
@@ -71,6 +72,7 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallPlaySpecificSequence = PrepSDKCall_PlaySpecificSequence(gamedata);
 	g_SDKCallDoClassSpecialSkill = PrepSDKCall_DoClassSpecialSkill(gamedata);
 	g_SDKCallResetRageBuffs = PrepSDKCall_ResetRageBuffs(gamedata);
+	g_SDKCallIsAllowedToTaunt = PrepSDKCall_IsAllowedToTaunt(gamedata);
 	g_SDKCallGetHealthMultiplier = PrepSDKCall_GetHealthMultiplier(gamedata);
 	g_SDKCallResetMap = PrepSDKCall_ResetMap(gamedata);
 	g_SDKCallIsSpaceToSpawnHere = PrepSDKCall_IsSpaceToSpawnHere(gamedata);
@@ -249,6 +251,19 @@ static Handle PrepSDKCall_ResetRageBuffs(GameData gamedata)
 	Handle call = EndPrepSDKCall();
 	if (!call)
 		LogMessage("Failed to create SDKCall: CTFPlayerShared::ResetRageBuffs");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_IsAllowedToTaunt(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::IsAllowedToTaunt");
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFPlayer::IsAllowedToTaunt");
 	
 	return call;
 }
@@ -592,6 +607,14 @@ void SDKCall_ResetRageBuffs(any m_Shared)
 {
 	if (g_SDKCallResetRageBuffs)
 		SDKCall(g_SDKCallResetRageBuffs, m_Shared);
+}
+
+bool SDKCall_IsAllowedToTaunt(int player)
+{
+	if (g_SDKCallIsAllowedToTaunt)
+		return SDKCall(g_SDKCallIsAllowedToTaunt, player);
+	
+	return false;
 }
 
 float SDKCall_GetHealthMultiplier(int populator, bool bIsTank = false)

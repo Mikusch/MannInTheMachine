@@ -126,16 +126,6 @@
 				"linux"		"@_ZN9CTFPlayer19DoClassSpecialSkillEv"
 				"windows"	"\x56\x8B\xF1\x8B\x06\x8B\x80\x04\x01\x00\x00\xFF\xD0\x84\xC0\x75\x2A\x32\xC0\x5E\xC3\xF7\x86\x84\x1A\x00\x00\x00\x00\x04\x00"
 			}
-			"CTFPlayer::CanBeForcedToLaugh"
-			{
-				"linux"		"@_ZN9CTFPlayer18CanBeForcedToLaughEv"
-				"windows"	"\xA1\x2A\x2A\x2A\x2A\x56\x8B\xF1\x85\xC0\x74\x2A\x80\xB8\x66\x09\x00\x00\x00\x74\x2A\x8B\x06"
-			}
-			"CBaseObject::FindSnapToBuildPos"
-			{
-				"linux"		"@_ZN11CBaseObject18FindSnapToBuildPosEPS_"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x38\x57\x8B\xF9\xE8\x2A\x2A\x2A\x2A\x84\xC0"
-			}
 			"CTFPlayer::HasTheFlag"
 			{
 				"linux"		"@_ZNK9CTFPlayer10HasTheFlagEP11ETFFlagTypei"
@@ -733,13 +723,6 @@
 				"return"		"bool"
 				"this"			"entity"
 			}
-			"CTFPlayer::CanBeForcedToLaugh"
-			{
-				"signature"		"CTFPlayer::CanBeForcedToLaugh"
-				"callconv"		"thiscall"
-				"return"		"bool"
-				"this"			"entity"
-			}
 			"CTFPlayer::CheckInstantLoadoutRespawn"
 			{
 				"signature"		"CTFPlayer::CheckInstantLoadoutRespawn"
@@ -770,20 +753,6 @@
 				"arguments"
 				{
 					"pTarget"
-					{
-						"type"	"cbaseentity"
-					}
-				}
-			}
-			"CBaseObject::FindSnapToBuildPos"
-			{
-				"signature"	"CBaseObject::FindSnapToBuildPos"
-				"callconv"	"thiscall"
-				"return"	"bool"
-				"this"		"entity"
-				"arguments"
-				{
-					"pObjectOverride"
 					{
 						"type"	"cbaseentity"
 					}

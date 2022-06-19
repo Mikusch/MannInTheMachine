@@ -100,6 +100,7 @@ public Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroa
 	bool bSilent = (team == TFTeam_Spectator) || (team == TFTeam_Invaders);
 	event.SetInt("silent", bSilent);
 	
+	Player(client).SetPrevMission(NO_MISSION);
 	TF2Attrib_RemoveAll(client);
 	// Clear Sound
 	Player(client).StopIdleSound();

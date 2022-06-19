@@ -1271,7 +1271,7 @@ Action OnClientTakeDamageAlive(int victim, int &attacker, int &inflictor, float 
 		if (0 < attacker <= MaxClients && TF2_GetClientTeam(attacker) == TFTeam_Invaders)
 		{
 			if ((attacker != victim) &&
-				Player(attacker).m_prevMission == MISSION_DESTROY_SENTRIES &&
+				Player(attacker).GetPrevMission() == MISSION_DESTROY_SENTRIES &&
 				g_bForceFriendlyFire &&
 				TF2_GetClientTeam(victim) == TF2_GetClientTeam(attacker) &&
 				GetEntProp(victim, Prop_Send, "m_bIsMiniBoss"))

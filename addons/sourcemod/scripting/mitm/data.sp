@@ -415,6 +415,16 @@ methodmap Player
 		SetModelScale(this._client, this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : 1.0);
 	}
 	
+	public MissionType GetPrevMission()
+	{
+		return this.m_prevMission;
+	}
+	
+	public void SetPrevMission(MissionType prevMission)
+	{
+		this.m_prevMission = prevMission;
+	}
+	
 	public bool HasMission(MissionType mission)
 	{
 		return this.m_mission == mission ? true : false;
@@ -427,7 +437,7 @@ methodmap Player
 	
 	public void SetMission(MissionType mission)
 	{
-		this.m_prevMission = this.m_mission;
+		this.SetPrevMission(this.m_mission);
 		this.m_mission = mission;
 		
 		// Temp hack - some missions play an idle loop

@@ -429,7 +429,7 @@ public MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		Player(newPlayer).StartIdleSound();
 		
 		// Add our items first, they'll get replaced below by the normal MvM items if any are needed
-		if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(newPlayer) == TFTeam_Invaders)
+		if (GameRules_IsMannVsMachineMode() && (TF2_GetClientTeam(newPlayer) == TFTeam_Invaders))
 		{
 			// Apply the Rome 2 promo items to each player. They'll be 
 			// filtered out for clients that do not have Romevision.

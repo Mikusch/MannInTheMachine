@@ -216,10 +216,11 @@ public MRESReturn DHookCallback_RestoreCheckpoint_Pre(int populator)
 	if (!g_bInWaitingForPlayers)
 	{
 		// The populator calls this multiple times, but we only want it once...
-		if ((g_restoreCheckpointTime + 0.1) < GetGameTime())
+		if (g_flNextRestoreCheckpointTime < GetGameTime())
 		{
-			g_restoreCheckpointTime = GetGameTime();
 			SelectNewDefenders();
+			
+			g_flNextRestoreCheckpointTime = GetGameTime() + 0.1;
 		}
 	}
 	

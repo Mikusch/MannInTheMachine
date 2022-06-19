@@ -469,7 +469,8 @@ bool g_bInWaitingForPlayers;
 StringMap g_offsets;
 bool g_bAllowTeamChange;
 bool g_bForceFriendlyFire;
-float g_restoreCheckpointTime;
+float g_flNextRestoreCheckpointTime;
+float g_flNextClientTick;
 
 // Plugin ConVars
 ConVar mitm_developer;
@@ -500,6 +501,7 @@ ConVar mp_tournament_blueteamname;
 ConVar mp_waitingforplayers_time;
 ConVar sv_stepsize;
 ConVar phys_pushscale;
+ConVar nb_update_frequency;
 
 #include "mitm/tf_bot_squad.sp"
 #include "mitm/data.sp"
@@ -568,6 +570,7 @@ public void OnPluginStart()
 	mp_waitingforplayers_time = FindConVar("mp_waitingforplayers_time");
 	sv_stepsize = FindConVar("sv_stepsize");
 	phys_pushscale = FindConVar("phys_pushscale");
+	nb_update_frequency = FindConVar("nb_update_frequency");
 	
 	Console_Initialize();
 	Events_Initialize();
@@ -645,7 +648,8 @@ public void OnMapStart()
 	
 	g_hWaitingForPlayersTimer = null;
 	g_bInWaitingForPlayers = true;
-	g_restoreCheckpointTime = 0.0;
+	g_flNextRestoreCheckpointTime = 0.0;
+	g_flNextClientTick = 0.0;
 	
 	DHooks_HookGamerules();
 	
@@ -722,16 +726,21 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 
 public void OnGameFrame()
 {
-	for (int client = 1; client <= MaxClients; client++)
+	if (g_flNextClientTick < GetGameTime())
 	{
-		if (!IsClientInGame(client))
-			continue;
+		for (int client = 1; client <= MaxClients; client++)
+		{
+			if (!IsClientInGame(client))
+				continue;
+			
+			OnClientTick(client);
+		}
 		
-		OnClientGameFrame(client);
+		g_flNextClientTick = GetGameTime() + nb_update_frequency.FloatValue;
 	}
 }
 
-public void OnClientGameFrame(int client)
+public void OnClientTick(int client)
 {
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{

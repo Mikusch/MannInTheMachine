@@ -117,6 +117,15 @@ public Action CommandListener_Build(int client, const char[] command, int argc)
 					return Plugin_Handled;
 				}
 			}
+			// Sapper: Actually a teleporter exit for Engineers, so treat it that way
+			case TFObject_Sapper:
+			{
+				if (TF2_GetPlayerClass(client) == TFClass_Engineer && GetNestTeleporterHint(client) == -1)
+				{
+					PrintCenterText(client, "%t", "Engineer_NotAllowedToBuild_NoHint");
+					return Plugin_Handled;
+				}
+			}
 		}
 	}
 	

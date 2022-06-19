@@ -66,6 +66,7 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CTFPlayer::CheckInstantLoadoutRespawn", DHookCallback_CheckInstantLoadoutRespawn_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayer::ShouldForceAutoTeam", DHookCallback_ShouldForceAutoTeam_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayer::DoClassSpecialSkill", DHookCallback_DoClassSpecialSkill_Pre);
+	CreateDynamicDetour(gamedata, "CTFPlayer::CanBeForcedToLaugh", DHookCallback_CanBeForcedToLaugh_Pre, DHookCallback_CanBeForcedToLaugh_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::RemoveAllOwnedEntitiesFromWorld", DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre);
 	CreateDynamicDetour(gamedata, "CWeaponMedigun::AllowedToHealTarget", DHookCallback_AllowedToHealTarget_Pre);
 	CreateDynamicDetour(gamedata, "CBaseObject::FindSnapToBuildPos", DHookCallback_FindSnapToBuildPos_Pre, DHookCallback_FindSnapToBuildPos_Post);
@@ -1115,6 +1116,20 @@ public MRESReturn DHookCallback_DoClassSpecialSkill_Pre(int player, DHookReturn 
 	}
 	
 	return MRES_Ignored;
+}
+
+public MRESReturn DHookCallback_CanBeForcedToLaugh_Pre(int player, DHookReturn ret)
+{
+	SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
+	
+	return MRES_Handled;
+}
+
+public MRESReturn DHookCallback_CanBeForcedToLaugh_Post(int player, DHookReturn ret)
+{
+	SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
+	
+	return MRES_Handled;
 }
 
 public MRESReturn DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre(int player, DHookParam params)

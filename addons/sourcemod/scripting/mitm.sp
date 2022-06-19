@@ -414,6 +414,14 @@ enum DifficultyType
 	NUM_DIFFICULTY_LEVELS
 };
 
+enum HintType
+{
+	HINT_INVALID = -1,
+	HINT_TELEPORTER_EXIT,
+	HINT_SENTRYGUN,
+	HINT_ENGINEER_NEST,
+};
+
 enum struct CountdownTimer
 {
 	float timestamp;
@@ -625,6 +633,9 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CCurrencyPack::m_bTouched");
 		
 		SetOffset(gamedata, "CTakeDamageInfo::m_bForceFriendlyFire");
+		SetOffset(gamedata, "CTFNavArea::m_distanceToBombTarget");
+		SetOffset(gamedata, "CBaseTFBotHintEntity::m_isDisabled");
+		SetOffset(gamedata, "BombInfo_t::m_flMaxBattleFront");
 		
 		delete gamedata;
 	}

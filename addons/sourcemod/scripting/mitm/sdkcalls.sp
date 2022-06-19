@@ -48,6 +48,9 @@ static Handle g_SDKCallClip1;
 static Handle g_SDKCallFindSpawnLocation;
 static Handle g_SDKCallGetSentryBusterDamageAndKillThreshold;
 static Handle g_SDKCallCTFBotSpawnerSpawn;
+static Handle g_SDKCallGetBombInfo;
+static Handle g_SDKCallIsStaleNest;
+static Handle g_SDKCallDetonateStaleNest;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
@@ -90,6 +93,9 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallFindSpawnLocation = PrepSDKCall_FindSpawnLocation(gamedata);
 	g_SDKCallGetSentryBusterDamageAndKillThreshold = PrepSDKCall_GetSentryBusterDamageAndKillThreshold(gamedata);
 	g_SDKCallCTFBotSpawnerSpawn = PrepSDKCall_IPopulationSpawnerSpawn(gamedata);
+	g_SDKCallGetBombInfo = PrepSDKCall_GetBombInfo(gamedata);
+	g_SDKCallIsStaleNest = PrepSDKCall_IsStaleNest(gamedata);
+	g_SDKCallDetonateStaleNest = PrepSDKCall_DetonateStaleNest(gamedata);
 }
 
 static Handle PrepSDKCall_GetClassIcon_Linux(GameData gamedata)
@@ -526,6 +532,45 @@ static Handle PrepSDKCall_RemoveObject(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_GetBombInfo(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Static);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "GetBombInfo");
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: GetBombInfo");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_IsStaleNest(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFBotHintEngineerNest::IsStaleNest");
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFBotHintEngineerNest::IsStaleNest");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_DetonateStaleNest(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFBotHintEngineerNest::DetonateStaleNest");
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFBotHintEngineerNest::DetonateStaleNest");
+	
+	return call;
+}
+
 Address SDKCall_GetClassIcon(any spawner, int nSpawnNum = -1)
 {
 	Address result;
@@ -737,4 +782,26 @@ void SDKCall_RemoveObject(int player, int obj)
 {
 	if (g_SDKCallRemoveObject)
 		SDKCall(g_SDKCallRemoveObject, player, obj);
+}
+
+bool SDKCall_GetBombInfo(any pBombInfo = Address_Null)
+{
+	if (g_SDKCallGetBombInfo)
+		return SDKCall(g_SDKCallGetBombInfo, pBombInfo);
+	
+	return false;
+}
+
+bool SDKCall_IsStaleNest(int nest)
+{
+	if (g_SDKCallIsStaleNest)
+		return SDKCall(g_SDKCallIsStaleNest, nest);
+	
+	return false;
+}
+
+void SDKCall_DetonateStaleNest(int nest)
+{
+	if (g_SDKCallDetonateStaleNest)
+		SDKCall(g_SDKCallDetonateStaleNest, nest);
 }

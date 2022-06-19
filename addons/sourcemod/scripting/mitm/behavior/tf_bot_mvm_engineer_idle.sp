@@ -25,6 +25,7 @@ static int m_nTeleportedCount[MAXPLAYERS + 1];
 static bool m_bTeleportedToHint[MAXPLAYERS + 1];
 static bool m_bTriedToDetonateStaleNest[MAXPLAYERS + 1];
 static CountdownTimer m_findHintTimer[MAXPLAYERS + 1];
+static CountdownTimer m_reevaluateNestTimer[MAXPLAYERS + 1];
 
 void CTFBotMvMEngineerIdle_OnStart(int me)
 {
@@ -44,7 +45,7 @@ bool CTFBotMvMEngineerIdle_Update(int me)
 		return false;
 	}
 	
-	if (m_sentryHint[me] == -1)
+	if (m_sentryHint[me] == -1 || ShouldAdvanceNestSpot(me))
 	{
 		if (m_findHintTimer[me].HasStarted() && !m_findHintTimer[me].IsElapsed())
 		{
@@ -90,14 +91,40 @@ bool CTFBotMvMEngineerIdle_Update(int me)
 			CTFBotMvMEngineerTeleportSpawn_Create(me, m_nestHint[me], bFirstTeleportSpawn);
 			return true;
 		}
+		
+		int mySentry = -1;
+		if (m_sentryHint[me] != -1)
+		{
+			int owner = GetEntPropEnt(m_sentryHint[me], Prop_Send, "m_hOwnerEntity");
+			if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
+			{
+				mySentry = owner;
+			}
+			
+			if (mySentry == -1)
+			{
+				// check if there's a stale object on the hint
+				if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
+				{
+					mySentry = owner;
+					AcceptEntityInput(mySentry, "SetBuilder", me);
+				}
+				else
+				{
+					return true;
+				}
+			}
+		}
 	}
+	
+	TryToDetonateStaleNest(me);
 	
 	return true;
 }
 
 static void TakeOverStaleNest(int hint, int me)
 {
-	if (hint != -1 && OwnerObjectHasNoOwner(hint))
+	if (hint != -1 && CBaseTFBotHintEntity(hint).OwnerObjectHasNoOwner())
 	{
 		int obj = GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity");
 		SetEntityOwner(obj, me);
@@ -105,24 +132,93 @@ static void TakeOverStaleNest(int hint, int me)
 	}
 }
 
-static bool OwnerObjectHasNoOwner(int hint)
+static bool ShouldAdvanceNestSpot(int me)
 {
-	int owner = GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity");
-	if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
+	if (m_nestHint[me] == -1)
 	{
-		if (GetEntPropEnt(owner, Prop_Send, "m_hBuilder") == -1)
+		return false;
+	}
+	
+	if (!m_reevaluateNestTimer[me].HasStarted())
+	{
+		m_reevaluateNestTimer[me].Start(5.0);
+		return false;
+	}
+	
+	for (int i = 0; i < TF2Util_GetPlayerObjectCount(me); ++i)
+	{
+		int obj = TF2Util_GetPlayerObject(me, i);
+		if (obj != -1 && GetEntProp(obj, Prop_Data, "m_iHealth") < GetEntProp(obj, Prop_Data, "m_iMaxHealth"))
 		{
-			return true;
+			// if the nest is under attack, don't advance the nest
+			m_reevaluateNestTimer[me].Start(5.0);
+			return false;
 		}
-		else
+	}
+	
+	if (m_reevaluateNestTimer[me].IsElapsed())
+	{
+		m_reevaluateNestTimer[me].Invalidate();
+	}
+	
+	BombInfo_t bombInfo = view_as<BombInfo_t>(Malloc(20)); // sizeof(BombInfo_t)
+	if (SDKCall_GetBombInfo(bombInfo))
+	{
+		if (m_nestHint[me] != -1)
 		{
-			if (TF2_GetPlayerClass(GetEntPropEnt(owner, Prop_Send, "m_hBuilder")) != TFClass_Engineer)
+			float origin[3];
+			GetEntPropVector(m_nestHint[me], Prop_Data, "m_vecAbsOrigin", origin);
+			
+			CNavArea hintArea = TheNavMesh.GetNearestNavArea(origin, false, 1000.0);
+			if (hintArea)
 			{
-				LogError("Object has an owner that's not engineer.");
+				float hintDistanceToTarget = Deref(hintArea + GetOffset("CTFNavArea::m_distanceToBombTarget"));
+				
+				bool bShouldAdvance = (hintDistanceToTarget > bombInfo.m_flMaxBattleFront);
+				
+				return bShouldAdvance;
 			}
 		}
 	}
+	
 	return false;
+}
+
+static void TryToDetonateStaleNest(int me)
+{
+	if (m_bTriedToDetonateStaleNest[me])
+		return;
+	
+	// wait until the engy finish building his nest
+	if ((m_sentryHint[me] != -1 && !CBaseTFBotHintEntity(m_sentryHint[me]).OwnerObjectFinishBuilding()) ||
+		(m_teleporterHint[me] != -1 && !CBaseTFBotHintEntity(m_teleporterHint[me]).OwnerObjectFinishBuilding()))
+		return;
+	
+	ArrayList activeEngineerNest = new ArrayList();
+	
+	// collect all existing and active teleporter hints
+	int hint = MaxClients + 1;
+	while ((hint = FindEntityByClassname(hint, "bot_hint_engineer_nest*")) != -1)
+	{
+		if (CBaseTFBotHintEntity(hint).IsEnabled() && GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity") == -1)
+		{
+			activeEngineerNest.Push(hint);
+		}
+	}
+	
+	// try to detonate stale nest that's out of range, when engineer finished building his nest
+	for (int i = 0; i < activeEngineerNest.Length; ++i)
+	{
+		int nest = activeEngineerNest.Get(i);
+		if (SDKCall_IsStaleNest(nest))
+		{
+			SDKCall_DetonateStaleNest(nest);
+		}
+	}
+	
+	m_bTriedToDetonateStaleNest[me] = true;
+	
+	delete activeEngineerNest;
 }
 
 int GetNestSentryHint(int player)

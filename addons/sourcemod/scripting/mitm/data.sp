@@ -1428,3 +1428,78 @@ CPopulationManager GetPopulationManager()
 	// There is only ever one population manager, so this should be safe...
 	return CPopulationManager(FindEntityByClassname(MaxClients + 1, "info_populator"));
 }
+
+methodmap BombInfo_t
+{
+	public BombInfo_t(Address pThis)
+	{
+		return view_as<BombInfo_t>(pThis);
+	}
+	
+	property float m_flMaxBattleFront
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("BombInfo_t::m_flMaxBattleFront"));
+		}
+	}
+}
+
+methodmap CBaseTFBotHintEntity
+{
+	public CBaseTFBotHintEntity(int entity)
+	{
+		return view_as<CBaseTFBotHintEntity>(entity);
+	}
+	
+	property int _index
+	{
+		public get()
+		{
+			return view_as<int>(this);
+		}
+	}
+	
+	property bool m_isDisabled
+	{
+		public get()
+		{
+			return GetEntData(this._index, GetOffset("CBaseTFBotHintEntity::m_isDisabled"), 1) != 0;
+		}
+	}
+	
+	public bool IsEnabled()
+	{
+		return !this.m_isDisabled;
+	}
+	
+	public bool OwnerObjectHasNoOwner()
+	{
+		int owner = GetEntPropEnt(this._index, Prop_Send, "m_hOwnerEntity");
+		if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
+		{
+			if (GetEntPropEnt(owner, Prop_Send, "m_hBuilder") == -1)
+			{
+				return true;
+			}
+			else
+			{
+				if (TF2_GetPlayerClass(GetEntPropEnt(owner, Prop_Send, "m_hBuilder")) != TFClass_Engineer)
+				{
+					LogError("Object has an owner that's not engineer.");
+				}
+			}
+		}
+		return false;
+	}
+	
+	public bool OwnerObjectFinishBuilding()
+	{
+		int owner = GetEntPropEnt(this._index, Prop_Send, "m_hOwnerEntity");
+		if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
+		{
+			return !GetEntProp(owner, Prop_Send, "m_bBuilding");
+		}
+		return false;
+	}
+}

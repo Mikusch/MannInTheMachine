@@ -231,6 +231,16 @@
 				"linux"		"@_ZN18CTraceFilterObject15ShouldHitEntityEP13IHandleEntityi"
 				"windows"	"\x55\x8B\xEC\x51\x8B\xC1\x8B\x0D\x2A\x2A\x2A\x2A"
 			}
+			"CTFBotHintEngineerNest::IsStaleNest"
+			{
+				"linux"		"@_ZNK22CTFBotHintEngineerNest11IsStaleNestEv"
+				"windows"	"\x56\x57\x8B\xF9\x33\xF6\x39\xB7\x70\x03\x00\x00"
+			}
+			"CTFBotHintEngineerNest::DetonateStaleNest"
+			{
+				"linux"		"@_ZN22CTFBotHintEngineerNest17DetonateStaleNestEv"
+				"windows"	"\x56\x8B\xF1\x8D\x86\x64\x03\x00\x00"
+			}
 			"DoTeleporterOverride"
 			{
 				"linux"		"@_Z20DoTeleporterOverrideP11CBaseEntityR6Vectorb"
@@ -240,6 +250,11 @@
 			{
 				"linux"		"@_Z15OnBotTeleportedP6CTFBot"
 				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x83\xEC\x40\x56\x83\xF8\xFF"
+			}
+			"GetBombInfo"
+			{
+				"linux"		"@_Z11GetBombInfoP10BombInfo_t"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x20\x8B\x15\x2A\x2A\x2A\x2A"
 			}
 		}
 		"Offsets"
@@ -523,6 +538,21 @@
 			{
 				"linux"		"92"
 				"windows"	"92"
+			}
+			"CTFNavArea::m_distanceToBombTarget"
+			{
+				"linux"		"552"
+				"windows"	"548"
+			}
+			"BombInfo_t::m_flMaxBattleFront"
+			{
+				"linux"		"16"
+				"windows"	"16"
+			}
+			"CBaseTFBotHintEntity::m_isDisabled"
+			{
+				"linux"		"880"
+				"windows"	"860"
 			}
 		}
 		"Functions"

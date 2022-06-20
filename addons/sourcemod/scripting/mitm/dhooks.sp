@@ -1559,7 +1559,7 @@ public MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret
 {
 	int entity = params.Get(2);
 	
-	if (0 < entity < MaxClients && TF2_GetClientTeam(entity) == TFTeam_Invaders)
+	if (0 < entity <= MaxClients && TF2_GetClientTeam(entity) == TFTeam_Invaders)
 	{
 		bool m_bRequireAllTags = GetEntProp(filter, Prop_Data, "m_bRequireAllTags") != 0;
 		

@@ -739,25 +739,27 @@ public void OnGameFrame()
 {
 	if (g_flNextClientTick < GetGameTime())
 	{
+		float flInterval = nb_update_frequency.FloatValue;
+		
 		for (int client = 1; client <= MaxClients; client++)
 		{
 			if (!IsClientInGame(client))
 				continue;
 			
-			OnClientTick(client);
+			OnClientTick(client, flInterval);
 		}
 		
-		g_flNextClientTick = GetGameTime() + nb_update_frequency.FloatValue;
+		g_flNextClientTick = GetGameTime() + flInterval;
 	}
 }
 
-public void OnClientTick(int client)
+public void OnClientTick(int client, float flInterval)
 {
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
 		if (Player(client).HasTag("bot_gatebot"))
 		{
-			SetHudTextParams(0.05, 0.05, 0.1, 255, 255, 255, 255, _, 0.0, 0.0, 0.0);
+			SetHudTextParams(0.05, 0.05, flInterval, 255, 255, 255, 255);
 			ShowSyncHudText(client, g_InfoHudSync, "%t", "Invader_GateBot");
 		}
 		
@@ -815,7 +817,7 @@ public void OnClientTick(int client)
 					else if (flTimeLeft <= 15.0)
 					{
 						// motivate them to leave their spawn
-						SetHudTextParams(-1.0, 0.7, 0.1, 255, 255, 255, 255, _, 0.0, 0.0, 0.0);
+						SetHudTextParams(-1.0, 0.7, flInterval, 255, 255, 255, 255);
 						ShowSyncHudText(client, g_WarningHudSync, "%t", "Invader_HurryOutOfSpawn", flTimeLeft);
 					}
 				}

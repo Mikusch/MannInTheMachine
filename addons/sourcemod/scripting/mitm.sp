@@ -603,6 +603,7 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CSquadSpawner::m_bShouldPreserveSquad");
 		SetOffset(gamedata, "CMissionPopulator::m_mission");
 		SetOffset(gamedata, "CMissionPopulator::m_cooldownDuration");
+		SetOffset(gamedata, "CWaveSpawnPopulator::m_bSupportWave");
 		SetOffset(gamedata, "CWaveSpawnPopulator::m_bLimitedSupport");
 		SetOffset(gamedata, "CPopulationManager::m_canBotsAttackWhileInSpawnRoom");
 		SetOffset(gamedata, "CPopulationManager::m_bSpawningPaused");
@@ -624,6 +625,7 @@ public void OnPluginStart()
 		
 		SetOffset(gamedata, "CTFPlayer::m_flSpawnTime");
 		SetOffset(gamedata, "CTFPlayer::m_bIsMissionEnemy");
+		SetOffset(gamedata, "CTFPlayer::m_bIsSupportEnemy");
 		SetOffset(gamedata, "CTFPlayer::m_bIsLimitedSupportEnemy");
 		SetOffset(gamedata, "CTFPlayer::m_pWaveSpawnPopulator");
 		SetOffset(gamedata, "CTFPlayer::m_accumulatedSentryGunDamageDealt");

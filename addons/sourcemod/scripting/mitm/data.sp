@@ -1035,6 +1035,16 @@ methodmap Player
 		return true;
 	}
 	
+	public void MarkAsSupportEnemy()
+	{
+		SetEntData(this._client, GetOffset("CTFPlayer::m_bIsSupportEnemy"), true, 1);
+	}
+	
+	public void MarkAsLimitedSupportEnemy()
+	{
+		SetEntData(this._client, GetOffset("CTFPlayer::m_bIsLimitedSupportEnemy"), true, 1);
+	}
+	
 	public CTFBotSquad GetSquad()
 	{
 		return this.m_squad;
@@ -1511,5 +1521,23 @@ methodmap CBaseTFBotHintEntity
 			return !GetEntProp(owner, Prop_Send, "m_bBuilding");
 		}
 		return false;
+	}
+}
+
+methodmap CWaveSpawnPopulator
+{
+	public CWaveSpawnPopulator(Address pThis)
+	{
+		return view_as<CWaveSpawnPopulator>(pThis);
+	}
+	
+	public bool IsSupportWave()
+	{
+		return Deref(this + GetOffset("CWaveSpawnPopulator::m_bSupportWave"), NumberType_Int8);
+	}
+	
+	public bool IsLimitedSupportWave()
+	{
+		return Deref(this + GetOffset("CWaveSpawnPopulator::m_bLimitedSupport"), NumberType_Int8);
 	}
 }

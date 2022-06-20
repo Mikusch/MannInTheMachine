@@ -369,6 +369,11 @@
 				"linux"		"8820"
 				"windows"	"8816"
 			}
+			"CTFPlayer::m_bIsSupportEnemy"
+			{
+				"linux"		"8821"
+				"windows"	"8817"
+			}
 			"CTFPlayer::m_bIsLimitedSupportEnemy"
 			{
 				"linux"		"8822"
@@ -463,6 +468,11 @@
 			{
 				"linux"		"60"
 				"windows"	"60"
+			}
+			"CWaveSpawnPopulator::m_bSupportWave"
+			{
+				"linux"		"1228"
+				"windows"	"1228"
 			}
 			"CWaveSpawnPopulator::m_bLimitedSupport"
 			{

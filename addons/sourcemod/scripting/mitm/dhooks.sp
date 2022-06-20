@@ -627,10 +627,14 @@ public MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 		// Allows client UI to know if a specific spawner is active
 		SetMannVsMachineWaveClassActive(GetEntData(player, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")));
 		
-		bool bLimitedSupport = Deref(pThis + GetOffset("CWaveSpawnPopulator::m_bLimitedSupport"), NumberType_Int8);
-		if (bLimitedSupport)
+		if (CWaveSpawnPopulator(pThis).IsSupportWave())
 		{
-			SetEntData(player, GetOffset("CTFPlayer::m_bIsLimitedSupportEnemy"), true, 1);
+			Player(player).MarkAsSupportEnemy();
+		}
+		
+		if (CWaveSpawnPopulator(pThis).IsLimitedSupportWave())
+		{
+			Player(player).MarkAsLimitedSupportEnemy();
 		}
 		
 		// what bot should do after spawning at teleporter exit

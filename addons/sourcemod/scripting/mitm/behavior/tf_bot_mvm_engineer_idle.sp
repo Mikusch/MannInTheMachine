@@ -161,7 +161,7 @@ static bool ShouldAdvanceNestSpot(int me)
 		m_reevaluateNestTimer[me].Invalidate();
 	}
 	
-	BombInfo_t bombInfo = view_as<BombInfo_t>(Malloc(20)); // sizeof(BombInfo_t)
+	BombInfo_t bombInfo = malloc(20); // sizeof(BombInfo_t)
 	if (SDKCall_GetBombInfo(bombInfo))
 	{
 		if (m_nestHint[me] != -1)
@@ -180,6 +180,7 @@ static bool ShouldAdvanceNestSpot(int me)
 			}
 		}
 	}
+	free(bombInfo);
 	
 	return false;
 }

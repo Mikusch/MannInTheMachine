@@ -88,7 +88,7 @@ void DHooks_Initialize(GameData gamedata)
 	g_DHookFPlayerCanTakeDamage = CreateDynamicHook(gamedata, "CTFGameRules::FPlayerCanTakeDamage");
 }
 
-void DHooks_HookClient(int client)
+void DHooks_OnClientPutInServer(int client)
 {
 	if (g_DHookEventKilled)
 	{

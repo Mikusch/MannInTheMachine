@@ -685,11 +685,10 @@ public void OnMapStart()
 
 public void OnClientPutInServer(int client)
 {
-	DHooks_HookClient(client);
+	DHooks_OnClientPutInServer(client);
+	SDKHooks_OnClientPutInServer(client);
 	
 	Player(client).Reset();
-	
-	SDKHooks_OnClientPutInServer(client);
 	
 	if (AreClientCookiesCached(client))
 	{

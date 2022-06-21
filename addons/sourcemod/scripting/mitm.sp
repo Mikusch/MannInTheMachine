@@ -810,7 +810,7 @@ public void OnClientTick(int client, float flInterval)
 					if (TF2_IsPlayerInCondition(client, TFCond_Dazed))
 					{
 						// If we are stunned in our spawn, extend the time
-						Player(client).m_flRequiredSpawnLeaveTime += GetGameFrameTime();
+						Player(client).m_flRequiredSpawnLeaveTime += flInterval;
 					}
 					
 					float flTimeLeft = Player(client).m_flRequiredSpawnLeaveTime - GetGameTime();

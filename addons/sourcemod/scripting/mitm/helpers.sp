@@ -351,28 +351,6 @@ void RemoveEntityGlow(int entity)
 	}
 }
 
-Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)
-{
-	int target = GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity");
-	
-	if (Player(client).HasMission(MISSION_DESTROY_SENTRIES) && target == Player(client).GetMissionTarget())
-	{
-		// show the glow of our target sentry
-		return Plugin_Continue;
-	}
-	
-	if (Player(client).IsInASquad())
-	{
-		if (client != target && Player(client).GetSquad().IsLeader(target))
-		{
-			// show the glow of our squad leader
-			return Plugin_Continue;
-		}
-	}
-	
-	return Plugin_Handled;
-}
-
 int Compare(any val1, any val2)
 {
 	if (val1 > val2)

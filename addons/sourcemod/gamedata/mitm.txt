@@ -304,6 +304,11 @@
 				"linux"		"347"
 				"windows"	"341"
 			}
+			"CTFGrenadePipebombProjectile::GetLiveTime"
+			{
+				"linux"		"254"
+				"windows"	"253"
+			}
 			"CItem::ComeToRest"
 			{
 				"linux"		"230"
@@ -568,6 +573,11 @@
 			{
 				"linux"		"880"
 				"windows"	"860"
+			}
+			"CTFGrenadePipebombProjectile::m_flCreationTime"
+			{
+				"linux"		"1332"
+				"windows"	"1316"
 			}
 		}
 		"Functions"

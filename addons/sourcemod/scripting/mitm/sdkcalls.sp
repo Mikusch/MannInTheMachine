@@ -51,6 +51,7 @@ static Handle g_SDKCallCTFBotSpawnerSpawn;
 static Handle g_SDKCallGetBombInfo;
 static Handle g_SDKCallIsStaleNest;
 static Handle g_SDKCallDetonateStaleNest;
+static Handle g_SDKCallGetLiveTime;
 
 void SDKCalls_Initialize(GameData gamedata)
 {
@@ -96,6 +97,7 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallGetBombInfo = PrepSDKCall_GetBombInfo(gamedata);
 	g_SDKCallIsStaleNest = PrepSDKCall_IsStaleNest(gamedata);
 	g_SDKCallDetonateStaleNest = PrepSDKCall_DetonateStaleNest(gamedata);
+	g_SDKCallGetLiveTime = PrepSDKCall_GetLiveTime(gamedata);
 }
 
 static Handle PrepSDKCall_GetClassIcon_Linux(GameData gamedata)
@@ -571,6 +573,19 @@ static Handle PrepSDKCall_DetonateStaleNest(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_GetLiveTime(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTFGrenadePipebombProjectile::GetLiveTime");
+	PrepSDKCall_SetReturnInfo(SDKType_Float, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFGrenadePipebombProjectile::GetLiveTime");
+	
+	return call;
+}
+
 Address SDKCall_GetClassIcon(any spawner, int nSpawnNum = -1)
 {
 	Address result;
@@ -804,4 +819,12 @@ void SDKCall_DetonateStaleNest(int nest)
 {
 	if (g_SDKCallDetonateStaleNest)
 		SDKCall(g_SDKCallDetonateStaleNest, nest);
+}
+
+float SDKCall_GetLiveTime(int grenade)
+{
+	if (g_SDKCallGetLiveTime)
+		return SDKCall(g_SDKCallGetLiveTime, grenade);
+	
+	return 0.0;
 }

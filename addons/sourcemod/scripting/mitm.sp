@@ -532,6 +532,7 @@ ConVar nb_update_frequency;
 #include "mitm/queue.sp"
 #include "mitm/menus.sp"
 #include "mitm/sdkcalls.sp"
+#include "mitm/sdkhooks.sp"
 
 public Plugin myinfo =
 {
@@ -638,6 +639,7 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CTFNavArea::m_distanceToBombTarget");
 		SetOffset(gamedata, "CBaseTFBotHintEntity::m_isDisabled");
 		SetOffset(gamedata, "BombInfo_t::m_flMaxBattleFront");
+		SetOffset(gamedata, "CTFGrenadePipebombProjectile::m_flCreationTime");
 		
 		delete gamedata;
 	}
@@ -681,18 +683,13 @@ public void OnMapStart()
 	delete directory;
 }
 
-public void OnEntityDestroyed(int entity)
-{
-	Entity(entity).Delete();
-}
-
 public void OnClientPutInServer(int client)
 {
 	DHooks_HookClient(client);
 	
 	Player(client).Reset();
 	
-	SDKHook(client, SDKHook_OnTakeDamageAlive, OnClientTakeDamageAlive);
+	SDKHooks_OnClientPutInServer(client);
 	
 	if (AreClientCookiesCached(client))
 	{
@@ -718,6 +715,12 @@ public void OnClientCookiesCached(int client)
 public void OnEntityCreated(int entity, const char[] classname)
 {
 	DHooks_OnEntityCreated(entity, classname);
+	SDKHooks_OnEntityCreated(entity, classname);
+}
+
+public void OnEntityDestroyed(int entity)
+{
+	Entity(entity).Delete();
 }
 
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int & subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
@@ -1252,39 +1255,4 @@ void FireWeaponAtEnemy(int client, int &buttons)
 			TF2Attrib_RemoveByName(weapon, "provide on active");
 		}
 	}
-}
-
-Action OnClientTakeDamageAlive(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
-{
-	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
-	{
-		// Don't let Sentry Busters die until they've done their spin-up
-		if (Player(victim).HasMission(MISSION_DESTROY_SENTRIES))
-		{
-			if ((float(GetEntProp(victim, Prop_Data, "m_iHealth")) - damage) <= 0.0)
-			{
-				CTFBotMissionSuicideBomber_OnKilled(victim);
-				
-				SetEntityHealth(victim, 1);
-				return Plugin_Handled;
-			}
-		}
-		
-		// Sentry Busters hurt teammates when they explode.
-		// Force damage value when the victim is a giant.
-		if (0 < attacker <= MaxClients && TF2_GetClientTeam(attacker) == TFTeam_Invaders)
-		{
-			if ((attacker != victim) &&
-				Player(attacker).GetPrevMission() == MISSION_DESTROY_SENTRIES &&
-				g_bForceFriendlyFire &&
-				TF2_GetClientTeam(victim) == TF2_GetClientTeam(attacker) &&
-				GetEntProp(victim, Prop_Send, "m_bIsMiniBoss"))
-			{
-				damage = 600.0;
-				return Plugin_Changed;
-			}
-		}
-	}
-	
-	return Plugin_Continue;
 }

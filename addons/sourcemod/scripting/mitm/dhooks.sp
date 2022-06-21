@@ -335,7 +335,6 @@ public MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 			team = TFTeam_Invaders;
 		}
 		
-		// TODO: CTFBot::ChangeTeam does a little bit more, like making team switches silent
 		TF2_ChangeClientTeam(newPlayer, team);
 		
 		SetEntProp(newPlayer, Prop_Data, "m_bAllowInstantSpawn", true);

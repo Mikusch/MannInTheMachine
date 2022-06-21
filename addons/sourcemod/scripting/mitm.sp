@@ -955,7 +955,9 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 		{
 			case TFCond_MVMBotRadiowave:
 			{
-				// apply gatebot stun
+				// apply gatebot effects
+				TE_TFParticleEffect("bot_radio_waves", .attachType = PATTACH_POINT_FOLLOW, .entity = client, .attachPoint = LookupEntityAttachment(client, "head"));
+				
 				float flDuration = TF2Util_GetPlayerConditionDuration(client, TFCond_MVMBotRadiowave);
 				TF2_StunPlayer(client, flDuration, 1.0, TF_STUNFLAG_SLOWDOWN | TF_STUNFLAG_BONKSTUCK | TF_STUNFLAG_NOSOUNDOREFFECT);
 			}
@@ -963,6 +965,21 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 			{
 				// no spawn outline for robots
 				TF2_RemoveCondition(client, condition);
+			}
+		}
+	}
+}
+
+public void TF2_OnConditionRemoved(int client, TFCond condition)
+{
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	{
+		switch (condition)
+		{
+			case TFCond_MVMBotRadiowave:
+			{
+				SetVariantString("ParticleEffectStop");
+				AcceptEntityInput(client, "DispatchEffect");
 			}
 		}
 	}

@@ -336,13 +336,13 @@
 			}
 			"CTFPlayer::IsAllowedToPickUpFlag"
 			{
-				"linux"		"480"
-				"windows"	"479"
+				"linux"		"481"
+				"windows"	"480"
 			}
 			"CBasePlayer::EntSelectSpawnPoint"
 			{
-				"linux"		"400"
-				"windows"	"399"
+				"linux"		"401"
+				"windows"	"400"
 			}
 			"CTFItem::PickUp"
 			{

@@ -335,6 +335,9 @@ enum AttributeType
 	PROJECTILE_SHIELD			= 1<<27,				// medic projectile shield
 };
 
+//-----------------------------------------------------------------------------
+// Purpose: Slots for items within loadouts
+//-----------------------------------------------------------------------------
 enum
 {
 	LOADOUT_POSITION_INVALID = -1,
@@ -754,6 +757,21 @@ public void OnGameFrame()
 		}
 		
 		g_flNextClientTick = GetGameTime() + flInterval;
+	}
+	
+	// In rare cases, the bomb can get stuck on spectators after a wave ends.
+	// Look for flags that aren't home and reset them.
+	if (GameRules_GetRoundState() == RoundState_BetweenRounds)
+	{
+		int flag = MaxClients + 1;
+		while ((flag = FindEntityByClassname(flag, "item_teamflag")) != -1)
+		{
+			if (GetEntProp(flag, Prop_Send, "m_nFlagStatus") != TF_FLAGINFO_HOME)
+			{
+				// flag is not home - reset!
+				AcceptEntityInput(flag, "ForceReset");
+			}
+		}
 	}
 }
 

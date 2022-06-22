@@ -1518,6 +1518,7 @@ public MRESReturn DHookCallback_EventKilled_Post(int player, DHookParam params)
 
 public MRESReturn DHookCallback_ShouldGib_Pre(int player, DHookReturn ret, DHookParam params)
 {
+	// only gib giant/miniboss
 	if (GameRules_IsMannVsMachineMode() && (GetEntProp(player, Prop_Send, "m_bIsMiniBoss") || GetEntPropFloat(player, Prop_Send, "m_flModelScale") > 1.0))
 	{
 		ret.Value = true;

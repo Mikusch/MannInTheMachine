@@ -29,6 +29,10 @@ void SDKHooks_OnEntityCreated(int entity, const char[] classname)
 	{
 		SDKHook(entity, SDKHook_SetTransmit, SDKHookCB_ProjectilePipeRemote_SetTransmit);
 	}
+	else if (StrEqual(classname, "entity_revive_marker"))
+	{
+		SDKHook(entity, SDKHook_SetTransmit, SDKHookCB_ReviveMarker_SetTransmit);
+	}
 }
 
 Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
@@ -79,6 +83,20 @@ Action SDKHookCB_ProjectilePipeRemote_SetTransmit(int entity, int client)
 			{
 				return Plugin_Handled;
 			}
+		}
+	}
+	
+	return Plugin_Continue;
+}
+
+Action SDKHookCB_ReviveMarker_SetTransmit(int entity, int client)
+{
+	if (view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum")) == TFTeam_Defenders)
+	{
+		if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+		{
+			// hide revive markers from invaders
+			return Plugin_Handled;
 		}
 	}
 	

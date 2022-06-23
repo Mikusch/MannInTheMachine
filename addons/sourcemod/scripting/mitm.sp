@@ -967,11 +967,11 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 
 public void TF2_OnConditionAdded(int client, TFCond condition)
 {
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	switch (condition)
 	{
-		switch (condition)
+		case TFCond_SpawnOutline:
 		{
-			case TFCond_SpawnOutline:
+			if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 			{
 				// no spawn outline for robots
 				TF2_RemoveCondition(client, condition);

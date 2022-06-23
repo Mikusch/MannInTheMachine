@@ -293,6 +293,12 @@ methodmap Player
 		}
 	}
 	
+	public bool IsInvader()
+	{
+		TFTeam team = TF2_GetClientTeam(this._client);
+		return (team == TFTeam_Spectator || team == TFTeam_Invaders) && !this.HasPreference(PREF_NO_SPAWNING);
+	}
+	
 	public int GetFlagTarget()
 	{
 		return this.m_hFollowingFlagTarget;

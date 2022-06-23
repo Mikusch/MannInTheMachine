@@ -73,7 +73,7 @@ public void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroad
 		// Remove any glows attached to us
 		RemoveEntityGlow(victim);
 	}
-	else if (0 < attacker <= MaxClients && TF2_GetClientTeam(victim) == TFTeam_Defenders && TF2_GetClientTeam(attacker) == TFTeam_Invaders)
+	else if (IsEntityClient(attacker) && TF2_GetClientTeam(victim) == TFTeam_Defenders && TF2_GetClientTeam(attacker) == TFTeam_Invaders)
 	{
 		bool isTaunting = !SDKCall_HasTheFlag(attacker) && GetRandomFloat(0.0, 100.0) <= tf_bot_taunt_victim_chance.FloatValue;
 		

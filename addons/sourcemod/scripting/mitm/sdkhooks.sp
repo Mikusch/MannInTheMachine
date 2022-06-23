@@ -53,7 +53,7 @@ Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int &inflic
 		
 		// Sentry Busters hurt teammates when they explode.
 		// Force damage value when the victim is a giant.
-		if (0 < attacker <= MaxClients && TF2_GetClientTeam(attacker) == TFTeam_Invaders)
+		if (IsEntityClient(attacker) && TF2_GetClientTeam(attacker) == TFTeam_Invaders)
 		{
 			if ((attacker != victim) &&
 				Player(attacker).GetPrevMission() == MISSION_DESTROY_SENTRIES &&
@@ -74,10 +74,10 @@ Action SDKHookCB_ProjectilePipeRemote_SetTransmit(int entity, int client)
 {
 	if (view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum")) == TFTeam_Defenders)
 	{
-		// Do not show defender stickybombs to the invading team (unless they disabled spawning)
-		if ((TF2_GetClientTeam(client) == TFTeam_Spectator || TF2_GetClientTeam(client) == TFTeam_Invaders) && !Player(client).HasPreference(PREF_NO_SPAWNING))
+		// do not show defender stickybombs to the invading team
+		if (Player(client).IsInvader())
 		{
-			// Only when fully armed
+			// only when fully armed
 			float flCreationTime = GetEntDataFloat(entity, GetOffset("CTFGrenadePipebombProjectile::m_flCreationTime"));
 			if ((GetGameTime() - flCreationTime) >= SDKCall_GetLiveTime(entity))
 			{
@@ -93,7 +93,7 @@ Action SDKHookCB_ReviveMarker_SetTransmit(int entity, int client)
 {
 	if (view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum")) == TFTeam_Defenders)
 	{
-		if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+		if (Player(client).IsInvader())
 		{
 			// hide revive markers from invaders
 			return Plugin_Handled;

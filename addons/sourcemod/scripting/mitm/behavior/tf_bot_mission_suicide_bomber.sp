@@ -258,7 +258,7 @@ static void Detonate(int me)
 		if (GetVectorLength(toVictim) > tf_bot_suicide_bomb_range.FloatValue)
 			continue;
 		
-		if (0 < victim <= MaxClients)
+		if (IsEntityClient(victim))
 		{
 			int colorHit[4] = { 255, 255, 255, 255 };
 			UTIL_ScreenFade(victim, colorHit, 1.0, 0.1, FFADE_IN);

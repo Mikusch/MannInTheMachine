@@ -901,7 +901,7 @@ public void OnClientTick(int client, float flInterval)
 			for (int i = 0; i < nNumHealers; ++i)
 			{
 				int healer = TF2Util_GetPlayerHealer(client, i);
-				if (0 < healer <= MaxClients)
+				if (IsEntityClient(healer))
 				{
 					bIsBeingHealedByAMedic = true;
 					break;

@@ -694,3 +694,8 @@ void TransmitShakeEvent(int player, float localAmplitude, float frequency, float
 		}
 	}
 }
+
+bool IsEntityClient(int client)
+{
+	return (0 < client <= MaxClients);
+}

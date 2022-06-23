@@ -1036,7 +1036,7 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 			
 			if (TF2_GetClientTeam(client) == TFTeam_Defenders)
 				iDefenderCount++;
-			else if (TF2_GetClientTeam(client) == TFTeam_Spectator || TF2_GetClientTeam(client) == TFTeam_Invaders)
+			else if (Player(client).IsInvader())
 				iInvaderCount++;
 		}
 		
@@ -1241,7 +1241,7 @@ public MRESReturn DHookCallback_ShouldHitEntity_Post(Address pFilter, DHookRetur
 	int me = GetEntityFromAddress(Deref(pFilter + view_as<Address>(0x4)));
 	int entity = GetEntityFromAddress(params.Get(1));
 	
-	if (0 < entity <= MaxClients)
+	if (IsEntityClient(entity))
 	{
 		if (GameRules_IsMannVsMachineMode())
 		{
@@ -1563,7 +1563,7 @@ public MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret
 {
 	int entity = params.Get(2);
 	
-	if (0 < entity <= MaxClients && TF2_GetClientTeam(entity) == TFTeam_Invaders)
+	if (IsEntityClient(entity) && TF2_GetClientTeam(entity) == TFTeam_Invaders)
 	{
 		bool m_bRequireAllTags = GetEntProp(filter, Prop_Data, "m_bRequireAllTags") != 0;
 		

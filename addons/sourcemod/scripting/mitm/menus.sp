@@ -27,7 +27,7 @@ void Menus_DisplayMainMenu(int client)
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
-public int MenuHandler_MainMenu(Menu menu, MenuAction action, int param1, int param2)
+int MenuHandler_MainMenu(Menu menu, MenuAction action, int param1, int param2)
 {
 	switch (action)
 	{
@@ -96,7 +96,7 @@ void Menus_DisplayQueueMenu(int client)
 	delete queue;
 }
 
-public int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int param2)
+int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int param2)
 {
 	switch (action)
 	{
@@ -138,7 +138,7 @@ void Menus_DisplayPreferencesMenu(int client)
 	}
 }
 
-public int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1, int param2)
+int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1, int param2)
 {
 	switch (action)
 	{

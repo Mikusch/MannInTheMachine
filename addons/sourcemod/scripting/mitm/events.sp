@@ -29,7 +29,7 @@ void Events_Initialize()
 	HookEvent("teamplay_flag_event", EventHook_TeamplayFlagEvent);
 }
 
-public void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
+void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	
@@ -59,7 +59,7 @@ Action Timer_UpdatePlayerGlow(Handle timer, int userid)
 	return Plugin_Continue;
 }
 
-public void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
+void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 {
 	int userid = event.GetInt("userid");
 	int victim = GetClientOfUserId(userid);
@@ -91,7 +91,7 @@ public void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroad
 	}
 }
 
-public Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
+Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
@@ -116,7 +116,7 @@ public Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroa
 	return Plugin_Changed;
 }
 
-public void EventHook_PostInventoryApplication(Event event, const char[] name, bool dontBroadcast)
+void EventHook_PostInventoryApplication(Event event, const char[] name, bool dontBroadcast)
 {
 	int userid = event.GetInt("userid");
 	int client = GetClientOfUserId(userid);
@@ -128,7 +128,7 @@ public void EventHook_PostInventoryApplication(Event event, const char[] name, b
 	}
 }
 
-public void RequestFrameCallback_ApplyWeaponRestrictions(int userid)
+void RequestFrameCallback_ApplyWeaponRestrictions(int userid)
 {
 	int client = GetClientOfUserId(userid);
 	if (client)
@@ -168,7 +168,7 @@ public void RequestFrameCallback_ApplyWeaponRestrictions(int userid)
 	}
 }
 
-public void EventHook_PlayerBuiltObject(Event event, const char[] name, bool dontBroadcast)
+void EventHook_PlayerBuiltObject(Event event, const char[] name, bool dontBroadcast)
 {
 	int builder = GetClientOfUserId(event.GetInt("userid"));
 	TFObjectType type = view_as<TFObjectType>(event.GetInt("object"));
@@ -216,7 +216,7 @@ public void EventHook_PlayerBuiltObject(Event event, const char[] name, bool don
 	}
 }
 
-public void EventHook_TeamplayRoundStart(Event event, const char[] name, bool dontBroadcast)
+void EventHook_TeamplayRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
 	if (GetCurrentWaveIndex() == 0 && !g_hWaitingForPlayersTimer)
 	{
@@ -234,7 +234,7 @@ public void EventHook_TeamplayRoundStart(Event event, const char[] name, bool do
 	}
 }
 
-public void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool dontBroadcast)
+void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool dontBroadcast)
 {
 	int player = event.GetInt("player");
 	int eventtype = event.GetInt("eventtype");
@@ -263,7 +263,7 @@ public void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool don
 	}
 }
 
-public Action Timer_OnWaitingForPlayersEnd(Handle timer)
+Action Timer_OnWaitingForPlayersEnd(Handle timer)
 {
 	if (!g_bInWaitingForPlayers)
 		return Plugin_Continue;
@@ -276,7 +276,7 @@ public Action Timer_OnWaitingForPlayersEnd(Handle timer)
 	return Plugin_Continue;
 }
 
-public Action Timer_DeadTimer(Handle timer, int userid)
+Action Timer_DeadTimer(Handle timer, int userid)
 {
 	int client = GetClientOfUserId(userid);
 	

@@ -30,7 +30,7 @@ void Console_Initialize()
 	AddCommandListener(CommandListener_DropItem, "dropitem");
 }
 
-public Action ConCmd_OpenMainMenu(int client, int args)
+Action ConCmd_OpenMainMenu(int client, int args)
 {
 	if (client == 0)
 	{
@@ -42,7 +42,7 @@ public Action ConCmd_OpenMainMenu(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action ConCmd_OpenQueueMenu(int client, int args)
+Action ConCmd_OpenQueueMenu(int client, int args)
 {
 	if (client == 0)
 	{
@@ -54,7 +54,7 @@ public Action ConCmd_OpenQueueMenu(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action ConCmd_OpenPreferencesMenu(int client, int args)
+Action ConCmd_OpenPreferencesMenu(int client, int args)
 {
 	if (client == 0)
 	{
@@ -78,7 +78,7 @@ public Action CommandListener_Suicide(int client, const char[] command, int argc
 	return Plugin_Continue;
 }
 
-public Action CommandListener_Build(int client, const char[] command, int argc)
+Action CommandListener_Build(int client, const char[] command, int argc)
 {
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
@@ -132,7 +132,7 @@ public Action CommandListener_Build(int client, const char[] command, int argc)
 	return Plugin_Continue;
 }
 
-public Action CommandListener_DropItem(int client, const char[] command, int argc)
+Action CommandListener_DropItem(int client, const char[] command, int argc)
 {
 	if (IsDeployingBomb(client))
 	{

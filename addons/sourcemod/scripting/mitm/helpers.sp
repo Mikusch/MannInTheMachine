@@ -361,7 +361,7 @@ int Compare(any val1, any val2)
 	return 0;
 }
 
-public int SortPlayersByPriority(int index1, int index2, Handle array, Handle hndl)
+int SortPlayersByPriority(int index1, int index2, Handle array, Handle hndl)
 {
 	ArrayList list = view_as<ArrayList>(array);
 	int client1 = list.Get(index1);

@@ -190,7 +190,7 @@ static DynamicHook CreateDynamicHook(GameData gamedata, const char[] name)
 	return hook;
 }
 
-public MRESReturn DHookCallback_PreClientUpdate_Pre()
+MRESReturn DHookCallback_PreClientUpdate_Pre()
 {
 	// Allows us to have an MvM server with 32 visible player slots
 	GameRules_SetProp("m_bPlayingMannVsMachine", false);
@@ -198,7 +198,7 @@ public MRESReturn DHookCallback_PreClientUpdate_Pre()
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_PreClientUpdate_Post()
+MRESReturn DHookCallback_PreClientUpdate_Post()
 {
 	// Set it back afterwards
 	GameRules_SetProp("m_bPlayingMannVsMachine", true);
@@ -206,13 +206,13 @@ public MRESReturn DHookCallback_PreClientUpdate_Post()
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_AllocateBots_Pre(int populator)
+MRESReturn DHookCallback_AllocateBots_Pre(int populator)
 {
 	// Do not allow the populator to allocate bots
 	return MRES_Supercede;
 }
 
-public MRESReturn DHookCallback_RestoreCheckpoint_Pre(int populator)
+MRESReturn DHookCallback_RestoreCheckpoint_Pre(int populator)
 {
 	if (!g_bInWaitingForPlayers)
 	{
@@ -232,7 +232,7 @@ public MRESReturn DHookCallback_RestoreCheckpoint_Pre(int populator)
  * This detour supercedes the original function and recreates it
  * as accurately as possible to spawn players instead of bots.
  */
-public MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookReturn ret, DHookParam params)
+MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookReturn ret, DHookParam params)
 {
 	CTFBotSpawner m_spawner = CTFBotSpawner(pThis);
 	
@@ -552,7 +552,7 @@ public MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 	return MRES_Supercede;
 }
 
-public MRESReturn DHookCallback_CSquadSpawner_Post(Address pThis, DHookReturn ret, DHookParam params)
+MRESReturn DHookCallback_CSquadSpawner_Post(Address pThis, DHookReturn ret, DHookParam params)
 {
 	CSquadSpawner spawner = CSquadSpawner(pThis);
 	
@@ -580,7 +580,7 @@ public MRESReturn DHookCallback_CSquadSpawner_Post(Address pThis, DHookReturn re
 	return MRES_Ignored;
 }
 
-public MRESReturn DHookCallback_PopulationManagerUpdate_Pre(int populator)
+MRESReturn DHookCallback_PopulationManagerUpdate_Pre(int populator)
 {
 	// allows spawners to freely switch teams of players
 	g_bAllowTeamChange = true;
@@ -588,14 +588,14 @@ public MRESReturn DHookCallback_PopulationManagerUpdate_Pre(int populator)
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_PopulationManagerUpdate_Post(int populator)
+MRESReturn DHookCallback_PopulationManagerUpdate_Post(int populator)
 {
 	g_bAllowTeamChange = false;
 	
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_PeriodicSpawnPopulatorUpdate_Post(Address pThis)
+MRESReturn DHookCallback_PeriodicSpawnPopulatorUpdate_Post(Address pThis)
 {
 	for (int i = 0; i < m_justSpawnedVector.Length; i++)
 	{
@@ -614,7 +614,7 @@ public MRESReturn DHookCallback_PeriodicSpawnPopulatorUpdate_Post(Address pThis)
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
+MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 {
 	for (int i = 0; i < m_justSpawnedVector.Length; i++)
 	{
@@ -649,7 +649,7 @@ public MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Pre(Address pThis, DHookReturn ret, DHookParam params)
+MRESReturn DHookCallback_MissionPopulatorUpdateMission_Pre(Address pThis, DHookReturn ret, DHookParam params)
 {
 	CMissionPopulator populator = CMissionPopulator(pThis);
 	MissionType mission = params.Get(1);
@@ -714,7 +714,7 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Pre(Address pThis,
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis, DHookReturn ret, DHookParam params)
+MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis, DHookReturn ret, DHookParam params)
 {
 	MissionType mission = params.Get(1);
 	
@@ -764,7 +764,7 @@ public MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, DHookReturn ret)
+MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, DHookReturn ret)
 {
 	CMissionPopulator populator = CMissionPopulator(pThis);
 	s_MissionPopulator = populator;
@@ -959,14 +959,14 @@ public MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 	return MRES_Supercede;
 }
 
-public MRESReturn DHookCallback_UpdateMissionDestroySentries_Post(Address pThis, DHookReturn ret)
+MRESReturn DHookCallback_UpdateMissionDestroySentries_Post(Address pThis, DHookReturn ret)
 {
 	s_MissionPopulator = CMissionPopulator(Address_Null);
 	
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterface, DHookParam params)
+MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterface, DHookParam params)
 {
 	Address iszVal = params.GetObjectVar(1, 0x8, ObjectValueType_Int);
 	
@@ -997,7 +997,7 @@ public MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterf
 	return MRES_Supercede;
 }
 
-public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, DHookParam params)
+MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, DHookParam params)
 {
 	int player = params.Get(1);
 	TFTeam nDesiredTeam = params.Get(2);
@@ -1055,7 +1055,7 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 	}
 }
 
-public MRESReturn DHookCallback_GetTeamAssignmentOverride_Post(DHookReturn ret, DHookParam params)
+MRESReturn DHookCallback_GetTeamAssignmentOverride_Post(DHookReturn ret, DHookParam params)
 {
 	if (g_bAllowTeamChange)
 	{
@@ -1065,7 +1065,7 @@ public MRESReturn DHookCallback_GetTeamAssignmentOverride_Post(DHookReturn ret, 
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_GetLoadoutItem_Pre(int player, DHookReturn ret, DHookParam params)
+MRESReturn DHookCallback_GetLoadoutItem_Pre(int player, DHookReturn ret, DHookParam params)
 {
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
@@ -1076,7 +1076,7 @@ public MRESReturn DHookCallback_GetLoadoutItem_Pre(int player, DHookReturn ret, 
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_GetLoadoutItem_Post(int player, DHookReturn ret, DHookParam params)
+MRESReturn DHookCallback_GetLoadoutItem_Post(int player, DHookReturn ret, DHookParam params)
 {
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
@@ -1086,7 +1086,7 @@ public MRESReturn DHookCallback_GetLoadoutItem_Post(int player, DHookReturn ret,
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_CheckInstantLoadoutRespawn_Pre(int player)
+MRESReturn DHookCallback_CheckInstantLoadoutRespawn_Pre(int player)
 {
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
@@ -1097,14 +1097,14 @@ public MRESReturn DHookCallback_CheckInstantLoadoutRespawn_Pre(int player)
 	return MRES_Ignored;
 }
 
-public MRESReturn DHookCallback_ShouldForceAutoTeam_Pre(int player, DHookReturn ret)
+MRESReturn DHookCallback_ShouldForceAutoTeam_Pre(int player, DHookReturn ret)
 {
 	// don't allow game logic to force players on a team
 	ret.Value = false;
 	return MRES_Supercede;
 }
 
-public MRESReturn DHookCallback_DoClassSpecialSkill_Pre(int player, DHookReturn ret)
+MRESReturn DHookCallback_DoClassSpecialSkill_Pre(int player, DHookReturn ret)
 {
 	if (TF2_GetPlayerClass(player) == TFClass_DemoMan && GetEntProp(player, Prop_Send, "m_bShieldEquipped"))
 	{
@@ -1121,21 +1121,21 @@ public MRESReturn DHookCallback_DoClassSpecialSkill_Pre(int player, DHookReturn 
 	return MRES_Ignored;
 }
 
-public MRESReturn DHookCallback_CanBeForcedToLaugh_Pre(int player, DHookReturn ret)
+MRESReturn DHookCallback_CanBeForcedToLaugh_Pre(int player, DHookReturn ret)
 {
 	SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
 	
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_CanBeForcedToLaugh_Post(int player, DHookReturn ret)
+MRESReturn DHookCallback_CanBeForcedToLaugh_Post(int player, DHookReturn ret)
 {
 	SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
 	
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre(int player, DHookParam params)
+MRESReturn DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre(int player, DHookParam params)
 {
 	if (Player(player).HasAttribute(RETAIN_BUILDINGS))
 	{
@@ -1146,7 +1146,7 @@ public MRESReturn DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre(int player, 
 	return MRES_Ignored;
 }
 
-public MRESReturn DHookCallback_AllowedToHealTarget_Pre(int medigun, DHookReturn ret, DHookParam params)
+MRESReturn DHookCallback_AllowedToHealTarget_Pre(int medigun, DHookReturn ret, DHookParam params)
 {
 	int target = params.Get(1);
 	int owner = GetEntPropEnt(medigun, Prop_Send, "m_hOwnerEntity");
@@ -1174,7 +1174,7 @@ public MRESReturn DHookCallback_AllowedToHealTarget_Pre(int medigun, DHookReturn
 	return MRES_Ignored;
 }
 
-public MRESReturn DHookCallback_FindSnapToBuildPos_Pre(int obj, DHookReturn ret, DHookParam params)
+MRESReturn DHookCallback_FindSnapToBuildPos_Pre(int obj, DHookReturn ret, DHookParam params)
 {
 	int builder = GetEntPropEnt(obj, Prop_Send, "m_hBuilder");
 	
@@ -1201,7 +1201,7 @@ public MRESReturn DHookCallback_FindSnapToBuildPos_Pre(int obj, DHookReturn ret,
 	return MRES_Ignored;
 }
 
-public MRESReturn DHookCallback_FindSnapToBuildPos_Post(int obj, DHookReturn ret, DHookParam params)
+MRESReturn DHookCallback_FindSnapToBuildPos_Post(int obj, DHookReturn ret, DHookParam params)
 {
 	int builder = GetEntPropEnt(obj, Prop_Send, "m_hBuilder");
 	
@@ -1227,7 +1227,7 @@ public MRESReturn DHookCallback_FindSnapToBuildPos_Post(int obj, DHookReturn ret
 	return MRES_Ignored;
 }
 
-public MRESReturn DHookCallback_FindSpawnLocation_Post(Address where, DHookReturn ret, DHookParam params)
+MRESReturn DHookCallback_FindSpawnLocation_Post(Address where, DHookReturn ret, DHookParam params)
 {
 	// Store for use in populator callbacks.
 	// We can't use CWaveSpawnPopulator::m_spawnLocationResult because it gets overridden in some cases.
@@ -1236,7 +1236,7 @@ public MRESReturn DHookCallback_FindSpawnLocation_Post(Address where, DHookRetur
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_ShouldHitEntity_Post(Address pFilter, DHookReturn ret, DHookParam params)
+MRESReturn DHookCallback_ShouldHitEntity_Post(Address pFilter, DHookReturn ret, DHookParam params)
 {
 	int me = GetEntityFromAddress(Deref(pFilter + view_as<Address>(0x4)));
 	int entity = GetEntityFromAddress(params.Get(1));
@@ -1264,7 +1264,7 @@ public MRESReturn DHookCallback_ShouldHitEntity_Post(Address pFilter, DHookRetur
 	return MRES_Ignored;
 }
 
-public MRESReturn DHookCallback_DoTeleporterOverride_Post(DHookReturn ret, DHookParam params)
+MRESReturn DHookCallback_DoTeleporterOverride_Post(DHookReturn ret, DHookParam params)
 {
 	CBaseEntity spawnEnt = CBaseEntity(params.Get(1));
 	
@@ -1353,7 +1353,7 @@ public MRESReturn DHookCallback_DoTeleporterOverride_Post(DHookReturn ret, DHook
 	return MRES_Supercede;
 }
 
-public MRESReturn DHookCallback_OnBotTeleported_Pre(DHookParam params)
+MRESReturn DHookCallback_OnBotTeleported_Pre(DHookParam params)
 {
 	// This crashes our server in local testing due to s_lastTeleporter being null
 	return MRES_Supercede;
@@ -1388,7 +1388,7 @@ void OnBotTeleported(int bot)
 	}
 }
 
-public MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
+MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 {
 	// Replicate behavior of CTFBot::Event_Killed
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
@@ -1506,7 +1506,7 @@ public MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_EventKilled_Post(int player, DHookParam params)
+MRESReturn DHookCallback_EventKilled_Post(int player, DHookParam params)
 {
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
@@ -1516,7 +1516,7 @@ public MRESReturn DHookCallback_EventKilled_Post(int player, DHookParam params)
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_ShouldGib_Pre(int player, DHookReturn ret, DHookParam params)
+MRESReturn DHookCallback_ShouldGib_Pre(int player, DHookReturn ret, DHookParam params)
 {
 	// only gib giant/miniboss
 	if (GameRules_IsMannVsMachineMode() && (GetEntProp(player, Prop_Send, "m_bIsMiniBoss") || GetEntPropFloat(player, Prop_Send, "m_flModelScale") > 1.0))
@@ -1528,7 +1528,7 @@ public MRESReturn DHookCallback_ShouldGib_Pre(int player, DHookReturn ret, DHook
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_IsAllowedToPickUpFlag_Post(int player, DHookReturn ret)
+MRESReturn DHookCallback_IsAllowedToPickUpFlag_Post(int player, DHookReturn ret)
 {
 	// only the leader of a squad can pick up the flag
 	if (Player(player).IsInASquad() && !Player(player).GetSquad().IsLeader(player))
@@ -1547,7 +1547,7 @@ public MRESReturn DHookCallback_IsAllowedToPickUpFlag_Post(int player, DHookRetu
 	return MRES_Ignored;
 }
 
-public MRESReturn DHookCallback_EntSelectSpawnPoint_Pre(int player, DHookReturn ret)
+MRESReturn DHookCallback_EntSelectSpawnPoint_Pre(int player, DHookReturn ret)
 {
 	// override normal spawn behavior to spawn robots at the right place
 	if (IsValidEntity(Player(player).m_spawnPointEntity))
@@ -1559,7 +1559,7 @@ public MRESReturn DHookCallback_EntSelectSpawnPoint_Pre(int player, DHookReturn 
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret, DHookParam params)
+MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret, DHookParam params)
 {
 	int entity = params.Get(2);
 	
@@ -1599,7 +1599,7 @@ public MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret
 	return MRES_Ignored;
 }
 
-public MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
+MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
 {
 	int player = params.Get(1);
 	
@@ -1614,7 +1614,7 @@ public MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
 	return MRES_Ignored;
 }
 
-public MRESReturn DHookCallback_SetModel_Post(int entity, DHookParam params)
+MRESReturn DHookCallback_SetModel_Post(int entity, DHookParam params)
 {
 	char szModelName[PLATFORM_MAX_PATH];
 	params.GetString(1, szModelName, sizeof(szModelName));
@@ -1634,7 +1634,7 @@ public MRESReturn DHookCallback_SetModel_Post(int entity, DHookParam params)
 	return MRES_Handled;
 }
 
-public MRESReturn DHookCallback_CanBeUpgraded_Pre(int obj, DHookReturn ret, DHookParam params)
+MRESReturn DHookCallback_CanBeUpgraded_Pre(int obj, DHookReturn ret, DHookParam params)
 {
 	int player = params.Get(1);
 	
@@ -1650,7 +1650,7 @@ public MRESReturn DHookCallback_CanBeUpgraded_Pre(int obj, DHookReturn ret, DHoo
 	return MRES_Ignored;
 }
 
-public MRESReturn DHookCallback_ComeToRest_Pre(int item)
+MRESReturn DHookCallback_ComeToRest_Pre(int item)
 {
 	float origin[3];
 	GetEntPropVector(item, Prop_Data, "m_vecAbsOrigin", origin);
@@ -1670,14 +1670,14 @@ public MRESReturn DHookCallback_ComeToRest_Pre(int item)
 	return MRES_Ignored;
 }
 
-public MRESReturn DHookCallback_ClientConnected_Pre(DHookReturn ret, DHookParam params)
+MRESReturn DHookCallback_ClientConnected_Pre(DHookReturn ret, DHookParam params)
 {
 	// MvM will start rejecting connections if the server has 10 humans
 	ret.Value = true;
 	return MRES_Supercede;
 }
 
-public MRESReturn DHookCallback_FPlayerCanTakeDamage_Pre(DHookReturn ret, DHookParam params)
+MRESReturn DHookCallback_FPlayerCanTakeDamage_Pre(DHookReturn ret, DHookParam params)
 {
 	if (g_bForceFriendlyFire)
 	{

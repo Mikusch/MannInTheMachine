@@ -775,7 +775,7 @@ public void OnGameFrame()
 	}
 }
 
-public void OnClientTick(int client, float flInterval)
+void OnClientTick(int client, float flInterval)
 {
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{

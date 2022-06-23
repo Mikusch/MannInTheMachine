@@ -138,6 +138,7 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 		if (g_DHookPickUp)
 		{
 			g_DHookPickUp.HookEntity(Hook_Pre, entity, DHookCallback_PickUp_Pre);
+			g_DHookPickUp.HookEntity(Hook_Post, entity, DHookCallback_PickUp_Post);
 		}
 	}
 	else if (StrEqual(classname, "obj_teleporter"))
@@ -1570,10 +1571,25 @@ MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
 	
 	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
+		// do not trip up the assert_cast< CTFBot* >
+		SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
+		
 		if (Player(player).HasAttribute(IGNORE_FLAG))
 			return MRES_Supercede;
 		
 		Player(player).SetFlagTarget(item);
+	}
+	
+	return MRES_Ignored;
+}
+
+MRESReturn DHookCallback_PickUp_Post(int item, DHookParam params)
+{
+	int player = params.Get(1);
+	
+	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(player) == TFTeam_Invaders)
+	{
+		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
 	}
 	
 	return MRES_Ignored;

@@ -1061,21 +1061,6 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 	}
 }
 
-public Action TF2Items_OnGiveNamedItem(int client, char[] classname, int itemDefIndex, Handle &item)
-{
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
-	{
-		int slot = TF2Econ_GetItemLoadoutSlot(itemDefIndex, TF2_GetPlayerClass(client));
-		if (slot == LOADOUT_POSITION_ACTION)
-		{
-			// Robots aren't allowed to have action items
-			return Plugin_Handled;
-		}
-	}
-	
-	return Plugin_Continue;
-}
-
 any GetOffset(const char[] name)
 {
 	int offset;

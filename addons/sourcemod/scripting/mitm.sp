@@ -1088,7 +1088,7 @@ void SelectNewDefenders()
 	CPrintToChatAll("%s %t", PLUGIN_TAG, "Queue_NewDefenders");
 	
 	// grab team names
-	char redTeamname[64], blueTeamname[64];
+	char redTeamname[MAX_TEAM_NAME_LENGTH], blueTeamname[MAX_TEAM_NAME_LENGTH];
 	mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
 	mp_tournament_blueteamname.GetString(blueTeamname, sizeof(blueTeamname));
 	

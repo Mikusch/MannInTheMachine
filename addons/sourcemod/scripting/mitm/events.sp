@@ -105,12 +105,18 @@ Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 	// Clear Sound
 	Player(client).StopIdleSound();
 	
-	if (team == TFTeam_Spectator || team == TFTeam_Red)
+	if (team == TFTeam_Invaders)
+	{
+		SetEntityFlags(client, GetEntityFlags(client) | FL_FAKECLIENT);
+	}
+	else
 	{
 		Player(client).ResetOnTeamChange();
 		
 		SetVariantString("");
 		AcceptEntityInput(client, "SetCustomModel");
+		
+		SetEntityFlags(client, GetEntityFlags(client) & ~FL_FAKECLIENT);
 	}
 	
 	return Plugin_Changed;

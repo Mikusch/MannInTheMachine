@@ -66,12 +66,12 @@ void DHooks_Initialize(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CTFPlayer::CheckInstantLoadoutRespawn", DHookCallback_CheckInstantLoadoutRespawn_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayer::ShouldForceAutoTeam", DHookCallback_ShouldForceAutoTeam_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayer::DoClassSpecialSkill", DHookCallback_DoClassSpecialSkill_Pre);
-	CreateDynamicDetour(gamedata, "CTFPlayer::CanBeForcedToLaugh", DHookCallback_CanBeForcedToLaugh_Pre, DHookCallback_CanBeForcedToLaugh_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::RemoveAllOwnedEntitiesFromWorld", DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre);
+	CreateDynamicDetour(gamedata, "CTFPlayer::CanBuild", DHookCallback_CanBuild_Pre, DHookCallback_CanBuild_Post);
 	CreateDynamicDetour(gamedata, "CWeaponMedigun::AllowedToHealTarget", DHookCallback_AllowedToHealTarget_Pre);
-	CreateDynamicDetour(gamedata, "CBaseObject::FindSnapToBuildPos", DHookCallback_FindSnapToBuildPos_Pre, DHookCallback_FindSnapToBuildPos_Post);
 	CreateDynamicDetour(gamedata, "CSpawnLocation::FindSpawnLocation", _, DHookCallback_FindSpawnLocation_Post);
 	CreateDynamicDetour(gamedata, "CTraceFilterObject::ShouldHitEntity", _, DHookCallback_ShouldHitEntity_Post);
+	CreateDynamicDetour(gamedata, "CLagCompensationManager::StartLagCompensation", DHookCallback_StartLagCompensation_Pre, DHookCallback_StartLagCompensation_Post);
 	CreateDynamicDetour(gamedata, "DoTeleporterOverride", _, DHookCallback_DoTeleporterOverride_Post);
 	CreateDynamicDetour(gamedata, "OnBotTeleported", DHookCallback_OnBotTeleported_Pre);
 	
@@ -93,7 +93,6 @@ void DHooks_OnClientPutInServer(int client)
 	if (g_DHookEventKilled)
 	{
 		g_DHookEventKilled.HookEntity(Hook_Pre, client, DHookCallback_EventKilled_Pre);
-		g_DHookEventKilled.HookEntity(Hook_Post, client, DHookCallback_EventKilled_Post);
 	}
 	
 	if (g_DHookShouldGib)
@@ -139,6 +138,7 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 		if (g_DHookPickUp)
 		{
 			g_DHookPickUp.HookEntity(Hook_Pre, entity, DHookCallback_PickUp_Pre);
+			g_DHookPickUp.HookEntity(Hook_Post, entity, DHookCallback_PickUp_Post);
 		}
 	}
 	else if (StrEqual(classname, "obj_teleporter"))
@@ -1121,26 +1121,33 @@ MRESReturn DHookCallback_DoClassSpecialSkill_Pre(int player, DHookReturn ret)
 	return MRES_Ignored;
 }
 
-MRESReturn DHookCallback_CanBeForcedToLaugh_Pre(int player, DHookReturn ret)
-{
-	SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
-	
-	return MRES_Handled;
-}
-
-MRESReturn DHookCallback_CanBeForcedToLaugh_Post(int player, DHookReturn ret)
-{
-	SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
-	
-	return MRES_Handled;
-}
-
 MRESReturn DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre(int player, DHookParam params)
 {
 	if (Player(player).HasAttribute(RETAIN_BUILDINGS))
 	{
 		// keep this bot's buildings
 		return MRES_Supercede;
+	}
+	
+	return MRES_Ignored;
+}
+
+MRESReturn DHookCallback_CanBuild_Pre(int player, DHookReturn ret, DHookParam params)
+{
+	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
+	{
+		// disallow human robot engineers from building multiple sentries
+		SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
+	}
+	
+	return MRES_Ignored;
+}
+
+MRESReturn DHookCallback_CanBuild_Post(int player, DHookReturn ret, DHookParam params)
+{
+	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
+	{
+		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
 	}
 	
 	return MRES_Ignored;
@@ -1169,59 +1176,6 @@ MRESReturn DHookCallback_AllowedToHealTarget_Pre(int medigun, DHookReturn ret, D
 			ret.Value = false;
 			return MRES_Supercede;
 		}
-	}
-	
-	return MRES_Ignored;
-}
-
-MRESReturn DHookCallback_FindSnapToBuildPos_Pre(int obj, DHookReturn ret, DHookParam params)
-{
-	int builder = GetEntPropEnt(obj, Prop_Send, "m_hBuilder");
-	
-	if (TF2_GetClientTeam(builder) != TFTeam_Defenders)
-	{
-		return MRES_Ignored;
-	}
-	
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		if (TF2_GetClientTeam(client) != GetEnemyTeam(TF2_GetClientTeam(builder)))
-			continue;
-		
-		if (!IsPlayerAlive(client))
-			continue;
-		
-		// The robot sapper only works on bots so we make every invader a fake client
-		SetEntityFlags(client, GetEntityFlags(client) | FL_FAKECLIENT);
-	}
-	
-	return MRES_Ignored;
-}
-
-MRESReturn DHookCallback_FindSnapToBuildPos_Post(int obj, DHookReturn ret, DHookParam params)
-{
-	int builder = GetEntPropEnt(obj, Prop_Send, "m_hBuilder");
-	
-	if (TF2_GetClientTeam(builder) != TFTeam_Defenders)
-	{
-		return MRES_Ignored;
-	}
-	
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		if (TF2_GetClientTeam(client) != GetEnemyTeam(TF2_GetClientTeam(builder)))
-			continue;
-		
-		if (!IsPlayerAlive(client))
-			continue;
-		
-		SetEntityFlags(client, GetEntityFlags(client) & ~FL_FAKECLIENT);
 	}
 	
 	return MRES_Ignored;
@@ -1259,6 +1213,31 @@ MRESReturn DHookCallback_ShouldHitEntity_Post(Address pFilter, DHookReturn ret, 
 				return MRES_Supercede;
 			}
 		}
+	}
+	
+	return MRES_Ignored;
+}
+
+MRESReturn DHookCallback_StartLagCompensation_Pre(DHookParam params)
+{
+	int player = params.Get(1);
+	
+	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
+	{
+		// re-enable lag compensation for our "human bots"
+		SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
+	}
+	
+	return MRES_Ignored;
+}
+
+MRESReturn DHookCallback_StartLagCompensation_Post(DHookParam params)
+{
+	int player = params.Get(1);
+	
+	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
+	{
+		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
 	}
 	
 	return MRES_Ignored;
@@ -1491,9 +1470,6 @@ MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 				}
 			}
 		}
-		
-		// Enables currency drops from human kills
-		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
 	}
 	
 	if (Player(player).IsInASquad())
@@ -1502,16 +1478,6 @@ MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 	}
 	
 	Player(player).StopIdleSound();
-	
-	return MRES_Handled;
-}
-
-MRESReturn DHookCallback_EventKilled_Post(int player, DHookParam params)
-{
-	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
-	{
-		SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
-	}
 	
 	return MRES_Handled;
 }
@@ -1605,10 +1571,25 @@ MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
 	
 	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
+		// do not trip up the assert_cast< CTFBot* >
+		SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
+		
 		if (Player(player).HasAttribute(IGNORE_FLAG))
 			return MRES_Supercede;
 		
 		Player(player).SetFlagTarget(item);
+	}
+	
+	return MRES_Ignored;
+}
+
+MRESReturn DHookCallback_PickUp_Post(int item, DHookParam params)
+{
+	int player = params.Get(1);
+	
+	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(player) == TFTeam_Invaders)
+	{
+		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
 	}
 	
 	return MRES_Ignored;

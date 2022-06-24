@@ -126,16 +126,6 @@
 				"linux"		"@_ZN9CTFPlayer19DoClassSpecialSkillEv"
 				"windows"	"\x56\x8B\xF1\x8B\x06\x8B\x80\x04\x01\x00\x00\xFF\xD0\x84\xC0\x75\x2A\x32\xC0\x5E\xC3\xF7\x86\x84\x1A\x00\x00\x00\x00\x04\x00"
 			}
-			"CTFPlayer::CanBeForcedToLaugh"
-			{
-				"linux"		"@_ZN9CTFPlayer18CanBeForcedToLaughEv"
-				"windows"	"\xA1\x2A\x2A\x2A\x2A\x56\x8B\xF1\x85\xC0\x74\x2A\x80\xB8\x66\x09\x00\x00\x00\x74\x2A\x8B\x06"
-			}
-			"CBaseObject::FindSnapToBuildPos"
-			{
-				"linux"		"@_ZN11CBaseObject18FindSnapToBuildPosEPS_"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x38\x57\x8B\xF9\xE8\x2A\x2A\x2A\x2A\x84\xC0"
-			}
 			"CTFPlayer::HasTheFlag"
 			{
 				"linux"		"@_ZNK9CTFPlayer10HasTheFlagEP11ETFFlagTypei"
@@ -170,6 +160,11 @@
 			{
 				"linux"		"@_ZN9CTFPlayer16IsAllowedToTauntEv"
 				"windows"	"\x55\x8B\xEC\x51\x56\x8B\xF1\x8B\x06\x8B\x80\x04\x01\x00\x00\xFF\xD0\x84\xC0\x75\x2A"
+			}
+			"CTFPlayer::CanBuild"
+			{
+				"linux"		"@_ZN9CTFPlayer8CanBuildEii"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x0C\x53\x8B\x5D\x08\x57\x8B\xF9\x83\xFB\x03"
 			}
 			"CEconEntity::UpdateModelToClass"
 			{
@@ -235,6 +230,11 @@
 			{
 				"linux"		"@_ZN18CTraceFilterObject15ShouldHitEntityEP13IHandleEntityi"
 				"windows"	"\x55\x8B\xEC\x51\x8B\xC1\x8B\x0D\x2A\x2A\x2A\x2A"
+			}
+			"CLagCompensationManager::StartLagCompensation"
+			{
+				"linux"		"@_ZN23CLagCompensationManager20StartLagCompensationEP11CBasePlayerP8CUserCmd"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x24\x57\x8B\xF9\x89\x7D\xE8"
 			}
 			"CTFBotHintEngineerNest::IsStaleNest"
 			{
@@ -753,13 +753,6 @@
 				"return"		"bool"
 				"this"			"entity"
 			}
-			"CTFPlayer::CanBeForcedToLaugh"
-			{
-				"signature"		"CTFPlayer::CanBeForcedToLaugh"
-				"callconv"		"thiscall"
-				"return"		"bool"
-				"this"			"entity"
-			}
 			"CTFPlayer::CheckInstantLoadoutRespawn"
 			{
 				"signature"		"CTFPlayer::CheckInstantLoadoutRespawn"
@@ -781,6 +774,24 @@
 					}
 				}
 			}
+			"CTFPlayer::CanBuild"
+			{
+				"signature"	"CTFPlayer::CanBuild"
+				"callconv"	"thiscall"
+				"return"	"int"
+				"this"		"entity"
+				"arguments"
+				{
+					"iObjectType"
+					{
+						"type"	"int"
+					}
+					"iObjectMode"
+					{
+						"type"	"int"
+					}
+				}
+			}
 			"CWeaponMedigun::AllowedToHealTarget"
 			{
 				"signature"	"CWeaponMedigun::AllowedToHealTarget"
@@ -790,20 +801,6 @@
 				"arguments"
 				{
 					"pTarget"
-					{
-						"type"	"cbaseentity"
-					}
-				}
-			}
-			"CBaseObject::FindSnapToBuildPos"
-			{
-				"signature"	"CBaseObject::FindSnapToBuildPos"
-				"callconv"	"thiscall"
-				"return"	"bool"
-				"this"		"entity"
-				"arguments"
-				{
-					"pObjectOverride"
 					{
 						"type"	"cbaseentity"
 					}
@@ -868,6 +865,24 @@
 					"contentsMask"
 					{
 						"type"	"int"
+					}
+				}
+			}
+			"CLagCompensationManager::StartLagCompensation"
+			{
+				"signature"	"CLagCompensationManager::StartLagCompensation"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"ignore"
+				"arguments"
+				{
+					"player"
+					{
+						"type"	"cbaseentity"
+					}
+					"cmd"
+					{
+						"type"	"objectptr"
 					}
 				}
 			}

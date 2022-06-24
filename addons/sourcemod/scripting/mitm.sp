@@ -37,6 +37,8 @@
 
 #define DEFINDEX_UNDEFINED	65535
 
+#define MAX_TEAM_NAME_LENGTH	32	// Max length of a team's name
+
 // m_lifeState values
 #define LIFE_ALIVE				0 // alive
 #define LIFE_DYING				1 // playing death animation or still falling off of a ledge waiting to hit ground
@@ -472,6 +474,47 @@ enum struct CountdownTimer
 	}
 }
 
+enum struct IntervalTimer
+{
+	float m_timestamp;
+	
+	void Reset()
+	{
+		this.m_timestamp = GetGameTime();
+	}
+	
+	void Start()
+	{
+		this.m_timestamp = GetGameTime();
+	}
+	
+	void Invalidate()
+	{
+		this.m_timestamp = -1.0;
+	}
+	
+	bool HasStarted()
+	{
+		return (this.m_timestamp > 0.0);
+	}
+	
+	/// if not started, elapsed time is very large
+	float GetElapsedTime()
+	{
+		return (this.HasStarted()) ? (GetGameTime() - this.m_timestamp) : 99999.9;
+	}
+	
+	bool IsLessThen(float duration)
+	{
+		return (GetGameTime() - this.m_timestamp < duration) ? true : false;
+	}
+	
+	bool IsGreaterThen(float duration)
+	{
+		return (GetGameTime() - this.m_timestamp > duration) ? true : false;
+	}
+}
+
 // Globals
 Handle g_WarningHudSync;
 Handle g_InfoHudSync;
@@ -482,6 +525,8 @@ bool g_bAllowTeamChange;
 bool g_bForceFriendlyFire;
 float g_flNextRestoreCheckpointTime;
 float g_flNextClientTick;
+
+IntervalTimer m_undergroundTimer[MAXPLAYERS + 1];
 
 // Plugin ConVars
 ConVar mitm_developer;
@@ -857,6 +902,42 @@ void OnClientTick(int client, float flInterval)
 			TF2Attrib_RemoveByName(client, "no_jump");
 		}
 		
+		float origin[3];
+		GetClientAbsOrigin(client, origin);
+		
+		// watch for bots that have fallen through the ground
+		if (myArea && myArea.GetZVector(origin) - origin[2] > 100.0)
+		{
+			if (!m_undergroundTimer[client].HasStarted())
+			{
+				m_undergroundTimer[client].Start();
+			}
+			else if (m_undergroundTimer[client].IsGreaterThen(3.0))
+			{
+				char auth[MAX_AUTHID_LENGTH];
+				GetClientAuthId(client, AuthId_Engine, auth, sizeof(auth), false);
+				
+				char teamName[MAX_TEAM_NAME_LENGTH];
+				GetTeamName(GetClientTeam(client), teamName, sizeof(teamName));
+				
+				LogMessage( "\"%N<%i><%s><%s>\" underground (position \"%3.2f %3.2f %3.2f\")", 
+							client, 
+							GetClientUserId(client), 
+							auth, 
+							teamName, 
+							origin[0], origin[1], origin[2]);
+				
+				// teleport bot to a reasonable place
+				float center[3];
+				myArea.GetCenter(center);
+				TeleportEntity(client, center);
+			}
+		}
+		else
+		{
+			m_undergroundTimer[client].Invalidate();
+		}
+		
 		if (SDKCall_HasTheFlag(client))
 		{
 			CTFBotDeliverFlag_Update(client);
@@ -967,55 +1048,17 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 
 public void TF2_OnConditionAdded(int client, TFCond condition)
 {
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	switch (condition)
 	{
-		switch (condition)
+		case TFCond_SpawnOutline:
 		{
-			case TFCond_MVMBotRadiowave:
-			{
-				// apply gatebot effects
-				TE_TFParticleEffect("bot_radio_waves", .attachType = PATTACH_POINT_FOLLOW, .entity = client, .attachPoint = LookupEntityAttachment(client, "head"));
-				
-				float flDuration = TF2Util_GetPlayerConditionDuration(client, TFCond_MVMBotRadiowave);
-				TF2_StunPlayer(client, flDuration, 1.0, TF_STUNFLAG_SLOWDOWN | TF_STUNFLAG_BONKSTUCK | TF_STUNFLAG_NOSOUNDOREFFECT);
-			}
-			case TFCond_SpawnOutline:
+			if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 			{
 				// no spawn outline for robots
 				TF2_RemoveCondition(client, condition);
 			}
 		}
 	}
-}
-
-public void TF2_OnConditionRemoved(int client, TFCond condition)
-{
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
-	{
-		switch (condition)
-		{
-			case TFCond_MVMBotRadiowave:
-			{
-				SetVariantString("ParticleEffectStop");
-				AcceptEntityInput(client, "DispatchEffect");
-			}
-		}
-	}
-}
-
-public Action TF2Items_OnGiveNamedItem(int client, char[] classname, int itemDefIndex, Handle &item)
-{
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
-	{
-		int slot = TF2Econ_GetItemLoadoutSlot(itemDefIndex, TF2_GetPlayerClass(client));
-		if (slot == LOADOUT_POSITION_ACTION)
-		{
-			// Robots aren't allowed to have action items
-			return Plugin_Handled;
-		}
-	}
-	
-	return Plugin_Continue;
 }
 
 any GetOffset(const char[] name)
@@ -1045,7 +1088,7 @@ void SelectNewDefenders()
 	CPrintToChatAll("%s %t", PLUGIN_TAG, "Queue_NewDefenders");
 	
 	// grab team names
-	char redTeamname[64], blueTeamname[64];
+	char redTeamname[MAX_TEAM_NAME_LENGTH], blueTeamname[MAX_TEAM_NAME_LENGTH];
 	mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
 	mp_tournament_blueteamname.GetString(blueTeamname, sizeof(blueTeamname));
 	

@@ -555,8 +555,9 @@ MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookReturn ret, 
 MRESReturn DHookCallback_CSquadSpawner_Post(Address pThis, DHookReturn ret, DHookParam params)
 {
 	CSquadSpawner spawner = CSquadSpawner(pThis);
+	CUtlVector result = CUtlVector(params.Get(2));
 	
-	if (ret.Value)
+	if (ret.Value && result)
 	{
 		// create the squad
 		CTFBotSquad squad = CTFBotSquad.Create();
@@ -565,9 +566,9 @@ MRESReturn DHookCallback_CSquadSpawner_Post(Address pThis, DHookReturn ret, DHoo
 			squad.SetFormationSize(spawner.m_formationSize);
 			squad.SetShouldPreserveSquad(spawner.m_bShouldPreserveSquad);
 			
-			for (int i = 0; i < m_justSpawnedVector.Length; ++i)
+			for (int i = 0; i < result.Count(); ++i)
 			{
-				int bot = m_justSpawnedVector.Get(i);
+				int bot = GetEntityFromHandle(Deref(result.Get(i)));
 				if (bot != -1)
 				{
 					Player(bot).JoinSquad(squad);
@@ -576,7 +577,6 @@ MRESReturn DHookCallback_CSquadSpawner_Post(Address pThis, DHookReturn ret, DHoo
 		}
 	}
 	
-	// do not clear m_justSpawnedVector here, populators will handle that
 	return MRES_Ignored;
 }
 

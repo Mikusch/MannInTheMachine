@@ -803,25 +803,15 @@ public void OnGameFrame()
 		
 		g_flNextClientTick = GetGameTime() + flInterval;
 	}
-	
-	// In rare cases, the bomb can get stuck on spectators after a wave ends.
-	// Look for flags that aren't home and reset them.
-	if (GameRules_GetRoundState() == RoundState_BetweenRounds)
-	{
-		int flag = MaxClients + 1;
-		while ((flag = FindEntityByClassname(flag, "item_teamflag")) != -1)
-		{
-			if (GetEntProp(flag, Prop_Send, "m_nFlagStatus") != TF_FLAGINFO_HOME)
-			{
-				// flag is not home - reset!
-				AcceptEntityInput(flag, "ForceReset");
-			}
-		}
-	}
 }
 
 void OnClientTick(int client, float flInterval)
 {
+	// if bot is already dead at this point, make sure it's dead
+	// check for !IsAlive because bot could be DYING
+	if (!IsPlayerAlive(client))
+		return;
+	
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
 		if (Player(client).HasTag("bot_gatebot"))

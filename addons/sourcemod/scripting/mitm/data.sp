@@ -18,7 +18,6 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define DONT_UPGRADE	-1
 #define MY_CURRENT_GUN	0
 
 // Auto Jump

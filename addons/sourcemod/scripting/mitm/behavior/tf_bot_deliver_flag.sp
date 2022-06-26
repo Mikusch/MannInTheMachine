@@ -18,6 +18,8 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+#define DONT_UPGRADE	-1
+
 static bool g_bInCaptureZone;
 
 static CountdownTimer m_upgradeTimer[MAXPLAYERS + 1];

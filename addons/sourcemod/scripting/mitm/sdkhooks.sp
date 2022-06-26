@@ -20,7 +20,7 @@
 
 void SDKHooks_OnClientPutInServer(int client)
 {
-	SDKHook(client, SDKHook_OnTakeDamageAlive, SDKHookCB_Client_OnTakeDamageAlive);
+	SDKHook(client, SDKHook_OnTakeDamage, SDKHookCB_Client_OnTakeDamage);
 }
 
 void SDKHooks_OnEntityCreated(int entity, const char[] classname)
@@ -35,7 +35,7 @@ void SDKHooks_OnEntityCreated(int entity, const char[] classname)
 	}
 }
 
-Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+Action SDKHookCB_Client_OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
 	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
 	{
@@ -44,8 +44,6 @@ Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int &inflic
 		{
 			if ((float(GetEntProp(victim, Prop_Data, "m_iHealth")) - damage) <= 0.0)
 			{
-				CTFBotMissionSuicideBomber_OnKilled(victim);
-				
 				SetEntityHealth(victim, 1);
 				return Plugin_Handled;
 			}

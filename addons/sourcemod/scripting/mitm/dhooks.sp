@@ -1470,14 +1470,19 @@ MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 				}
 			}
 		}
+		
+		if (Player(player).IsInASquad())
+		{
+			Player(player).LeaveSquad();
+		}
+		
+		Player(player).StopIdleSound();
+		
+		if (Player(player).HasMission(MISSION_DESTROY_SENTRIES))
+		{
+			CTFBotMissionSuicideBomber_OnKilled(player);
+		}
 	}
-	
-	if (Player(player).IsInASquad())
-	{
-		Player(player).LeaveSquad();
-	}
-	
-	Player(player).StopIdleSound();
 	
 	return MRES_Handled;
 }

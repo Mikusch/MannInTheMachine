@@ -1478,8 +1478,10 @@ MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 		
 		Player(player).StopIdleSound();
 		
+		// TODO: This is horrible. Create an actions system.
 		if (Player(player).HasMission(MISSION_DESTROY_SENTRIES))
 		{
+			g_binMissionSuicideBomber[player] = false;
 			CTFBotMissionSuicideBomber_OnKilled(player);
 		}
 	}

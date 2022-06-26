@@ -527,6 +527,7 @@ float g_flNextRestoreCheckpointTime;
 float g_flNextClientTick;
 
 IntervalTimer m_undergroundTimer[MAXPLAYERS + 1];
+bool g_binMissionSuicideBomber[MAXPLAYERS + 1];
 
 // Plugin ConVars
 ConVar mitm_developer;
@@ -939,18 +940,16 @@ void OnClientTick(int client, float flInterval)
 		{
 			case MISSION_DESTROY_SENTRIES:
 			{
-				static bool s_inMissionSuicideBomber[MAXPLAYERS + 1];
-				
-				if (s_inMissionSuicideBomber[client])
+				if (g_binMissionSuicideBomber[client])
 				{
 					if (!CTFBotMissionSuicideBomber_Update(client))
 					{
-						s_inMissionSuicideBomber[client] = false;
+						g_binMissionSuicideBomber[client] = false;
 					}
 				}
 				else
 				{
-					s_inMissionSuicideBomber[client] = true;
+					g_binMissionSuicideBomber[client] = true;
 					CTFBotMissionSuicideBomber_OnStart(client);
 				}
 				

@@ -526,8 +526,10 @@ bool g_bForceFriendlyFire;
 float g_flNextRestoreCheckpointTime;
 float g_flNextClientTick;
 
+// TODO: This is horrible. Create an actions system.
 IntervalTimer m_undergroundTimer[MAXPLAYERS + 1];
 bool g_binMissionSuicideBomber[MAXPLAYERS + 1];
+bool g_bInEngineerIdle[MAXPLAYERS + 1];
 
 // Plugin ConVars
 ConVar mitm_developer;
@@ -998,18 +1000,16 @@ void OnClientTick(int client, float flInterval)
 				m_bIsTeleportingIn[client] = false;
 			}
 			
-			static bool s_inEngineerIdle[MAXPLAYERS + 1];
-			
-			if (s_inEngineerIdle[client])
+			if (g_bInEngineerIdle[client])
 			{
 				if (!CTFBotMvMEngineerIdle_Update(client))
 				{
-					s_inEngineerIdle[client] = false;
+					g_bInEngineerIdle[client] = false;
 				}
 			}
 			else
 			{
-				s_inEngineerIdle[client] = true;
+				g_bInEngineerIdle[client] = true;
 				CTFBotMvMEngineerIdle_OnStart(client);
 			}
 			

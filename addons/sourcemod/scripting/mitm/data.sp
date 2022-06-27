@@ -621,13 +621,15 @@ methodmap Player
 			// and add ones that we want specifically
 			for (int i = 0; i < pEvent.m_characterAttributes.Count(); i++)
 			{
-				// static_attrib_t
-				Address pDef = pEvent.m_characterAttributes.Get(i, 8);
+				Address characterAttributes = pEvent.m_characterAttributes.Get(i, 8); // static_attrib_t
+				int defIndex = Deref(characterAttributes, NumberType_Int16);
 				
-				int defIndex = Deref(pDef, NumberType_Int16);
-				float value = Deref(pDef + view_as<Address>(0x4));
-				
-				TF2Attrib_SetByDefIndex(this._client, defIndex, value);
+				Address pDef = TF2Econ_GetAttributeDefinitionAddress(defIndex);
+				if (pDef)
+				{
+					float flValue = Deref(characterAttributes + view_as<Address>(0x4));
+					TF2Attrib_SetByDefIndex(this._client, defIndex, flValue);
+				}
 			}
 			
 			// set health back to what it was before we clear bot's attributes
@@ -661,8 +663,7 @@ methodmap Player
 						CUtlVector m_attributes = CUtlVector(itemAttributes + view_as<Address>(0x8));
 						for (int iAtt = 0; iAtt < m_attributes.Count(); ++iAtt)
 						{
-							// item_attributes_t
-							Address attrib = m_attributes.Get(iAtt, 8);
+							Address attrib = m_attributes.Get(iAtt, 8); // item_attributes_t
 							
 							int defIndex = Deref(attrib, NumberType_Int16);
 							float value = Deref(attrib + view_as<Address>(0x4));

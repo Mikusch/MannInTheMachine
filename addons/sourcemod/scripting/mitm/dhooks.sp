@@ -569,7 +569,7 @@ MRESReturn DHookCallback_CSquadSpawner_Post(Address pThis, DHookReturn ret, DHoo
 			for (int i = 0; i < result.Count(); ++i)
 			{
 				int bot = GetEntityFromHandle(Deref(result.Get(i)));
-				if (bot != -1)
+				if (IsEntityClient(bot))
 				{
 					Player(bot).JoinSquad(squad);
 				}

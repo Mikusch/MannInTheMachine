@@ -26,7 +26,7 @@ static CountdownTimer m_teleportDelay[MAXPLAYERS + 1];
 
 void CTFBotMvMEngineerTeleportSpawn_Init()
 {
-	ActionFactory = new NextBotActionFactory("EngineerTeleportSpawn");
+	ActionFactory = new NextBotActionFactory("MvMEngineerTeleportSpawn");
 	ActionFactory.BeginDataMapDesc()
 	// TODO
 	.EndDataMapDesc();
@@ -56,14 +56,12 @@ static int CTFBotMvMEngineerTeleportSpawn_Update(NextBotAction action, int actor
 {
 	if (!m_teleportDelay[actor].HasStarted())
 	{
+		float origin[3];
+		GetEntPropVector(m_hintEntity[actor], Prop_Data, "m_vecAbsOrigin", origin);
+		
 		m_teleportDelay[actor].Start(0.1);
 		if (m_hintEntity[actor] != -1)
-		{
-			float origin[3];
-			GetEntPropVector(m_hintEntity[actor], Prop_Data, "m_vecAbsOrigin", origin);
-			
 			SDKCall_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Defenders);
-		}
 	}
 	else if (m_teleportDelay[actor].IsElapsed())
 	{

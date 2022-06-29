@@ -23,13 +23,37 @@ static NextBotActionFactory ActionFactory;
 void CTFBotScenarioMonitor_Init()
 {
 	ActionFactory = new NextBotActionFactory("ScenarioMonitor");
-	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotScenarioMonitor_Update);
 	ActionFactory.SetCallback(NextBotActionCallbackType_InitialContainedAction, CTFBotScenarioMonitor_InitialContainedAction);
+	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotScenarioMonitor_Update);
 }
 
 NextBotAction CTFBotScenarioMonitor_Create()
 {
 	return ActionFactory.Create();
+}
+
+static NextBotAction CTFBotScenarioMonitor_InitialContainedAction(NextBotAction action, int actor)
+{
+	if (Player(actor).IsInASquad())
+	{
+		if (Player(actor).GetSquad().IsLeader(actor))
+		{
+			// I'm the leader of this Squad, so I can do what I want and the other Squaddies will support actor
+			return DesiredScenarioAndClassAction(actor);
+		}
+		
+		// Medics are the exception - they always heal, and have special squad logic in their heal logic
+		if (TF2_GetPlayerClass(actor) == TFClass_Medic)
+		{
+			return CTFBotMedicHeal_Create();
+		}
+		
+		// I'm in a Squad but not the leader, do "escort and support" Squad behavior
+		// until the Squad disbands, and then do my normal thing
+		return DesiredScenarioAndClassAction(actor);
+	}
+	
+	return DesiredScenarioAndClassAction(actor);
 }
 
 static int CTFBotScenarioMonitor_Update(NextBotAction action, int actor, float interval)
@@ -48,30 +72,6 @@ static int CTFBotScenarioMonitor_Update(NextBotAction action, int actor, float i
 	}
 	
 	return action.Continue();
-}
-
-static NextBotAction CTFBotScenarioMonitor_InitialContainedAction(NextBotAction action, int actor)
-{
-	if (Player(actor).IsInASquad())
-	{
-		if (Player(actor).GetSquad().IsLeader(actor))
-		{
-			// I'm the leader of this Squad, so I can do what I want and the other Squaddies will support actor
-			return DesiredScenarioAndClassAction(actor);
-		}
-		
-		// Medics are the exception - they always heal, and have special squad logic in their heal logic
-		if (TF2_GetPlayerClass(actor) == TFClass_Medic)
-		{
-			//return CTFBotMedicHeal_Create();
-		}
-		
-		// I'm in a Squad but not the leader, do "escort and support" Squad behavior
-		// until the Squad disbands, and then do my normal thing
-		return DesiredScenarioAndClassAction(actor);
-	}
-	
-	return DesiredScenarioAndClassAction(actor);
 }
 
 static NextBotAction DesiredScenarioAndClassAction(int actor)

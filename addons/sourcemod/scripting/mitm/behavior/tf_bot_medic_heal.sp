@@ -37,7 +37,7 @@ static int CTFBotMedicHeal_Update(NextBotAction action, int actor, float interva
 	if (Player(actor).IsInASquad())
 	{
 		CTFBotSquad squad = Player(actor).GetSquad();
-		if (squad.IsLeader(actor))
+		if (GameRules_IsMannVsMachineMode() && squad.IsLeader(actor))
 		{
 			return action.ChangeTo(CTFBotFetchFlag_Create(), "I'm now a squad leader! Going for the flag!");
 		}
@@ -74,11 +74,15 @@ static int CTFBotMedicHeal_Update(NextBotAction action, int actor, float interva
 		Player(actor).SetMission(NO_MISSION);
 	}
 	
-	// this differs from actual bot code - we only care whether the player should go for the flag
 	if (SelectPatient(actor) == -1)
 	{
-		// no-one is left to heal - get the flag!
-		return action.ChangeTo(CTFBotFetchFlag_Create(), "Everyone is gone! Going for the flag");
+		// no patients
+		
+		if (GameRules_IsMannVsMachineMode())
+		{
+			// no-one is left to heal - get the flag!
+			return action.ChangeTo(CTFBotFetchFlag_Create(), "Everyone is gone! Going for the flag");
+		}
 	}
 	
 	return action.Continue();

@@ -155,12 +155,12 @@ static int CTFBotMainAction_Update(NextBotAction action, int actor, float interv
 				char teamName[MAX_TEAM_NAME_LENGTH];
 				GetTeamName(GetClientTeam(actor), teamName, sizeof(teamName));
 				
-				LogMessage("\"%N<%i><%s><%s>\" underground (position \"%3.2f %3.2f %3.2f\")", 
-					actor, 
-					GetClientUserId(actor), 
-					auth, 
-					teamName, 
-					origin[0], origin[1], origin[2]);
+				LogMessage( "\"%N<%i><%s><%s>\" underground (position \"%3.2f %3.2f %3.2f\")", 
+							actor, 
+							GetClientUserId(actor), 
+							auth, 
+							teamName, 
+							origin[0], origin[1], origin[2]);
 				
 				// teleport bot to a reasonable place
 				float center[3];

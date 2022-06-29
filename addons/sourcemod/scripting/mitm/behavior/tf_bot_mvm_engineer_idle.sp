@@ -31,7 +31,7 @@ static CountdownTimer m_reevaluateNestTimer[MAXPLAYERS + 1];
 
 void CTFBotMvMEngineerIdle_Init()
 {
-	ActionFactory = new NextBotActionFactory("EngineerIdle");
+	ActionFactory = new NextBotActionFactory("MvMEngineerIdle");
 	ActionFactory.BeginDataMapDesc()
 	// TODO
 	.EndDataMapDesc();

@@ -23,12 +23,18 @@ static NextBotActionFactory ActionFactory;
 void CTFBotFetchFlag_Init()
 {
 	ActionFactory = new NextBotActionFactory("FetchFlag");
+	ActionFactory.BeginDataMapDesc()
+		.DefineBoolField("m_isTemporary")
+	.EndDataMapDesc();
 	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotFetchFlag_Update);
 }
 
-NextBotAction CTFBotFetchFlag_Create()
+NextBotAction CTFBotFetchFlag_Create(bool isTemporary = false)
 {
-	return ActionFactory.Create();
+	NextBotAction action = ActionFactory.Create();
+	action.SetData("m_isTemporary", isTemporary);
+	
+	return action;
 }
 
 static int CTFBotFetchFlag_Update(NextBotAction action, int actor, float interval)
@@ -46,6 +52,15 @@ static int CTFBotFetchFlag_Update(NextBotAction action, int actor, float interva
 		{
 			// we just spawned - give us the flag
 			SDKCall_PickUp(flag, actor, true);
+		}
+		else
+		{
+			if (action.GetData("m_isTemporary"))
+			{
+				return action.Done("Flag unreachable");
+			}
+			
+			return action.Continue();
 		}
 	}
 	

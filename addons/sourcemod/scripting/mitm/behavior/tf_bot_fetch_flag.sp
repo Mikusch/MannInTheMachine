@@ -18,22 +18,36 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-void CTFBotFetchFlag_Update(int me)
+static NextBotActionFactory ActionFactory;
+
+void CTFBotFetchFlag_Init()
 {
-	int flag = Player(me).GetFlagToFetch();
+	ActionFactory = new NextBotActionFactory("FetchFlag");
+	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotFetchFlag_Update);
+}
+
+NextBotAction CTFBotFetchFlag_Create()
+{
+	return ActionFactory.Create();
+}
+
+static int CTFBotFetchFlag_Update(NextBotAction action, int actor, float interval)
+{
+	int flag = Player(actor).GetFlagToFetch();
 	
 	if (flag == -1)
 	{
-		// no flag
-		return;
+		return action.Done("No flag");
 	}
 	
 	if (GameRules_IsMannVsMachineMode() && GetEntProp(flag, Prop_Send, "m_nFlagStatus") == TF_FLAGINFO_HOME)
 	{
-		if (GetGameTime() - GetEntDataFloat(me, GetOffset("CTFPlayer::m_flSpawnTime")) < 1.0 && TF2_GetClientTeam(me) != TFTeam_Spectator)
+		if (GetGameTime() - GetEntDataFloat(actor, GetOffset("CTFPlayer::m_flSpawnTime")) < 1.0 && TF2_GetClientTeam(actor) != TFTeam_Spectator)
 		{
 			// we just spawned - give us the flag
-			SDKCall_PickUp(flag, me, true);
+			SDKCall_PickUp(flag, actor, true);
 		}
 	}
+	
+	return action.Continue();
 }

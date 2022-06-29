@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2022  Mikusch
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,6 +18,8 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+static NextBotActionFactory ActionFactory;
+
 static int m_sentryHint[MAXPLAYERS + 1];
 static int m_teleporterHint[MAXPLAYERS + 1];
 static int m_nestHint[MAXPLAYERS + 1];
@@ -27,75 +29,91 @@ static bool m_bTriedToDetonateStaleNest[MAXPLAYERS + 1];
 static CountdownTimer m_findHintTimer[MAXPLAYERS + 1];
 static CountdownTimer m_reevaluateNestTimer[MAXPLAYERS + 1];
 
-void CTFBotMvMEngineerIdle_OnStart(int me)
+void CTFBotMvMEngineerIdle_Init()
 {
-	m_sentryHint[me] = -1;
-	m_teleporterHint[me] = -1;
-	m_nestHint[me] = -1;
-	m_nTeleportedCount[me] = 0;
-	m_bTeleportedToHint[me] = false;
-	m_bTriedToDetonateStaleNest[me] = false;
+	ActionFactory = new NextBotActionFactory("EngineerIdle");
+	ActionFactory.BeginDataMapDesc()
+	// TODO
+	.EndDataMapDesc();
+	ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, CTFBotMvMEngineerIdle_OnStart);
+	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotMvMEngineerIdle_Update);
 }
 
-bool CTFBotMvMEngineerIdle_Update(int me)
+NextBotAction CTFBotMvMEngineerIdle_Create()
 {
-	if (!IsPlayerAlive(me))
+	return ActionFactory.Create();
+}
+
+static int CTFBotMvMEngineerIdle_OnStart(NextBotAction action, int actor, NextBotAction priorAction)
+{
+	m_sentryHint[actor] = -1;
+	m_teleporterHint[actor] = -1;
+	m_nestHint[actor] = -1;
+	m_nTeleportedCount[actor] = 0;
+	m_bTeleportedToHint[actor] = false;
+	m_bTriedToDetonateStaleNest[actor] = false;
+	
+	return action.Continue();
+}
+
+static int CTFBotMvMEngineerIdle_Update(NextBotAction action, int actor, float interval)
+{
+	if (!IsPlayerAlive(actor))
 	{
 		// don't do anything when I'm dead
-		return false;
+		return action.Done();
 	}
 	
-	if (m_sentryHint[me] == -1 || ShouldAdvanceNestSpot(me))
+	if (m_sentryHint[actor] == -1 || ShouldAdvanceNestSpot(actor))
 	{
-		if (m_findHintTimer[me].HasStarted() && !m_findHintTimer[me].IsElapsed())
+		if (m_findHintTimer[actor].HasStarted() && !m_findHintTimer[actor].IsElapsed())
 		{
 			// too soon
-			return true;
+			return action.Continue();
 		}
 		
-		m_findHintTimer[me].Start(GetRandomFloat(1.0, 2.0));
+		m_findHintTimer[actor].Start(GetRandomFloat(1.0, 2.0));
 		
 		// figure out where to teleport into the map
-		bool bShouldTeleportToHint = Player(me).HasAttribute(TELEPORT_TO_HINT);
-		bool bShouldCheckForBlockingObject = !m_bTeleportedToHint[me] && bShouldTeleportToHint;
+		bool bShouldTeleportToHint = Player(actor).HasAttribute(TELEPORT_TO_HINT);
+		bool bShouldCheckForBlockingObject = !m_bTeleportedToHint[actor] && bShouldTeleportToHint;
 		int newNest = -1;
 		if (!SDKCall_FindHint(bShouldCheckForBlockingObject, !bShouldTeleportToHint, newNest))
 		{
 			// try again next time
-			return true;
+			return action.Continue();
 		}
 		
 		// unown the old nest
-		if (m_nestHint[me] != -1)
+		if (m_nestHint[actor] != -1)
 		{
-			SetEntityOwner(m_nestHint[me], -1);
+			SetEntityOwner(m_nestHint[actor], -1);
 		}
 		
-		m_nestHint[me] = newNest;
-		SetEntityOwner(m_nestHint[me], me);
-		m_sentryHint[me] = SDKCall_GetSentryHint(m_nestHint[me]);
-		TakeOverStaleNest(m_sentryHint[me], me);
+		m_nestHint[actor] = newNest;
+		SetEntityOwner(m_nestHint[actor], actor);
+		m_sentryHint[actor] = SDKCall_GetSentryHint(m_nestHint[actor]);
+		TakeOverStaleNest(m_sentryHint[actor], actor);
 		
-		if (Player(me).m_teleportWhereName.Length > 0)
+		if (Player(actor).m_teleportWhereName.Length > 0)
 		{
-			m_teleporterHint[me] = SDKCall_GetTeleporterHint(m_nestHint[me]);
-			TakeOverStaleNest(m_teleporterHint[me], me);
+			m_teleporterHint[actor] = SDKCall_GetTeleporterHint(m_nestHint[actor]);
+			TakeOverStaleNest(m_teleporterHint[actor], actor);
 		}
 		
-		if (!m_bTeleportedToHint[me] && Player(me).HasAttribute(TELEPORT_TO_HINT))
+		if (!m_bTeleportedToHint[actor] && Player(actor).HasAttribute(TELEPORT_TO_HINT))
 		{
-			m_nTeleportedCount[me]++;
-			bool bFirstTeleportSpawn = m_nTeleportedCount[me] == 1;
-			m_bTeleportedToHint[me] = true;
+			m_nTeleportedCount[actor]++;
+			bool bFirstTeleportSpawn = m_nTeleportedCount[actor] == 1;
+			m_bTeleportedToHint[actor] = true;
 			
-			CTFBotMvMEngineerTeleportSpawn_Create(me, m_nestHint[me], bFirstTeleportSpawn);
-			return true;
+			return action.SuspendFor(CTFBotMvMEngineerTeleportSpawn_Create(actor, m_nestHint[actor], bFirstTeleportSpawn), "In spawn area - teleport to the teleporter hint");
 		}
 		
 		int mySentry = -1;
-		if (m_sentryHint[me] != -1)
+		if (m_sentryHint[actor] != -1)
 		{
-			int owner = GetEntPropEnt(m_sentryHint[me], Prop_Send, "m_hOwnerEntity");
+			int owner = GetEntPropEnt(m_sentryHint[actor], Prop_Send, "m_hOwnerEntity");
 			if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
 			{
 				mySentry = owner;
@@ -107,67 +125,67 @@ bool CTFBotMvMEngineerIdle_Update(int me)
 				if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
 				{
 					mySentry = owner;
-					AcceptEntityInput(mySentry, "SetBuilder", me);
+					AcceptEntityInput(mySentry, "SetBuilder", actor);
 				}
 				else
 				{
-					return true;
+					return action.Continue();
 				}
 			}
 		}
 	}
 	
-	TryToDetonateStaleNest(me);
+	TryToDetonateStaleNest(actor);
 	
-	return true;
+	return action.Continue();
 }
 
-static void TakeOverStaleNest(int hint, int me)
+static void TakeOverStaleNest(int hint, int actor)
 {
 	if (hint != -1 && CBaseTFBotHintEntity(hint).OwnerObjectHasNoOwner())
 	{
 		int obj = GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity");
-		SetEntityOwner(obj, me);
-		AcceptEntityInput(obj, "SetBuilder", me);
+		SetEntityOwner(obj, actor);
+		AcceptEntityInput(obj, "SetBuilder", actor);
 	}
 }
 
-static bool ShouldAdvanceNestSpot(int me)
+static bool ShouldAdvanceNestSpot(int actor)
 {
-	if (m_nestHint[me] == -1)
+	if (m_nestHint[actor] == -1)
 	{
 		return false;
 	}
 	
-	if (!m_reevaluateNestTimer[me].HasStarted())
+	if (!m_reevaluateNestTimer[actor].HasStarted())
 	{
-		m_reevaluateNestTimer[me].Start(5.0);
+		m_reevaluateNestTimer[actor].Start(5.0);
 		return false;
 	}
 	
-	for (int i = 0; i < TF2Util_GetPlayerObjectCount(me); ++i)
+	for (int i = 0; i < TF2Util_GetPlayerObjectCount(actor); ++i)
 	{
-		int obj = TF2Util_GetPlayerObject(me, i);
+		int obj = TF2Util_GetPlayerObject(actor, i);
 		if (obj != -1 && GetEntProp(obj, Prop_Data, "m_iHealth") < GetEntProp(obj, Prop_Data, "m_iMaxHealth"))
 		{
 			// if the nest is under attack, don't advance the nest
-			m_reevaluateNestTimer[me].Start(5.0);
+			m_reevaluateNestTimer[actor].Start(5.0);
 			return false;
 		}
 	}
 	
-	if (m_reevaluateNestTimer[me].IsElapsed())
+	if (m_reevaluateNestTimer[actor].IsElapsed())
 	{
-		m_reevaluateNestTimer[me].Invalidate();
+		m_reevaluateNestTimer[actor].Invalidate();
 	}
 	
 	BombInfo_t bombInfo = malloc(20); // sizeof(BombInfo_t)
 	if (SDKCall_GetBombInfo(bombInfo))
 	{
-		if (m_nestHint[me] != -1)
+		if (m_nestHint[actor] != -1)
 		{
 			float origin[3];
-			GetEntPropVector(m_nestHint[me], Prop_Data, "m_vecAbsOrigin", origin);
+			GetEntPropVector(m_nestHint[actor], Prop_Data, "m_vecAbsOrigin", origin);
 			
 			CNavArea hintArea = TheNavMesh.GetNearestNavArea(origin, false, 1000.0);
 			if (hintArea)
@@ -185,15 +203,15 @@ static bool ShouldAdvanceNestSpot(int me)
 	return false;
 }
 
-static void TryToDetonateStaleNest(int me)
+static void TryToDetonateStaleNest(int actor)
 {
-	if (m_bTriedToDetonateStaleNest[me])
+	if (m_bTriedToDetonateStaleNest[actor])
 		return;
 	
 	// wait until the engy finish building his nest
-	if ((m_sentryHint[me] != -1 && !CBaseTFBotHintEntity(m_sentryHint[me]).OwnerObjectFinishBuilding()) ||
-		(m_teleporterHint[me] != -1 && !CBaseTFBotHintEntity(m_teleporterHint[me]).OwnerObjectFinishBuilding()))
-		return;
+	if ((m_sentryHint[actor] != -1 && !CBaseTFBotHintEntity(m_sentryHint[actor]).OwnerObjectFinishBuilding()) || 
+		(m_teleporterHint[actor] != -1 && !CBaseTFBotHintEntity(m_teleporterHint[actor]).OwnerObjectFinishBuilding()))
+	return;
 	
 	ArrayList activeEngineerNest = new ArrayList();
 	
@@ -217,7 +235,7 @@ static void TryToDetonateStaleNest(int me)
 		}
 	}
 	
-	m_bTriedToDetonateStaleNest[me] = true;
+	m_bTriedToDetonateStaleNest[actor] = true;
 	
 	delete activeEngineerNest;
 }

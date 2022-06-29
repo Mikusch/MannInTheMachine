@@ -440,6 +440,11 @@ methodmap Player
 		return this.m_mission == NO_MISSION ? false : true;
 	}
 	
+	public MissionType GetMission()
+	{
+		return this.m_mission;
+	}
+	
 	public void SetMission(MissionType mission)
 	{
 		this.SetPrevMission(this.m_mission);

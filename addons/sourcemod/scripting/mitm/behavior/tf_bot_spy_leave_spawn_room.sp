@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2022  Mikusch
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,26 +18,44 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static CountdownTimer m_waitTimer[MAXPLAYERS + 1];
-static int m_attempt[MAXPLAYERS + 1];
+static NextBotActionFactory ActionFactory;
 
-void CTFBotSpyLeaveSpawnRoom_OnStart(int me)
+static CountdownTimer m_waitTimer[MAXPLAYERS + 1];
+
+void CTFBotSpyLeaveSpawnRoom_Init()
 {
-	// disguise as enemy team
-	Player(me).DisguiseAsMemberOfEnemyTeam();
-	
-	// cloak
-	SDKCall_DoClassSpecialSkill(me);
-	
-	// wait a few moments to guarantee a minimum time between announcing Spies and their attack
-	m_waitTimer[me].Start(2.0 + GetRandomFloat(0.0, 1.0));
-	
-	m_attempt[me] = 0;
+	ActionFactory = new NextBotActionFactory("SpyLeaveSpawnRoom");
+	ActionFactory.BeginDataMapDesc()
+		.DefineIntField("m_attempt")
+	.EndDataMapDesc();
+	ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, CTFBotSpyLeaveSpawnRoom_OnStart);
+	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotSpyLeaveSpawnRoom_Update);
 }
 
-void CTFBotSpyLeaveSpawnRoom_Update(int me)
+NextBotAction CTFBotSpyLeaveSpawnRoom_Create()
 {
-	if (m_waitTimer[me].HasStarted() && m_waitTimer[me].IsElapsed())
+	return ActionFactory.Create();
+}
+
+static int CTFBotSpyLeaveSpawnRoom_OnStart(NextBotAction action, int actor, NextBotAction prevAction)
+{
+	// disguise as enemy team
+	Player(actor).DisguiseAsMemberOfEnemyTeam();
+	
+	// cloak
+	SDKCall_DoClassSpecialSkill(actor);
+	
+	// wait a few moments to guarantee a minimum time between announcing Spies and their attack
+	m_waitTimer[actor].Start(2.0 + GetRandomFloat(0.0, 1.0));
+	
+	action.SetData("m_attempt", 0);
+	
+	return action.Continue();
+}
+
+static int CTFBotSpyLeaveSpawnRoom_Update(NextBotAction action, int actor, float interval)
+{
+	if (m_waitTimer[actor].HasStarted() && m_waitTimer[actor].IsElapsed())
 	{
 		int victim = -1;
 		
@@ -48,7 +66,7 @@ void CTFBotSpyLeaveSpawnRoom_Update(int me)
 			if (!IsClientInGame(client))
 				continue;
 			
-			if (TF2_GetClientTeam(client) == TF2_GetClientTeam(me))
+			if (TF2_GetClientTeam(client) == TF2_GetClientTeam(actor))
 				continue;
 			
 			if (!IsPlayerAlive(client))
@@ -73,7 +91,7 @@ void CTFBotSpyLeaveSpawnRoom_Update(int me)
 		
 		for (int i = 0; i < enemyVector.Length; ++i)
 		{
-			if (TeleportNearVictim(me, enemyVector.Get(i), m_attempt[me]))
+			if (TeleportNearVictim(actor, enemyVector.Get(i), action.GetData("m_attempt")))
 			{
 				victim = enemyVector.Get(i);
 				break;
@@ -83,21 +101,22 @@ void CTFBotSpyLeaveSpawnRoom_Update(int me)
 		// if we didn't find a victim, try again in a bit
 		if (victim == -1)
 		{
-			m_waitTimer[me].Start(1.0);
+			m_waitTimer[actor].Start(1.0);
 			
-			++m_attempt[me];
+			action.SetData("m_attempt", action.GetData("m_attempt") + 1);
 			
 			delete enemyVector;
-			return;
+			return action.Continue();
 		}
 		
-		m_waitTimer[me].Invalidate();
 		delete enemyVector;
-		return;
+		return action.Done();
 	}
+	
+	return action.Continue();
 }
 
-static bool TeleportNearVictim(int me, int victim, int attempt)
+static bool TeleportNearVictim(int actor, int victim, int attempt)
 {
 	if (victim == -1)
 	{
@@ -161,7 +180,7 @@ static bool TeleportNearVictim(int me, int victim, int attempt)
 		
 		if (SDKCall_IsSpaceToSpawnHere(where))
 		{
-			TeleportEntity(me, where, ZERO_VECTOR, ZERO_VECTOR);
+			TeleportEntity(actor, where, ZERO_VECTOR, ZERO_VECTOR);
 			delete ambushVector;
 			return true;
 		}

@@ -1477,16 +1477,6 @@ MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 		}
 		
 		Player(player).StopIdleSound();
-		
-		if (Player(player).HasMission(MISSION_DESTROY_SENTRIES))
-		{
-			CTFBotMissionSuicideBomber_OnKilled(player);
-		}
-		
-		// TODO: This is horrible. Create an actions system.
-		g_binMissionSuicideBomber[player] = false;
-		m_bIsTeleportingIn[player] = false;
-		g_bInEngineerIdle[player] = false;
 	}
 	
 	return MRES_Handled;

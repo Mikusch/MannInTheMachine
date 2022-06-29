@@ -699,3 +699,9 @@ bool IsEntityClient(int client)
 {
 	return (0 < client <= MaxClients);
 }
+
+bool FClassnameIs(int entity, const char[] szClassname)
+{
+	char m_iClassname[64];
+	return GetEntityClassname(entity, m_iClassname, sizeof(m_iClassname)) && StrEqual(szClassname, m_iClassname);
+}

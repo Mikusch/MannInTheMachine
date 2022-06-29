@@ -18,16 +18,28 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-void CTFBotMedicHeal_Update(int me)
+static NextBotActionFactory ActionFactory;
+
+void CTFBotMedicHeal_Init()
+{
+	ActionFactory = new NextBotActionFactory("MedicHeal");
+	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotMedicHeal_Update);
+}
+
+NextBotAction CTFBotMedicHeal_Create()
+{
+	return ActionFactory.Create();
+}
+
+static int CTFBotMedicHeal_Update(NextBotAction action, int actor, float interval)
 {
 	// if we're in a squad, and the only other members are medics, disband the squad
-	if (Player(me).IsInASquad())
+	if (Player(actor).IsInASquad())
 	{
-		CTFBotSquad squad = Player(me).GetSquad();
-		if (squad.IsLeader(me))
+		CTFBotSquad squad = Player(actor).GetSquad();
+		if (squad.IsLeader(actor))
 		{
-			CTFBotFetchFlag_Update(me);
-			return;
+			return action.ChangeTo(CTFBotFetchFlag_Create(), "I'm now a squad leader! Going for the flag!");
 		}
 		
 		if (!squad.ShouldPreserveSquad())
@@ -59,37 +71,38 @@ void CTFBotMedicHeal_Update(int me)
 	else
 	{
 		// not in a squad - for now, assume whatever mission I was on is over
-		Player(me).SetMission(NO_MISSION);
+		Player(actor).SetMission(NO_MISSION);
 	}
 	
 	// this differs from actual bot code - we only care whether the player should go for the flag
-	if (SelectPatient(me) == -1)
+	if (SelectPatient(actor) == -1)
 	{
 		// no-one is left to heal - get the flag!
-		CTFBotFetchFlag_Update(me);
-		return;
+		return action.ChangeTo(CTFBotFetchFlag_Create(), "Everyone is gone! Going for the flag");
 	}
+	
+	return action.Continue();
 }
 
-static int SelectPatient(int me)
+static int SelectPatient(int actor)
 {
 	for (int client = 1; client <= MaxClients; client++)
 	{
 		if (!IsClientInGame(client))
 			continue;
 		
-		if (TF2_GetClientTeam(client) != TF2_GetClientTeam(me))
+		if (TF2_GetClientTeam(client) != TF2_GetClientTeam(actor))
 			continue;
 		
 		if (!IsPlayerAlive(client))
 			continue;
 		
-		if (client == me)
+		if (client == actor)
 			continue;
 		
 		// always heal the flag carrier, regardless of class
 		// squads always heal the leader
-		if (!SDKCall_HasTheFlag(client) && !Player(me).IsInASquad())
+		if (!SDKCall_HasTheFlag(client) && !Player(actor).IsInASquad())
 		{
 			TFClassType class = TF2_GetPlayerClass(client);
 			if (class == TFClass_Medic ||

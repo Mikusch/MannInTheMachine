@@ -21,12 +21,14 @@
 static NextBotActionFactory ActionFactory;
 
 static CountdownTimer m_tauntTimer[MAXPLAYERS + 1];
-CountdownTimer m_tauntEndTimer[MAXPLAYERS + 1];
-static bool m_didTaunt[MAXPLAYERS + 1];
+static CountdownTimer m_tauntEndTimer[MAXPLAYERS + 1];
 
 void CTFBotTaunt_Init()
 {
 	ActionFactory = new NextBotActionFactory("Taunt");
+	ActionFactory.BeginDataMapDesc()
+		.DefineBoolField("m_didTaunt")
+	.EndDataMapDesc();
 	ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, CTFBotTaunt_OnStart);
 	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotTaunt_Update);
 }
@@ -39,7 +41,7 @@ NextBotAction CTFBotTaunt_Create()
 static int CTFBotTaunt_OnStart(NextBotAction action, int actor, NextBotAction priorAction)
 {
 	m_tauntTimer[actor].Start(GetRandomFloat(0.0, 1.0));
-	m_didTaunt[actor] = false;
+	action.SetData("m_didTaunt", false);
 	
 	return action.Continue();
 }
@@ -48,7 +50,7 @@ static int CTFBotTaunt_Update(NextBotAction action, int actor, float interval)
 {
 	if (m_tauntTimer[actor].IsElapsed())
 	{
-		if (m_didTaunt[actor])
+		if (action.GetData("m_didTaunt"))
 		{
 			// Stop taunting after a while
 			if (m_tauntEndTimer[actor].IsElapsed() && view_as<taunts_t>(GetEntProp(actor, Prop_Send, "m_iTauntIndex")) == TAUNT_LONG)
@@ -67,7 +69,7 @@ static int CTFBotTaunt_Update(NextBotAction action, int actor, float interval)
 			// Start a timer to end our taunt in case we're still going after awhile
 			m_tauntEndTimer[actor].Start(GetRandomFloat(3.0, 5.0));
 			
-			m_didTaunt[actor] = true;
+			action.SetData("m_didTaunt", true);
 		}
 	}
 	

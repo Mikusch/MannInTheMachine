@@ -24,13 +24,12 @@ static NextBotActionFactory ActionFactory;
 
 static CountdownTimer m_upgradeTimer[MAXPLAYERS + 1];
 static CountdownTimer m_buffPulseTimer[MAXPLAYERS + 1];
-static int m_upgradeLevel[MAXPLAYERS + 1];
 
 void CTFBotDeliverFlag_Init()
 {
 	ActionFactory = new NextBotActionFactory("DeliverFlag");
 	ActionFactory.BeginDataMapDesc()
-	// TODO
+		.DefineIntField("m_upgradeLevel")
 	.EndDataMapDesc();
 	ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, CTFBotDeliverFlag_OnStart);
 	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotDeliverFlag_Update);
@@ -54,14 +53,14 @@ static int CTFBotDeliverFlag_OnStart(NextBotAction action, int actor, NextBotAct
 	if (GetEntProp(actor, Prop_Send, "m_bIsMiniBoss"))
 	{
 		// Set threat level to max
-		m_upgradeLevel[actor] = DONT_UPGRADE;
+		action.SetData("m_upgradeLevel", DONT_UPGRADE);
 		SetEntProp(TFObjectiveResource(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 4);
 		SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", -1.0);
 		SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", -1.0);
 	}
 	else
 	{
-		m_upgradeLevel[actor] = 0;
+		action.SetData("m_upgradeLevel", 0);
 		m_upgradeTimer[actor].Start(tf_mvm_bot_flag_carrier_interval_to_1st_upgrade.FloatValue);
 		SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
 		SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
@@ -85,7 +84,7 @@ static int CTFBotDeliverFlag_Update(NextBotAction action, int actor, float inter
 		return action.Done("I'm no longer carrying the flag");
 	}
 	
-	if (UpgradeOverTime(actor))
+	if (UpgradeOverTime(action, actor))
 	{
 		return action.SuspendFor(CTFBotTaunt_Create(), "Taunting for our new upgrade");
 	}
@@ -103,9 +102,9 @@ static void CTFBotDeliverFlag_OnEnd(NextBotAction action, int actor, NextBotActi
 	}
 }
 
-static bool UpgradeOverTime(int actor)
+static bool UpgradeOverTime(NextBotAction action, int actor)
 {
-	if (m_upgradeLevel[actor] != DONT_UPGRADE)
+	if (action.GetData("m_upgradeLevel") != DONT_UPGRADE)
 	{
 		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(actor).GetLastKnownArea());
 		TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(actor) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
@@ -119,7 +118,7 @@ static bool UpgradeOverTime(int actor)
 		}
 		
 		// do defensive buff effect ourselves (since we're not a soldier)
-		if (m_upgradeLevel[actor] > 0 && m_buffPulseTimer[actor].IsElapsed())
+		if (action.GetData("m_upgradeLevel") > 0 && m_buffPulseTimer[actor].IsElapsed())
 		{
 			m_buffPulseTimer[actor].Start(1.0);
 			
@@ -148,13 +147,13 @@ static bool UpgradeOverTime(int actor)
 		{
 			const int maxLevel = 3;
 			
-			if (m_upgradeLevel[actor] < maxLevel)
+			if (action.GetData("m_upgradeLevel") < maxLevel)
 			{
-				++m_upgradeLevel[actor];
+				action.SetData("m_upgradeLevel", action.GetData("m_upgradeLevel") + 1);
 				
 				TFGameRules_BroadcastSound(255, "MVM.Warning");
 				
-				switch (m_upgradeLevel[actor])
+				switch (action.GetData("m_upgradeLevel"))
 				{
 					//---------------------------------------
 					case 1:

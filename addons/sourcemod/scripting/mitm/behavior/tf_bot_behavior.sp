@@ -149,18 +149,16 @@ static int CTFBotMainAction_Update(NextBotAction action, int actor, float interv
 			}
 			else if (m_undergroundTimer[actor].IsGreaterThen(3.0))
 			{
-				char auth[MAX_AUTHID_LENGTH];
+				char auth[MAX_AUTHID_LENGTH], teamName[MAX_TEAM_NAME_LENGTH];
 				GetClientAuthId(actor, AuthId_Engine, auth, sizeof(auth), false);
-				
-				char teamName[MAX_TEAM_NAME_LENGTH];
 				GetTeamName(GetClientTeam(actor), teamName, sizeof(teamName));
 				
-				LogMessage( "\"%N<%i><%s><%s>\" underground (position \"%3.2f %3.2f %3.2f\")", 
-							actor, 
-							GetClientUserId(actor), 
-							auth, 
-							teamName, 
-							origin[0], origin[1], origin[2]);
+				LogMessage("\"%N<%i><%s><%s>\" underground (position \"%3.2f %3.2f %3.2f\")", 
+						   actor, 
+						   GetClientUserId(actor), 
+						   auth, 
+						   teamName, 
+						   origin[0], origin[1], origin[2]);
 				
 				// teleport bot to a reasonable place
 				float center[3];
@@ -219,7 +217,7 @@ static int CTFBotMainAction_OnOtherKilled(NextBotAction action, int actor, int v
 			if (isTaunting)
 			{
 				// we just killed a human - taunt!
-				return action.TrySuspendFor(  CTFBotTaunt_Create(), RESULT_IMPORTANT, "Taunting our victim" );
+				return action.TrySuspendFor(CTFBotTaunt_Create(), RESULT_IMPORTANT, "Taunting our victim");
 			}
 		}
 	}

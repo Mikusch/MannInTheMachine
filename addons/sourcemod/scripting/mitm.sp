@@ -438,48 +438,48 @@ enum HintType
 
 enum struct CountdownTimer
 {
-	float timestamp;
-	float duration;
+	float m_timestamp;
+	float m_duration;
 	
 	void Reset()
 	{
-		this.timestamp = GetGameTime() + this.duration;
+		this.m_timestamp = GetGameTime() + this.m_duration;
 	}
 	
 	void Start(float duration)
 	{
-		this.timestamp = GetGameTime() + duration;
-		this.duration = duration;
+		this.m_timestamp = GetGameTime() + duration;
+		this.m_duration = duration;
 	}
 	
 	void Invalidate()
 	{
-		this.timestamp = -1.0;
+		this.m_timestamp = -1.0;
 	}
 	
 	bool HasStarted()
 	{
-		return this.timestamp > 0.0;
+		return this.m_timestamp > 0.0;
 	}
 	
 	bool IsElapsed()
 	{
-		return GetGameTime() > this.timestamp;
+		return GetGameTime() > this.m_timestamp;
 	}
 	
 	float GetElapsedTime()
 	{
-		return GetGameTime() - this.timestamp + this.duration;
+		return GetGameTime() - this.m_timestamp + this.m_duration;
 	}
 	
 	float GetRemainingTime()
 	{
-		return this.timestamp - GetGameTime();
+		return this.m_timestamp - GetGameTime();
 	}
 	
 	float GetCountdownDuration()
 	{
-		return this.HasStarted() ? this.duration : 0.0;
+		return this.HasStarted() ? this.m_duration : 0.0;
 	}
 }
 
@@ -656,7 +656,10 @@ public void OnPluginStart()
 	CTFBotSpyLeaveSpawnRoom_Init();
 	CTFBotTaunt_Init();
 	
+	// Install player action factory
 	EntityFactory = new CEntityFactory("player");
+	EntityFactory.DeriveFromClass("player");
+	EntityFactory.AttachNextBot();
 	EntityFactory.SetInitialActionFactory(CTFBotMainAction_GetFactory());
 	EntityFactory.Install();
 	

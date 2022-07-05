@@ -18,7 +18,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-void Console_Initialize()
+void Console_Init()
 {
 	RegConsoleCmd("mitm", ConCmd_OpenMainMenu, "Opens the main menu.");
 	RegConsoleCmd("queue", ConCmd_OpenQueueMenu, "Opens the queue menu.");

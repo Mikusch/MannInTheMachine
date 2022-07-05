@@ -53,7 +53,7 @@ static Handle g_SDKCallIsStaleNest;
 static Handle g_SDKCallDetonateStaleNest;
 static Handle g_SDKCallGetLiveTime;
 
-void SDKCalls_Initialize(GameData gamedata)
+void SDKCalls_Init(GameData gamedata)
 {
 	g_SDKCallGetClassIconLinux = PrepSDKCall_GetClassIcon_Linux(gamedata);
 	if (!g_SDKCallGetClassIconLinux)

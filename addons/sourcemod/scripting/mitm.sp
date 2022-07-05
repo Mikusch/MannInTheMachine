@@ -663,15 +663,15 @@ public void OnPluginStart()
 	EntityFactory.SetInitialActionFactory(CTFBotMainAction_GetFactory());
 	EntityFactory.Install();
 	
-	Console_Initialize();
-	Events_Initialize();
-	ClientPrefs_Initialize();
+	Console_Init();
+	Events_Init();
+	ClientPrefs_Init();
 	
 	GameData gamedata = new GameData("mitm");
 	if (gamedata)
 	{
-		DHooks_Initialize(gamedata);
-		SDKCalls_Initialize(gamedata);
+		DHooks_Init(gamedata);
+		SDKCalls_Init(gamedata);
 		
 		SetOffset(gamedata, "CTFBotSpawner::m_class");
 		SetOffset(gamedata, "CTFBotSpawner::m_health");

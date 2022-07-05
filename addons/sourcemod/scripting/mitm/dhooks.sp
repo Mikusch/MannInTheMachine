@@ -46,7 +46,7 @@ static int s_nSniperCount;
 static CBaseEntity s_lastTeleporter;
 static float s_flLastTeleportTime;
 
-void DHooks_Initialize(GameData gamedata)
+void DHooks_Init(GameData gamedata)
 {
 	m_justSpawnedVector = new ArrayList(MaxClients);
 	

@@ -18,7 +18,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-void Events_Initialize()
+void Events_Init()
 {
 	HookEvent("player_spawn", EventHook_PlayerSpawn);
 	HookEvent("player_death", EventHook_PlayerDeath);

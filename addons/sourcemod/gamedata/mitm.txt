@@ -369,6 +369,11 @@
 				"linux"		"8616"
 				"windows"	"8612"
 			}
+			"CTFPlayer::m_bAutoReload"
+			{
+				"linux"		"8687"
+				"windows"	"8683"
+			}
 			"CTFPlayer::m_bIsMissionEnemy"
 			{
 				"linux"		"8820"

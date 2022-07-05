@@ -178,16 +178,15 @@ static int CTFBotMainAction_Update(NextBotAction action, int actor, float interv
 		}*/
 	}
 	
-	// TODO
 	if (TF2_GetPlayerClass(actor) == TFClass_DemoMan)
 	{
 		// dont auto reload, so we fire stickies fast
-		//me->SetAutoReload( false );
+		SetEntData(actor, GetOffset("CTFPlayer::m_bAutoReload"), false, 1);
 	}
 	else
 	{
 		// reload weapons
-		//me->SetAutoReload( true );
+		SetEntData(actor, GetOffset("CTFPlayer::m_bAutoReload"), true, 1);
 	}
 	
 	return action.Continue();

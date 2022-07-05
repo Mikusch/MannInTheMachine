@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+static ArrayList g_EntityProperties;
+
 enum struct EntityProperties
 {
 	int m_index;
@@ -34,8 +36,6 @@ enum struct EntityProperties
 		delete this.m_teleportWhereName;
 	}
 }
-
-static ArrayList g_EntityProperties;
 
 /**
  * A methodmap that holds entity data.
@@ -57,7 +57,7 @@ methodmap Entity
 			g_EntityProperties = new ArrayList(sizeof(EntityProperties));
 		}
 		
-		// doubly convert it to ensure it's a reference
+		// doubly convert it to ensure we store it as an entity reference
 		entity = EntIndexToEntRef(EntRefToEntIndex(entity));
 		
 		if (g_EntityProperties.FindValue(entity, EntityProperties::m_index) == -1)
@@ -114,6 +114,13 @@ methodmap Entity
 		if (this.m_listIndex == -1)
 			return;
 		
+		EntityProperties properties;
+		if (g_EntityProperties.GetArray(this.m_listIndex, properties))
+		{
+			properties.Destroy();
+		}
+		
+		// finally, remove the entry from local storage
 		g_EntityProperties.Erase(this.m_listIndex);
 	}
 }

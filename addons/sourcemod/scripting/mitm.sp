@@ -15,6 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma semicolon 1
+#pragma newdecls required
+
 #include <sourcemod>
 #include <tf2_stocks>
 #include <sdkhooks>
@@ -29,9 +32,6 @@
 #include <cbasenpc>
 #include <cbasenpc/tf/nav>
 #include <morecolors>
-
-#pragma semicolon 1
-#pragma newdecls required
 
 #define ZERO_VECTOR	{ 0.0, 0.0, 0.0 }
 
@@ -539,6 +539,7 @@ float g_flNextRestoreCheckpointTime;
 
 // Plugin ConVars
 ConVar mitm_developer;
+ConVar mitm_defender_min_count;
 ConVar mitm_defender_max_count;
 ConVar mitm_spawn_hurry_time;
 ConVar mitm_queue_points;
@@ -614,6 +615,7 @@ public void OnPluginStart()
 	g_offsets = new StringMap();
 	
 	mitm_developer = CreateConVar("mitm_developer", "0", "Toggle plugin developer mode.");
+	mitm_defender_min_count = CreateConVar("mitm_defender_min_count", "6", "Minimum amount of defenders, regardless of player count.", _, _, _, true, 10.0);
 	mitm_defender_max_count = CreateConVar("mitm_defender_max_count", "8", "Maximum amount of defenders on a full server.", _, true, 6.0, true, 10.0);
 	mitm_spawn_hurry_time = CreateConVar("mitm_spawn_hurry_time", "30.0", "Time that invaders have to leave their spawn.");
 	mitm_queue_points = CreateConVar("mitm_queue_points", "5", "Amount of queue points awarded to players that did not become defenders.", _, true, 1.0);
@@ -919,7 +921,7 @@ void SelectNewDefenders()
 	
 	ArrayList defenderList = Queue_GetDefenderQueue();
 	int iDefenderCount = 0;
-	int iReqDefenderCount = RoundToNearest((float(playerList.Length) / float(MaxClients)) * mitm_defender_max_count.IntValue);
+	int iReqDefenderCount = Max(mitm_defender_min_count.FloatValue, RoundToNearest((float(playerList.Length) / float(MaxClients)) * mitm_defender_max_count.IntValue));
 	
 	// select our defenders
 	for (int i = 0; i < defenderList.Length; i++)

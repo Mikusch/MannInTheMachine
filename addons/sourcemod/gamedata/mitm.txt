@@ -156,11 +156,6 @@
 				"linux"		"@_ZN15CTFPlayerShared14ResetRageBuffsEv"
 				"windows"	"\xC7\x81\x98\x02\x00\x00\x00\x00\x00\x00"
 			}
-			"CTFPlayer::IsAllowedToTaunt"
-			{
-				"linux"		"@_ZN9CTFPlayer16IsAllowedToTauntEv"
-				"windows"	"\x55\x8B\xEC\x51\x56\x8B\xF1\x8B\x06\x8B\x80\x04\x01\x00\x00\xFF\xD0\x84\xC0\x75\x2A"
-			}
 			"CTFPlayer::CanBuild"
 			{
 				"linux"		"@_ZN9CTFPlayer8CanBuildEii"

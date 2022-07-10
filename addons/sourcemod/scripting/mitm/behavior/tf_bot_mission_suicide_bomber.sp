@@ -129,7 +129,7 @@ static int CTFBotMissionSuicideBomber_Update(NextBotAction action, int actor, fl
 	
 	// Get to a third of the damage range before detonating
 	float detonateRange = tf_bot_suicide_bomb_range.FloatValue / 3.0;
-	if (IsDistanceBetweenLessThan(actor, m_lastKnownVictimPosition[actor], detonateRange) && SDKCall_IsAllowedToTaunt(actor))
+	if (IsDistanceBetweenLessThan(actor, m_lastKnownVictimPosition[actor], detonateRange))
 	{
 		float where[3];
 		AddVectors(m_lastKnownVictimPosition[actor], Vector(0.0, 0.0, sv_stepsize.FloatValue), where);

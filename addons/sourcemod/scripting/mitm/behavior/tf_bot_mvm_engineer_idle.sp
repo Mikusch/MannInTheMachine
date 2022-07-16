@@ -20,12 +20,6 @@
 
 static NextBotActionFactory ActionFactory;
 
-static int m_sentryHint[MAXPLAYERS + 1];
-static int m_teleporterHint[MAXPLAYERS + 1];
-static int m_nestHint[MAXPLAYERS + 1];
-static int m_nTeleportedCount[MAXPLAYERS + 1];
-static bool m_bTeleportedToHint[MAXPLAYERS + 1];
-static bool m_bTriedToDetonateStaleNest[MAXPLAYERS + 1];
 static CountdownTimer m_findHintTimer[MAXPLAYERS + 1];
 static CountdownTimer m_reevaluateNestTimer[MAXPLAYERS + 1];
 
@@ -33,8 +27,13 @@ void CTFBotMvMEngineerIdle_Init()
 {
 	ActionFactory = new NextBotActionFactory("MvMEngineerIdle");
 	ActionFactory.BeginDataMapDesc()
-	// TODO
-	.EndDataMapDesc();
+		.DefineEntityField("m_sentryHint")
+		.DefineEntityField("m_teleporterHint")
+		.DefineEntityField("m_nestHint")
+		.DefineIntField("m_nTeleportedCount")
+		.DefineBoolField("m_bTeleportedToHint")
+		.DefineBoolField("m_bTriedToDetonateStaleNest")
+		.EndDataMapDesc();
 	ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, CTFBotMvMEngineerIdle_OnStart);
 	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotMvMEngineerIdle_Update);
 }
@@ -46,12 +45,12 @@ NextBotAction CTFBotMvMEngineerIdle_Create()
 
 static int CTFBotMvMEngineerIdle_OnStart(NextBotAction action, int actor, NextBotAction priorAction)
 {
-	m_sentryHint[actor] = -1;
-	m_teleporterHint[actor] = -1;
-	m_nestHint[actor] = -1;
-	m_nTeleportedCount[actor] = 0;
-	m_bTeleportedToHint[actor] = false;
-	m_bTriedToDetonateStaleNest[actor] = false;
+	action.SetDataEnt("m_sentryHint", -1);
+	action.SetDataEnt("m_teleporterHint", -1);
+	action.SetDataEnt("m_nestHint", -1);
+	action.SetData("m_nTeleportedCount", 0);
+	action.SetData("m_bTeleportedToHint", false);
+	action.SetData("m_bTriedToDetonateStaleNest", false);
 	
 	return action.Continue();
 }
@@ -64,7 +63,7 @@ static int CTFBotMvMEngineerIdle_Update(NextBotAction action, int actor, float i
 		return action.Done();
 	}
 	
-	if (m_sentryHint[actor] == -1 || ShouldAdvanceNestSpot(actor))
+	if (action.GetDataEnt("m_sentryHint") == -1 || ShouldAdvanceNestSpot(action, actor))
 	{
 		if (m_findHintTimer[actor].HasStarted() && !m_findHintTimer[actor].IsElapsed())
 		{
@@ -76,7 +75,7 @@ static int CTFBotMvMEngineerIdle_Update(NextBotAction action, int actor, float i
 		
 		// figure out where to teleport into the map
 		bool bShouldTeleportToHint = Player(actor).HasAttribute(TELEPORT_TO_HINT);
-		bool bShouldCheckForBlockingObject = !m_bTeleportedToHint[actor] && bShouldTeleportToHint;
+		bool bShouldCheckForBlockingObject = !action.GetData("m_bTeleportedToHint") && bShouldTeleportToHint;
 		int newNest = -1;
 		if (!SDKCall_FindHint(bShouldCheckForBlockingObject, !bShouldTeleportToHint, newNest))
 		{
@@ -85,57 +84,57 @@ static int CTFBotMvMEngineerIdle_Update(NextBotAction action, int actor, float i
 		}
 		
 		// unown the old nest
-		if (m_nestHint[actor] != -1)
+		if (action.GetDataEnt("m_nestHint") != -1)
 		{
-			SetEntityOwner(m_nestHint[actor], -1);
+			SetEntityOwner(action.GetDataEnt("m_nestHint"), -1);
 		}
 		
-		m_nestHint[actor] = newNest;
-		SetEntityOwner(m_nestHint[actor], actor);
-		m_sentryHint[actor] = SDKCall_GetSentryHint(m_nestHint[actor]);
-		TakeOverStaleNest(m_sentryHint[actor], actor);
+		action.SetDataEnt("m_nestHint", newNest);
+		SetEntityOwner(action.GetDataEnt("m_nestHint"), actor);
+		action.SetDataEnt("m_sentryHint", SDKCall_GetSentryHint(action.GetDataEnt("m_nestHint")));
+		TakeOverStaleNest(action.GetDataEnt("m_sentryHint"), actor);
 		
 		if (Player(actor).m_teleportWhereName.Length > 0)
 		{
-			m_teleporterHint[actor] = SDKCall_GetTeleporterHint(m_nestHint[actor]);
-			TakeOverStaleNest(m_teleporterHint[actor], actor);
+			action.SetDataEnt("m_teleporterHint", SDKCall_GetTeleporterHint(action.GetDataEnt("m_nestHint")));
+			TakeOverStaleNest(action.GetDataEnt("m_teleporterHint"), actor);
+		}
+	}
+	
+	if (!action.GetData("m_bTeleportedToHint") && Player(actor).HasAttribute(TELEPORT_TO_HINT))
+	{
+		action.SetData("m_nTeleportedCount", action.GetData("m_nTeleportedCount") + 1);
+		bool bFirstTeleportSpawn = action.GetData("m_nTeleportedCount") == 1;
+		action.SetData("m_bTeleportedToHint", true);
+		
+		return action.SuspendFor(CTFBotMvMEngineerTeleportSpawn_Create(action.GetDataEnt("m_nestHint"), bFirstTeleportSpawn), "In spawn area - teleport to the teleporter hint");
+	}
+	
+	int mySentry = -1;
+	if (action.GetDataEnt("m_sentryHint") != -1)
+	{
+		int owner = GetEntPropEnt(action.GetDataEnt("m_sentryHint"), Prop_Send, "m_hOwnerEntity");
+		if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
+		{
+			mySentry = owner;
 		}
 		
-		if (!m_bTeleportedToHint[actor] && Player(actor).HasAttribute(TELEPORT_TO_HINT))
+		if (mySentry == -1)
 		{
-			m_nTeleportedCount[actor]++;
-			bool bFirstTeleportSpawn = m_nTeleportedCount[actor] == 1;
-			m_bTeleportedToHint[actor] = true;
-			
-			return action.SuspendFor(CTFBotMvMEngineerTeleportSpawn_Create(m_nestHint[actor], bFirstTeleportSpawn), "In spawn area - teleport to the teleporter hint");
-		}
-		
-		int mySentry = -1;
-		if (m_sentryHint[actor] != -1)
-		{
-			int owner = GetEntPropEnt(m_sentryHint[actor], Prop_Send, "m_hOwnerEntity");
+			// check if there's a stale object on the hint
 			if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
 			{
 				mySentry = owner;
+				AcceptEntityInput(mySentry, "SetBuilder", actor);
 			}
-			
-			if (mySentry == -1)
+			else
 			{
-				// check if there's a stale object on the hint
-				if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
-				{
-					mySentry = owner;
-					AcceptEntityInput(mySentry, "SetBuilder", actor);
-				}
-				else
-				{
-					return action.Continue();
-				}
+				return action.Continue();
 			}
 		}
 	}
 	
-	TryToDetonateStaleNest(actor);
+	TryToDetonateStaleNest(action);
 	
 	return action.Continue();
 }
@@ -150,9 +149,9 @@ static void TakeOverStaleNest(int hint, int actor)
 	}
 }
 
-static bool ShouldAdvanceNestSpot(int actor)
+static bool ShouldAdvanceNestSpot(NextBotAction action, int actor)
 {
-	if (m_nestHint[actor] == -1)
+	if (action.GetDataEnt("m_nestHint") == -1)
 	{
 		return false;
 	}
@@ -182,10 +181,10 @@ static bool ShouldAdvanceNestSpot(int actor)
 	BombInfo_t bombInfo = malloc(20); // sizeof(BombInfo_t)
 	if (SDKCall_GetBombInfo(bombInfo))
 	{
-		if (m_nestHint[actor] != -1)
+		if (action.GetDataEnt("m_nestHint") != -1)
 		{
 			float origin[3];
-			GetEntPropVector(m_nestHint[actor], Prop_Data, "m_vecAbsOrigin", origin);
+			GetEntPropVector(action.GetDataEnt("m_nestHint"), Prop_Data, "m_vecAbsOrigin", origin);
 			
 			CNavArea hintArea = TheNavMesh.GetNearestNavArea(origin, false, 1000.0);
 			if (hintArea)
@@ -203,14 +202,14 @@ static bool ShouldAdvanceNestSpot(int actor)
 	return false;
 }
 
-static void TryToDetonateStaleNest(int actor)
+static void TryToDetonateStaleNest(NextBotAction action)
 {
-	if (m_bTriedToDetonateStaleNest[actor])
+	if (action.GetData("m_bTriedToDetonateStaleNest"))
 		return;
 	
 	// wait until the engy finish building his nest
-	if ((m_sentryHint[actor] != -1 && !CBaseTFBotHintEntity(m_sentryHint[actor]).OwnerObjectFinishBuilding()) || 
-		(m_teleporterHint[actor] != -1 && !CBaseTFBotHintEntity(m_teleporterHint[actor]).OwnerObjectFinishBuilding()))
+	if ((action.GetDataEnt("m_sentryHint") != -1 && !CBaseTFBotHintEntity(action.GetDataEnt("m_sentryHint")).OwnerObjectFinishBuilding()) || 
+		(action.GetDataEnt("m_teleporterHint") != -1 && !CBaseTFBotHintEntity(action.GetDataEnt("m_teleporterHint")).OwnerObjectFinishBuilding()))
 		return;
 	
 	ArrayList activeEngineerNest = new ArrayList();
@@ -235,17 +234,7 @@ static void TryToDetonateStaleNest(int actor)
 		}
 	}
 	
-	m_bTriedToDetonateStaleNest[actor] = true;
+	action.SetData("m_bTriedToDetonateStaleNest", true);
 	
 	delete activeEngineerNest;
-}
-
-int GetNestSentryHint(int player)
-{
-	return m_sentryHint[player];
-}
-
-int GetNestTeleporterHint(int player)
-{
-	return m_teleporterHint[player];
 }

@@ -705,3 +705,22 @@ bool FClassnameIs(int entity, const char[] szClassname)
 	char m_iClassname[64];
 	return GetEntityClassname(entity, m_iClassname, sizeof(m_iClassname)) && StrEqual(szClassname, m_iClassname);
 }
+
+int FindBotHintForPlayer(int player, const char[] classname)
+{
+	int hint = MaxClients + 1;
+	while ((hint = FindEntityByClassname(hint, classname)) != -1)
+	{
+		int owner = GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity");
+		if (owner != -1)
+		{
+			int builder = GetEntPropEnt(owner, Prop_Send, "m_hBuilder");
+			if (builder == player)
+			{
+				return hint;
+			}
+		}
+	}
+	
+	return -1;
+}

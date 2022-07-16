@@ -102,7 +102,7 @@ Action CommandListener_Build(int client, const char[] command, int argc)
 					return Plugin_Handled;
 				}
 				
-				if (GetNestTeleporterHint(client) == -1)
+				if (FindBotHintForPlayer(client, "bot_hint_teleporter_exit") == -1)
 				{
 					PrintCenterText(client, "%t", "Engineer_NotAllowedToBuild_NoHint");
 					return Plugin_Handled;
@@ -111,7 +111,7 @@ Action CommandListener_Build(int client, const char[] command, int argc)
 			// Sentry Gun: Only allow if we have a sentry hint
 			case TFObject_Sentry:
 			{
-				if (GetNestSentryHint(client) == -1)
+				if (FindBotHintForPlayer(client, "bot_hint_sentrygun") == -1)
 				{
 					PrintCenterText(client, "%t", "Engineer_NotAllowedToBuild_NoHint");
 					return Plugin_Handled;
@@ -120,7 +120,7 @@ Action CommandListener_Build(int client, const char[] command, int argc)
 			// Sapper: Actually a teleporter exit for Engineers, so treat it that way
 			case TFObject_Sapper:
 			{
-				if (TF2_GetPlayerClass(client) == TFClass_Engineer && GetNestTeleporterHint(client) == -1)
+				if (TF2_GetPlayerClass(client) == TFClass_Engineer && FindBotHintForPlayer(client, "bot_hint_teleporter_exit") == -1)
 				{
 					PrintCenterText(client, "%t", "Engineer_NotAllowedToBuild_NoHint");
 					return Plugin_Handled;

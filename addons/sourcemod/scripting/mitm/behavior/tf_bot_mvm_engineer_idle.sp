@@ -81,38 +81,38 @@ bool CTFBotMvMEngineerIdle_Update(int me)
 			m_teleporterHint[me] = SDKCall_GetTeleporterHint(m_nestHint[me]);
 			TakeOverStaleNest(m_teleporterHint[me], me);
 		}
+	}
+	
+	if (!m_bTeleportedToHint[me] && Player(me).HasAttribute(TELEPORT_TO_HINT))
+	{
+		m_nTeleportedCount[me]++;
+		bool bFirstTeleportSpawn = m_nTeleportedCount[me] == 1;
+		m_bTeleportedToHint[me] = true;
 		
-		if (!m_bTeleportedToHint[me] && Player(me).HasAttribute(TELEPORT_TO_HINT))
+		CTFBotMvMEngineerTeleportSpawn_Create(me, m_nestHint[me], bFirstTeleportSpawn);
+		return true;
+	}
+	
+	int mySentry = -1;
+	if (m_sentryHint[me] != -1)
+	{
+		int owner = GetEntPropEnt(m_sentryHint[me], Prop_Send, "m_hOwnerEntity");
+		if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
 		{
-			m_nTeleportedCount[me]++;
-			bool bFirstTeleportSpawn = m_nTeleportedCount[me] == 1;
-			m_bTeleportedToHint[me] = true;
-			
-			CTFBotMvMEngineerTeleportSpawn_Create(me, m_nestHint[me], bFirstTeleportSpawn);
-			return true;
+			mySentry = owner;
 		}
 		
-		int mySentry = -1;
-		if (m_sentryHint[me] != -1)
+		if (mySentry == -1)
 		{
-			int owner = GetEntPropEnt(m_sentryHint[me], Prop_Send, "m_hOwnerEntity");
+			// check if there's a stale object on the hint
 			if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
 			{
 				mySentry = owner;
+				AcceptEntityInput(mySentry, "SetBuilder", me);
 			}
-			
-			if (mySentry == -1)
+			else
 			{
-				// check if there's a stale object on the hint
-				if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
-				{
-					mySentry = owner;
-					AcceptEntityInput(mySentry, "SetBuilder", me);
-				}
-				else
-				{
-					return true;
-				}
+				return true;
 			}
 		}
 	}

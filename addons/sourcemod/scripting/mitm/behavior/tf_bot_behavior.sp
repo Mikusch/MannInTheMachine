@@ -63,8 +63,6 @@ static int CTFBotMainAction_OnStart(NextBotAction action, int actor, NextBotActi
 
 static int CTFBotMainAction_Update(NextBotAction action, int actor, float interval)
 {
-	PrintToServer("CTFBotMainAction_Update");
-	
 	if (TF2_GetClientTeam(actor) != TFTeam_Blue && TF2_GetClientTeam(actor) != TFTeam_Red)
 	{
 		// not on a team - do nothing

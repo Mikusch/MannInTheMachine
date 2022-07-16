@@ -58,8 +58,6 @@ static NextBotAction CTFBotScenarioMonitor_InitialContainedAction(NextBotAction 
 
 static int CTFBotScenarioMonitor_Update(NextBotAction action, int actor, float interval)
 {
-	PrintToServer("Update");
-	
 	if (SDKCall_HasTheFlag(actor))
 	{
 		if (tf_bot_flag_kill_on_touch.BoolValue)

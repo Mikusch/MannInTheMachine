@@ -20,23 +20,19 @@
 
 static NextBotActionFactory ActionFactory;
 
-static int m_victim[MAXPLAYERS + 1];
-static float m_lastKnownVictimPosition[MAXPLAYERS + 1][3];
-
 static CountdownTimer m_talkTimer[MAXPLAYERS + 1];
 static CountdownTimer m_detonateTimer[MAXPLAYERS + 1];
-
-static bool m_bHasDetonated[MAXPLAYERS + 1];
-static bool m_bWasSuccessful[MAXPLAYERS + 1];
-static bool m_bWasKilled[MAXPLAYERS + 1];
-
-static float m_vecDetLocation[MAXPLAYERS + 1][3];
 
 void CTFBotMissionSuicideBomber_Init()
 {
 	ActionFactory = new NextBotActionFactory("MissionSuicideBomber");
 	ActionFactory.BeginDataMapDesc()
-	// TODO
+		.DefineEntityField("m_victim")
+		.DefineVectorField("m_lastKnownVictimPosition")
+		.DefineBoolField("m_bHasDetonated")
+		.DefineBoolField("m_bWasSuccessful")
+		.DefineBoolField("m_bWasKilled")
+		.DefineVectorField("m_vecDetLocation")
 	.EndDataMapDesc();
 	ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, CTFBotMissionSuicideBomber_OnStart);
 	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotMissionSuicideBomber_Update);
@@ -51,15 +47,17 @@ NextBotAction CTFBotMissionSuicideBomber_Create()
 static int CTFBotMissionSuicideBomber_OnStart(NextBotAction action, int actor, NextBotAction priorAction)
 {
 	m_detonateTimer[actor].Invalidate();
-	m_bHasDetonated[actor] = false;
-	m_bWasSuccessful[actor] = false;
-	m_bWasKilled[actor] = false;
+	action.SetData("m_bHasDetonated", false);
+	action.SetData("m_bWasSuccessful", false);
+	action.SetData("m_bWasKilled", false);
 	
-	m_victim[actor] = EntIndexToEntRef(Player(actor).GetMissionTarget());
+	action.SetDataEnt("m_victim", Player(actor).GetMissionTarget());
 	
-	if (IsValidEntity(m_victim[actor]))
+	if (IsValidEntity(action.GetDataEnt("m_victim")))
 	{
-		GetEntPropVector(m_victim[actor], Prop_Data, "m_vecAbsOrigin", m_lastKnownVictimPosition[actor]);
+		float vecAbsOrigin[3];
+		GetEntPropVector(action.GetDataEnt("m_victim"), Prop_Data, "m_vecAbsOrigin", vecAbsOrigin);
+		action.SetDataVector("m_lastKnownVictimPosition", vecAbsOrigin);
 	}
 	
 	return action.Continue();
@@ -72,22 +70,27 @@ static int CTFBotMissionSuicideBomber_Update(NextBotAction action, int actor, fl
 	{
 		if (m_detonateTimer[actor].IsElapsed())
 		{
-			GetClientAbsOrigin(actor, m_vecDetLocation[actor]);
-			Detonate(actor);
+			float vecAbsOrigin[3];
+			GetClientAbsOrigin(actor, vecAbsOrigin);
+			action.SetDataVector("m_vecDetLocation", vecAbsOrigin);
+			Detonate(action, actor);
 			
 			// Send out an event
-			if (m_bWasSuccessful[actor] && IsValidEntity(m_victim[actor]) && HasEntProp(m_victim[actor], Prop_Send, "m_hBuilder"))
+			if (action.GetData("m_bWasSuccessful") && IsValidEntity(action.GetDataEnt("m_victim")) && HasEntProp(action.GetDataEnt("m_victim"), Prop_Send, "m_hBuilder"))
 			{
-				int owner = GetEntPropEnt(m_victim[actor], Prop_Send, "m_hBuilder");
+				int owner = GetEntPropEnt(action.GetDataEnt("m_victim"), Prop_Send, "m_hBuilder");
 				if (owner != -1)
 				{
 					Event event = CreateEvent("mvm_sentrybuster_detonate");
 					if (event)
 					{
+						float vecDetLocation[3];
+						action.GetDataVector("m_vecDetLocation", vecDetLocation);
+						
 						event.SetInt("player", owner);
-						event.SetFloat("det_x", m_vecDetLocation[actor][0]);
-						event.SetFloat("det_y", m_vecDetLocation[actor][1]);
-						event.SetFloat("det_z", m_vecDetLocation[actor][2]);
+						event.SetFloat("det_x", vecDetLocation[0]);
+						event.SetFloat("det_y", vecDetLocation[1]);
+						event.SetFloat("det_z", vecDetLocation[2]);
 						FireEvent(event);
 					}
 				}
@@ -103,39 +106,45 @@ static int CTFBotMissionSuicideBomber_Update(NextBotAction action, int actor, fl
 	if (GetEntProp(actor, Prop_Data, "m_iHealth") == 1)
 	{
 		// low on health - detonate where we are!
-		StartDetonate(actor, false, true);
+		StartDetonate(action, actor, false, true);
 		
 		return action.Continue();
 	}
 	
-	if (IsValidEntity(m_victim[actor]))
+	if (IsValidEntity(action.GetDataEnt("m_victim")))
 	{
 		// update chase destination
-		if (GetEntProp(m_victim[actor], Prop_Data, "m_lifeState") == LIFE_ALIVE && !(GetEntProp(m_victim[actor], Prop_Data, "m_fEffects") & EF_NODRAW))
+		if (GetEntProp(action.GetDataEnt("m_victim"), Prop_Data, "m_lifeState") == LIFE_ALIVE && !(GetEntProp(action.GetDataEnt("m_victim"), Prop_Data, "m_fEffects") & EF_NODRAW))
 		{
-			GetEntPropVector(m_victim[actor], Prop_Data, "m_vecAbsOrigin", m_lastKnownVictimPosition[actor]);
+			float vecAbsOrigin[3];
+			GetEntPropVector(action.GetDataEnt("m_victim"), Prop_Data, "m_vecAbsOrigin", vecAbsOrigin);
+			action.SetDataVector("m_lastKnownVictimPosition", vecAbsOrigin);
 		}
 		
 		// if the engineer is carrying his sentry, he becomes the victim
-		if (HasEntProp(m_victim[actor], Prop_Send, "m_hBuilder"))
+		if (HasEntProp(action.GetDataEnt("m_victim"), Prop_Send, "m_hBuilder"))
 		{
-			if (GetEntProp(m_victim[actor], Prop_Send, "m_bCarried") && GetEntPropEnt(m_victim[actor], Prop_Send, "m_hBuilder") != -1)
+			if (GetEntProp(action.GetDataEnt("m_victim"), Prop_Send, "m_bCarried") && GetEntPropEnt(action.GetDataEnt("m_victim"), Prop_Send, "m_hBuilder") != -1)
 			{
 				// path to the engineer carrying the sentry
-				GetEntPropVector(GetEntPropEnt(m_victim[actor], Prop_Send, "m_hBuilder"), Prop_Data, "m_vecAbsOrigin", m_lastKnownVictimPosition[actor]);
+				float vecAbsOrigin[3];
+				GetEntPropVector(GetEntPropEnt(action.GetDataEnt("m_victim"), Prop_Send, "m_hBuilder"), Prop_Data, "m_vecAbsOrigin", vecAbsOrigin);
+				action.SetDataVector("m_lastKnownVictimPosition", vecAbsOrigin);
 			}
 		}
 	}
 	
 	// Get to a third of the damage range before detonating
+	float lastKnownVictimPosition[3];
+	action.GetDataVector("m_lastKnownVictimPosition", lastKnownVictimPosition);
 	float detonateRange = tf_bot_suicide_bomb_range.FloatValue / 3.0;
-	if (IsDistanceBetweenLessThan(actor, m_lastKnownVictimPosition[actor], detonateRange))
+	if (IsDistanceBetweenLessThan(actor, lastKnownVictimPosition, detonateRange))
 	{
 		float where[3];
-		AddVectors(m_lastKnownVictimPosition[actor], Vector(0.0, 0.0, sv_stepsize.FloatValue), where);
+		AddVectors(lastKnownVictimPosition, Vector(0.0, 0.0, sv_stepsize.FloatValue), where);
 		if (IsLineOfFireClear(actor, where))
 		{
-			StartDetonate(actor, true);
+			StartDetonate(action, actor, true);
 		}
 	}
 	
@@ -150,15 +159,15 @@ static int CTFBotMissionSuicideBomber_Update(NextBotAction action, int actor, fl
 
 static int CTFBotMissionSuicideBomber_OnKilled(NextBotAction action, int actor, int attacker, int inflictor, float damage, int damagetype)
 {
-	if (!m_bHasDetonated[actor])
+	if (!action.GetData("m_bHasDetonated"))
 	{
 		if (!m_detonateTimer[actor].HasStarted())
 		{
-			StartDetonate(actor);
+			StartDetonate(action, actor);
 		}
 		else if (m_detonateTimer[actor].IsElapsed())
 		{
-			Detonate(actor);
+			Detonate(action, actor);
 		}
 		else
 		{
@@ -174,7 +183,7 @@ static int CTFBotMissionSuicideBomber_OnKilled(NextBotAction action, int actor, 
 	return action.TryContinue();
 }
 
-static void StartDetonate(int actor, bool bWasSuccessful = false, bool bWasKilled = false)
+static void StartDetonate(NextBotAction action, int actor, bool bWasSuccessful = false, bool bWasKilled = false)
 {
 	if (m_detonateTimer[actor].HasStarted())
 		return;
@@ -188,8 +197,8 @@ static void StartDetonate(int actor, bool bWasSuccessful = false, bool bWasKille
 		}
 	}
 	
-	m_bWasSuccessful[actor] = bWasSuccessful;
-	m_bWasKilled[actor] = bWasKilled;
+	action.SetData("m_bWasSuccessful", bWasSuccessful);
+	action.SetData("m_bWasKilled", bWasKilled);
 	
 	SetEntProp(actor, Prop_Data, "m_takedamage", DAMAGE_NO);
 	
@@ -199,10 +208,10 @@ static void StartDetonate(int actor, bool bWasSuccessful = false, bool bWasKille
 	EmitGameSoundToAll("MvM.SentryBusterSpin", actor);
 }
 
-static void Detonate(int actor)
+static void Detonate(NextBotAction action, int actor)
 {
 	// BLAST!
-	m_bHasDetonated[actor] = true;
+	action.SetData("m_bHasDetonated", true);
 	
 	float origin[3], angles[3];
 	GetClientAbsOrigin(actor, origin);
@@ -215,7 +224,7 @@ static void Detonate(int actor)
 	
 	UTIL_ScreenShake(origin, 25.0, 5.0, 5.0, 1000.0, SHAKE_START);
 	
-	if (!m_bWasSuccessful[actor])
+	if (!action.GetData("m_bWasSuccessful"))
 	{
 		if (GameRules_IsMannVsMachineMode())
 		{
@@ -251,7 +260,7 @@ static void Detonate(int actor)
 	}
 	
 	// Send out an event whenever players damaged us to the point where we had to detonate
-	if (m_bWasKilled[actor])
+	if (action.GetData("m_bWasKilled"))
 	{
 		Event event = CreateEvent("mvm_sentrybuster_killed");
 		if (event)
@@ -313,7 +322,7 @@ static void Detonate(int actor)
 		TF2_ChangeClientTeam(actor, TFTeam_Spectator);
 	}
 	
-	if (m_bWasKilled[actor])
+	if (action.GetData("m_bWasKilled"))
 	{
 		// increment num sentry killed this wave
 		CWave wave = GetPopulationManager().GetCurrentWave();

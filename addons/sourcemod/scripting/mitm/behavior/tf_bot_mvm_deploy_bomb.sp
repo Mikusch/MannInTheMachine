@@ -20,15 +20,13 @@
 
 static NextBotActionFactory ActionFactory;
 
-static float m_anchorPos[MAXPLAYERS + 1][3];
 static CountdownTimer m_timer[MAXPLAYERS + 1];
-static BombDeployingState_t m_nDeployingBombState[MAXPLAYERS + 1];
 
 void CTFBotMvMDeployBomb_Init()
 {
 	ActionFactory = new NextBotActionFactory("MvMDeployBomb");
 	ActionFactory.BeginDataMapDesc()
-	// TODO
+		.DefineVectorField("m_anchorPos")
 	.EndDataMapDesc();
 	ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, CTFBotMvMDeployBomb_OnStart);
 	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotMvMDeployBomb_Update);
@@ -43,11 +41,13 @@ NextBotAction CTFBotMvMDeployBomb_Create()
 
 static int CTFBotMvMDeployBomb_OnStart(NextBotAction action, int actor, NextBotAction priorAction)
 {
-	m_nDeployingBombState[actor] = TF_BOMB_DEPLOYING_DELAY;
+	Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_DELAY);
 	m_timer[actor].Start(tf_deploying_bomb_delay_time.FloatValue);
 	
 	// remember where we start deploying
-	GetClientAbsOrigin(actor, m_anchorPos[actor]);
+	float vecAbsOrigin[3];
+	GetClientAbsOrigin(actor, vecAbsOrigin);
+	action.SetDataVector("m_anchorPos", vecAbsOrigin);
 	TF2_AddCondition(actor, TFCond_FreezeInput);
 	SetEntPropVector(actor, Prop_Data, "m_vecAbsVelocity", ZERO_VECTOR);
 	
@@ -63,7 +63,7 @@ static int CTFBotMvMDeployBomb_Update(NextBotAction action, int actor, float int
 {
 	int areaTrigger = -1;
 	
-	if (m_nDeployingBombState[actor] != TF_BOMB_DEPLOYING_COMPLETE)
+	if (Player(actor).GetDeployingBombState() != TF_BOMB_DEPLOYING_COMPLETE)
 	{
 		areaTrigger = Player(actor).GetClosestCaptureZone();
 		if (!IsValidEntity(areaTrigger))
@@ -75,8 +75,10 @@ static int CTFBotMvMDeployBomb_Update(NextBotAction action, int actor, float int
 		GetClientAbsOrigin(actor, meOrigin);
 		
 		// if we've been moved, give up and go back to normal behavior
+		float anchorPos[3];
+		action.GetDataVector("m_anchorPos", anchorPos);
 		const float movedRange = 20.0;
-		if (GetVectorDistance(m_anchorPos[actor], meOrigin) > movedRange)
+		if (GetVectorDistance(anchorPos, meOrigin) > movedRange)
 		{
 			return action.Done("I've been pushed");
 		}
@@ -96,7 +98,7 @@ static int CTFBotMvMDeployBomb_Update(NextBotAction action, int actor, float int
 		TeleportEntity(actor, .angles = desiredAngles);
 	}
 	
-	switch (m_nDeployingBombState[actor])
+	switch (Player(actor).GetDeployingBombState())
 	{
 		case TF_BOMB_DEPLOYING_DELAY:
 		{
@@ -107,7 +109,7 @@ static int CTFBotMvMDeployBomb_Update(NextBotAction action, int actor, float int
 				
 				SDKCall_PlaySpecificSequence(actor, "primary_deploybomb");
 				m_timer[actor].Start(tf_deploying_bomb_time.FloatValue);
-				m_nDeployingBombState[actor] = TF_BOMB_DEPLOYING_ANIMATING;
+				Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_ANIMATING);
 				
 				EmitGameSoundToAll(GetEntProp(actor, Prop_Send, "m_bIsMiniBoss") ? "MVM.DeployBombGiant" : "MVM.DeployBombSmall", actor);
 				
@@ -125,7 +127,7 @@ static int CTFBotMvMDeployBomb_Update(NextBotAction action, int actor, float int
 				
 				m_timer[actor].Start(2.0);
 				TFGameRules_BroadcastSound(255, "Announcer.MVM_Robots_Planted");
-				m_nDeployingBombState[actor] = TF_BOMB_DEPLOYING_COMPLETE;
+				Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_COMPLETE);
 				SetEntProp(actor, Prop_Data, "m_takedamage", DAMAGE_NO);
 				SetEntProp(actor, Prop_Data, "m_fEffects", GetEntProp(actor, Prop_Data, "m_fEffects") | EF_NODRAW);
 				TF2_RemoveAllWeapons(actor);
@@ -135,7 +137,7 @@ static int CTFBotMvMDeployBomb_Update(NextBotAction action, int actor, float int
 		{
 			if (m_timer[actor].IsElapsed())
 			{
-				m_nDeployingBombState[actor] = TF_BOMB_DEPLOYING_NONE;
+				Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_NONE);
 				SetEntProp(actor, Prop_Data, "m_takedamage", DAMAGE_YES);
 				SDKHooks_TakeDamage(actor, actor, actor, 99999.9, DMG_CRUSH);
 				return action.Done("I've deployed successfully");
@@ -148,7 +150,7 @@ static int CTFBotMvMDeployBomb_Update(NextBotAction action, int actor, float int
 
 static void CTFBotMvMDeployBomb_OnEnd(NextBotAction action, int actor, NextBotAction nextAction)
 {
-	if (m_nDeployingBombState[actor] == TF_BOMB_DEPLOYING_ANIMATING)
+	if (Player(actor).GetDeployingBombState() == TF_BOMB_DEPLOYING_ANIMATING)
 	{
 		SDKCall_DoAnimationEvent(actor, PLAYERANIMEVENT_SPAWN);
 	}
@@ -158,7 +160,7 @@ static void CTFBotMvMDeployBomb_OnEnd(NextBotAction action, int actor, NextBotAc
 		TF2Attrib_RemoveByName(actor, "airblast vertical vulnerability multiplier");
 	}
 	
-	m_nDeployingBombState[actor] = TF_BOMB_DEPLOYING_NONE;
+	Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_NONE);
 	
 	SetVariantInt(0);
 	AcceptEntityInput(actor, "SetForcedTauntCam");
@@ -169,9 +171,4 @@ static int CTFBotMvMDeployBomb_OnContact(NextBotAction action, int actor, int ot
 {
 	// so event doesn't fall thru to buried action which will then redo transition to this state as we stay in contact with the zone
 	return action.TryToSustain(RESULT_CRITICAL);
-}
-
-bool IsDeployingBomb(int client)
-{
-	return m_nDeployingBombState[client] != TF_BOMB_DEPLOYING_NONE;
 }

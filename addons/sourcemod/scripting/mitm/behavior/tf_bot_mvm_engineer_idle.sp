@@ -211,7 +211,7 @@ static void TryToDetonateStaleNest(int actor)
 	// wait until the engy finish building his nest
 	if ((m_sentryHint[actor] != -1 && !CBaseTFBotHintEntity(m_sentryHint[actor]).OwnerObjectFinishBuilding()) || 
 		(m_teleporterHint[actor] != -1 && !CBaseTFBotHintEntity(m_teleporterHint[actor]).OwnerObjectFinishBuilding()))
-	return;
+		return;
 	
 	ArrayList activeEngineerNest = new ArrayList();
 	

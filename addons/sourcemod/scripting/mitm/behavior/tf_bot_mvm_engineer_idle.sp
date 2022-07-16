@@ -107,7 +107,7 @@ static int CTFBotMvMEngineerIdle_Update(NextBotAction action, int actor, float i
 			bool bFirstTeleportSpawn = m_nTeleportedCount[actor] == 1;
 			m_bTeleportedToHint[actor] = true;
 			
-			return action.SuspendFor(CTFBotMvMEngineerTeleportSpawn_Create(actor, m_nestHint[actor], bFirstTeleportSpawn), "In spawn area - teleport to the teleporter hint");
+			return action.SuspendFor(CTFBotMvMEngineerTeleportSpawn_Create(m_nestHint[actor], bFirstTeleportSpawn), "In spawn area - teleport to the teleporter hint");
 		}
 		
 		int mySentry = -1;

@@ -20,26 +20,26 @@
 
 static NextBotActionFactory ActionFactory;
 
-static int m_hintEntity[MAXPLAYERS + 1];
-static bool m_bFirstTeleportSpawn[MAXPLAYERS + 1];
 static CountdownTimer m_teleportDelay[MAXPLAYERS + 1];
 
 void CTFBotMvMEngineerTeleportSpawn_Init()
 {
 	ActionFactory = new NextBotActionFactory("MvMEngineerTeleportSpawn");
 	ActionFactory.BeginDataMapDesc()
-	// TODO
+		.DefineEntityField("m_hintEntity")
+		.DefineBoolField("m_bFirstTeleportSpawn")
 	.EndDataMapDesc();
 	ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, CTFBotMvMEngineerTeleportSpawn_OnStart);
 	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotMvMEngineerTeleportSpawn_Update);
 }
 
-NextBotAction CTFBotMvMEngineerTeleportSpawn_Create(int player, int hint, bool bFirstTeleportSpawn)
+NextBotAction CTFBotMvMEngineerTeleportSpawn_Create(int hint, bool bFirstTeleportSpawn)
 {
-	m_hintEntity[player] = hint;
-	m_bFirstTeleportSpawn[player] = bFirstTeleportSpawn;
+	NextBotAction action = ActionFactory.Create();
+	action.SetDataEnt("m_hintEntity", hint);
+	action.SetData("m_bFirstTeleportSpawn", bFirstTeleportSpawn);
 	
-	return ActionFactory.Create();
+	return action;
 }
 
 static int CTFBotMvMEngineerTeleportSpawn_OnStart(NextBotAction action, int actor, NextBotAction priorAction)
@@ -57,21 +57,21 @@ static int CTFBotMvMEngineerTeleportSpawn_Update(NextBotAction action, int actor
 	if (!m_teleportDelay[actor].HasStarted())
 	{
 		float origin[3];
-		GetEntPropVector(m_hintEntity[actor], Prop_Data, "m_vecAbsOrigin", origin);
+		GetEntPropVector(action.GetDataEnt("m_hintEntity"), Prop_Data, "m_vecAbsOrigin", origin);
 		
 		m_teleportDelay[actor].Start(0.1);
-		if (m_hintEntity[actor] != -1)
+		if (action.GetDataEnt("m_hintEntity") != -1)
 			SDKCall_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Defenders);
 	}
 	else if (m_teleportDelay[actor].IsElapsed())
 	{
-		if (m_hintEntity[actor] == -1)
+		if (action.GetDataEnt("m_hintEntity") == -1)
 			return action.Done("Cannot teleport to hint as m_hintEntity is NULL");
 		
 		// teleport the engineer to the sentry spawn point
 		float angles[3], origin[3];
-		GetEntPropVector(m_hintEntity[actor], Prop_Data, "m_angAbsRotation", angles);
-		GetEntPropVector(m_hintEntity[actor], Prop_Data, "m_vecAbsOrigin", origin);
+		GetEntPropVector(action.GetDataEnt("m_hintEntity"), Prop_Data, "m_angAbsRotation", angles);
+		GetEntPropVector(action.GetDataEnt("m_hintEntity"), Prop_Data, "m_vecAbsOrigin", origin);
 		origin[2] += 10.0; // move up off the around a little bit to prevent the engineer from getting stuck in the ground
 		
 		TeleportEntity(actor, origin, angles);
@@ -79,12 +79,12 @@ static int CTFBotMvMEngineerTeleportSpawn_Update(NextBotAction action, int actor
 		TE_TFParticleEffect("teleported_blue", origin);
 		TE_TFParticleEffect("player_sparkles_blue", origin);
 		
-		if (m_bFirstTeleportSpawn[actor])
+		if (action.GetData("m_bFirstTeleportSpawn"))
 		{
 			// notify players that engineer's teleported into the map
 			TE_TFParticleEffect("teleported_mvm_bot", origin);
 			EmitGameSoundToAll("Engineer.MVM_BattleCry07", actor);
-			EmitGameSoundToAll("MVM.Robot_Engineer_Spawn", m_hintEntity[actor]);
+			EmitGameSoundToAll("MVM.Robot_Engineer_Spawn", action.GetDataEnt("m_hintEntity"));
 			
 			if (GetPopulationManager())
 			{

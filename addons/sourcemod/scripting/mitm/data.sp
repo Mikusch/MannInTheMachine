@@ -783,6 +783,11 @@ methodmap Player
 				// Always allow specific passive weapons
 				return false;
 			}
+			else if (TF2Attrib_GetByName(weapon, "is_passive_weapon"))
+			{
+				// Always allow weapons with is_passive_weapon attribute
+				return false;
+			}
 		}
 		
 		// Get the weapon's loadout slot

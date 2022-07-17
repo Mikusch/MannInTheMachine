@@ -72,6 +72,8 @@ void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 		
 		// Remove any glows attached to us
 		RemoveEntityGlow(victim);
+		
+		Player(victim).RemoveRobotName();
 	}
 	else if (IsEntityClient(attacker) && TF2_GetClientTeam(victim) == TFTeam_Defenders && TF2_GetClientTeam(attacker) == TFTeam_Invaders)
 	{

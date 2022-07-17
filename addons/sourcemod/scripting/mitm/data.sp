@@ -43,6 +43,7 @@ static int m_spawnPointEntity[MAXPLAYERS + 1];
 static CTFBotSquad m_squad[MAXPLAYERS + 1];
 static int m_hFollowingFlagTarget[MAXPLAYERS + 1];
 static BombDeployingState_t m_nDeployingBombState[MAXPLAYERS + 1];
+static char m_iszOldClientName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
 
 // Non-resetting Properties
 static int m_invaderPriority[MAXPLAYERS + 1];
@@ -573,6 +574,23 @@ methodmap Player
 			StopGameSound(this._client, idleSound);
 			this.ClearIdleSound();
 		}
+	}
+	
+	public void SetRobotName(const char[] name)
+	{
+		if (GetClientName(this._client, m_iszOldClientName[this._client], sizeof(m_iszOldClientName[])))
+		{
+			SetClientName(this._client, name);
+		}
+	}
+	
+	public void RemoveRobotName()
+	{
+		if (m_iszOldClientName[this._client][0] == EOS)
+			return;
+		
+		SetClientName(this._client, m_iszOldClientName[this._client]);
+		m_iszOldClientName[this._client][0] = EOS;
 	}
 	
 	public void ModifyMaxHealth(int nNewMaxHealth, bool bSetCurrentHealth = true, bool bAllowModelScaling = true)

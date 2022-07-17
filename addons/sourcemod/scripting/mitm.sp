@@ -543,6 +543,7 @@ ConVar mitm_defender_min_count;
 ConVar mitm_defender_max_count;
 ConVar mitm_spawn_hurry_time;
 ConVar mitm_queue_points;
+ConVar mitm_rename_robots;
 
 // TF ConVars
 ConVar tf_avoidteammates_pushaway;
@@ -619,6 +620,7 @@ public void OnPluginStart()
 	mitm_defender_max_count = CreateConVar("mitm_defender_max_count", "8", "Maximum amount of defenders on a full server.", _, _, _, true, 10.0);
 	mitm_spawn_hurry_time = CreateConVar("mitm_spawn_hurry_time", "30.0", "Time that invaders have to leave their spawn.");
 	mitm_queue_points = CreateConVar("mitm_queue_points", "5", "Amount of queue points awarded to players that did not become defenders.", _, true, 1.0);
+	mitm_rename_robots = CreateConVar("mitm_rename_robots", "1", "Whether to rename robots as they spawn?");
 	
 	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");
@@ -668,6 +670,8 @@ public void OnPluginStart()
 	Console_Init();
 	Events_Init();
 	ClientPrefs_Init();
+	
+	HookUserMessage(GetUserMessageId("SayText2"), OnSayText2, true);
 	
 	GameData gamedata = new GameData("mitm");
 	if (gamedata)
@@ -1143,4 +1147,27 @@ void FireWeaponAtEnemy(int client, int &buttons)
 			TF2Attrib_RemoveByName(weapon, "provide on active");
 		}
 	}
+}
+
+Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNum, bool reliable, bool init)
+{
+	if (!mitm_rename_robots.BoolValue)
+		return Plugin_Continue;
+	
+	int client = msg.ReadByte();
+	bool bWantsToChat = view_as<bool>(msg.ReadByte());
+	
+	if (!bWantsToChat && Player(client).IsInvader())
+	{
+		char szBuf[MAX_MESSAGE_LENGTH];
+		msg.ReadString(szBuf, sizeof(szBuf));
+		
+		if (StrEqual(szBuf, "#TF_Name_Change"))
+		{
+			// prevent rename messages in chat
+			return Plugin_Stop;
+		}
+	}
+	
+	return Plugin_Continue;
 }

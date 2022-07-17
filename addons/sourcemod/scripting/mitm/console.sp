@@ -134,7 +134,7 @@ Action CommandListener_Build(int client, const char[] command, int argc)
 
 Action CommandListener_DropItem(int client, const char[] command, int argc)
 {
-	if (Player(actor).GetDeployingBombState() != TF_BOMB_DEPLOYING_NONE)
+	if (Player(client).GetDeployingBombState() != TF_BOMB_DEPLOYING_NONE)
 	{
 		// do not allow dropping the bomb while deploying
 		return Plugin_Handled;

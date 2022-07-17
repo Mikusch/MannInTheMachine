@@ -895,7 +895,7 @@ methodmap Player
 				continue;
 			
 			// If I'm carrying a flag, look for mine and early-out
-			if (SDKCall_HasTheFlag(this._client))
+			if (HasTheFlag(this._client))
 			{
 				if (GetEntPropEnt(flag, Prop_Send, "m_hOwnerEntity") == this._client)
 				{

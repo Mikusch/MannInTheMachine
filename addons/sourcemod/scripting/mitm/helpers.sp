@@ -724,3 +724,8 @@ int FindBotHintForPlayer(int player, const char[] classname)
 	
 	return -1;
 }
+
+bool HasTheFlag(int client)
+{
+	return GetEntPropEnt(client, Prop_Send, "m_hItem") != -1;
+}

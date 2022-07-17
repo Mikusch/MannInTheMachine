@@ -98,7 +98,7 @@ static int CTFBotMainAction_Update(NextBotAction action, int actor, float interv
 				if (!Player(actor).m_flRequiredSpawnLeaveTime)
 				{
 					// minibosses and bomb carriers are slow and get more time to leave
-					float flTime = (GetEntProp(actor, Prop_Send, "m_bIsMiniBoss") || SDKCall_HasTheFlag(actor)) ? mitm_spawn_hurry_time.FloatValue * 1.5 : mitm_spawn_hurry_time.FloatValue;
+					float flTime = (GetEntProp(actor, Prop_Send, "m_bIsMiniBoss") || HasTheFlag(actor)) ? mitm_spawn_hurry_time.FloatValue * 1.5 : mitm_spawn_hurry_time.FloatValue;
 					Player(actor).m_flRequiredSpawnLeaveTime = GetGameTime() + flTime;
 				}
 				else
@@ -203,7 +203,7 @@ static int CTFBotMainAction_OnOtherKilled(NextBotAction action, int actor, int v
 	{
 		if (TF2_GetClientTeam(actor) != TF2_GetClientTeam(victim) && actor == attacker)
 		{
-			bool isTaunting = !SDKCall_HasTheFlag(attacker) && GetRandomFloat(0.0, 100.0) <= tf_bot_taunt_victim_chance.FloatValue;
+			bool isTaunting = !HasTheFlag(attacker) && GetRandomFloat(0.0, 100.0) <= tf_bot_taunt_victim_chance.FloatValue;
 			
 			if (GetEntProp(attacker, Prop_Send, "m_bIsMiniBoss"))
 			{

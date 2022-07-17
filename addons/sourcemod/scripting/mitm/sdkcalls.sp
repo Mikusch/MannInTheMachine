@@ -23,7 +23,6 @@ static Handle g_SDKCallGetClassIconWindows;
 static Handle g_SDKCallPlayThrottledAlert;
 static Handle g_SDKCallPostInventoryApplication;
 static Handle g_SDKCallUpdateModelToClass;
-static Handle g_SDKCallHasTheFlag;
 static Handle g_SDKCallPickUp;
 static Handle g_SDKCallCapture;
 static Handle g_SDKCallDoAnimationEvent;
@@ -68,7 +67,6 @@ void SDKCalls_Init(GameData gamedata)
 	g_SDKCallPlayThrottledAlert = PrepSDKCall_PlayThrottledAlert(gamedata);
 	g_SDKCallPostInventoryApplication = PrepSDKCall_PostInventoryApplication(gamedata);
 	g_SDKCallUpdateModelToClass = PrepSDKCall_UpdateModelToClass(gamedata);
-	g_SDKCallHasTheFlag = PrepSDKCall_HasTheFlag(gamedata);
 	g_SDKCallPickUp = PrepSDKCall_PickUp(gamedata);
 	g_SDKCallCapture = PrepSDKCall_Capture(gamedata);
 	g_SDKCallDoAnimationEvent = PrepSDKCall_DoAnimationEvent(gamedata);
@@ -162,21 +160,6 @@ static Handle PrepSDKCall_UpdateModelToClass(GameData gamedata)
 	Handle call = EndPrepSDKCall();
 	if (!call)
 		LogMessage("Failed to create SDKCall: CEconEntity::UpdateModelToClass");
-	
-	return call;
-}
-
-static Handle PrepSDKCall_HasTheFlag(GameData gamedata)
-{
-	StartPrepSDKCall(SDKCall_Player);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::HasTheFlag");
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
-	
-	Handle call = EndPrepSDKCall();
-	if (!call)
-		LogMessage("Failed to create SDKCall: CTFPlayer::HasTheFlag");
 	
 	return call;
 }
@@ -607,14 +590,6 @@ void SDKCall_UpdateModelToClass(int entity)
 {
 	if (g_SDKCallUpdateModelToClass)
 		SDKCall(g_SDKCallUpdateModelToClass, entity);
-}
-
-bool SDKCall_HasTheFlag(int player, int exceptionTypes = 0, int nNumExceptions = 0)
-{
-	if (g_SDKCallHasTheFlag)
-		return SDKCall(g_SDKCallHasTheFlag, player, exceptionTypes, nNumExceptions);
-	
-	return false;
 }
 
 void SDKCall_PickUp(int flag, int player, bool invisible)

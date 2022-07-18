@@ -552,7 +552,8 @@ methodmap Player
 	{
 		if (GetClientName(this._client, m_iszOldClientName[this._client], sizeof(m_iszOldClientName[])))
 		{
-			SetClientName(this._client, name);
+			// SetClientInfo allows setting duplicate names without prepending numbers
+			SetClientInfo(this._client, "name", name);
 		}
 	}
 	
@@ -561,7 +562,7 @@ methodmap Player
 		if (m_iszOldClientName[this._client][0] == EOS)
 			return;
 		
-		SetClientName(this._client, m_iszOldClientName[this._client]);
+		SetClientInfo(this._client, "name", m_iszOldClientName[this._client]);
 		m_iszOldClientName[this._client][0] = EOS;
 	}
 	

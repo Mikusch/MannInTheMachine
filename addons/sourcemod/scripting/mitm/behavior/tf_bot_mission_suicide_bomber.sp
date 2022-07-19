@@ -284,6 +284,8 @@ static void Detonate(int me)
 		}
 	}
 	
+	delete victimList;
+	
 	// make sure we're removed (in case we detonated in our spawn area where we are invulnerable)
 	ForcePlayerSuicide(me);
 	if (IsPlayerAlive(me))

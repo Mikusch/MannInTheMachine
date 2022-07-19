@@ -580,7 +580,8 @@ methodmap Player
 	{
 		if (GetClientName(this._client, m_iszOldClientName[this._client], sizeof(m_iszOldClientName[])))
 		{
-			SetClientName(this._client, name);
+			// SetClientInfo allows setting duplicate names without prepending numbers
+			SetClientInfo(this._client, "name", name);
 		}
 	}
 	
@@ -589,7 +590,7 @@ methodmap Player
 		if (m_iszOldClientName[this._client][0] == EOS)
 			return;
 		
-		SetClientName(this._client, m_iszOldClientName[this._client]);
+		SetClientInfo(this._client, "name", m_iszOldClientName[this._client]);
 		m_iszOldClientName[this._client][0] = EOS;
 	}
 	
@@ -809,6 +810,11 @@ methodmap Player
 			if (weaponId == TF_WEAPON_BUFF_ITEM || weaponId == TF_WEAPON_LUNCHBOX || weaponId == TF_WEAPON_PARACHUTE || weaponId == TF_WEAPON_GRAPPLINGHOOK)
 			{
 				// Always allow specific passive weapons
+				return false;
+			}
+			else if (TF2Attrib_GetByName(weapon, "is_passive_weapon"))
+			{
+				// Always allow weapons with is_passive_weapon attribute
 				return false;
 			}
 		}

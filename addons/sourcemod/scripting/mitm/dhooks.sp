@@ -323,13 +323,11 @@ MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookReturn ret, 
 		char name[MAX_NAME_LENGTH];
 		m_spawner.GetName(name, sizeof(name));
 		
+		PrintCenterText(newPlayer, "%t", "Invader_Spawned", name[0] == EOS ? "TFBot" : name);
+		
 		if (mitm_rename_robots.BoolValue)
 		{
 			Player(newPlayer).SetRobotName(name[0] == EOS ? "TFBot" : name);
-		}
-		else
-		{
-			PrintCenterText(newPlayer, "%t", "Invader_Spawned", name[0] == EOS ? "TFBot" : name);
 		}
 		
 		DispatchKeyValueVector(g_InternalSpawnPoint, "origin", here);

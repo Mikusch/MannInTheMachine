@@ -706,19 +706,30 @@ bool FClassnameIs(int entity, const char[] szClassname)
 	return GetEntityClassname(entity, m_iClassname, sizeof(m_iClassname)) && StrEqual(szClassname, m_iClassname);
 }
 
-int FindBotHintForPlayer(int player, const char[] classname)
+int FindTeleporterHintForPlayer(int player)
 {
 	int hint = MaxClients + 1;
-	while ((hint = FindEntityByClassname(hint, classname)) != -1)
+	while ((hint = FindEntityByClassname(hint, "bot_hint_engineer_nest")) != -1)
 	{
 		int owner = GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity");
-		if (owner != -1)
+		if (owner == player)
 		{
-			int builder = GetEntPropEnt(owner, Prop_Send, "m_hBuilder");
-			if (builder == player)
-			{
-				return hint;
-			}
+			return SDKCall_GetTeleporterHint(hint);
+		}
+	}
+	
+	return -1;
+}
+
+int FindSentryHintForPlayer(int player)
+{
+	int hint = MaxClients + 1;
+	while ((hint = FindEntityByClassname(hint, "bot_hint_engineer_nest")) != -1)
+	{
+		int owner = GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity");
+		if (owner == player)
+		{
+			return SDKCall_GetSentryHint(hint);
 		}
 	}
 	

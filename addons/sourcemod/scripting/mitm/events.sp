@@ -173,7 +173,7 @@ void EventHook_PlayerBuiltObject(Event event, const char[] name, bool dontBroadc
 			SetEntProp(index, Prop_Data, "m_iHealth", iHealth);
 			
 			// the teleporter owns this hint now
-			int hint = FindBotHintForPlayer(builder, "bot_hint_teleporter_exit");
+			int hint = FindTeleporterHintForPlayer(builder);
 			if (hint != -1)
 			{
 				SetEntityOwner(hint, index);
@@ -188,7 +188,7 @@ void EventHook_PlayerBuiltObject(Event event, const char[] name, bool dontBroadc
 			SetEntProp(index, Prop_Data, "m_nDefaultUpgradeLevel", 2);
 			
 			// the sentry owns this hint now
-			int hint = FindBotHintForPlayer(builder, "bot_hint_sentrygun");
+			int hint = FindSentryHintForPlayer(builder);
 			if (hint != -1)
 			{
 				SetEntityOwner(hint, index);

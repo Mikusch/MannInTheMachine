@@ -43,7 +43,7 @@ static int m_spawnPointEntity[MAXPLAYERS + 1];
 static CTFBotSquad m_squad[MAXPLAYERS + 1];
 static int m_hFollowingFlagTarget[MAXPLAYERS + 1];
 static BombDeployingState_t m_nDeployingBombState[MAXPLAYERS + 1];
-static char m_iszOldClientName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
+static char m_szOldClientName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
 
 // Non-resetting Properties
 static int m_invaderPriority[MAXPLAYERS + 1];
@@ -434,7 +434,7 @@ methodmap Player
 	
 	public void ClearIdleSound()
 	{
-		strcopy(m_szIdleSound[this._client], sizeof(m_szIdleSound[]), "");
+		this.SetIdleSound("");
 	}
 	
 	public void SetScaleOverride(float fScale)
@@ -576,22 +576,21 @@ methodmap Player
 		}
 	}
 	
-	public void SetRobotName(const char[] name)
+	public void SetName(const char[] name)
 	{
-		if (GetClientName(this._client, m_iszOldClientName[this._client], sizeof(m_iszOldClientName[])))
+		if (GetClientName(this._client, m_szOldClientName[this._client], sizeof(m_szOldClientName[])))
 		{
-			// SetClientInfo allows setting duplicate names without prepending numbers
-			SetClientInfo(this._client, "name", name);
+			SetClientName(this._client, name);
 		}
 	}
 	
-	public void RemoveRobotName()
+	public void ResetName()
 	{
-		if (m_iszOldClientName[this._client][0] == EOS)
+		if (m_szOldClientName[this._client][0] == EOS)
 			return;
 		
-		SetClientInfo(this._client, "name", m_iszOldClientName[this._client]);
-		m_iszOldClientName[this._client][0] = EOS;
+		SetClientName(this._client, m_szOldClientName[this._client]);
+		strcopy(m_szOldClientName[this._client], sizeof(m_szOldClientName[]), "");
 	}
 	
 	public void ModifyMaxHealth(int nNewMaxHealth, bool bSetCurrentHealth = true, bool bAllowModelScaling = true)
@@ -1152,7 +1151,6 @@ methodmap Player
 		m_autoJumpTimer[this._client].Invalidate();
 		
 		this.ClearTeleportWhere();
-		
 		this.ClearEventChangeAttributes();
 		this.ClearTags();
 		this.ClearWeaponRestrictions();
@@ -1172,6 +1170,8 @@ methodmap Player
 		this.m_bWasMiniBoss = false;
 		this.m_defenderQueuePoints = -1;
 		this.m_preferences = -1;
+		
+		strcopy(m_szOldClientName[this._client], sizeof(m_szOldClientName[]), "");
 	}
 }
 

@@ -62,8 +62,6 @@ void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 	{
 		// Remove any glows attached to us
 		RemoveEntityGlow(victim);
-		
-		Player(victim).RemoveRobotName();
 	}
 }
 
@@ -88,6 +86,7 @@ Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 	else
 	{
 		Player(client).ResetOnTeamChange();
+		Player(client).ResetName();
 		
 		SetVariantString("");
 		AcceptEntityInput(client, "SetCustomModel");

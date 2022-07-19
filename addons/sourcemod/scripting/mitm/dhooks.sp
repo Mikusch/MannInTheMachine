@@ -327,7 +327,7 @@ MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookReturn ret, 
 		
 		if (mitm_rename_robots.BoolValue)
 		{
-			Player(newPlayer).SetRobotName(name[0] == EOS ? "TFBot" : name);
+			Player(newPlayer).SetName(name[0] == EOS ? "TFBot" : name);
 		}
 		
 		DispatchKeyValueVector(g_InternalSpawnPoint, "origin", here);

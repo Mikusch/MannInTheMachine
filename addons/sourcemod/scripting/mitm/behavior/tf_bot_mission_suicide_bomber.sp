@@ -315,6 +315,8 @@ static void Detonate(NextBotAction action, int actor)
 		}
 	}
 	
+	delete victimList;
+	
 	// make sure we're removed (in case we detonated in our spawn area where we are invulnerable)
 	ForcePlayerSuicide(actor);
 	if (IsPlayerAlive(actor))

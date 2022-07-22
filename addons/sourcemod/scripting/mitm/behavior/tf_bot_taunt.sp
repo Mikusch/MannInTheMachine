@@ -23,34 +23,49 @@ static NextBotActionFactory ActionFactory;
 static CountdownTimer m_tauntTimer[MAXPLAYERS + 1];
 static CountdownTimer m_tauntEndTimer[MAXPLAYERS + 1];
 
-void CTFBotTaunt_Init()
+methodmap CTFBotTaunt < NextBotAction
 {
-	ActionFactory = new NextBotActionFactory("Taunt");
-	ActionFactory.BeginDataMapDesc()
-		.DefineBoolField("m_didTaunt")
-	.EndDataMapDesc();
-	ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, CTFBotTaunt_OnStart);
-	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotTaunt_Update);
+	public static void Init()
+	{
+		ActionFactory = new NextBotActionFactory("Taunt");
+		ActionFactory.BeginDataMapDesc()
+			.DefineBoolField("m_didTaunt")
+		.EndDataMapDesc();
+		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
+		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
+	}
+	
+	public CTFBotTaunt()
+	{
+		return view_as<CTFBotTaunt>(ActionFactory.Create());
+	}
+	
+	property bool m_didTaunt
+	{
+		public get()
+		{
+			return this.GetData("m_didTaunt");
+		}
+		public set(bool didTaunt)
+		{
+			this.SetData("m_didTaunt", didTaunt);
+		}
+	}
 }
 
-NextBotAction CTFBotTaunt_Create()
-{
-	return ActionFactory.Create();
-}
-
-static int CTFBotTaunt_OnStart(NextBotAction action, int actor, NextBotAction priorAction)
+static int OnStart(CTFBotTaunt action, int actor, NextBotAction priorAction)
 {
 	m_tauntTimer[actor].Start(GetRandomFloat(0.0, 1.0));
-	action.SetData("m_didTaunt", false);
+	action.m_didTaunt = false;
 	
 	return action.Continue();
 }
 
-static int CTFBotTaunt_Update(NextBotAction action, int actor, float interval)
+static int Update(CTFBotTaunt action, int actor, float interval)
 {
 	if (m_tauntTimer[actor].IsElapsed())
 	{
-		if (action.GetData("m_didTaunt"))
+		if (action.m_didTaunt)
 		{
 			// Stop taunting after a while
 			if (m_tauntEndTimer[actor].IsElapsed() && view_as<taunts_t>(GetEntProp(actor, Prop_Send, "m_iTauntIndex")) == TAUNT_LONG)
@@ -69,7 +84,7 @@ static int CTFBotTaunt_Update(NextBotAction action, int actor, float interval)
 			// Start a timer to end our taunt in case we're still going after awhile
 			m_tauntEndTimer[actor].Start(GetRandomFloat(3.0, 5.0));
 			
-			action.SetData("m_didTaunt", true);
+			action.m_didTaunt = true;
 		}
 	}
 	

@@ -22,22 +22,37 @@ static NextBotActionFactory ActionFactory;
 
 static CountdownTimer m_waitTimer[MAXPLAYERS + 1];
 
-void CTFBotSpyLeaveSpawnRoom_Init()
+methodmap CTFBotSpyLeaveSpawnRoom < NextBotAction
 {
-	ActionFactory = new NextBotActionFactory("SpyLeaveSpawnRoom");
-	ActionFactory.BeginDataMapDesc()
-		.DefineIntField("m_attempt")
-	.EndDataMapDesc();
-	ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, CTFBotSpyLeaveSpawnRoom_OnStart);
-	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotSpyLeaveSpawnRoom_Update);
+	public static void Init()
+	{
+		ActionFactory = new NextBotActionFactory("SpyLeaveSpawnRoom");
+		ActionFactory.BeginDataMapDesc()
+			.DefineIntField("m_attempt")
+		.EndDataMapDesc();
+		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
+		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
+	}
+	
+	public CTFBotSpyLeaveSpawnRoom()
+	{
+		return view_as<CTFBotSpyLeaveSpawnRoom>(ActionFactory.Create());
+	}
+	
+	property int m_attempt
+	{
+		public get()
+		{
+			return this.GetData("m_attempt");
+		}
+		public set(int attempt)
+		{
+			this.SetData("m_attempt", attempt);
+		}
+	}
 }
 
-NextBotAction CTFBotSpyLeaveSpawnRoom_Create()
-{
-	return ActionFactory.Create();
-}
-
-static int CTFBotSpyLeaveSpawnRoom_OnStart(NextBotAction action, int actor, NextBotAction prevAction)
+static int OnStart(CTFBotSpyLeaveSpawnRoom action, int actor, NextBotAction prevAction)
 {
 	// disguise as enemy team
 	Player(actor).DisguiseAsMemberOfEnemyTeam();
@@ -48,12 +63,12 @@ static int CTFBotSpyLeaveSpawnRoom_OnStart(NextBotAction action, int actor, Next
 	// wait a few moments to guarantee a minimum time between announcing Spies and their attack
 	m_waitTimer[actor].Start(2.0 + GetRandomFloat(0.0, 1.0));
 	
-	action.SetData("m_attempt", 0);
+	action.m_attempt = 0;
 	
 	return action.Continue();
 }
 
-static int CTFBotSpyLeaveSpawnRoom_Update(NextBotAction action, int actor, float interval)
+static int Update(CTFBotSpyLeaveSpawnRoom action, int actor, float interval)
 {
 	if (m_waitTimer[actor].HasStarted() && m_waitTimer[actor].IsElapsed())
 	{
@@ -91,7 +106,7 @@ static int CTFBotSpyLeaveSpawnRoom_Update(NextBotAction action, int actor, float
 		
 		for (int i = 0; i < enemyVector.Length; ++i)
 		{
-			if (TeleportNearVictim(actor, enemyVector.Get(i), action.GetData("m_attempt")))
+			if (TeleportNearVictim(actor, enemyVector.Get(i), action.m_attempt))
 			{
 				victim = enemyVector.Get(i);
 				break;
@@ -103,7 +118,7 @@ static int CTFBotSpyLeaveSpawnRoom_Update(NextBotAction action, int actor, float
 		{
 			m_waitTimer[actor].Start(1.0);
 			
-			action.SetData("m_attempt", action.GetData("m_attempt") + 1);
+			++action.m_attempt;
 			
 			delete enemyVector;
 			return action.Continue();

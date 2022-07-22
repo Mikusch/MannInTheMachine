@@ -25,24 +25,39 @@ static NextBotActionFactory ActionFactory;
 static CountdownTimer m_upgradeTimer[MAXPLAYERS + 1];
 static CountdownTimer m_buffPulseTimer[MAXPLAYERS + 1];
 
-void CTFBotDeliverFlag_Init()
+methodmap CTFBotDeliverFlag < NextBotAction
 {
-	ActionFactory = new NextBotActionFactory("DeliverFlag");
-	ActionFactory.BeginDataMapDesc()
-		.DefineIntField("m_upgradeLevel")
-	.EndDataMapDesc();
-	ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, CTFBotDeliverFlag_OnStart);
-	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotDeliverFlag_Update);
-	ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, CTFBotDeliverFlag_OnEnd);
-	ActionFactory.SetEventCallback(EventResponderType_OnContact, CTFBotDeliverFlag_OnContact);
+	public static void Init()
+	{
+		ActionFactory = new NextBotActionFactory("DeliverFlag");
+		ActionFactory.BeginDataMapDesc()
+			.DefineIntField("m_upgradeLevel")
+		.EndDataMapDesc();
+		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
+		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
+		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
+		ActionFactory.SetEventCallback(EventResponderType_OnContact, OnContact);
+	}
+	
+	public CTFBotDeliverFlag()
+	{
+		return view_as<CTFBotDeliverFlag>(ActionFactory.Create());
+	}
+	
+	property int m_upgradeLevel
+	{
+		public get()
+		{
+			return this.GetData("m_upgradeLevel");
+		}
+		public set(int upgradeLevel)
+		{
+			this.SetData("m_upgradeLevel", upgradeLevel);
+		}
+	}
 }
 
-NextBotAction CTFBotDeliverFlag_Create()
-{
-	return ActionFactory.Create();
-}
-
-static int CTFBotDeliverFlag_OnStart(NextBotAction action, int actor, NextBotAction priorAction)
+static int OnStart(CTFBotDeliverFlag action, int actor, NextBotAction priorAction)
 {
 	if (!tf_mvm_bot_allow_flag_carrier_to_fight.BoolValue)
 	{
@@ -53,14 +68,14 @@ static int CTFBotDeliverFlag_OnStart(NextBotAction action, int actor, NextBotAct
 	if (GetEntProp(actor, Prop_Send, "m_bIsMiniBoss"))
 	{
 		// Set threat level to max
-		action.SetData("m_upgradeLevel", DONT_UPGRADE);
+		action.m_upgradeLevel = DONT_UPGRADE;
 		SetEntProp(TFObjectiveResource(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 4);
 		SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", -1.0);
 		SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", -1.0);
 	}
 	else
 	{
-		action.SetData("m_upgradeLevel", 0);
+		action.m_upgradeLevel = 0;
 		m_upgradeTimer[actor].Start(tf_mvm_bot_flag_carrier_interval_to_1st_upgrade.FloatValue);
 		SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
 		SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
@@ -69,7 +84,7 @@ static int CTFBotDeliverFlag_OnStart(NextBotAction action, int actor, NextBotAct
 	return action.Continue();
 }
 
-static int CTFBotDeliverFlag_Update(NextBotAction action, int actor, float interval)
+static int Update(CTFBotDeliverFlag action, int actor, float interval)
 {
 	int flag = Player(actor).GetFlagToFetch();
 	
@@ -86,13 +101,13 @@ static int CTFBotDeliverFlag_Update(NextBotAction action, int actor, float inter
 	
 	if (UpgradeOverTime(action, actor))
 	{
-		return action.SuspendFor(CTFBotTaunt_Create(), "Taunting for our new upgrade");
+		return action.SuspendFor(CTFBotTaunt(), "Taunting for our new upgrade");
 	}
 	
 	return action.Continue();
 }
 
-static void CTFBotDeliverFlag_OnEnd(NextBotAction action, int actor, NextBotAction nextAction)
+static void OnEnd(CTFBotDeliverFlag action, int actor, NextBotAction nextAction)
 {
 	Player(actor).ClearAttribute(SUPPRESS_FIRE);
 	
@@ -102,9 +117,9 @@ static void CTFBotDeliverFlag_OnEnd(NextBotAction action, int actor, NextBotActi
 	}
 }
 
-static bool UpgradeOverTime(NextBotAction action, int actor)
+static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 {
-	if (action.GetData("m_upgradeLevel") != DONT_UPGRADE)
+	if (action.m_upgradeLevel != DONT_UPGRADE)
 	{
 		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(actor).GetLastKnownArea());
 		TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(actor) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
@@ -118,7 +133,7 @@ static bool UpgradeOverTime(NextBotAction action, int actor)
 		}
 		
 		// do defensive buff effect ourselves (since we're not a soldier)
-		if (action.GetData("m_upgradeLevel") > 0 && m_buffPulseTimer[actor].IsElapsed())
+		if (action.m_upgradeLevel > 0 && m_buffPulseTimer[actor].IsElapsed())
 		{
 			m_buffPulseTimer[actor].Start(1.0);
 			
@@ -147,13 +162,13 @@ static bool UpgradeOverTime(NextBotAction action, int actor)
 		{
 			const int maxLevel = 3;
 			
-			if (action.GetData("m_upgradeLevel") < maxLevel)
+			if (action.m_upgradeLevel < maxLevel)
 			{
-				action.SetData("m_upgradeLevel", action.GetData("m_upgradeLevel") + 1);
+				++action.m_upgradeLevel;
 				
 				TFGameRules_BroadcastSound(255, "MVM.Warning");
 				
-				switch (action.GetData("m_upgradeLevel"))
+				switch (action.m_upgradeLevel)
 				{
 					//---------------------------------------
 					case 1:
@@ -209,11 +224,11 @@ static bool UpgradeOverTime(NextBotAction action, int actor)
 	return false;
 }
 
-static int CTFBotDeliverFlag_OnContact(NextBotAction action, int actor, int other, Address result)
+static int OnContact(CTFBotDeliverFlag action, int actor, int other, Address result)
 {
 	if (GameRules_IsMannVsMachineMode() && IsValidEntity(other) && FClassnameIs(other, "func_capturezone"))
 	{
-		return action.TrySuspendFor(CTFBotMvMDeployBomb_Create(), RESULT_CRITICAL, "Delivering the bomb!");
+		return action.TrySuspendFor(CTFBotMvMDeployBomb(), RESULT_CRITICAL, "Delivering the bomb!");
 	}
 	
 	return action.TryContinue();

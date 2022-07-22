@@ -20,24 +20,38 @@
 
 static NextBotActionFactory ActionFactory;
 
-void CTFBotFetchFlag_Init()
+methodmap CTFBotFetchFlag < NextBotAction
 {
-	ActionFactory = new NextBotActionFactory("FetchFlag");
-	ActionFactory.BeginDataMapDesc()
-		.DefineBoolField("m_isTemporary")
-	.EndDataMapDesc();
-	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotFetchFlag_Update);
-}
-
-NextBotAction CTFBotFetchFlag_Create(bool isTemporary = false)
-{
-	NextBotAction action = ActionFactory.Create();
-	action.SetData("m_isTemporary", isTemporary);
+	public static void Init()
+	{
+		ActionFactory = new NextBotActionFactory("FetchFlag");
+		ActionFactory.BeginDataMapDesc()
+			.DefineBoolField("m_isTemporary")
+		.EndDataMapDesc();
+		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
+	}
 	
-	return action;
+	public CTFBotFetchFlag(bool isTemporary = false)
+	{
+		CTFBotFetchFlag action = view_as<CTFBotFetchFlag>(ActionFactory.Create());
+		action.m_isTemporary = isTemporary;
+		return action;
+	}
+	
+	property bool m_isTemporary
+	{
+		public get()
+		{
+			return this.GetData("m_isTemporary");
+		}
+		public set(bool isTemporary)
+		{
+			this.SetData("m_isTemporary", isTemporary);
+		}
+	}
 }
 
-static int CTFBotFetchFlag_Update(NextBotAction action, int actor, float interval)
+static int Update(CTFBotFetchFlag action, int actor, float interval)
 {
 	int flag = Player(actor).GetFlagToFetch();
 	

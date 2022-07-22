@@ -22,24 +22,27 @@ static NextBotActionFactory ActionFactory;
 
 static CountdownTimer m_timer[MAXPLAYERS + 1];
 
-void CTFBotMvMDeployBomb_Init()
+methodmap CTFBotMvMDeployBomb < NextBotAction
 {
-	ActionFactory = new NextBotActionFactory("MvMDeployBomb");
-	ActionFactory.BeginDataMapDesc()
-		.DefineVectorField("m_anchorPos")
-	.EndDataMapDesc();
-	ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, CTFBotMvMDeployBomb_OnStart);
-	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotMvMDeployBomb_Update);
-	ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, CTFBotMvMDeployBomb_OnEnd);
-	ActionFactory.SetEventCallback(EventResponderType_OnContact, CTFBotMvMDeployBomb_OnContact);
+	public static void Init()
+	{
+		ActionFactory = new NextBotActionFactory("MvMDeployBomb");
+		ActionFactory.BeginDataMapDesc()
+			.DefineVectorField("m_anchorPos")
+		.EndDataMapDesc();
+		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
+		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
+		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
+		ActionFactory.SetEventCallback(EventResponderType_OnContact, OnContact);
+	}
+	
+	public CTFBotMvMDeployBomb()
+	{
+		return view_as<CTFBotMvMDeployBomb>(ActionFactory.Create());
+	}
 }
 
-NextBotAction CTFBotMvMDeployBomb_Create()
-{
-	return ActionFactory.Create();
-}
-
-static int CTFBotMvMDeployBomb_OnStart(NextBotAction action, int actor, NextBotAction priorAction)
+static int OnStart(CTFBotMvMDeployBomb action, int actor, NextBotAction priorAction)
 {
 	Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_DELAY);
 	m_timer[actor].Start(tf_deploying_bomb_delay_time.FloatValue);
@@ -59,7 +62,7 @@ static int CTFBotMvMDeployBomb_OnStart(NextBotAction action, int actor, NextBotA
 	return action.Continue();
 }
 
-static int CTFBotMvMDeployBomb_Update(NextBotAction action, int actor, float interval)
+static int Update(CTFBotMvMDeployBomb action, int actor, float interval)
 {
 	int areaTrigger = -1;
 	
@@ -148,7 +151,7 @@ static int CTFBotMvMDeployBomb_Update(NextBotAction action, int actor, float int
 	return action.Continue();
 }
 
-static void CTFBotMvMDeployBomb_OnEnd(NextBotAction action, int actor, NextBotAction nextAction)
+static void OnEnd(CTFBotMvMDeployBomb action, int actor, NextBotAction nextAction)
 {
 	if (Player(actor).GetDeployingBombState() == TF_BOMB_DEPLOYING_ANIMATING)
 	{
@@ -167,7 +170,7 @@ static void CTFBotMvMDeployBomb_OnEnd(NextBotAction action, int actor, NextBotAc
 	TF2_RemoveCondition(actor, TFCond_FreezeInput);
 }
 
-static int CTFBotMvMDeployBomb_OnContact(NextBotAction action, int actor, int other, Address result)
+static int OnContact(CTFBotMvMDeployBomb action, int actor, int other, Address result)
 {
 	// so event doesn't fall thru to buried action which will then redo transition to this state as we stay in contact with the zone
 	return action.TryToSustain(RESULT_CRITICAL);

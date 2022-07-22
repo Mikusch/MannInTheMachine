@@ -647,24 +647,24 @@ public void OnPluginStart()
 	phys_pushscale = FindConVar("phys_pushscale");
 	
 	// Init bot actions
-	CTFBotMainAction_Init();
-	CTFBotDead_Init();
-	CTFBotDeliverFlag_Init();
-	CTFBotFetchFlag_Init();
-	CTFBotMedicHeal_Init();
-	CTFBotMissionSuicideBomber_Init();
-	CTFBotMvMDeployBomb_Init();
-	CTFBotMvMEngineerIdle_Init();
-	CTFBotMvMEngineerTeleportSpawn_Init();
-	CTFBotScenarioMonitor_Init();
-	CTFBotSpyLeaveSpawnRoom_Init();
-	CTFBotTaunt_Init();
+	CTFBotMainAction.Init();
+	CTFBotDead.Init();
+	CTFBotDeliverFlag.Init();
+	CTFBotFetchFlag.Init();
+	CTFBotMedicHeal.Init();
+	CTFBotMissionSuicideBomber.Init();
+	CTFBotMvMDeployBomb.Init();
+	CTFBotMvMEngineerIdle.Init();
+	CTFBotMvMEngineerTeleportSpawn.Init();
+	CTFBotScenarioMonitor.Init();
+	CTFBotSpyLeaveSpawnRoom.Init();
+	CTFBotTaunt.Init();
 	
 	// Install player action factory
 	EntityFactory = new CEntityFactory("player");
 	EntityFactory.DeriveFromClass("player");
 	EntityFactory.AttachNextBot(FACTORY_NEXTBOT_PLAYER);
-	EntityFactory.SetInitialActionFactory(CTFBotMainAction_GetFactory());
+	EntityFactory.SetInitialActionFactory(CTFBotMainAction.GetFactory());
 	EntityFactory.Install();
 	
 	Console_Init();

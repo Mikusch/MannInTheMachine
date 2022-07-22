@@ -20,18 +20,21 @@
 
 static NextBotActionFactory ActionFactory;
 
-void CTFBotMedicHeal_Init()
+methodmap CTFBotMedicHeal < NextBotAction
 {
-	ActionFactory = new NextBotActionFactory("MedicHeal");
-	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotMedicHeal_Update);
+	public static void Init()
+	{
+		ActionFactory = new NextBotActionFactory("MedicHeal");
+		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
+	}
+	
+	public CTFBotMedicHeal()
+	{
+		return view_as<CTFBotMedicHeal>(ActionFactory.Create());
+	}
 }
 
-NextBotAction CTFBotMedicHeal_Create()
-{
-	return ActionFactory.Create();
-}
-
-static int CTFBotMedicHeal_Update(NextBotAction action, int actor, float interval)
+static int Update(CTFBotMedicHeal action, int actor, float interval)
 {
 	// if we're in a squad, and the only other members are medics, disband the squad
 	if (Player(actor).IsInASquad())
@@ -39,7 +42,7 @@ static int CTFBotMedicHeal_Update(NextBotAction action, int actor, float interva
 		CTFBotSquad squad = Player(actor).GetSquad();
 		if (GameRules_IsMannVsMachineMode() && squad.IsLeader(actor))
 		{
-			return action.ChangeTo(CTFBotFetchFlag_Create(), "I'm now a squad leader! Going for the flag!");
+			return action.ChangeTo(CTFBotFetchFlag(), "I'm now a squad leader! Going for the flag!");
 		}
 		
 		if (!squad.ShouldPreserveSquad())
@@ -81,7 +84,7 @@ static int CTFBotMedicHeal_Update(NextBotAction action, int actor, float interva
 		if (GameRules_IsMannVsMachineMode())
 		{
 			// no-one is left to heal - get the flag!
-			return action.ChangeTo(CTFBotFetchFlag_Create(), "Everyone is gone! Going for the flag");
+			return action.ChangeTo(CTFBotFetchFlag(), "Everyone is gone! Going for the flag");
 		}
 	}
 	

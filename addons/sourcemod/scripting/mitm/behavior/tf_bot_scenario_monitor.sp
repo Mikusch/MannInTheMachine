@@ -20,19 +20,22 @@
 
 static NextBotActionFactory ActionFactory;
 
-void CTFBotScenarioMonitor_Init()
+methodmap CTFBotScenarioMonitor < NextBotAction
 {
-	ActionFactory = new NextBotActionFactory("ScenarioMonitor");
-	ActionFactory.SetCallback(NextBotActionCallbackType_InitialContainedAction, CTFBotScenarioMonitor_InitialContainedAction);
-	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotScenarioMonitor_Update);
+	public static void Init()
+	{
+		ActionFactory = new NextBotActionFactory("ScenarioMonitor");
+		ActionFactory.SetCallback(NextBotActionCallbackType_InitialContainedAction, InitialContainedAction);
+		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
+	}
+	
+	public CTFBotScenarioMonitor()
+	{
+		return view_as<CTFBotScenarioMonitor>(ActionFactory.Create());
+	}
 }
 
-NextBotAction CTFBotScenarioMonitor_Create()
-{
-	return ActionFactory.Create();
-}
-
-static NextBotAction CTFBotScenarioMonitor_InitialContainedAction(NextBotAction action, int actor)
+static NextBotAction InitialContainedAction(NextBotAction action, int actor)
 {
 	if (Player(actor).IsInASquad())
 	{
@@ -45,7 +48,7 @@ static NextBotAction CTFBotScenarioMonitor_InitialContainedAction(NextBotAction 
 		// Medics are the exception - they always heal, and have special squad logic in their heal logic
 		if (TF2_GetPlayerClass(actor) == TFClass_Medic)
 		{
-			return CTFBotMedicHeal_Create();
+			return CTFBotMedicHeal();
 		}
 		
 		// I'm in a Squad but not the leader, do "escort and support" Squad behavior
@@ -56,7 +59,7 @@ static NextBotAction CTFBotScenarioMonitor_InitialContainedAction(NextBotAction 
 	return DesiredScenarioAndClassAction(actor);
 }
 
-static int CTFBotScenarioMonitor_Update(NextBotAction action, int actor, float interval)
+static int Update(NextBotAction action, int actor, float interval)
 {
 	if (HasTheFlag(actor))
 	{
@@ -66,7 +69,7 @@ static int CTFBotScenarioMonitor_Update(NextBotAction action, int actor, float i
 			return action.Done("Flag kill");
 		}
 		
-		return action.SuspendFor(CTFBotDeliverFlag_Create(), "I've picked up the flag! Running it in...");
+		return action.SuspendFor(CTFBotDeliverFlag(), "I've picked up the flag! Running it in...");
 	}
 	
 	return action.Continue();
@@ -78,7 +81,7 @@ static NextBotAction DesiredScenarioAndClassAction(int actor)
 	{
 		case MISSION_DESTROY_SENTRIES:
 		{
-			return CTFBotMissionSuicideBomber_Create();
+			return CTFBotMissionSuicideBomber();
 		}
 	}
 	
@@ -86,7 +89,7 @@ static NextBotAction DesiredScenarioAndClassAction(int actor)
 	{
 		if (TF2_GetPlayerClass(actor) == TFClass_Spy)
 		{
-			return CTFBotSpyLeaveSpawnRoom_Create();
+			return CTFBotSpyLeaveSpawnRoom();
 		}
 		
 		if (TF2_GetPlayerClass(actor) == TFClass_Medic)
@@ -106,17 +109,17 @@ static NextBotAction DesiredScenarioAndClassAction(int actor)
 			
 			if (!bIsBeingHealedByAMedic)
 			{
-				return CTFBotMedicHeal_Create();
+				return CTFBotMedicHeal();
 			}
 		}
 		
 		if (TF2_GetPlayerClass(actor) == TFClass_Engineer)
 		{
-			return CTFBotMvMEngineerIdle_Create();
+			return CTFBotMvMEngineerIdle();
 		}
 		
 		// capture the flag
-		return CTFBotFetchFlag_Create();
+		return CTFBotFetchFlag();
 	}
 	
 	return NULL_ACTION;

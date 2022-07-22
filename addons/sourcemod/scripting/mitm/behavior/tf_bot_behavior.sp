@@ -22,46 +22,47 @@ static NextBotActionFactory ActionFactory;
 
 static IntervalTimer m_undergroundTimer[MAXPLAYERS + 1];
 
-void CTFBotMainAction_Init()
+methodmap CTFBotMainAction < NextBotAction
 {
-	ActionFactory = new NextBotActionFactory("MainAction");
-	ActionFactory.SetCallback(NextBotActionCallbackType_InitialContainedAction, CTFBotMainAction_InitialContainedAction);
-	ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, CTFBotMainAction_OnStart);
-	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotMainAction_Update);
-	ActionFactory.SetEventCallback(EventResponderType_OnKilled, CTFBotMainAction_OnKilled);
-	ActionFactory.SetEventCallback(EventResponderType_OnOtherKilled, CTFBotMainAction_OnOtherKilled);
-}
-
-NextBotAction CTFBotMainAction_Create()
-{
-	return ActionFactory.Create();
-}
-
-NextBotActionFactory CTFBotMainAction_GetFactory()
-{
-	return ActionFactory;
-}
-
-static NextBotAction CTFBotMainAction_InitialContainedAction(NextBotAction action, int actor)
-{
-	return CTFBotScenarioMonitor_Create();
-}
-
-static int CTFBotMainAction_OnStart(NextBotAction action, int actor, NextBotAction priorAction)
-{
-	action.SetData("m_isWaitingForFullReload", false);
+	public static void Init()
+	{
+		ActionFactory = new NextBotActionFactory("MainAction");
+		ActionFactory.SetCallback(NextBotActionCallbackType_InitialContainedAction, InitialContainedAction);
+		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
+		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
+		ActionFactory.SetEventCallback(EventResponderType_OnKilled, OnKilled);
+		ActionFactory.SetEventCallback(EventResponderType_OnOtherKilled, OnOtherKilled);
+	}
 	
+	public static NextBotActionFactory GetFactory()
+	{
+		return ActionFactory;
+	}
+	
+	public CTFBotMainAction()
+	{
+		return view_as<CTFBotMainAction>(ActionFactory.Create());
+	}
+}
+
+static NextBotAction InitialContainedAction(CTFBotMainAction action, int actor)
+{
+	return CTFBotScenarioMonitor();
+}
+
+static int OnStart(CTFBotMainAction action, int actor, NextBotAction priorAction)
+{
 	// if bot is already dead at this point, make sure it's dead
 	// check for !IsAlive because bot could be DYING
 	if (!IsPlayerAlive(actor))
 	{
-		return action.ChangeTo(CTFBotDead_Create(), "I'm actually dead");
+		return action.ChangeTo(CTFBotDead(), "I'm actually dead");
 	}
 	
 	return action.Continue();
 }
 
-static int CTFBotMainAction_Update(NextBotAction action, int actor, float interval)
+static int Update(CTFBotMainAction action, int actor, float interval)
 {
 	if (TF2_GetClientTeam(actor) != TFTeam_Blue && TF2_GetClientTeam(actor) != TFTeam_Red)
 	{
@@ -151,11 +152,11 @@ static int CTFBotMainAction_Update(NextBotAction action, int actor, float interv
 				GetClientAuthId(actor, AuthId_Engine, auth, sizeof(auth), false);
 				GetTeamName(GetClientTeam(actor), teamName, sizeof(teamName));
 				
-				LogMessage("\"%N<%i><%s><%s>\" underground (position \"%3.2f %3.2f %3.2f\")", 
-						   actor, 
-						   GetClientUserId(actor), 
-						   auth, 
-						   teamName, 
+				LogMessage("\"%N<%i><%s><%s>\" underground (position \"%3.2f %3.2f %3.2f\")",
+						   actor,
+						   GetClientUserId(actor),
+						   auth,
+						   teamName,
 						   origin[0], origin[1], origin[2]);
 				
 				// teleport bot to a reasonable place
@@ -190,12 +191,12 @@ static int CTFBotMainAction_Update(NextBotAction action, int actor, float interv
 	return action.Continue();
 }
 
-static int CTFBotMainAction_OnKilled(NextBotAction action, int actor, int attacker, int inflictor, float damage, int damagetype)
+static int OnKilled(CTFBotMainAction action, int actor, int attacker, int inflictor, float damage, int damagetype)
 {
-	return action.TryChangeTo(CTFBotDead_Create(), RESULT_CRITICAL, "I died!");
+	return action.TryChangeTo(CTFBotDead(), RESULT_CRITICAL, "I died!");
 }
 
-static int CTFBotMainAction_OnOtherKilled(NextBotAction action, int actor, int victim, int attacker, int inflictor, float damage, int damagetype)
+static int OnOtherKilled(CTFBotMainAction action, int actor, int victim, int attacker, int inflictor, float damage, int damagetype)
 {
 	bool do_taunt = IsEntityClient(victim);
 	
@@ -214,7 +215,7 @@ static int CTFBotMainAction_OnOtherKilled(NextBotAction action, int actor, int v
 			if (isTaunting)
 			{
 				// we just killed a human - taunt!
-				return action.TrySuspendFor(CTFBotTaunt_Create(), RESULT_IMPORTANT, "Taunting our victim");
+				return action.TrySuspendFor(CTFBotTaunt(), RESULT_IMPORTANT, "Taunting our victim");
 			}
 		}
 	}

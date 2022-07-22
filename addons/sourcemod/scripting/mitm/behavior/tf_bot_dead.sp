@@ -22,31 +22,34 @@ static NextBotActionFactory ActionFactory;
 
 static IntervalTimer m_deadTimer[MAXPLAYERS + 1];
 
-void CTFBotDead_Init()
+methodmap CTFBotDead < NextBotAction
 {
-	ActionFactory = new NextBotActionFactory("Dead");
-	ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, CTFBotDead_OnStart);
-	ActionFactory.SetCallback(NextBotActionCallbackType_Update, CTFBotDead_Update);
+	public static void Init()
+	{
+		ActionFactory = new NextBotActionFactory("Dead");
+		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
+		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
+	}
+	
+	public CTFBotDead()
+	{
+		return view_as<CTFBotDead>(ActionFactory.Create());
+	}
 }
 
-NextBotAction CTFBotDead_Create()
-{
-	return ActionFactory.Create();
-}
-
-static int CTFBotDead_OnStart(NextBotAction action, int actor, NextBotAction priorAction)
+static int OnStart(CTFBotDead action, int actor, NextBotAction priorAction)
 {
 	m_deadTimer[actor].Start();
 	
 	return action.Continue();
 }
 
-static int CTFBotDead_Update(NextBotAction action, int actor, float interval)
+static int Update(CTFBotDead action, int actor, float interval)
 {
 	if (IsPlayerAlive(actor))
 	{
 		// how did this happen?
-		return action.ChangeTo(CTFBotMainAction_Create(), "This should not happen!");
+		return action.ChangeTo(CTFBotMainAction(), "This should not happen!");
 	}
 	
 	if (m_deadTimer[actor].IsGreaterThen(5.0))

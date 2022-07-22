@@ -663,7 +663,7 @@ public void OnPluginStart()
 	// Install player action factory
 	EntityFactory = new CEntityFactory("player");
 	EntityFactory.DeriveFromClass("player");
-	EntityFactory.AttachNextBot();
+	EntityFactory.AttachNextBot(FACTORY_NEXTBOT_PLAYER);
 	EntityFactory.SetInitialActionFactory(CTFBotMainAction_GetFactory());
 	EntityFactory.Install();
 	

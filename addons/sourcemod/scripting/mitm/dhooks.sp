@@ -1283,10 +1283,10 @@ MRESReturn DHookCallback_DoTeleporterOverride_Post(DHookReturn ret, DHookParam p
 		char szSpawnPointName[64];
 		spawnEnt.GetPropString(Prop_Data, "m_iName", szSpawnPointName, sizeof(szSpawnPointName));
 		
-		for (int iTelePoints = 0; iTelePoints < Entity(obj).m_teleportWhereName.Length; ++iTelePoints)
+		for (int iTelePoints = 0; iTelePoints < Entity(obj).GetTeleportWhere().Length; ++iTelePoints)
 		{
 			char teleportWhereName[64];
-			Entity(obj).m_teleportWhereName.GetString(iTelePoints, teleportWhereName, sizeof(teleportWhereName));
+			Entity(obj).GetTeleportWhere().GetString(iTelePoints, teleportWhereName, sizeof(teleportWhereName));
 			
 			if (StrEqual(teleportWhereName, szSpawnPointName, false))
 			{

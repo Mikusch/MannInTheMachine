@@ -106,14 +106,35 @@ methodmap Entity
 	
 	public void SetTeleportWhere(ArrayList teleportWhereName)
 	{
-		this.m_teleportWhereName = teleportWhereName.Clone();
+		// deep copy strings
+		for (int i = 0; i < teleportWhereName.Length; i++)
+		{
+			char szTeleportWhereName[64];
+			if (teleportWhereName.GetString(i, szTeleportWhereName, sizeof(szTeleportWhereName)))
+			{
+				this.m_teleportWhereName.PushString(szTeleportWhereName);
+			}
+		}
 	}
 	
-	public void Delete()
+	public ArrayList GetTeleportWhere()
+	{
+		return this.m_teleportWhereName;
+	}
+	
+	public void Destroy()
 	{
 		if (this.m_listIndex == -1)
 			return;
 		
+		EntityProperties properties;
+		if (g_EntityProperties.GetArray(this.m_listIndex, properties))
+		{
+			// properly dispose of contained handles
+			properties.Destroy();
+		}
+		
+		// finally, remove the list entry
 		g_EntityProperties.Erase(this.m_listIndex);
 	}
 }

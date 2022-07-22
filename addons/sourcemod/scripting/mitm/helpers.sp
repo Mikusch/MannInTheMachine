@@ -117,6 +117,7 @@ int GetItemDefinitionByName(const char[] name)
 		
 		if (StrEqual(itemName, name, false))
 		{
+			delete itemList;
 			return itemdef;
 		}
 	}

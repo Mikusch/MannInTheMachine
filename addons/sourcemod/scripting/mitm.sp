@@ -925,7 +925,7 @@ void SelectNewDefenders()
 	
 	ArrayList defenderList = Queue_GetDefenderQueue();
 	int iDefenderCount = 0;
-	int iReqDefenderCount = Max(mitm_defender_min_count.FloatValue, RoundToNearest((float(playerList.Length) / float(MaxClients)) * mitm_defender_max_count.IntValue));
+	int iReqDefenderCount = Max(mitm_defender_min_count.IntValue, RoundToNearest((float(playerList.Length) / float(MaxClients)) * mitm_defender_max_count.IntValue));
 	
 	// select our defenders
 	for (int i = 0; i < defenderList.Length; i++)

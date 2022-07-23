@@ -47,11 +47,21 @@ methodmap CTFBotMainAction < NextBotAction
 
 static NextBotAction InitialContainedAction(CTFBotMainAction action, int actor)
 {
-	return CTFBotScenarioMonitor();
+	if (TF2_GetClientTeam(actor) == TFTeam_Invaders)
+	{
+		return CTFBotScenarioMonitor();
+	}
+	
+	return NULL_ACTION;
 }
 
 static int OnStart(CTFBotMainAction action, int actor, NextBotAction priorAction)
 {
+	if (TF2_GetClientTeam(actor) == TFTeam_Invaders)
+	{
+		return action.Done("Not an invader");
+	}
+	
 	// if bot is already dead at this point, make sure it's dead
 	// check for !IsAlive because bot could be DYING
 	if (!IsPlayerAlive(actor))

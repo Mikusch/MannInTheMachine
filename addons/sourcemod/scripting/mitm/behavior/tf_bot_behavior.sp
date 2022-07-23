@@ -174,12 +174,6 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 		{
 			m_undergroundTimer[actor].Invalidate();
 		}
-		
-		// TODO: Check if this is a good place
-		/*if ( me->ShouldAutoJump() )
-		{
-			me->GetLocomotionInterface()->Jump();
-		}*/
 	}
 	
 	if (TF2_GetPlayerClass(actor) == TFClass_DemoMan)

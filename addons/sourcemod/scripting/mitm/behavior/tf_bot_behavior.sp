@@ -57,11 +57,6 @@ static NextBotAction InitialContainedAction(CTFBotMainAction action, int actor)
 
 static int OnStart(CTFBotMainAction action, int actor, NextBotAction priorAction)
 {
-	if (TF2_GetClientTeam(actor) == TFTeam_Invaders)
-	{
-		return action.Done("Not an invader");
-	}
-	
 	// if bot is already dead at this point, make sure it's dead
 	// check for !IsAlive because bot could be DYING
 	if (!IsPlayerAlive(actor))
@@ -74,10 +69,10 @@ static int OnStart(CTFBotMainAction action, int actor, NextBotAction priorAction
 
 static int Update(CTFBotMainAction action, int actor, float interval)
 {
-	if (TF2_GetClientTeam(actor) != TFTeam_Blue && TF2_GetClientTeam(actor) != TFTeam_Red)
+	if (TF2_GetClientTeam(actor) != TFTeam_Invaders)
 	{
-		// not on a team - do nothing
-		return action.Done("Not on a playing team");
+		// not an invader - do nothing
+		return action.Done("Not an invader");
 	}
 	
 	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(actor) == TFTeam_Invaders)

@@ -325,7 +325,7 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 	Player(actor).SetMission(NO_MISSION);
 	SetEntProp(actor, Prop_Data, "m_takedamage", DAMAGE_YES);
 	
-	// kill victims (including actor)
+	// kill victims (including me)
 	for (int i = 0; i < victimList.Length; ++i)
 	{
 		int victim = victimList.Get(i);

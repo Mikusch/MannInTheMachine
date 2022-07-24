@@ -1128,7 +1128,6 @@ void FireWeaponAtEnemy(int client, int &buttons)
 			
 			buttons &= ~IN_ATTACK;
 			buttons &= ~IN_ATTACK2;
-			return;
 		}
 	}
 	else if (s_isInSpawn[client])

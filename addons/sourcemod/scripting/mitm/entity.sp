@@ -27,7 +27,7 @@ enum struct EntityProperties
 	void Initialize(int entity)
 	{
 		this.m_index = entity;
-		this.m_teleportWhereName = new ArrayList();
+		this.m_teleportWhereName = new ArrayList(64);
 		this.m_glowEntity = INVALID_ENT_REFERENCE;
 	}
 	
@@ -107,7 +107,7 @@ methodmap Entity
 	public void SetTeleportWhere(ArrayList teleportWhereName)
 	{
 		// deep copy strings
-		for (int i = 0; i < teleportWhereName.Length; i++)
+		for (int i = 0; i < teleportWhereName.Length; ++i)
 		{
 			char szTeleportWhereName[64];
 			if (teleportWhereName.GetString(i, szTeleportWhereName, sizeof(szTeleportWhereName)))

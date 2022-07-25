@@ -663,7 +663,7 @@ public void OnPluginStart()
 	// Install player action factory
 	EntityFactory = new CEntityFactory("player");
 	EntityFactory.DeriveFromClass("player");
-	EntityFactory.AttachNextBot(FACTORY_NEXTBOT_PLAYER);
+	EntityFactory.AttachNextBot(CreateNextBotPlayer);
 	EntityFactory.SetInitialActionFactory(CTFBotMainAction.GetFactory());
 	EntityFactory.Install();
 	
@@ -1169,4 +1169,11 @@ Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNu
 	}
 	
 	return Plugin_Continue;
+}
+
+INextBot CreateNextBotPlayer(Address entity)
+{
+	ToolsNextBotPlayer nextbot = ToolsNextBotPlayer(entity);
+	nextbot.IsDormantWhenDead = false;
+	return nextbot;
 }

@@ -700,3 +700,44 @@ bool IsEntityClient(int client)
 {
 	return (0 < client <= MaxClients);
 }
+
+bool FClassnameIs(int entity, const char[] szClassname)
+{
+	char m_iClassname[64];
+	return GetEntityClassname(entity, m_iClassname, sizeof(m_iClassname)) && StrEqual(szClassname, m_iClassname);
+}
+
+int FindTeleporterHintForPlayer(int player)
+{
+	int hint = MaxClients + 1;
+	while ((hint = FindEntityByClassname(hint, "bot_hint_engineer_nest")) != -1)
+	{
+		int owner = GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity");
+		if (owner == player)
+		{
+			return SDKCall_GetTeleporterHint(hint);
+		}
+	}
+	
+	return -1;
+}
+
+int FindSentryHintForPlayer(int player)
+{
+	int hint = MaxClients + 1;
+	while ((hint = FindEntityByClassname(hint, "bot_hint_engineer_nest")) != -1)
+	{
+		int owner = GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity");
+		if (owner == player)
+		{
+			return SDKCall_GetSentryHint(hint);
+		}
+	}
+	
+	return -1;
+}
+
+bool HasTheFlag(int client)
+{
+	return GetEntPropEnt(client, Prop_Send, "m_hItem") != -1;
+}

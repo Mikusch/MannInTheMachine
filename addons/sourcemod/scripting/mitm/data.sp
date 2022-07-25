@@ -42,6 +42,7 @@ static float m_flRequiredSpawnLeaveTime[MAXPLAYERS + 1];
 static int m_spawnPointEntity[MAXPLAYERS + 1];
 static CTFBotSquad m_squad[MAXPLAYERS + 1];
 static int m_hFollowingFlagTarget[MAXPLAYERS + 1];
+static BombDeployingState_t m_nDeployingBombState[MAXPLAYERS + 1];
 static char m_szOldClientName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
 
 // Non-resetting Properties
@@ -293,6 +294,18 @@ methodmap Player
 		}
 	}
 	
+	property BombDeployingState_t m_nDeployingBombState
+	{
+		public get()
+		{
+			return m_nDeployingBombState[this._client];
+		}
+		public set(BombDeployingState_t nDeployingBombState)
+		{
+			m_nDeployingBombState[this._client] = nDeployingBombState;
+		}
+	}
+	
 	public bool IsInvader()
 	{
 		TFTeam team = TF2_GetClientTeam(this._client);
@@ -312,6 +325,16 @@ methodmap Player
 	public bool HasFlagTarget()
 	{
 		return this.m_hFollowingFlagTarget != -1;
+	}
+	
+	public BombDeployingState_t GetDeployingBombState()
+	{
+		return this.m_nDeployingBombState;
+	}
+	
+	public void SetDeployingBombState(BombDeployingState_t nDeployingBombState)
+	{
+		this.m_nDeployingBombState = nDeployingBombState;
 	}
 	
 	public void SetAutoJump(float flAutoJumpMin, float flAutoJumpMax)
@@ -439,6 +462,11 @@ methodmap Player
 	public bool IsOnAnyMission()
 	{
 		return this.m_mission == NO_MISSION ? false : true;
+	}
+	
+	public MissionType GetMission()
+	{
+		return this.m_mission;
 	}
 	
 	public void SetMission(MissionType mission)
@@ -890,7 +918,7 @@ methodmap Player
 				continue;
 			
 			// If I'm carrying a flag, look for mine and early-out
-			if (SDKCall_HasTheFlag(this._client))
+			if (HasTheFlag(this._client))
 			{
 				if (GetEntPropEnt(flag, Prop_Send, "m_hOwnerEntity") == this._client)
 				{

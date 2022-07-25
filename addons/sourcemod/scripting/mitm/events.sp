@@ -18,7 +18,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-void Events_Initialize()
+void Events_Init()
 {
 	HookEvent("player_spawn", EventHook_PlayerSpawn);
 	HookEvent("player_death", EventHook_PlayerDeath);
@@ -35,11 +35,6 @@ void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 	
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
-		if (TF2_GetPlayerClass(client) == TFClass_Spy)
-		{
-			CTFBotSpyLeaveSpawnRoom_OnStart(client);
-		}
-		
 		CreateTimer(0.1, Timer_UpdatePlayerGlow, GetClientUserId(client));
 	}
 }
@@ -61,33 +56,12 @@ Action Timer_UpdatePlayerGlow(Handle timer, int userid)
 
 void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 {
-	int userid = event.GetInt("userid");
-	int victim = GetClientOfUserId(userid);
-	int attacker = GetClientOfUserId(event.GetInt("attacker"));
+	int victim = GetClientOfUserId(event.GetInt("userid"));
 	
 	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
 	{
-		// Replicate behavior of CTFBotDead::Update
-		CreateTimer(5.0, Timer_DeadTimer, userid);
-		
 		// Remove any glows attached to us
 		RemoveEntityGlow(victim);
-	}
-	else if (IsEntityClient(attacker) && TF2_GetClientTeam(victim) == TFTeam_Defenders && TF2_GetClientTeam(attacker) == TFTeam_Invaders)
-	{
-		bool isTaunting = !SDKCall_HasTheFlag(attacker) && GetRandomFloat(0.0, 100.0) <= tf_bot_taunt_victim_chance.FloatValue;
-		
-		if (GetEntProp(attacker, Prop_Send, "m_bIsMiniBoss"))
-		{
-			// Bosses don't taunt puny humans
-			isTaunting = false;
-		}
-		
-		if (isTaunting)
-		{
-			// we just killed a human - taunt!
-			FakeClientCommand(attacker, "taunt");
-		}
 	}
 }
 
@@ -199,7 +173,7 @@ void EventHook_PlayerBuiltObject(Event event, const char[] name, bool dontBroadc
 			SetEntProp(index, Prop_Data, "m_iHealth", iHealth);
 			
 			// the teleporter owns this hint now
-			int hint = GetNestTeleporterHint(builder);
+			int hint = FindTeleporterHintForPlayer(builder);
 			if (hint != -1)
 			{
 				SetEntityOwner(hint, index);
@@ -214,7 +188,7 @@ void EventHook_PlayerBuiltObject(Event event, const char[] name, bool dontBroadc
 			SetEntProp(index, Prop_Data, "m_nDefaultUpgradeLevel", 2);
 			
 			// the sentry owns this hint now
-			int hint = GetNestSentryHint(builder);
+			int hint = FindSentryHintForPlayer(builder);
 			if (hint != -1)
 			{
 				SetEntityOwner(hint, index);
@@ -255,8 +229,6 @@ void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool dontBroadc
 				// Prevent the bomb carrier from being pushed around
 				tf_avoidteammates_pushaway.ReplicateToClient(player, "0");
 			}
-			
-			CTFBotDeliverFlag_OnStart(player);
 		}
 		case TF_FLAGEVENT_DROPPED, TF_FLAGEVENT_CAPTURED:
 		{
@@ -264,8 +236,6 @@ void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool dontBroadc
 			{
 				tf_avoidteammates_pushaway.ReplicateToClient(player, "1");
 			}
-			
-			CTFBotDeliverFlag_OnEnd(player);
 		}
 	}
 }
@@ -279,27 +249,6 @@ Action Timer_OnWaitingForPlayersEnd(Handle timer)
 	g_bInWaitingForPlayers = false;
 	
 	GetPopulationManager().ResetMap();
-	
-	return Plugin_Continue;
-}
-
-Action Timer_DeadTimer(Handle timer, int userid)
-{
-	int client = GetClientOfUserId(userid);
-	
-	if (client != 0 && IsClientInGame(client) && !IsPlayerAlive(client))
-	{
-		if (Player(client).HasAttribute(REMOVE_ON_DEATH))
-		{
-			ServerCommand("kickid %d", userid);
-		}
-		else if (Player(client).HasAttribute(BECOME_SPECTATOR_ON_DEATH))
-		{
-			g_bAllowTeamChange = true;
-			TF2_ChangeClientTeam(client, TFTeam_Spectator);
-			g_bAllowTeamChange = false;
-		}
-	}
 	
 	return Plugin_Continue;
 }

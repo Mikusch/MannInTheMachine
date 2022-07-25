@@ -15,6 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma semicolon 1
+#pragma newdecls required
+
 #include <sourcemod>
 #include <tf2_stocks>
 #include <sdkhooks>
@@ -29,9 +32,6 @@
 #include <cbasenpc>
 #include <cbasenpc/tf/nav>
 #include <morecolors>
-
-#pragma semicolon 1
-#pragma newdecls required
 
 #define ZERO_VECTOR	{ 0.0, 0.0, 0.0 }
 
@@ -185,6 +185,15 @@ enum SpawnLocationResult
 	SPAWN_LOCATION_NOT_FOUND = 0,
 	SPAWN_LOCATION_NAV,
 	SPAWN_LOCATION_TELEPORTER
+};
+
+enum taunts_t
+{
+	TAUNT_BASE_WEAPON,		// The standard taunt we shipped with. Taunts based on your currently held weapon
+	TAUNT_MISC_ITEM,		// Taunts based on the item you have equipped in your Misc slot.
+	TAUNT_SHOW_ITEM,		// Show off an item to everyone nearby
+	TAUNT_LONG,				// Press-and-hold taunt
+	TAUNT_SPECIAL,			// Special-case taunts called explicitly from code
 };
 
 //-----------------------------------------------------------------------------
@@ -429,48 +438,48 @@ enum HintType
 
 enum struct CountdownTimer
 {
-	float timestamp;
-	float duration;
+	float m_timestamp;
+	float m_duration;
 	
 	void Reset()
 	{
-		this.timestamp = GetGameTime() + this.duration;
+		this.m_timestamp = GetGameTime() + this.m_duration;
 	}
 	
 	void Start(float duration)
 	{
-		this.timestamp = GetGameTime() + duration;
-		this.duration = duration;
+		this.m_timestamp = GetGameTime() + duration;
+		this.m_duration = duration;
 	}
 	
 	void Invalidate()
 	{
-		this.timestamp = -1.0;
+		this.m_timestamp = -1.0;
 	}
 	
 	bool HasStarted()
 	{
-		return this.timestamp > 0.0;
+		return this.m_timestamp > 0.0;
 	}
 	
 	bool IsElapsed()
 	{
-		return GetGameTime() > this.timestamp;
+		return GetGameTime() > this.m_timestamp;
 	}
 	
 	float GetElapsedTime()
 	{
-		return GetGameTime() - this.timestamp + this.duration;
+		return GetGameTime() - this.m_timestamp + this.m_duration;
 	}
 	
 	float GetRemainingTime()
 	{
-		return this.timestamp - GetGameTime();
+		return this.m_timestamp - GetGameTime();
 	}
 	
 	float GetCountdownDuration()
 	{
-		return this.HasStarted() ? this.duration : 0.0;
+		return this.HasStarted() ? this.m_duration : 0.0;
 	}
 }
 
@@ -515,6 +524,9 @@ enum struct IntervalTimer
 	}
 }
 
+// Static
+static CEntityFactory EntityFactory;
+
 // Globals
 Handle g_WarningHudSync;
 Handle g_InfoHudSync;
@@ -524,15 +536,10 @@ StringMap g_offsets;
 bool g_bAllowTeamChange;
 bool g_bForceFriendlyFire;
 float g_flNextRestoreCheckpointTime;
-float g_flNextClientTick;
-
-// TODO: This is horrible. Create an actions system.
-IntervalTimer m_undergroundTimer[MAXPLAYERS + 1];
-bool g_binMissionSuicideBomber[MAXPLAYERS + 1];
-bool g_bInEngineerIdle[MAXPLAYERS + 1];
 
 // Plugin ConVars
 ConVar mitm_developer;
+ConVar mitm_defender_min_count;
 ConVar mitm_defender_max_count;
 ConVar mitm_spawn_hurry_time;
 ConVar mitm_queue_points;
@@ -556,25 +563,29 @@ ConVar tf_bot_suicide_bomb_range;
 ConVar tf_bot_suicide_bomb_friendly_fire;
 ConVar tf_bot_taunt_victim_chance;
 ConVar tf_bot_always_full_reload;
+ConVar tf_bot_flag_kill_on_touch;
 ConVar mp_tournament_redteamname;
 ConVar mp_tournament_blueteamname;
 ConVar mp_waitingforplayers_time;
 ConVar sv_stepsize;
 ConVar phys_pushscale;
-ConVar nb_update_frequency;
 
 #include "mitm/tf_bot_squad.sp"
 #include "mitm/data.sp"
 #include "mitm/entity.sp"
 
+#include "mitm/behavior/tf_bot_behavior.sp"
+#include "mitm/behavior/tf_bot_dead.sp"
 #include "mitm/behavior/tf_bot_deliver_flag.sp"
 #include "mitm/behavior/tf_bot_fetch_flag.sp"
-#include "mitm/behavior/tf_bot_spy_leave_spawn_room.sp"
+#include "mitm/behavior/tf_bot_medic_heal.sp"
+#include "mitm/behavior/tf_bot_mission_suicide_bomber.sp"
 #include "mitm/behavior/tf_bot_mvm_deploy_bomb.sp"
 #include "mitm/behavior/tf_bot_mvm_engineer_idle.sp"
 #include "mitm/behavior/tf_bot_mvm_engineer_teleport_spawn.sp"
-#include "mitm/behavior/tf_bot_mission_suicide_bomber.sp"
-#include "mitm/behavior/tf_bot_medic_heal.sp"
+#include "mitm/behavior/tf_bot_scenario_monitor.sp"
+#include "mitm/behavior/tf_bot_spy_leave_spawn_room.sp"
+#include "mitm/behavior/tf_bot_taunt.sp"
 
 #include "mitm/clientprefs.sp"
 #include "mitm/console.sp"
@@ -605,7 +616,8 @@ public void OnPluginStart()
 	g_offsets = new StringMap();
 	
 	mitm_developer = CreateConVar("mitm_developer", "0", "Toggle plugin developer mode.");
-	mitm_defender_max_count = CreateConVar("mitm_defender_max_count", "8", "Maximum amount of defenders on a full server.", _, true, 6.0, true, 10.0);
+	mitm_defender_min_count = CreateConVar("mitm_defender_min_count", "6", "Minimum amount of defenders, regardless of player count.", _, _, _, true, 10.0);
+	mitm_defender_max_count = CreateConVar("mitm_defender_max_count", "8", "Maximum amount of defenders on a full server.", _, _, _, true, 10.0);
 	mitm_spawn_hurry_time = CreateConVar("mitm_spawn_hurry_time", "30.0", "Time that invaders have to leave their spawn.");
 	mitm_queue_points = CreateConVar("mitm_queue_points", "5", "Amount of queue points awarded to players that did not become defenders.", _, true, 1.0);
 	mitm_rename_robots = CreateConVar("mitm_rename_robots", "0", "Whether to rename robots as they spawn?");
@@ -627,24 +639,45 @@ public void OnPluginStart()
 	tf_bot_suicide_bomb_friendly_fire = FindConVar("tf_bot_suicide_bomb_friendly_fire");
 	tf_bot_taunt_victim_chance = FindConVar("tf_bot_taunt_victim_chance");
 	tf_bot_always_full_reload = FindConVar("tf_bot_always_full_reload");
+	tf_bot_flag_kill_on_touch = FindConVar("tf_bot_flag_kill_on_touch");
 	mp_tournament_redteamname = FindConVar("mp_tournament_redteamname");
 	mp_tournament_blueteamname = FindConVar("mp_tournament_blueteamname");
 	mp_waitingforplayers_time = FindConVar("mp_waitingforplayers_time");
 	sv_stepsize = FindConVar("sv_stepsize");
 	phys_pushscale = FindConVar("phys_pushscale");
-	nb_update_frequency = FindConVar("nb_update_frequency");
 	
-	Console_Initialize();
-	Events_Initialize();
-	ClientPrefs_Initialize();
+	// Init bot actions
+	CTFBotMainAction.Init();
+	CTFBotDead.Init();
+	CTFBotDeliverFlag.Init();
+	CTFBotFetchFlag.Init();
+	CTFBotMedicHeal.Init();
+	CTFBotMissionSuicideBomber.Init();
+	CTFBotMvMDeployBomb.Init();
+	CTFBotMvMEngineerIdle.Init();
+	CTFBotMvMEngineerTeleportSpawn.Init();
+	CTFBotScenarioMonitor.Init();
+	CTFBotSpyLeaveSpawnRoom.Init();
+	CTFBotTaunt.Init();
+	
+	// Install player action factory
+	EntityFactory = new CEntityFactory("player");
+	EntityFactory.DeriveFromClass("player");
+	EntityFactory.AttachNextBot(CreateNextBotPlayer);
+	EntityFactory.SetInitialActionFactory(CTFBotMainAction.GetFactory());
+	EntityFactory.Install();
+	
+	Console_Init();
+	Events_Init();
+	ClientPrefs_Init();
 	
 	HookUserMessage(GetUserMessageId("SayText2"), OnSayText2, true);
 	
 	GameData gamedata = new GameData("mitm");
 	if (gamedata)
 	{
-		DHooks_Initialize(gamedata);
-		SDKCalls_Initialize(gamedata);
+		DHooks_Init(gamedata);
+		SDKCalls_Init(gamedata);
 		
 		SetOffset(gamedata, "CTFBotSpawner::m_class");
 		SetOffset(gamedata, "CTFBotSpawner::m_health");
@@ -680,6 +713,7 @@ public void OnPluginStart()
 		SetOffset(gamedata, "EventChangeAttributes_t::m_tags");
 		
 		SetOffset(gamedata, "CTFPlayer::m_flSpawnTime");
+		SetOffset(gamedata, "CTFPlayer::m_bAutoReload");
 		SetOffset(gamedata, "CTFPlayer::m_bIsMissionEnemy");
 		SetOffset(gamedata, "CTFPlayer::m_bIsSupportEnemy");
 		SetOffset(gamedata, "CTFPlayer::m_bIsLimitedSupportEnemy");
@@ -719,7 +753,6 @@ public void OnMapStart()
 	g_hWaitingForPlayersTimer = null;
 	g_bInWaitingForPlayers = true;
 	g_flNextRestoreCheckpointTime = 0.0;
-	g_flNextClientTick = 0.0;
 	
 	DHooks_HookGamerules();
 	
@@ -794,39 +827,10 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	return Plugin_Continue;
 }
 
-public void OnGameFrame()
+public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
 {
-	if (g_flNextClientTick < GetGameTime())
-	{
-		float flInterval = nb_update_frequency.FloatValue;
-		
-		for (int client = 1; client <= MaxClients; client++)
-		{
-			if (!IsClientInGame(client))
-				continue;
-			
-			OnClientTick(client, flInterval);
-		}
-		
-		g_flNextClientTick = GetGameTime() + flInterval;
-	}
-}
-
-void OnClientTick(int client, float flInterval)
-{
-	// if bot is already dead at this point, make sure it's dead
-	// check for !IsAlive because bot could be DYING
-	if (!IsPlayerAlive(client))
-		return;
-	
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
-		if (Player(client).HasTag("bot_gatebot"))
-		{
-			SetHudTextParams(0.05, 0.05, flInterval, 255, 255, 255, 255);
-			ShowSyncHudText(client, g_InfoHudSync, "%t", "Invader_GateBot");
-		}
-		
 		if (Player(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
 		{
 			TF2_AddCondition(client, TFCond_CritCanteen);
@@ -840,188 +844,6 @@ void OnClientTick(int client, float flInterval)
 				Player(client).LeaveSquad();
 			}
 		}
-		
-		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(client).GetLastKnownArea());
-		TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(client) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
-		
-		if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
-		{
-			// invading bots get uber while they leave their spawn so they don't drop their cash where players can't pick it up
-			TF2_AddCondition(client, TFCond_Ubercharged, 0.5);
-			TF2_AddCondition(client, TFCond_UberchargedHidden, 0.5);
-			TF2_AddCondition(client, TFCond_UberchargeFading, 0.5);
-			
-			// force bots to walk out of spawn
-			if (!Player(client).HasAttribute(AUTO_JUMP))
-			{
-				TF2Attrib_SetByName(client, "no_jump", 1.0);
-			}
-			
-			if (mitm_spawn_hurry_time.FloatValue)
-			{
-				if (!Player(client).m_flRequiredSpawnLeaveTime)
-				{
-					// minibosses and bomb carriers are slow and get more time to leave
-					float flTime = (GetEntProp(client, Prop_Send, "m_bIsMiniBoss") || SDKCall_HasTheFlag(client)) ? mitm_spawn_hurry_time.FloatValue * 1.5 : mitm_spawn_hurry_time.FloatValue;
-					Player(client).m_flRequiredSpawnLeaveTime = GetGameTime() + flTime;
-				}
-				else
-				{
-					if (TF2_IsPlayerInCondition(client, TFCond_Dazed))
-					{
-						// If we are stunned in our spawn, extend the time
-						Player(client).m_flRequiredSpawnLeaveTime += flInterval;
-					}
-					
-					float flTimeLeft = Player(client).m_flRequiredSpawnLeaveTime - GetGameTime();
-					if (flTimeLeft <= 0.0)
-					{
-						ForcePlayerSuicide(client);
-					}
-					else if (flTimeLeft <= 15.0)
-					{
-						// motivate them to leave their spawn
-						SetHudTextParams(-1.0, 0.7, flInterval, 255, 255, 255, 255);
-						ShowSyncHudText(client, g_WarningHudSync, "%t", "Invader_HurryOutOfSpawn", flTimeLeft);
-					}
-				}
-			}
-			else
-			{
-				Player(client).m_flRequiredSpawnLeaveTime = 0.0;
-			}
-		}
-		else
-		{
-			// not in spawn, reset their time
-			Player(client).m_flRequiredSpawnLeaveTime = 0.0;
-			
-			TF2Attrib_RemoveByName(client, "no_jump");
-		}
-		
-		float origin[3];
-		GetClientAbsOrigin(client, origin);
-		
-		// watch for bots that have fallen through the ground
-		if (myArea && myArea.GetZVector(origin) - origin[2] > 100.0)
-		{
-			if (!m_undergroundTimer[client].HasStarted())
-			{
-				m_undergroundTimer[client].Start();
-			}
-			else if (m_undergroundTimer[client].IsGreaterThen(3.0))
-			{
-				char auth[MAX_AUTHID_LENGTH];
-				GetClientAuthId(client, AuthId_Engine, auth, sizeof(auth), false);
-				
-				char teamName[MAX_TEAM_NAME_LENGTH];
-				GetTeamName(GetClientTeam(client), teamName, sizeof(teamName));
-				
-				LogMessage( "\"%N<%i><%s><%s>\" underground (position \"%3.2f %3.2f %3.2f\")", 
-							client, 
-							GetClientUserId(client), 
-							auth, 
-							teamName, 
-							origin[0], origin[1], origin[2]);
-				
-				// teleport bot to a reasonable place
-				float center[3];
-				myArea.GetCenter(center);
-				TeleportEntity(client, center);
-			}
-		}
-		else
-		{
-			m_undergroundTimer[client].Invalidate();
-		}
-		
-		if (SDKCall_HasTheFlag(client))
-		{
-			CTFBotDeliverFlag_Update(client);
-			return;
-		}
-		
-		// from CTFBotScenarioMonitor::DesiredScenarioAndClassAction
-		switch (Player(client).m_mission)
-		{
-			case MISSION_DESTROY_SENTRIES:
-			{
-				if (g_binMissionSuicideBomber[client])
-				{
-					if (!CTFBotMissionSuicideBomber_Update(client))
-					{
-						g_binMissionSuicideBomber[client] = false;
-					}
-				}
-				else
-				{
-					g_binMissionSuicideBomber[client] = true;
-					CTFBotMissionSuicideBomber_OnStart(client);
-				}
-				
-				return;
-			}
-		}
-		
-		if (TF2_GetPlayerClass(client) == TFClass_Spy)
-		{
-			CTFBotSpyLeaveSpawnRoom_Update(client);
-			return;
-		}
-		
-		if (TF2_GetPlayerClass(client) == TFClass_Medic)
-		{
-			// if I'm being healed by another medic, I should do something else other than healing
-			bool bIsBeingHealedByAMedic = false;
-			int nNumHealers = GetEntProp(client, Prop_Send, "m_nNumHealers");
-			for (int i = 0; i < nNumHealers; ++i)
-			{
-				int healer = TF2Util_GetPlayerHealer(client, i);
-				if (IsEntityClient(healer))
-				{
-					bIsBeingHealedByAMedic = true;
-					break;
-				}
-			}
-			
-			if (!bIsBeingHealedByAMedic)
-			{
-				CTFBotMedicHeal_Update(client);
-				return;
-			}
-		}
-		
-		if (TF2_GetPlayerClass(client) == TFClass_Engineer)
-		{
-			if (m_bIsTeleportingIn[client])
-			{
-				if (CTFBotMvMEngineerTeleportSpawn_Update(client))
-				{
-					// this takes precedence over CTFBotMvMEngineerIdle
-					return;
-				}
-				
-				m_bIsTeleportingIn[client] = false;
-			}
-			
-			if (g_bInEngineerIdle[client])
-			{
-				if (!CTFBotMvMEngineerIdle_Update(client))
-				{
-					g_bInEngineerIdle[client] = false;
-				}
-			}
-			else
-			{
-				g_bInEngineerIdle[client] = true;
-				CTFBotMvMEngineerIdle_OnStart(client);
-			}
-			
-			return;
-		}
-		
-		// capture the flag
-		CTFBotFetchFlag_Update(client);
 	}
 }
 
@@ -1103,7 +925,7 @@ void SelectNewDefenders()
 	
 	ArrayList defenderList = Queue_GetDefenderQueue();
 	int iDefenderCount = 0;
-	int iReqDefenderCount = RoundToNearest((float(playerList.Length) / float(MaxClients)) * mitm_defender_max_count.IntValue);
+	int iReqDefenderCount = Max(mitm_defender_min_count.IntValue, RoundToNearest((float(playerList.Length) / float(MaxClients)) * mitm_defender_max_count.IntValue));
 	
 	// select our defenders
 	for (int i = 0; i < defenderList.Length; i++)
@@ -1306,7 +1128,6 @@ void FireWeaponAtEnemy(int client, int &buttons)
 			
 			buttons &= ~IN_ATTACK;
 			buttons &= ~IN_ATTACK2;
-			return;
 		}
 	}
 	else if (s_isInSpawn[client])
@@ -1348,4 +1169,11 @@ Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNu
 	}
 	
 	return Plugin_Continue;
+}
+
+INextBot CreateNextBotPlayer(Address entity)
+{
+	ToolsNextBotPlayer nextbot = ToolsNextBotPlayer(entity);
+	nextbot.IsDormantWhenDead = false;
+	return nextbot;
 }

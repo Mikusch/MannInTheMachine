@@ -126,11 +126,6 @@
 				"linux"		"@_ZN9CTFPlayer19DoClassSpecialSkillEv"
 				"windows"	"\x56\x8B\xF1\x8B\x06\x8B\x80\x04\x01\x00\x00\xFF\xD0\x84\xC0\x75\x2A\x32\xC0\x5E\xC3\xF7\x86\x84\x1A\x00\x00\x00\x00\x04\x00"
 			}
-			"CTFPlayer::HasTheFlag"
-			{
-				"linux"		"@_ZNK9CTFPlayer10HasTheFlagEP11ETFFlagTypei"
-				"windows"	"\x55\x8B\xEC\x56\x8B\xF1\x57\x8B\x96\xC0\x20\x00\x00"
-			}
 			"CTFPlayer::DoAnimationEvent"
 			{
 				"linux"		"@_ZN9CTFPlayer16DoAnimationEventE17PlayerAnimEvent_ti"
@@ -155,11 +150,6 @@
 			{
 				"linux"		"@_ZN15CTFPlayerShared14ResetRageBuffsEv"
 				"windows"	"\xC7\x81\x98\x02\x00\x00\x00\x00\x00\x00"
-			}
-			"CTFPlayer::IsAllowedToTaunt"
-			{
-				"linux"		"@_ZN9CTFPlayer16IsAllowedToTauntEv"
-				"windows"	"\x55\x8B\xEC\x51\x56\x8B\xF1\x8B\x06\x8B\x80\x04\x01\x00\x00\xFF\xD0\x84\xC0\x75\x2A"
 			}
 			"CTFPlayer::CanBuild"
 			{
@@ -368,6 +358,11 @@
 			{
 				"linux"		"8616"
 				"windows"	"8612"
+			}
+			"CTFPlayer::m_bAutoReload"
+			{
+				"linux"		"8687"
+				"windows"	"8683"
 			}
 			"CTFPlayer::m_bIsMissionEnemy"
 			{

@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+static ArrayList g_EntityProperties;
+
 enum struct EntityProperties
 {
 	int m_index;
@@ -25,7 +27,7 @@ enum struct EntityProperties
 	void Initialize(int entity)
 	{
 		this.m_index = entity;
-		this.m_teleportWhereName = new ArrayList();
+		this.m_teleportWhereName = new ArrayList(64);
 		this.m_glowEntity = INVALID_ENT_REFERENCE;
 	}
 	
@@ -34,8 +36,6 @@ enum struct EntityProperties
 		delete this.m_teleportWhereName;
 	}
 }
-
-static ArrayList g_EntityProperties;
 
 /**
  * A methodmap that holds entity data.
@@ -57,7 +57,7 @@ methodmap Entity
 			g_EntityProperties = new ArrayList(sizeof(EntityProperties));
 		}
 		
-		// doubly convert it to ensure it's a reference
+		// doubly convert it to ensure we store it as an entity reference
 		entity = EntIndexToEntRef(EntRefToEntIndex(entity));
 		
 		if (g_EntityProperties.FindValue(entity, EntityProperties::m_index) == -1)
@@ -107,7 +107,7 @@ methodmap Entity
 	public void SetTeleportWhere(ArrayList teleportWhereName)
 	{
 		// deep copy strings
-		for (int i = 0; i < teleportWhereName.Length; i++)
+		for (int i = 0; i < teleportWhereName.Length; ++i)
 		{
 			char szTeleportWhereName[64];
 			if (teleportWhereName.GetString(i, szTeleportWhereName, sizeof(szTeleportWhereName)))
@@ -134,7 +134,7 @@ methodmap Entity
 			properties.Destroy();
 		}
 		
-		// finally, remove the list entry
+		// finally, remove the entry from local storage
 		g_EntityProperties.Erase(this.m_listIndex);
 	}
 }

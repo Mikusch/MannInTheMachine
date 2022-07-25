@@ -35,7 +35,7 @@ char g_PreferenceNames[][] =
 static Cookie g_cookieQueuePoints;
 static Cookie g_cookiePreferences;
 
-void ClientPrefs_Initialize()
+void ClientPrefs_Init()
 {
 	g_cookieQueuePoints = new Cookie("mitm_queue", "Mann in the Machine: Queue Points", CookieAccess_Protected);
 	g_cookiePreferences = new Cookie("mitm_prefs", "Mann in the Machine: Preferences", CookieAccess_Protected);

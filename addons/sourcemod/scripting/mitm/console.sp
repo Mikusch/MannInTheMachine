@@ -18,7 +18,7 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-void Console_Initialize()
+void Console_Init()
 {
 	RegConsoleCmd("mitm", ConCmd_OpenMainMenu, "Opens the main menu.");
 	RegConsoleCmd("queue", ConCmd_OpenQueueMenu, "Opens the queue menu.");
@@ -102,7 +102,7 @@ Action CommandListener_Build(int client, const char[] command, int argc)
 					return Plugin_Handled;
 				}
 				
-				if (GetNestTeleporterHint(client) == -1)
+				if (FindTeleporterHintForPlayer(client) == -1)
 				{
 					PrintCenterText(client, "%t", "Engineer_NotAllowedToBuild_NoHint");
 					return Plugin_Handled;
@@ -111,7 +111,7 @@ Action CommandListener_Build(int client, const char[] command, int argc)
 			// Sentry Gun: Only allow if we have a sentry hint
 			case TFObject_Sentry:
 			{
-				if (GetNestSentryHint(client) == -1)
+				if (FindSentryHintForPlayer(client) == -1)
 				{
 					PrintCenterText(client, "%t", "Engineer_NotAllowedToBuild_NoHint");
 					return Plugin_Handled;
@@ -120,7 +120,7 @@ Action CommandListener_Build(int client, const char[] command, int argc)
 			// Sapper: Actually a teleporter exit for Engineers, so treat it that way
 			case TFObject_Sapper:
 			{
-				if (TF2_GetPlayerClass(client) == TFClass_Engineer && GetNestTeleporterHint(client) == -1)
+				if (TF2_GetPlayerClass(client) == TFClass_Engineer && FindTeleporterHintForPlayer(client) == -1)
 				{
 					PrintCenterText(client, "%t", "Engineer_NotAllowedToBuild_NoHint");
 					return Plugin_Handled;
@@ -134,7 +134,7 @@ Action CommandListener_Build(int client, const char[] command, int argc)
 
 Action CommandListener_DropItem(int client, const char[] command, int argc)
 {
-	if (IsDeployingBomb(client))
+	if (Player(client).GetDeployingBombState() != TF_BOMB_DEPLOYING_NONE)
 	{
 		// do not allow dropping the bomb while deploying
 		return Plugin_Handled;

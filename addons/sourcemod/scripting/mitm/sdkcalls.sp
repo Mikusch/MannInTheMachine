@@ -23,14 +23,12 @@ static Handle g_SDKCallGetClassIconWindows;
 static Handle g_SDKCallPlayThrottledAlert;
 static Handle g_SDKCallPostInventoryApplication;
 static Handle g_SDKCallUpdateModelToClass;
-static Handle g_SDKCallHasTheFlag;
 static Handle g_SDKCallPickUp;
 static Handle g_SDKCallCapture;
 static Handle g_SDKCallDoAnimationEvent;
 static Handle g_SDKCallPlaySpecificSequence;
 static Handle g_SDKCallDoClassSpecialSkill;
 static Handle g_SDKCallResetRageBuffs;
-static Handle g_SDKCallIsAllowedToTaunt;
 static Handle g_SDKCallGetHealthMultiplier;
 static Handle g_SDKCallResetMap;
 static Handle g_SDKCallIsSpaceToSpawnHere;
@@ -53,7 +51,7 @@ static Handle g_SDKCallIsStaleNest;
 static Handle g_SDKCallDetonateStaleNest;
 static Handle g_SDKCallGetLiveTime;
 
-void SDKCalls_Initialize(GameData gamedata)
+void SDKCalls_Init(GameData gamedata)
 {
 	g_SDKCallGetClassIconLinux = PrepSDKCall_GetClassIcon_Linux(gamedata);
 	if (!g_SDKCallGetClassIconLinux)
@@ -69,14 +67,12 @@ void SDKCalls_Initialize(GameData gamedata)
 	g_SDKCallPlayThrottledAlert = PrepSDKCall_PlayThrottledAlert(gamedata);
 	g_SDKCallPostInventoryApplication = PrepSDKCall_PostInventoryApplication(gamedata);
 	g_SDKCallUpdateModelToClass = PrepSDKCall_UpdateModelToClass(gamedata);
-	g_SDKCallHasTheFlag = PrepSDKCall_HasTheFlag(gamedata);
 	g_SDKCallPickUp = PrepSDKCall_PickUp(gamedata);
 	g_SDKCallCapture = PrepSDKCall_Capture(gamedata);
 	g_SDKCallDoAnimationEvent = PrepSDKCall_DoAnimationEvent(gamedata);
 	g_SDKCallPlaySpecificSequence = PrepSDKCall_PlaySpecificSequence(gamedata);
 	g_SDKCallDoClassSpecialSkill = PrepSDKCall_DoClassSpecialSkill(gamedata);
 	g_SDKCallResetRageBuffs = PrepSDKCall_ResetRageBuffs(gamedata);
-	g_SDKCallIsAllowedToTaunt = PrepSDKCall_IsAllowedToTaunt(gamedata);
 	g_SDKCallGetHealthMultiplier = PrepSDKCall_GetHealthMultiplier(gamedata);
 	g_SDKCallResetMap = PrepSDKCall_ResetMap(gamedata);
 	g_SDKCallIsSpaceToSpawnHere = PrepSDKCall_IsSpaceToSpawnHere(gamedata);
@@ -168,21 +164,6 @@ static Handle PrepSDKCall_UpdateModelToClass(GameData gamedata)
 	return call;
 }
 
-static Handle PrepSDKCall_HasTheFlag(GameData gamedata)
-{
-	StartPrepSDKCall(SDKCall_Player);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::HasTheFlag");
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
-	
-	Handle call = EndPrepSDKCall();
-	if (!call)
-		LogMessage("Failed to create SDKCall: CTFPlayer::HasTheFlag");
-	
-	return call;
-}
-
 static Handle PrepSDKCall_PickUp(GameData gamedata)
 {
 	StartPrepSDKCall(SDKCall_Entity);
@@ -259,19 +240,6 @@ static Handle PrepSDKCall_ResetRageBuffs(GameData gamedata)
 	Handle call = EndPrepSDKCall();
 	if (!call)
 		LogMessage("Failed to create SDKCall: CTFPlayerShared::ResetRageBuffs");
-	
-	return call;
-}
-
-static Handle PrepSDKCall_IsAllowedToTaunt(GameData gamedata)
-{
-	StartPrepSDKCall(SDKCall_Player);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFPlayer::IsAllowedToTaunt");
-	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
-	
-	Handle call = EndPrepSDKCall();
-	if (!call)
-		LogMessage("Failed to create SDKCall: CTFPlayer::IsAllowedToTaunt");
 	
 	return call;
 }
@@ -624,14 +592,6 @@ void SDKCall_UpdateModelToClass(int entity)
 		SDKCall(g_SDKCallUpdateModelToClass, entity);
 }
 
-bool SDKCall_HasTheFlag(int player, int exceptionTypes = 0, int nNumExceptions = 0)
-{
-	if (g_SDKCallHasTheFlag)
-		return SDKCall(g_SDKCallHasTheFlag, player, exceptionTypes, nNumExceptions);
-	
-	return false;
-}
-
 void SDKCall_PickUp(int flag, int player, bool invisible)
 {
 	SDKCall(g_SDKCallPickUp, flag, player, invisible);
@@ -667,14 +627,6 @@ void SDKCall_ResetRageBuffs(any m_Shared)
 {
 	if (g_SDKCallResetRageBuffs)
 		SDKCall(g_SDKCallResetRageBuffs, m_Shared);
-}
-
-bool SDKCall_IsAllowedToTaunt(int player)
-{
-	if (g_SDKCallIsAllowedToTaunt)
-		return SDKCall(g_SDKCallIsAllowedToTaunt, player);
-	
-	return false;
 }
 
 float SDKCall_GetHealthMultiplier(int populator, bool bIsTank = false)

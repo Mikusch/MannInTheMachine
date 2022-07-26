@@ -916,6 +916,9 @@ void SelectNewDefenders()
 		if (!IsClientInGame(client))
 			continue;
 		
+		if (IsClientSourceTV(client))
+			continue;
+		
 		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
 			continue;
 		

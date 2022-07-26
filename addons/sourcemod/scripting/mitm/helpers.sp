@@ -209,7 +209,7 @@ int GetRobotToSpawn(bool bMiniBoss)
 		if (!IsClientInGame(client))
 			continue;
 		
-		if (IsFakeClient(client))
+		if (IsClientSourceTV(client))
 			continue;
 		
 		if (TF2_GetClientTeam(client) != TFTeam_Spectator)
@@ -259,8 +259,7 @@ int GetRobotToSpawn(bool bMiniBoss)
 		if (!IsClientInGame(client))
 			continue;
 		
-		// check active and waiting invaders
-		if (TF2_GetClientTeam(client) != TFTeam_Spectator || TF2_GetClientTeam(client) != TFTeam_Invaders)
+		if (!Player(client).IsInvader())
 			continue;
 		
 		if (Player(client).HasPreference(PREF_NO_GIANT))
@@ -282,7 +281,7 @@ int GetRobotToSpawn(bool bMiniBoss)
 			if (!IsClientInGame(client))
 				continue;
 			
-			if (TF2_GetClientTeam(client) != TFTeam_Spectator || TF2_GetClientTeam(client) != TFTeam_Invaders)
+			if (!Player(client).IsInvader())
 				continue;
 			
 			Player(client).m_bWasMiniBoss = false;

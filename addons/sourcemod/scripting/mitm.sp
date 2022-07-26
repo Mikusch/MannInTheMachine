@@ -713,7 +713,6 @@ public void OnPluginStart()
 		SetOffset(gamedata, "EventChangeAttributes_t::m_tags");
 		
 		SetOffset(gamedata, "CTFPlayer::m_flSpawnTime");
-		SetOffset(gamedata, "CTFPlayer::m_bAutoReload");
 		SetOffset(gamedata, "CTFPlayer::m_bIsMissionEnemy");
 		SetOffset(gamedata, "CTFPlayer::m_bIsSupportEnemy");
 		SetOffset(gamedata, "CTFPlayer::m_bIsLimitedSupportEnemy");

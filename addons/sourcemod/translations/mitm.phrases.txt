@@ -106,8 +106,21 @@
 		"#format"	"{1:1.2f}"
 		"en"		"You have {1} seconds to leave the spawn area."
 	}
-	"Invader_GateBot"
+	"Invader_CaptureGate"
 	{
-		"en"		"OBJECTIVE: Capture the Gate"
+		"en"		"Capture the gate!"
+	}
+	"Invader_DeliverBomb"
+	{
+		"en"		"Deliver the bomb to the hatch!"
+	}
+	"Invader_SupportTeam"
+	{
+		"en"		"Help your team deliver the bomb!"
+	}
+	"ConVarQuery_ShowPluginMessages"
+	{
+		"#format"	"{1:s},{2:d}"
+		"en"		"Set {cyan}{1} {default}to {cyan}{2}{default} to receive helpful messages during gameplay."
 	}
 }

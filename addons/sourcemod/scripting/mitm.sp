@@ -529,7 +529,6 @@ static CEntityFactory EntityFactory;
 
 // Globals
 Handle g_WarningHudSync;
-Handle g_InfoHudSync;
 Handle g_hWaitingForPlayersTimer;
 bool g_bInWaitingForPlayers;
 StringMap g_offsets;
@@ -612,7 +611,6 @@ public void OnPluginStart()
 	LoadTranslations("mitm.phrases");
 	
 	g_WarningHudSync = CreateHudSynchronizer();
-	g_InfoHudSync = CreateHudSynchronizer();
 	g_offsets = new StringMap();
 	
 	mitm_developer = CreateConVar("mitm_developer", "0", "Toggle plugin developer mode.");
@@ -672,6 +670,8 @@ public void OnPluginStart()
 	ClientPrefs_Init();
 	
 	HookUserMessage(GetUserMessageId("SayText2"), OnSayText2, true);
+	
+	CreateTimer(120.0, Timer_QueryShowPluginMessages, _, TIMER_REPEAT);
 	
 	GameData gamedata = new GameData("mitm");
 	if (gamedata)
@@ -1178,4 +1178,35 @@ INextBot CreateNextBotPlayer(Address entity)
 	ToolsNextBotPlayer nextbot = ToolsNextBotPlayer(entity);
 	nextbot.IsDormantWhenDead = false;
 	return nextbot;
+}
+
+Action Timer_QueryShowPluginMessages(Handle timer)
+{
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (IsFakeClient(client))
+			continue;
+		
+		QueryClientConVar(client, "cl_showpluginmessages", ConVarQueryFinished_ShowPluginMessages);
+	}
+	
+	return Plugin_Continue;
+}
+
+void ConVarQueryFinished_ShowPluginMessages(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue)
+{
+	if (!IsClientInGame(client))
+		return;
+
+	if (result != ConVarQuery_Okay)
+		return;
+	
+	int value = StringToInt(cvarValue);
+	if (value == 0)
+	{
+		CPrintToChat(client, "%s %t", PLUGIN_TAG, "ConVarQuery_ShowPluginMessages", cvarName, 1);
+	}
 }

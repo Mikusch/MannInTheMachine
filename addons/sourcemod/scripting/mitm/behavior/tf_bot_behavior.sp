@@ -77,10 +77,27 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 	
 	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(actor) == TFTeam_Invaders)
 	{
+		char title[64];
+		int color[4];
 		if (Player(actor).HasTag("bot_gatebot"))
 		{
-			SetHudTextParams(0.05, 0.05, interval, 255, 255, 255, 255);
-			ShowSyncHudText(actor, g_InfoHudSync, "%t", "Invader_GateBot");
+			Format(title, sizeof(title), "%T", "Invader_CaptureGate", actor);
+			color = { 255, 200, 80, 255 };
+		}
+		else if (SDKCall_IsAllowedToPickUpFlag(actor))
+		{
+			Format(title, sizeof(title), "%T", "Invader_DeliverBomb", actor);
+			color = { 88, 133, 162, 255 };
+		}
+		else
+		{
+			Format(title, sizeof(title), "%T", "Invader_SupportTeam", actor);
+			color = { 255, 255, 255, 255 };
+		}
+		
+		if (title[0])
+		{
+			CreateMsgDialog(actor, title, Player(actor).m_hudMsgLevel--, RoundToCeil(interval), color);
 		}
 		
 		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(actor).GetLastKnownArea());

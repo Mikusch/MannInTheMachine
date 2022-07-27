@@ -740,3 +740,13 @@ bool HasTheFlag(int client)
 {
 	return GetEntPropEnt(client, Prop_Send, "m_hItem") != -1;
 }
+
+void CreateMsgDialog(int client, const char[] title, int level = cellmax, int time = 10, int color[4] = { 255, 255, 255, 255 } )
+{
+	KeyValues kv = new KeyValues("Dialog", "title", title);
+	kv.SetNum("level", level);
+	kv.SetNum("time", time);
+	kv.SetColor4("color", color);
+	CreateDialog(client, kv, DialogType_Msg);
+	delete kv;
+}

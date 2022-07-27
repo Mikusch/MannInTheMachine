@@ -80,9 +80,10 @@ static NextBotAction DesiredScenarioAndClassAction(int actor)
 	switch (Player(actor).GetMission())
 	{
 		case MISSION_DESTROY_SENTRIES:
-		{
 			return CTFBotMissionSuicideBomber();
-		}
+		
+		case MISSION_SNIPER:
+			return CTFBotSniperLurk();
 	}
 	
 	if (GameRules_IsMannVsMachineMode())

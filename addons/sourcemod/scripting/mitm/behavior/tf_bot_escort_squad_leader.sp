@@ -28,7 +28,6 @@ methodmap CTFBotEscortSquadLeader < NextBotAction
 		ActionFactory.BeginDataMapDesc()
 			.DefineIntField("m_actionToDoAfterSquadDisbands")
 		.EndDataMapDesc();
-		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
 	}
 	
@@ -50,12 +49,6 @@ methodmap CTFBotEscortSquadLeader < NextBotAction
 			this.SetData("m_actionToDoAfterSquadDisbands", actionToDoAfterSquadDisbands);
 		}
 	}
-}
-
-static int OnStart(CTFBotEscortSquadLeader action, int actor, NextBotAction prevAction)
-{
-	
-	return action.Continue();
 }
 
 static int Update(CTFBotEscortSquadLeader action, int actor, float interval)

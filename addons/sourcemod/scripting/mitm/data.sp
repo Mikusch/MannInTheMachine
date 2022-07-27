@@ -1337,12 +1337,16 @@ methodmap CTFBotSpawner
 		}
 	}
 	
-	public void GetName(char[] buffer, int maxlen)
+	public void GetName(char[] buffer, int maxlen, const char[] defValue = "")
 	{
 		Address m_name = Deref(this + GetOffset("CTFBotSpawner::m_name"));
 		if (m_name)
 		{
 			PtrToString(m_name, buffer, maxlen);
+		}
+		else if (defValue[0])
+		{
+			strcopy(buffer, maxlen, defValue);
 		}
 	}
 	

@@ -586,6 +586,7 @@ ConVar phys_pushscale;
 #include "mitm/behavior/tf_bot_sniper_lurk.sp"
 #include "mitm/behavior/tf_bot_spy_leave_spawn_room.sp"
 #include "mitm/behavior/tf_bot_taunt.sp"
+#include "mitm/behavior/tf_bot_escort_squad_leader.sp"
 
 #include "mitm/clientprefs.sp"
 #include "mitm/console.sp"
@@ -659,6 +660,7 @@ public void OnPluginStart()
 	CTFBotSniperLurk.Init();
 	CTFBotSpyLeaveSpawnRoom.Init();
 	CTFBotTaunt.Init();
+	CTFBotEscortSquadLeader.Init();
 	
 	// Install player action factory
 	EntityFactory = new CEntityFactory("player");

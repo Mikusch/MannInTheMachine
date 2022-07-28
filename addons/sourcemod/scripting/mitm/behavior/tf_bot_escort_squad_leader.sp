@@ -31,7 +31,7 @@ methodmap CTFBotEscortSquadLeader < NextBotAction
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
 	}
 	
-	public CTFBotEscortSquadLeader(NextBotAction actionToDoAfterSquadDisbands)
+	public CTFBotEscortSquadLeader(NextBotAction actionToDoAfterSquadDisbands = NULL_ACTION)
 	{
 		CTFBotEscortSquadLeader action = view_as<CTFBotEscortSquadLeader>(ActionFactory.Create());
 		action.m_actionToDoAfterSquadDisbands = actionToDoAfterSquadDisbands;

@@ -40,7 +40,6 @@ methodmap CTFBotMvMEngineerTeleportSpawn < NextBotAction
 		CTFBotMvMEngineerTeleportSpawn action = view_as<CTFBotMvMEngineerTeleportSpawn>(ActionFactory.Create());
 		action.m_hintEntity = hint;
 		action.m_bFirstTeleportSpawn = bFirstTeleportSpawn;
-		
 		return action;
 	}
 	

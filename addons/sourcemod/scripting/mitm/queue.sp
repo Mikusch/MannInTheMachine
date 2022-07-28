@@ -26,7 +26,7 @@ enum struct QueueData
 
 ArrayList Queue_GetDefenderQueue()
 {
-	ArrayList hQueue = new ArrayList(sizeof(QueueData));
+	ArrayList queueList = new ArrayList(sizeof(QueueData));
 	
 	for (int client = 1; client <= MaxClients; client++)
 	{
@@ -46,11 +46,11 @@ ArrayList Queue_GetDefenderQueue()
 		data.m_queuePoints = Player(client).m_defenderQueuePoints; // block 0 gets sorted
 		data.m_client = client;
 		
-		hQueue.PushArray(data);
+		queueList.PushArray(data);
 	}
 	
-	hQueue.Sort(Sort_Descending, Sort_Integer);
-	return hQueue;
+	queueList.Sort(Sort_Descending, Sort_Integer);
+	return queueList;
 }
 
 void Queue_AddPoints(int client, int points)

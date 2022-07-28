@@ -30,7 +30,7 @@ static DynamicHook g_DHookPickUp;
 static DynamicHook g_DHookClientConnected;
 static DynamicHook g_DHookFPlayerCanTakeDamage;
 
-static ArrayList m_justSpawnedVector;
+static ArrayList m_justSpawnedList;
 
 static int g_InternalSpawnPoint = INVALID_ENT_REFERENCE;
 static SpawnLocationResult s_spawnLocationResult = SPAWN_LOCATION_NOT_FOUND;
@@ -48,7 +48,7 @@ static float s_flLastTeleportTime;
 
 void DHooks_Init(GameData gamedata)
 {
-	m_justSpawnedVector = new ArrayList(MaxClients);
+	m_justSpawnedList = new ArrayList();
 	
 	CreateDynamicDetour(gamedata, "CTFGCServerSystem::PreClientUpdate", DHookCallback_PreClientUpdate_Pre, DHookCallback_PreClientUpdate_Post);
 	CreateDynamicDetour(gamedata, "CPopulationManager::AllocateBots", DHookCallback_AllocateBots_Pre);
@@ -522,7 +522,7 @@ MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookReturn ret, 
 		}
 		
 		// for easy access in populator spawner callbacks
-		m_justSpawnedVector.Push(newPlayer);
+		m_justSpawnedList.Push(newPlayer);
 		
 		if (GameRules_IsMannVsMachineMode())
 		{
@@ -601,9 +601,9 @@ MRESReturn DHookCallback_PopulationManagerUpdate_Post(int populator)
 
 MRESReturn DHookCallback_PeriodicSpawnPopulatorUpdate_Post(Address pThis)
 {
-	for (int i = 0; i < m_justSpawnedVector.Length; i++)
+	for (int i = 0; i < m_justSpawnedList.Length; i++)
 	{
-		int player = m_justSpawnedVector.Get(i);
+		int player = m_justSpawnedList.Get(i);
 		
 		// what bot should do after spawning at teleporter exit
 		if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
@@ -612,17 +612,17 @@ MRESReturn DHookCallback_PeriodicSpawnPopulatorUpdate_Post(Address pThis)
 		}
 	}
 	
-	// after we are done, clear the vector
-	m_justSpawnedVector.Clear();
+	// after we are done, clear the list
+	m_justSpawnedList.Clear();
 	
 	return MRES_Handled;
 }
 
 MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 {
-	for (int i = 0; i < m_justSpawnedVector.Length; i++)
+	for (int i = 0; i < m_justSpawnedList.Length; i++)
 	{
-		int player = m_justSpawnedVector.Get(i);
+		int player = m_justSpawnedList.Get(i);
 		
 		SetEntProp(player, Prop_Send, "m_nCurrency", 0);
 		SetEntData(player, GetOffset("CTFPlayer::m_pWaveSpawnPopulator"), pThis);
@@ -647,8 +647,8 @@ MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 		}
 	}
 	
-	// after we are done, clear the vector
-	m_justSpawnedVector.Clear();
+	// after we are done, clear the list
+	m_justSpawnedList.Clear();
 	
 	return MRES_Handled;
 }
@@ -658,7 +658,7 @@ MRESReturn DHookCallback_MissionPopulatorUpdateMission_Pre(Address pThis, DHookR
 	CMissionPopulator populator = CMissionPopulator(pThis);
 	MissionType mission = params.Get(1);
 	
-	ArrayList livePlayerVector = new ArrayList(MaxClients);
+	ArrayList livePlayerList = new ArrayList();
 	
 	for (int client = 1; client <= MaxClients; ++client)
 	{
@@ -671,14 +671,14 @@ MRESReturn DHookCallback_MissionPopulatorUpdateMission_Pre(Address pThis, DHookR
 		if (!IsPlayerAlive(client))
 			continue;
 		
-		livePlayerVector.Push(client);
+		livePlayerList.Push(client);
 	}
 	
 	s_activeMissionMembers = 0;
 	
-	for (int i = 0; i < livePlayerVector.Length; i++)
+	for (int i = 0; i < livePlayerList.Length; i++)
 	{
-		int player = livePlayerVector.Get(i);
+		int player = livePlayerList.Get(i);
 		if (Player(player).HasMission(mission))
 		{
 			++s_activeMissionMembers;
@@ -692,29 +692,29 @@ MRESReturn DHookCallback_MissionPopulatorUpdateMission_Pre(Address pThis, DHookR
 		// cooldown is time after death of last mission member
 		m_cooldownTimer.Start(populator.m_cooldownDuration);
 		
-		delete livePlayerVector;
+		delete livePlayerList;
 		ret.Value = false;
 		return MRES_Supercede;
 	}
 	
 	if (!m_cooldownTimer.IsElapsed())
 	{
-		delete livePlayerVector;
+		delete livePlayerList;
 		ret.Value = false;
 		return MRES_Supercede;
 	}
 	
 	s_nSniperCount = 0;
-	for (int i = 0; i < livePlayerVector.Length; i++)
+	for (int i = 0; i < livePlayerList.Length; i++)
 	{
-		int liveBot = livePlayerVector.Get(i);
+		int liveBot = livePlayerList.Get(i);
 		if (TF2_GetPlayerClass(liveBot) == TFClass_Sniper)
 		{
 			s_nSniperCount++;
 		}
 	}
 	
-	delete livePlayerVector;
+	delete livePlayerList;
 	return MRES_Handled;
 }
 
@@ -722,9 +722,9 @@ MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis, DHook
 {
 	MissionType mission = params.Get(1);
 	
-	for (int i = 0; i < m_justSpawnedVector.Length; i++)
+	for (int i = 0; i < m_justSpawnedList.Length; i++)
 	{
-		int player = m_justSpawnedVector.Get(i);
+		int player = m_justSpawnedList.Get(i);
 		
 		Player(player).SetFlagTarget(-1);
 		Player(player).SetMission(mission);
@@ -762,8 +762,8 @@ MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis, DHook
 		}
 	}
 	
-	// after we are done, clear the vector
-	m_justSpawnedVector.Clear();
+	// after we are done, clear the list
+	m_justSpawnedList.Clear();
 	
 	return MRES_Handled;
 }
@@ -794,7 +794,7 @@ MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, DHookRe
 	m_checkForDangerousSentriesTimer.Start(GetRandomFloat(5.0, 10.0));
 	
 	// collect all of the dangerous sentries
-	ArrayList dangerousSentryVector = new ArrayList();
+	ArrayList dangerousSentryList = new ArrayList();
 	
 	int nDmgLimit = 0;
 	int nKillLimit = 0;
@@ -819,14 +819,14 @@ MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, DHookRe
 					
 					if (nDmgDone >= nDmgLimit || nKillsMade >= nKillLimit)
 					{
-						dangerousSentryVector.Push(obj);
+						dangerousSentryList.Push(obj);
 					}
 				}
 			}
 		}
 	}
 	
-	ArrayList livePlayerVector = new ArrayList();
+	ArrayList livePlayerList = new ArrayList();
 	for (int client = 1; client <= MaxClients; client++)
 	{
 		if (!IsClientInGame(client))
@@ -838,21 +838,21 @@ MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, DHookRe
 		if (!IsPlayerAlive(client))
 			continue;
 		
-		livePlayerVector.Push(client);
+		livePlayerList.Push(client);
 	}
 	
 	// dispatch a sentry busting squad for each dangerous sentry
 	bool didSpawn = false;
 	
-	for (int i = 0; i < dangerousSentryVector.Length; ++i)
+	for (int i = 0; i < dangerousSentryList.Length; ++i)
 	{
-		int targetSentry = dangerousSentryVector.Get(i);
+		int targetSentry = dangerousSentryList.Get(i);
 		
 		// if there is already a squad out there destroying this sentry, don't spawn another one
 		int j;
-		for (j = 0; j < livePlayerVector.Length; ++j)
+		for (j = 0; j < livePlayerList.Length; ++j)
 		{
-			int bot = livePlayerVector.Get(j);
+			int bot = livePlayerList.Get(j);
 			if (Player(bot).HasMission(MISSION_DESTROY_SENTRIES) && Player(bot).GetMissionTarget() == targetSentry)
 			{
 				// there is already a sentry busting squad active for this sentry
@@ -860,7 +860,7 @@ MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, DHookRe
 			}
 		}
 		
-		if (j < livePlayerVector.Length)
+		if (j < livePlayerList.Length)
 		{
 			continue;
 		}
@@ -880,9 +880,9 @@ MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, DHookRe
 					LogMessage("MANN VS MACHINE: %3.2f: <<<< Spawning Sentry Busting Mission >>>>", GetGameTime());
 				}
 				
-				for (int k = 0; k < m_justSpawnedVector.Length; ++k)
+				for (int k = 0; k < m_justSpawnedList.Length; ++k)
 				{
-					int bot = m_justSpawnedVector.Get(k);
+					int bot = m_justSpawnedList.Get(k);
 					
 					Player(bot).SetFlagTarget(-1);
 					Player(bot).SetMission(MISSION_DESTROY_SENTRIES);
@@ -920,8 +920,8 @@ MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, DHookRe
 					}
 				}
 				
-				// after we are done, clear the vector
-				m_justSpawnedVector.Clear();
+				// after we are done, clear the list
+				m_justSpawnedList.Clear();
 			}
 		}
 		else if (tf_populator_debug.BoolValue)
@@ -956,8 +956,8 @@ MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, DHookRe
 		m_cooldownTimer.Start(flCoolDown);
 	}
 	
-	delete dangerousSentryVector;
-	delete livePlayerVector;
+	delete dangerousSentryList;
+	delete livePlayerList;
 	
 	ret.Value = didSpawn;
 	return MRES_Supercede;

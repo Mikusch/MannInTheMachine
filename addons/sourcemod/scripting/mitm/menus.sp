@@ -64,8 +64,8 @@ int MenuHandler_MainMenu(Menu menu, MenuAction action, int param1, int param2)
 
 void Menus_DisplayQueueMenu(int client)
 {
-	ArrayList queue = Queue_GetDefenderQueue();
-	if (queue.Length > 0)
+	ArrayList queueList = Queue_GetDefenderQueue();
+	if (queueList.Length > 0)
 	{
 		Menu menu = new Menu(MenuHandler_QueueMenu, MenuAction_Cancel | MenuAction_End);
 		menu.ExitBackButton = true;
@@ -75,10 +75,10 @@ void Menus_DisplayQueueMenu(int client)
 		else
 			menu.SetTitle("%T\n%T", "Menu_Queue_Title", client, "Menu_Queue_NotLoaded", client);
 		
-		for (int i = 0; i < queue.Length; i++)
+		for (int i = 0; i < queueList.Length; i++)
 		{
-			int queuePoints = queue.Get(i, 0);
-			int queueClient = queue.Get(i, 1);
+			int queuePoints = queueList.Get(i, 0);
+			int queueClient = queueList.Get(i, 1);
 			
 			char display[MAX_NAME_LENGTH + 8];
 			Format(display, sizeof(display), "%N (%d)", queueClient, queuePoints);
@@ -93,7 +93,7 @@ void Menus_DisplayQueueMenu(int client)
 		PrintHintText(client, "%t", "Menu_Queue_NotLoaded");
 		Menus_DisplayMainMenu(client);
 	}
-	delete queue;
+	delete queueList;
 }
 
 int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int param2)

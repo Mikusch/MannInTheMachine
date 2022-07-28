@@ -921,7 +921,7 @@ methodmap Player
 			}
 		}
 		
-		ArrayList flagsVector = new ArrayList();
+		ArrayList flagsList = new ArrayList();
 		
 		// Collect flags
 		int flag = MaxClients + 1;
@@ -935,7 +935,7 @@ methodmap Player
 			{
 				if (GetEntPropEnt(flag, Prop_Send, "m_hOwnerEntity") == this._client)
 				{
-					delete flagsVector;
+					delete flagsList;
 					return flag;
 				}
 			}
@@ -947,7 +947,7 @@ methodmap Player
 					if (view_as<TFTeam>(GetEntProp(flag, Prop_Send, "m_iTeamNum")) == GetEnemyTeam(TF2_GetClientTeam(this._client)))
 					{
 						// we want to steal the other team's flag
-						flagsVector.Push(flag);
+						flagsList.Push(flag);
 					}
 				}
 				
@@ -956,7 +956,7 @@ methodmap Player
 					if (view_as<TFTeam>(GetEntProp(flag, Prop_Send, "m_iTeamNum")) != GetEnemyTeam(TF2_GetClientTeam(this._client)))
 					{
 						// we want to move our team's flag or a neutral flag
-						flagsVector.Push(flag);
+						flagsList.Push(flag);
 					}
 				}
 			}
@@ -974,9 +974,9 @@ methodmap Player
 		
 		if (GameRules_IsMannVsMachineMode())
 		{
-			for (int i = 0; i < flagsVector.Length; i++)
+			for (int i = 0; i < flagsList.Length; i++)
 			{
-				flag = flagsVector.Get(i);
+				flag = flagsList.Get(i);
 				
 				// Find the closest
 				float flagOrigin[3], playerOrigin[3];
@@ -994,7 +994,7 @@ methodmap Player
 				}
 				
 				// Find the closest uncarried
-				if (nCarriedFlags < flagsVector.Length && GetEntProp(flag, Prop_Send, "m_nFlagStatus") != TF_FLAGINFO_STOLEN)
+				if (nCarriedFlags < flagsList.Length && GetEntProp(flag, Prop_Send, "m_nFlagStatus") != TF_FLAGINFO_STOLEN)
 				{
 					if (flDist < flClosestUncarriedFlagDist)
 					{
@@ -1005,7 +1005,7 @@ methodmap Player
 			}
 		}
 		
-		delete flagsVector;
+		delete flagsList;
 		
 		// If we have an uncarried flag, prioritize
 		if (pClosestUncarriedFlag != -1)
@@ -1061,7 +1061,7 @@ methodmap Player
 	
 	public void DisguiseAsMemberOfEnemyTeam()
 	{
-		ArrayList enemyVector = new ArrayList(MaxClients);
+		ArrayList enemyList = new ArrayList();
 		
 		for (int client = 1; client <= MaxClients; client++)
 		{
@@ -1071,18 +1071,18 @@ methodmap Player
 			if (TF2_GetClientTeam(client) == TF2_GetClientTeam(this._client))
 				continue;
 			
-			enemyVector.Push(client);
+			enemyList.Push(client);
 		}
 		
 		TFClassType disguise = view_as<TFClassType>(GetRandomInt(view_as<int>(TFClass_Scout), view_as<int>(TFClass_Engineer)));
 		
-		if (enemyVector.Length > 0)
+		if (enemyList.Length > 0)
 		{
-			disguise = TF2_GetPlayerClass(enemyVector.Get(GetRandomInt(0, enemyVector.Length - 1)));
+			disguise = TF2_GetPlayerClass(enemyList.Get(GetRandomInt(0, enemyList.Length - 1)));
 		}
 		
 		TF2_DisguisePlayer(this._client, GetEnemyTeam(TF2_GetClientTeam(this._client)), disguise);
-		delete enemyVector;
+		delete enemyList;
 	}
 	
 	public bool HasPreference(PreferenceType preference)

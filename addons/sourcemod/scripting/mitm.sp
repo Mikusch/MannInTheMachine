@@ -910,7 +910,7 @@ void SelectNewDefenders()
 	
 	g_bAllowTeamChange = true;
 	
-	ArrayList playerList = new ArrayList(MaxClients);
+	ArrayList playerList = new ArrayList();
 	
 	// collect valid players
 	for (int client = 1; client <= MaxClients; client++)
@@ -927,14 +927,14 @@ void SelectNewDefenders()
 		playerList.Push(client);
 	}
 	
-	ArrayList defenderList = Queue_GetDefenderQueue();
+	ArrayList queueList = Queue_GetDefenderQueue();
 	int iDefenderCount = 0;
 	int iReqDefenderCount = Max(mitm_defender_min_count.IntValue, RoundToNearest((float(playerList.Length) / float(MaxClients)) * mitm_defender_max_count.IntValue));
 	
 	// select our defenders
-	for (int i = 0; i < defenderList.Length; i++)
+	for (int i = 0; i < queueList.Length; i++)
 	{
-		int defender = defenderList.Get(i, QueueData::m_client);
+		int defender = queueList.Get(i, QueueData::m_client);
 		
 		TF2_ChangeClientTeam(defender, TFTeam_Defenders);
 		LogMessage("Assigned %N to team DEFENDERS (Queue Points: %d)", defender, Player(defender).m_defenderQueuePoints);
@@ -962,8 +962,8 @@ void SelectNewDefenders()
 		{
 			int defender = playerList.Get(i);
 			
-			// we only want people who are not in the defender vector
-			if (defenderList.FindValue(defender, QueueData::m_client) != -1)
+			// we only want people who are not in the defender list
+			if (queueList.FindValue(defender, QueueData::m_client) != -1)
 				continue;
 			
 			if (iDefenderCount++ < iReqDefenderCount)
@@ -1014,7 +1014,7 @@ void SelectNewDefenders()
 	
 	// free the memory
 	delete playerList;
-	delete defenderList;
+	delete queueList;
 }
 
 void FireWeaponAtEnemy(int client, int &buttons)

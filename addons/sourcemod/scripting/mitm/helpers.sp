@@ -201,7 +201,7 @@ TFTeam GetEnemyTeam(TFTeam team)
 
 int GetRobotToSpawn(bool bMiniBoss)
 {
-	ArrayList players = new ArrayList(MaxClients);
+	ArrayList playerList = new ArrayList();
 	
 	// collect valid players
 	for (int client = 1; client <= MaxClients; client++)
@@ -221,16 +221,16 @@ int GetRobotToSpawn(bool bMiniBoss)
 		if (bMiniBoss && Player(client).HasPreference(PREF_NO_GIANT))
 			continue;
 		
-		players.Push(client);
+		playerList.Push(client);
 	}
 	
 	// sort players by priority
-	players.SortCustom(SortPlayersByPriority);
+	playerList.SortCustom(SortPlayersByPriority);
 	
 	int priorityClient = -1;
-	for (int i = 0; i < players.Length; i++)
+	for (int i = 0; i < playerList.Length; i++)
 	{
-		int client = players.Get(i);
+		int client = playerList.Get(i);
 		if (i == 0)
 		{
 			// store the player and reset priority
@@ -250,7 +250,7 @@ int GetRobotToSpawn(bool bMiniBoss)
 		}
 	}
 	
-	delete players;
+	delete playerList;
 	
 	// check whether every invader has been a miniboss at least once, then reset everyone
 	int playerCount = 0, miniBossCount = 0;

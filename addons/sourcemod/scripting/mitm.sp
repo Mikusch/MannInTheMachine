@@ -576,6 +576,7 @@ ConVar phys_pushscale;
 #include "mitm/behavior/tf_bot_behavior.sp"
 #include "mitm/behavior/tf_bot_dead.sp"
 #include "mitm/behavior/tf_bot_deliver_flag.sp"
+#include "mitm/behavior/tf_bot_escort_squad_leader.sp"
 #include "mitm/behavior/tf_bot_fetch_flag.sp"
 #include "mitm/behavior/tf_bot_medic_heal.sp"
 #include "mitm/behavior/tf_bot_mission_suicide_bomber.sp"
@@ -586,7 +587,6 @@ ConVar phys_pushscale;
 #include "mitm/behavior/tf_bot_sniper_lurk.sp"
 #include "mitm/behavior/tf_bot_spy_leave_spawn_room.sp"
 #include "mitm/behavior/tf_bot_taunt.sp"
-#include "mitm/behavior/tf_bot_escort_squad_leader.sp"
 
 #include "mitm/clientprefs.sp"
 #include "mitm/console.sp"
@@ -650,6 +650,7 @@ public void OnPluginStart()
 	CTFBotMainAction.Init();
 	CTFBotDead.Init();
 	CTFBotDeliverFlag.Init();
+	CTFBotEscortSquadLeader.Init();
 	CTFBotFetchFlag.Init();
 	CTFBotMedicHeal.Init();
 	CTFBotMissionSuicideBomber.Init();
@@ -660,7 +661,6 @@ public void OnPluginStart()
 	CTFBotSniperLurk.Init();
 	CTFBotSpyLeaveSpawnRoom.Init();
 	CTFBotTaunt.Init();
-	CTFBotEscortSquadLeader.Init();
 	
 	// Install player action factory
 	EntityFactory = new CEntityFactory("player");

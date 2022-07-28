@@ -1046,7 +1046,7 @@ MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, DHookPar
 		
 		float flReqRatio = float(MaxClients - mitm_defender_max_count.IntValue) / mitm_defender_max_count.FloatValue;
 		float flCurRatio = float(iInvaderCount) / float(iDefenderCount);
-		if (flCurRatio < flReqRatio)
+		if (flCurRatio < flReqRatio || Player(player).HasPreference(PREF_DONT_BE_DEFENDER))
 		{
 			ret.Value = TFTeam_Spectator;
 		}

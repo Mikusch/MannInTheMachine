@@ -53,7 +53,7 @@ static NextBotAction InitialContainedAction(NextBotAction action, int actor)
 		
 		// I'm in a Squad but not the leader, do "escort and support" Squad behavior
 		// until the Squad disbands, and then do my normal thing
-		return DesiredScenarioAndClassAction(actor);
+		return CTFBotEscortSquadLeader(DesiredScenarioAndClassAction(actor));
 	}
 	
 	return DesiredScenarioAndClassAction(actor);

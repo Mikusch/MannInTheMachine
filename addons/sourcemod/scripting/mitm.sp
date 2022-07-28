@@ -576,6 +576,7 @@ ConVar phys_pushscale;
 #include "mitm/behavior/tf_bot_behavior.sp"
 #include "mitm/behavior/tf_bot_dead.sp"
 #include "mitm/behavior/tf_bot_deliver_flag.sp"
+#include "mitm/behavior/tf_bot_escort_squad_leader.sp"
 #include "mitm/behavior/tf_bot_fetch_flag.sp"
 #include "mitm/behavior/tf_bot_medic_heal.sp"
 #include "mitm/behavior/tf_bot_mission_suicide_bomber.sp"
@@ -649,6 +650,7 @@ public void OnPluginStart()
 	CTFBotMainAction.Init();
 	CTFBotDead.Init();
 	CTFBotDeliverFlag.Init();
+	CTFBotEscortSquadLeader.Init();
 	CTFBotFetchFlag.Init();
 	CTFBotMedicHeal.Init();
 	CTFBotMissionSuicideBomber.Init();

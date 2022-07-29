@@ -1006,7 +1006,11 @@ MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, DHookPar
 	int player = params.Get(1);
 	TFTeam nDesiredTeam = params.Get(2);
 	
-	if (g_bInWaitingForPlayers)
+	if (IsClientSourceTV(player))
+	{
+		return MRES_Ignored;
+	}
+	else if (g_bInWaitingForPlayers)
 	{
 		// funnel players into defender team during waiting for players so they can run around
 		ret.Value = TFTeam_Defenders;

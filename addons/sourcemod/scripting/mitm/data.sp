@@ -321,6 +321,9 @@ methodmap Player
 	
 	public bool IsInvader()
 	{
+		if (IsClientSourceTV(this._client))
+			return false;
+		
 		TFTeam team = TF2_GetClientTeam(this._client);
 		return (team == TFTeam_Spectator || team == TFTeam_Invaders) && !this.HasPreference(PREF_NO_SPAWNING);
 	}

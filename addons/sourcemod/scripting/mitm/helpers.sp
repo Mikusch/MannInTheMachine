@@ -209,7 +209,7 @@ int GetRobotToSpawn(bool bMiniBoss)
 		if (!IsClientInGame(client))
 			continue;
 		
-		if (IsFakeClient(client))
+		if (IsClientSourceTV(client))
 			continue;
 		
 		if (TF2_GetClientTeam(client) != TFTeam_Spectator)

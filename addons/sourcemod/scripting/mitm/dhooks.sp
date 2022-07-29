@@ -1075,7 +1075,7 @@ MRESReturn DHookCallback_GetTeamAssignmentOverride_Post(DHookReturn ret, DHookPa
 
 MRESReturn DHookCallback_GetLoadoutItem_Pre(int player, DHookReturn ret, DHookParam params)
 {
-	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
+	if (IsClientInGame(player) && TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
 		// Generate base items for robot players
 		GameRules_SetProp("m_bIsInTraining", true);
@@ -1086,7 +1086,7 @@ MRESReturn DHookCallback_GetLoadoutItem_Pre(int player, DHookReturn ret, DHookPa
 
 MRESReturn DHookCallback_GetLoadoutItem_Post(int player, DHookReturn ret, DHookParam params)
 {
-	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
+	if (IsClientInGame(player) && TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
 		GameRules_SetProp("m_bIsInTraining", false);
 	}

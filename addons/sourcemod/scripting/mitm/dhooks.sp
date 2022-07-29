@@ -529,7 +529,10 @@ MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookReturn ret, 
 			if (GetEntProp(newPlayer, Prop_Send, "m_bIsMiniBoss"))
 			{
 				HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_GIANT_CALLOUT", TFTeam_Defenders);
-				
+			}
+			
+			if (!Player(newPlayer).HasPreference(PREF_NO_SPAWN_NOTIFICATION))
+			{
 				EmitSoundToClient(newPlayer, "ui/system_message_alert.wav", .channel = SNDCHAN_STATIC);
 			}
 			

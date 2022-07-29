@@ -39,11 +39,15 @@
 	}
 	"Preference_NoSpawning"
 	{
-		"en"		"No Spawning (Spectator Mode)"
+		"en"		"No spawning (Spectator Mode)"
 	}
 	"Preference_NoGiant"
 	{
 		"en"		"Don't spawn me as Giant Robot"
+	}
+	"Preference_NoSpawnNotification"
+	{
+		"en"		"Disable spawn notification"
 	}
 	"Preferences_Enabled"
 	{

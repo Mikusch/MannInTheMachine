@@ -38,6 +38,7 @@ methodmap CTFBotMissionSuicideBomber < NextBotAction
 		.EndDataMapDesc();
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
+		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
 		ActionFactory.SetEventCallback(EventResponderType_OnKilled, OnKilled);
 	}
 	
@@ -206,6 +207,12 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 	}
 	
 	return action.Continue();
+}
+
+static void OnEnd(CTFBotMissionSuicideBomber action, int actor, NextBotAction nextAction)
+{
+	// Hide mission annotation created in object_destroyed event hook
+	HideAnnotation(actor, actor);
 }
 
 static int OnKilled(CTFBotMissionSuicideBomber action, int actor, int attacker, int inflictor, float damage, int damagetype)

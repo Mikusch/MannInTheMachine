@@ -68,6 +68,8 @@
 
 #define SCREENFADE_FRACBITS		9		// which leaves 16-this for the integer part
 
+#define TF_MISSION_DESTROY_SENTRIES_HINT_MASK	(0x10200)	// annotations have id ( TF_MISSION_DESTROY_SENTRIES_HINT_MASK | entindex )
+
 #define PLUGIN_TAG	"[{orange}MitM{default}]"
 
 const TFTeam TFTeam_Defenders = TFTeam_Red;

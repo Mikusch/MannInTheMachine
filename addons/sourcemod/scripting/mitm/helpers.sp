@@ -751,7 +751,7 @@ void CreateMsgDialog(int client, const char[] title, int level = cellmax, int ti
 	delete kv;
 }
 
-void CreateWorldAnnotation(int client, int id, const char[] text, const float worldPos[3], float lifeTime = 5.0, const char[] sound = "ui/hint.wav", bool showDistance = true, bool showEffect = true)
+void CreateWorldAnnotation(int client, int id, const char[] text, int target = 0, const float worldPos[3] = ZERO_VECTOR, float lifeTime = 5.0, const char[] sound = "ui/hint.wav", bool showDistance = true, bool showEffect = true)
 {
 	Event event = CreateEvent("show_annotation");
 	if (event)
@@ -761,7 +761,7 @@ void CreateWorldAnnotation(int client, int id, const char[] text, const float wo
 		event.SetFloat("worldPosX", worldPos[0]);
 		event.SetFloat("worldPosY", worldPos[1]);
 		event.SetFloat("worldPosZ", worldPos[2]);
-		event.SetInt("follow_entindex", 0);
+		event.SetInt("follow_entindex", target);
 		event.SetFloat("lifetime", lifeTime);
 		event.SetString("play_sound", sound);
 		event.SetBool("show_distance", showDistance);

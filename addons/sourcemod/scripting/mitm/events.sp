@@ -219,7 +219,7 @@ void EventHook_ObjectDestroyed(Event event, const char[] name, bool dontBroadcas
 			float worldPos[3];
 			GetEntPropVector(index, Prop_Data, "m_vecAbsOrigin", worldPos);
 			
-			CreateWorldAnnotation(client, client, text, worldPos, 30.0);
+			CreateWorldAnnotation(client, TF_MISSION_DESTROY_SENTRIES_HINT_MASK | client, text, _, worldPos, 30.0);
 		}
 	}
 }

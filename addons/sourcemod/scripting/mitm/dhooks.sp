@@ -1084,9 +1084,10 @@ MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Post(DHookParam par
 	if (mitm_setup_time.IntValue <= 0)
 		return MRES_Ignored;
 	
+	// If m_flRestartRoundTime is -1.0 at this point, all players have toggled off ready
 	if (GameRules_GetPropFloat("m_flRestartRoundTime") == -1.0)
 	{
-		// avoid players cancelling the forced ready time
+		// Prevent cancelling the forced ready timer
 		GameRules_SetPropFloat("m_flRestartRoundTime", g_flTempRestartRoundTime);
 	}
 	
@@ -1097,9 +1098,9 @@ MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Post(DHookParam par
 
 MRESReturn DHookCallback_ResetPlayerAndTeamReadyState_Pre()
 {
-	if (g_flTempRestartRoundTime)
+	if (GameRules_GetPropFloat("m_flRestartRoundTime") == -1.0 && g_flTempRestartRoundTime)
 	{
-		// prevent continously shortening the timer by toggling ready state
+		// Prevent players from continously shortening the timer by toggling ready state on and off
 		return MRES_Supercede;
 	}
 	

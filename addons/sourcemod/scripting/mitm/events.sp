@@ -212,7 +212,24 @@ void EventHook_TeamplayRoundStart(Event event, const char[] name, bool dontBroad
 	{
 		tf_mvm_min_players_to_start.IntValue = 0;
 		g_bInWaitingForPlayers = false;
+		
+		CreateTimer(0.1, Timer_SetReadyState);
 	}
+}
+
+Action Timer_SetReadyState(Handle timer)
+{
+	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + mitm_setup_time.FloatValue);
+	GameRules_SetProp("m_bAwaitingReadyRestart", false);
+	
+	Event event = CreateEvent("teamplay_round_restart_seconds");
+	if (event)
+	{
+		event.SetInt("seconds", mitm_setup_time.IntValue);
+		event.Fire();
+	}
+	
+	return Plugin_Continue;
 }
 
 void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool dontBroadcast)

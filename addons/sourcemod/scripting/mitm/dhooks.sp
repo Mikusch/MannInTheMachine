@@ -34,6 +34,7 @@ static ArrayList m_justSpawnedList;
 
 static int g_InternalSpawnPoint = INVALID_ENT_REFERENCE;
 static SpawnLocationResult s_spawnLocationResult = SPAWN_LOCATION_NOT_FOUND;
+static float g_flTempRestartRoundTime;
 
 // CMissionPopulator
 static CountdownTimer m_cooldownTimer;
@@ -62,6 +63,7 @@ void DHooks_Init(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMissionDestroySentries", DHookCallback_UpdateMissionDestroySentries_Pre, DHookCallback_UpdateMissionDestroySentries_Post);
 	CreateDynamicDetour(gamedata, "CPointPopulatorInterface::InputChangeBotAttributes", DHookCallback_InputChangeBotAttributes_Pre);
 	CreateDynamicDetour(gamedata, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_GetTeamAssignmentOverride_Pre, DHookCallback_GetTeamAssignmentOverride_Post);
+	CreateDynamicDetour(gamedata, "CTFGameRules::PlayerReadyStatus_UpdatePlayerState", DHookCallback_PlayerReadyStatus_UpdatePlayerState_Pre, DHookCallback_PlayerReadyStatus_UpdatePlayerState_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::GetLoadoutItem", DHookCallback_GetLoadoutItem_Pre, DHookCallback_GetLoadoutItem_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::CheckInstantLoadoutRespawn", DHookCallback_CheckInstantLoadoutRespawn_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayer::ShouldForceAutoTeam", DHookCallback_ShouldForceAutoTeam_Pre);
@@ -1064,6 +1066,24 @@ MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, DHookPar
 		
 		return MRES_Supercede;
 	}
+}
+
+MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Pre(DHookParam params)
+{
+	g_flTempRestartRoundTime = GameRules_GetPropFloat("m_flRestartRoundTime");
+	
+	return MRES_Handled;
+}
+
+MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Post(DHookParam params)
+{
+	if (GameRules_GetPropFloat("m_flRestartRoundTime") == -1.0)
+	{
+		// avoid players cancelling the forced ready time
+		GameRules_SetPropFloat("m_flRestartRoundTime", g_flTempRestartRoundTime);
+	}
+	
+	return MRES_Handled;
 }
 
 MRESReturn DHookCallback_GetTeamAssignmentOverride_Post(DHookReturn ret, DHookParam params)

@@ -543,6 +543,7 @@ ConVar mitm_defender_max_count;
 ConVar mitm_spawn_hurry_time;
 ConVar mitm_queue_points;
 ConVar mitm_rename_robots;
+ConVar mitm_setup_time;
 
 // TF ConVars
 ConVar tf_avoidteammates_pushaway;
@@ -621,6 +622,7 @@ public void OnPluginStart()
 	mitm_spawn_hurry_time = CreateConVar("mitm_spawn_hurry_time", "30.0", "Time that invaders have to leave their spawn.");
 	mitm_queue_points = CreateConVar("mitm_queue_points", "5", "Amount of queue points awarded to players that did not become defenders.", _, true, 1.0);
 	mitm_rename_robots = CreateConVar("mitm_rename_robots", "0", "Whether to rename robots as they spawn?");
+	mitm_setup_time = CreateConVar("mitm_setup_time", "150", "Time for defenders to set up before the round automatically starts.");
 	
 	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");

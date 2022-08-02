@@ -22,6 +22,7 @@ static NextBotActionFactory ActionFactory;
 
 static CountdownTimer m_talkTimer[MAXPLAYERS + 1];
 static CountdownTimer m_detonateTimer[MAXPLAYERS + 1];
+static CountdownTimer m_annotationTimer[MAXPLAYERS + 1];
 
 methodmap CTFBotMissionSuicideBomber < NextBotAction
 {
@@ -38,6 +39,7 @@ methodmap CTFBotMissionSuicideBomber < NextBotAction
 		.EndDataMapDesc();
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
+		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
 		ActionFactory.SetEventCallback(EventResponderType_OnKilled, OnKilled);
 	}
 	
@@ -98,6 +100,7 @@ methodmap CTFBotMissionSuicideBomber < NextBotAction
 static int OnStart(CTFBotMissionSuicideBomber action, int actor, NextBotAction priorAction)
 {
 	m_detonateTimer[actor].Invalidate();
+	m_annotationTimer[actor].Invalidate();
 	action.m_bHasDetonated = false;
 	action.m_bWasSuccessful = false;
 	action.m_bWasKilled = false;
@@ -109,6 +112,7 @@ static int OnStart(CTFBotMissionSuicideBomber action, int actor, NextBotAction p
 		float vecAbsOrigin[3];
 		GetEntPropVector(action.m_victim, Prop_Data, "m_vecAbsOrigin", vecAbsOrigin);
 		action.SetDataVector("m_lastKnownVictimPosition", vecAbsOrigin);
+		m_annotationTimer[actor].Start(0.1);
 	}
 	
 	return action.Continue();
@@ -116,6 +120,17 @@ static int OnStart(CTFBotMissionSuicideBomber action, int actor, NextBotAction p
 
 static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 {
+	if (m_annotationTimer[actor].HasStarted() && m_annotationTimer[actor].IsElapsed())
+	{
+		if (IsValidEntity(action.m_victim))
+		{
+			char text[64];
+			Format(text, sizeof(text), "%T", "Invader_DestroySentries_DetonateSentry", actor);
+			CreateAnnotation(actor, TF_MISSION_DESTROY_SENTRIES_HINT_MASK | actor, text, action.m_victim, _, 60.0, "coach/coach_attack_here.wav");
+			m_annotationTimer[actor].Invalidate();
+		}
+	}
+	
 	// one we start detonating, there's no turning back
 	if (m_detonateTimer[actor].HasStarted())
 	{
@@ -206,6 +221,11 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 	}
 	
 	return action.Continue();
+}
+
+static void OnEnd(CTFBotMissionSuicideBomber action, int actor, NextBotAction nextAction)
+{
+	HideAnnotation(actor, TF_MISSION_DESTROY_SENTRIES_HINT_MASK | actor);
 }
 
 static int OnKilled(CTFBotMissionSuicideBomber action, int actor, int attacker, int inflictor, float damage, int damagetype)

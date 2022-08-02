@@ -25,6 +25,8 @@ void Events_Init()
 	HookEvent("player_team", EventHook_PlayerTeam, EventHookMode_Pre);
 	HookEvent("post_inventory_application", EventHook_PostInventoryApplication);
 	HookEvent("player_builtobject", EventHook_PlayerBuiltObject);
+	HookEvent("object_destroyed", EventHook_ObjectDestroyed);
+	HookEvent("object_detonated", EventHook_ObjectDestroyed);
 	HookEvent("teamplay_round_start", EventHook_TeamplayRoundStart);
 	HookEvent("teamplay_flag_event", EventHook_TeamplayFlagEvent);
 }
@@ -193,6 +195,31 @@ void EventHook_PlayerBuiltObject(Event event, const char[] name, bool dontBroadc
 			{
 				SetEntityOwner(hint, index);
 			}
+		}
+	}
+}
+
+void EventHook_ObjectDestroyed(Event event, const char[] name, bool dontBroadcast)
+{
+	int index = event.GetInt("index");
+	
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (!IsPlayerAlive(client))
+			continue;
+		
+		if (Player(client).HasMission(MISSION_DESTROY_SENTRIES) && index == Player(client).GetMissionTarget())
+		{
+			char text[64];
+			Format(text, sizeof(text), "%T", "Invader_DestroySentries_DetonateHere", client);
+			
+			float worldPos[3];
+			GetEntPropVector(index, Prop_Data, "m_vecAbsOrigin", worldPos);
+			
+			CreateAnnotation(client, TF_MISSION_DESTROY_SENTRIES_HINT_MASK | client, text, _, worldPos, 30.0, "coach/coach_go_here.wav");
 		}
 	}
 }

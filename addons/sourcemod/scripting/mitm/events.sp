@@ -29,6 +29,7 @@ void Events_Init()
 	HookEvent("object_detonated", EventHook_ObjectDestroyed);
 	HookEvent("teamplay_round_start", EventHook_TeamplayRoundStart);
 	HookEvent("teamplay_flag_event", EventHook_TeamplayFlagEvent);
+	HookEvent("mvm_wave_complete", EventHook_MvMWaveComplete);
 }
 
 void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
@@ -244,24 +245,6 @@ void EventHook_TeamplayRoundStart(Event event, const char[] name, bool dontBroad
 	}
 }
 
-Action Timer_SetReadyState(Handle timer)
-{
-	if (mitm_setup_time.IntValue <= 0)
-		return Plugin_Continue;
-	
-	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + mitm_setup_time.FloatValue);
-	GameRules_SetProp("m_bAwaitingReadyRestart", false);
-	
-	Event event = CreateEvent("teamplay_round_restart_seconds");
-	if (event)
-	{
-		event.SetInt("seconds", mitm_setup_time.IntValue);
-		event.Fire();
-	}
-	
-	return Plugin_Continue;
-}
-
 void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool dontBroadcast)
 {
 	int player = event.GetInt("player");
@@ -287,6 +270,11 @@ void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool dontBroadc
 	}
 }
 
+void EventHook_MvMWaveComplete(Event event, const char[] name, bool dontBroadcast)
+{
+	CreateTimer(0.1, Timer_SetReadyState);
+}
+
 Action Timer_OnWaitingForPlayersEnd(Handle timer)
 {
 	if (!g_bInWaitingForPlayers)
@@ -296,6 +284,24 @@ Action Timer_OnWaitingForPlayersEnd(Handle timer)
 	g_bInWaitingForPlayers = false;
 	
 	GetPopulationManager().ResetMap();
+	
+	return Plugin_Continue;
+}
+
+Action Timer_SetReadyState(Handle timer)
+{
+	if (mitm_setup_time.IntValue <= 0)
+		return Plugin_Continue;
+	
+	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + mitm_setup_time.FloatValue);
+	GameRules_SetProp("m_bAwaitingReadyRestart", false);
+	
+	Event event = CreateEvent("teamplay_round_restart_seconds");
+	if (event)
+	{
+		event.SetInt("seconds", mitm_setup_time.IntValue);
+		event.Fire();
+	}
 	
 	return Plugin_Continue;
 }

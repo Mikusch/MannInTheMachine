@@ -127,6 +127,14 @@
 	{
 		"en"		"Help your team deliver the bomb!"
 	}
+	"Invader_DestroySentries_DetonateSentry"
+	{
+		"en"		"Detonate!"
+	}
+	"Invader_DestroySentries_DetonateHere"
+	{
+		"en"		"Detonate here to complete your mission!"
+	}
 	"ConVarQuery_ShowPluginMessages"
 	{
 		"#format"	"{1:s},{2:d}"

@@ -219,7 +219,7 @@ void EventHook_ObjectDestroyed(Event event, const char[] name, bool dontBroadcas
 			float worldPos[3];
 			GetEntPropVector(index, Prop_Data, "m_vecAbsOrigin", worldPos);
 			
-			CreateAnnotation(client, TF_MISSION_DESTROY_SENTRIES_HINT_MASK | client, text, _, worldPos, 30.0);
+			CreateAnnotation(client, TF_MISSION_DESTROY_SENTRIES_HINT_MASK | client, text, _, worldPos, 30.0, "coach/coach_go_here.wav");
 		}
 	}
 }

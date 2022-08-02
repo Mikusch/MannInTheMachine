@@ -772,7 +772,7 @@ void CreateAnnotation(int client, int id, const char[] text, int target = 0, con
 
 void HideAnnotation(int client, int id)
 {
-	Event event = CreateEvent("show_annotation");
+	Event event = CreateEvent("hide_annotation");
 	if (event)
 	{
 		event.SetInt("id", id);

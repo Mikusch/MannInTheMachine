@@ -126,7 +126,7 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 		{
 			char text[64];
 			Format(text, sizeof(text), "%T", "Invader_DestroySentries_DetonateSentry", actor);
-			CreateWorldAnnotation(actor, TF_MISSION_DESTROY_SENTRIES_HINT_MASK | actor, text, action.m_victim, _, 60.0);
+			CreateAnnotation(actor, TF_MISSION_DESTROY_SENTRIES_HINT_MASK | actor, text, action.m_victim, _, 60.0);
 			m_annotationTimer[actor].Invalidate();
 		}
 	}

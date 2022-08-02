@@ -751,7 +751,7 @@ void CreateMsgDialog(int client, const char[] title, int level = cellmax, int ti
 	delete kv;
 }
 
-void CreateWorldAnnotation(int client, int id, const char[] text, int target = 0, const float worldPos[3] = ZERO_VECTOR, float lifeTime = 5.0, const char[] sound = "ui/hint.wav", bool showDistance = true, bool showEffect = true)
+void CreateAnnotation(int client, int id, const char[] text, int target = 0, const float worldPos[3] = ZERO_VECTOR, float lifeTime = 5.0, const char[] sound = "ui/hint.wav", bool showDistance = true, bool showEffect = true)
 {
 	Event event = CreateEvent("show_annotation");
 	if (event)

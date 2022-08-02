@@ -64,6 +64,7 @@ void DHooks_Init(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CPointPopulatorInterface::InputChangeBotAttributes", DHookCallback_InputChangeBotAttributes_Pre);
 	CreateDynamicDetour(gamedata, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_GetTeamAssignmentOverride_Pre, DHookCallback_GetTeamAssignmentOverride_Post);
 	CreateDynamicDetour(gamedata, "CTFGameRules::PlayerReadyStatus_UpdatePlayerState", DHookCallback_PlayerReadyStatus_UpdatePlayerState_Pre, DHookCallback_PlayerReadyStatus_UpdatePlayerState_Post);
+	CreateDynamicDetour(gamedata, "CTeamplayRoundBasedRules::ResetPlayerAndTeamReadyState", DHookCallback_ResetPlayerAndTeamReadyState_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayer::GetLoadoutItem", DHookCallback_GetLoadoutItem_Pre, DHookCallback_GetLoadoutItem_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::CheckInstantLoadoutRespawn", DHookCallback_CheckInstantLoadoutRespawn_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayer::ShouldForceAutoTeam", DHookCallback_ShouldForceAutoTeam_Pre);
@@ -1070,6 +1071,9 @@ MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, DHookPar
 
 MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Pre(DHookParam params)
 {
+	if (mitm_setup_time.IntValue <= 0)
+		return MRES_Ignored;
+	
 	g_flTempRestartRoundTime = GameRules_GetPropFloat("m_flRestartRoundTime");
 	
 	return MRES_Handled;
@@ -1077,10 +1081,26 @@ MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Pre(DHookParam para
 
 MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Post(DHookParam params)
 {
+	if (mitm_setup_time.IntValue <= 0)
+		return MRES_Ignored;
+	
 	if (GameRules_GetPropFloat("m_flRestartRoundTime") == -1.0)
 	{
 		// avoid players cancelling the forced ready time
 		GameRules_SetPropFloat("m_flRestartRoundTime", g_flTempRestartRoundTime);
+	}
+	
+	g_flTempRestartRoundTime = 0.0;
+	
+	return MRES_Handled;
+}
+
+MRESReturn DHookCallback_ResetPlayerAndTeamReadyState_Pre()
+{
+	if (g_flTempRestartRoundTime)
+	{
+		// prevent continously shortening the timer by toggling ready state
+		return MRES_Supercede;
 	}
 	
 	return MRES_Handled;

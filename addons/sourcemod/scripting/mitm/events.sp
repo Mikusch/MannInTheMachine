@@ -219,6 +219,9 @@ void EventHook_TeamplayRoundStart(Event event, const char[] name, bool dontBroad
 
 Action Timer_SetReadyState(Handle timer)
 {
+	if (!mitm_setup_time.IntValue <= 0)
+		return Plugin_Continue;
+	
 	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + mitm_setup_time.FloatValue);
 	GameRules_SetProp("m_bAwaitingReadyRestart", false);
 	

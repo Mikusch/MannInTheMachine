@@ -82,7 +82,7 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 		if (Player(actor).HasTag("bot_gatebot"))
 		{
 			Format(title, sizeof(title), "%T", "Invader_CaptureGate", actor);
-			color = { 255, 200, 80, 255 };
+			color = { 248, 164, 45, 255 };
 		}
 		else if (SDKCall_IsAllowedToPickUpFlag(actor))
 		{

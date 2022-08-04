@@ -241,7 +241,7 @@ void EventHook_TeamplayRoundStart(Event event, const char[] name, bool dontBroad
 		tf_mvm_min_players_to_start.IntValue = 0;
 		g_bInWaitingForPlayers = false;
 		
-		CreateTimer(0.1, Timer_SetReadyState);
+		CreateTimer(1.0, Timer_SetReadyState);
 	}
 }
 
@@ -272,7 +272,7 @@ void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool dontBroadc
 
 void EventHook_MvMWaveComplete(Event event, const char[] name, bool dontBroadcast)
 {
-	CreateTimer(0.1, Timer_SetReadyState);
+	CreateTimer(1.0, Timer_SetReadyState);
 }
 
 Action Timer_OnWaitingForPlayersEnd(Handle timer)

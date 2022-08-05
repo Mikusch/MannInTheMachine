@@ -59,6 +59,11 @@ static int OnStart(CTFBotMvMDeployBomb action, int actor, NextBotAction priorAct
 		TF2Attrib_SetByName(actor, "airblast vertical vulnerability multiplier", 0.0);
 	}
 	
+	if (!IsFakeClient(actor))
+	{
+		tf_avoidteammates_pushaway.ReplicateToClient(actor, "0");
+	}
+	
 	return action.Continue();
 }
 
@@ -168,6 +173,11 @@ static void OnEnd(CTFBotMvMDeployBomb action, int actor, NextBotAction nextActio
 	SetVariantInt(0);
 	AcceptEntityInput(actor, "SetForcedTauntCam");
 	TF2_RemoveCondition(actor, TFCond_FreezeInput);
+	
+	if (!IsFakeClient(actor))
+	{
+		tf_avoidteammates_pushaway.ReplicateToClient(actor, "1");
+	}
 }
 
 static int OnContact(CTFBotMvMDeployBomb action, int actor, int other, Address result)

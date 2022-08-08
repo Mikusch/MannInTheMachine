@@ -1114,7 +1114,7 @@ void FireWeaponAtEnemy(int client, int &buttons)
 		delete attributes;
 	}
 	
-	if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_LUNCHBOX || weaponID == TF_WEAPON_BUFF_ITEM || weaponID == TF_WEAPON_BAT_WOOD || GetEntProp(client, Prop_Send, "m_bShieldEquipped"))
+	if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_LUNCHBOX || weaponID == TF_WEAPON_BUFF_ITEM || weaponID == TF_WEAPON_BAT_WOOD)
 	{
 		// allow robots to use certain weapons at all time
 		return;
@@ -1135,6 +1135,12 @@ void FireWeaponAtEnemy(int client, int &buttons)
 			// disable attacking
 			TF2Attrib_SetByName(myWeapon, "no_attack", 1.0);
 			TF2Attrib_SetByName(myWeapon, "provide on active", 1.0);
+			
+			// always do our class special skill, regardless of attack restrictions
+			if (buttons & IN_ATTACK2)
+			{
+				SDKCall_DoClassSpecialSkill(client);
+			}
 			
 			buttons &= ~IN_ATTACK;
 			buttons &= ~IN_ATTACK2;
@@ -1248,7 +1254,7 @@ void ConVarQueryFinished_ShowPluginMessages(QueryCookie cookie, int client, ConV
 {
 	if (!IsClientInGame(client))
 		return;
-
+	
 	if (result != ConVarQuery_Okay)
 		return;
 	

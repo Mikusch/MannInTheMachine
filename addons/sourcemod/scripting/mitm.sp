@@ -1028,12 +1028,6 @@ void FireWeaponAtEnemy(int client, int &buttons)
 	if (!IsPlayerAlive(client))
 		return;
 	
-	if (Player(client).HasAttribute(SUPPRESS_FIRE))
-		return;
-	
-	if (Player(client).HasAttribute(IGNORE_ENEMIES))
-		return;
-	
 	int myWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 	if (myWeapon == -1)
 		return;
@@ -1042,30 +1036,25 @@ void FireWeaponAtEnemy(int client, int &buttons)
 	{
 		if (Player(client).HasAttribute(HOLD_FIRE_UNTIL_FULL_RELOAD) || tf_bot_always_full_reload.BoolValue)
 		{
-			static int m_isWaitingForFullReload[MAXPLAYERS + 1];
+			static int s_isWaitingForFullReload[MAXPLAYERS + 1];
 			
 			if (SDKCall_Clip1(myWeapon) <= 0)
 			{
-				m_isWaitingForFullReload[client] = true;
+				s_isWaitingForFullReload[client] = true;
 			}
 			
-			if (m_isWaitingForFullReload[client])
+			if (s_isWaitingForFullReload[client])
 			{
 				if (SDKCall_Clip1(myWeapon) < TF2Util_GetWeaponMaxClip(myWeapon))
 				{
-					TF2Attrib_SetByName(myWeapon, "no_attack", 1.0);
-					TF2Attrib_SetByName(myWeapon, "provide on active", 1.0);
-					
-					buttons &= ~IN_ATTACK;
-					buttons &= ~IN_ATTACK2;
+					LockWeapon(client, myWeapon, buttons);
 					return;
 				}
 				
-				TF2Attrib_RemoveByName(myWeapon, "no_attack");
-				TF2Attrib_RemoveByName(myWeapon, "provide on active");
+				UnlockWeapon(myWeapon);
 				
 				// we are fully reloaded
-				m_isWaitingForFullReload[client] = false;
+				s_isWaitingForFullReload[client] = false;
 			}
 		}
 	}
@@ -1078,12 +1067,12 @@ void FireWeaponAtEnemy(int client, int &buttons)
 	
 	if (Player(client).HasMission(MISSION_DESTROY_SENTRIES))
 	{
-		TF2Attrib_SetByName(myWeapon, "no_attack", 1.0);
-		TF2Attrib_SetByName(myWeapon, "provide on active", 1.0);
-		
-		buttons &= ~IN_ATTACK;
-		buttons &= ~IN_ATTACK2;
+		LockWeapon(client, myWeapon, buttons);
 		return;
+	}
+	else if (Player(client).GetPrevMission() == MISSION_DESTROY_SENTRIES)
+	{
+		UnlockWeapon(myWeapon);
 	}
 	
 	int weaponID = TF2Util_GetWeaponID(myWeapon);
@@ -1126,7 +1115,7 @@ void FireWeaponAtEnemy(int client, int &buttons)
 	
 	if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_LUNCHBOX || weaponID == TF_WEAPON_BUFF_ITEM || weaponID == TF_WEAPON_BAT_WOOD)
 	{
-		// allow robots to use certain weapons at all time
+		// allow robots to use certain weapons at all times
 		return;
 	}
 	
@@ -1142,24 +1131,13 @@ void FireWeaponAtEnemy(int client, int &buttons)
 		{
 			s_isInSpawn[client] = true;
 			
-			// disable attacking
-			TF2Attrib_SetByName(myWeapon, "no_attack", 1.0);
-			TF2Attrib_SetByName(myWeapon, "provide on active", 1.0);
-			
-			// always do our class special skill, regardless of attack restrictions
-			if (buttons & IN_ATTACK2)
-			{
-				SDKCall_DoClassSpecialSkill(client);
-			}
-			
-			buttons &= ~IN_ATTACK;
-			buttons &= ~IN_ATTACK2;
+			LockWeapon(client, myWeapon, buttons);
+			return;
 		}
 	}
-	else if (s_isInSpawn[client])
+	
+	if (s_isInSpawn[client])
 	{
-		s_isInSpawn[client] = false;
-		
 		// the active weapon might have switched, remove attributes from all
 		int numWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
 		for (int i = 0; i < numWeapons; i++)
@@ -1168,10 +1146,33 @@ void FireWeaponAtEnemy(int client, int &buttons)
 			if (weapon == -1)
 				continue;
 			
-			TF2Attrib_RemoveByName(weapon, "no_attack");
-			TF2Attrib_RemoveByName(weapon, "provide on active");
+			UnlockWeapon(weapon);
 		}
+		
+		// we have left the spawn
+		s_isInSpawn[client] = false;
 	}
+}
+
+void LockWeapon(int client, int weapon, int &buttons)
+{
+	TF2Attrib_SetByName(weapon, "no_attack", 1.0);
+	TF2Attrib_SetByName(weapon, "provide on active", 1.0);
+	
+	// always do our class special skill, regardless of attack restrictions
+	if (buttons & IN_ATTACK2)
+	{
+		SDKCall_DoClassSpecialSkill(client);
+	}
+	
+	buttons &= ~IN_ATTACK;
+	buttons &= ~IN_ATTACK2;
+}
+
+void UnlockWeapon(int weapon)
+{
+	TF2Attrib_RemoveByName(weapon, "no_attack");
+	TF2Attrib_RemoveByName(weapon, "provide on active");
 }
 
 Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNum, bool reliable, bool init)

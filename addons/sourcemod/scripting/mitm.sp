@@ -728,6 +728,8 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CTFPlayer::m_accumulatedSentryGunDamageDealt");
 		SetOffset(gamedata, "CTFPlayer::m_accumulatedSentryGunKillCount");
 		
+		SetOffset(gamedata, "CTFWeaponBase::m_bInAttack2");
+		
 		SetOffset(gamedata, "CCurrencyPack::m_nAmount");
 		SetOffset(gamedata, "CCurrencyPack::m_bTouched");
 		
@@ -1159,10 +1161,23 @@ void LockWeapon(int client, int weapon, int &buttons)
 	TF2Attrib_SetByName(weapon, "no_attack", 1.0);
 	TF2Attrib_SetByName(weapon, "provide on active", 1.0);
 	
-	// always do our class special skill, regardless of attack restrictions
+	// no_attack prevents class special skills, do them manually
 	if (buttons & IN_ATTACK2)
 	{
-		SDKCall_DoClassSpecialSkill(client);
+		// auto behavior
+		if (TF2Util_GetWeaponID(weapon) == TF_WEAPON_GRENADELAUNCHER || GetEntProp(client, Prop_Send, "m_bShieldEquipped"))
+		{
+			SDKCall_DoClassSpecialSkill(client);
+		}
+		// semi-auto behaviour
+		else
+		{
+			if (view_as<bool>(GetEntData(weapon, GetOffset("CTFWeaponBase::m_bInAttack2"), 1)) == false)
+			{
+				SDKCall_DoClassSpecialSkill(client);
+				SetEntData(weapon, GetOffset("CTFWeaponBase::m_bInAttack2"), true, 1);
+			}
+		}
 	}
 	
 	buttons &= ~IN_ATTACK;

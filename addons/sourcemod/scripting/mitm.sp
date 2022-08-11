@@ -602,6 +602,7 @@ ConVar phys_pushscale;
 #include "mitm/behavior/tf_bot_mvm_deploy_bomb.sp"
 #include "mitm/behavior/tf_bot_mvm_engineer_idle.sp"
 #include "mitm/behavior/tf_bot_mvm_engineer_teleport_spawn.sp"
+#include "mitm/behavior/tf_bot_push_to_capture_point.sp"
 #include "mitm/behavior/tf_bot_scenario_monitor.sp"
 #include "mitm/behavior/tf_bot_sniper_lurk.sp"
 #include "mitm/behavior/tf_bot_spy_leave_spawn_room.sp"
@@ -676,6 +677,7 @@ public void OnPluginStart()
 	CTFBotMvMDeployBomb.Init();
 	CTFBotMvMEngineerIdle.Init();
 	CTFBotMvMEngineerTeleportSpawn.Init();
+	CTFBotPushToCapturePoint.Init();
 	CTFBotScenarioMonitor.Init();
 	CTFBotSniperLurk.Init();
 	CTFBotSpyLeaveSpawnRoom.Init();

@@ -92,12 +92,12 @@ static int Update(CTFBotMvMDeployBomb action, int actor, float interval)
 		}
 		
 		// slam facing towards bomb hole
-		float areaCenter[3], meCenter[3];
+		float areaCenter[3], actorCenter[3];
 		CBaseEntity(areaTrigger).WorldSpaceCenter(areaCenter);
-		CBaseEntity(actor).WorldSpaceCenter(meCenter);
+		CBaseEntity(actor).WorldSpaceCenter(actorCenter);
 		
 		float to[3];
-		SubtractVectors(areaCenter, meCenter, to);
+		SubtractVectors(areaCenter, actorCenter, to);
 		NormalizeVector(to, to);
 		
 		float desiredAngles[3];

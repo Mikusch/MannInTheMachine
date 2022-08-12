@@ -380,7 +380,7 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 			
 			float vecForce[3];
 			CalculateMeleeDamageForce(toVictim, flDamage, 1.0, vecForce);
-			SDKHooks_TakeDamage(victim, actor, actor, flDamage, DMG_BLAST, .damageForce = vecForce, .damagePosition = meCenter, .bypassHooks = false);
+			SDKHooks_TakeDamage(victim, actor, actor, flDamage, DMG_BLAST, .damageForce = vecForce, .damagePosition = actorCenter, .bypassHooks = false);
 			
 			g_bForceFriendlyFire = false;
 		}

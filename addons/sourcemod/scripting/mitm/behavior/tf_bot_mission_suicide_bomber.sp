@@ -350,12 +350,12 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 	{
 		int victim = victimList.Get(i);
 		
-		float victimCenter[3], meCenter[3];
+		float victimCenter[3], actorCenter[3];
 		CBaseEntity(victim).WorldSpaceCenter(victimCenter);
-		CBaseEntity(actor).WorldSpaceCenter(meCenter);
+		CBaseEntity(actor).WorldSpaceCenter(actorCenter);
 		
 		float toVictim[3];
-		SubtractVectors(victimCenter, meCenter, toVictim);
+		SubtractVectors(victimCenter, actorCenter, toVictim);
 		
 		if (GetVectorLength(toVictim) > tf_bot_suicide_bomb_range.FloatValue)
 			continue;
@@ -380,7 +380,7 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 			
 			float vecForce[3];
 			CalculateMeleeDamageForce(toVictim, flDamage, 1.0, vecForce);
-			SDKHooks_TakeDamage(victim, actor, actor, flDamage, DMG_BLAST, .damageForce = vecForce, .damagePosition = meCenter, .bypassHooks = false);
+			SDKHooks_TakeDamage(victim, actor, actor, flDamage, DMG_BLAST, .damageForce = vecForce, .damagePosition = actorCenter, .bypassHooks = false);
 			
 			g_bForceFriendlyFire = false;
 		}

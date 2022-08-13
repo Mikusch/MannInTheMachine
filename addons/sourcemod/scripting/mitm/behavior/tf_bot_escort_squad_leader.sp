@@ -84,8 +84,15 @@ static int Update(CTFBotEscortSquadLeader action, int actor, float interval)
 	
 	if (GameRules_IsMannVsMachineMode() && leader == actor)
 	{
+		char[] szNowLeader = "I'm now the squad leader! Going for the flag!";
+		if (Player(actor).HasAttribute(AGGRESSIVE))
+		{
+			// push for the point first, then attack
+			return action.ChangeTo(CTFBotPushToCapturePoint(CTFBotFetchFlag()), szNowLeader);
+		}
+		
 		// capture the flag
-		return action.ChangeTo(CTFBotFetchFlag(), "I'm now the squad leader! Going for the flag!");
+		return action.ChangeTo(CTFBotFetchFlag(), szNowLeader);
 	}
 	
 	return action.Continue();

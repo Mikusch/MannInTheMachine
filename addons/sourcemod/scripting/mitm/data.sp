@@ -1017,6 +1017,20 @@ methodmap Player
 		return pClosestFlag;
 	}
 	
+	public int GetFlagCaptureZone()
+	{
+		int zone = MaxClients + 1;
+		while ((zone = FindEntityByClassname(zone, "func_capturezone")) != -1)
+		{
+			if (GetEntProp(zone, Prop_Data, "m_iTeamNum") == GetClientTeam(this._client))
+			{
+				return zone;
+			}
+		}
+		
+		return -1;
+	}
+	
 	public bool ShouldAutoJump()
 	{
 		if (!this.HasAttribute(AUTO_JUMP))

@@ -404,6 +404,11 @@
 				"linux"		"9064"
 				"windows"	"9060"
 			}
+			"CTFWeaponBase::m_bInAttack2"
+			{
+				"linux"		"1721"
+				"windows"	"1717"
+			}
 			"CCurrencyPack::m_nAmount"
 			{
 				"linux"		"1276"

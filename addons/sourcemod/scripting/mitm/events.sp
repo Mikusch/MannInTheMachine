@@ -28,7 +28,6 @@ void Events_Init()
 	HookEvent("object_destroyed", EventHook_ObjectDestroyed);
 	HookEvent("object_detonated", EventHook_ObjectDestroyed);
 	HookEvent("teamplay_round_start", EventHook_TeamplayRoundStart);
-	HookEvent("teamplay_flag_event", EventHook_TeamplayFlagEvent);
 }
 
 void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
@@ -239,31 +238,6 @@ void EventHook_TeamplayRoundStart(Event event, const char[] name, bool dontBroad
 	{
 		tf_mvm_min_players_to_start.IntValue = 0;
 		g_bInWaitingForPlayers = false;
-	}
-}
-
-void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool dontBroadcast)
-{
-	int player = event.GetInt("player");
-	int eventtype = event.GetInt("eventtype");
-	
-	switch (eventtype)
-	{
-		case TF_FLAGEVENT_PICKEDUP:
-		{
-			if (!IsFakeClient(player))
-			{
-				// Prevent the bomb carrier from being pushed around
-				tf_avoidteammates_pushaway.ReplicateToClient(player, "0");
-			}
-		}
-		case TF_FLAGEVENT_DROPPED, TF_FLAGEVENT_CAPTURED:
-		{
-			if (!IsFakeClient(player))
-			{
-				tf_avoidteammates_pushaway.ReplicateToClient(player, "1");
-			}
-		}
 	}
 }
 

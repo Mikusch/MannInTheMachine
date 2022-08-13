@@ -119,6 +119,12 @@ static NextBotAction DesiredScenarioAndClassAction(int actor)
 			return CTFBotMvMEngineerIdle();
 		}
 		
+		if (Player(actor).HasAttribute(AGGRESSIVE))
+		{
+			// push for the point first, then attack
+			return CTFBotPushToCapturePoint(CTFBotFetchFlag());
+		}
+		
 		// capture the flag
 		return CTFBotFetchFlag();
 	}

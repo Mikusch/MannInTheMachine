@@ -172,6 +172,23 @@ char g_szRomePromoItems_Misc[][] =
 	"tw_engineerbot_armor",
 };
 
+enum SolidFlags_t
+{
+	FSOLID_CUSTOMRAYTEST		= 0x0001,	// Ignore solid type + always call into the entity for ray tests
+	FSOLID_CUSTOMBOXTEST		= 0x0002,	// Ignore solid type + always call into the entity for swept box tests
+	FSOLID_NOT_SOLID			= 0x0004,	// Are we currently not solid?
+	FSOLID_TRIGGER				= 0x0008,	// This is something may be collideable but fires touch functions
+											// even when it's not collideable (when the FSOLID_NOT_SOLID flag is set)
+	FSOLID_NOT_STANDABLE		= 0x0010,	// You can't stand on this
+	FSOLID_VOLUME_CONTENTS		= 0x0020,	// Contains volumetric contents (like water)
+	FSOLID_FORCE_WORLD_ALIGNED	= 0x0040,	// Forces the collision rep to be world-aligned even if it's SOLID_BSP or SOLID_VPHYSICS
+	FSOLID_USE_TRIGGER_BOUNDS	= 0x0080,	// Uses a special trigger bounds separate from the normal OBB
+	FSOLID_ROOT_PARENT_ALIGNED	= 0x0100,	// Collisions are defined in root parent's local coordinate space
+	FSOLID_TRIGGER_TOUCH_DEBRIS	= 0x0200,	// This trigger will touch debris objects
+
+	FSOLID_MAX_BITS	= 10
+};
+
 enum
 {
 	DONT_BLEED = -1,
@@ -586,6 +603,7 @@ ConVar phys_pushscale;
 #include "mitm/behavior/tf_bot_mvm_deploy_bomb.sp"
 #include "mitm/behavior/tf_bot_mvm_engineer_idle.sp"
 #include "mitm/behavior/tf_bot_mvm_engineer_teleport_spawn.sp"
+#include "mitm/behavior/tf_bot_push_to_capture_point.sp"
 #include "mitm/behavior/tf_bot_scenario_monitor.sp"
 #include "mitm/behavior/tf_bot_sniper_lurk.sp"
 #include "mitm/behavior/tf_bot_spy_leave_spawn_room.sp"
@@ -661,6 +679,7 @@ public void OnPluginStart()
 	CTFBotMvMDeployBomb.Init();
 	CTFBotMvMEngineerIdle.Init();
 	CTFBotMvMEngineerTeleportSpawn.Init();
+	CTFBotPushToCapturePoint.Init();
 	CTFBotScenarioMonitor.Init();
 	CTFBotSniperLurk.Init();
 	CTFBotSpyLeaveSpawnRoom.Init();
@@ -729,6 +748,8 @@ public void OnPluginStart()
 		SetOffset(gamedata, "CTFPlayer::m_pWaveSpawnPopulator");
 		SetOffset(gamedata, "CTFPlayer::m_accumulatedSentryGunDamageDealt");
 		SetOffset(gamedata, "CTFPlayer::m_accumulatedSentryGunKillCount");
+		
+		SetOffset(gamedata, "CTFWeaponBase::m_bInAttack2");
 		
 		SetOffset(gamedata, "CCurrencyPack::m_nAmount");
 		SetOffset(gamedata, "CCurrencyPack::m_bTouched");
@@ -1030,12 +1051,6 @@ void FireWeaponAtEnemy(int client, int &buttons)
 	if (!IsPlayerAlive(client))
 		return;
 	
-	if (Player(client).HasAttribute(SUPPRESS_FIRE))
-		return;
-	
-	if (Player(client).HasAttribute(IGNORE_ENEMIES))
-		return;
-	
 	int myWeapon = GetEntPropEnt(client, Prop_Send, "m_hActiveWeapon");
 	if (myWeapon == -1)
 		return;
@@ -1044,30 +1059,25 @@ void FireWeaponAtEnemy(int client, int &buttons)
 	{
 		if (Player(client).HasAttribute(HOLD_FIRE_UNTIL_FULL_RELOAD) || tf_bot_always_full_reload.BoolValue)
 		{
-			static int m_isWaitingForFullReload[MAXPLAYERS + 1];
+			static int s_isWaitingForFullReload[MAXPLAYERS + 1];
 			
 			if (SDKCall_Clip1(myWeapon) <= 0)
 			{
-				m_isWaitingForFullReload[client] = true;
+				s_isWaitingForFullReload[client] = true;
 			}
 			
-			if (m_isWaitingForFullReload[client])
+			if (s_isWaitingForFullReload[client])
 			{
 				if (SDKCall_Clip1(myWeapon) < TF2Util_GetWeaponMaxClip(myWeapon))
 				{
-					TF2Attrib_SetByName(myWeapon, "no_attack", 1.0);
-					TF2Attrib_SetByName(myWeapon, "provide on active", 1.0);
-					
-					buttons &= ~IN_ATTACK;
-					buttons &= ~IN_ATTACK2;
+					LockWeapon(client, myWeapon, buttons);
 					return;
 				}
 				
-				TF2Attrib_RemoveByName(myWeapon, "no_attack");
-				TF2Attrib_RemoveByName(myWeapon, "provide on active");
+				UnlockWeapon(myWeapon);
 				
 				// we are fully reloaded
-				m_isWaitingForFullReload[client] = false;
+				s_isWaitingForFullReload[client] = false;
 			}
 		}
 	}
@@ -1076,6 +1086,16 @@ void FireWeaponAtEnemy(int client, int &buttons)
 	{
 		buttons |= IN_ATTACK;
 		return;
+	}
+	
+	if (Player(client).HasMission(MISSION_DESTROY_SENTRIES))
+	{
+		LockWeapon(client, myWeapon, buttons);
+		return;
+	}
+	else if (Player(client).GetPrevMission() == MISSION_DESTROY_SENTRIES)
+	{
+		UnlockWeapon(myWeapon);
 	}
 	
 	int weaponID = TF2Util_GetWeaponID(myWeapon);
@@ -1116,9 +1136,9 @@ void FireWeaponAtEnemy(int client, int &buttons)
 		delete attributes;
 	}
 	
-	if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_LUNCHBOX || weaponID == TF_WEAPON_BUFF_ITEM || weaponID == TF_WEAPON_BAT_WOOD || GetEntProp(client, Prop_Send, "m_bShieldEquipped"))
+	if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_LUNCHBOX || weaponID == TF_WEAPON_BUFF_ITEM || weaponID == TF_WEAPON_BAT_WOOD)
 	{
-		// allow robots to use certain weapons at all time
+		// allow robots to use certain weapons at all times
 		return;
 	}
 	
@@ -1134,18 +1154,13 @@ void FireWeaponAtEnemy(int client, int &buttons)
 		{
 			s_isInSpawn[client] = true;
 			
-			// disable attacking
-			TF2Attrib_SetByName(myWeapon, "no_attack", 1.0);
-			TF2Attrib_SetByName(myWeapon, "provide on active", 1.0);
-			
-			buttons &= ~IN_ATTACK;
-			buttons &= ~IN_ATTACK2;
+			LockWeapon(client, myWeapon, buttons);
+			return;
 		}
 	}
-	else if (s_isInSpawn[client])
+	
+	if (s_isInSpawn[client])
 	{
-		s_isInSpawn[client] = false;
-		
 		// the active weapon might have switched, remove attributes from all
 		int numWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
 		for (int i = 0; i < numWeapons; i++)
@@ -1154,10 +1169,46 @@ void FireWeaponAtEnemy(int client, int &buttons)
 			if (weapon == -1)
 				continue;
 			
-			TF2Attrib_RemoveByName(weapon, "no_attack");
-			TF2Attrib_RemoveByName(weapon, "provide on active");
+			UnlockWeapon(weapon);
+		}
+		
+		// we have left the spawn
+		s_isInSpawn[client] = false;
+	}
+}
+
+void LockWeapon(int client, int weapon, int &buttons)
+{
+	TF2Attrib_SetByName(weapon, "no_attack", 1.0);
+	TF2Attrib_SetByName(weapon, "provide on active", 1.0);
+	
+	// no_attack prevents class special skills, do them manually
+	if (buttons & IN_ATTACK2)
+	{
+		// auto behavior
+		if (TF2Util_GetWeaponID(weapon) == TF_WEAPON_GRENADELAUNCHER || GetEntProp(client, Prop_Send, "m_bShieldEquipped"))
+		{
+			SDKCall_DoClassSpecialSkill(client);
+		}
+		// semi-auto behaviour
+		else
+		{
+			if (view_as<bool>(GetEntData(weapon, GetOffset("CTFWeaponBase::m_bInAttack2"), 1)) == false)
+			{
+				SDKCall_DoClassSpecialSkill(client);
+				SetEntData(weapon, GetOffset("CTFWeaponBase::m_bInAttack2"), true, 1);
+			}
 		}
 	}
+	
+	buttons &= ~IN_ATTACK;
+	buttons &= ~IN_ATTACK2;
+}
+
+void UnlockWeapon(int weapon)
+{
+	TF2Attrib_RemoveByName(weapon, "no_attack");
+	TF2Attrib_RemoveByName(weapon, "provide on active");
 }
 
 Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNum, bool reliable, bool init)
@@ -1250,7 +1301,7 @@ void ConVarQueryFinished_ShowPluginMessages(QueryCookie cookie, int client, ConV
 {
 	if (!IsClientInGame(client))
 		return;
-
+	
 	if (result != ConVarQuery_Okay)
 		return;
 	

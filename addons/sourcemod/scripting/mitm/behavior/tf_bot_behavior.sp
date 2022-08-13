@@ -31,6 +31,7 @@ methodmap CTFBotMainAction < NextBotAction
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
 		ActionFactory.SetEventCallback(EventResponderType_OnKilled, OnKilled);
+		ActionFactory.SetEventCallback(EventResponderType_OnContact, OnContact);
 		ActionFactory.SetEventCallback(EventResponderType_OnOtherKilled, OnOtherKilled);
 	}
 	
@@ -82,7 +83,7 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 		if (Player(actor).HasTag("bot_gatebot"))
 		{
 			Format(title, sizeof(title), "%T", "Invader_CaptureGate", actor);
-			color = { 255, 200, 80, 255 };
+			color = { 248, 164, 45, 255 };
 		}
 		else if (SDKCall_IsAllowedToPickUpFlag(actor))
 		{
@@ -199,6 +200,35 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 static int OnKilled(CTFBotMainAction action, int actor, int attacker, int inflictor, float damage, int damagetype)
 {
 	return action.TryChangeTo(CTFBotDead(), RESULT_CRITICAL, "I died!");
+}
+
+static int OnContact(CTFBotMainAction action, int actor, int other, Address result)
+{
+	if (IsValidEntity(other) && !(view_as<SolidFlags_t>(GetEntProp(other, Prop_Data, "m_usSolidFlags")) & FSOLID_NOT_SOLID) && other != 0 && !IsEntityClient(other))
+	{
+		// Mini-bosses destroy non-Sentrygun objects they bump into (ie: Dispensers)
+		if (GameRules_IsMannVsMachineMode() && GetEntProp(actor, Prop_Send, "m_bIsMiniBoss"))
+		{
+			if (HasEntProp(other, Prop_Send, "m_hBuilder"))
+			{
+				if (TF2_GetObjectType(other) != TFObject_Sentry || GetEntProp(other, Prop_Send, "m_bMiniBuilding"))
+				{
+					int damage = Max(GetEntProp(other, Prop_Data, "m_iMaxHealth"), GetEntProp(other, Prop_Data, "m_iHealth"));
+					
+					float victimCenter[3], actorCenter[3], toVictim[3];
+					CBaseEntity(other).WorldSpaceCenter(victimCenter);
+					CBaseEntity(actor).WorldSpaceCenter(actorCenter);
+					SubtractVectors(victimCenter, actorCenter, toVictim);
+					
+					float vecForce[3];
+					CalculateMeleeDamageForce(toVictim, float(4 * damage), 1.0, vecForce);
+					SDKHooks_TakeDamage(other, actor, actor, float(4 * damage), DMG_BLAST, _, vecForce, actorCenter);
+				}
+			}
+		}
+	}
+	
+	return action.TryContinue();
 }
 
 static int OnOtherKilled(CTFBotMainAction action, int actor, int victim, int attacker, int inflictor, float damage, int damagetype)

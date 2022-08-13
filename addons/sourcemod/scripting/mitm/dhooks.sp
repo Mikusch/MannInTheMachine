@@ -1111,7 +1111,7 @@ MRESReturn DHookCallback_ResetPlayerAndTeamReadyState_Pre()
 		return MRES_Supercede;
 	}
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 MRESReturn DHookCallback_GetTeamAssignmentOverride_Post(DHookReturn ret, DHookParam params)

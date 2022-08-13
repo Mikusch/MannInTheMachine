@@ -30,7 +30,7 @@ void Console_Init()
 	AddCommandListener(CommandListener_DropItem, "dropitem");
 }
 
-Action ConCmd_OpenMainMenu(int client, int args)
+static Action ConCmd_OpenMainMenu(int client, int args)
 {
 	if (client == 0)
 	{
@@ -42,7 +42,7 @@ Action ConCmd_OpenMainMenu(int client, int args)
 	return Plugin_Handled;
 }
 
-Action ConCmd_OpenQueueMenu(int client, int args)
+static Action ConCmd_OpenQueueMenu(int client, int args)
 {
 	if (client == 0)
 	{
@@ -54,7 +54,7 @@ Action ConCmd_OpenQueueMenu(int client, int args)
 	return Plugin_Handled;
 }
 
-Action ConCmd_OpenPreferencesMenu(int client, int args)
+static Action ConCmd_OpenPreferencesMenu(int client, int args)
 {
 	if (client == 0)
 	{
@@ -66,7 +66,7 @@ Action ConCmd_OpenPreferencesMenu(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action CommandListener_Suicide(int client, const char[] command, int argc)
+static Action CommandListener_Suicide(int client, const char[] command, int argc)
 {
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
@@ -78,7 +78,7 @@ public Action CommandListener_Suicide(int client, const char[] command, int argc
 	return Plugin_Continue;
 }
 
-Action CommandListener_Build(int client, const char[] command, int argc)
+static Action CommandListener_Build(int client, const char[] command, int argc)
 {
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
@@ -132,7 +132,7 @@ Action CommandListener_Build(int client, const char[] command, int argc)
 	return Plugin_Continue;
 }
 
-Action CommandListener_DropItem(int client, const char[] command, int argc)
+static Action CommandListener_DropItem(int client, const char[] command, int argc)
 {
 	if (Player(client).GetDeployingBombState() != TF_BOMB_DEPLOYING_NONE)
 	{

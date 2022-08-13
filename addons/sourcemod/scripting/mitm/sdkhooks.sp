@@ -35,7 +35,7 @@ void SDKHooks_OnEntityCreated(int entity, const char[] classname)
 	}
 }
 
-Action SDKHookCB_Client_OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+static Action SDKHookCB_Client_OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
 	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
 	{
@@ -68,7 +68,7 @@ Action SDKHookCB_Client_OnTakeDamage(int victim, int &attacker, int &inflictor, 
 	return Plugin_Continue;
 }
 
-Action SDKHookCB_ProjectilePipeRemote_SetTransmit(int entity, int client)
+static Action SDKHookCB_ProjectilePipeRemote_SetTransmit(int entity, int client)
 {
 	if (view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum")) == TFTeam_Defenders)
 	{
@@ -87,7 +87,7 @@ Action SDKHookCB_ProjectilePipeRemote_SetTransmit(int entity, int client)
 	return Plugin_Continue;
 }
 
-Action SDKHookCB_ReviveMarker_SetTransmit(int entity, int client)
+static Action SDKHookCB_ReviveMarker_SetTransmit(int entity, int client)
 {
 	if (view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum")) == TFTeam_Defenders)
 	{

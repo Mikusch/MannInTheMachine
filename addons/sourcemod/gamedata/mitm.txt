@@ -364,6 +364,11 @@
 				"linux"		"64"
 				"windows"	"63"
 			}
+			"CTeamplayRoundBasedRules::BetweenRounds_Start"
+			{
+				"linux"		"202"
+				"windows"	"200"
+			}
 			"CTFPlayer::m_flSpawnTime"
 			{
 				"linux"		"8616"
@@ -1094,6 +1099,13 @@
 						"type"	"objectptr"
 					}
 				}
+			}
+			"CTeamplayRoundBasedRules::BetweenRounds_Start"
+			{
+				"offset"	"CTeamplayRoundBasedRules::BetweenRounds_Start"
+				"hooktype"	"gamerules"
+				"return"	"void"
+				"this"		"ignore"
 			}
 			"CTFItem::PickUp"
 			{

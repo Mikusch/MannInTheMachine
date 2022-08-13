@@ -29,6 +29,7 @@ static DynamicHook g_DHookPassesFilterImpl;
 static DynamicHook g_DHookPickUp;
 static DynamicHook g_DHookClientConnected;
 static DynamicHook g_DHookFPlayerCanTakeDamage;
+static DynamicHook g_DHookBetweenRoundsStart;
 
 static ArrayList m_justSpawnedList;
 
@@ -89,6 +90,7 @@ void DHooks_Init(GameData gamedata)
 	g_DHookPickUp = CreateDynamicHook(gamedata, "CTFItem::PickUp");
 	g_DHookClientConnected = CreateDynamicHook(gamedata, "CTFGameRules::ClientConnected");
 	g_DHookFPlayerCanTakeDamage = CreateDynamicHook(gamedata, "CTFGameRules::FPlayerCanTakeDamage");
+	g_DHookBetweenRoundsStart = CreateDynamicHook(gamedata, "CTeamplayRoundBasedRules::BetweenRounds_Start");
 }
 
 void DHooks_OnClientPutInServer(int client)
@@ -124,6 +126,11 @@ void DHooks_HookGamerules()
 	if (g_DHookFPlayerCanTakeDamage)
 	{
 		g_DHookFPlayerCanTakeDamage.HookGamerules(Hook_Pre, DHookCallback_FPlayerCanTakeDamage_Pre);
+	}
+	
+	if (g_DHookBetweenRoundsStart)
+	{
+		g_DHookBetweenRoundsStart.HookGamerules(Hook_Post, DHookCallback_BetweenRoundsStart_Post);
 	}
 }
 
@@ -1719,4 +1726,29 @@ MRESReturn DHookCallback_FPlayerCanTakeDamage_Pre(DHookReturn ret, DHookParam pa
 	}
 	
 	return MRES_Ignored;
+}
+
+MRESReturn DHookCallback_BetweenRoundsStart_Post()
+{
+	if (!g_bInWaitingForPlayers && mitm_setup_time.IntValue > 0)
+	{
+		RequestFrame(RequestFrameCallback_StartReadyTimer);
+		return MRES_Handled;
+	}
+	
+	return MRES_Ignored;
+}
+
+static void RequestFrameCallback_StartReadyTimer()
+{
+	// automatically start the ready timer
+	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + mitm_setup_time.FloatValue);
+	GameRules_SetProp("m_bAwaitingReadyRestart", false);
+	
+	Event event = CreateEvent("teamplay_round_restart_seconds");
+	if (event)
+	{
+		event.SetInt("seconds", mitm_setup_time.IntValue);
+		event.Fire();
+	}
 }

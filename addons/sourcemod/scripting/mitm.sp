@@ -617,6 +617,7 @@ ConVar phys_pushscale;
 #include "mitm/menus.sp"
 #include "mitm/sdkcalls.sp"
 #include "mitm/sdkhooks.sp"
+#include "mitm/party.sp"
 
 public Plugin myinfo =
 {
@@ -693,6 +694,7 @@ public void OnPluginStart()
 	Console_Init();
 	Events_Init();
 	ClientPrefs_Init();
+	Party_Init();
 	
 	HookUserMessage(GetUserMessageId("SayText2"), OnSayText2, true);
 	

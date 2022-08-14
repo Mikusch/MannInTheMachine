@@ -254,9 +254,7 @@ methodmap CTFBotSquad
 	public void Delete()
 	{
 		if (this.m_listIndex == -1)
-		{
-			ThrowError("Failed to delete squad because it wasn't in our list");
-		}
+			return;
 		
 		CTFBotSquadInfo info;
 		g_squads.GetArray(this.m_listIndex, info);

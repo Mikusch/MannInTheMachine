@@ -51,6 +51,7 @@ static bool m_bWasMiniBoss[MAXPLAYERS + 1];
 static int m_defenderQueuePoints[MAXPLAYERS + 1];
 static int m_preferences[MAXPLAYERS + 1];
 static int m_hudMsgLevel[MAXPLAYERS + 1];
+static Party m_party[MAXPLAYERS + 1];
 
 methodmap Player
 {
@@ -316,6 +317,18 @@ methodmap Player
 		public set(BombDeployingState_t nDeployingBombState)
 		{
 			m_nDeployingBombState[this._client] = nDeployingBombState;
+		}
+	}
+	
+	property Party m_party
+	{
+		public get()
+		{
+			return m_party[this._client];
+		}
+		public set(Party party)
+		{
+			m_party[this._client] = party;
 		}
 	}
 	
@@ -1165,6 +1178,50 @@ methodmap Player
 		if (this.m_squad)
 		{
 			this.m_squad = NULL_SQUAD;
+		}
+	}
+	
+	public Party GetParty()
+	{
+		return this.m_party;
+	}
+	
+	public void InviteToParty(Party party)
+	{
+		if (party)
+		{
+			party.AddInvite(this._client);
+		}
+	}
+	
+	public void JoinParty(Party party)
+	{
+		if (party)
+		{
+			party.Join(this._client);
+			this.m_party = party;
+		}
+	}
+	
+	public void LeaveParty()
+	{
+		if (this.m_party)
+		{
+			this.m_party.Leave(this._client);
+			this.m_party = Party(0);
+		}
+	}
+	
+	public bool IsInAParty()
+	{
+		return this.m_party == Party(0) ? false : true;
+	}
+	
+	public void DeleteParty()
+	{
+		if (this.m_party)
+		{
+			this.m_party = Party(0);
 		}
 	}
 	

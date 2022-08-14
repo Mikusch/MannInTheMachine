@@ -103,7 +103,9 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 		case MenuAction_Cancel:
 		{
 			if (param2 == MenuCancel_ExitBack)
+			{
 				Menus_DisplayMainMenu(param1);
+			}
 		}
 		case MenuAction_End:
 		{
@@ -166,7 +168,9 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 		case MenuAction_Cancel:
 		{
 			if (param2 == MenuCancel_ExitBack)
+			{
 				Menus_DisplayMainMenu(param1);
+			}
 		}
 		case MenuAction_End:
 		{
@@ -185,6 +189,126 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 			else
 				Format(display, sizeof(display), "☐ %T", g_PreferenceNames[i], param1);
 			
+			return RedrawMenuItem(display);
+		}
+	}
+	
+	return 0;
+}
+
+void Menus_DisplayPartyMenu(int client)
+{
+	Menu menu = new Menu(MenuHandler_PartyMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
+	
+	char text[64];
+	strcopy(text, sizeof(text), Player(client).IsInAParty() ? "You are currently in a party." : "You are not currently in a party.");
+	
+	char title[256];
+	Format(title, sizeof(title), "Party Menu\n%s", text);
+	
+	menu.SetTitle(title);
+	menu.ExitBackButton = true;
+	
+	if (Player(client).IsInAParty() && Player(client).GetParty().IsLeader(client))
+	{
+		menu.AddItem("manage_party", "Manage Party");
+	}
+	
+	menu.AddItem("manage_invites", "Manage Party Invites");
+	
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+
+static int MenuHandler_PartyMenu(Menu menu, MenuAction action, int param1, int param2)
+{
+	switch (action)
+	{
+		case MenuAction_Select:
+		{
+			char info[64];
+			menu.GetItem(param2, info, sizeof(info));
+			
+			if (StrEqual(info, "manage_party"))
+			{
+				FakeClientCommand(param1, "sm_party manage");
+			}
+			else if (StrEqual(info, "manage_invites"))
+			{
+				FakeClientCommand(param1, "sm_party invites");
+			}
+		}
+		case MenuAction_Cancel:
+		{
+			if (param2 == MenuCancel_ExitBack)
+			{
+				Menus_DisplayMainMenu(param1);
+			}
+		}
+		case MenuAction_End:
+		{
+			delete menu;
+		}
+		case MenuAction_DisplayItem:
+		{
+			char info[64], display[128];
+			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
+			
+			Format(display, sizeof(display), "%T", display, param1);
+			return RedrawMenuItem(display);
+		}
+	}
+	
+	return 0;
+}
+
+void Menus_DisplayPartyManageMenu(int client)
+{
+	Menu menu = new Menu(MenuHandler_PartyManageMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
+	
+	menu.SetTitle("Manage Your Party");
+	menu.ExitBackButton = true;
+	
+	menu.AddItem("invite_members", "Invite Players");
+	menu.AddItem("manage_members", "Manage Party Members")
+	
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+
+static int MenuHandler_PartyManageMenu(Menu menu, MenuAction action, int param1, int param2)
+{
+	switch (action)
+	{
+		case MenuAction_Select:
+		{
+			char info[64];
+			menu.GetItem(param2, info, sizeof(info));
+			
+			if (StrEqual(info, "invite_members"))
+			{
+				FakeClientCommand(param1, "sm_party invite");
+			}
+			else if (StrEqual(info, "manage_members"))
+			{
+				FakeClientCommand(param1, "sm_party kick");
+			}
+		}
+		case MenuAction_Cancel:
+		{
+			if (param2 == MenuCancel_ExitBack)
+			{
+				Menus_DisplayPartyMenu(param1);
+			}
+		}
+		case MenuAction_End:
+		{
+			delete menu;
+		}
+		case MenuAction_DisplayItem:
+		{
+			char info[64], display[128];
+			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
+			
+			Format(display, sizeof(display), "%T", display, param1);
 			return RedrawMenuItem(display);
 		}
 	}

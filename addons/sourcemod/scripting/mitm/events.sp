@@ -66,6 +66,8 @@ static void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroad
 	
 	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
 	{
+		HideAnnotation(victim, MITM_HINT_MASK | victim);
+		
 		// Remove any glows attached to us
 		RemoveEntityGlow(victim);
 	}

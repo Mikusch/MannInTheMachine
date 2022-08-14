@@ -325,7 +325,7 @@ methodmap Player
 			return false;
 		
 		TFTeam team = TF2_GetClientTeam(this._client);
-		return (team == TFTeam_Spectator || team == TFTeam_Invaders) && !this.HasPreference(PREF_NO_SPAWNING);
+		return (team == TFTeam_Spectator || team == TFTeam_Invaders) && !this.HasPreference(PREF_DISABLE_SPAWNING);
 	}
 	
 	public int GetFlagTarget()

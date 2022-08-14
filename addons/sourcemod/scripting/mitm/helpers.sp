@@ -215,10 +215,10 @@ int GetRobotToSpawn(bool bMiniBoss)
 		if (TF2_GetClientTeam(client) != TFTeam_Spectator)
 			continue;
 		
-		if (Player(client).HasPreference(PREF_NO_SPAWNING))
+		if (Player(client).HasPreference(PREF_DISABLE_SPAWNING))
 			continue;
 		
-		if (bMiniBoss && Player(client).HasPreference(PREF_NO_GIANT))
+		if (bMiniBoss && Player(client).HasPreference(PREF_DISABLE_GIANT))
 			continue;
 		
 		playerList.Push(client);
@@ -262,7 +262,7 @@ int GetRobotToSpawn(bool bMiniBoss)
 		if (!Player(client).IsInvader())
 			continue;
 		
-		if (Player(client).HasPreference(PREF_NO_GIANT))
+		if (Player(client).HasPreference(PREF_DISABLE_GIANT))
 			continue;
 		
 		playerCount++;
@@ -753,6 +753,9 @@ void CreateMsgDialog(int client, const char[] title, int level = cellmax, int ti
 
 void CreateAnnotation(int client, int id, const char[] text, int target = 0, const float worldPos[3] = ZERO_VECTOR, float lifeTime = 10.0, const char[] sound = "ui/hint.wav", bool showDistance = true, bool showEffect = true)
 {
+	if (Player(client).HasPreference(PREF_DISABLE_ANNOTATIONS))
+		return;
+	
 	Event event = CreateEvent("show_annotation");
 	if (event)
 	{

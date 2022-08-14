@@ -1011,11 +1011,11 @@ void SelectNewDefenders()
 		TF2_ChangeClientTeam(invader, TFTeam_Spectator);
 		LogMessage("Assigned %N to team ROBOTS (Queue Points: %d)", invader, Player(invader).m_defenderQueuePoints);
 		
-		if (Player(invader).HasPreference(PREF_DONT_BE_DEFENDER))
+		if (Player(invader).HasPreference(PREF_DISABLE_DEFENDER))
 		{
 			CPrintToChat(invader, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader_NoQueue", blueTeamname);
 		}
-		else if (!Player(invader).HasPreference(PREF_NO_SPAWNING))
+		else if (!Player(invader).HasPreference(PREF_DISABLE_SPAWNING))
 		{
 			Queue_AddPoints(invader, mitm_queue_points.IntValue);
 			CPrintToChat(invader, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname, mitm_queue_points.IntValue, Player(invader).m_defenderQueuePoints);

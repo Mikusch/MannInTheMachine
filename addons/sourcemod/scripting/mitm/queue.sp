@@ -39,7 +39,7 @@ ArrayList Queue_GetDefenderQueue()
 		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
 			continue;
 		
-		if (Player(client).HasPreference(PREF_DONT_BE_DEFENDER) || Player(client).HasPreference(PREF_NO_SPAWNING))
+		if (Player(client).HasPreference(PREF_DISABLE_DEFENDER) || Player(client).HasPreference(PREF_DISABLE_SPAWNING))
 			continue;
 		
 		if (Player(client).m_defenderQueuePoints == -1)

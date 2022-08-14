@@ -56,12 +56,12 @@
 	"Preferences_Enabled"
 	{
 		"#format"	"{1:s}"
-		"en"		"You have enabled the preference {1}."
+		"en"		"You have enabled the preference {cyan}{1}{default}."
 	}
 	"Preferences_Disabled"
 	{
 		"#format"	"{1:s}"
-		"en"		"You have disabled the preference {1}."
+		"en"		"You have disabled the preference {cyan}{1}{default}."
 	}
 	"Queue_NewDefenders"
 	{

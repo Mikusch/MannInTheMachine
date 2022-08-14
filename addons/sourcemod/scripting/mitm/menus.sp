@@ -51,7 +51,7 @@ static int MenuHandler_MainMenu(Menu menu, MenuAction action, int param1, int pa
 		}
 		case MenuAction_DisplayItem:
 		{
-			char info[64], display[128];
+			char info[64], display[64];
 			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
 			
 			Format(display, sizeof(display), "%T", display, param1);
@@ -147,19 +147,18 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 			char info[4];
 			menu.GetItem(param2, info, sizeof(info));
 			
-			// TODO: There's no way this is required
 			int i = StringToInt(info);
 			PreferenceType preference = view_as<PreferenceType>(RoundToNearest(Pow(2.0, float(i))));
 			
 			Player(param1).SetPreference(preference, !Player(param1).HasPreference(preference));
 			
-			char name[128];
+			char name[64];
 			Format(name, sizeof(name), "%T", g_PreferenceNames[i], param1);
 			
 			if (Player(param1).HasPreference(preference))
-				PrintToChat(param1, "%t", "Preferences_Enabled", name);
+				CPrintToChat(param1, "%s %t", PLUGIN_TAG, "Preferences_Enabled", name);
 			else
-				PrintToChat(param1, "%t", "Preferences_Disabled", name);
+				CPrintToChat(param1, "%s %t", PLUGIN_TAG, "Preferences_Disabled", name);
 			
 			Menus_DisplayPreferencesMenu(param1);
 		}
@@ -174,7 +173,7 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 		}
 		case MenuAction_DisplayItem:
 		{
-			char info[4], display[128];
+			char info[4], display[64];
 			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
 			
 			int i = StringToInt(info);

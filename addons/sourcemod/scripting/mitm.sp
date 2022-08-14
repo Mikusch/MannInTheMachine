@@ -696,8 +696,6 @@ public void OnPluginStart()
 	
 	HookUserMessage(GetUserMessageId("SayText2"), OnSayText2, true);
 	
-	RegAdminCmd("sm_addqueue", ConCmd_AddQueuePoints, ADMFLAG_CHEATS, "Adds defender queue points to a player.");
-	
 	CreateTimer(120.0, Timer_QueryShowPluginMessages, _, TIMER_REPEAT);
 	
 	GameData gamedata = new GameData("mitm");
@@ -1175,41 +1173,14 @@ void FireWeaponAtEnemy(int client, int &buttons)
 	}
 }
 
-void LockWeapon(int client, int weapon, int &buttons)
+INextBot CreateNextBotPlayer(Address entity)
 {
-	TF2Attrib_SetByName(weapon, "no_attack", 1.0);
-	TF2Attrib_SetByName(weapon, "provide on active", 1.0);
-	
-	// no_attack prevents class special skills, do them manually
-	if (buttons & IN_ATTACK2)
-	{
-		// auto behavior
-		if (TF2Util_GetWeaponID(weapon) == TF_WEAPON_GRENADELAUNCHER || GetEntProp(client, Prop_Send, "m_bShieldEquipped"))
-		{
-			SDKCall_DoClassSpecialSkill(client);
-		}
-		// semi-auto behaviour
-		else
-		{
-			if (view_as<bool>(GetEntData(weapon, GetOffset("CTFWeaponBase::m_bInAttack2"), 1)) == false)
-			{
-				SDKCall_DoClassSpecialSkill(client);
-				SetEntData(weapon, GetOffset("CTFWeaponBase::m_bInAttack2"), true, 1);
-			}
-		}
-	}
-	
-	buttons &= ~IN_ATTACK;
-	buttons &= ~IN_ATTACK2;
+	ToolsNextBotPlayer nextbot = ToolsNextBotPlayer(entity);
+	nextbot.IsDormantWhenDead = false;
+	return nextbot;
 }
 
-void UnlockWeapon(int weapon)
-{
-	TF2Attrib_RemoveByName(weapon, "no_attack");
-	TF2Attrib_RemoveByName(weapon, "provide on active");
-}
-
-Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNum, bool reliable, bool init)
+static Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNum, bool reliable, bool init)
 {
 	if (!mitm_rename_robots.BoolValue)
 		return Plugin_Continue;
@@ -1232,54 +1203,7 @@ Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNu
 	return Plugin_Continue;
 }
 
-INextBot CreateNextBotPlayer(Address entity)
-{
-	ToolsNextBotPlayer nextbot = ToolsNextBotPlayer(entity);
-	nextbot.IsDormantWhenDead = false;
-	return nextbot;
-}
-
-Action ConCmd_AddQueuePoints(int client, int args)
-{
-	if (args < 2)
-	{
-		ReplyToCommand(client, "[SM] Usage: sm_addqueue <#userid|name> <amount>");
-		return Plugin_Handled;
-	}
-	
-	char target[MAX_TARGET_LENGTH];
-	GetCmdArg(1, target, sizeof(target));
-	
-	int amount = GetCmdArgInt(2);
-	
-	char target_name[MAX_TARGET_LENGTH];
-	int target_list[MAXPLAYERS], target_count;
-	bool tn_is_ml;
-	
-	if ((target_count = ProcessTargetString(target, client, target_list, MaxClients + 1, COMMAND_TARGET_NONE, target_name, sizeof(target_name), tn_is_ml)) <= 0)
-	{
-		ReplyToTargetError(client, target_count);
-		return Plugin_Handled;
-	}
-	
-	for (int i = 0; i < target_count; i++)
-	{
-		Queue_AddPoints(target_list[i], amount);
-	}
-	
-	if (tn_is_ml)
-	{
-		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Queue_AddedPoints", amount, target_name);
-	}
-	else
-	{
-		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Queue_AddedPoints", amount, "_s", target_name);
-	}
-	
-	return Plugin_Handled;
-}
-
-Action Timer_QueryShowPluginMessages(Handle timer)
+static Action Timer_QueryShowPluginMessages(Handle timer)
 {
 	for (int client = 1; client <= MaxClients; client++)
 	{
@@ -1295,7 +1219,7 @@ Action Timer_QueryShowPluginMessages(Handle timer)
 	return Plugin_Continue;
 }
 
-void ConVarQueryFinished_ShowPluginMessages(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue)
+static void ConVarQueryFinished_ShowPluginMessages(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue)
 {
 	if (!IsClientInGame(client))
 		return;

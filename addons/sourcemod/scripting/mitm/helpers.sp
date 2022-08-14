@@ -818,3 +818,37 @@ void ShowGateBotAnnotation(int client)
 		}
 	}
 }
+
+void LockWeapon(int client, int weapon, int &buttons)
+{
+	TF2Attrib_SetByName(weapon, "no_attack", 1.0);
+	TF2Attrib_SetByName(weapon, "provide on active", 1.0);
+	
+	// no_attack prevents class special skills, do them manually
+	if (buttons & IN_ATTACK2)
+	{
+		// auto behavior
+		if (TF2Util_GetWeaponID(weapon) == TF_WEAPON_GRENADELAUNCHER || GetEntProp(client, Prop_Send, "m_bShieldEquipped"))
+		{
+			SDKCall_DoClassSpecialSkill(client);
+		}
+		// semi-auto behaviour
+		else
+		{
+			if (view_as<bool>(GetEntData(weapon, GetOffset("CTFWeaponBase::m_bInAttack2"), 1)) == false)
+			{
+				SDKCall_DoClassSpecialSkill(client);
+				SetEntData(weapon, GetOffset("CTFWeaponBase::m_bInAttack2"), true, 1);
+			}
+		}
+	}
+	
+	buttons &= ~IN_ATTACK;
+	buttons &= ~IN_ATTACK2;
+}
+
+void UnlockWeapon(int weapon)
+{
+	TF2Attrib_RemoveByName(weapon, "no_attack");
+	TF2Attrib_RemoveByName(weapon, "provide on active");
+}

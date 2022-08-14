@@ -24,6 +24,8 @@ void Console_Init()
 	RegConsoleCmd("queue", ConCmd_OpenQueueMenu, "Opens the queue menu.");
 	RegConsoleCmd("preferences", ConCmd_OpenPreferencesMenu, "Opens the preferences menu.");
 	
+	RegAdminCmd("sm_addqueue", ConCmd_AddQueuePoints, ADMFLAG_CHEATS, "Adds defender queue points to a player.");
+	
 	AddCommandListener(CommandListener_Suicide, "explode");
 	AddCommandListener(CommandListener_Suicide, "kill");
 	AddCommandListener(CommandListener_Build, "build");
@@ -63,6 +65,46 @@ static Action ConCmd_OpenPreferencesMenu(int client, int args)
 	}
 	
 	Menus_DisplayPreferencesMenu(client);
+	return Plugin_Handled;
+}
+
+static Action ConCmd_AddQueuePoints(int client, int args)
+{
+	if (args < 2)
+	{
+		ReplyToCommand(client, "[SM] Usage: sm_addqueue <#userid|name> <amount>");
+		return Plugin_Handled;
+	}
+	
+	char target[MAX_TARGET_LENGTH];
+	GetCmdArg(1, target, sizeof(target));
+	
+	int amount = GetCmdArgInt(2);
+	
+	char target_name[MAX_TARGET_LENGTH];
+	int target_list[MAXPLAYERS], target_count;
+	bool tn_is_ml;
+	
+	if ((target_count = ProcessTargetString(target, client, target_list, MaxClients + 1, COMMAND_TARGET_NONE, target_name, sizeof(target_name), tn_is_ml)) <= 0)
+	{
+		ReplyToTargetError(client, target_count);
+		return Plugin_Handled;
+	}
+	
+	for (int i = 0; i < target_count; i++)
+	{
+		Queue_AddPoints(target_list[i], amount);
+	}
+	
+	if (tn_is_ml)
+	{
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Queue_AddedPoints", amount, target_name);
+	}
+	else
+	{
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Queue_AddedPoints", amount, "_s", target_name);
+	}
+	
 	return Plugin_Handled;
 }
 

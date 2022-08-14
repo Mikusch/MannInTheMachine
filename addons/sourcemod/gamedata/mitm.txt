@@ -354,6 +354,11 @@
 				"linux"		"64"
 				"windows"	"63"
 			}
+			"CTFGameRules::TeamMayCapturePoint"
+			{
+				"linux"		"155"
+				"windows"	"154"
+			}
 			"CTFPlayer::m_flSpawnTime"
 			{
 				"linux"		"8616"

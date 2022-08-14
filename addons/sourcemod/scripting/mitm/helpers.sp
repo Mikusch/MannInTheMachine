@@ -788,18 +788,26 @@ void ShowGateBotAnnotation(int client)
 	// show an annotation for gate bots
 	if (Player(client).HasTag("bot_gatebot"))
 	{
-		int door = MaxClients + 1;
-		while ((door = FindEntityByClassname(door, "trigger_timer_door")) != -1)
+		int trigger = MaxClients + 1;
+		while ((trigger = FindEntityByClassname(trigger, "trigger_*")) != -1)
 		{
-			if (GetEntProp(door, Prop_Data, "m_bDisabled"))
+			// only area capture triggers
+			if (!HasEntProp(trigger, Prop_Data, "CTriggerAreaCaptureCaptureThink"))
+				continue;
+			
+			if (GetEntProp(trigger, Prop_Data, "m_bDisabled"))
 				continue;
 			
 			char iszCapPointName[64];
-			GetEntPropString(door, Prop_Data, "m_iszCapPointName", iszCapPointName, sizeof(iszCapPointName));
+			GetEntPropString(trigger, Prop_Data, "m_iszCapPointName", iszCapPointName, sizeof(iszCapPointName));
 			
 			int point = MaxClients + 1;
 			while ((point = FindEntityByClassname(point, "team_control_point")) != -1)
 			{
+				// locked, requiring preceding points, etc.
+				if (!SDKCall_TeamMayCapturePoint(TF2_GetClientTeam(client), GetEntProp(point, Prop_Data, "m_iPointIndex")))
+					continue;
+				
 				char iName[64];
 				GetEntPropString(point, Prop_Data, "m_iName", iName, sizeof(iName));
 				
@@ -809,7 +817,7 @@ void ShowGateBotAnnotation(int client)
 					GetEntPropString(point, Prop_Data, "m_iszPrintName", iszPrintName, sizeof(iszPrintName));
 					
 					float center[3];
-					CBaseEntity(door).WorldSpaceCenter(center);
+					CBaseEntity(trigger).WorldSpaceCenter(center);
 					
 					char text[64];
 					Format(text, sizeof(text), "%T", "Invader_CaptureGate_Annotation", client, iszPrintName);

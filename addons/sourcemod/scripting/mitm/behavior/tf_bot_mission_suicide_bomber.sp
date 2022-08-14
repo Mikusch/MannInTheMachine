@@ -142,7 +142,7 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 			Detonate(action, actor);
 			
 			// Send out an event
-			if (action.m_bWasSuccessful && IsValidEntity(action.m_victim) && HasEntProp(action.m_victim, Prop_Send, "m_hBuilder"))
+			if (action.m_bWasSuccessful && IsValidEntity(action.m_victim) && IsBaseObject(action.m_victim))
 			{
 				int owner = GetEntPropEnt(action.m_victim, Prop_Send, "m_hBuilder");
 				if (owner != -1)
@@ -188,7 +188,7 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 		}
 		
 		// if the engineer is carrying his sentry, he becomes the victim
-		if (HasEntProp(action.m_victim, Prop_Send, "m_hBuilder"))
+		if (IsBaseObject(action.m_victim))
 		{
 			if (GetEntProp(action.m_victim, Prop_Send, "m_bCarried") && GetEntPropEnt(action.m_victim, Prop_Send, "m_hBuilder") != -1)
 			{

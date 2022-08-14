@@ -863,3 +863,8 @@ void UnlockWeapon(int weapon)
 	TF2Attrib_RemoveByName(weapon, "no_attack");
 	TF2Attrib_RemoveByName(weapon, "provide on active");
 }
+
+bool IsBaseObject(int entity)
+{
+	return HasEntProp(entity, Prop_Data, "CBaseObjectUpgradeThink");
+}

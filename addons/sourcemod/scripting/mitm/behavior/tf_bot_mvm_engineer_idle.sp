@@ -189,7 +189,7 @@ static int Update(CTFBotMvMEngineerIdle action, int actor, float interval)
 	if (action.m_sentryHint != -1)
 	{
 		int owner = GetEntPropEnt(action.m_sentryHint, Prop_Send, "m_hOwnerEntity");
-		if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
+		if (owner != -1 && IsBaseObject(owner))
 		{
 			mySentry = owner;
 		}
@@ -197,7 +197,7 @@ static int Update(CTFBotMvMEngineerIdle action, int actor, float interval)
 		if (mySentry == -1)
 		{
 			// check if there's a stale object on the hint
-			if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
+			if (owner != -1 && IsBaseObject(owner))
 			{
 				mySentry = owner;
 				AcceptEntityInput(mySentry, "SetBuilder", actor);

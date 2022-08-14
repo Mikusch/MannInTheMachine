@@ -119,6 +119,10 @@
 	{
 		"en"		"Capture the gate!"
 	}
+	"Invader_CaptureGate_Annotation"
+	{
+		"en"		"Capture %s!"
+	}
 	"Invader_DeliverBomb"
 	{
 		"en"		"Deliver the bomb to the hatch!"

@@ -68,7 +68,7 @@
 
 #define SCREENFADE_FRACBITS		9		// which leaves 16-this for the integer part
 
-#define TF_MISSION_DESTROY_SENTRIES_HINT_MASK	(0x10200)	// annotations have id ( TF_MISSION_DESTROY_SENTRIES_HINT_MASK | entindex )
+#define MITM_HINT_MASK	(0x10200)	// annotations have id ( MITM_HINT_MASK | entindex )
 
 #define PLUGIN_TAG	"[{orange}MitM{default}]"
 

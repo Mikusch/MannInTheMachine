@@ -18,6 +18,8 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+static Handle g_annotationTimer[MAXPLAYERS + 1];
+
 void Events_Init()
 {
 	HookEvent("player_spawn", EventHook_PlayerSpawn);
@@ -28,6 +30,7 @@ void Events_Init()
 	HookEvent("object_destroyed", EventHook_ObjectDestroyed);
 	HookEvent("object_detonated", EventHook_ObjectDestroyed);
 	HookEvent("teamplay_round_start", EventHook_TeamplayRoundStart);
+	HookEvent("teamplay_point_captured", EventHook_TeamplayPointCaptured);
 }
 
 static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
@@ -38,6 +41,8 @@ static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroad
 	{
 		CreateTimer(0.1, Timer_UpdatePlayerGlow, GetClientUserId(client));
 	}
+	
+	g_annotationTimer[client] = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
 }
 
 static Action Timer_UpdatePlayerGlow(Handle timer, int userid)
@@ -218,7 +223,7 @@ static void EventHook_ObjectDestroyed(Event event, const char[] name, bool dontB
 			float worldPos[3];
 			GetEntPropVector(index, Prop_Data, "m_vecAbsOrigin", worldPos);
 			
-			CreateAnnotation(client, TF_MISSION_DESTROY_SENTRIES_HINT_MASK | client, text, _, worldPos, 30.0, "coach/coach_go_here.wav");
+			CreateAnnotation(client, MITM_HINT_MASK | client, text, _, worldPos, 60.0, "coach/coach_go_here.wav");
 		}
 	}
 }
@@ -241,6 +246,30 @@ static void EventHook_TeamplayRoundStart(Event event, const char[] name, bool do
 	}
 }
 
+static void EventHook_TeamplayPointCaptured(Event event, const char[] name, bool dontBroadcast)
+{
+	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
+	
+	if (team == TFTeam_Invaders)
+	{
+		for (int client = 1; client <= MaxClients; client++)
+		{
+			if (!IsClientInGame(client))
+				continue;
+			
+			if (!IsPlayerAlive(client))
+				continue;
+			
+			if (TF2_GetClientTeam(client) != team)
+				continue;
+			
+			// hide current annotation and recreate later
+			HideAnnotation(client, MITM_HINT_MASK | client);
+			g_annotationTimer[client] = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
+		}
+	}
+}
+
 static Action Timer_OnWaitingForPlayersEnd(Handle timer)
 {
 	if (!g_bInWaitingForPlayers)
@@ -252,4 +281,30 @@ static Action Timer_OnWaitingForPlayersEnd(Handle timer)
 	GetPopulationManager().ResetMap();
 	
 	return Plugin_Continue;
+}
+
+static Action Timer_CheckGateBotAnnotation(Handle timer, int userid)
+{
+	int client = GetClientOfUserId(userid);
+	
+	if (client == 0)
+		return Plugin_Stop;
+	
+	if (timer != g_annotationTimer[client])
+		return Plugin_Stop;
+	
+	// only alive players
+	if (!IsPlayerAlive(client))
+		return Plugin_Stop;
+	
+	// only gatebots
+	if (!Player(client).HasTag("bot_gatebot"))
+		return Plugin_Stop;
+	
+	// we are gate stunned - wait until it wears off
+	if (TF2_IsPlayerInCondition(client, TFCond_MVMBotRadiowave))
+		return Plugin_Continue;
+	
+	ShowGateBotAnnotation(client);
+	return Plugin_Stop;
 }

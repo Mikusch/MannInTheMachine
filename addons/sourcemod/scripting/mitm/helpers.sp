@@ -779,3 +779,42 @@ void HideAnnotation(int client, int id)
 		event.FireToClient(client);
 	}
 }
+
+void ShowGateBotAnnotation(int client)
+{
+	// show an annotation for gate bots
+	if (Player(client).HasTag("bot_gatebot"))
+	{
+		int door = MaxClients + 1;
+		while ((door = FindEntityByClassname(door, "trigger_timer_door")) != -1)
+		{
+			if (GetEntProp(door, Prop_Data, "m_bDisabled"))
+				continue;
+			
+			char iszCapPointName[64];
+			GetEntPropString(door, Prop_Data, "m_iszCapPointName", iszCapPointName, sizeof(iszCapPointName));
+			
+			int point = MaxClients + 1;
+			while ((point = FindEntityByClassname(point, "team_control_point")) != -1)
+			{
+				char iName[64];
+				GetEntPropString(point, Prop_Data, "m_iName", iName, sizeof(iName));
+				
+				if (StrEqual(iszCapPointName, iName))
+				{
+					char iszPrintName[64];
+					GetEntPropString(point, Prop_Data, "m_iszPrintName", iszPrintName, sizeof(iszPrintName));
+					
+					float center[3];
+					CBaseEntity(door).WorldSpaceCenter(center);
+					
+					char text[64];
+					Format(text, sizeof(text), "%T", "Invader_CaptureGate_Annotation", client, iszPrintName);
+					
+					CreateAnnotation(client, MITM_HINT_MASK | client, text, 0, center, 60.0, "coach/coach_go_here.wav");
+					return;
+				}
+			}
+		}
+	}
+}

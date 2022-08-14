@@ -751,7 +751,7 @@ void CreateMsgDialog(int client, const char[] title, int level = cellmax, int ti
 	delete kv;
 }
 
-void CreateAnnotation(int client, int id, const char[] text, int target = 0, const float worldPos[3] = ZERO_VECTOR, float lifeTime = 10.0, const char[] sound = "ui/hint.wav", bool showDistance = true, bool showEffect = true)
+void ShowAnnotation(int client, int id, const char[] text, int target = 0, const float worldPos[3] = ZERO_VECTOR, float lifeTime = 10.0, const char[] sound = "ui/hint.wav", bool showDistance = true, bool showEffect = true)
 {
 	if (Player(client).HasPreference(PREF_DISABLE_ANNOTATIONS))
 		return;
@@ -822,7 +822,7 @@ void ShowGateBotAnnotation(int client)
 					char text[64];
 					Format(text, sizeof(text), "%T", "Invader_CaptureGate_Annotation", client, iszPrintName);
 					
-					CreateAnnotation(client, MITM_HINT_MASK | client, text, 0, center, 60.0, "coach/coach_go_here.wav");
+					ShowAnnotation(client, MITM_HINT_MASK | client, text, 0, center, mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
 					return;
 				}
 			}

@@ -531,7 +531,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 				HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_GIANT_CALLOUT", TFTeam_Defenders);
 			}
 			
-			if (!Player(newPlayer).HasPreference(PREF_NO_SPAWN_NOTIFICATION))
+			if (!Player(newPlayer).HasPreference(PREF_DISABLE_SPAWN_NOTIFICATION))
 			{
 				EmitSoundToClient(newPlayer, "ui/system_message_alert.wav", .channel = SNDCHAN_STATIC);
 			}
@@ -1053,7 +1053,7 @@ static MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 		
 		float flReqRatio = float(MaxClients - mitm_defender_max_count.IntValue) / mitm_defender_max_count.FloatValue;
 		float flCurRatio = float(iInvaderCount) / float(iDefenderCount);
-		if (flCurRatio < flReqRatio || Player(player).HasPreference(PREF_DONT_BE_DEFENDER) || Player(player).HasPreference(PREF_NO_SPAWNING))
+		if (flCurRatio < flReqRatio || Player(player).HasPreference(PREF_DISABLE_DEFENDER) || Player(player).HasPreference(PREF_DISABLE_SPAWNING))
 		{
 			ret.Value = TFTeam_Spectator;
 		}

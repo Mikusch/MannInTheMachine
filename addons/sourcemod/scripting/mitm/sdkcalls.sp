@@ -38,6 +38,7 @@ static Handle g_SDKCallRemoveObject;
 static Handle g_SDKCallFindHint;
 static Handle g_SDKCallPushAllPlayersAway;
 static Handle g_SDKCallDistributeCurrencyAmount;
+static Handle g_SDKCallTeamMayCapturePoint;
 static Handle g_SDKCallGetSentryHint;
 static Handle g_SDKCallGetTeleporterHint;
 static Handle g_SDKCallGetCurrentWave;
@@ -83,6 +84,7 @@ void SDKCalls_Init(GameData gamedata)
 	g_SDKCallFindHint = PrepSDKCall_FindHint(gamedata);
 	g_SDKCallPushAllPlayersAway = PrepSDKCall_PushAllPlayersAway(gamedata);
 	g_SDKCallDistributeCurrencyAmount = PrepSDKCall_DistributeCurrencyAmount(gamedata);
+	g_SDKCallTeamMayCapturePoint = PrepSDKCall_TeamMayCapturePoint(gamedata);
 	g_SDKCallGetSentryHint = PrepSDKCall_GetSentryHint(gamedata);
 	g_SDKCallGetTeleporterHint = PrepSDKCall_GetTeleporterHint(gamedata);
 	g_SDKCallGetCurrentWave = PrepSDKCall_GetCurrentWave(gamedata);
@@ -347,6 +349,23 @@ static Handle PrepSDKCall_DistributeCurrencyAmount(GameData gamedata)
 	if (!call)
 	{
 		LogMessage("Failed to create SDKCall: CTFGameRules::DistributeCurrencyAmount");
+	}
+	
+	return call;
+}
+
+static Handle PrepSDKCall_TeamMayCapturePoint(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_GameRules);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTFGameRules::TeamMayCapturePoint");
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+	{
+		LogMessage("Failed to create SDKCall: CTFGameRules::TeamMayCapturePoint");
 	}
 	
 	return call;
@@ -704,6 +723,14 @@ int SDKCall_DistributeCurrencyAmount(int amount, int player = -1, bool shared = 
 		return SDKCall(g_SDKCallDistributeCurrencyAmount, amount, player, shared, countAsDropped, isBonus);
 	
 	return 0;
+}
+
+bool SDKCall_TeamMayCapturePoint(TFTeam team, int pointIndex)
+{
+	if (g_SDKCallTeamMayCapturePoint)
+		return SDKCall(g_SDKCallTeamMayCapturePoint, team, pointIndex);
+	
+	return false;
 }
 
 Address SDKCall_GetCurrentWave(int populator)

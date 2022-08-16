@@ -215,10 +215,10 @@ int GetRobotToSpawn(bool bMiniBoss)
 		if (TF2_GetClientTeam(client) != TFTeam_Spectator)
 			continue;
 		
-		if (Player(client).HasPreference(PREF_NO_SPAWNING))
+		if (Player(client).HasPreference(PREF_DISABLE_SPAWNING))
 			continue;
 		
-		if (bMiniBoss && Player(client).HasPreference(PREF_NO_GIANT))
+		if (bMiniBoss && Player(client).HasPreference(PREF_DISABLE_GIANT))
 			continue;
 		
 		playerList.Push(client);
@@ -262,7 +262,7 @@ int GetRobotToSpawn(bool bMiniBoss)
 		if (!Player(client).IsInvader())
 			continue;
 		
-		if (Player(client).HasPreference(PREF_NO_GIANT))
+		if (Player(client).HasPreference(PREF_DISABLE_GIANT))
 			continue;
 		
 		playerCount++;
@@ -751,8 +751,11 @@ void CreateMsgDialog(int client, const char[] title, int level = cellmax, int ti
 	delete kv;
 }
 
-void CreateAnnotation(int client, int id, const char[] text, int target = 0, const float worldPos[3] = ZERO_VECTOR, float lifeTime = 10.0, const char[] sound = "ui/hint.wav", bool showDistance = true, bool showEffect = true)
+void ShowAnnotation(int client, int id, const char[] text, int target = 0, const float worldPos[3] = ZERO_VECTOR, float lifeTime = 10.0, const char[] sound = "ui/hint.wav", bool showDistance = true, bool showEffect = true)
 {
+	if (Player(client).HasPreference(PREF_DISABLE_ANNOTATIONS))
+		return;
+	
 	Event event = CreateEvent("show_annotation");
 	if (event)
 	{
@@ -785,18 +788,26 @@ void ShowGateBotAnnotation(int client)
 	// show an annotation for gate bots
 	if (Player(client).HasTag("bot_gatebot"))
 	{
-		int door = MaxClients + 1;
-		while ((door = FindEntityByClassname(door, "trigger_timer_door")) != -1)
+		int trigger = MaxClients + 1;
+		while ((trigger = FindEntityByClassname(trigger, "trigger_*")) != -1)
 		{
-			if (GetEntProp(door, Prop_Data, "m_bDisabled"))
+			// only area capture triggers
+			if (!HasEntProp(trigger, Prop_Data, "CTriggerAreaCaptureCaptureThink"))
+				continue;
+			
+			if (GetEntProp(trigger, Prop_Data, "m_bDisabled"))
 				continue;
 			
 			char iszCapPointName[64];
-			GetEntPropString(door, Prop_Data, "m_iszCapPointName", iszCapPointName, sizeof(iszCapPointName));
+			GetEntPropString(trigger, Prop_Data, "m_iszCapPointName", iszCapPointName, sizeof(iszCapPointName));
 			
 			int point = MaxClients + 1;
 			while ((point = FindEntityByClassname(point, "team_control_point")) != -1)
 			{
+				// locked, requiring preceding points, etc.
+				if (!SDKCall_TeamMayCapturePoint(TF2_GetClientTeam(client), GetEntProp(point, Prop_Data, "m_iPointIndex")))
+					continue;
+				
 				char iName[64];
 				GetEntPropString(point, Prop_Data, "m_iName", iName, sizeof(iName));
 				
@@ -806,12 +817,12 @@ void ShowGateBotAnnotation(int client)
 					GetEntPropString(point, Prop_Data, "m_iszPrintName", iszPrintName, sizeof(iszPrintName));
 					
 					float center[3];
-					CBaseEntity(door).WorldSpaceCenter(center);
+					CBaseEntity(trigger).WorldSpaceCenter(center);
 					
 					char text[64];
 					Format(text, sizeof(text), "%T", "Invader_CaptureGate_Annotation", client, iszPrintName);
 					
-					CreateAnnotation(client, MITM_HINT_MASK | client, text, 0, center, 60.0, "coach/coach_go_here.wav");
+					ShowAnnotation(client, MITM_HINT_MASK | client, text, 0, center, mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
 					return;
 				}
 			}
@@ -851,4 +862,9 @@ void UnlockWeapon(int weapon)
 {
 	TF2Attrib_RemoveByName(weapon, "no_attack");
 	TF2Attrib_RemoveByName(weapon, "provide on active");
+}
+
+bool IsBaseObject(int entity)
+{
+	return HasEntProp(entity, Prop_Data, "CBaseObjectUpgradeThink");
 }

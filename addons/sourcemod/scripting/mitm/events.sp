@@ -225,7 +225,7 @@ static void EventHook_ObjectDestroyed(Event event, const char[] name, bool dontB
 			float worldPos[3];
 			GetEntPropVector(index, Prop_Data, "m_vecAbsOrigin", worldPos);
 			
-			CreateAnnotation(client, MITM_HINT_MASK | client, text, _, worldPos, 60.0, "coach/coach_go_here.wav");
+			ShowAnnotation(client, MITM_HINT_MASK | client, text, _, worldPos, mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
 		}
 	}
 }

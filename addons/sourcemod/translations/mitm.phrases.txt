@@ -33,31 +33,35 @@
 	{
 		"en"		"Your preferences are still loading, please wait a moment."
 	}
-	"Preference_DontBeDefender"
+	"Preference_DisableDefender"
 	{
 		"en"		"Don't select me as Defender"
 	}
-	"Preference_NoSpawning"
+	"Preference_DisableSpawning"
 	{
-		"en"		"No spawning (Spectator Mode)"
+		"en"		"Disable spawning (Spectator mode)"
 	}
-	"Preference_NoGiant"
+	"Preference_DisableGiant"
 	{
 		"en"		"Don't spawn me as Giant Robot"
 	}
-	"Preference_NoSpawnNotification"
+	"Preference_DisableSpawnNotification"
 	{
 		"en"		"Disable spawn notification"
+	}
+	"Preference_DisableAnnotations"
+	{
+		"en"		"Disable annotations"
 	}
 	"Preferences_Enabled"
 	{
 		"#format"	"{1:s}"
-		"en"		"You have enabled the preference {1}."
+		"en"		"You have enabled the preference {cyan}{1}{default}."
 	}
 	"Preferences_Disabled"
 	{
 		"#format"	"{1:s}"
-		"en"		"You have disabled the preference {1}."
+		"en"		"You have disabled the preference {cyan}{1}{default}."
 	}
 	"Queue_NewDefenders"
 	{

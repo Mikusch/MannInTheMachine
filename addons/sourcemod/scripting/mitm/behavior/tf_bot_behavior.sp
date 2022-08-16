@@ -209,7 +209,7 @@ static int OnContact(CTFBotMainAction action, int actor, int other, Address resu
 		// Mini-bosses destroy non-Sentrygun objects they bump into (ie: Dispensers)
 		if (GameRules_IsMannVsMachineMode() && GetEntProp(actor, Prop_Send, "m_bIsMiniBoss"))
 		{
-			if (HasEntProp(other, Prop_Send, "m_hBuilder"))
+			if (IsBaseObject(other))
 			{
 				if (TF2_GetObjectType(other) != TFObject_Sentry || GetEntProp(other, Prop_Send, "m_bMiniBuilding"))
 				{

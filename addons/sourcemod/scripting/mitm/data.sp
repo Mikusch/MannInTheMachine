@@ -338,7 +338,7 @@ methodmap Player
 			return false;
 		
 		TFTeam team = TF2_GetClientTeam(this._client);
-		return (team == TFTeam_Spectator || team == TFTeam_Invaders) && !this.HasPreference(PREF_NO_SPAWNING);
+		return (team == TFTeam_Spectator || team == TFTeam_Invaders) && !this.HasPreference(PREF_DISABLE_SPAWNING);
 	}
 	
 	public int GetFlagTarget()
@@ -1646,7 +1646,7 @@ methodmap CBaseTFBotHintEntity
 	public bool OwnerObjectHasNoOwner()
 	{
 		int owner = GetEntPropEnt(this._index, Prop_Send, "m_hOwnerEntity");
-		if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
+		if (owner != -1 && IsBaseObject(owner))
 		{
 			if (GetEntPropEnt(owner, Prop_Send, "m_hBuilder") == -1)
 			{
@@ -1666,7 +1666,7 @@ methodmap CBaseTFBotHintEntity
 	public bool OwnerObjectFinishBuilding()
 	{
 		int owner = GetEntPropEnt(this._index, Prop_Send, "m_hOwnerEntity");
-		if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
+		if (owner != -1 && IsBaseObject(owner))
 		{
 			return !GetEntProp(owner, Prop_Send, "m_bBuilding");
 		}

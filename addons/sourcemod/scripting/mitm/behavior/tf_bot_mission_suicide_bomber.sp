@@ -126,7 +126,7 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 		{
 			char text[64];
 			Format(text, sizeof(text), "%T", "Invader_DestroySentries_DetonateSentry", actor);
-			CreateAnnotation(actor, MITM_HINT_MASK | actor, text, action.m_victim, _, 60.0, "coach/coach_attack_here.wav");
+			ShowAnnotation(actor, MITM_HINT_MASK | actor, text, action.m_victim, _, mitm_annotation_lifetime.FloatValue, "coach/coach_attack_here.wav");
 			m_annotationTimer[actor].Invalidate();
 		}
 	}
@@ -142,7 +142,7 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 			Detonate(action, actor);
 			
 			// Send out an event
-			if (action.m_bWasSuccessful && IsValidEntity(action.m_victim) && HasEntProp(action.m_victim, Prop_Send, "m_hBuilder"))
+			if (action.m_bWasSuccessful && IsValidEntity(action.m_victim) && IsBaseObject(action.m_victim))
 			{
 				int owner = GetEntPropEnt(action.m_victim, Prop_Send, "m_hBuilder");
 				if (owner != -1)
@@ -188,7 +188,7 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 		}
 		
 		// if the engineer is carrying his sentry, he becomes the victim
-		if (HasEntProp(action.m_victim, Prop_Send, "m_hBuilder"))
+		if (IsBaseObject(action.m_victim))
 		{
 			if (GetEntProp(action.m_victim, Prop_Send, "m_bCarried") && GetEntPropEnt(action.m_victim, Prop_Send, "m_hBuilder") != -1)
 			{

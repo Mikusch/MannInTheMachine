@@ -161,11 +161,23 @@
 	}
 	"Party_InviteMenu_Title"
 	{
+		"en"		"Manage Pending Invites"
+	}
+	"Party_ManageInviteMenu_Title"
+	{
 		"en"		"Invite Players"
 	}
 	"Party_ManageMenu_Title"
 	{
 		"en"		"Manage Your Party"
+	}
+	"Party_KickMenu_Title"
+	{
+		"en"		"Kick Party Members"
+	}
+	"Party_KickMenu_NotEnoughMembers"
+	{
+		"en"		"You do not have any members in your party."
 	}
 	"Party_Menu_InAParty"
 	{
@@ -174,6 +186,10 @@
 	"Party_Menu_NotInAParty"
 	{
 		"en"		"You are not currently in a party."
+	}
+	"Party_Menu_YouAreLeader"
+	{
+		"en"		"You are the party leader."
 	}
 	"Party_Menu_ManageParty"
 	{
@@ -187,17 +203,17 @@
 	{
 		"en"		"Leave your current party"
 	}
-	"Party_Menu_ManagePartyInvites"
+	"Party_Menu_ViewPartyInvites"
 	{
-		"en"		"Manage pending party invites"
+		"en"		"View pending party invites"
 	}
 	"Party_ManageMenu_InviteMembers"
 	{
-		"en"		"Invite members"
+		"en"		"Invite players to party"
 	}
-	"Party_ManageMenu_ManageMembers"
+	"Party_ManageMenu_KickMembers"
 	{
-		"en"		"Manage party members"
+		"en"		"Kick party members"
 	}
 	"Party_InvitedPlayers"
 	{
@@ -217,13 +233,17 @@
 	{
 		"en"		"You are already a member of this party!"
 	}
+	"Party_AlreadyInAParty"
+	{
+		"en"		"You are already in a party!"
+	}
 	"Party_RequireInvite"
 	{
 		"en"		"You need an invite to join this party!"
 	}
 	"Party_MaxMembers"
 	{
-		"en"		"This party is full and can not accept new members."
+		"en"		"This party is already full and can not accept new members."
 	}
 	"Party_Created"
 	{

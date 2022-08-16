@@ -246,6 +246,11 @@ void Party_Init()
 	RegConsoleCmd("sm_party", ConCmd_Party);
 }
 
+ArrayList Party_GetAllActiveParties()
+{
+	return g_parties.Clone();
+}
+
 Action ConCmd_Party(int client, int args)
 {
 	char subcommand[64];
@@ -267,11 +272,15 @@ Action ConCmd_Party(int client, int args)
 	{
 		return HandleCommand_InviteToParty(client, args);
 	}
+	else if (StrEqual(subcommand, "invites"))
+	{
+		return HandleCommand_ViewPartyInvites(client, args);
+	}
 	else if (StrEqual(subcommand, "manage"))
 	{
 		return HandleCommand_ManageParty(client);
 	}
-	else if (StrEqual(subcommand, "party"))
+	else if (StrEqual(subcommand, "kick"))
 	{
 		return HandleCommand_KickFromParty(client, args);
 	}
@@ -313,14 +322,13 @@ static Action HandleCommand_JoinParty(int client)
 	}
 	
 	// first player can always join, everyone else needs an invite
-	if (party.m_members.Length > 0 && !party.IsInvited(client))
+	if (party.GetMemberCount() > 0 && !party.IsInvited(client))
 	{
 		ReplyToCommand(client, "%t", "Party_RequireInvite");
 		return Plugin_Handled;
 	}
 	
-	// TODO
-	if (party.m_members.Length > 6)
+	if (party.GetMemberCount() > 6)
 	{
 		ReplyToCommand(client, "%t", "Party_MaxMembers");
 		return Plugin_Handled;
@@ -366,6 +374,12 @@ static Action HandleCommand_InviteToParty(int client, int args)
 		return Plugin_Handled;
 	}
 	
+	if (Player(client).GetParty().GetMemberCount() > 6)
+	{
+		ReplyToCommand(client, "%t", "Party_MaxMembers");
+		return Plugin_Handled;
+	}
+	
 	if (args >= 2)
 	{
 		char target[MAX_TARGET_LENGTH];
@@ -405,6 +419,13 @@ static Action HandleCommand_InviteToParty(int client, int args)
 	{
 		Menus_OpenPartyManageInviteMenu(client);
 	}
+	
+	return Plugin_Handled;
+}
+
+static Action HandleCommand_ViewPartyInvites(int client, int args)
+{
+	Menus_DisplayPartyInviteMenu(client);
 	
 	return Plugin_Handled;
 }

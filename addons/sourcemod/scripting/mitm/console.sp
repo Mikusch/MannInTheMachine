@@ -20,9 +20,9 @@
 
 void Console_Init()
 {
-	RegConsoleCmd("mitm", ConCmd_OpenMainMenu, "Opens the main menu.");
-	RegConsoleCmd("queue", ConCmd_OpenQueueMenu, "Opens the queue menu.");
-	RegConsoleCmd("preferences", ConCmd_OpenPreferencesMenu, "Opens the preferences menu.");
+	RegConsoleCmd("sm_mitm", ConCmd_OpenMainMenu, "Opens the main menu.");
+	RegConsoleCmd("sm_queue", ConCmd_OpenQueueMenu, "Opens the queue menu.");
+	RegConsoleCmd("sm_preferences", ConCmd_OpenPreferencesMenu, "Opens the preferences menu.");
 	
 	RegAdminCmd("sm_addqueue", ConCmd_AddQueuePoints, ADMFLAG_CHEATS, "Adds defender queue points to a player.");
 	

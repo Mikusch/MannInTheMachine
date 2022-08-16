@@ -148,4 +148,108 @@
 		"#format"	"{1:s},{2:d}"
 		"en"		"Set {cyan}{1} {default}to {cyan}{2}{default} to receive helpful messages during gameplay."
 	}
+	
+	// Party
+	
+	"Menu_Main_Party"
+	{
+		"en"		"Create or join a party"
+	}
+	"Party_Menu_Title"
+	{
+		"en"		"Party Menu"
+	}
+	"Party_InviteMenu_Title"
+	{
+		"en"		"Invite Players"
+	}
+	"Party_ManageMenu_Title"
+	{
+		"en"		"Manage Your Party"
+	}
+	"Party_Menu_InAParty"
+	{
+		"en"		"You are currently in a party."
+	}
+	"Party_Menu_NotInAParty"
+	{
+		"en"		"You are not currently in a party."
+	}
+	"Party_Menu_ManageParty"
+	{
+		"en"		"Manage your party"
+	}
+	"Party_Menu_CreateParty"
+	{
+		"en"		"Create a new party"
+	}
+	"Party_Menu_LeaveParty"
+	{
+		"en"		"Leave your current party"
+	}
+	"Party_Menu_ManagePartyInvites"
+	{
+		"en"		"Manage pending party invites"
+	}
+	"Party_ManageMenu_InviteMembers"
+	{
+		"en"		"Invite members"
+	}
+	"Party_ManageMenu_ManageMembers"
+	{
+		"en"		"Manage party members"
+	}
+	"Party_InvitedPlayers"
+	{
+		"#format"	"{1:t}"
+		"en"		"You have invited {1} to your party."
+	}
+	"Party_KickedPlayers"
+	{
+		"#format"	"{1:t}"
+		"en"		"You have kicked {1} from your party."
+	}
+	"Party_DoesNotExist"
+	{
+		"en"		"This party does not exist!"
+	}
+	"Party_AlreadyMember"
+	{
+		"en"		"You are already a member of this party!"
+	}
+	"Party_RequireInvite"
+	{
+		"en"		"You need an invite to join this party!"
+	}
+	"Party_MaxMembers"
+	{
+		"en"		"This party is full and can not accept new members."
+	}
+	"Party_Created"
+	{
+		"#format"	"{1:d}"
+		"en"		"You have created party #{1}."
+	}
+	"Party_Joined"
+	{
+		"#format"	"{1:d}"
+		"en"		"You have joined party #{1}."
+	}
+	"Party_Left"
+	{
+		"#format"	"{1:d}"
+		"en"		"You have left party #{1}."
+	}
+	"Party_Kicked"
+	{
+		"en"		"You have been kicked from your party by the party leader."
+	}
+	"Party_RequireMember"
+	{
+		"en"		"You need to be in a party to use this."
+	}
+	"Party_RequireLeader"
+	{
+		"en"		"You need to be the party leader to use this."
+	}
 }

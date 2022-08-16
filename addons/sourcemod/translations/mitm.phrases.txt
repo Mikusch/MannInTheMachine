@@ -143,6 +143,10 @@
 	{
 		"en"		"Detonate here to complete your mission!"
 	}
+	"Invader_Queue_Header"
+	{
+		"en"		"Next Robot Spawns:"
+	}
 	"ConVarQuery_ShowPluginMessages"
 	{
 		"#format"	"{1:s},{2:d}"

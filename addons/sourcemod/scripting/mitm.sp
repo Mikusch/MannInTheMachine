@@ -37,6 +37,8 @@
 
 #define DEFINDEX_UNDEFINED	65535
 
+#define MAX_USER_MSG_DATA	255
+
 #define MAX_TEAM_NAME_LENGTH	32	// Max length of a team's name
 
 // m_lifeState values
@@ -872,6 +874,29 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 				Player(client).LeaveSquad();
 			}
 		}
+	}
+	
+	if (Player(client).IsInvader() && !IsPlayerAlive(client))
+	{
+		char text[MAX_USER_MSG_DATA];
+		Format(text, sizeof(text), "%T\n", "Invader_Queue_Header", client);
+		
+		ArrayList queue = GetInvaderQueue();
+		for (int i = 0; i < Min(queue.Length, 10); i++)
+		{
+			int other = queue.Get(i);
+			if (other == client)
+			{
+				Format(text, sizeof(text), "%s\n➤ %N", text, other);
+			}
+			else
+			{
+				Format(text, sizeof(text), "%s\n%N", text, other);
+			}
+		}
+		delete queue;
+		
+		PrintKeyHintText(client, text);
 	}
 }
 

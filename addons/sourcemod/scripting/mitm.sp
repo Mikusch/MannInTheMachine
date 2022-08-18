@@ -882,7 +882,7 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 		Format(text, sizeof(text), "%T\n", "Invader_Queue_Header", client);
 		
 		ArrayList queue = GetInvaderQueue();
-		for (int i = 0; i < Min(queue.Length, 10); i++)
+		for (int i = 0; i < Min(queue.Length, 8); i++)
 		{
 			int other = queue.Get(i);
 			if (other == client)

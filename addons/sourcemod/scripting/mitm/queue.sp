@@ -18,12 +18,6 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-enum struct QueueData
-{
-	int m_queuePoints;
-	int m_client;
-}
-
 ArrayList Queue_GetDefenderQueue()
 {
 	ArrayList queueList = new ArrayList(sizeof(QueueData));
@@ -36,6 +30,10 @@ ArrayList Queue_GetDefenderQueue()
 		if (IsClientSourceTV(client))
 			continue;
 		
+		// parties get handled later
+		if (Player(client).IsInAParty() && Player(client).GetParty().GetMemberCount() > 1)
+			continue;
+		
 		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
 			continue;
 		
@@ -46,11 +44,31 @@ ArrayList Queue_GetDefenderQueue()
 			continue;
 		
 		QueueData data;
-		data.m_queuePoints = Player(client).m_defenderQueuePoints; // block 0 gets sorted
+		data.m_points = Player(client).m_defenderQueuePoints; // block 0 gets sorted
 		data.m_client = client;
 		
 		queueList.PushArray(data);
 	}
+	
+	ArrayList parties = Party_GetAllActiveParties();
+	for (int i=0;i<parties.Length;i++)
+	{
+		PartyInfo info;
+		if (!parties.GetArray(i, info))
+			continue;
+		
+		Party party = Party(info.m_id);
+		
+		if (party.GetMemberCount() <= 1)
+			continue;
+		
+		QueueData data;
+		data.m_points = party.CalculateQueuePoints(); // block 0 gets sorted
+		data.m_party = party;
+		
+		queueList.PushArray(data);
+	}
+	delete parties;
 	
 	queueList.Sort(Sort_Descending, Sort_Integer);
 	return queueList;

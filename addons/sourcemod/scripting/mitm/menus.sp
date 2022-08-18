@@ -85,13 +85,23 @@ void Menus_DisplayQueueMenu(int client)
 		
 		for (int i = 0; i < queueList.Length; i++)
 		{
-			int queuePoints = queueList.Get(i, 0);
-			int queueClient = queueList.Get(i, 1);
+			int points = queueList.Get(i, QueueData::m_points);
+			int other = queueList.Get(i, QueueData::m_client);
+			Party party = queueList.Get(i, QueueData::m_party);
 			
-			char display[MAX_NAME_LENGTH + 8];
-			Format(display, sizeof(display), "%N (%d)", queueClient, queuePoints);
-			
-			menu.AddItem(NULL_STRING, display, client == queueClient ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+			if (party == NULL_PARTY)
+			{
+				char display[MAX_NAME_LENGTH + 8];
+				Format(display, sizeof(display), "%N (%d)", other, points);
+				menu.AddItem(NULL_STRING, display, client == other ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+			}
+			else
+			{
+				char name[MAX_NAME_LENGTH], display[MAX_NAME_LENGTH + 8];
+				party.GetName(name, sizeof(name));
+				Format(display, sizeof(display), "• %s (%d)", name, points);
+				menu.AddItem(NULL_STRING, display, Player(client).IsInAParty() && Player(client).GetParty() == party ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+			}
 		}
 		
 		menu.Display(client, MENU_TIME_FOREVER);
@@ -367,7 +377,7 @@ static int MenuHandler_PartyManageMenu(Menu menu, MenuAction action, int param1,
 	return 0;
 }
 
-void Menus_OpenPartyManageInviteMenu(int client)
+void Menus_DisplayPartyManageInviteMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_PartyManageInviteMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
 	menu.SetTitle("%T", "Party_ManageInviteMenu_Title", client);
@@ -420,7 +430,7 @@ static int MenuHandler_PartyManageInviteMenu(Menu menu, MenuAction action, int p
 				FakeClientCommand(param1, "sm_party_invite #%d", userid);
 			}
 			
-			Menus_OpenPartyManageInviteMenu(param1);
+			Menus_DisplayPartyManageInviteMenu(param1);
 		}
 		case MenuAction_Cancel:
 		{
@@ -449,7 +459,7 @@ static int MenuHandler_PartyManageInviteMenu(Menu menu, MenuAction action, int p
 	return 0;
 }
 
-void Menus_OpenPartyManageKickMenu(int client)
+void Menus_DisplayPartyManageKickMenu(int client)
 {
 	Party party = Player(client).GetParty();
 	
@@ -506,7 +516,7 @@ static int MenuHandler_PartyKickMenu(Menu menu, MenuAction action, int param1, i
 				FakeClientCommand(param1, "sm_party_kick #%d", userid);
 			}
 			
-			Menus_OpenPartyManageInviteMenu(param1);
+			Menus_DisplayPartyManageInviteMenu(param1);
 		}
 		case MenuAction_Cancel:
 		{
@@ -584,7 +594,7 @@ static int MenuHandler_PartyInviteMenu(Menu menu, MenuAction action, int param1,
 			
 			FakeClientCommand(param1, "sm_party_join %s", info);
 			
-			Menus_OpenPartyManageInviteMenu(param1);
+			Menus_DisplayPartyInviteMenu(param1);
 		}
 		case MenuAction_Cancel:
 		{

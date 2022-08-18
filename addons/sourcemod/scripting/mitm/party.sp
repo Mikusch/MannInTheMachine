@@ -221,6 +221,22 @@ methodmap Party
 		return count;
 	}
 	
+	public int CalculateQueuePoints()
+	{
+		int count = 0, points = 0;
+		for (int i=0;i<this.m_members.Length;++i)
+		{
+			int member = this.m_members.Get(i);
+			if (IsValidEntity(member) && !Player(member).HasPreference(PREF_DISABLE_DEFENDER) && !Player(member).HasPreference(PREF_DISABLE_SPAWNING))
+			{
+				++count;
+				points += Player(member).m_defenderQueuePoints;
+			}
+		}
+		
+		return count != 0 ? (points / count) : 0;
+	}
+	
 	public bool IsLeader(int client)
 	{
 		return this.m_leader == client;
@@ -303,6 +319,7 @@ static Action ConCmd_PartyCreate(int client, int args)
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Created", name);
+		ClientCommand(client, "play ui/message_update.wav");
 	}
 	
 	return Plugin_Handled;
@@ -348,6 +365,7 @@ static Action ConCmd_PartyJoin(int client, int args)
 	
 	Player(client).JoinParty(party);
 	
+	// notify the new member
 	if (!party.IsLeader(client))
 	{
 		party.RemoveInvite(client);
@@ -355,7 +373,22 @@ static Action ConCmd_PartyJoin(int client, int args)
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Joined", name);
+		ClientCommand(client, "play ui/message_update.wav");
 	}
+	
+	// notify all other members
+	ArrayList members = new ArrayList();
+	party.CollectMembers(members);
+	for (int i = 0; i < members.Length; i++)
+	{
+		int member = members.Get(i);
+		if (member == client)
+			continue;
+		
+		CPrintToChat(member, "%s %t", PLUGIN_TAG, "Party_JoinedOther", client);
+		ClientCommand(member, "play ui/message_update.wav");
+	}
+	delete members;
 	
 	return Plugin_Handled;
 }
@@ -374,8 +407,24 @@ static Action ConCmd_PartyLeave(int client, int args)
 	party.GetName(name, sizeof(name));
 	
 	Player(client).LeaveParty();
-
+	
+	// party might be gone now
+	if (!party.IsNull())
+	{
+		// notify all members
+		ArrayList members = new ArrayList();
+		party.CollectMembers(members);
+		for (int i = 0; i < members.Length; i++)
+		{
+			int member = members.Get(i);
+			CPrintToChat(member, "%s %t", PLUGIN_TAG, "Party_LeftOther", client);
+			ClientCommand(member, "play ui/message_update.wav");
+		}
+		delete members;
+	}
+	
 	CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Left", name);
+	ClientCommand(client, "play ui/message_update.wav");
 	return Plugin_Handled;
 }
 
@@ -403,7 +452,7 @@ static Action ConCmd_PartyInvite(int client, int args)
 	
 	if (args < 1)
 	{
-		Menus_OpenPartyManageInviteMenu(client);
+		Menus_DisplayPartyManageInviteMenu(client);
 		return Plugin_Handled;
 	}
 	
@@ -414,7 +463,7 @@ static Action ConCmd_PartyInvite(int client, int args)
 	int target_list[MAXPLAYERS], target_count;
 	bool tn_is_ml;
 	
-	if ((target_count = ProcessTargetString(target, client, target_list, MaxClients + 1, COMMAND_TARGET_NONE, target_name, sizeof(target_name), tn_is_ml)) <= 0)
+	if ((target_count = ProcessTargetString(target, 0, target_list, MaxClients + 1, COMMAND_TARGET_NONE, target_name, sizeof(target_name), tn_is_ml)) <= 0)
 	{
 		ReplyToTargetError(client, target_count);
 		return Plugin_Handled;
@@ -431,8 +480,13 @@ static Action ConCmd_PartyInvite(int client, int args)
 		if (Player(target_list[i]).IsInAParty())
 			continue;
 		
+		if (party.IsInvited(target_list[i]))
+			continue;
+		
 		Player(target_list[i]).InviteToParty(party);
-		CPrintToChat(target_list[i], "%s %t", PLUGIN_TAG, "Party_IncomingInvite", name);
+		
+		CPrintToChat(target_list[i], "%s %t", PLUGIN_TAG, "Party_IncomingInvite", name, client);
+		ClientCommand(target_list[i], "play ui/notification_alert.wav");
 	}
 	
 	if (tn_is_ml)
@@ -481,7 +535,7 @@ static Action ConCmd_PartyKick(int client, int args)
 	
 	if (args < 1)
 	{
-		Menus_OpenPartyManageKickMenu(client);
+		Menus_DisplayPartyManageKickMenu(client);
 		return Plugin_Handled;
 	}
 	
@@ -492,7 +546,7 @@ static Action ConCmd_PartyKick(int client, int args)
 	int target_list[MAXPLAYERS], target_count;
 	bool tn_is_ml;
 	
-	if ((target_count = ProcessTargetString(target, client, target_list, MaxClients + 1, COMMAND_TARGET_NONE, target_name, sizeof(target_name), tn_is_ml)) <= 0)
+	if ((target_count = ProcessTargetString(target, 0, target_list, MaxClients + 1, COMMAND_TARGET_NONE, target_name, sizeof(target_name), tn_is_ml)) <= 0)
 	{
 		ReplyToTargetError(client, target_count);
 		return Plugin_Handled;
@@ -513,6 +567,21 @@ static Action ConCmd_PartyKick(int client, int args)
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
 		CPrintToChat(target_list[i], "%s %t", PLUGIN_TAG, "Party_Kicked", name);
+		ClientCommand(target_list[i], "play ui/message_update.wav");
+		
+		// notify all other members
+		ArrayList members = new ArrayList();
+		party.CollectMembers(members);
+		for (int j = 0; j < members.Length; j++)
+		{
+			int member = members.Get(j);
+			if (party.IsLeader(member))
+				continue;
+			
+			CPrintToChat(member, "%s %t", PLUGIN_TAG, "Party_KickedOther", target_list[i]);
+			ClientCommand(member, "play ui/message_update.wav");
+		}
+		delete members;
 	}
 	
 	if (tn_is_ml)

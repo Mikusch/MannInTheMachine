@@ -592,6 +592,7 @@ ConVar sv_stepsize;
 ConVar phys_pushscale;
 
 #include "mitm/tf_bot_squad.sp"
+#include "mitm/party.sp"
 #include "mitm/data.sp"
 #include "mitm/entity.sp"
 
@@ -620,7 +621,13 @@ ConVar phys_pushscale;
 #include "mitm/menus.sp"
 #include "mitm/sdkcalls.sp"
 #include "mitm/sdkhooks.sp"
-#include "mitm/party.sp"
+
+enum struct QueueData
+{
+	int m_points;
+	int m_client;
+	Party m_party;
+}
 
 public Plugin myinfo =
 {
@@ -989,20 +996,43 @@ void SelectNewDefenders()
 	for (int i = 0; i < queueList.Length; i++)
 	{
 		int defender = queueList.Get(i, QueueData::m_client);
+		Party party = queueList.Get(i, QueueData::m_party);
 		
-		TF2_ChangeClientTeam(defender, TFTeam_Defenders);
-		LogMessage("Assigned %N to team DEFENDERS (Queue Points: %d)", defender, Player(defender).m_defenderQueuePoints);
-		
-		Queue_SetPoints(defender, 0);
-		CPrintToChat(defender, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
-		
-		playerList.Erase(playerList.FindValue(defender));
+		// parties should always stay together
+		if (party == NULL_PARTY)
+		{
+			TF2_ChangeClientTeam(defender, TFTeam_Defenders);
+			Queue_SetPoints(defender, 0);
+			CPrintToChat(defender, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
+			playerList.Erase(playerList.FindValue(defender));
+			
+			++iDefenderCount;
+		}
+		else
+		{
+			// are there enough slots for this party to play?
+			if (iReqDefenderCount - party.GetMemberCount() < 0)
+				continue;
+			
+			ArrayList members = new ArrayList();
+			party.CollectMembers(members);
+			for (int j = 0; j < members.Length; j++)
+			{
+				int member = members.Get(j);
+				
+				TF2_ChangeClientTeam(member, TFTeam_Defenders);
+				Queue_SetPoints(member, 0);
+				CPrintToChat(member, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
+				playerList.Erase(playerList.FindValue(member));
+				
+				++iDefenderCount;
+			}
+			delete members;
+		}
 		
 		// If we have enough defenders, early out
 		if (iReqDefenderCount == ++iDefenderCount)
-		{
 			break;
-		}
 	}
 	
 	if (iDefenderCount < iReqDefenderCount)
@@ -1019,6 +1049,8 @@ void SelectNewDefenders()
 			// we only want people who are not in the defender list
 			if (queueList.FindValue(defender, QueueData::m_client) != -1)
 				continue;
+			
+			// TODO: Also check parties here
 			
 			if (iDefenderCount++ < iReqDefenderCount)
 			{

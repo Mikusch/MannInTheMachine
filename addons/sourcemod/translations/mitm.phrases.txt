@@ -6,11 +6,15 @@
 	}
 	"Menu_Main_Queue"
 	{
-		"en"		"View Defender Queue"
+		"en"		"View defender queue"
 	}
 	"Menu_Main_Preferences"
 	{
-		"en"		"Change Preferences"
+		"en"		"Change preferences"
+	}
+	"Menu_Main_Party"
+	{
+		"en"		"Open party menu"
 	}
 	"Menu_Queue_Title"
 	{
@@ -151,10 +155,6 @@
 	
 	// Party
 	
-	"Menu_Main_Party"
-	{
-		"en"		"Create or join a party"
-	}
 	"Party_Menu_Title"
 	{
 		"en"		"Party Menu"
@@ -173,7 +173,7 @@
 	}
 	"Party_KickMenu_Title"
 	{
-		"en"		"Kick Party Members"
+		"en"		"Kick Members"
 	}
 	"Party_KickMenu_NotEnoughMembers"
 	{
@@ -181,11 +181,12 @@
 	}
 	"Party_Menu_InAParty"
 	{
-		"en"		"You are currently in a party."
+		"#format"	"{1:s}"
+		"en"		"Current party: {1}"
 	}
 	"Party_Menu_NotInAParty"
 	{
-		"en"		"You are not currently in a party."
+		"en"		"You are not in a party."
 	}
 	"Party_Menu_YouAreLeader"
 	{
@@ -197,19 +198,19 @@
 	}
 	"Party_Menu_CreateParty"
 	{
-		"en"		"Create a new party"
+		"en"		"Create new party"
 	}
 	"Party_Menu_LeaveParty"
 	{
-		"en"		"Leave your current party"
+		"en"		"Leave current party"
 	}
 	"Party_Menu_ViewPartyInvites"
 	{
-		"en"		"View pending party invites"
+		"en"		"View pending invites"
 	}
 	"Party_ManageMenu_InviteMembers"
 	{
-		"en"		"Invite players to party"
+		"en"		"Invite players"
 	}
 	"Party_ManageMenu_KickMembers"
 	{
@@ -247,22 +248,23 @@
 	}
 	"Party_Created"
 	{
-		"#format"	"{1:d}"
-		"en"		"You have created party #{1}."
+		"#format"	"{1:s}"
+		"en"		"You have created and automatically joined {1}."
 	}
 	"Party_Joined"
 	{
-		"#format"	"{1:d}"
-		"en"		"You have joined party #{1}."
+		"#format"	"{1:s}"
+		"en"		"You have joined {1}."
 	}
 	"Party_Left"
 	{
-		"#format"	"{1:d}"
-		"en"		"You have left party #{1}."
+		"#format"	"{1:s}"
+		"en"		"You have left {1}."
 	}
 	"Party_Kicked"
 	{
-		"en"		"You have been kicked from your party by the party leader."
+		"#format"	"{1:s}"
+		"en"		"You have been kicked from {1} by the party leader."
 	}
 	"Party_RequireMember"
 	{
@@ -271,5 +273,10 @@
 	"Party_RequireLeader"
 	{
 		"en"		"You need to be the party leader to use this."
+	}
+	"Party_Renamed"
+	{
+		"#format"	"{1:s}"
+		"en"		"You have renamed your party to {1}."
 	}
 }

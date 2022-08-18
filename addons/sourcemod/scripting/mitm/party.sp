@@ -30,6 +30,8 @@ enum struct PartyInfo
 {
 	int m_id;
 	
+	char name[MAX_NAME_LENGTH];
+	
 	ArrayList m_members;
 	ArrayList m_invites;
 	int m_leader;
@@ -104,6 +106,30 @@ methodmap Party
 		public set(int leader)
 		{
 			g_parties.Set(this.m_listIndex, leader, PartyInfo::m_leader);
+		}
+	}
+	
+	public void GetName(char[] buffer, int maxlen)
+	{
+		PartyInfo info;
+		if (g_parties.GetArray(this.m_listIndex, info))
+		{
+			strcopy(buffer, maxlen, info.name);
+		}
+		
+		// no custom name set
+		if (!strlen(buffer))
+		{
+			Format(buffer, maxlen, "Party #%d", this.m_id);
+		}
+	}
+	
+	public void SetName(const char[] name)
+	{
+		PartyInfo info;
+		if (g_parties.GetArray(this.m_listIndex, info))
+		{
+			strcopy(info.name, sizeof(info.name), name);
 		}
 	}
 	
@@ -243,7 +269,13 @@ void Party_Init()
 {
 	g_parties = new ArrayList(sizeof(PartyInfo));
 	
-	RegConsoleCmd("sm_party", ConCmd_Party);
+	RegConsoleCmd("sm_party_create", ConCmd_PartyCreate, "Create a new party.");
+	RegConsoleCmd("sm_party_join", ConCmd_PartyJoin, "Join a party.");
+	RegConsoleCmd("sm_party_leave", ConCmd_PartyLeave, "Leave your party.");
+	RegConsoleCmd("sm_party_invite", ConCmd_PartyInvite, "Invite a player to your party.");
+	RegConsoleCmd("sm_party_manage", ConCmd_PartyManage, "Manage your party.");
+	RegConsoleCmd("sm_party_kick", ConCmd_PartyKick, "Kick a player from your party.");
+	RegConsoleCmd("sm_party_name", ConCmd_PartyName, "Rename your party.");
 }
 
 ArrayList Party_GetAllActiveParties()
@@ -251,62 +283,30 @@ ArrayList Party_GetAllActiveParties()
 	return g_parties.Clone();
 }
 
-Action ConCmd_Party(int client, int args)
-{
-	char subcommand[64];
-	GetCmdArg(1, subcommand, sizeof(subcommand));
-	
-	if (StrEqual(subcommand, "create"))
-	{
-		return HandleCommand_CreateParty(client);
-	}
-	else if (StrEqual(subcommand, "join"))
-	{
-		return HandleCommand_JoinParty(client);
-	}
-	else if (StrEqual(subcommand, "leave"))
-	{
-		return HandleCommand_LeaveParty(client);
-	}
-	else if (StrEqual(subcommand, "invite"))
-	{
-		return HandleCommand_InviteToParty(client, args);
-	}
-	else if (StrEqual(subcommand, "invites"))
-	{
-		return HandleCommand_ViewPartyInvites(client, args);
-	}
-	else if (StrEqual(subcommand, "manage"))
-	{
-		return HandleCommand_ManageParty(client);
-	}
-	else if (StrEqual(subcommand, "kick"))
-	{
-		return HandleCommand_KickFromParty(client, args);
-	}
-	else
-	{
-		Menus_DisplayPartyMenu(client);
-	}
-	
-	return Plugin_Handled;
-}
-
-static Action HandleCommand_CreateParty(int client)
+static Action ConCmd_PartyCreate(int client, int args)
 {
 	Party party = Party.Create();
 	if (party)
 	{
-		FakeClientCommand(client, "sm_party join %d", party.m_id);
-		ReplyToCommand(client, "%t", "Party_Created", party.m_id);
+		FakeClientCommand(client, "sm_party_join %d", party.m_id);
+		
+		char name[MAX_NAME_LENGTH];
+		party.GetName(name, sizeof(name));
+		ReplyToCommand(client, "%t", "Party_Created", name);
 	}
 	
 	return Plugin_Handled;
 }
 
-static Action HandleCommand_JoinParty(int client)
+static Action ConCmd_PartyJoin(int client, int args)
 {
-	int id = GetCmdArgInt(2);
+	if (args < 1)
+	{
+		Menus_DisplayPartyInviteMenu(client);
+		return Plugin_Handled;
+	}
+	
+	int id = GetCmdArgInt(1);
 	
 	Party party = Party(id);
 	if (party.IsNull())
@@ -338,13 +338,15 @@ static Action HandleCommand_JoinParty(int client)
 	
 	if (!party.IsLeader(client))
 	{
-		ReplyToCommand(client, "%t", "Party_Joined", id);
+		char name[MAX_NAME_LENGTH];
+		party.GetName(name, sizeof(name));
+		ReplyToCommand(client, "%t", "Party_Joined", name);
 	}
 	
 	return Plugin_Handled;
 }
 
-static Action HandleCommand_LeaveParty(int client)
+static Action ConCmd_PartyLeave(int client, int args)
 {
 	if (!Player(client).IsInAParty())
 	{
@@ -354,13 +356,16 @@ static Action HandleCommand_LeaveParty(int client)
 	
 	Party party = Player(client).GetParty();
 	
-	Player(client).LeaveParty();
-	ReplyToCommand(client, "%t", "Party_Left", party.m_id);
+	char name[MAX_NAME_LENGTH];
+	party.GetName(name, sizeof(name));
 	
+	Player(client).LeaveParty();
+
+	ReplyToCommand(client, "%t", "Party_Left", name);
 	return Plugin_Handled;
 }
 
-static Action HandleCommand_InviteToParty(int client, int args)
+static Action ConCmd_PartyInvite(int client, int args)
 {
 	if (!Player(client).IsInAParty())
 	{
@@ -368,69 +373,63 @@ static Action HandleCommand_InviteToParty(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	if (!Player(client).GetParty().IsLeader(client))
+	Party party = Player(client).GetParty();
+	
+	if (!party.IsLeader(client))
 	{
 		ReplyToCommand(client, "%t", "Party_RequireLeader");
 		return Plugin_Handled;
 	}
 	
-	if (Player(client).GetParty().GetMemberCount() > 6)
+	if (party.GetMemberCount() > 6)
 	{
 		ReplyToCommand(client, "%t", "Party_MaxMembers");
 		return Plugin_Handled;
 	}
 	
-	if (args >= 2)
+	if (args < 1)
 	{
-		char target[MAX_TARGET_LENGTH];
-		GetCmdArg(2, target, sizeof(target));
+		Menus_OpenPartyManageInviteMenu(client);
+		return Plugin_Handled;
+	}
+	
+	char target[MAX_TARGET_LENGTH];
+	GetCmdArg(1, target, sizeof(target));
+	
+	char target_name[MAX_TARGET_LENGTH];
+	int target_list[MAXPLAYERS], target_count;
+	bool tn_is_ml;
+	
+	if ((target_count = ProcessTargetString(target, client, target_list, MaxClients + 1, COMMAND_TARGET_NONE, target_name, sizeof(target_name), tn_is_ml)) <= 0)
+	{
+		ReplyToTargetError(client, target_count);
+		return Plugin_Handled;
+	}
+	
+	for (int i = 0; i < target_count; i++)
+	{
+		if (target_list[i] == client)
+			continue;
 		
-		char target_name[MAX_TARGET_LENGTH];
-		int target_list[MAXPLAYERS], target_count;
-		bool tn_is_ml;
+		if (Player(target_list[i]).IsInAParty())
+			continue;
 		
-		if ((target_count = ProcessTargetString(target, client, target_list, MaxClients + 1, COMMAND_TARGET_NONE, target_name, sizeof(target_name), tn_is_ml)) <= 0)
-		{
-			ReplyToTargetError(client, target_count);
-			return Plugin_Handled;
-		}
-		
-		for (int i = 0; i < target_count; i++)
-		{
-			if (target_list[i] == client)
-				continue;
-			
-			if (Player(target_list[i]).IsInAParty())
-				continue;
-			
-			Player(target_list[i]).InviteToParty(Player(client).GetParty());
-		}
-		
-		if (tn_is_ml)
-		{
-			CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_InvitedPlayers", target_name);
-		}
-		else
-		{
-			CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_InvitedPlayers", "_s", target_name);
-		}
+		Player(target_list[i]).InviteToParty(Player(client).GetParty());
+	}
+	
+	if (tn_is_ml)
+	{
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_InvitedPlayers", target_name);
 	}
 	else
 	{
-		Menus_OpenPartyManageInviteMenu(client);
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_InvitedPlayers", "_s", target_name);
 	}
 	
 	return Plugin_Handled;
 }
 
-static Action HandleCommand_ViewPartyInvites(int client, int args)
-{
-	Menus_DisplayPartyInviteMenu(client);
-	
-	return Plugin_Handled;
-}
-
-static Action HandleCommand_ManageParty(int client)
+static Action ConCmd_PartyManage(int client, int args)
 {
 	if (!Player(client).IsInAParty())
 	{
@@ -445,11 +444,10 @@ static Action HandleCommand_ManageParty(int client)
 	}
 	
 	Menus_DisplayPartyManageMenu(client);
-	
 	return Plugin_Handled;
 }
 
-static Action HandleCommand_KickFromParty(int client, int args)
+static Action ConCmd_PartyKick(int client, int args)
 {
 	if (!Player(client).IsInAParty())
 	{
@@ -463,46 +461,80 @@ static Action HandleCommand_KickFromParty(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	if (args >= 2)
+	if (args < 1)
 	{
-		char target[MAX_TARGET_LENGTH];
-		GetCmdArg(2, target, sizeof(target));
+		Menus_OpenPartyManageKickMenu(client);
+		return Plugin_Handled;
+	}
+	
+	char target[MAX_TARGET_LENGTH];
+	GetCmdArg(1, target, sizeof(target));
+	
+	char target_name[MAX_TARGET_LENGTH];
+	int target_list[MAXPLAYERS], target_count;
+	bool tn_is_ml;
+	
+	if ((target_count = ProcessTargetString(target, client, target_list, MaxClients + 1, COMMAND_TARGET_NONE, target_name, sizeof(target_name), tn_is_ml)) <= 0)
+	{
+		ReplyToTargetError(client, target_count);
+		return Plugin_Handled;
+	}
+	
+	Party party = Player(client).GetParty();
+	
+	for (int i = 0; i < target_count; i++)
+	{
+		if (target_list[i] == client)
+			continue;
 		
-		char target_name[MAX_TARGET_LENGTH];
-		int target_list[MAXPLAYERS], target_count;
-		bool tn_is_ml;
+		if (Player(target_list[i]).GetParty() != party)
+			continue;
 		
-		if ((target_count = ProcessTargetString(target, client, target_list, MaxClients + 1, COMMAND_TARGET_NONE, target_name, sizeof(target_name), tn_is_ml)) <= 0)
-		{
-			ReplyToTargetError(client, target_count);
-			return Plugin_Handled;
-		}
+		Player(target_list[i]).LeaveParty();
 		
-		for (int i = 0; i < target_count; i++)
-		{
-			if (target_list[i] == client)
-				continue;
-			
-			if (Player(target_list[i]).GetParty() != Player(client).GetParty())
-				continue;
-			
-			Player(target_list[i]).LeaveParty();
-			PrintToChat(target_list[i], "%t", "Party_Kicked");
-		}
-		
-		if (tn_is_ml)
-		{
-			CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_KickedPlayers", target_name);
-		}
-		else
-		{
-			CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_KickedPlayers", "_s", target_name);
-		}
+		char name[MAX_NAME_LENGTH];
+		party.GetName(name, sizeof(name));
+		PrintToChat(target_list[i], "%t", "Party_Kicked", name);
+	}
+	
+	if (tn_is_ml)
+	{
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_KickedPlayers", target_name);
 	}
 	else
 	{
-		Menus_OpenPartyManageKickMenu(client);
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_KickedPlayers", "_s", target_name);
 	}
 	
+	return Plugin_Handled;
+}
+
+static Action ConCmd_PartyName(int client, int args)
+{
+	if (!Player(client).IsInAParty())
+	{
+		ReplyToCommand(client, "%t", "Party_RequireMember");
+		return Plugin_Handled;
+	}
+	
+	Party party = Player(client).GetParty();
+	
+	if (!party.IsLeader(client))
+	{
+		ReplyToCommand(client, "%t", "Party_RequireLeader");
+		return Plugin_Handled;
+	}
+	
+	if (args < 1)
+	{
+		ReplyToCommand(client, "Usage: sm_party_name <name>");
+		return Plugin_Handled;
+	}
+	
+	char name[MAX_NAME_LENGTH];
+	GetCmdArg(1, name, sizeof(name));
+	party.SetName(name);
+	
+	ReplyToCommand(client, "%t", "Party_Renamed", name);
 	return Plugin_Handled;
 }

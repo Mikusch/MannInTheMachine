@@ -208,9 +208,13 @@ void Menus_DisplayPartyMenu(int client)
 	
 	if (Player(client).IsInAParty())
 	{
-		Format(text, sizeof(text), "%T", "Party_Menu_InAParty", client);
+		Party party = Player(client).GetParty();
 		
-		if (Player(client).GetParty().IsLeader(client))
+		char name[MAX_NAME_LENGTH];
+		party.GetName(name, sizeof(name));
+		Format(text, sizeof(text), "%T", "Party_Menu_InAParty", client, name);
+		
+		if (party.IsLeader(client))
 		{
 			Format(text, sizeof(text), "%s\n%T", text, "Party_Menu_YouAreLeader", client);
 		}
@@ -259,21 +263,21 @@ static int MenuHandler_PartyMenu(Menu menu, MenuAction action, int param1, int p
 			
 			if (StrEqual(info, "create_party"))
 			{
-				FakeClientCommand(param1, "sm_party create");
+				FakeClientCommand(param1, "sm_party_create");
 				FakeClientCommand(param1, "sm_party");
 			}
 			else if (StrEqual(info, "leave_party"))
 			{
-				FakeClientCommand(param1, "sm_party leave")
+				FakeClientCommand(param1, "sm_party_leave")
 				FakeClientCommand(param1, "sm_party");
 			}
 			else if (StrEqual(info, "manage_party"))
 			{
-				FakeClientCommand(param1, "sm_party manage");
+				FakeClientCommand(param1, "sm_party_manage");
 			}
 			else if (StrEqual(info, "view_invites"))
 			{
-				FakeClientCommand(param1, "sm_party invites");
+				FakeClientCommand(param1, "sm_party_join");
 			}
 		}
 		case MenuAction_Cancel:
@@ -323,11 +327,11 @@ static int MenuHandler_PartyManageMenu(Menu menu, MenuAction action, int param1,
 			
 			if (StrEqual(info, "invite_members"))
 			{
-				FakeClientCommand(param1, "sm_party invite");
+				FakeClientCommand(param1, "sm_party_invite");
 			}
 			else if (StrEqual(info, "kick_members"))
 			{
-				FakeClientCommand(param1, "sm_party kick");
+				FakeClientCommand(param1, "sm_party_kick");
 			}
 		}
 		case MenuAction_Cancel:
@@ -400,7 +404,7 @@ static int MenuHandler_PartyManageInviteMenu(Menu menu, MenuAction action, int p
 			}
 			else
 			{
-				FakeClientCommand(param1, "sm_party invite #%d", userid);
+				FakeClientCommand(param1, "sm_party_invite #%d", userid);
 			}
 			
 			Menus_OpenPartyManageInviteMenu(param1);
@@ -409,7 +413,7 @@ static int MenuHandler_PartyManageInviteMenu(Menu menu, MenuAction action, int p
 		{
 			if (param2 == MenuCancel_ExitBack)
 			{
-				FakeClientCommand(param1, "sm_party manage");
+				FakeClientCommand(param1, "sm_party_manage");
 			}
 		}
 		case MenuAction_End:
@@ -423,10 +427,12 @@ static int MenuHandler_PartyManageInviteMenu(Menu menu, MenuAction action, int p
 
 void Menus_OpenPartyManageKickMenu(int client)
 {
-	if (Player(client).GetParty().GetMemberCount() <= 1)
+	Party party = Player(client).GetParty();
+	
+	if (party.GetMemberCount() <= 1)
 	{
 		PrintHintText(client, "%t", "Party_KickMenu_NotEnoughMembers");
-		FakeClientCommand(client, "sm_party manage");
+		FakeClientCommand(client, "sm_party_manage");
 		return;
 	}
 	
@@ -444,7 +450,7 @@ void Menus_OpenPartyManageKickMenu(int client)
 			continue;
 		
 		// only party members
-		if (Player(other).GetParty() != Player(client).GetParty())
+		if (Player(other).GetParty() != party)
 			continue;
 		
 		// ignore ourselves
@@ -481,7 +487,7 @@ static int MenuHandler_PartyKickMenu(Menu menu, MenuAction action, int param1, i
 			}
 			else
 			{
-				FakeClientCommand(param1, "sm_party kick #%d", userid);
+				FakeClientCommand(param1, "sm_party_kick #%d", userid);
 			}
 			
 			Menus_OpenPartyManageInviteMenu(param1);
@@ -490,7 +496,7 @@ static int MenuHandler_PartyKickMenu(Menu menu, MenuAction action, int param1, i
 		{
 			if (param2 == MenuCancel_ExitBack)
 			{
-				FakeClientCommand(param1, "sm_party manage");
+				FakeClientCommand(param1, "sm_party_manage");
 			}
 		}
 		case MenuAction_End:

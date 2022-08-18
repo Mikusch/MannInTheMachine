@@ -112,13 +112,11 @@ methodmap Party
 	public void GetName(char[] buffer, int maxlen)
 	{
 		PartyInfo info;
-		if (g_parties.GetArray(this.m_listIndex, info))
+		if (g_parties.GetArray(this.m_listIndex, info) && strlen(info.name) != 0)
 		{
 			strcopy(buffer, maxlen, info.name);
 		}
-		
-		// no custom name set
-		if (!strlen(buffer))
+		else
 		{
 			Format(buffer, maxlen, "Party #%d", this.m_id);
 		}
@@ -130,6 +128,9 @@ methodmap Party
 		if (g_parties.GetArray(this.m_listIndex, info))
 		{
 			strcopy(info.name, sizeof(info.name), name);
+			CRemoveTags(info.name, sizeof(info.name));
+			
+			g_parties.SetArray(this.m_listIndex, info);
 		}
 	}
 	
@@ -292,7 +293,7 @@ static Action ConCmd_PartyCreate(int client, int args)
 		
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
-		ReplyToCommand(client, "%t", "Party_Created", name);
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Created", name);
 	}
 	
 	return Plugin_Handled;
@@ -311,26 +312,26 @@ static Action ConCmd_PartyJoin(int client, int args)
 	Party party = Party(id);
 	if (party.IsNull())
 	{
-		ReplyToCommand(client, "%t", "Party_DoesNotExist");
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_DoesNotExist");
 		return Plugin_Handled;
 	}
 	
 	if (Player(client).m_party == party)
 	{
-		ReplyToCommand(client, "%t", "Party_AlreadyMember");
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_AlreadyMember");
 		return Plugin_Handled;
 	}
 	
 	// first player can always join, everyone else needs an invite
 	if (party.GetMemberCount() > 0 && !party.IsInvited(client))
 	{
-		ReplyToCommand(client, "%t", "Party_RequireInvite");
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireInvite");
 		return Plugin_Handled;
 	}
 	
 	if (party.GetMemberCount() > 6)
 	{
-		ReplyToCommand(client, "%t", "Party_MaxMembers");
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_MaxMembers");
 		return Plugin_Handled;
 	}
 	
@@ -340,7 +341,7 @@ static Action ConCmd_PartyJoin(int client, int args)
 	{
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
-		ReplyToCommand(client, "%t", "Party_Joined", name);
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Joined", name);
 	}
 	
 	return Plugin_Handled;
@@ -350,7 +351,7 @@ static Action ConCmd_PartyLeave(int client, int args)
 {
 	if (!Player(client).IsInAParty())
 	{
-		ReplyToCommand(client, "%t", "Party_RequireMember");
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireMember");
 		return Plugin_Handled;
 	}
 	
@@ -361,7 +362,7 @@ static Action ConCmd_PartyLeave(int client, int args)
 	
 	Player(client).LeaveParty();
 
-	ReplyToCommand(client, "%t", "Party_Left", name);
+	CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Left", name);
 	return Plugin_Handled;
 }
 
@@ -369,7 +370,7 @@ static Action ConCmd_PartyInvite(int client, int args)
 {
 	if (!Player(client).IsInAParty())
 	{
-		ReplyToCommand(client, "%t", "Party_RequireMember");
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireMember");
 		return Plugin_Handled;
 	}
 	
@@ -377,13 +378,13 @@ static Action ConCmd_PartyInvite(int client, int args)
 	
 	if (!party.IsLeader(client))
 	{
-		ReplyToCommand(client, "%t", "Party_RequireLeader");
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireLeader");
 		return Plugin_Handled;
 	}
 	
 	if (party.GetMemberCount() > 6)
 	{
-		ReplyToCommand(client, "%t", "Party_MaxMembers");
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_MaxMembers");
 		return Plugin_Handled;
 	}
 	
@@ -414,16 +415,19 @@ static Action ConCmd_PartyInvite(int client, int args)
 		if (Player(target_list[i]).IsInAParty())
 			continue;
 		
-		Player(target_list[i]).InviteToParty(Player(client).GetParty());
+		Player(target_list[i]).InviteToParty(party);
 	}
+	
+	char name[MAX_NAME_LENGTH];
+	party.GetName(name, sizeof(name));
 	
 	if (tn_is_ml)
 	{
-		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_InvitedPlayers", target_name);
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_InvitedPlayers", target_name, name);
 	}
 	else
 	{
-		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_InvitedPlayers", "_s", target_name);
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_InvitedPlayers", "_s", target_name, name);
 	}
 	
 	return Plugin_Handled;
@@ -433,13 +437,13 @@ static Action ConCmd_PartyManage(int client, int args)
 {
 	if (!Player(client).IsInAParty())
 	{
-		ReplyToCommand(client, "%t", "Party_RequireMember");
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireMember");
 		return Plugin_Handled;
 	}
 	
 	if (!Player(client).GetParty().IsLeader(client))
 	{
-		ReplyToCommand(client, "%t", "Party_RequireLeader");
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireLeader");
 		return Plugin_Handled;
 	}
 	
@@ -451,13 +455,13 @@ static Action ConCmd_PartyKick(int client, int args)
 {
 	if (!Player(client).IsInAParty())
 	{
-		ReplyToCommand(client, "%t", "Party_RequireMember");
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireMember");
 		return Plugin_Handled;
 	}
 	
 	if (!Player(client).GetParty().IsLeader(client))
 	{
-		ReplyToCommand(client, "%t", "Party_RequireLeader");
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireLeader");
 		return Plugin_Handled;
 	}
 	
@@ -494,7 +498,7 @@ static Action ConCmd_PartyKick(int client, int args)
 		
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
-		PrintToChat(target_list[i], "%t", "Party_Kicked", name);
+		CPrintToChat(target_list[i], "%s %t", PLUGIN_TAG, "Party_Kicked", name);
 	}
 	
 	if (tn_is_ml)
@@ -513,7 +517,7 @@ static Action ConCmd_PartyName(int client, int args)
 {
 	if (!Player(client).IsInAParty())
 	{
-		ReplyToCommand(client, "%t", "Party_RequireMember");
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireMember");
 		return Plugin_Handled;
 	}
 	
@@ -521,7 +525,7 @@ static Action ConCmd_PartyName(int client, int args)
 	
 	if (!party.IsLeader(client))
 	{
-		ReplyToCommand(client, "%t", "Party_RequireLeader");
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireLeader");
 		return Plugin_Handled;
 	}
 	
@@ -535,6 +539,6 @@ static Action ConCmd_PartyName(int client, int args)
 	GetCmdArg(1, name, sizeof(name));
 	party.SetName(name);
 	
-	ReplyToCommand(client, "%t", "Party_Renamed", name);
+	CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Renamed", name);
 	return Plugin_Handled;
 }

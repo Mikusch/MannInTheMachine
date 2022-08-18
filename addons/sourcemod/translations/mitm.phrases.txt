@@ -239,13 +239,13 @@
 	}
 	"Party_InvitedPlayers"
 	{
-		"#format"	"{1:t}"
-		"en"		"You have invited {1} to your party."
+		"#format"	"{1:t},{2:s}"
+		"en"		"You have invited {lightgreen}{1} {default}to {cyan}{2}{default}."
 	}
 	"Party_KickedPlayers"
 	{
 		"#format"	"{1:t}"
-		"en"		"You have kicked {1} from your party."
+		"en"		"You have kicked {cyan}{1} {default}from your party."
 	}
 	"Party_DoesNotExist"
 	{
@@ -270,22 +270,22 @@
 	"Party_Created"
 	{
 		"#format"	"{1:s}"
-		"en"		"You have created and automatically joined {1}."
+		"en"		"You have created and automatically joined {cyan}{1}{default}."
 	}
 	"Party_Joined"
 	{
 		"#format"	"{1:s}"
-		"en"		"You have joined {1}."
+		"en"		"You have joined {cyan}{1}{default}."
 	}
 	"Party_Left"
 	{
 		"#format"	"{1:s}"
-		"en"		"You have left {1}."
+		"en"		"You have left {cyan}{1}{default}."
 	}
 	"Party_Kicked"
 	{
 		"#format"	"{1:s}"
-		"en"		"You have been kicked from {1} by the party leader."
+		"en"		"You have been kicked from {cyan}{1} {default}by the party leader."
 	}
 	"Party_RequireMember"
 	{
@@ -298,6 +298,6 @@
 	"Party_Renamed"
 	{
 		"#format"	"{1:s}"
-		"en"		"You have renamed your party to {1}."
+		"en"		"You have renamed your party to {cyan}{1}{default}."
 	}
 }

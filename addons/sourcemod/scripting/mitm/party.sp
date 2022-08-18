@@ -139,6 +139,15 @@ methodmap Party
 		this.m_invites.Push(client);
 	}
 	
+	public void RemoveInvite(int client)
+	{
+		int index = this.m_invites.FindValue(client);
+		if (index == -1)
+			return;
+		
+		this.m_invites.Erase(index);
+	}
+	
 	public bool IsInvited(int client)
 	{
 		return this.m_invites.FindValue(client) != -1;
@@ -331,6 +340,8 @@ static Action ConCmd_PartyJoin(int client, int args)
 	
 	if (party.GetMemberCount() > 6)
 	{
+		party.RemoveInvite(client);
+		
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_MaxMembers");
 		return Plugin_Handled;
 	}
@@ -339,6 +350,8 @@ static Action ConCmd_PartyJoin(int client, int args)
 	
 	if (!party.IsLeader(client))
 	{
+		party.RemoveInvite(client);
+		
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Joined", name);
@@ -407,6 +420,9 @@ static Action ConCmd_PartyInvite(int client, int args)
 		return Plugin_Handled;
 	}
 	
+	char name[MAX_NAME_LENGTH];
+	party.GetName(name, sizeof(name));
+	
 	for (int i = 0; i < target_count; i++)
 	{
 		if (target_list[i] == client)
@@ -416,10 +432,8 @@ static Action ConCmd_PartyInvite(int client, int args)
 			continue;
 		
 		Player(target_list[i]).InviteToParty(party);
+		CPrintToChat(target_list[i], "%s %t", PLUGIN_TAG, "Party_IncomingInvite", name);
 	}
-	
-	char name[MAX_NAME_LENGTH];
-	party.GetName(name, sizeof(name));
 	
 	if (tn_is_ml)
 	{

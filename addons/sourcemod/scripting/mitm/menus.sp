@@ -56,8 +56,11 @@ static int MenuHandler_MainMenu(Menu menu, MenuAction action, int param1, int pa
 		}
 		case MenuAction_DisplayItem:
 		{
-			char info[64], display[64];
+			char info[32], display[64];
 			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
+			
+			if (!TranslationPhraseExists(display))
+				return 0;
 			
 			Format(display, sizeof(display), "%T", display, param1);
 			return RedrawMenuItem(display);
@@ -293,8 +296,11 @@ static int MenuHandler_PartyMenu(Menu menu, MenuAction action, int param1, int p
 		}
 		case MenuAction_DisplayItem:
 		{
-			char info[64], display[128];
+			char info[32], display[64];
 			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
+			
+			if (!TranslationPhraseExists(display))
+				return 0;
 			
 			Format(display, sizeof(display), "%T", display, param1);
 			return RedrawMenuItem(display);
@@ -347,8 +353,11 @@ static int MenuHandler_PartyManageMenu(Menu menu, MenuAction action, int param1,
 		}
 		case MenuAction_DisplayItem:
 		{
-			char info[64], display[128];
+			char info[32], display[64];
 			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
+			
+			if (!TranslationPhraseExists(display))
+				return 0;
 			
 			Format(display, sizeof(display), "%T", display, param1);
 			return RedrawMenuItem(display);
@@ -360,11 +369,10 @@ static int MenuHandler_PartyManageMenu(Menu menu, MenuAction action, int param1,
 
 void Menus_OpenPartyManageInviteMenu(int client)
 {
-	Menu menu = new Menu(MenuHandler_PartyManageInviteMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End);
+	Menu menu = new Menu(MenuHandler_PartyManageInviteMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
 	menu.SetTitle("%T", "Party_ManageInviteMenu_Title", client);
 	menu.ExitBackButton = true;
 	
-	// TODO: Collect members and only create menu if count > 0
 	for (int other = 1; other <= MaxClients; other++)
 	{
 		if (!IsClientInGame(other))
@@ -381,6 +389,11 @@ void Menus_OpenPartyManageInviteMenu(int client)
 		GetClientName(other, name, sizeof(name));
 		
 		menu.AddItem(userid, name);
+	}
+	
+	if (menu.ItemCount == 0)
+	{
+		menu.AddItem(NULL_STRING, "Party_ManageInviteMenu_NoPlayers", ITEMDRAW_DISABLED);
 	}
 	
 	menu.Display(client, MENU_TIME_FOREVER);
@@ -420,6 +433,17 @@ static int MenuHandler_PartyManageInviteMenu(Menu menu, MenuAction action, int p
 		{
 			delete menu;
 		}
+		case MenuAction_DisplayItem:
+		{
+			char info[32], display[64];
+			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
+			
+			if (!TranslationPhraseExists(display))
+				return 0;
+			
+			Format(display, sizeof(display), "%T", display, param1);
+			return RedrawMenuItem(display);
+		}
 	}
 	
 	return 0;
@@ -429,41 +453,33 @@ void Menus_OpenPartyManageKickMenu(int client)
 {
 	Party party = Player(client).GetParty();
 	
-	if (party.GetMemberCount() <= 1)
-	{
-		PrintHintText(client, "%t", "Party_KickMenu_NotEnoughMembers");
-		FakeClientCommand(client, "sm_party_manage");
-		return;
-	}
-	
-	Menu menu = new Menu(MenuHandler_PartyKickMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End);
+	Menu menu = new Menu(MenuHandler_PartyKickMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
 	menu.SetTitle("%T", "Party_KickMenu_Title", client);
 	menu.ExitBackButton = true;
 	
-	for (int other = 1; other <= MaxClients; other++)
+	ArrayList memberList = new ArrayList();
+	party.CollectMembers(memberList);
+	
+	for (int i = 0; i < memberList.Length; i++)
 	{
-		if (!IsClientInGame(other))
-			continue;
+		int member = memberList.Get(i);
 		
-		// only players in a party
-		if (!Player(other).IsInAParty())
-			continue;
-		
-		// only party members
-		if (Player(other).GetParty() != party)
-			continue;
-		
-		// ignore ourselves
-		if (other == client)
+		if (member == client)
 			continue;
 		
 		char userid[16];
-		IntToString(GetClientUserId(other), userid, sizeof(userid));
+		IntToString(GetClientUserId(member), userid, sizeof(userid));
 		
 		char name[MAX_NAME_LENGTH];
-		GetClientName(other, name, sizeof(name));
+		GetClientName(member, name, sizeof(name));
 		
 		menu.AddItem(userid, name);
+	}
+	delete memberList;
+	
+	if (menu.ItemCount == 0)
+	{
+		menu.AddItem(NULL_STRING, "Party_KickMenu_NoMembers", ITEMDRAW_DISABLED);
 	}
 	
 	menu.Display(client, MENU_TIME_FOREVER);
@@ -503,6 +519,17 @@ static int MenuHandler_PartyKickMenu(Menu menu, MenuAction action, int param1, i
 		{
 			delete menu;
 		}
+		case MenuAction_DisplayItem:
+		{
+			char info[32], display[64];
+			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
+			
+			if (!TranslationPhraseExists(display))
+				return 0;
+			
+			Format(display, sizeof(display), "%T", display, param1);
+			return RedrawMenuItem(display);
+		}
 	}
 	
 	return 0;
@@ -510,11 +537,10 @@ static int MenuHandler_PartyKickMenu(Menu menu, MenuAction action, int param1, i
 
 void Menus_DisplayPartyInviteMenu(int client)
 {
-	Menu menu = new Menu(MenuHandler_PartyInviteMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End);
+	Menu menu = new Menu(MenuHandler_PartyInviteMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
 	menu.SetTitle("%T", "Party_InviteMenu_Title", client);
 	menu.ExitBackButton = true;
 	
-	// TODO: Collect members and only create menu if count > 0
 	ArrayList parties = Party_GetAllActiveParties();
 	for (int i = 0; i < parties.Length; i++)
 	{
@@ -529,19 +555,60 @@ void Menus_DisplayPartyInviteMenu(int client)
 		if (!party.IsInvited(client))
 			continue;
 		
-		char id[8];
+		char id[32];
 		IntToString(info.m_id, id, sizeof(id));
 		
-		// TODO: Name here
-		menu.AddItem(id, id);
+		char name[MAX_NAME_LENGTH];
+		party.GetName(name, sizeof(name));
+		
+		menu.AddItem(id, name);
 	}
 	delete parties;
+	
+	if (menu.ItemCount == 0)
+	{
+		menu.AddItem(NULL_STRING, "Party_InviteMenu_NoPendingInvites", ITEMDRAW_DISABLED);
+	}
 	
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
 static int MenuHandler_PartyInviteMenu(Menu menu, MenuAction action, int param1, int param2)
 {
-	// TODO
+	switch (action)
+	{
+		case MenuAction_Select:
+		{
+			char info[32];
+			menu.GetItem(param2, info, sizeof(info));
+			
+			FakeClientCommand(param1, "sm_party_join %s", info);
+			
+			Menus_OpenPartyManageInviteMenu(param1);
+		}
+		case MenuAction_Cancel:
+		{
+			if (param2 == MenuCancel_ExitBack)
+			{
+				FakeClientCommand(param1, "sm_party");
+			}
+		}
+		case MenuAction_End:
+		{
+			delete menu;
+		}
+		case MenuAction_DisplayItem:
+		{
+			char info[32], display[64];
+			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
+			
+			if (!TranslationPhraseExists(display))
+				return 0;
+			
+			Format(display, sizeof(display), "%T", display, param1);
+			return RedrawMenuItem(display);
+		}
+	}
+	
 	return 0;
 }

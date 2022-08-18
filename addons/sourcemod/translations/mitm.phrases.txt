@@ -196,9 +196,9 @@
 	{
 		"en"		"Kick Members"
 	}
-	"Party_KickMenu_NotEnoughMembers"
+	"Party_KickMenu_NoMembers"
 	{
-		"en"		"You do not have any members in your party."
+		"en"		"No members to kick"
 	}
 	"Party_Menu_InAParty"
 	{
@@ -237,6 +237,14 @@
 	{
 		"en"		"Kick party members"
 	}
+	"Party_ManageInviteMenu_NoPlayers"
+	{
+		"en"		"No players to invite"
+	}
+	"Party_InviteMenu_NoPendingInvites"
+	{
+		"en"		"No pending invites"
+	}
 	"Party_InvitedPlayers"
 	{
 		"#format"	"{1:t},{2:s}"
@@ -249,7 +257,7 @@
 	}
 	"Party_DoesNotExist"
 	{
-		"en"		"This party does not exist!"
+		"en"		"The party does not exist. It may have been deleted."
 	}
 	"Party_AlreadyMember"
 	{
@@ -299,5 +307,10 @@
 	{
 		"#format"	"{1:s}"
 		"en"		"You have renamed your party to {cyan}{1}{default}."
+	}
+	"Party_IncomingInvite"
+	{
+		"#format"	"{1:s}"
+		"en"		"You have been invited to {cyan}{1}{default}."
 	}
 }

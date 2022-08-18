@@ -199,9 +199,9 @@ TFTeam GetEnemyTeam(TFTeam team)
 	}
 }
 
-int GetRobotToSpawn(bool bMiniBoss)
+ArrayList GetInvaderQueue(bool bMiniBoss = false)
 {
-	ArrayList playerList = new ArrayList();
+	ArrayList queue = new ArrayList();
 	
 	// collect valid players
 	for (int client = 1; client <= MaxClients; client++)
@@ -221,16 +221,22 @@ int GetRobotToSpawn(bool bMiniBoss)
 		if (bMiniBoss && Player(client).HasPreference(PREF_DISABLE_GIANT))
 			continue;
 		
-		playerList.Push(client);
+		queue.Push(client);
 	}
 	
 	// sort players by priority
-	playerList.SortCustom(SortPlayersByPriority);
+	queue.SortCustom(SortPlayersByPriority);
 	
+	return queue;
+}
+
+int GetRobotToSpawn(bool bMiniBoss)
+{
+	ArrayList queue = GetInvaderQueue(bMiniBoss);
 	int priorityClient = -1;
-	for (int i = 0; i < playerList.Length; i++)
+	for (int i = 0; i < queue.Length; i++)
 	{
-		int client = playerList.Get(i);
+		int client = queue.Get(i);
 		if (i == 0)
 		{
 			// store the player and reset priority
@@ -249,8 +255,7 @@ int GetRobotToSpawn(bool bMiniBoss)
 			Player(client).m_invaderPriority++;
 		}
 	}
-	
-	delete playerList;
+	delete queue;
 	
 	// check whether every invader has been a miniboss at least once, then reset everyone
 	int playerCount = 0, miniBossCount = 0;
@@ -867,4 +872,16 @@ void UnlockWeapon(int weapon)
 bool IsBaseObject(int entity)
 {
 	return HasEntProp(entity, Prop_Data, "CBaseObjectUpgradeThink");
+}
+
+void PrintKeyHintText(int client, const char[] format, any...)
+{
+	char buffer[256];
+	SetGlobalTransTarget(client);
+	VFormat(buffer, sizeof(buffer), format, 3);
+	
+	BfWrite bf = UserMessageToBfWrite(StartMessageOne("KeyHintText", client));
+	bf.WriteByte(1);	// One message
+	bf.WriteString(buffer);
+	EndMessage();
 }

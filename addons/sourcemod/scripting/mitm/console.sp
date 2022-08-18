@@ -71,45 +71,13 @@ static Action ConCmd_Settings(int client, int args)
 
 static Action ConCmd_Party(int client, int args)
 {
-	if (args < 1)
+	if (client == 0)
 	{
-		Menus_DisplayPartyMenu(client);
+		ReplyToCommand(client, "%t", "Command is in-game only");
 		return Plugin_Handled;
 	}
 	
-	char subcommand[64];
-	GetCmdArg(1, subcommand, sizeof(subcommand));
-	
-	if (StrEqual(subcommand, "create"))
-	{
-		FakeClientCommand(client, "sm_party_create");
-	}
-	else if (StrEqual(subcommand, "join"))
-	{
-		FakeClientCommand(client, "sm_party_join");
-	}
-	else if (StrEqual(subcommand, "leave"))
-	{
-		FakeClientCommand(client, "sm_party_leave");
-	}
-	else if (StrEqual(subcommand, "invite"))
-	{
-		FakeClientCommand(client, "sm_party_invite");
-	}
-	else if (StrEqual(subcommand, "manage"))
-	{
-		FakeClientCommand(client, "sm_party_manage");
-	}
-	else if (StrEqual(subcommand, "kick"))
-	{
-		FakeClientCommand(client, "sm_party_kick");
-	}
-	else
-	{
-		// invalid subcommand
-		return Plugin_Continue;
-	}
-	
+	Menus_DisplayPartyMenu(client);
 	return Plugin_Handled;
 }
 

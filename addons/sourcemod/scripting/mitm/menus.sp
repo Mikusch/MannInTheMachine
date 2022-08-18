@@ -111,7 +111,7 @@ void Menus_DisplayQueueMenu(int client)
 					strcopy(display, sizeof(display), "•");
 				}
 				
-				Format(display, sizeof(display), "%s %s (%d)", name, points);
+				Format(display, sizeof(display), "%s %s (%d)", display, name, points);
 				
 				menu.AddItem(NULL_STRING, display, Player(client).IsInAParty() && Player(client).GetParty() == party ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 			}
@@ -281,12 +281,12 @@ void Menus_DisplayPartyMenu(int client)
 		menu.AddItem("create_party", "Party_Menu_CreateParty");
 	}
 	
+	menu.AddItem("view_invites", "Party_Menu_ViewPartyInvites");
+	
 	if (Player(client).IsInAParty())
 	{
 		menu.AddItem("leave_party", "Party_Menu_LeaveParty");
 	}
-	
-	menu.AddItem("view_invites", "Party_Menu_ViewPartyInvites");
 	
 	menu.Display(client, MENU_TIME_FOREVER);
 }

@@ -211,23 +211,23 @@
 	}
 	"Party_Menu_ManageParty"
 	{
-		"en"		"★ Manage your party"
+		"en"		"★ Manage party"
 	}
 	"Party_Menu_CreateParty"
 	{
-		"en"		"Create a new party"
+		"en"		"Create new party"
 	}
 	"Party_Menu_LeaveParty"
 	{
-		"en"		"☆ Leave your current party"
+		"en"		"☆ Leave party"
 	}
 	"Party_Menu_ViewPartyInvites"
 	{
-		"en"		"• View pending party invites"
+		"en"		"View pending invites"
 	}
 	"Party_ManageMenu_InviteMembers"
 	{
-		"en"		"★ Invite new members"
+		"en"		"★ Invite players"
 	}
 	"Party_ManageMenu_KickMembers"
 	{

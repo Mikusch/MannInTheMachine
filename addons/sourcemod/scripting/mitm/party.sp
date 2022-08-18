@@ -612,7 +612,7 @@ static Action ConCmd_PartyName(int client, int args)
 	}
 	
 	char name[MAX_NAME_LENGTH];
-	GetCmdArg(1, name, sizeof(name));
+	GetCmdArgString(name, sizeof(name));
 	party.SetName(name);
 	
 	CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Renamed", name);

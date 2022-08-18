@@ -89,17 +89,30 @@ void Menus_DisplayQueueMenu(int client)
 			int other = queueList.Get(i, QueueData::m_client);
 			Party party = queueList.Get(i, QueueData::m_party);
 			
+			char display[64];
+			
 			if (party == NULL_PARTY)
 			{
-				char display[MAX_NAME_LENGTH + 8];
 				Format(display, sizeof(display), "%N (%d)", other, points);
+				
 				menu.AddItem(NULL_STRING, display, client == other ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 			}
 			else
 			{
-				char name[MAX_NAME_LENGTH], display[MAX_NAME_LENGTH + 8];
+				char name[MAX_NAME_LENGTH];
 				party.GetName(name, sizeof(name));
-				Format(display, sizeof(display), "• %s (%d)", name, points);
+				
+				if (Player(client).IsInAParty() && Player(client).GetParty() == party)
+				{
+					strcopy(display, sizeof(display), party.IsLeader(client) ? "★" : "☆");
+				}
+				else
+				{
+					strcopy(display, sizeof(display), "•");
+				}
+				
+				Format(display, sizeof(display), "%s %s (%d)", name, points);
+				
 				menu.AddItem(NULL_STRING, display, Player(client).IsInAParty() && Player(client).GetParty() == party ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
 			}
 		}
@@ -217,34 +230,47 @@ void Menus_DisplayPartyMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_PartyMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
 	
-	char text[64];
+	// show title
+	char title[256];
+	Format(title, sizeof(title), "%T\n", "Party_Menu_Title", client);
 	
 	if (Player(client).IsInAParty())
 	{
 		Party party = Player(client).GetParty();
 		
+		// show party name
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
-		Format(text, sizeof(text), "%T", "Party_Menu_InAParty", client, name);
+		Format(title, sizeof(title), "%s%T\n", title, "Party_Menu_CurrentParty", client, name);
 		
-		if (party.IsLeader(client))
+		// show party members
+		ArrayList members = new ArrayList();
+		party.CollectMembers(members);
+		for (int i = 0; i < members.Length; i++)
 		{
-			Format(text, sizeof(text), "%s\n%T", text, "Party_Menu_YouAreLeader", client);
+			int member = members.Get(i);
+			if (party.IsLeader(member))
+			{
+				Format(title, sizeof(title), "%s★ %N\n", title, member);
+			}
+			else
+			{
+				Format(title, sizeof(title), "%s☆ %N\n", title, member);
+			}
 		}
+		delete members;
 	}
 	else
 	{
-		Format(text, sizeof(text), "%T", "Party_Menu_NotInAParty", client);
+		Format(title, sizeof(title), "%s%T", title, "Party_Menu_NotInAParty", client);
 	}
-	
-	char title[256];
-	Format(title, sizeof(title), "%T\n%s", "Party_Menu_Title", client, text);
 	
 	menu.SetTitle(title);
 	menu.ExitBackButton = true;
 	
 	if (Player(client).IsInAParty())
 	{
+		// party leader options come first
 		if (Player(client).GetParty().IsLeader(client))
 		{
 			menu.AddItem("manage_party", "Party_Menu_ManageParty");
@@ -255,12 +281,12 @@ void Menus_DisplayPartyMenu(int client)
 		menu.AddItem("create_party", "Party_Menu_CreateParty");
 	}
 	
-	menu.AddItem("view_invites", "Party_Menu_ViewPartyInvites");
-	
 	if (Player(client).IsInAParty())
 	{
 		menu.AddItem("leave_party", "Party_Menu_LeaveParty");
 	}
+	
+	menu.AddItem("view_invites", "Party_Menu_ViewPartyInvites");
 	
 	menu.Display(client, MENU_TIME_FOREVER);
 }
@@ -388,17 +414,44 @@ void Menus_DisplayPartyManageInviteMenu(int client)
 		if (!IsClientInGame(other))
 			continue;
 		
-		// only players not in a party
-		if (Player(other).IsInAParty())
+		if (other == client)
 			continue;
 		
-		char userid[16]
+		Party party = Player(client).GetParty();
+		
+		char userid[32]
 		IntToString(GetClientUserId(other), userid, sizeof(userid));
 		
 		char name[MAX_NAME_LENGTH];
 		GetClientName(other, name, sizeof(name));
 		
-		menu.AddItem(userid, name);
+		char display[64];
+		
+		if (Player(other).IsInAParty())
+		{
+			// show party members (including others)
+			if (Player(other).GetParty() == party)
+			{
+				Format(display, sizeof(display), "☆ %N", other);
+			}
+			else
+			{
+				Format(display, sizeof(display), "• %N", other);
+			}
+			
+			menu.AddItem(userid, display, ITEMDRAW_DISABLED);
+		}
+		else if (party.IsInvited(other))
+		{
+			// show already invited
+			Format(display, sizeof(display), "%N %T", other, "Party_ManageInviteMenu_AlreadyInvited", other);
+			menu.AddItem(userid, display, ITEMDRAW_DISABLED);
+		}
+		else
+		{
+			// show everyone else
+			menu.AddItem(userid, name);
+		}
 	}
 	
 	if (menu.ItemCount == 0)
@@ -430,7 +483,7 @@ static int MenuHandler_PartyManageInviteMenu(Menu menu, MenuAction action, int p
 				FakeClientCommand(param1, "sm_party_invite #%d", userid);
 			}
 			
-			Menus_DisplayPartyManageInviteMenu(param1);
+			FakeClientCommand(param1, "sm_party_invite");
 		}
 		case MenuAction_Cancel:
 		{
@@ -516,7 +569,7 @@ static int MenuHandler_PartyKickMenu(Menu menu, MenuAction action, int param1, i
 				FakeClientCommand(param1, "sm_party_kick #%d", userid);
 			}
 			
-			Menus_DisplayPartyManageInviteMenu(param1);
+			FakeClientCommand(param1, "sm_party_kick");
 		}
 		case MenuAction_Cancel:
 		{
@@ -568,10 +621,11 @@ void Menus_DisplayPartyInviteMenu(int client)
 		char id[32];
 		IntToString(info.m_id, id, sizeof(id));
 		
-		char name[MAX_NAME_LENGTH];
+		char display[64], name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
+		Format(display, sizeof(display), "%s (★ %N)", name, party.GetLeader());
 		
-		menu.AddItem(id, name);
+		menu.AddItem(id, display);
 	}
 	delete parties;
 	
@@ -593,8 +647,7 @@ static int MenuHandler_PartyInviteMenu(Menu menu, MenuAction action, int param1,
 			menu.GetItem(param2, info, sizeof(info));
 			
 			FakeClientCommand(param1, "sm_party_join %s", info);
-			
-			Menus_DisplayPartyInviteMenu(param1);
+			FakeClientCommand(param1, "sm_party");
 		}
 		case MenuAction_Cancel:
 		{

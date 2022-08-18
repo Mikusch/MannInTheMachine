@@ -109,6 +109,11 @@ methodmap Party
 		}
 	}
 	
+	public int GetLeader()
+	{
+		return this.m_leader;
+	}
+	
 	public void GetName(char[] buffer, int maxlen)
 	{
 		PartyInfo info;
@@ -224,7 +229,7 @@ methodmap Party
 	public int CalculateQueuePoints()
 	{
 		int count = 0, points = 0;
-		for (int i=0;i<this.m_members.Length;++i)
+		for (int i = 0; i < this.m_members.Length; ++i)
 		{
 			int member = this.m_members.Get(i);
 			if (IsValidEntity(member) && !Player(member).HasPreference(PREF_DISABLE_DEFENDER) && !Player(member).HasPreference(PREF_DISABLE_SPAWNING))
@@ -575,22 +580,10 @@ static Action ConCmd_PartyKick(int client, int args)
 		for (int j = 0; j < members.Length; j++)
 		{
 			int member = members.Get(j);
-			if (party.IsLeader(member))
-				continue;
-			
 			CPrintToChat(member, "%s %t", PLUGIN_TAG, "Party_KickedOther", target_list[i]);
 			ClientCommand(member, "play ui/message_update.wav");
 		}
 		delete members;
-	}
-	
-	if (tn_is_ml)
-	{
-		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_KickedPlayers", target_name);
-	}
-	else
-	{
-		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_KickedPlayers", "_s", target_name);
 	}
 	
 	return Plugin_Handled;

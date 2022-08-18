@@ -182,7 +182,7 @@
 	}
 	"Party_InviteMenu_Title"
 	{
-		"en"		"Manage Pending Invites"
+		"en"		"Pending Party Invites"
 	}
 	"Party_ManageInviteMenu_Title"
 	{
@@ -190,7 +190,7 @@
 	}
 	"Party_ManageMenu_Title"
 	{
-		"en"		"Manage Your Party"
+		"en"		"Manage Party"
 	}
 	"Party_KickMenu_Title"
 	{
@@ -200,46 +200,46 @@
 	{
 		"en"		"No members to kick"
 	}
-	"Party_Menu_InAParty"
+	"Party_Menu_CurrentParty"
 	{
 		"#format"	"{1:s}"
-		"en"		"Current party: {1}"
+		"en"		"Your party: {1}"
 	}
 	"Party_Menu_NotInAParty"
 	{
 		"en"		"You are not in a party."
 	}
-	"Party_Menu_YouAreLeader"
-	{
-		"en"		"You are the party leader."
-	}
 	"Party_Menu_ManageParty"
 	{
-		"en"		"Manage your party"
+		"en"		"★ Manage your party"
 	}
 	"Party_Menu_CreateParty"
 	{
-		"en"		"Create new party"
+		"en"		"Create a new party"
 	}
 	"Party_Menu_LeaveParty"
 	{
-		"en"		"Leave current party"
+		"en"		"☆ Leave your current party"
 	}
 	"Party_Menu_ViewPartyInvites"
 	{
-		"en"		"View pending invites"
+		"en"		"• View pending party invites"
 	}
 	"Party_ManageMenu_InviteMembers"
 	{
-		"en"		"Invite players"
+		"en"		"★ Invite new members"
 	}
 	"Party_ManageMenu_KickMembers"
 	{
-		"en"		"Kick party members"
+		"en"		"★ Kick members"
 	}
 	"Party_ManageInviteMenu_NoPlayers"
 	{
 		"en"		"No players to invite"
+	}
+	"Party_ManageInviteMenu_AlreadyInvited"
+	{
+		"en"		"(pending)"
 	}
 	"Party_InviteMenu_NoPendingInvites"
 	{
@@ -249,11 +249,6 @@
 	{
 		"#format"	"{1:t},{2:s}"
 		"en"		"You have invited {lightgreen}{1} {default}to {cyan}{2}{default}."
-	}
-	"Party_KickedPlayers"
-	{
-		"#format"	"{1:t}"
-		"en"		"You have kicked {lightgreen}{1} {default}from your party."
 	}
 	"Party_DoesNotExist"
 	{
@@ -303,7 +298,7 @@
 	"Party_Kicked"
 	{
 		"#format"	"{1:s}"
-		"en"		"You have been kicked from {cyan}{1} {default}by the party leader."
+		"en"		"You have been kicked from {cyan}{1}{default}."
 	}
 	"Party_KickedOther"
 	{

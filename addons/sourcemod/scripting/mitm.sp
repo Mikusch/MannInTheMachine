@@ -830,6 +830,11 @@ public void OnClientDisconnect(int client)
 		// progress the wave and drop their cash before disconnect
 		ForcePlayerSuicide(client);
 	}
+	
+	if (Player(client).IsInAParty())
+	{
+		Player(client).LeaveParty();
+	}
 }
 
 public void OnClientCookiesCached(int client)

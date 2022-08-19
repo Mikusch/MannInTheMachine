@@ -224,7 +224,7 @@
 	}
 	"Party_Menu_LeaveParty"
 	{
-		"en"		"☆ Leave party"
+		"en"		"Leave party"
 	}
 	"Party_Menu_ViewPartyInvites"
 	{

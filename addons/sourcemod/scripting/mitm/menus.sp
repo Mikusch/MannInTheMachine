@@ -291,6 +291,7 @@ void Menus_DisplayPartyMenu(int client)
 	
 	if (Player(client).IsInAParty())
 	{
+		menu.AddItem(NULL_STRING, NULL_STRING, ITEMDRAW_SPACER);
 		menu.AddItem("leave_party", "Party_Menu_LeaveParty");
 	}
 	

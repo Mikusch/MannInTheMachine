@@ -989,9 +989,6 @@ void SelectNewDefenders()
 		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
 			continue;
 		
-		if (Player(client).HasPreference(PREF_DISABLE_SPAWNING))
-			continue;
-		
 		players.Push(client);
 	}
 	
@@ -1050,10 +1047,14 @@ void SelectNewDefenders()
 		
 		for (int i = 0; i < players.Length; i++)
 		{
+			int client = players.Get(i);
+			
+			if (Player(client).HasPreference(PREF_DISABLE_SPAWNING))
+				continue;
+			
 			// Keep filling slots until our quota is met
 			if (iDefenderCount++ < iReqDefenderCount)
 			{
-				int client = players.Get(i);
 				TF2_ChangeClientTeam(client, TFTeam_Defenders);
 				CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender_Forced", redTeamname);
 				

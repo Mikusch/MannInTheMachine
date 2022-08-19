@@ -1015,7 +1015,7 @@ void SelectNewDefenders()
 		else
 		{
 			// Only let parties play if all members have space to join
-			if (iReqDefenderCount - party.GetMemberCount(false) < 0)
+			if (iReqDefenderCount - iDefenderCount - party.GetMemberCount(false) < 0)
 				continue;
 			
 			ArrayList members = new ArrayList();

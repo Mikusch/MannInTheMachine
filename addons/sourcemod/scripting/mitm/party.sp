@@ -374,7 +374,7 @@ static Action ConCmd_PartyJoin(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	if (party.GetMemberCount() > party.GetMaxPlayers())
+	if (party.GetMemberCount() >= party.GetMaxPlayers())
 	{
 		party.RemoveInvite(client);
 		
@@ -463,7 +463,7 @@ static Action ConCmd_PartyInvite(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	if (party.GetMemberCount() > party.GetMaxPlayers())
+	if (party.GetMemberCount() >= party.GetMaxPlayers())
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_MaxMembers");
 		return Plugin_Handled;

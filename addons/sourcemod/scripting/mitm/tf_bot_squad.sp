@@ -215,7 +215,7 @@ methodmap CTFBotSquad
 		for (int i = 0; i < this.m_roster.Length; ++i)
 		{
 			int member = this.m_roster.Get(i);
-			if (IsValidEntity(member) && IsPlayerAlive(member))
+			if (IsClientInGame(member) && IsPlayerAlive(member))
 			{
 				memberList.Push(member);
 			}
@@ -229,7 +229,7 @@ methodmap CTFBotSquad
 		for (int i = 0; i < this.m_roster.Length; ++i)
 		{
 			int member = this.m_roster.Get(i);
-			if (IsValidEntity(member) && IsPlayerAlive(member))
+			if (IsClientInGame(member) && IsPlayerAlive(member))
 				++count;
 		}
 		
@@ -242,7 +242,7 @@ methodmap CTFBotSquad
 		for (int i = 0; i < this.m_roster.Length; ++i)
 		{
 			int member = this.m_roster.Get(i);
-			if (IsValidEntity(member))
+			if (IsClientInGame(member))
 			{
 				Player(member).DeleteSquad();
 			}

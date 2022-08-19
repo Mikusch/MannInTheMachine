@@ -241,7 +241,10 @@ void Menus_DisplayPartyMenu(int client)
 		// show party name
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
-		Format(title, sizeof(title), "%s%T\n", title, "Party_Menu_CurrentParty", client, name);
+		Format(title, sizeof(title), "%s%T\n \n", title, "Party_Menu_CurrentParty", client, name);
+		
+		// show member count
+		Format(title, sizeof(title), "%s%T\n", title, "Party_Menu_Members", client, party.GetMemberCount(), party.GetMaxPlayers());
 		
 		// show party members
 		ArrayList members = new ArrayList();
@@ -264,6 +267,9 @@ void Menus_DisplayPartyMenu(int client)
 	{
 		Format(title, sizeof(title), "%s%T", title, "Party_Menu_NotInAParty", client);
 	}
+	
+	// final newline so it looks nicer
+	Format(title, sizeof(title), "%s \n", title);
 	
 	menu.SetTitle(title);
 	menu.ExitBackButton = true;
@@ -612,8 +618,6 @@ void Menus_DisplayPartyInviteMenu(int client)
 			continue;
 		
 		Party party = Party(info.m_id);
-		if (party == Party(0))
-			continue;
 		
 		if (!party.IsInvited(client))
 			continue;

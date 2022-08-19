@@ -30,7 +30,7 @@ ArrayList Queue_GetDefenderQueue()
 		if (IsClientSourceTV(client))
 			continue;
 		
-		// parties get handled later
+		// do not include players in parties, they get handled separately
 		if (Player(client).IsInAParty() && Player(client).GetParty().GetMemberCount() > 1)
 			continue;
 		
@@ -44,14 +44,14 @@ ArrayList Queue_GetDefenderQueue()
 			continue;
 		
 		QueueData data;
-		data.m_points = Player(client).m_defenderQueuePoints; // block 0 gets sorted
+		data.m_points = Player(client).m_defenderQueuePoints;
 		data.m_client = client;
 		
 		queueList.PushArray(data);
 	}
 	
 	ArrayList parties = Party_GetAllActiveParties();
-	for (int i=0;i<parties.Length;i++)
+	for (int i = 0; i < parties.Length; i++)
 	{
 		PartyInfo info;
 		if (!parties.GetArray(i, info))
@@ -59,18 +59,21 @@ ArrayList Queue_GetDefenderQueue()
 		
 		Party party = Party(info.m_id);
 		
+		// do not include one-person parties
 		if (party.GetMemberCount() <= 1)
 			continue;
 		
 		QueueData data;
-		data.m_points = party.CalculateQueuePoints(); // block 0 gets sorted
+		data.m_points = party.CalculateQueuePoints();
 		data.m_party = party;
 		
 		queueList.PushArray(data);
 	}
 	delete parties;
 	
+	// sorts by queue points
 	queueList.Sort(Sort_Descending, Sort_Integer);
+	
 	return queueList;
 }
 

@@ -1210,20 +1210,20 @@ methodmap Player
 		if (this.m_party)
 		{
 			this.m_party.Leave(this._client);
-			this.m_party = Party(0);
+			this.m_party = NULL_PARTY;
 		}
 	}
 	
 	public bool IsInAParty()
 	{
-		return this.m_party == Party(0) ? false : true;
+		return this.m_party == NULL_PARTY ? false : true;
 	}
 	
 	public void DeleteParty()
 	{
 		if (this.m_party)
 		{
-			this.m_party = Party(0);
+			this.m_party = NULL_PARTY;
 		}
 	}
 	

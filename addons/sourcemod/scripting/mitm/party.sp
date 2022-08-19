@@ -139,6 +139,11 @@ methodmap Party
 		}
 	}
 	
+	public int GetMaxPlayers()
+	{
+		return Min(6, mitm_defender_min_count.IntValue);
+	}
+	
 	public void AddInvite(int client)
 	{
 		this.m_invites.Push(client);
@@ -200,46 +205,45 @@ methodmap Party
 		}
 	}
 	
-	public void CollectMembers(ArrayList &memberList)
+	public void CollectMembers(ArrayList &memberList, bool bIncludeSpectators = true)
 	{
 		for (int i = 0; i < this.m_members.Length; ++i)
 		{
 			int member = this.m_members.Get(i);
-			if (IsValidEntity(member))
-			{
-				memberList.Push(member);
-			}
+			if (!IsClientInGame(member))
+				continue;
+			
+			if (!bIncludeSpectators && (Player(member).HasPreference(PREF_DISABLE_DEFENDER) || Player(member).HasPreference(PREF_DISABLE_SPAWNING)))
+				continue;
+			
+			memberList.Push(member);
 		}
 	}
 	
-	public int GetMemberCount()
+	public int GetMemberCount(bool bIncludeSpectators = true)
 	{
-		// count the non-NULL members
-		int count = 0;
-		for (int i = 0; i < this.m_members.Length; ++i)
-		{
-			int member = this.m_members.Get(i);
-			if (IsValidEntity(member))
-				++count;
-		}
-		
+		ArrayList members = new ArrayList();
+		this.CollectMembers(members, bIncludeSpectators);
+		int count = members.Length;
+		delete members;
 		return count;
 	}
 	
 	public int CalculateQueuePoints()
 	{
-		int count = 0, points = 0;
-		for (int i = 0; i < this.m_members.Length; ++i)
-		{
-			int member = this.m_members.Get(i);
-			if (IsValidEntity(member) && !Player(member).HasPreference(PREF_DISABLE_DEFENDER) && !Player(member).HasPreference(PREF_DISABLE_SPAWNING))
-			{
-				++count;
-				points += Player(member).m_defenderQueuePoints;
-			}
-		}
+		int points = 0;
 		
-		return count != 0 ? (points / count) : 0;
+		ArrayList members = new ArrayList();
+		this.CollectMembers(members, false);
+		for (int i = 0; i < members.Length; ++i)
+		{
+			int member = members.Get(i);
+			points += Player(member).m_defenderQueuePoints;
+		}
+		delete members;
+		
+		// party queue points are calculated as an average of all non-spectating players
+		return members.Length ? (points / members.Length) : 0;
 	}
 	
 	public bool IsLeader(int client)
@@ -258,7 +262,7 @@ methodmap Party
 		for (int i = 0; i < this.m_members.Length; ++i)
 		{
 			int member = this.m_members.Get(i);
-			if (IsValidEntity(member))
+			if (IsClientInGame(member))
 			{
 				Player(member).DeleteParty();
 			}
@@ -360,7 +364,7 @@ static Action ConCmd_PartyJoin(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	if (party.GetMemberCount() > 6)
+	if (party.GetMemberCount() > party.GetMaxPlayers())
 	{
 		party.RemoveInvite(client);
 		
@@ -449,7 +453,7 @@ static Action ConCmd_PartyInvite(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	if (party.GetMemberCount() > 6)
+	if (party.GetMemberCount() > party.GetMaxPlayers())
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_MaxMembers");
 		return Plugin_Handled;

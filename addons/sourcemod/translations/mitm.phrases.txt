@@ -205,6 +205,11 @@
 		"#format"	"{1:s}"
 		"en"		"Your party: {1}"
 	}
+	"Party_Menu_Members"
+	{
+		"#format"	"{1:d},{2:d}"
+		"en"		"Members ({1}/{2}):"
+	}
 	"Party_Menu_NotInAParty"
 	{
 		"en"		"You are not in a party."

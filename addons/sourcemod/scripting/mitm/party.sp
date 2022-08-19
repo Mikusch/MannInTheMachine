@@ -245,10 +245,15 @@ methodmap Party
 			int member = members.Get(i);
 			points += Player(member).m_defenderQueuePoints;
 		}
+		
+		if (members.Length)
+		{
+			// average of all members queue points
+			points = (points / members.Length);
+		}
 		delete members;
 		
-		// party queue points are calculated as an average of all non-spectating players
-		return members.Length ? (points / members.Length) : 0;
+		return points;
 	}
 	
 	public bool IsLeader(int client)

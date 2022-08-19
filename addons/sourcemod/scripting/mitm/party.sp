@@ -20,6 +20,10 @@
 
 #define NULL_PARTY	Party(0)
 
+#define SYMBOL_PARTY_LEADER	"★"
+#define SYMBOL_PARTY_MEMBER	"☆"
+#define SYMBOL_PARTY_OTHER	"◆"
+
 static ArrayList g_parties;
 
 /**
@@ -47,6 +51,7 @@ enum struct PartyInfo
 	void Delete()
 	{
 		delete this.m_members;
+		delete this.m_invites;
 	}
 }
 

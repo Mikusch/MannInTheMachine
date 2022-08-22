@@ -885,3 +885,20 @@ void PrintKeyHintText(int client, const char[] format, any...)
 	bf.WriteString(buffer);
 	EndMessage();
 }
+
+bool ArrayListEquals(ArrayList list1, ArrayList list2)
+{
+	if (list1.Length != list2.Length)
+		return false;
+	
+	for (int i = 0; i < list1.Length; i++)
+	{
+		for (int j = 0; j < list1.BlockSize; j++)
+		{
+			if (list1.Get(i, j) != list2.Get(i, j))
+				return false;
+		}
+	}
+	
+	return true;
+}

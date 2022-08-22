@@ -74,7 +74,7 @@ static int Update(CTFBotSpyLeaveSpawnRoom action, int actor, float interval)
 	{
 		int victim = -1;
 		
-		ArrayList enemyVector = new ArrayList(MaxClients);
+		ArrayList enemyList = new ArrayList();
 		
 		for (int client = 1; client <= MaxClients; client++)
 		{
@@ -87,28 +87,28 @@ static int Update(CTFBotSpyLeaveSpawnRoom action, int actor, float interval)
 			if (!IsPlayerAlive(client))
 				continue;
 			
-			enemyVector.Push(client);
+			enemyList.Push(client);
 		}
 		
 		// randomly shuffle our enemies
-		enemyVector.Sort(Sort_Random, Sort_Integer);
+		enemyList.Sort(Sort_Random, Sort_Integer);
 		
-		int n = enemyVector.Length;
+		int n = enemyList.Length;
 		while (n > 1)
 		{
 			int k = GetRandomInt(0, n - 1);
 			n--;
 			
-			int tmp = enemyVector.Get(n);
-			enemyVector.Set(n, enemyVector.Get(k));
-			enemyVector.Set(k, tmp);
+			int tmp = enemyList.Get(n);
+			enemyList.Set(n, enemyList.Get(k));
+			enemyList.Set(k, tmp);
 		}
 		
-		for (int i = 0; i < enemyVector.Length; ++i)
+		for (int i = 0; i < enemyList.Length; ++i)
 		{
-			if (TeleportNearVictim(actor, enemyVector.Get(i), action.m_attempt))
+			if (TeleportNearVictim(actor, enemyList.Get(i), action.m_attempt))
 			{
-				victim = enemyVector.Get(i);
+				victim = enemyList.Get(i);
 				break;
 			}
 		}
@@ -120,11 +120,11 @@ static int Update(CTFBotSpyLeaveSpawnRoom action, int actor, float interval)
 			
 			++action.m_attempt;
 			
-			delete enemyVector;
+			delete enemyList;
 			return action.Continue();
 		}
 		
-		delete enemyVector;
+		delete enemyList;
 		return action.Done();
 	}
 	
@@ -143,7 +143,7 @@ static bool TeleportNearVictim(int actor, int victim, int attempt)
 		return false;
 	}
 	
-	ArrayList ambushVector = new ArrayList(); // vector of hidden but near-to-victim areas
+	ArrayList ambushList = new ArrayList(); // vector of hidden but near-to-victim areas
 	
 	const float maxSurroundTravelRange = 6000.0;
 	
@@ -154,13 +154,13 @@ static bool TeleportNearVictim(int actor, int victim, int attempt)
 	}
 	
 	// collect walkable areas surrounding this victim
-	SurroundingAreasCollector areaVector;
-	areaVector = TheNavMesh.CollectSurroundingAreas(CBaseCombatCharacter(victim).GetLastKnownArea(), surroundTravelRange, sv_stepsize.FloatValue, sv_stepsize.FloatValue);
+	SurroundingAreasCollector areas;
+	areas = TheNavMesh.CollectSurroundingAreas(CBaseCombatCharacter(victim).GetLastKnownArea(), surroundTravelRange, sv_stepsize.FloatValue, sv_stepsize.FloatValue);
 	
 	// keep subset that isn't visible to the victim's team
-	for (int i = 0; i < areaVector.Count(); i++)
+	for (int i = 0; i < areas.Count(); i++)
 	{
-		CTFNavArea area = view_as<CTFNavArea>(areaVector.Get(i));
+		CTFNavArea area = view_as<CTFNavArea>(areas.Get(i));
 		
 		if (!IsAreaValidForWanderingPopulation(area))
 		{
@@ -172,23 +172,23 @@ static bool TeleportNearVictim(int actor, int victim, int attempt)
 			continue;
 		}
 		
-		ambushVector.Push(area);
+		ambushList.Push(area);
 	}
 	
-	delete areaVector;
+	delete areas;
 	
-	if (ambushVector.Length == 0)
+	if (ambushList.Length == 0)
 	{
-		delete ambushVector;
+		delete ambushList;
 		return false;
 	}
 	
-	int maxTries = Min(10, ambushVector.Length);
+	int maxTries = Min(10, ambushList.Length);
 	
 	for (int retry = 0; retry < maxTries; ++retry)
 	{
-		int which = GetRandomInt(0, ambushVector.Length - 1);
-		CNavArea area = ambushVector.Get(which);
+		int which = GetRandomInt(0, ambushList.Length - 1);
+		CNavArea area = ambushList.Get(which);
 		float where[3];
 		area.GetCenter(where);
 		AddVectors(where, Vector(0.0, 0.0, sv_stepsize.FloatValue), where);
@@ -196,11 +196,11 @@ static bool TeleportNearVictim(int actor, int victim, int attempt)
 		if (SDKCall_IsSpaceToSpawnHere(where))
 		{
 			TeleportEntity(actor, where, ZERO_VECTOR, ZERO_VECTOR);
-			delete ambushVector;
+			delete ambushList;
 			return true;
 		}
 	}
 	
-	delete ambushVector;
+	delete ambushList;
 	return false;
 }

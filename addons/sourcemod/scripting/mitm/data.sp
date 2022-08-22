@@ -1196,8 +1196,6 @@ methodmap Player
 	
 	public void JoinParty(Party party)
 	{
-		this.LeaveParty();
-		
 		if (party)
 		{
 			party.Join(this._client);

@@ -72,22 +72,34 @@ static int MenuHandler_MainMenu(Menu menu, MenuAction action, int param1, int pa
 
 void Menus_DisplayQueueMenu(int client)
 {
-	ArrayList queueList = Queue_GetDefenderQueue();
-	if (queueList.Length > 0)
+	ArrayList queue = Queue_GetDefenderQueue();
+	if (queue.Length > 0)
 	{
 		Menu menu = new Menu(MenuHandler_QueueMenu, MenuAction_Cancel | MenuAction_End);
 		menu.ExitBackButton = true;
 		
 		if (Player(client).m_defenderQueuePoints != -1)
-			menu.SetTitle("%T\n%T", "Menu_Queue_Title", client, "Menu_Queue_Title_QueuePoints", client, Player(client).m_defenderQueuePoints);
-		else
-			menu.SetTitle("%T\n%T", "Menu_Queue_Title", client, "Menu_Queue_NotLoaded", client);
-		
-		for (int i = 0; i < queueList.Length; i++)
 		{
-			int points = queueList.Get(i, QueueData::m_points);
-			int other = queueList.Get(i, QueueData::m_client);
-			Party party = queueList.Get(i, QueueData::m_party);
+			int index = queue.FindValue(client, QueueData::m_client);
+			if (index != -1)
+			{
+				menu.SetTitle("%T\n%T", "Menu_Queue_Title", client, "Menu_Queue_Title_QueuePoints", client, Player(client).m_defenderQueuePoints, index + 1);
+			}
+			else
+			{
+				menu.SetTitle("%T\n%T", "Menu_Queue_Title", client, "Menu_Queue_Title_NotInQueue", client);
+			}
+		}
+		else
+		{
+			menu.SetTitle("%T\n%T", "Menu_Queue_Title", client, "Menu_Queue_NotLoaded", client);
+		}
+		
+		for (int i = 0; i < queue.Length; i++)
+		{
+			int points = queue.Get(i, QueueData::m_points);
+			int other = queue.Get(i, QueueData::m_client);
+			Party party = queue.Get(i, QueueData::m_party);
 			
 			char display[64];
 			
@@ -124,7 +136,7 @@ void Menus_DisplayQueueMenu(int client)
 		PrintHintText(client, "%t", "Menu_Queue_NotLoaded");
 		FakeClientCommand(client, "sm_mitm");
 	}
-	delete queueList;
+	delete queue;
 }
 
 static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int param2)
@@ -229,6 +241,7 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 void Menus_DisplayPartyMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_PartyMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
+	menu.ExitBackButton = true;
 	
 	// show title
 	char title[256];
@@ -241,7 +254,20 @@ void Menus_DisplayPartyMenu(int client)
 		// show party name
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
-		Format(title, sizeof(title), "%s%T\n \n", title, "Party_Menu_CurrentParty", client, name);
+		Format(title, sizeof(title), "%s%T\n", title, "Party_Menu_CurrentParty", client, name);
+		
+		// show queue points
+		ArrayList queue = Queue_GetDefenderQueue();
+		int index = queue.FindValue(party, QueueData::m_party);
+		if (index != -1)
+		{
+			Format(title, sizeof(title), "%s%T\n \n", title, "Party_Menu_QueuePoints", client, queue.Get(index, QueueData::m_points), index + 1);
+		}
+		else
+		{
+			Format(title, sizeof(title), "%s%T\n \n", title, "Party_Menu_NotEnoughMembersForQueue", client);
+		}
+		delete queue;
 		
 		// show member count
 		Format(title, sizeof(title), "%s%T\n", title, "Party_Menu_Members", client, party.GetMemberCount(), party.GetMaxPlayers());
@@ -272,7 +298,6 @@ void Menus_DisplayPartyMenu(int client)
 	Format(title, sizeof(title), "%s \n", title);
 	
 	menu.SetTitle(title);
-	menu.ExitBackButton = true;
 	
 	if (Player(client).IsInAParty())
 	{
@@ -287,12 +312,14 @@ void Menus_DisplayPartyMenu(int client)
 		menu.AddItem("create_party", "Party_Menu_CreateParty");
 	}
 	
-	menu.AddItem("view_invites", "Party_Menu_ViewPartyInvites");
-	
 	if (Player(client).IsInAParty())
 	{
 		menu.AddItem(NULL_STRING, NULL_STRING, ITEMDRAW_SPACER);
 		menu.AddItem("leave_party", "Party_Menu_LeaveParty");
+	}
+	else
+	{
+		menu.AddItem("view_invites", "Party_Menu_ViewPartyInvites");
 	}
 	
 	menu.Display(client, MENU_TIME_FOREVER);

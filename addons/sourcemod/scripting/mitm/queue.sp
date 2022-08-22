@@ -20,7 +20,7 @@
 
 ArrayList Queue_GetDefenderQueue()
 {
-	ArrayList queueList = new ArrayList(sizeof(QueueData));
+	ArrayList queue = new ArrayList(sizeof(QueueData));
 	
 	for (int client = 1; client <= MaxClients; client++)
 	{
@@ -47,7 +47,7 @@ ArrayList Queue_GetDefenderQueue()
 		data.m_points = Player(client).m_defenderQueuePoints;
 		data.m_client = client;
 		
-		queueList.PushArray(data);
+		queue.PushArray(data);
 	}
 	
 	ArrayList parties = Party_GetAllActiveParties();
@@ -67,14 +67,14 @@ ArrayList Queue_GetDefenderQueue()
 		data.m_points = party.CalculateQueuePoints();
 		data.m_party = party;
 		
-		queueList.PushArray(data);
+		queue.PushArray(data);
 	}
 	delete parties;
 	
 	// sorts by queue points
-	queueList.Sort(Sort_Descending, Sort_Integer);
+	queue.Sort(Sort_Descending, Sort_Integer);
 	
-	return queueList;
+	return queue;
 }
 
 void Queue_AddPoints(int client, int points)

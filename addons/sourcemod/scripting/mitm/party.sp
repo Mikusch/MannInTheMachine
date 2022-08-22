@@ -128,7 +128,7 @@ methodmap Party
 		}
 		else
 		{
-			Format(buffer, maxlen, "Party #%d", this.m_id);
+			Format(buffer, maxlen, "%N's Party", this.GetLeader());
 		}
 	}
 	
@@ -146,7 +146,7 @@ methodmap Party
 	
 	public int GetMaxPlayers()
 	{
-		return Min(6, mitm_defender_min_count.IntValue);
+		return Min(mitm_party_max_size.IntValue, mitm_defender_min_count.IntValue);
 	}
 	
 	public void AddInvite(int client)
@@ -382,6 +382,24 @@ static Action ConCmd_PartyJoin(int client, int args)
 		return Plugin_Handled;
 	}
 	
+	// when in a party already, inform all current members
+	if (Player(client).IsInAParty())
+	{
+		ArrayList members = new ArrayList();
+		Player(client).GetParty().CollectMembers(members);
+		for (int i = 0; i < members.Length; i++)
+		{
+			int member = members.Get(i);
+			if (member == client)
+				continue;
+			
+			CPrintToChat(member, "%s %t", PLUGIN_TAG, "Party_LeftOther", client);
+			ClientCommand(member, "play ui/message_update.wav");
+		}
+		delete members;
+	}
+	
+	Player(client).LeaveParty();
 	Player(client).JoinParty(party);
 	
 	// notify the new member

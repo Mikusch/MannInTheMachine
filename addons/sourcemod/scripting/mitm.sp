@@ -565,6 +565,7 @@ ConVar mitm_spawn_hurry_time;
 ConVar mitm_queue_points;
 ConVar mitm_rename_robots;
 ConVar mitm_annotation_lifetime;
+ConVar mitm_party_max_size;
 
 // TF ConVars
 ConVar tf_avoidteammates_pushaway;
@@ -653,6 +654,7 @@ public void OnPluginStart()
 	mitm_queue_points = CreateConVar("mitm_queue_points", "5", "Amount of queue points awarded to players that did not become defenders.", _, true, 1.0);
 	mitm_rename_robots = CreateConVar("mitm_rename_robots", "0", "Whether to rename robots as they spawn.");
 	mitm_annotation_lifetime = CreateConVar("mitm_annotation_lifetime", "30.0", "The lifetime of annotations shown to clients, in seconds.", _, true, 1.0);
+	mitm_party_max_size = CreateConVar("mitm_party_max_size", "6", "Maximum size of player parties.", _, _, _, true, 10.0);
 	
 	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");

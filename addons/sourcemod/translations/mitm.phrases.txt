@@ -39,8 +39,12 @@
 	}
 	"Menu_Queue_Title_QueuePoints"
 	{
-		"#format"	"{1:d}"
-		"en"		"Your queue points: {1}"
+		"#format"	"{1:d},{2:d}"
+		"en"		"Your queue points: {1} [#{2}]"
+	}
+	"Menu_Queue_Title_NotInQueue"
+	{
+		"en"		"You are not currently in the queue."
 	}
 	"Menu_Queue_NotLoaded"
 	{
@@ -213,6 +217,15 @@
 	"Party_Menu_NotInAParty"
 	{
 		"en"		"You are not in a party."
+	}
+	"Party_Menu_QueuePoints"
+	{
+		"#format"	"{1:d},{2:d}"
+		"en"		"Queue points: {1} [#{2}]"
+	}
+	"Party_Menu_NotEnoughMembersForQueue"
+	{
+		"en"		"Invite players to queue together!"
 	}
 	"Party_Menu_ManageParty"
 	{

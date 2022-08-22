@@ -78,22 +78,47 @@ void Menus_DisplayQueueMenu(int client)
 		Menu menu = new Menu(MenuHandler_QueueMenu, MenuAction_Cancel | MenuAction_End);
 		menu.ExitBackButton = true;
 		
+		char title[256];
+		Format(title, sizeof(title), "%T", "Menu_Queue_Title", client);
+		
 		if (Player(client).m_defenderQueuePoints != -1)
 		{
 			int index = queue.FindValue(client, QueueData::m_client);
 			if (index != -1)
 			{
-				menu.SetTitle("%T\n%T", "Menu_Queue_Title", client, "Menu_Queue_Title_QueuePoints", client, Player(client).m_defenderQueuePoints, index + 1);
+				// Player is in queue
+				Format(title, sizeof(title), "%s\n%T", title, "Menu_Queue_Title_QueuePoints", client, queue.Get(index, QueueData::m_points), index + 1);
 			}
 			else
 			{
-				menu.SetTitle("%T\n%T", "Menu_Queue_Title", client, "Menu_Queue_Title_NotInQueue", client);
+				if (Player(client).IsInAParty())
+				{
+					index = queue.FindValue(Player(client).GetParty(), QueueData::m_party);
+					if (index != -1)
+					{
+						// Player is in a party and queuing with others
+						Format(title, sizeof(title), "%s\n%T", title, "Menu_Queue_Title_PartyQueuePoints", client, queue.Get(index, QueueData::m_points), index + 1);
+					}
+					else
+					{
+						// Player is in a party but everyone has disabled being a defender
+						Format(title, sizeof(title), "%s\n%T", title, "Menu_Queue_Title_NotInQueue", client);
+					}
+				}
+				else
+				{
+					// Player is not in queue and not in a party
+					Format(title, sizeof(title), "%s\n%T", title, "Menu_Queue_Title_NotInQueue", client);
+				}
 			}
 		}
 		else
 		{
-			menu.SetTitle("%T\n%T", "Menu_Queue_Title", client, "Menu_Queue_NotLoaded", client);
+			// Player has invalid queue points
+			Format(title, sizeof(title), "%s\n%T", title, "Menu_Queue_NotLoaded", client);
 		}
+		
+		menu.SetTitle(title);
 		
 		for (int i = 0; i < queue.Length; i++)
 		{

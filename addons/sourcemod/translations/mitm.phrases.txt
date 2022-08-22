@@ -42,6 +42,11 @@
 		"#format"	"{1:d},{2:d}"
 		"en"		"Your queue points: {1} [#{2}]"
 	}
+	"Menu_Queue_Title_PartyQueuePoints"
+	{
+		"#format"	"{1:d},{2:d}"
+		"en"		"Your party's queue points: {1} [#{2}]"
+	}
 	"Menu_Queue_Title_NotInQueue"
 	{
 		"en"		"You are not currently in the queue."

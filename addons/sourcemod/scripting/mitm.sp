@@ -875,29 +875,52 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 			}
 		}
 	}
+}
+
+public void OnGameFrame()
+{
+	static ArrayList s_prevQueue;
 	
-	if (Player(client).IsInvader() && !IsPlayerAlive(client))
+	ArrayList queue = GetInvaderQueue();
+	
+	// only send the hint if the queue isn't empty and has changed
+	if (queue.Length > 0 && s_prevQueue && !ArrayListEquals(s_prevQueue, queue))
 	{
-		char text[MAX_USER_MSG_DATA];
-		Format(text, sizeof(text), "%T\n", "Invader_Queue_Header", client);
-		
-		ArrayList queue = GetInvaderQueue();
-		for (int i = 0; i < Min(queue.Length, 8); i++)
+		for (int client = 1; client <= MaxClients; client++)
 		{
-			int other = queue.Get(i);
-			if (other == client)
+			if (!IsClientInGame(client))
+				continue;
+			
+			if (!Player(client).IsInvader())
+				continue;
+			
+			if (IsPlayerAlive(client))
+				continue;
+			
+			char text[MAX_USER_MSG_DATA];
+			Format(text, sizeof(text), "%T\n", "Invader_Queue_Header", client);
+			
+			for (int i = 0; i < Min(queue.Length, 8); i++)
 			{
-				Format(text, sizeof(text), "%s\n➤ %N", text, other);
+				int other = queue.Get(i);
+				if (other == client)
+				{
+					Format(text, sizeof(text), "%s\n➤ %N", text, other);
+				}
+				else
+				{
+					Format(text, sizeof(text), "%s\n%N", text, other);
+				}
 			}
-			else
-			{
-				Format(text, sizeof(text), "%s\n%N", text, other);
-			}
+			
+			PrintKeyHintText(client, text);
 		}
-		delete queue;
-		
-		PrintKeyHintText(client, text);
 	}
+	
+	// store old queue
+	delete s_prevQueue;
+	s_prevQueue = queue.Clone();
+	delete queue;
 }
 
 public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname, bool &result)

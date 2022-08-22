@@ -520,6 +520,9 @@ static Action ConCmd_PartyInvite(int client, int args)
 		if (party.IsInvited(target_list[i]))
 			continue;
 		
+		if (Player(target_list[i]).HasPreference(PREF_IGNORE_PARTY_INVITES))
+			continue;
+		
 		Player(target_list[i]).InviteToParty(party);
 		
 		CPrintToChat(target_list[i], "%s %t", PLUGIN_TAG, "Party_IncomingInvite", name, client);

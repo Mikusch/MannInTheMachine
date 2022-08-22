@@ -25,6 +25,7 @@ enum PreferenceType
 	PREF_DISABLE_GIANT = (1 << 2),
 	PREF_DISABLE_SPAWN_NOTIFICATION = (1 << 3),
 	PREF_DISABLE_ANNOTATIONS = (1 << 4),
+	PREF_IGNORE_PARTY_INVITES = (1 << 5),
 }
 
 char g_PreferenceNames[][] =
@@ -34,6 +35,7 @@ char g_PreferenceNames[][] =
 	"Preference_DisableGiant",
 	"Preference_DisableSpawnNotification",
 	"Preference_DisableAnnotations",
+	"Preference_IgnorePartyInvites",
 };
 
 static Cookie g_cookieQueuePoints;

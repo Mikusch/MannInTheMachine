@@ -78,6 +78,10 @@
 	{
 		"en"		"Disable annotations"
 	}
+	"Preference_IgnorePartyInvites"
+	{
+		"en"		"Ignore party invites"
+	}
 	"Preferences_Enabled"
 	{
 		"#format"	"{1:s}"

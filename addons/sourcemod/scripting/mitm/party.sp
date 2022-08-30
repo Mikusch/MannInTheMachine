@@ -128,7 +128,19 @@ methodmap Party
 		}
 		else
 		{
-			Format(buffer, maxlen, "%N's Party", this.GetLeader());
+			char name[MAX_NAME_LENGTH];
+			GetClientName(this.GetLeader(), name, sizeof(name));
+			
+			// hardcoded to english language
+			char last = name[strlen(name) - 1];
+			if (last == 'S' || last == 's')
+			{
+				Format(buffer, maxlen, "%s' Party", name);
+			}
+			else
+			{
+				Format(buffer, maxlen, "%s's Party", name);
+			}
 		}
 	}
 	
@@ -218,7 +230,7 @@ methodmap Party
 			if (!IsClientInGame(member))
 				continue;
 			
-			if (!bIncludeSpectators && (Player(member).HasPreference(PREF_DISABLE_DEFENDER) || Player(member).HasPreference(PREF_DISABLE_SPAWNING)))
+			if (!bIncludeSpectators && Player(member).HasPreference(PREF_DISABLE_SPAWNING))
 				continue;
 			
 			memberList.Push(member);

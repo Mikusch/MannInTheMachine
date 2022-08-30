@@ -70,7 +70,8 @@ static Action SDKHookCB_Client_OnTakeDamage(int victim, int &attacker, int &infl
 
 static Action SDKHookCB_ProjectilePipeRemote_SetTransmit(int entity, int client)
 {
-	if (view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum")) == TFTeam_Defenders)
+	TFTeam team = view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum"));
+	if (team == TFTeam_Defenders)
 	{
 		// do not show defender stickybombs to the invading team
 		if (Player(client).IsInvader())
@@ -89,12 +90,17 @@ static Action SDKHookCB_ProjectilePipeRemote_SetTransmit(int entity, int client)
 
 static Action SDKHookCB_ReviveMarker_SetTransmit(int entity, int client)
 {
-	if (view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum")) == TFTeam_Defenders)
+	TFTeam team = view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum"));
+	if (team == TFTeam_Defenders)
 	{
-		if (Player(client).IsInvader())
+		int owner = GetEntProp(entity, Prop_Send, "m_hOwnerEntity");
+		if (IsEntityClient(owner) && TF2_GetPlayerClass(owner) == TFClass_Spy)
 		{
-			// hide revive markers from invaders
-			return Plugin_Handled;
+			if (Player(client).IsInvader())
+			{
+				// hide spy revive markers from invaders
+				return Plugin_Handled;
+			}
 		}
 	}
 	

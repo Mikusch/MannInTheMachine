@@ -882,6 +882,7 @@ public void OnGameFrame()
 	static ArrayList s_prevQueue;
 	
 	ArrayList queue = GetInvaderQueue();
+	queue.Resize(Min(queue.Length, 8));
 	
 	// only send the hint if the queue isn't empty and has changed
 	if (queue.Length > 0 && s_prevQueue && !ArrayListEquals(s_prevQueue, queue))
@@ -900,7 +901,7 @@ public void OnGameFrame()
 			char text[MAX_USER_MSG_DATA];
 			Format(text, sizeof(text), "%T\n", "Invader_Queue_Header", client);
 			
-			for (int i = 0; i < Min(queue.Length, 8); i++)
+			for (int i = 0; i < queue.Length; i++)
 			{
 				int other = queue.Get(i);
 				if (other == client)

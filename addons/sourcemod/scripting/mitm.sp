@@ -816,7 +816,10 @@ public void OnClientPutInServer(int client)
 
 public void OnClientDisconnect(int client)
 {
-	if (IsClientInGame(client) && TF2_GetClientTeam(client) == TFTeam_Invaders)
+	if (!IsClientInGame(client))
+		return;
+	
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
 		// progress the wave and drop their cash before disconnect
 		ForcePlayerSuicide(client);
@@ -842,6 +845,9 @@ public void OnEntityDestroyed(int entity)
 
 public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int & subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
 {
+	if (!IsClientInGame(client))
+		return Plugin_Continue;
+	
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
 		if (Player(client).ShouldAutoJump())
@@ -859,6 +865,9 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 
 public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
 {
+	if (!IsClientInGame(client))
+		return;
+	
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
 		if (Player(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))

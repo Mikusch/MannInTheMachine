@@ -1532,7 +1532,11 @@ methodmap CPopulationManager
 	
 	public void GetDefaultEventChangeAttributesName(char[] buffer, int maxlen)
 	{
-		PtrToString(GetEntData(this._index, GetOffset("CPopulationManager::m_defaultEventChangeAttributesName")), buffer, maxlen);
+		Address defaultEventChangeAttributesName = view_as<Address>(GetEntData(this._index, GetOffset("CPopulationManager::m_defaultEventChangeAttributesName")));
+		if (!defaultEventChangeAttributesName)
+			return;
+		
+		PtrToString(defaultEventChangeAttributesName, buffer, maxlen);
 	}
 }
 

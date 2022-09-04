@@ -1211,7 +1211,7 @@ methodmap EventChangeAttributes_t
 		return view_as<EventChangeAttributes_t>(address);
 	}
 	
-	property any m_eventName
+	property Address m_eventName
 	{
 		public get()
 		{
@@ -1501,11 +1501,11 @@ methodmap CPopulationManager
 		}
 	}
 	
-	property any m_defaultEventChangeAttributesName
+	property Address m_defaultEventChangeAttributesName
 	{
 		public get()
 		{
-			return GetEntData(this._index, GetOffset("CPopulationManager::m_defaultEventChangeAttributesName"));
+			return view_as<Address>(GetEntData(this._index, GetOffset("CPopulationManager::m_defaultEventChangeAttributesName")));
 		}
 	}
 	
@@ -1519,7 +1519,7 @@ methodmap CPopulationManager
 		return this.m_bSpawningPaused;
 	}
 	
-	public any GetDefaultEventChangeAttributesName()
+	public Address GetDefaultEventChangeAttributesName()
 	{
 		return this.m_defaultEventChangeAttributesName;
 	}

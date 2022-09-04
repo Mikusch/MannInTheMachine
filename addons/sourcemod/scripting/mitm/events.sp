@@ -243,8 +243,9 @@ static void EventHook_TeamplayRoundStart(Event event, const char[] name, bool do
 	}
 	else
 	{
-		tf_mvm_min_players_to_start.IntValue = 0;
 		g_bInWaitingForPlayers = false;
+		
+		tf_mvm_min_players_to_start.IntValue = 0;
 	}
 }
 

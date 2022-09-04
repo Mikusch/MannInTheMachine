@@ -651,15 +651,13 @@ methodmap Player
 		this.m_eventChangeAttributes.Push(newEvent);
 	}
 	
-	public EventChangeAttributes_t GetEventChangeAttributes(const char[] pszEventName)
+	public EventChangeAttributes_t GetEventChangeAttributes(Address pszEventName)
 	{
 		for (int i = 0; i < this.m_eventChangeAttributes.Length; ++i)
 		{
 			EventChangeAttributes_t attributes = this.m_eventChangeAttributes.Get(i);
 			
-			char eventName[64];
-			attributes.GetEventName(eventName, sizeof(eventName));
-			if (StrEqual(eventName, pszEventName, false))
+			if (StrPtrEquals(attributes.m_eventName, pszEventName))
 			{
 				return attributes;
 			}
@@ -1270,6 +1268,14 @@ methodmap EventChangeAttributes_t
 		return view_as<EventChangeAttributes_t>(address);
 	}
 	
+	property Address m_eventName
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("EventChangeAttributes_t::m_eventName"));
+		}
+	}
+	
 	property DifficultyType m_skill
 	{
 		public get()
@@ -1332,11 +1338,6 @@ methodmap EventChangeAttributes_t
 		{
 			return CUtlVector(this + GetOffset("EventChangeAttributes_t::m_tags"));
 		}
-	}
-	
-	public void GetEventName(char[] buffer, int maxlen)
-	{
-		PtrToString(Deref(this + GetOffset("EventChangeAttributes_t::m_eventName")), buffer, maxlen);
 	}
 };
 
@@ -1557,6 +1558,14 @@ methodmap CPopulationManager
 		}
 	}
 	
+	property Address m_defaultEventChangeAttributesName
+	{
+		public get()
+		{
+			return view_as<Address>(GetEntData(this._index, GetOffset("CPopulationManager::m_defaultEventChangeAttributesName")));
+		}
+	}
+	
 	public bool CanBotsAttackWhileInSpawnRoom()
 	{
 		return this.m_canBotsAttackWhileInSpawnRoom;
@@ -1565,6 +1574,11 @@ methodmap CPopulationManager
 	public bool IsSpawningPaused()
 	{
 		return this.m_bSpawningPaused;
+	}
+	
+	public Address GetDefaultEventChangeAttributesName()
+	{
+		return this.m_defaultEventChangeAttributesName;
 	}
 	
 	public void ResetMap()
@@ -1585,11 +1599,6 @@ methodmap CPopulationManager
 	public void GetSentryBusterDamageAndKillThreshold(int &nDamage, int &nKills)
 	{
 		SDKCall_GetSentryBusterDamageAndKillThreshold(this._index, nDamage, nKills);
-	}
-	
-	public void GetDefaultEventChangeAttributesName(char[] buffer, int maxlen)
-	{
-		PtrToString(GetEntData(this._index, GetOffset("CPopulationManager::m_defaultEventChangeAttributesName")), buffer, maxlen);
 	}
 }
 

@@ -447,10 +447,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 			}
 		}
 		
-		char defaultEventChangeAttributesName[64];
-		GetPopulationManager().GetDefaultEventChangeAttributesName(defaultEventChangeAttributesName, sizeof(defaultEventChangeAttributesName));
-		
-		EventChangeAttributes_t pEventChangeAttributes = Player(newPlayer).GetEventChangeAttributes(defaultEventChangeAttributesName);
+		EventChangeAttributes_t pEventChangeAttributes = Player(newPlayer).GetEventChangeAttributes(GetPopulationManager().GetDefaultEventChangeAttributesName());
 		if (!pEventChangeAttributes)
 		{
 			pEventChangeAttributes = spawner.m_defaultAttributes;
@@ -975,10 +972,7 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Post(Address pThis,
 
 static MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterface, DHookParam params)
 {
-	Address iszVal = params.GetObjectVar(1, 0x8, ObjectValueType_Int);
-	
-	char pszEventName[64];
-	PtrToString(iszVal, pszEventName, sizeof(pszEventName));
+	Address pszEventName = params.GetObjectVar(1, 0x8, ObjectValueType_Int);
 	
 	if (GameRules_IsMannVsMachineMode())
 	{

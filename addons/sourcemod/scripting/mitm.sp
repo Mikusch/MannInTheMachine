@@ -680,6 +680,8 @@ public void OnPluginStart()
 	sv_stepsize = FindConVar("sv_stepsize");
 	phys_pushscale = FindConVar("phys_pushscale");
 	
+	tf_mvm_min_players_to_start.AddChangeHook(ConVarChanged_MinPlayersToStart);
+	
 	// Init bot actions
 	CTFBotMainAction.Init();
 	CTFBotDead.Init();
@@ -1279,6 +1281,15 @@ INextBot CreateNextBotPlayer(Address entity)
 	ToolsNextBotPlayer nextbot = ToolsNextBotPlayer(entity);
 	nextbot.IsDormantWhenDead = false;
 	return nextbot;
+}
+
+static void ConVarChanged_MinPlayersToStart(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	if (g_bInWaitingForPlayers)
+	{
+		// Don't allow maps to modify this using point_servercommand
+		convar.IntValue = MaxClients + 1;
+	}
 }
 
 static Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNum, bool reliable, bool init)

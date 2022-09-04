@@ -55,7 +55,7 @@ static int Update(CTFBotFetchFlag action, int actor, float interval)
 {
 	int flag = Player(actor).GetFlagToFetch();
 	
-	if (flag == -1)
+	if (!IsValidEntity(flag))
 	{
 		return action.Done("No flag");
 	}

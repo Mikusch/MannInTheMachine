@@ -94,7 +94,7 @@ static int Update(CTFBotDeliverFlag action, int actor, float interval)
 	}
 	
 	int carrier = GetEntPropEnt(flag, Prop_Send, "m_hOwnerEntity");
-	if (!IsValidEntity(carrier) || actor != carrier)
+	if (carrier == -1 || actor != carrier)
 	{
 		return action.Done("I'm no longer carrying the flag");
 	}

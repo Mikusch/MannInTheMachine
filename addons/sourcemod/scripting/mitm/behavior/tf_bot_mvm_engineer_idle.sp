@@ -138,7 +138,7 @@ static int Update(CTFBotMvMEngineerIdle action, int actor, float interval)
 		return action.Done();
 	}
 	
-	if (action.m_sentryHint == -1 || ShouldAdvanceNestSpot(action, actor))
+	if (!IsValidEntity(action.m_sentryHint) || ShouldAdvanceNestSpot(action, actor))
 	{
 		if (m_findHintTimer[actor].HasStarted() && !m_findHintTimer[actor].IsElapsed())
 		{
@@ -159,7 +159,7 @@ static int Update(CTFBotMvMEngineerIdle action, int actor, float interval)
 		}
 		
 		// unown the old nest
-		if (action.m_nestHint != -1)
+		if (IsValidEntity(action.m_nestHint))
 		{
 			SetEntityOwner(action.m_nestHint, -1);
 		}
@@ -186,7 +186,7 @@ static int Update(CTFBotMvMEngineerIdle action, int actor, float interval)
 	}
 	
 	int mySentry = -1;
-	if (action.m_sentryHint != -1)
+	if (IsValidEntity(action.m_sentryHint))
 	{
 		int owner = GetEntPropEnt(action.m_sentryHint, Prop_Send, "m_hOwnerEntity");
 		if (owner != -1 && IsBaseObject(owner))
@@ -216,7 +216,7 @@ static int Update(CTFBotMvMEngineerIdle action, int actor, float interval)
 
 static void TakeOverStaleNest(int hint, int actor)
 {
-	if (hint != -1 && CBaseTFBotHintEntity(hint).OwnerObjectHasNoOwner())
+	if (IsValidEntity(hint) && CBaseTFBotHintEntity(hint).OwnerObjectHasNoOwner())
 	{
 		int obj = GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity");
 		SetEntityOwner(obj, actor);
@@ -226,7 +226,7 @@ static void TakeOverStaleNest(int hint, int actor)
 
 static bool ShouldAdvanceNestSpot(CTFBotMvMEngineerIdle action, int actor)
 {
-	if (action.m_nestHint == -1)
+	if (!IsValidEntity(action.m_nestHint))
 	{
 		return false;
 	}
@@ -256,7 +256,7 @@ static bool ShouldAdvanceNestSpot(CTFBotMvMEngineerIdle action, int actor)
 	BombInfo_t bombInfo = malloc(20); // sizeof(BombInfo_t)
 	if (SDKCall_GetBombInfo(bombInfo))
 	{
-		if (action.m_nestHint != -1)
+		if (IsValidEntity(action.m_nestHint))
 		{
 			float origin[3];
 			GetEntPropVector(action.m_nestHint, Prop_Data, "m_vecAbsOrigin", origin);
@@ -283,8 +283,8 @@ static void TryToDetonateStaleNest(CTFBotMvMEngineerIdle action)
 		return;
 	
 	// wait until the engy finish building his nest
-	if ((action.m_sentryHint != -1 && !CBaseTFBotHintEntity(action.m_sentryHint).OwnerObjectFinishBuilding()) || 
-		(action.m_teleporterHint != -1 && !CBaseTFBotHintEntity(action.m_teleporterHint).OwnerObjectFinishBuilding()))
+	if ((IsValidEntity(action.m_sentryHint) && !CBaseTFBotHintEntity(action.m_sentryHint).OwnerObjectFinishBuilding()) || 
+		(IsValidEntity(action.m_teleporterHint) && !CBaseTFBotHintEntity(action.m_teleporterHint).OwnerObjectFinishBuilding()))
 		return;
 	
 	ArrayList activeEngineerNest = new ArrayList();

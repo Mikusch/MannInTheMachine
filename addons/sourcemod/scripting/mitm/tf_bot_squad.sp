@@ -167,7 +167,7 @@ methodmap CTFBotSquad
 		}
 		else if (GameRules_IsMannVsMachineMode())
 		{
-			Player(bot).SetFlagTarget(-1);
+			Player(bot).SetFlagTarget(INVALID_ENT_REFERENCE);
 		}
 		
 		this.m_roster.Push(bot);

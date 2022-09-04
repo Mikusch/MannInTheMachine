@@ -32,7 +32,7 @@ static DynamicHook g_DHookFPlayerCanTakeDamage;
 
 static ArrayList m_justSpawnedList;
 
-static int g_InternalSpawnPoint = INVALID_ENT_REFERENCE;
+static int g_internalSpawnPoint = INVALID_ENT_REFERENCE;
 static SpawnLocationResult s_spawnLocationResult = SPAWN_LOCATION_NOT_FOUND;
 
 // CMissionPopulator
@@ -314,10 +314,10 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		// clear any old TeleportWhere settings 
 		Player(newPlayer).ClearTeleportWhere();
 		
-		if (g_InternalSpawnPoint == INVALID_ENT_REFERENCE || EntRefToEntIndex(g_InternalSpawnPoint) == -1)
+		if (g_internalSpawnPoint == INVALID_ENT_REFERENCE || EntRefToEntIndex(g_internalSpawnPoint) == -1)
 		{
-			g_InternalSpawnPoint = EntIndexToEntRef(CreateEntityByName("populator_internal_spawn_point"));
-			DispatchSpawn(g_InternalSpawnPoint);
+			g_internalSpawnPoint = EntIndexToEntRef(CreateEntityByName("populator_internal_spawn_point"));
+			DispatchSpawn(g_internalSpawnPoint);
 		}
 		
 		char name[MAX_NAME_LENGTH];
@@ -328,8 +328,8 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 			Player(newPlayer).SetName(name);
 		}
 		
-		DispatchKeyValueVector(g_InternalSpawnPoint, "origin", here);
-		Player(newPlayer).m_spawnPointEntity = g_InternalSpawnPoint;
+		DispatchKeyValueVector(g_internalSpawnPoint, "origin", here);
+		Player(newPlayer).SetSpawnPoint(g_internalSpawnPoint);
 		
 		TFTeam team = TFTeam_Red;
 		
@@ -455,7 +455,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		Player(newPlayer).OnEventChangeAttributes(pEventChangeAttributes);
 		
 		int flag = Player(newPlayer).GetFlagToFetch();
-		if (flag != -1)
+		if (IsValidEntity(flag))
 		{
 			Player(newPlayer).SetFlagTarget(flag);
 		}
@@ -726,7 +726,7 @@ static MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 	{
 		int player = m_justSpawnedList.Get(i);
 		
-		Player(player).SetFlagTarget(-1);
+		Player(player).SetFlagTarget(INVALID_ENT_REFERENCE);
 		Player(player).SetMission(mission);
 		SetEntData(player, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true, 1);
 		
@@ -884,7 +884,7 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 				{
 					int bot = m_justSpawnedList.Get(k);
 					
-					Player(bot).SetFlagTarget(-1);
+					Player(bot).SetFlagTarget(INVALID_ENT_REFERENCE);
 					Player(bot).SetMission(MISSION_DESTROY_SENTRIES);
 					Player(bot).SetMissionTarget(targetSentry);
 					
@@ -1527,7 +1527,7 @@ static MRESReturn DHookCallback_EntSelectSpawnPoint_Pre(int player, DHookReturn 
 		return MRES_Supercede;
 	}
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret, DHookParam params)
@@ -1582,7 +1582,7 @@ static MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
 		if (Player(player).HasAttribute(IGNORE_FLAG))
 			return MRES_Supercede;
 		
-		Player(player).SetFlagTarget(item);
+		Player(player).SetFlagTarget(EntIndexToEntRef(item));
 	}
 	
 	return MRES_Ignored;

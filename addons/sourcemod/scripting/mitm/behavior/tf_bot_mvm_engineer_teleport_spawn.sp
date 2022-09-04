@@ -86,12 +86,12 @@ static int Update(CTFBotMvMEngineerTeleportSpawn action, int actor, float interv
 		GetEntPropVector(action.m_hintEntity, Prop_Data, "m_vecAbsOrigin", origin);
 		
 		m_teleportDelay[actor].Start(0.1);
-		if (action.m_hintEntity != -1)
+		if (IsValidEntity(action.m_hintEntity))
 			SDKCall_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Defenders);
 	}
 	else if (m_teleportDelay[actor].IsElapsed())
 	{
-		if (action.m_hintEntity == -1)
+		if (!IsValidEntity(action.m_hintEntity))
 			return action.Done("Cannot teleport to hint as m_hintEntity is NULL");
 		
 		// teleport the engineer to the sentry spawn point

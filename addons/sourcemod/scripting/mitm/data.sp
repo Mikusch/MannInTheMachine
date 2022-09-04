@@ -340,7 +340,12 @@ methodmap Player
 	
 	public bool HasFlagTarget()
 	{
-		return this.m_hFollowingFlagTarget != -1;
+		return IsValidEntity(this.m_hFollowingFlagTarget);
+	}
+	
+	public void SetSpawnPoint(int spawnPoint)
+	{
+		this.m_spawnPointEntity = spawnPoint;
 	}
 	
 	public BombDeployingState_t GetDeployingBombState()
@@ -787,11 +792,11 @@ methodmap Player
 		}
 		else
 		{
-			int pEntity = TF2Util_GetPlayerLoadoutEntity(this._client, slot);
-			if (pEntity != -1)
+			int entity = TF2Util_GetPlayerLoadoutEntity(this._client, slot);
+			if (entity != -1)
 			{
-				RemovePlayerItem(this._client, pEntity);
-				RemoveEntity(pEntity);
+				RemovePlayerItem(this._client, entity);
+				RemoveEntity(entity);
 			}
 		}
 		
@@ -908,12 +913,12 @@ methodmap Player
 		{
 			if (TF2_GetClientTeam(this._client) == TFTeam_Invaders && TF2_GetPlayerClass(this._client) == TFClass_Engineer)
 			{
-				return -1;
+				return INVALID_ENT_REFERENCE;
 			}
 			
 			if (this.HasAttribute(IGNORE_FLAG))
 			{
-				return -1;
+				return INVALID_ENT_REFERENCE;
 			}
 			
 			if (GameRules_IsMannVsMachineMode() && this.HasFlagTarget())
@@ -937,7 +942,7 @@ methodmap Player
 				if (GetEntPropEnt(flag, Prop_Send, "m_hOwnerEntity") == this._client)
 				{
 					delete flagsList;
-					return flag;
+					return EntIndexToEntRef(flag);
 				}
 			}
 			
@@ -968,39 +973,40 @@ methodmap Player
 			}
 		}
 		
-		int pClosestFlag = -1;
+		int closestFlag = INVALID_ENT_REFERENCE;
 		float flClosestFlagDist = float(cellmax);
-		int pClosestUncarriedFlag = -1;
+		int closestUncarriedFlag = INVALID_ENT_REFERENCE;
 		float flClosestUncarriedFlagDist = float(cellmax);
 		
 		if (GameRules_IsMannVsMachineMode())
 		{
 			for (int i = 0; i < flagsList.Length; i++)
 			{
-				flag = flagsList.Get(i);
-				
-				// Find the closest
-				float flagOrigin[3], playerOrigin[3];
-				GetEntPropVector(flag, Prop_Data, "m_vecAbsOrigin", flagOrigin);
-				GetClientAbsOrigin(this._client, playerOrigin);
-				
-				float origins[3];
-				SubtractVectors(flagOrigin, playerOrigin, origins);
-				
-				float flDist = GetVectorLength(origins, true);
-				if (flDist < flClosestFlagDist)
+				if (IsValidEntity(flagsList.Get(i)))
 				{
-					pClosestFlag = flag;
-					flClosestFlagDist = flDist;
-				}
-				
-				// Find the closest uncarried
-				if (nCarriedFlags < flagsList.Length && GetEntProp(flag, Prop_Send, "m_nFlagStatus") != TF_FLAGINFO_STOLEN)
-				{
-					if (flDist < flClosestUncarriedFlagDist)
+					// Find the closest
+					float flagOrigin[3], playerOrigin[3];
+					GetEntPropVector(flagsList.Get(i), Prop_Data, "m_vecAbsOrigin", flagOrigin);
+					GetClientAbsOrigin(this._client, playerOrigin);
+					
+					float origins[3];
+					SubtractVectors(flagOrigin, playerOrigin, origins);
+					
+					float flDist = GetVectorLength(origins, true);
+					if (flDist < flClosestFlagDist)
 					{
-						pClosestUncarriedFlag = flag;
-						flClosestUncarriedFlagDist = flDist;
+						closestFlag = EntIndexToEntRef(flagsList.Get(i));
+						flClosestFlagDist = flDist;
+					}
+					
+					// Find the closest uncarried
+					if (nCarriedFlags < flagsList.Length && GetEntProp(flagsList.Get(i), Prop_Send, "m_nFlagStatus") != TF_FLAGINFO_STOLEN)
+					{
+						if (flDist < flClosestUncarriedFlagDist)
+						{
+							closestUncarriedFlag = EntIndexToEntRef(flagsList.Get(i));
+							flClosestUncarriedFlagDist = flDist;
+						}
 					}
 				}
 			}
@@ -1009,10 +1015,10 @@ methodmap Player
 		delete flagsList;
 		
 		// If we have an uncarried flag, prioritize
-		if (pClosestUncarriedFlag != -1)
-			return pClosestUncarriedFlag;
+		if (closestUncarriedFlag != INVALID_ENT_REFERENCE)
+			return closestUncarriedFlag;
 		
-		return pClosestFlag;
+		return closestFlag;
 	}
 	
 	public int GetFlagCaptureZone()
@@ -1186,8 +1192,8 @@ methodmap Player
 		this.ClearIdleSound();
 		this.m_fModelScaleOverride = 0.0;
 		this.m_flRequiredSpawnLeaveTime = 0.0;
-		this.m_spawnPointEntity = -1;
-		this.m_hFollowingFlagTarget = -1;
+		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
+		this.m_hFollowingFlagTarget = INVALID_ENT_REFERENCE;
 	}
 	
 	public void Reset()

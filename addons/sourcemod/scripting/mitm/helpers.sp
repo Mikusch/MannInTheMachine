@@ -902,3 +902,19 @@ bool ArrayListEquals(ArrayList list1, ArrayList list2)
 	
 	return true;
 }
+
+bool StrPtrEquals(Address psz1, Address psz2)
+{
+	if (psz1 == psz2)
+		return true;
+	
+	if (!psz1 || !psz2)
+		return false;
+	
+	// should be big enough for our use case
+	char sz1[64], sz2[64];
+	PtrToString(psz1, sz1, sizeof(sz1));
+	PtrToString(psz2, sz2, sizeof(sz2));
+	
+	return strcmp(sz1, sz2, false) == 0;
+}

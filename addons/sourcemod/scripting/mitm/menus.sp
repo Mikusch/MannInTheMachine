@@ -39,15 +39,15 @@ static int MenuHandler_MainMenu(Menu menu, MenuAction action, int param1, int pa
 			
 			if (StrEqual(info, "queue"))
 			{
-				FakeClientCommand(param1, "sm_queue");
+				Menus_DisplayQueueMenu(param1);
 			}
 			else if (StrEqual(info, "prefs"))
 			{
-				FakeClientCommand(param1, "sm_preferences");
+				Menus_DisplayPreferencesMenu(param1);
 			}
 			else if (StrEqual(info, "party"))
 			{
-				FakeClientCommand(param1, "sm_party");
+				Menus_DisplayPartyMenu(param1);
 			}
 		}
 		case MenuAction_End:
@@ -75,7 +75,7 @@ void Menus_DisplayQueueMenu(int client)
 	ArrayList queue = Queue_GetDefenderQueue();
 	if (queue.Length > 0)
 	{
-		Menu menu = new Menu(MenuHandler_QueueMenu, MenuAction_Cancel | MenuAction_End);
+		Menu menu = new Menu(MenuHandler_QueueMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End);
 		menu.ExitBackButton = true;
 		
 		char title[256];
@@ -126,13 +126,14 @@ void Menus_DisplayQueueMenu(int client)
 			int other = queue.Get(i, QueueData::m_client);
 			Party party = queue.Get(i, QueueData::m_party);
 			
-			char display[64];
+			char info[32], display[64];
 			
 			if (party == NULL_PARTY)
 			{
+				Format(info, sizeof(info), "player_%d", other);
 				Format(display, sizeof(display), "%N (%d)", other, points);
 				
-				menu.AddItem(NULL_STRING, display, client == other ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+				menu.AddItem(info, display, ITEMDRAW_DISABLED);
 			}
 			else
 			{
@@ -148,9 +149,10 @@ void Menus_DisplayQueueMenu(int client)
 					strcopy(display, sizeof(display), SYMBOL_PARTY_OTHER);
 				}
 				
+				Format(info, sizeof(info), "party_%d", party.m_id);
 				Format(display, sizeof(display), "%s %s (%d)", display, name, points);
 				
-				menu.AddItem(NULL_STRING, display, Player(client).IsInAParty() && Player(client).GetParty() == party ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+				menu.AddItem(info, display, ITEMDRAW_DEFAULT);
 			}
 		}
 		
@@ -159,7 +161,7 @@ void Menus_DisplayQueueMenu(int client)
 	else
 	{
 		PrintHintText(client, "%t", "Menu_Queue_NotLoaded");
-		FakeClientCommand(client, "sm_mitm");
+		Menus_DisplayMainMenu(client);
 	}
 	delete queue;
 }
@@ -168,6 +170,47 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 {
 	switch (action)
 	{
+		case MenuAction_Select:
+		{
+			char info[32];
+			menu.GetItem(param2, info, sizeof(info));
+			
+			// Display party members
+			if (!strncmp(info, "party_", 6))
+			{
+				ReplaceStringEx(info, sizeof(info), "party_", "");
+				
+				int id = StringToInt(info);
+				Party party = Party(id);
+				
+				char name[MAX_NAME_LENGTH], strMembers[128];
+				party.GetName(name, sizeof(name));
+				
+				ArrayList members = new ArrayList();
+				party.CollectMembers(members);
+				
+				for (int i = 0; i < members.Length; i++)
+				{
+					char strMember[64];
+					
+					if (i == members.Length - 1)
+					{
+						Format(strMember, sizeof(strMember), "{lightgreen}%N", members.Get(i));
+					}
+					else
+					{
+						Format(strMember, sizeof(strMember), "{lightgreen}%N{default}, ", members.Get(i));
+					}
+					
+					StrCat(strMembers, sizeof(strMembers), strMember);
+				}
+				
+				delete members;
+				
+				CPrintToChat(param1, "%s {cyan}%s{default}: %s", PLUGIN_TAG, name, strMembers);
+				Menus_DisplayQueueMenu(param1);
+			}
+		}
 		case MenuAction_Cancel:
 		{
 			if (param2 == MenuCancel_ExitBack)
@@ -204,7 +247,7 @@ void Menus_DisplayPreferencesMenu(int client)
 	else
 	{
 		PrintHintText(client, "%t", "Menu_Preferences_NotLoaded");
-		FakeClientCommand(client, "sm_mitm");
+		Menus_DisplayMainMenu(client);
 	}
 }
 
@@ -230,13 +273,13 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 			else
 				CPrintToChat(param1, "%s %t", PLUGIN_TAG, "Preferences_Disabled", name);
 			
-			FakeClientCommand(param1, "sm_preferences");
+			Menus_DisplayPreferencesMenu(param1);
 		}
 		case MenuAction_Cancel:
 		{
 			if (param2 == MenuCancel_ExitBack)
 			{
-				FakeClientCommand(param1, "sm_mitm");
+				Menus_DisplayMainMenu(param1);
 			}
 		}
 		case MenuAction_End:
@@ -362,27 +405,27 @@ static int MenuHandler_PartyMenu(Menu menu, MenuAction action, int param1, int p
 			if (StrEqual(info, "create_party"))
 			{
 				FakeClientCommand(param1, "sm_party_create");
-				FakeClientCommand(param1, "sm_party");
+				Menus_DisplayPartyMenu(param1);
 			}
 			else if (StrEqual(info, "leave_party"))
 			{
 				FakeClientCommand(param1, "sm_party_leave")
-				FakeClientCommand(param1, "sm_party");
+				Menus_DisplayPartyMenu(param1);
 			}
 			else if (StrEqual(info, "manage_party"))
 			{
-				FakeClientCommand(param1, "sm_party_manage");
+				Menus_DisplayPartyManageMenu(param1);
 			}
 			else if (StrEqual(info, "view_invites"))
 			{
-				FakeClientCommand(param1, "sm_party_join");
+				Menus_DisplayPartyInviteMenu(param1);
 			}
 		}
 		case MenuAction_Cancel:
 		{
 			if (param2 == MenuCancel_ExitBack)
 			{
-				FakeClientCommand(param1, "sm_mitm");
+				Menus_DisplayMainMenu(param1);
 			}
 		}
 		case MenuAction_End:
@@ -428,18 +471,18 @@ static int MenuHandler_PartyManageMenu(Menu menu, MenuAction action, int param1,
 			
 			if (StrEqual(info, "invite_members"))
 			{
-				FakeClientCommand(param1, "sm_party_invite");
+				Menus_DisplayPartyManageInviteMenu(param1);
 			}
 			else if (StrEqual(info, "kick_members"))
 			{
-				FakeClientCommand(param1, "sm_party_kick");
+				Menus_DisplayPartyManageKickMenu(param1);
 			}
 		}
 		case MenuAction_Cancel:
 		{
 			if (param2 == MenuCancel_ExitBack)
 			{
-				FakeClientCommand(param1, "sm_party");
+				Menus_DisplayPartyMenu(param1);
 			}
 		}
 		case MenuAction_End:
@@ -542,13 +585,13 @@ static int MenuHandler_PartyManageInviteMenu(Menu menu, MenuAction action, int p
 				FakeClientCommand(param1, "sm_party_invite #%d", userid);
 			}
 			
-			FakeClientCommand(param1, "sm_party_invite");
+			Menus_DisplayPartyManageInviteMenu(param1);
 		}
 		case MenuAction_Cancel:
 		{
 			if (param2 == MenuCancel_ExitBack)
 			{
-				FakeClientCommand(param1, "sm_party_manage");
+				Menus_DisplayPartyManageMenu(param1);
 			}
 		}
 		case MenuAction_End:
@@ -628,13 +671,13 @@ static int MenuHandler_PartyKickMenu(Menu menu, MenuAction action, int param1, i
 				FakeClientCommand(param1, "sm_party_kick #%d", userid);
 			}
 			
-			FakeClientCommand(param1, "sm_party_kick");
+			Menus_DisplayPartyManageKickMenu(param1);
 		}
 		case MenuAction_Cancel:
 		{
 			if (param2 == MenuCancel_ExitBack)
 			{
-				FakeClientCommand(param1, "sm_party_manage");
+				Menus_DisplayPartyManageMenu(param1);
 			}
 		}
 		case MenuAction_End:
@@ -704,13 +747,13 @@ static int MenuHandler_PartyInviteMenu(Menu menu, MenuAction action, int param1,
 			menu.GetItem(param2, info, sizeof(info));
 			
 			FakeClientCommand(param1, "sm_party_join %s", info);
-			FakeClientCommand(param1, "sm_party");
+			Menus_DisplayPartyMenu(param1);
 		}
 		case MenuAction_Cancel:
 		{
 			if (param2 == MenuCancel_ExitBack)
 			{
-				FakeClientCommand(param1, "sm_party");
+				Menus_DisplayPartyMenu(param1);
 			}
 		}
 		case MenuAction_End:

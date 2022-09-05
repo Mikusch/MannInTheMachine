@@ -179,35 +179,42 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 			if (!strncmp(info, "party_", 6))
 			{
 				ReplaceStringEx(info, sizeof(info), "party_", "");
-				
 				int id = StringToInt(info);
+				
 				Party party = Party(id);
-				
-				char name[MAX_NAME_LENGTH], strMembers[128];
-				party.GetName(name, sizeof(name));
-				
-				ArrayList members = new ArrayList();
-				party.CollectMembers(members);
-				
-				for (int i = 0; i < members.Length; i++)
+				if (!party.IsNull())
 				{
-					char strMember[64];
+					char name[MAX_NAME_LENGTH], strMembers[128];
+					party.GetName(name, sizeof(name));
 					
-					if (i == members.Length - 1)
+					ArrayList members = new ArrayList();
+					party.CollectMembers(members);
+					
+					for (int i = 0; i < members.Length; i++)
 					{
-						Format(strMember, sizeof(strMember), "{lightgreen}%N", members.Get(i));
-					}
-					else
-					{
-						Format(strMember, sizeof(strMember), "{lightgreen}%N{default}, ", members.Get(i));
+						char strMember[64];
+						
+						if (i == members.Length - 1)
+						{
+							Format(strMember, sizeof(strMember), "{lightgreen}%N", members.Get(i));
+						}
+						else
+						{
+							Format(strMember, sizeof(strMember), "{lightgreen}%N{default}, ", members.Get(i));
+						}
+						
+						StrCat(strMembers, sizeof(strMembers), strMember);
 					}
 					
-					StrCat(strMembers, sizeof(strMembers), strMember);
+					delete members;
+					
+					CPrintToChat(param1, "%s {cyan}%s{default}: %s", PLUGIN_TAG, name, strMembers);
+				}
+				else
+				{
+					CPrintToChat(param1, "%s %t", PLUGIN_TAG, "Party_DoesNotExist");
 				}
 				
-				delete members;
-				
-				CPrintToChat(param1, "%s {cyan}%s{default}: %s", PLUGIN_TAG, name, strMembers);
 				Menus_DisplayQueueMenu(param1);
 			}
 		}

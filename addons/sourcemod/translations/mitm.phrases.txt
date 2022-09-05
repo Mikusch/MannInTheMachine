@@ -23,11 +23,15 @@
 	}
 	"Menu_Main_Queue"
 	{
-		"en"		"View Defender Queue"
+		"en"		"View defender queue"
 	}
 	"Menu_Main_Preferences"
 	{
-		"en"		"Change Preferences"
+		"en"		"Change preferences"
+	}
+	"Menu_Main_Party"
+	{
+		"en"		"Open party menu"
 	}
 	"Menu_Queue_Title"
 	{
@@ -35,8 +39,17 @@
 	}
 	"Menu_Queue_Title_QueuePoints"
 	{
-		"#format"	"{1:d}"
-		"en"		"Your queue points: {1}"
+		"#format"	"{1:d},{2:d}"
+		"en"		"Your queue points: {1} [#{2}]"
+	}
+	"Menu_Queue_Title_PartyQueuePoints"
+	{
+		"#format"	"{1:d},{2:d}"
+		"en"		"Your party's queue points: {1} [#{2}]"
+	}
+	"Menu_Queue_Title_NotInQueue"
+	{
+		"en"		"You are not currently in the queue."
 	}
 	"Menu_Queue_NotLoaded"
 	{
@@ -69,6 +82,10 @@
 	"Preference_DisableAnnotations"
 	{
 		"en"		"Disable annotations"
+	}
+	"Preference_IgnorePartyInvites"
+	{
+		"en"		"Ignore party invites"
 	}
 	"Preferences_Enabled"
 	{
@@ -168,5 +185,169 @@
 	{
 		"#format"	"{1:s},{2:d}"
 		"en"		"Set {cyan}{1} {default}to {cyan}{2}{default} to receive helpful messages during gameplay."
+	}
+	
+	// Party
+	
+	"Party_Menu_Title"
+	{
+		"en"		"Party Menu"
+	}
+	"Party_InviteMenu_Title"
+	{
+		"en"		"Pending Party Invites"
+	}
+	"Party_ManageInviteMenu_Title"
+	{
+		"en"		"Invite Players"
+	}
+	"Party_ManageMenu_Title"
+	{
+		"en"		"Manage Party"
+	}
+	"Party_KickMenu_Title"
+	{
+		"en"		"Kick Members"
+	}
+	"Party_KickMenu_NoMembers"
+	{
+		"en"		"No members to kick"
+	}
+	"Party_Menu_CurrentParty"
+	{
+		"#format"	"{1:s}"
+		"en"		"Your party: {1}"
+	}
+	"Party_Menu_Members"
+	{
+		"#format"	"{1:d},{2:d}"
+		"en"		"Members ({1}/{2}):"
+	}
+	"Party_Menu_NotInAParty"
+	{
+		"en"		"You are not in a party."
+	}
+	"Party_Menu_QueuePoints"
+	{
+		"#format"	"{1:d},{2:d}"
+		"en"		"Queue points: {1} [#{2}]"
+	}
+	"Party_Menu_NotEnoughMembersForQueue"
+	{
+		"en"		"Invite players to queue together!"
+	}
+	"Party_Menu_ManageParty"
+	{
+		"en"		"★ Manage party"
+	}
+	"Party_Menu_CreateParty"
+	{
+		"en"		"Create new party"
+	}
+	"Party_Menu_LeaveParty"
+	{
+		"en"		"Leave party"
+	}
+	"Party_Menu_ViewPartyInvites"
+	{
+		"en"		"View pending invites"
+	}
+	"Party_ManageMenu_InviteMembers"
+	{
+		"en"		"★ Invite players"
+	}
+	"Party_ManageMenu_KickMembers"
+	{
+		"en"		"★ Kick members"
+	}
+	"Party_ManageInviteMenu_NoPlayers"
+	{
+		"en"		"No players to invite"
+	}
+	"Party_ManageInviteMenu_AlreadyInvited"
+	{
+		"en"		"(pending)"
+	}
+	"Party_InviteMenu_NoPendingInvites"
+	{
+		"en"		"No pending invites"
+	}
+	"Party_InvitedPlayers"
+	{
+		"#format"	"{1:t},{2:s}"
+		"en"		"You have invited {lightgreen}{1} {default}to {cyan}{2}{default}."
+	}
+	"Party_DoesNotExist"
+	{
+		"en"		"The party does not exist. It may have been deleted."
+	}
+	"Party_AlreadyMember"
+	{
+		"en"		"You are already a member of this party!"
+	}
+	"Party_AlreadyInAParty"
+	{
+		"en"		"You are already in a party!"
+	}
+	"Party_RequireInvite"
+	{
+		"en"		"You need an invite to join this party!"
+	}
+	"Party_MaxMembers"
+	{
+		"en"		"This party is already full and can not accept new members."
+	}
+	"Party_Created"
+	{
+		"#format"	"{1:s}"
+		"en"		"You have created and automatically joined {cyan}{1}{default}."
+	}
+	"Party_Joined"
+	{
+		"#format"	"{1:s}"
+		"en"		"You have joined {cyan}{1}{default}."
+	}
+	"Party_JoinedOther"
+	{
+		"#format"	"{1:N}"
+		"en"		"{lightgreen}{1} {default}has joined the party."
+	}
+	"Party_Left"
+	{
+		"#format"	"{1:s}"
+		"en"		"You have left {cyan}{1}{default}."
+	}
+	"Party_LeftOther"
+	{
+		"#format"	"{1:N}"
+		"en"		"{lightgreen}{1} {default}has left the party."
+	}
+	"Party_Kicked"
+	{
+		"#format"	"{1:s}"
+		"en"		"You have been kicked from {cyan}{1}{default}."
+	}
+	"Party_KickedOther"
+	{
+		"#format"	"{1:N}"
+		"en"		"{lightgreen}{1} {default}has been kicked from the party."
+	}
+	"Party_RequireMember"
+	{
+		"en"		"You need to be in a party to use this."
+	}
+	"Party_RequireLeader"
+	{
+		"en"		"You need to be the party leader to use this."
+	}
+	"Party_Renamed"
+	{
+		"#format"	"{1:s}"
+		"en"		"You have renamed your party to {cyan}{1}{default}."
+	}
+	"Party_IncomingInvite"
+	{
+		"#format"	"{1:s},{2:N}"
+		"en"		"You have been invited to {cyan}{1}{default} by {lightgreen}{2}{default}. Type {yellow}/party {default}to accept."
 	}
 }

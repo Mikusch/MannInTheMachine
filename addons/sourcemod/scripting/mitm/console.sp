@@ -20,9 +20,10 @@
 
 void Console_Init()
 {
-	RegConsoleCmd("mitm", ConCmd_OpenMainMenu, "Opens the main menu.");
-	RegConsoleCmd("queue", ConCmd_OpenQueueMenu, "Opens the queue menu.");
-	RegConsoleCmd("preferences", ConCmd_OpenPreferencesMenu, "Opens the preferences menu.");
+	RegConsoleCmd("sm_mitm", ConCmd_MannInTheMachine, "Opens the main menu.");
+	RegConsoleCmd("sm_queue", ConCmd_Queue, "Opens the queue menu.");
+	RegConsoleCmd("sm_preferences", ConCmd_Settings, "Opens the preferences menu.");
+	RegConsoleCmd("sm_party", ConCmd_Party, "Opens the party menu.");
 	
 	RegAdminCmd("sm_addqueue", ConCmd_AddQueuePoints, ADMFLAG_CHEATS, "Adds defender queue points to a player.");
 	
@@ -32,7 +33,7 @@ void Console_Init()
 	AddCommandListener(CommandListener_DropItem, "dropitem");
 }
 
-static Action ConCmd_OpenMainMenu(int client, int args)
+static Action ConCmd_MannInTheMachine(int client, int args)
 {
 	if (client == 0)
 	{
@@ -44,7 +45,7 @@ static Action ConCmd_OpenMainMenu(int client, int args)
 	return Plugin_Handled;
 }
 
-static Action ConCmd_OpenQueueMenu(int client, int args)
+static Action ConCmd_Queue(int client, int args)
 {
 	if (client == 0)
 	{
@@ -56,7 +57,7 @@ static Action ConCmd_OpenQueueMenu(int client, int args)
 	return Plugin_Handled;
 }
 
-static Action ConCmd_OpenPreferencesMenu(int client, int args)
+static Action ConCmd_Settings(int client, int args)
 {
 	if (client == 0)
 	{
@@ -65,6 +66,18 @@ static Action ConCmd_OpenPreferencesMenu(int client, int args)
 	}
 	
 	Menus_DisplayPreferencesMenu(client);
+	return Plugin_Handled;
+}
+
+static Action ConCmd_Party(int client, int args)
+{
+	if (client == 0)
+	{
+		ReplyToCommand(client, "%t", "Command is in-game only");
+		return Plugin_Handled;
+	}
+	
+	Menus_DisplayPartyMenu(client);
 	return Plugin_Handled;
 }
 

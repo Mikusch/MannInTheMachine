@@ -566,6 +566,7 @@ ConVar mitm_queue_points;
 ConVar mitm_rename_robots;
 ConVar mitm_annotation_lifetime;
 ConVar mitm_invader_allow_suicide;
+ConVar mitm_party_max_size;
 
 // TF ConVars
 ConVar tf_avoidteammates_pushaway;
@@ -593,6 +594,7 @@ ConVar sv_stepsize;
 ConVar phys_pushscale;
 
 #include "mitm/tf_bot_squad.sp"
+#include "mitm/party.sp"
 #include "mitm/data.sp"
 #include "mitm/entity.sp"
 
@@ -622,6 +624,13 @@ ConVar phys_pushscale;
 #include "mitm/sdkcalls.sp"
 #include "mitm/sdkhooks.sp"
 
+enum struct QueueData
+{
+	int m_points;
+	int m_client;
+	Party m_party;
+}
+
 public Plugin myinfo =
 {
 	name = "Mann in the Machine",
@@ -647,6 +656,7 @@ public void OnPluginStart()
 	mitm_rename_robots = CreateConVar("mitm_rename_robots", "0", "Whether to rename robots as they spawn.");
 	mitm_annotation_lifetime = CreateConVar("mitm_annotation_lifetime", "30.0", "The lifetime of annotations shown to clients, in seconds.", _, true, 1.0);
 	mitm_invader_allow_suicide = CreateConVar("mitm_invader_allow_suicide", "0", "Whether to allow invaders to suicide.");
+	mitm_party_max_size = CreateConVar("mitm_party_max_size", "6", "Maximum size of player parties.", _, _, _, true, 10.0);
 	
 	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");
@@ -701,6 +711,7 @@ public void OnPluginStart()
 	Console_Init();
 	Events_Init();
 	ClientPrefs_Init();
+	Party_Init();
 	
 	HookUserMessage(GetUserMessageId("SayText2"), OnSayText2, true);
 	
@@ -827,6 +838,11 @@ public void OnClientDisconnect(int client)
 	{
 		// progress the wave and drop their cash before disconnect
 		ForcePlayerSuicide(client);
+	}
+	
+	if (Player(client).IsInAParty())
+	{
+		FakeClientCommand(client, "sm_party_leave");
 	}
 }
 
@@ -992,16 +1008,15 @@ void SelectNewDefenders()
 {
 	CPrintToChatAll("%s %t", PLUGIN_TAG, "Queue_NewDefenders");
 	
-	// grab team names
 	char redTeamname[MAX_TEAM_NAME_LENGTH], blueTeamname[MAX_TEAM_NAME_LENGTH];
 	mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
 	mp_tournament_blueteamname.GetString(blueTeamname, sizeof(blueTeamname));
 	
 	g_bAllowTeamChange = true;
 	
-	ArrayList playerList = new ArrayList();
+	ArrayList players = new ArrayList();
 	
-	// collect valid players
+	// Collect all valid players
 	for (int client = 1; client <= MaxClients; client++)
 	{
 		if (!IsClientInGame(client))
@@ -1013,76 +1028,101 @@ void SelectNewDefenders()
 		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
 			continue;
 		
-		playerList.Push(client);
+		players.Push(client);
 	}
 	
-	ArrayList queueList = Queue_GetDefenderQueue();
+	ArrayList queue = Queue_GetDefenderQueue();
 	int iDefenderCount = 0;
-	int iReqDefenderCount = Max(mitm_defender_min_count.IntValue, RoundToNearest((float(playerList.Length) / float(MaxClients)) * mitm_defender_max_count.IntValue));
+	int iReqDefenderCount = Max(mitm_defender_min_count.IntValue, RoundToNearest((float(players.Length) / float(MaxClients)) * mitm_defender_max_count.IntValue));
 	
-	// select our defenders
-	for (int i = 0; i < queueList.Length; i++)
+	// Select our defenders
+	for (int i = 0; i < queue.Length; i++)
 	{
-		int defender = queueList.Get(i, QueueData::m_client);
+		int client = queue.Get(i, QueueData::m_client);
+		Party party = queue.Get(i, QueueData::m_party);
 		
-		TF2_ChangeClientTeam(defender, TFTeam_Defenders);
-		LogMessage("Assigned %N to team DEFENDERS (Queue Points: %d)", defender, Player(defender).m_defenderQueuePoints);
-		
-		Queue_SetPoints(defender, 0);
-		CPrintToChat(defender, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
-		
-		playerList.Erase(playerList.FindValue(defender));
+		// All members of a party queue together
+		if (party == NULL_PARTY)
+		{
+			TF2_ChangeClientTeam(client, TFTeam_Defenders);
+			Queue_SetPoints(client, 0);
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
+			
+			players.Erase(players.FindValue(client));
+			++iDefenderCount;
+		}
+		else
+		{
+			// Only let parties play if all members have space to join
+			if (iReqDefenderCount - iDefenderCount - party.GetMemberCount(false) < 0)
+				continue;
+			
+			ArrayList members = new ArrayList();
+			party.CollectMembers(members, false);
+			for (int j = 0; j < members.Length; j++)
+			{
+				int member = members.Get(j);
+				
+				TF2_ChangeClientTeam(member, TFTeam_Defenders);
+				Queue_SetPoints(member, 0);
+				CPrintToChat(member, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
+				
+				players.Erase(players.FindValue(member));
+				++iDefenderCount;
+			}
+			delete members;
+		}
 		
 		// If we have enough defenders, early out
-		if (iReqDefenderCount == ++iDefenderCount)
-		{
+		if (iReqDefenderCount == iDefenderCount)
 			break;
+	}
+	
+	// We have less defenders than we wanted.
+	// Pick random players, regardless of their defender preference.
+	if (iDefenderCount < iReqDefenderCount)
+	{
+		players.Sort(Sort_Random, Sort_Integer);
+		
+		for (int i = 0; i < players.Length; i++)
+		{
+			int client = players.Get(i);
+			
+			if (Player(client).HasPreference(PREF_DISABLE_SPAWNING))
+				continue;
+			
+			// Keep filling slots until our quota is met
+			if (iDefenderCount++ < iReqDefenderCount)
+			{
+				TF2_ChangeClientTeam(client, TFTeam_Defenders);
+				CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender_Forced", redTeamname);
+				
+				players.Erase(i);
+			}
 		}
 	}
 	
 	if (iDefenderCount < iReqDefenderCount)
 	{
-		// we have less defenders than we wanted...
-		// let's just pick some random people, regardless of their defender preference
-		
-		playerList.Sort(Sort_Random, Sort_Integer);
-		
-		for (int i = 0; i < playerList.Length; i++)
-		{
-			int defender = playerList.Get(i);
-			
-			// we only want people who are not in the defender list
-			if (queueList.FindValue(defender, QueueData::m_client) != -1)
-				continue;
-			
-			if (iDefenderCount++ < iReqDefenderCount)
-			{
-				TF2_ChangeClientTeam(defender, TFTeam_Defenders);
-				
-				CPrintToChat(defender, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender_Forced", redTeamname);
-				LogMessage("Forced %N to team DEFENDERS", defender);
-				
-				playerList.Erase(i);
-			}
-		}
+		LogError("Not enough players to meet defender quota (%d/%d)", iDefenderCount, iReqDefenderCount);
 	}
 	
-	// move everyone else to the spectator team
-	for (int i = 0; i < playerList.Length; i++)
+	// Move everyone else to the spectator team
+	for (int i = 0; i < players.Length; i++)
 	{
-		int invader = playerList.Get(i);
+		int client = players.Get(i);
 		
-		TF2_ChangeClientTeam(invader, TFTeam_Spectator);
-		LogMessage("Assigned %N to team ROBOTS (Queue Points: %d)", invader, Player(invader).m_defenderQueuePoints);
+		TF2_ChangeClientTeam(client, TFTeam_Spectator);
 		
-		if (Player(invader).HasPreference(PREF_DISABLE_DEFENDER))
+		// Players who disable being defender don't earn queue points, unless they're in a party
+		if (Player(client).HasPreference(PREF_DISABLE_DEFENDER) && (!Player(client).IsInAParty() || Player(client).GetParty().GetMemberCount() <= 1))
 		{
-			CPrintToChat(invader, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader_NoQueue", blueTeamname);
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader_NoQueue", blueTeamname);
 		}
-		else if (!Player(invader).HasPreference(PREF_DISABLE_SPAWNING))
+		else if (!Player(client).HasPreference(PREF_DISABLE_SPAWNING))
 		{
-			Queue_AddPoints(invader, mitm_queue_points.IntValue);
-			CPrintToChat(invader, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname, mitm_queue_points.IntValue, Player(invader).m_defenderQueuePoints);
+			Queue_AddPoints(client, mitm_queue_points.IntValue);
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname, mitm_queue_points.IntValue, Player(client).m_defenderQueuePoints);
 		}
 	}
 	
@@ -1096,14 +1136,16 @@ void SelectNewDefenders()
 		if (TF2_GetClientTeam(client) != TFTeam_Defenders)
 			continue;
 		
-		// make sure the defender has a class
+		// Show class selection menu
 		if (TF2_GetPlayerClass(client) == TFClass_Unknown)
+		{
 			ShowVGUIPanel(client, "class_red");
+		}
 	}
 	
-	// free the memory
-	delete playerList;
-	delete queueList;
+	// Free the memory
+	delete players;
+	delete queue;
 }
 
 void FireWeaponAtEnemy(int client, int &buttons)

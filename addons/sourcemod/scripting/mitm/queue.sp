@@ -18,15 +18,9 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-enum struct QueueData
-{
-	int m_queuePoints;
-	int m_client;
-}
-
 ArrayList Queue_GetDefenderQueue()
 {
-	ArrayList queueList = new ArrayList(sizeof(QueueData));
+	ArrayList queue = new ArrayList(sizeof(QueueData));
 	
 	for (int client = 1; client <= MaxClients; client++)
 	{
@@ -34,6 +28,10 @@ ArrayList Queue_GetDefenderQueue()
 			continue;
 		
 		if (IsClientSourceTV(client))
+			continue;
+		
+		// ignore players in a party, they get handled separately
+		if (Player(client).IsInAParty() && Player(client).GetParty().GetMemberCount() > 1)
 			continue;
 		
 		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
@@ -46,14 +44,37 @@ ArrayList Queue_GetDefenderQueue()
 			continue;
 		
 		QueueData data;
-		data.m_queuePoints = Player(client).m_defenderQueuePoints; // block 0 gets sorted
+		data.m_points = Player(client).m_defenderQueuePoints;
 		data.m_client = client;
 		
-		queueList.PushArray(data);
+		queue.PushArray(data);
 	}
 	
-	queueList.Sort(Sort_Descending, Sort_Integer);
-	return queueList;
+	ArrayList parties = Party_GetAllActiveParties();
+	for (int i = 0; i < parties.Length; i++)
+	{
+		PartyInfo info;
+		if (!parties.GetArray(i, info))
+			continue;
+		
+		Party party = Party(info.m_id);
+		
+		// do not include parties with only one member
+		if (party.GetMemberCount() <= 1)
+			continue;
+		
+		QueueData data;
+		data.m_points = party.CalculateQueuePoints();
+		data.m_party = party;
+		
+		queue.PushArray(data);
+	}
+	delete parties;
+	
+	// sort by queue points
+	queue.Sort(Sort_Descending, Sort_Integer);
+	
+	return queue;
 }
 
 void Queue_AddPoints(int client, int points)

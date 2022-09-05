@@ -192,7 +192,7 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 					
 					for (int i = 0; i < members.Length; i++)
 					{
-						char strMember[64];
+						char strMember[256];
 						
 						if (i == members.Length - 1)
 						{

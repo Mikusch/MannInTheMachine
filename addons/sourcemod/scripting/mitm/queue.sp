@@ -30,7 +30,7 @@ ArrayList Queue_GetDefenderQueue()
 		if (IsClientSourceTV(client))
 			continue;
 		
-		// do not include players in parties, they get handled separately
+		// ignore players in a party, they get handled separately
 		if (Player(client).IsInAParty() && Player(client).GetParty().GetMemberCount() > 1)
 			continue;
 		
@@ -59,7 +59,7 @@ ArrayList Queue_GetDefenderQueue()
 		
 		Party party = Party(info.m_id);
 		
-		// do not include one-person parties
+		// do not include parties with only one member
 		if (party.GetMemberCount() <= 1)
 			continue;
 		
@@ -71,7 +71,7 @@ ArrayList Queue_GetDefenderQueue()
 	}
 	delete parties;
 	
-	// sorts by queue points
+	// sort by queue points
 	queue.Sort(Sort_Descending, Sort_Integer);
 	
 	return queue;

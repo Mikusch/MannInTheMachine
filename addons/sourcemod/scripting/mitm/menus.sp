@@ -22,7 +22,7 @@ void Menus_DisplayMainMenu(int client)
 	menu.SetTitle("%T", "Menu_Main_Title", client);
 	
 	menu.AddItem("queue", "Menu_Main_Queue");
-	menu.AddItem("prefs", "Menu_Main_Preferences");
+	menu.AddItem("preferences", "Menu_Main_Preferences");
 	menu.AddItem("party", "Menu_Main_Party");
 	
 	menu.Display(client, MENU_TIME_FOREVER);
@@ -34,14 +34,14 @@ static int MenuHandler_MainMenu(Menu menu, MenuAction action, int param1, int pa
 	{
 		case MenuAction_Select:
 		{
-			char info[64];
+			char info[32];
 			menu.GetItem(param2, info, sizeof(info));
 			
 			if (StrEqual(info, "queue"))
 			{
 				Menus_DisplayQueueMenu(param1);
 			}
-			else if (StrEqual(info, "prefs"))
+			else if (StrEqual(info, "preferences"))
 			{
 				Menus_DisplayPreferencesMenu(param1);
 			}
@@ -86,7 +86,7 @@ void Menus_DisplayQueueMenu(int client)
 			int index = queue.FindValue(client, QueueData::m_client);
 			if (index != -1)
 			{
-				// Player is in queue
+				// player is in queue
 				Format(title, sizeof(title), "%s\n%T", title, "Menu_Queue_Title_QueuePoints", client, queue.Get(index, QueueData::m_points), index + 1);
 			}
 			else
@@ -96,25 +96,25 @@ void Menus_DisplayQueueMenu(int client)
 					index = queue.FindValue(Player(client).GetParty(), QueueData::m_party);
 					if (index != -1)
 					{
-						// Player is in a party and queuing with others
+						// player is in a party and queuing with others
 						Format(title, sizeof(title), "%s\n%T", title, "Menu_Queue_Title_PartyQueuePoints", client, queue.Get(index, QueueData::m_points), index + 1);
 					}
 					else
 					{
-						// Player is in a party but everyone has disabled being a defender
+						// player is in a party but members aren't eligible to queue
 						Format(title, sizeof(title), "%s\n%T", title, "Menu_Queue_Title_NotInQueue", client);
 					}
 				}
 				else
 				{
-					// Player is not in queue and not in a party
+					// player is not in queue and not in a party
 					Format(title, sizeof(title), "%s\n%T", title, "Menu_Queue_Title_NotInQueue", client);
 				}
 			}
 		}
 		else
 		{
-			// Player has invalid queue points
+			// player has invalid queue points
 			Format(title, sizeof(title), "%s\n%T", title, "Menu_Queue_NotLoaded", client);
 		}
 		
@@ -175,8 +175,8 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 			char info[32];
 			menu.GetItem(param2, info, sizeof(info));
 			
-			// Display party members
-			if (!strncmp(info, "party_", 6))
+			// display party members
+			if (strncmp(info, "party_", 6) == 0)
 			{
 				ReplaceStringEx(info, sizeof(info), "party_", "");
 				int id = StringToInt(info);
@@ -244,7 +244,7 @@ void Menus_DisplayPreferencesMenu(int client)
 		
 		for (int i = 0; i < sizeof(g_PreferenceNames); i++)
 		{
-			char info[4];
+			char info[32];
 			if (IntToString(i, info, sizeof(info)) > 0)
 				menu.AddItem(info, g_PreferenceNames[i]);
 		}
@@ -264,7 +264,7 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 	{
 		case MenuAction_Select:
 		{
-			char info[4];
+			char info[32];
 			menu.GetItem(param2, info, sizeof(info));
 			
 			int i = StringToInt(info);
@@ -295,7 +295,7 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 		}
 		case MenuAction_DisplayItem:
 		{
-			char info[4], display[64];
+			char info[32], display[64];
 			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
 			
 			int i = StringToInt(info);

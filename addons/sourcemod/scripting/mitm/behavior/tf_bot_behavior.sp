@@ -76,7 +76,7 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 		return action.Done("Not an invader");
 	}
 	
-	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(actor) == TFTeam_Invaders)
+	if (IsMannVsMachineMode() && TF2_GetClientTeam(actor) == TFTeam_Invaders)
 	{
 		char title[64];
 		int color[4];
@@ -207,7 +207,7 @@ static int OnContact(CTFBotMainAction action, int actor, int other, Address resu
 	if (IsValidEntity(other) && !(view_as<SolidFlags_t>(GetEntProp(other, Prop_Data, "m_usSolidFlags")) & FSOLID_NOT_SOLID) && other != 0 && !IsEntityClient(other))
 	{
 		// Mini-bosses destroy non-Sentrygun objects they bump into (ie: Dispensers)
-		if (GameRules_IsMannVsMachineMode() && GetEntProp(actor, Prop_Send, "m_bIsMiniBoss"))
+		if (IsMannVsMachineMode() && GetEntProp(actor, Prop_Send, "m_bIsMiniBoss"))
 		{
 			if (IsBaseObject(other))
 			{

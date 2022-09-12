@@ -18,17 +18,22 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+any Min(any a, any b)
+{
+	return a <= b ? a : b;
+}
+
 any Max(any a, any b)
 {
 	return a >= b ? a : b;
 }
 
-bool GameRules_IsMannVsMachineMode()
+bool IsMannVsMachineMode()
 {
 	return view_as<bool>(GameRules_GetProp("m_bPlayingMannVsMachine"));
 }
 
-void TFGameRules_BroadcastSound(int iTeam, const char[] sound, int iAdditionalSoundFlags = 0)
+void BroadcastSound(int iTeam, const char[] sound, int iAdditionalSoundFlags = 0)
 {
 	Event event = CreateEvent("teamplay_broadcast_audio");
 	if (event)
@@ -128,7 +133,7 @@ int GetItemDefinitionByName(const char[] name)
 
 void IncrementMannVsMachineWaveClassCount(any iszClassIconName, int iFlags)
 {
-	int objective = TFObjectiveResource();
+	int objective = GetObjectiveResourceEntity();
 	
 	for (int i = 0; i < GetEntPropArraySize(objective, Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
 	{
@@ -163,7 +168,7 @@ void IncrementMannVsMachineWaveClassCount(any iszClassIconName, int iFlags)
 
 void SetMannVsMachineWaveClassActive(any iszClassIconName, bool bActive = true)
 {
-	int objective = TFObjectiveResource();
+	int objective = GetObjectiveResourceEntity();
 	
 	for (int i = 0; i < GetEntPropArraySize(objective, Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
 	{
@@ -184,7 +189,7 @@ void SetMannVsMachineWaveClassActive(any iszClassIconName, bool bActive = true)
 	}
 }
 
-int TFObjectiveResource()
+int GetObjectiveResourceEntity()
 {
 	return FindEntityByClassname(MaxClients + 1, "tf_objective_resource");
 }
@@ -203,7 +208,7 @@ ArrayList GetInvaderQueue(bool bMiniBoss = false)
 {
 	ArrayList queue = new ArrayList();
 	
-	// collect valid players
+	// Collect valid players for spawning as invader
 	for (int client = 1; client <= MaxClients; client++)
 	{
 		if (!IsClientInGame(client))
@@ -224,7 +229,7 @@ ArrayList GetInvaderQueue(bool bMiniBoss = false)
 		queue.Push(client);
 	}
 	
-	// sort players by priority
+	// Sort players by priority
 	queue.SortCustom(SortPlayersByPriority);
 	
 	return queue;
@@ -239,11 +244,11 @@ int GetRobotToSpawn(bool bMiniBoss)
 		int client = queue.Get(i);
 		if (i == 0)
 		{
-			// store the player and reset priority
+			// Remember the player and reset priority
 			priorityClient = client;
 			Player(client).m_invaderPriority = 0;
 			
-			// this player is becoming a miniboss
+			// This player is becoming a miniboss
 			if (bMiniBoss)
 			{
 				Player(client).m_bWasMiniBoss = true;
@@ -251,13 +256,13 @@ int GetRobotToSpawn(bool bMiniBoss)
 		}
 		else
 		{
-			// every player who didn't get picked gets a priority point
+			// Every player who doesn't get spawned gets a priority point
 			Player(client).m_invaderPriority++;
 		}
 	}
 	delete queue;
 	
-	// check whether every invader has been a miniboss at least once, then reset everyone
+	// Check whether every invader has been a miniboss at least once
 	int playerCount = 0, miniBossCount = 0;
 	for (int client = 1; client <= MaxClients; client++)
 	{
@@ -278,7 +283,7 @@ int GetRobotToSpawn(bool bMiniBoss)
 		}
 	}
 	
-	// every client has been miniboss at least once, reset everyone
+	// If every player has been a miniboss at least once, reset the stat
 	if (playerCount == miniBossCount)
 	{
 		for (int client = 1; client <= MaxClients; client++)
@@ -310,7 +315,6 @@ int CreateEntityGlow(int entity)
 		
 		if (iszModel[0] == EOS)
 		{
-			// fall back to default model
 			GetEntPropString(entity, Prop_Data, "m_ModelName", iszModel, sizeof(iszModel));
 		}
 		
@@ -374,13 +378,13 @@ int SortPlayersByPriority(int index1, int index2, Handle array, Handle hndl)
 	
 	int c = 0;
 	
-	// sort by priority
+	// Sort by priority
 	if (c == 0)
 	{
 		c = Compare(Player(client2).m_invaderPriority, Player(client1).m_invaderPriority);
 	}
 	
-	// sort by players who have not been miniboss yet
+	// Sort by players who have not been a miniboss yet
 	if (c == 0)
 	{
 		c = Compare(Player(client1).m_bWasMiniBoss, Player(client2).m_bWasMiniBoss);
@@ -408,23 +412,23 @@ bool IsDistanceBetweenLessThan(int client, const float target[3], float range)
 }
 
 // Return true if a weapon has no obstructions along the line between the given points
-bool IsLineOfFireClear2(int client, const float from[3], const float to[3])
+bool IsLineOfFireClearGivenPoints(int client, const float from[3], const float to[3])
 {
 	TR_TraceRayFilter(from, to, MASK_SOLID_BRUSHONLY, RayType_EndPoint, TraceEntityFilter_IgnoreActorsAndFriendlyCombatItems, GetClientTeam(client));
 	return !TR_DidHit();
 }
 
 // Return true if a weapon has no obstructions along the line from our eye to the given position
-bool IsLineOfFireClear(int client, const float where[3])
+bool IsLineOfFireClearGivenPlayerAndPoint(int client, const float where[3])
 {
 	float pos[3];
 	GetClientEyePosition(client, pos);
 	
-	return IsLineOfFireClear2(client, pos, where);
+	return IsLineOfFireClearGivenPoints(client, pos, where);
 }
 
 // Return true if a weapon has no obstructions along the line between the given point and entity
-bool IsLineOfFireClear4(int client, const float from[3], int who)
+bool IsLineOfFireClearGivenPointAndEntity(int client, const float from[3], int who)
 {
 	float center[3];
 	CBaseEntity(who).WorldSpaceCenter(center);
@@ -435,12 +439,12 @@ bool IsLineOfFireClear4(int client, const float from[3], int who)
 }
 
 // Return true if a weapon has no obstructions along the line from our eye to the given entity
-bool IsLineOfFireClear3(int client, int who)
+bool IsLineOfFireClearGivenPlayerAndEntity(int client, int who)
 {
 	float pos[3];
 	GetClientEyePosition(client, pos);
 	
-	return IsLineOfFireClear4(client, pos, who);
+	return IsLineOfFireClearGivenPointAndEntity(client, pos, who);
 }
 
 bool TraceEntityFilter_IgnoreActorsAndFriendlyCombatItems(int entity, int contentsMask, int m_iIgnoreTeam)
@@ -559,11 +563,6 @@ float[] Vector(float x, float y, float z)
 	vec[1] = y;
 	vec[2] = z;
 	return vec;
-}
-
-any Min(any a, any b)
-{
-	return a <= b ? a : b;
 }
 
 int GetCurrentWaveIndex()
@@ -790,13 +789,13 @@ void HideAnnotation(int client, int id)
 
 void ShowGateBotAnnotation(int client)
 {
-	// show an annotation for gate bots
+	// Show an annotation for gate bots
 	if (Player(client).HasTag("bot_gatebot"))
 	{
 		int trigger = MaxClients + 1;
 		while ((trigger = FindEntityByClassname(trigger, "trigger_*")) != -1)
 		{
-			// only area capture triggers
+			// Only area capture triggers
 			if (!HasEntProp(trigger, Prop_Data, "CTriggerAreaCaptureCaptureThink"))
 				continue;
 			
@@ -809,7 +808,7 @@ void ShowGateBotAnnotation(int client)
 			int point = MaxClients + 1;
 			while ((point = FindEntityByClassname(point, "team_control_point")) != -1)
 			{
-				// locked, requiring preceding points, etc.
+				// Locked, requiring preceding points, etc.
 				if (!SDKCall_TeamMayCapturePoint(TF2_GetClientTeam(client), GetEntProp(point, Prop_Data, "m_iPointIndex")))
 					continue;
 				
@@ -876,7 +875,7 @@ bool IsBaseObject(int entity)
 
 void PrintKeyHintText(int client, const char[] format, any...)
 {
-	char buffer[256];
+	char buffer[MAX_USER_MSG_DATA];
 	SetGlobalTransTarget(client);
 	VFormat(buffer, sizeof(buffer), format, 3);
 	
@@ -911,7 +910,7 @@ bool StrPtrEquals(Address psz1, Address psz2)
 	if (!psz1 || !psz2)
 		return false;
 	
-	// should be big enough for our use case
+	// This should be big enough for our use case
 	char sz1[64], sz2[64];
 	PtrToString(psz1, sz1, sizeof(sz1));
 	PtrToString(psz2, sz2, sizeof(sz2));

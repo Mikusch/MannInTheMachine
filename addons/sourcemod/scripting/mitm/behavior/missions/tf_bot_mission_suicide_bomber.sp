@@ -208,7 +208,7 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 	{
 		float where[3];
 		AddVectors(lastKnownVictimPosition, Vector(0.0, 0.0, sv_stepsize.FloatValue), where);
-		if (IsLineOfFireClear(actor, where))
+		if (IsLineOfFireClearGivenPlayerAndPoint(actor, where))
 		{
 			StartDetonate(action, actor, true);
 		}
@@ -297,7 +297,7 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 	
 	if (!action.m_bWasSuccessful)
 	{
-		if (GameRules_IsMannVsMachineMode())
+		if (IsMannVsMachineMode())
 		{
 			HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_SENTRY_BUSTER_DOWN", TFTeam_Defenders);
 		}
@@ -366,7 +366,7 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 			UTIL_ScreenFade(victim, colorHit, 1.0, 0.1, FFADE_IN);
 		}
 		
-		if (IsLineOfFireClear3(actor, victim))
+		if (IsLineOfFireClearGivenPlayerAndEntity(actor, victim))
 		{
 			NormalizeVector(toVictim, toVictim);
 			

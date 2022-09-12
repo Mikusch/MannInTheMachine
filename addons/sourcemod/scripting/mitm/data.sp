@@ -550,7 +550,7 @@ methodmap Player
 	{
 		this.StopIdleSound();
 		
-		if (!GameRules_IsMannVsMachineMode())
+		if (!IsMannVsMachineMode())
 			return;
 		
 		if (GetEntProp(this._client, Prop_Send, "m_bIsMiniBoss"))
@@ -684,7 +684,7 @@ methodmap Player
 			this.ClearAllAttributes();
 			this.SetAttribute(pEvent.m_attributeFlags);
 			
-			if (GameRules_IsMannVsMachineMode())
+			if (IsMannVsMachineMode())
 			{
 				this.SetAttribute(BECOME_SPECTATOR_ON_DEATH);
 				this.SetAttribute(RETAIN_BUILDINGS);
@@ -922,7 +922,7 @@ methodmap Player
 		int nCarriedFlags = 0;
 		
 		// MvM Engineer bot never pick up a flag
-		if (GameRules_IsMannVsMachineMode())
+		if (IsMannVsMachineMode())
 		{
 			if (TF2_GetClientTeam(this._client) == TFTeam_Invaders && TF2_GetPlayerClass(this._client) == TFClass_Engineer)
 			{
@@ -934,7 +934,7 @@ methodmap Player
 				return INVALID_ENT_REFERENCE;
 			}
 			
-			if (GameRules_IsMannVsMachineMode() && this.HasFlagTarget())
+			if (IsMannVsMachineMode() && this.HasFlagTarget())
 			{
 				return this.GetFlagTarget();
 			}
@@ -991,7 +991,7 @@ methodmap Player
 		int closestUncarriedFlag = INVALID_ENT_REFERENCE;
 		float flClosestUncarriedFlagDist = float(cellmax);
 		
-		if (GameRules_IsMannVsMachineMode())
+		if (IsMannVsMachineMode())
 		{
 			for (int i = 0; i < flagsList.Length; i++)
 			{

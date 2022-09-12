@@ -69,16 +69,16 @@ static int OnStart(CTFBotDeliverFlag action, int actor, NextBotAction priorActio
 	{
 		// Set threat level to max
 		action.m_upgradeLevel = DONT_UPGRADE;
-		SetEntProp(TFObjectiveResource(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 4);
-		SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", -1.0);
-		SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", -1.0);
+		SetEntProp(GetObjectiveResourceEntity(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 4);
+		SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMBaseBombUpgradeTime", -1.0);
+		SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMNextBombUpgradeTime", -1.0);
 	}
 	else
 	{
 		action.m_upgradeLevel = 0;
 		m_upgradeTimer[actor].Start(tf_mvm_bot_flag_carrier_interval_to_1st_upgrade.FloatValue);
-		SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
-		SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
+		SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
+		SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
 	}
 	
 	return action.Continue();
@@ -111,7 +111,7 @@ static void OnEnd(CTFBotDeliverFlag action, int actor, NextBotAction nextAction)
 {
 	Player(actor).ClearAttribute(SUPPRESS_FIRE);
 	
-	if (GameRules_IsMannVsMachineMode())
+	if (IsMannVsMachineMode())
 	{
 		SDKCall_ResetRageBuffs(GetPlayerShared(actor));
 	}
@@ -128,8 +128,8 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 		{
 			// don't start counting down until we leave the spawn
 			m_upgradeTimer[actor].Start(tf_mvm_bot_flag_carrier_interval_to_1st_upgrade.FloatValue);
-			SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
-			SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
+			SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
+			SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
 		}
 		
 		// do defensive buff effect ourselves (since we're not a soldier)
@@ -166,7 +166,7 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 			{
 				++action.m_upgradeLevel;
 				
-				TFGameRules_BroadcastSound(255, "MVM.Warning");
+				BroadcastSound(255, "MVM.Warning");
 				
 				switch (action.m_upgradeLevel)
 				{
@@ -178,9 +178,9 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 						// permanent buff banner effect (handled above)
 						
 						// update the objective resource so clients have the information
-						SetEntProp(TFObjectiveResource(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 1);
-						SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
-						SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
+						SetEntProp(GetObjectiveResourceEntity(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 1);
+						SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
+						SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
 						HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE1", TFTeam_Defenders);
 						TE_TFParticleEffect("mvm_levelup1", .attachType = PATTACH_POINT_FOLLOW, .entity = actor, .attachPoint = LookupEntityAttachment(actor, "head"));
 						return true;
@@ -194,9 +194,9 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 						TF2Attrib_SetByName(actor, "health regen", tf_mvm_bot_flag_carrier_health_regen.FloatValue);
 						
 						// update the objective resource so clients have the information
-						SetEntProp(TFObjectiveResource(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 2);
-						SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
-						SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
+						SetEntProp(GetObjectiveResourceEntity(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 2);
+						SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
+						SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
 						HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE2", TFTeam_Defenders);
 						TE_TFParticleEffect("mvm_levelup2", .attachType = PATTACH_POINT_FOLLOW, .entity = actor, .attachPoint = LookupEntityAttachment(actor, "head"));
 						return true;
@@ -209,9 +209,9 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 						TF2_AddCondition(actor, TFCond_CritCanteen);
 						
 						// update the objective resource so clients have the information
-						SetEntProp(TFObjectiveResource(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 3);
-						SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMBaseBombUpgradeTime", -1.0);
-						SetEntPropFloat(TFObjectiveResource(), Prop_Send, "m_flMvMNextBombUpgradeTime", -1.0);
+						SetEntProp(GetObjectiveResourceEntity(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 3);
+						SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMBaseBombUpgradeTime", -1.0);
+						SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMNextBombUpgradeTime", -1.0);
 						HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE3", TFTeam_Defenders);
 						TE_TFParticleEffect("mvm_levelup3", .attachType = PATTACH_POINT_FOLLOW, .entity = actor, .attachPoint = LookupEntityAttachment(actor, "head"));
 						return true;
@@ -226,7 +226,7 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 
 static int OnContact(CTFBotDeliverFlag action, int actor, int other, Address result)
 {
-	if (GameRules_IsMannVsMachineMode() && IsValidEntity(other) && FClassnameIs(other, "func_capturezone"))
+	if (IsMannVsMachineMode() && IsValidEntity(other) && FClassnameIs(other, "func_capturezone"))
 	{
 		return action.TrySuspendFor(CTFBotMvMDeployBomb(), RESULT_CRITICAL, "Delivering the bomb!");
 	}

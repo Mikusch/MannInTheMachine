@@ -165,7 +165,7 @@ methodmap CTFBotSquad
 		{
 			this.m_leader = bot;
 		}
-		else if (GameRules_IsMannVsMachineMode())
+		else if (IsMannVsMachineMode())
 		{
 			Player(bot).SetFlagTarget(INVALID_ENT_REFERENCE);
 		}
@@ -195,7 +195,7 @@ methodmap CTFBotSquad
 				delete members;
 			}
 		}
-		else if (GameRules_IsMannVsMachineMode())
+		else if (IsMannVsMachineMode())
 		{
 			int flag = Player(bot).GetFlagToFetch();
 			if (flag != -1)

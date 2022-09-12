@@ -35,11 +35,13 @@
 
 #define ZERO_VECTOR	{ 0.0, 0.0, 0.0 }
 
-#define DEFINDEX_UNDEFINED	65535
+#define DEFINDEX_UNDEFINED	(0xFFFF)
 
 #define MAX_USER_MSG_DATA	255
 
 #define MAX_TEAM_NAME_LENGTH	32	// Max length of a team's name
+
+#define TF_ATTRIB_SET_WEAPON_MODE	144 // set_weapon_mode
 
 // m_lifeState values
 #define LIFE_ALIVE				0 // alive
@@ -598,20 +600,20 @@ ConVar phys_pushscale;
 #include "mitm/data.sp"
 #include "mitm/entity.sp"
 
+#include "mitm/behavior/engineer/mvm_engineer/tf_bot_mvm_engineer_idle.sp"
+#include "mitm/behavior/engineer/mvm_engineer/tf_bot_mvm_engineer_teleport_spawn.sp"
+#include "mitm/behavior/medic/tf_bot_medic_heal.sp"
+#include "mitm/behavior/missions/tf_bot_mission_suicide_bomber.sp"
+#include "mitm/behavior/scenario/capture_the_flag/tf_bot_deliver_flag.sp"
+#include "mitm/behavior/scenario/capture_the_flag/tf_bot_fetch_flag.sp"
+#include "mitm/behavior/scenario/capture_the_flag/tf_bot_push_to_capture_point.sp"
+#include "mitm/behavior/sniper/tf_bot_sniper_lurk.sp"
+#include "mitm/behavior/spy/tf_bot_spy_leave_spawn_room.sp"
+#include "mitm/behavior/squad/tf_bot_escort_squad_leader.sp"
 #include "mitm/behavior/tf_bot_behavior.sp"
 #include "mitm/behavior/tf_bot_dead.sp"
-#include "mitm/behavior/tf_bot_deliver_flag.sp"
-#include "mitm/behavior/tf_bot_escort_squad_leader.sp"
-#include "mitm/behavior/tf_bot_fetch_flag.sp"
-#include "mitm/behavior/tf_bot_medic_heal.sp"
-#include "mitm/behavior/tf_bot_mission_suicide_bomber.sp"
 #include "mitm/behavior/tf_bot_mvm_deploy_bomb.sp"
-#include "mitm/behavior/tf_bot_mvm_engineer_idle.sp"
-#include "mitm/behavior/tf_bot_mvm_engineer_teleport_spawn.sp"
-#include "mitm/behavior/tf_bot_push_to_capture_point.sp"
 #include "mitm/behavior/tf_bot_scenario_monitor.sp"
-#include "mitm/behavior/tf_bot_sniper_lurk.sp"
-#include "mitm/behavior/tf_bot_spy_leave_spawn_room.sp"
 #include "mitm/behavior/tf_bot_taunt.sp"
 
 #include "mitm/clientprefs.sp"
@@ -836,7 +838,7 @@ public void OnClientDisconnect(int client)
 	
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
-		// progress the wave and drop their cash before disconnect
+		// Progress the wave and drop their cash before disconnect
 		ForcePlayerSuicide(client);
 	}
 	
@@ -913,7 +915,7 @@ public void OnGameFrame()
 	ArrayList queue = GetInvaderQueue();
 	queue.Resize(Min(queue.Length, 8));
 	
-	// only send the hint if the queue isn't empty and has changed
+	// Only send the hint if the visible queue has changed
 	if (queue.Length > 0 && s_prevQueue && !ArrayListEquals(s_prevQueue, queue))
 	{
 		for (int client = 1; client <= MaxClients; client++)
@@ -947,7 +949,7 @@ public void OnGameFrame()
 		}
 	}
 	
-	// store old queue
+	// Store old queue list for comparison
 	delete s_prevQueue;
 	s_prevQueue = queue.Clone();
 	delete queue;
@@ -975,7 +977,7 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 		{
 			if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 			{
-				// no spawn outline for robots
+				// No spawn outline for robots
 				TF2_RemoveCondition(client, condition);
 			}
 		}
@@ -1202,11 +1204,11 @@ void FireWeaponAtEnemy(int client, int &buttons)
 	
 	int weaponID = TF2Util_GetWeaponID(myWeapon);
 	
-	// vaccinator resistance preference for robot medics
+	// Vaccinator resistance preference for robot medics
 	if (weaponID == TF_WEAPON_MEDIGUN)
 	{
 		ArrayList attributes = TF2Econ_GetItemStaticAttributes(GetEntProp(myWeapon, Prop_Send, "m_iItemDefinitionIndex"));
-		int index = attributes.FindValue(144); // set_weapon_mode
+		int index = attributes.FindValue(TF_ATTRIB_SET_WEAPON_MODE);
 		if (index != -1 && attributes.Get(index, 1) == float(MEDIGUN_RESIST))
 		{
 			bool preferBullets = Player(client).HasAttribute(PREFER_VACCINATOR_BULLETS);
@@ -1230,7 +1232,7 @@ void FireWeaponAtEnemy(int client, int &buttons)
 			{
 				delete attributes;
 				
-				// prevent switching resistance types
+				// Prevent switching resistance types
 				buttons &= ~IN_RELOAD;
 				return;
 			}
@@ -1240,7 +1242,7 @@ void FireWeaponAtEnemy(int client, int &buttons)
 	
 	if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_LUNCHBOX || weaponID == TF_WEAPON_BUFF_ITEM || weaponID == TF_WEAPON_BAT_WOOD)
 	{
-		// allow robots to use certain weapons at all times
+		// Allow robots to use certain weapons at all times
 		return;
 	}
 	
@@ -1263,7 +1265,7 @@ void FireWeaponAtEnemy(int client, int &buttons)
 	
 	if (s_isInSpawn[client])
 	{
-		// the active weapon might have switched, remove attributes from all
+		// The active weapon might have switched, remove attributes from all
 		int numWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
 		for (int i = 0; i < numWeapons; i++)
 		{
@@ -1274,7 +1276,7 @@ void FireWeaponAtEnemy(int client, int &buttons)
 			UnlockWeapon(weapon);
 		}
 		
-		// we have left the spawn
+		// We have left the spawn
 		s_isInSpawn[client] = false;
 	}
 }
@@ -1310,7 +1312,7 @@ static Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int cl
 		
 		if (StrEqual(szBuf, "#TF_Name_Change"))
 		{
-			// prevent rename messages in chat
+			// Prevent rename message spam in chat
 			return Plugin_Stop;
 		}
 	}

@@ -82,7 +82,7 @@ static int Update(CTFBotEscortSquadLeader action, int actor, float interval)
 		return action.Done("Squad leader is dead");
 	}
 	
-	if (GameRules_IsMannVsMachineMode() && leader == actor)
+	if (IsMannVsMachineMode() && leader == actor)
 	{
 		char[] szNowLeader = "I'm now the squad leader! Going for the flag!";
 		if (Player(actor).HasAttribute(AGGRESSIVE))

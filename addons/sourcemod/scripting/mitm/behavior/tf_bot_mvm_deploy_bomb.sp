@@ -134,7 +134,7 @@ static int Update(CTFBotMvMDeployBomb action, int actor, float interval)
 				}
 				
 				m_timer[actor].Start(2.0);
-				TFGameRules_BroadcastSound(255, "Announcer.MVM_Robots_Planted");
+				BroadcastSound(255, "Announcer.MVM_Robots_Planted");
 				Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_COMPLETE);
 				SetEntProp(actor, Prop_Data, "m_takedamage", DAMAGE_NO);
 				SetEntProp(actor, Prop_Data, "m_fEffects", GetEntProp(actor, Prop_Data, "m_fEffects") | EF_NODRAW);

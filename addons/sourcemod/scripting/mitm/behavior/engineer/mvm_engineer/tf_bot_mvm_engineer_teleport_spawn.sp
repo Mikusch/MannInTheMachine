@@ -119,11 +119,11 @@ static int Update(CTFBotMvMEngineerTeleportSpawn action, int actor, float interv
 				{
 					if (pWave.m_nNumEngineersTeleportSpawned == 0)
 					{
-						TFGameRules_BroadcastSound(255, "Announcer.MVM_First_Engineer_Teleport_Spawned");
+						BroadcastSound(255, "Announcer.MVM_First_Engineer_Teleport_Spawned");
 					}
 					else
 					{
-						TFGameRules_BroadcastSound(255, "Announcer.MVM_Another_Engineer_Teleport_Spawned");
+						BroadcastSound(255, "Announcer.MVM_Another_Engineer_Teleport_Spawned");
 					}
 					
 					pWave.m_nNumEngineersTeleportSpawned++;

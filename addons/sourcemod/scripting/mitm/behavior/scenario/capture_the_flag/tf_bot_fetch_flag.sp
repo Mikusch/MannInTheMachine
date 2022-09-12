@@ -60,7 +60,7 @@ static int Update(CTFBotFetchFlag action, int actor, float interval)
 		return action.Done("No flag");
 	}
 	
-	if (GameRules_IsMannVsMachineMode() && GetEntProp(flag, Prop_Send, "m_nFlagStatus") == TF_FLAGINFO_HOME)
+	if (IsMannVsMachineMode() && GetEntProp(flag, Prop_Send, "m_nFlagStatus") == TF_FLAGINFO_HOME)
 	{
 		if (GetGameTime() - GetEntDataFloat(actor, GetOffset("CTFPlayer::m_flSpawnTime")) < 1.0 && TF2_GetClientTeam(actor) != TFTeam_Spectator)
 		{

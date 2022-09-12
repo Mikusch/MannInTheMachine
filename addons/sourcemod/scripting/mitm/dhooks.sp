@@ -254,7 +254,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		return MRES_Supercede;
 	}
 	
-	if (GameRules_IsMannVsMachineMode())
+	if (IsMannVsMachineMode())
 	{
 		// Only spawn players while the round is running in MVM mode
 		if (GameRules_GetRoundState() != RoundState_RoundRunning)
@@ -287,7 +287,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		return MRES_Supercede;
 	}
 	
-	if (GameRules_IsMannVsMachineMode())
+	if (IsMannVsMachineMode())
 	{
 		if (spawner.m_class == TFClass_Engineer && spawner.m_defaultAttributes.m_attributeFlags & TELEPORT_TO_HINT && SDKCall_FindHint(true, false) == false)
 		{
@@ -333,7 +333,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		
 		TFTeam team = TFTeam_Red;
 		
-		if (GameRules_IsMannVsMachineMode())
+		if (IsMannVsMachineMode())
 		{
 			team = TFTeam_Invaders;
 		}
@@ -385,7 +385,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 			TF2_AddCondition(newPlayer, TFCond_FireImmune);
 		}
 		
-		if (GameRules_IsMannVsMachineMode())
+		if (IsMannVsMachineMode())
 		{
 			// initialize currency to be dropped on death to zero
 			SetEntProp(newPlayer, Prop_Send, "m_nCurrency", 0);
@@ -431,7 +431,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		Player(newPlayer).StartIdleSound();
 		
 		// Add our items first, they'll get replaced below by the normal MvM items if any are needed
-		if (GameRules_IsMannVsMachineMode() && (TF2_GetClientTeam(newPlayer) == TFTeam_Invaders))
+		if (IsMannVsMachineMode() && (TF2_GetClientTeam(newPlayer) == TFTeam_Invaders))
 		{
 			// Apply the Rome 2 promo items to each player. They'll be 
 			// filtered out for clients that do not have Romevision.
@@ -479,7 +479,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		
 		TFClassType nClassIndex = TF2_GetPlayerClass(newPlayer);
 		
-		if (GetEntProp(TFObjectiveResource(), Prop_Send, "m_nMvMEventPopfileType") == MVM_EVENT_POPFILE_HALLOWEEN)
+		if (GetEntProp(GetObjectiveResourceEntity(), Prop_Send, "m_nMvMEventPopfileType") == MVM_EVENT_POPFILE_HALLOWEEN)
 		{
 			// zombies use the original player models
 			SetEntProp(newPlayer, Prop_Send, "m_nSkin", 4);
@@ -521,7 +521,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		// for easy access in populator spawner callbacks
 		m_justSpawnedList.Push(newPlayer);
 		
-		if (GameRules_IsMannVsMachineMode())
+		if (IsMannVsMachineMode())
 		{
 			if (GetEntProp(newPlayer, Prop_Send, "m_bIsMiniBoss"))
 			{
@@ -742,7 +742,7 @@ static MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis
 		IncrementMannVsMachineWaveClassCount(GetEntData(player, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")), iFlags);
 		
 		// Response rules stuff for MvM
-		if (GameRules_IsMannVsMachineMode())
+		if (IsMannVsMachineMode())
 		{
 			// Only have defenders announce the arrival of the first enemy Sniper
 			if (Player(player).HasMission(MISSION_SNIPER))
@@ -941,11 +941,11 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 			
 			if (wave.m_nSentryBustersSpawned > 1)
 			{
-				TFGameRules_BroadcastSound(255, "Announcer.MVM_Sentry_Buster_Alert_Another");
+				BroadcastSound(255, "Announcer.MVM_Sentry_Buster_Alert_Another");
 			}
 			else
 			{
-				TFGameRules_BroadcastSound(255, "Announcer.MVM_Sentry_Buster_Alert");
+				BroadcastSound(255, "Announcer.MVM_Sentry_Buster_Alert");
 			}
 			
 			flCoolDown = populator.m_cooldownDuration + wave.m_nSentryBustersSpawned * populator.m_cooldownDuration;
@@ -974,7 +974,7 @@ static MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterf
 {
 	Address pszEventName = params.GetObjectVar(1, 0x8, ObjectValueType_Int);
 	
-	if (GameRules_IsMannVsMachineMode())
+	if (IsMannVsMachineMode())
 	{
 		for (int client = 1; client <= MaxClients; client++)
 		{
@@ -1202,7 +1202,7 @@ static MRESReturn DHookCallback_ShouldHitEntity_Post(Address pFilter, DHookRetur
 	
 	if (IsEntityClient(entity))
 	{
-		if (GameRules_IsMannVsMachineMode())
+		if (IsMannVsMachineMode())
 		{
 			if (Player(entity).HasMission(MISSION_DESTROY_SENTRIES))
 			{
@@ -1467,11 +1467,11 @@ static MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 				
 				if (bEngineerTeleporterInTheWorld)
 				{
-					TFGameRules_BroadcastSound(255, "Announcer.MVM_An_Engineer_Bot_Is_Dead_But_Not_Teleporter");
+					BroadcastSound(255, "Announcer.MVM_An_Engineer_Bot_Is_Dead_But_Not_Teleporter");
 				}
 				else
 				{
-					TFGameRules_BroadcastSound(255, "Announcer.MVM_An_Engineer_Bot_Is_Dead");
+					BroadcastSound(255, "Announcer.MVM_An_Engineer_Bot_Is_Dead");
 				}
 			}
 		}
@@ -1490,7 +1490,7 @@ static MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 static MRESReturn DHookCallback_ShouldGib_Pre(int player, DHookReturn ret, DHookParam params)
 {
 	// only gib giant/miniboss
-	if (GameRules_IsMannVsMachineMode() && (GetEntProp(player, Prop_Send, "m_bIsMiniBoss") || GetEntPropFloat(player, Prop_Send, "m_flModelScale") > 1.0))
+	if (IsMannVsMachineMode() && (GetEntProp(player, Prop_Send, "m_bIsMiniBoss") || GetEntPropFloat(player, Prop_Send, "m_flModelScale") > 1.0))
 	{
 		ret.Value = true;
 		return MRES_Supercede;
@@ -1574,7 +1574,7 @@ static MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
 {
 	int player = params.Get(1);
 	
-	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(player) == TFTeam_Invaders)
+	if (IsMannVsMachineMode() && TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
 		// do not trip up the assert_cast< CTFBot* >
 		SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
@@ -1592,7 +1592,7 @@ static MRESReturn DHookCallback_PickUp_Post(int item, DHookParam params)
 {
 	int player = params.Get(1);
 	
-	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(player) == TFTeam_Invaders)
+	if (IsMannVsMachineMode() && TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
 		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
 	}

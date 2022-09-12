@@ -715,6 +715,8 @@ public void OnPluginStart()
 	ClientPrefs_Init();
 	Party_Init();
 	
+	AddNormalSoundHook(OnNormalSoundPlayed);
+	
 	HookUserMessage(GetUserMessageId("SayText2"), OnSayText2, true);
 	
 	CreateTimer(120.0, Timer_QueryShowPluginMessages, _, TIMER_REPEAT);
@@ -796,6 +798,7 @@ public void OnPluginStart()
 public void OnMapStart()
 {
 	PrecacheSound("ui/system_message_alert.wav");
+	PrecacheSound(")mvm/mvm_tele_activate.wav");
 	
 	g_hWaitingForPlayersTimer = null;
 	g_bInWaitingForPlayers = true;
@@ -1295,6 +1298,23 @@ static void ConVarChanged_MinPlayersToStart(ConVar convar, const char[] oldValue
 		// Don't allow maps to modify this using point_servercommand
 		convar.IntValue = MaxClients + 1;
 	}
+}
+
+static Action OnNormalSoundPlayed(int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH], int &entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
+{
+	if (StrEqual(sample, ")weapons/teleporter_ready.wav"))
+	{
+		if (IsBaseObject(entity) && ((TF2_GetObjectType(entity) == TFObject_Teleporter && TF2_GetObjectMode(entity) == TFObjectMode_Exit) || TF2_GetObjectType(entity) == TFObject_Sapper))
+		{
+			if (view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum")) == TFTeam_Invaders)
+			{
+				// Alert defenders that a robot teleporter is now active
+				EmitSoundToAll(")mvm/mvm_tele_activate.wav", entity, SNDCHAN_STATIC, 150);
+			}
+		}
+	}
+	
+	return Plugin_Continue;
 }
 
 static Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNum, bool reliable, bool init)

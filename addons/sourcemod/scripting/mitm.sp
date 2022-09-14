@@ -886,10 +886,6 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 				TF2Attrib_SetByName(client, "no_jump", 1.0);
 			}
 		}
-		else
-		{
-			TF2Attrib_RemoveByName(client, "no_jump");
-		}
 		
 		FireWeaponAtEnemy(client, buttons);
 		

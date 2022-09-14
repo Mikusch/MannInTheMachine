@@ -135,7 +135,7 @@ static Action CommandListener_Suicide(int client, const char[] command, int argc
 
 static Action CommandListener_Build(int client, const char[] command, int argc)
 {
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders && TF2_GetPlayerClass(client) == TFClass_Engineer)
 	{
 		TFObjectType type = view_as<TFObjectType>(GetCmdArgInt(1));
 		TFObjectMode mode = view_as<TFObjectMode>(GetCmdArgInt(2));

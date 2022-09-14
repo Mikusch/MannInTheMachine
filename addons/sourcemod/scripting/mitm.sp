@@ -1041,9 +1041,6 @@ void SelectNewDefenders()
 		if (IsClientSourceTV(client))
 			continue;
 		
-		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
-			continue;
-		
 		players.Push(client);
 	}
 	

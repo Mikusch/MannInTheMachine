@@ -34,9 +34,6 @@ ArrayList Queue_GetDefenderQueue()
 		if (Player(client).IsInAParty() && Player(client).GetParty().GetMemberCount() > 1)
 			continue;
 		
-		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
-			continue;
-		
 		if (Player(client).HasPreference(PREF_DISABLE_DEFENDER) || Player(client).HasPreference(PREF_DISABLE_SPAWNING))
 			continue;
 		

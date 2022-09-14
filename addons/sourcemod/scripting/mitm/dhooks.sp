@@ -1028,26 +1028,27 @@ static MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 			return MRES_Supercede;
 		}
 		
-		// determine whether the teams are unbalanced enough to allow switching
-		int iDefenderCount = 0, iInvaderCount = 0;
+		int iPlayerCount = 0, iDefenderCount = 0;
+		
+		// collect all valid players
 		for (int client = 1; client <= MaxClients; client++)
 		{
 			if (!IsClientInGame(client))
 				continue;
 			
-			// do not include ourselves in the ratio calculations
-			if (client == player)
+			if (IsClientSourceTV(client))
 				continue;
 			
 			if (TF2_GetClientTeam(client) == TFTeam_Defenders)
 				iDefenderCount++;
-			else if (Player(client).IsInvader())
-				iInvaderCount++;
+			
+			iPlayerCount++;
 		}
 		
-		float flReqRatio = float(MaxClients - mitm_defender_max_count.IntValue) / mitm_defender_max_count.FloatValue;
-		float flCurRatio = float(iInvaderCount) / float(iDefenderCount);
-		if (flCurRatio < flReqRatio || Player(player).HasPreference(PREF_DISABLE_DEFENDER) || Player(player).HasPreference(PREF_DISABLE_SPAWNING))
+		int iReqDefenderCount = Max(mitm_defender_min_count.IntValue, RoundToNearest((float(iPlayerCount) / float(MaxClients)) * mitm_defender_max_count.IntValue));
+		
+		// determine whether we need more defenders
+		if (iDefenderCount >= iReqDefenderCount || Player(player).HasPreference(PREF_DISABLE_DEFENDER) || Player(player).HasPreference(PREF_DISABLE_SPAWNING))
 		{
 			ret.Value = TFTeam_Spectator;
 		}

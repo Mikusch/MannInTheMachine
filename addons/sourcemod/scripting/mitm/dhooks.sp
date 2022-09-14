@@ -55,10 +55,10 @@ void DHooks_Init(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CPopulationManager::RestoreCheckpoint", DHookCallback_RestoreCheckpoint_Pre);
 	CreateDynamicDetour(gamedata, "CTFBotSpawner::Spawn", DHookCallback_CTFBotSpawnerSpawn_Pre);
 	CreateDynamicDetour(gamedata, "CSquadSpawner::Spawn", _, DHookCallback_CSquadSpawner_Post);
-	CreateDynamicDetour(gamedata, "CPopulationManager::Update", DHookCallback_PopulationManagerUpdate_Pre, DHookCallback_PopulationManagerUpdate_Post);
-	CreateDynamicDetour(gamedata, "CPeriodicSpawnPopulator::Update", _, DHookCallback_PeriodicSpawnPopulatorUpdate_Post);
-	CreateDynamicDetour(gamedata, "CWaveSpawnPopulator::Update", _, DHookCallback_WaveSpawnPopulatorUpdate_Post);
-	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMission", DHookCallback_MissionPopulatorUpdateMission_Pre, DHookCallback_MissionPopulatorUpdateMission_Post);
+	CreateDynamicDetour(gamedata, "CPopulationManager::Update", DHookCallback_CPopulationManagerUpdate_Pre, DHookCallback_CPopulationManagerUpdate_Post);
+	CreateDynamicDetour(gamedata, "CPeriodicSpawnPopulator::Update", _, DHookCallback_CPeriodicSpawnPopulatorUpdate_Post);
+	CreateDynamicDetour(gamedata, "CWaveSpawnPopulator::Update", _, DHookCallback_CWaveSpawnPopulatorUpdate_Post);
+	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMission", DHookCallback_UpdateMission_Pre, DHookCallback_UpdateMission_Post);
 	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMissionDestroySentries", DHookCallback_UpdateMissionDestroySentries_Pre, DHookCallback_UpdateMissionDestroySentries_Post);
 	CreateDynamicDetour(gamedata, "CPointPopulatorInterface::InputChangeBotAttributes", DHookCallback_InputChangeBotAttributes_Pre);
 	CreateDynamicDetour(gamedata, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_GetTeamAssignmentOverride_Pre, DHookCallback_GetTeamAssignmentOverride_Post);
@@ -584,7 +584,7 @@ static MRESReturn DHookCallback_CSquadSpawner_Post(Address pThis, DHookReturn re
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_PopulationManagerUpdate_Pre(int populator)
+static MRESReturn DHookCallback_CPopulationManagerUpdate_Pre(int populator)
 {
 	// allows spawners to freely switch teams of players
 	g_bAllowTeamChange = true;
@@ -592,14 +592,14 @@ static MRESReturn DHookCallback_PopulationManagerUpdate_Pre(int populator)
 	return MRES_Handled;
 }
 
-static MRESReturn DHookCallback_PopulationManagerUpdate_Post(int populator)
+static MRESReturn DHookCallback_CPopulationManagerUpdate_Post(int populator)
 {
 	g_bAllowTeamChange = false;
 	
 	return MRES_Handled;
 }
 
-static MRESReturn DHookCallback_PeriodicSpawnPopulatorUpdate_Post(Address pThis)
+static MRESReturn DHookCallback_CPeriodicSpawnPopulatorUpdate_Post(Address pThis)
 {
 	for (int i = 0; i < m_justSpawnedList.Length; i++)
 	{
@@ -618,7 +618,7 @@ static MRESReturn DHookCallback_PeriodicSpawnPopulatorUpdate_Post(Address pThis)
 	return MRES_Handled;
 }
 
-static MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
+static MRESReturn DHookCallback_CWaveSpawnPopulatorUpdate_Post(Address pThis)
 {
 	for (int i = 0; i < m_justSpawnedList.Length; i++)
 	{
@@ -653,7 +653,7 @@ static MRESReturn DHookCallback_WaveSpawnPopulatorUpdate_Post(Address pThis)
 	return MRES_Handled;
 }
 
-static MRESReturn DHookCallback_MissionPopulatorUpdateMission_Pre(Address pThis, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_UpdateMission_Pre(Address pThis, DHookReturn ret, DHookParam params)
 {
 	CMissionPopulator populator = CMissionPopulator(pThis);
 	MissionType mission = params.Get(1);
@@ -718,7 +718,7 @@ static MRESReturn DHookCallback_MissionPopulatorUpdateMission_Pre(Address pThis,
 	return MRES_Handled;
 }
 
-static MRESReturn DHookCallback_MissionPopulatorUpdateMission_Post(Address pThis, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_UpdateMission_Post(Address pThis, DHookReturn ret, DHookParam params)
 {
 	MissionType mission = params.Get(1);
 	

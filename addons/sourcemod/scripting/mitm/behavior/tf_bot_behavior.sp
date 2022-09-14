@@ -78,29 +78,6 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 	
 	if (IsMannVsMachineMode() && TF2_GetClientTeam(actor) == TFTeam_Invaders)
 	{
-		char title[64];
-		int color[4];
-		if (Player(actor).HasTag("bot_gatebot"))
-		{
-			Format(title, sizeof(title), "%T", "Invader_CaptureGate", actor);
-			color = { 248, 164, 45, 255 };
-		}
-		else if (SDKCall_IsAllowedToPickUpFlag(actor))
-		{
-			Format(title, sizeof(title), "%T", "Invader_DeliverBomb", actor);
-			color = { 88, 133, 162, 255 };
-		}
-		else
-		{
-			Format(title, sizeof(title), "%T", "Invader_SupportTeam", actor);
-			color = { 255, 255, 255, 255 };
-		}
-		
-		if (title[0])
-		{
-			CreateMsgDialog(actor, title, Player(actor).m_hudMsgLevel--, RoundToCeil(interval), color);
-		}
-		
 		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(actor).GetLastKnownArea());
 		TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(actor) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
 		

@@ -50,7 +50,6 @@ static int m_invaderPriority[MAXPLAYERS + 1];
 static bool m_bWasMiniBoss[MAXPLAYERS + 1];
 static int m_defenderQueuePoints[MAXPLAYERS + 1];
 static int m_preferences[MAXPLAYERS + 1];
-static int m_hudMsgLevel[MAXPLAYERS + 1];
 static Party m_party[MAXPLAYERS + 1];
 
 methodmap Player
@@ -257,18 +256,6 @@ methodmap Player
 		public set(int preferences)
 		{
 			m_preferences[this._client] = preferences;
-		}
-	}
-	
-	property int m_hudMsgLevel
-	{
-		public get()
-		{
-			return m_hudMsgLevel[this._client];
-		}
-		public set(int hudMsgLevel)
-		{
-			m_hudMsgLevel[this._client] = hudMsgLevel;
 		}
 	}
 	
@@ -1261,7 +1248,6 @@ methodmap Player
 		this.m_bWasMiniBoss = false;
 		this.m_defenderQueuePoints = -1;
 		this.m_preferences = -1;
-		this.m_hudMsgLevel = cellmax;
 		
 		strcopy(m_szOldClientName[this._client], sizeof(m_szOldClientName[]), "");
 	}

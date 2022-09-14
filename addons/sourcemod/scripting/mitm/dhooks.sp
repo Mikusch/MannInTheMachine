@@ -1536,14 +1536,14 @@ static MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret
 	
 	if (IsEntityClient(entity) && TF2_GetClientTeam(entity) == TFTeam_Invaders)
 	{
-		bool m_bRequireAllTags = GetEntProp(filter, Prop_Data, "m_bRequireAllTags") != 0;
+		bool bRequireAllTags = GetEntProp(filter, Prop_Data, "m_bRequireAllTags") != 0;
 		
-		char m_iszTags[512];
-		GetEntPropString(filter, Prop_Data, "m_iszTags", m_iszTags, sizeof(m_iszTags));
+		char iszTags[512];
+		GetEntPropString(filter, Prop_Data, "m_iszTags", iszTags, sizeof(iszTags));
 		
 		// max. 8 tags with a length of 64 characters each
 		char tags[8][64];
-		int count = ExplodeString(m_iszTags, " ", tags, sizeof(tags), sizeof(tags[]));
+		int count = ExplodeString(iszTags, " ", tags, sizeof(tags), sizeof(tags[]));
 		
 		bool bPasses = false;
 		for (int i = 0; i < count; ++i)
@@ -1551,12 +1551,12 @@ static MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret
 			if (Player(entity).HasTag(tags[i]))
 			{
 				bPasses = true;
-				if (!m_bRequireAllTags)
+				if (!bRequireAllTags)
 				{
 					break;
 				}
 			}
-			else if (m_bRequireAllTags)
+			else if (bRequireAllTags)
 			{
 				ret.Value = false;
 				return MRES_Supercede;

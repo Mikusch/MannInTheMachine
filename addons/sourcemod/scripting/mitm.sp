@@ -719,8 +719,6 @@ public void OnPluginStart()
 	
 	HookUserMessage(GetUserMessageId("SayText2"), OnSayText2, true);
 	
-	CreateTimer(120.0, Timer_QueryShowPluginMessages, _, TIMER_REPEAT);
-	
 	GameData gamedata = new GameData("mitm");
 	if (gamedata)
 	{
@@ -1351,35 +1349,4 @@ static Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int cl
 	}
 	
 	return Plugin_Continue;
-}
-
-static Action Timer_QueryShowPluginMessages(Handle timer)
-{
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		if (IsFakeClient(client))
-			continue;
-		
-		QueryClientConVar(client, "cl_showpluginmessages", ConVarQueryFinished_ShowPluginMessages);
-	}
-	
-	return Plugin_Continue;
-}
-
-static void ConVarQueryFinished_ShowPluginMessages(QueryCookie cookie, int client, ConVarQueryResult result, const char[] cvarName, const char[] cvarValue)
-{
-	if (!IsClientInGame(client))
-		return;
-	
-	if (result != ConVarQuery_Okay)
-		return;
-	
-	int value = StringToInt(cvarValue);
-	if (value == 0)
-	{
-		CPrintToChat(client, "%s %t", PLUGIN_TAG, "ConVarQuery_ShowPluginMessages", cvarName, 1);
-	}
 }

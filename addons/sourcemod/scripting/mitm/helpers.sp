@@ -745,16 +745,6 @@ bool HasTheFlag(int client)
 	return GetEntPropEnt(client, Prop_Send, "m_hItem") != -1;
 }
 
-void CreateMsgDialog(int client, const char[] title, int level = cellmax, int time = 10, int color[4] = { 255, 255, 255, 255 } )
-{
-	KeyValues kv = new KeyValues("Dialog", "title", title);
-	kv.SetNum("level", level);
-	kv.SetNum("time", time);
-	kv.SetColor4("color", color);
-	CreateDialog(client, kv, DialogType_Msg);
-	delete kv;
-}
-
 void ShowAnnotation(int client, int id, const char[] text, int target = 0, const float worldPos[3] = ZERO_VECTOR, float lifeTime = 10.0, const char[] sound = "ui/hint.wav", bool showDistance = true, bool showEffect = true)
 {
 	if (Player(client).HasPreference(PREF_DISABLE_ANNOTATIONS))

@@ -1216,7 +1216,7 @@ methodmap Player
 		}
 	}
 	
-	public void Initialize()
+	public void Init()
 	{
 		this.m_teleportWhereName = new ArrayList(64);
 		this.m_eventChangeAttributes = new ArrayList();

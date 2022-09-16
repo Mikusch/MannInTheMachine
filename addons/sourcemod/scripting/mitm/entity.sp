@@ -24,7 +24,7 @@ enum struct EntityProperties
 	ArrayList m_teleportWhereName;
 	int m_glowEntity;
 	
-	void Initialize(int entity)
+	void Init(int entity)
 	{
 		this.m_index = entity;
 		this.m_teleportWhereName = new ArrayList(64);
@@ -64,7 +64,7 @@ methodmap Entity
 		{
 			// fill basic properties
 			EntityProperties properties;
-			properties.Initialize(entity);
+			properties.Init(entity);
 			
 			g_EntityProperties.PushArray(properties);
 		}

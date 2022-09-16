@@ -18,8 +18,6 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define NULL_PARTY	Party(0)
-
 #define SYMBOL_PARTY_LEADER	"★"
 #define SYMBOL_PARTY_MEMBER	"☆"
 #define SYMBOL_PARTY_OTHER	"◆"
@@ -40,7 +38,7 @@ enum struct PartyInfo
 	ArrayList m_invites;
 	int m_leader;
 	
-	void Initialize(int id)
+	void Init(int id)
 	{
 		this.m_id = id;
 		this.m_leader = -1;
@@ -314,7 +312,7 @@ methodmap Party
 		
 		// fill basic properties
 		PartyInfo properties;
-		properties.Initialize(s_id);
+		properties.Init(s_id);
 		
 		g_parties.PushArray(properties);
 		

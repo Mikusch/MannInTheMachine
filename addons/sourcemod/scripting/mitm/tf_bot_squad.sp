@@ -18,8 +18,6 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define NULL_SQUAD	CTFBotSquad(0)
-
 static ArrayList g_squads;
 
 /**
@@ -36,7 +34,7 @@ enum struct CTFBotSquadInfo
 	float m_formationSize;
 	bool m_bShouldPreserveSquad;
 	
-	void Initialize(int id)
+	void Init(int id)
 	{
 		this.m_id = id;
 		this.m_leader = -1;
@@ -280,7 +278,7 @@ methodmap CTFBotSquad
 		
 		// fill basic properties
 		CTFBotSquadInfo properties;
-		properties.Initialize(id);
+		properties.Init(id);
 		
 		g_squads.PushArray(properties);
 		

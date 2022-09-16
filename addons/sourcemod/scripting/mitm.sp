@@ -74,6 +74,9 @@
 
 #define MITM_HINT_MASK	(0x10200)	// annotations have id ( MITM_HINT_MASK | entindex )
 
+#define NULL_SQUAD	CTFBotSquad(0)
+#define NULL_PARTY	Party(0)
+
 #define PLUGIN_TAG	"[{orange}MitM{default}]"
 
 const TFTeam TFTeam_Defenders = TFTeam_Red;
@@ -451,14 +454,6 @@ enum DifficultyType
 	NUM_DIFFICULTY_LEVELS
 };
 
-enum HintType
-{
-	HINT_INVALID = -1,
-	HINT_TELEPORTER_EXIT,
-	HINT_SENTRYGUN,
-	HINT_ENGINEER_NEST,
-};
-
 enum struct CountdownTimer
 {
 	float m_timestamp;
@@ -547,14 +542,10 @@ enum struct IntervalTimer
 	}
 }
 
-// Static
-static CEntityFactory EntityFactory;
-
 // Globals
 Handle g_WarningHudSync;
 Handle g_hWaitingForPlayersTimer;
 bool g_bInWaitingForPlayers;
-StringMap g_offsets;
 bool g_bAllowTeamChange;
 bool g_bForceFriendlyFire;
 float g_flNextRestoreCheckpointTime;
@@ -570,7 +561,7 @@ ConVar mitm_annotation_lifetime;
 ConVar mitm_invader_allow_suicide;
 ConVar mitm_party_max_size;
 
-// TF ConVars
+// Game ConVars
 ConVar tf_avoidteammates_pushaway;
 ConVar tf_deploying_bomb_delay_time;
 ConVar tf_deploying_bomb_time;
@@ -595,10 +586,22 @@ ConVar mp_waitingforplayers_time;
 ConVar sv_stepsize;
 ConVar phys_pushscale;
 
-#include "mitm/tf_bot_squad.sp"
-#include "mitm/party.sp"
+#include "mitm/clientprefs.sp"
+#include "mitm/console.sp"
+#include "mitm/convars.sp"
 #include "mitm/data.sp"
+#include "mitm/dhooks.sp"
 #include "mitm/entity.sp"
+#include "mitm/events.sp"
+#include "mitm/helpers.sp"
+#include "mitm/hooks.sp"
+#include "mitm/party.sp"
+#include "mitm/queue.sp"
+#include "mitm/offsets.sp"
+#include "mitm/menus.sp"
+#include "mitm/sdkcalls.sp"
+#include "mitm/sdkhooks.sp"
+#include "mitm/tf_bot_squad.sp"
 
 #include "mitm/behavior/engineer/mvm_engineer/tf_bot_mvm_engineer_idle.sp"
 #include "mitm/behavior/engineer/mvm_engineer/tf_bot_mvm_engineer_teleport_spawn.sp"
@@ -615,16 +618,6 @@ ConVar phys_pushscale;
 #include "mitm/behavior/tf_bot_mvm_deploy_bomb.sp"
 #include "mitm/behavior/tf_bot_scenario_monitor.sp"
 #include "mitm/behavior/tf_bot_taunt.sp"
-
-#include "mitm/clientprefs.sp"
-#include "mitm/console.sp"
-#include "mitm/dhooks.sp"
-#include "mitm/events.sp"
-#include "mitm/helpers.sp"
-#include "mitm/queue.sp"
-#include "mitm/menus.sp"
-#include "mitm/sdkcalls.sp"
-#include "mitm/sdkhooks.sp"
 
 enum struct QueueData
 {
@@ -644,47 +637,10 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
+	g_WarningHudSync = CreateHudSynchronizer();
+	
 	LoadTranslations("common.phrases");
 	LoadTranslations("mitm.phrases");
-	
-	g_WarningHudSync = CreateHudSynchronizer();
-	g_offsets = new StringMap();
-	
-	mitm_developer = CreateConVar("mitm_developer", "0", "Toggle plugin developer mode.");
-	mitm_defender_min_count = CreateConVar("mitm_defender_min_count", "6", "Minimum amount of defenders, regardless of player count.", _, _, _, true, 10.0);
-	mitm_defender_max_count = CreateConVar("mitm_defender_max_count", "8", "Maximum amount of defenders on a full server.", _, _, _, true, 10.0);
-	mitm_spawn_hurry_time = CreateConVar("mitm_spawn_hurry_time", "30.0", "The time invaders have to leave their spawn, in seconds.");
-	mitm_queue_points = CreateConVar("mitm_queue_points", "5", "Amount of queue points awarded to players that did not become defenders.", _, true, 1.0);
-	mitm_rename_robots = CreateConVar("mitm_rename_robots", "0", "Whether to rename robots as they spawn.");
-	mitm_annotation_lifetime = CreateConVar("mitm_annotation_lifetime", "30.0", "The lifetime of annotations shown to clients, in seconds.", _, true, 1.0);
-	mitm_invader_allow_suicide = CreateConVar("mitm_invader_allow_suicide", "0", "Whether to allow invaders to suicide.");
-	mitm_party_max_size = CreateConVar("mitm_party_max_size", "6", "Maximum size of player parties.", _, _, _, true, 10.0);
-	
-	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
-	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");
-	tf_deploying_bomb_time = FindConVar("tf_deploying_bomb_time");
-	tf_bot_engineer_building_health_multiplier = FindConVar("tf_bot_engineer_building_health_multiplier");
-	tf_mvm_miniboss_scale = FindConVar("tf_mvm_miniboss_scale");
-	tf_mvm_min_players_to_start = FindConVar("tf_mvm_min_players_to_start");
-	tf_mvm_bot_allow_flag_carrier_to_fight = FindConVar("tf_mvm_bot_allow_flag_carrier_to_fight");
-	tf_mvm_bot_flag_carrier_health_regen = FindConVar("tf_mvm_bot_flag_carrier_health_regen");
-	tf_mvm_bot_flag_carrier_interval_to_1st_upgrade = FindConVar("tf_mvm_bot_flag_carrier_interval_to_1st_upgrade");
-	tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade = FindConVar("tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade");
-	tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade = FindConVar("tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade");
-	tf_mvm_engineer_teleporter_uber_duration = FindConVar("tf_mvm_engineer_teleporter_uber_duration");
-	tf_populator_debug = FindConVar("tf_populator_debug");
-	tf_bot_suicide_bomb_range = FindConVar("tf_bot_suicide_bomb_range");
-	tf_bot_suicide_bomb_friendly_fire = FindConVar("tf_bot_suicide_bomb_friendly_fire");
-	tf_bot_taunt_victim_chance = FindConVar("tf_bot_taunt_victim_chance");
-	tf_bot_always_full_reload = FindConVar("tf_bot_always_full_reload");
-	tf_bot_flag_kill_on_touch = FindConVar("tf_bot_flag_kill_on_touch");
-	mp_tournament_redteamname = FindConVar("mp_tournament_redteamname");
-	mp_tournament_blueteamname = FindConVar("mp_tournament_blueteamname");
-	mp_waitingforplayers_time = FindConVar("mp_waitingforplayers_time");
-	sv_stepsize = FindConVar("sv_stepsize");
-	phys_pushscale = FindConVar("phys_pushscale");
-	
-	tf_mvm_min_players_to_start.AddChangeHook(ConVarChanged_MinPlayersToStart);
 	
 	// Init bot actions
 	CTFBotMainAction.Init();
@@ -704,78 +660,27 @@ public void OnPluginStart()
 	CTFBotTaunt.Init();
 	
 	// Install player action factory
-	EntityFactory = new CEntityFactory("player");
+	CEntityFactory EntityFactory = new CEntityFactory("player");
 	EntityFactory.DeriveFromClass("player");
 	EntityFactory.AttachNextBot(CreateNextBotPlayer);
 	EntityFactory.SetInitialActionFactory(CTFBotMainAction.GetFactory());
 	EntityFactory.Install();
 	
+	// Init plugin functions
 	Console_Init();
+	ConVars_Init();
 	Events_Init();
+	Hooks_Init();
 	ClientPrefs_Init();
 	Party_Init();
-	
-	AddNormalSoundHook(OnNormalSoundPlayed);
-	
-	HookUserMessage(GetUserMessageId("SayText2"), OnSayText2, true);
 	
 	GameData gamedata = new GameData("mitm");
 	if (gamedata)
 	{
+		// Init plugin functions requiring gamedata
 		DHooks_Init(gamedata);
+		Offsets_Init(gamedata);
 		SDKCalls_Init(gamedata);
-		
-		SetOffset(gamedata, "CTFBotSpawner::m_class");
-		SetOffset(gamedata, "CTFBotSpawner::m_health");
-		SetOffset(gamedata, "CTFBotSpawner::m_scale");
-		SetOffset(gamedata, "CTFBotSpawner::m_flAutoJumpMin");
-		SetOffset(gamedata, "CTFBotSpawner::m_flAutoJumpMax");
-		SetOffset(gamedata, "CTFBotSpawner::m_eventChangeAttributes");
-		SetOffset(gamedata, "CTFBotSpawner::m_name");
-		SetOffset(gamedata, "CTFBotSpawner::m_teleportWhereName");
-		SetOffset(gamedata, "CTFBotSpawner::m_defaultAttributes");
-		SetOffset(gamedata, "CSquadSpawner::m_formationSize");
-		SetOffset(gamedata, "CSquadSpawner::m_bShouldPreserveSquad");
-		SetOffset(gamedata, "CMissionPopulator::m_mission");
-		SetOffset(gamedata, "CMissionPopulator::m_cooldownDuration");
-		SetOffset(gamedata, "CWaveSpawnPopulator::m_bSupportWave");
-		SetOffset(gamedata, "CWaveSpawnPopulator::m_bLimitedSupport");
-		SetOffset(gamedata, "CPopulationManager::m_canBotsAttackWhileInSpawnRoom");
-		SetOffset(gamedata, "CPopulationManager::m_bSpawningPaused");
-		SetOffset(gamedata, "CPopulationManager::m_defaultEventChangeAttributesName");
-		SetOffset(gamedata, "CWave::m_nSentryBustersSpawned");
-		SetOffset(gamedata, "CWave::m_nNumEngineersTeleportSpawned");
-		SetOffset(gamedata, "IPopulationSpawner::m_spawner");
-		SetOffset(gamedata, "IPopulationSpawner::m_where");
-		
-		SetOffset(gamedata, "EventChangeAttributes_t::m_eventName");
-		SetOffset(gamedata, "EventChangeAttributes_t::m_skill");
-		SetOffset(gamedata, "EventChangeAttributes_t::m_weaponRestriction");
-		SetOffset(gamedata, "EventChangeAttributes_t::m_mission");
-		SetOffset(gamedata, "EventChangeAttributes_t::m_attributeFlags");
-		SetOffset(gamedata, "EventChangeAttributes_t::m_items");
-		SetOffset(gamedata, "EventChangeAttributes_t::m_itemsAttributes");
-		SetOffset(gamedata, "EventChangeAttributes_t::m_characterAttributes");
-		SetOffset(gamedata, "EventChangeAttributes_t::m_tags");
-		
-		SetOffset(gamedata, "CTFPlayer::m_flSpawnTime");
-		SetOffset(gamedata, "CTFPlayer::m_bIsMissionEnemy");
-		SetOffset(gamedata, "CTFPlayer::m_bIsSupportEnemy");
-		SetOffset(gamedata, "CTFPlayer::m_bIsLimitedSupportEnemy");
-		SetOffset(gamedata, "CTFPlayer::m_pWaveSpawnPopulator");
-		SetOffset(gamedata, "CTFPlayer::m_accumulatedSentryGunDamageDealt");
-		SetOffset(gamedata, "CTFPlayer::m_accumulatedSentryGunKillCount");
-		
-		SetOffset(gamedata, "CTFWeaponBase::m_bInAttack2");
-		
-		SetOffset(gamedata, "CCurrencyPack::m_nAmount");
-		SetOffset(gamedata, "CCurrencyPack::m_bTouched");
-		
-		SetOffset(gamedata, "CTakeDamageInfo::m_bForceFriendlyFire");
-		SetOffset(gamedata, "CTFNavArea::m_distanceToBombTarget");
-		SetOffset(gamedata, "CBaseTFBotHintEntity::m_isDisabled");
-		SetOffset(gamedata, "BombInfo_t::m_flMaxBattleFront");
-		SetOffset(gamedata, "CTFGrenadePipebombProjectile::m_flCreationTime");
 		
 		delete gamedata;
 	}
@@ -786,25 +691,28 @@ public void OnPluginStart()
 	
 	for (int client = 1; client <= MaxClients; client++)
 	{
-		Player(client).Initialize();
+		// Init player properties
+		Player(client).Init();
 		
 		if (IsClientInGame(client))
+		{
 			OnClientPutInServer(client);
+		}
 	}
 }
 
 public void OnMapStart()
 {
-	PrecacheSound("ui/system_message_alert.wav");
-	PrecacheSound(")mvm/mvm_tele_activate.wav");
-	
 	g_hWaitingForPlayersTimer = null;
 	g_bInWaitingForPlayers = true;
 	g_flNextRestoreCheckpointTime = 0.0;
 	
+	PrecacheSound("ui/system_message_alert.wav");
+	PrecacheSound(")mvm/mvm_tele_activate.wav");
+	
 	DHooks_HookGamerules();
 	
-	// Add HUD icons to downloadables
+	// Add bot icons to the downloads table
 	DirectoryListing directory = OpenDirectory("materials/hud");
 	if (directory)
 	{
@@ -866,58 +774,6 @@ public void OnEntityDestroyed(int entity)
 	Entity(entity).Destroy();
 }
 
-public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int & subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
-{
-	if (!IsClientInGame(client))
-		return Plugin_Continue;
-	
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
-	{
-		if (Player(client).HasAttribute(AUTO_JUMP))
-		{
-			// AutoJump robots may not jump manually
-			if (Player(client).ShouldAutoJump())
-			{
-				buttons |= IN_JUMP;
-				TF2Attrib_RemoveByName(client, "no_jump");
-			}
-			else
-			{
-				TF2Attrib_SetByName(client, "no_jump", 1.0);
-			}
-		}
-		
-		FireWeaponAtEnemy(client, buttons);
-		
-		return Plugin_Changed;
-	}
-	
-	return Plugin_Continue;
-}
-
-public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
-{
-	if (!IsClientInGame(client))
-		return;
-	
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
-	{
-		if (Player(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
-		{
-			TF2_AddCondition(client, TFCond_CritCanteen);
-		}
-		
-		if (Player(client).IsInASquad())
-		{
-			if (Player(client).GetSquad().GetMemberCount() <= 1 || Player(client).GetSquad().GetLeader() == -1)
-			{
-				// squad has collapsed - disband it
-				Player(client).LeaveSquad();
-			}
-		}
-	}
-}
-
 public void OnGameFrame()
 {
 	static ArrayList s_prevQueue;
@@ -965,6 +821,58 @@ public void OnGameFrame()
 	delete queue;
 }
 
+public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int & subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
+{
+	if (!IsClientInGame(client))
+		return Plugin_Continue;
+	
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	{
+		if (Player(client).HasAttribute(AUTO_JUMP))
+		{
+			// AutoJump robots are not allowed to jump manually
+			if (Player(client).ShouldAutoJump())
+			{
+				buttons |= IN_JUMP;
+				TF2Attrib_RemoveByName(client, "no_jump");
+			}
+			else
+			{
+				TF2Attrib_SetByName(client, "no_jump", 1.0);
+			}
+		}
+		
+		FireWeaponAtEnemy(client, buttons);
+		
+		return Plugin_Changed;
+	}
+	
+	return Plugin_Continue;
+}
+
+public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
+{
+	if (!IsClientInGame(client))
+		return;
+	
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	{
+		if (Player(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
+		{
+			TF2_AddCondition(client, TFCond_CritCanteen);
+		}
+		
+		if (Player(client).IsInASquad())
+		{
+			if (Player(client).GetSquad().GetMemberCount() <= 1 || Player(client).GetSquad().GetLeader() == -1)
+			{
+				// squad has collapsed - disband it
+				Player(client).LeaveSquad();
+			}
+		}
+	}
+}
+
 public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname, bool &result)
 {
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
@@ -987,177 +895,21 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 		{
 			if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 			{
-				// No spawn outline for robots
+				// Remove spawn outline for robots
 				TF2_RemoveCondition(client, condition);
 			}
 		}
 	}
 }
 
-any GetOffset(const char[] name)
+static INextBot CreateNextBotPlayer(Address entity)
 {
-	int offset;
-	if (!g_offsets.GetValue(name, offset))
-	{
-		ThrowError("Offset \"%s\" not found in map", name);
-	}
-	
-	return offset;
+	ToolsNextBotPlayer nextbot = ToolsNextBotPlayer(entity);
+	nextbot.IsDormantWhenDead = false;
+	return nextbot;
 }
 
-void SetOffset(GameData gamedata, const char[] name)
-{
-	int offset = gamedata.GetOffset(name);
-	if (offset == -1)
-	{
-		ThrowError("Offset \"%s\" not found in gamedata", name);
-	}
-	
-	g_offsets.SetValue(name, offset);
-}
-
-void SelectNewDefenders()
-{
-	CPrintToChatAll("%s %t", PLUGIN_TAG, "Queue_NewDefenders");
-	
-	char redTeamname[MAX_TEAM_NAME_LENGTH], blueTeamname[MAX_TEAM_NAME_LENGTH];
-	mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
-	mp_tournament_blueteamname.GetString(blueTeamname, sizeof(blueTeamname));
-	
-	g_bAllowTeamChange = true;
-	
-	ArrayList players = new ArrayList();
-	
-	// Collect all valid players
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		if (IsClientSourceTV(client))
-			continue;
-		
-		players.Push(client);
-	}
-	
-	ArrayList queue = Queue_GetDefenderQueue();
-	int iDefenderCount = 0;
-	int iReqDefenderCount = Max(mitm_defender_min_count.IntValue, RoundToNearest((float(players.Length) / float(MaxClients)) * mitm_defender_max_count.IntValue));
-	
-	// Select our defenders
-	for (int i = 0; i < queue.Length; i++)
-	{
-		int client = queue.Get(i, QueueData::m_client);
-		Party party = queue.Get(i, QueueData::m_party);
-		
-		// All members of a party queue together
-		if (party == NULL_PARTY)
-		{
-			TF2_ChangeClientTeam(client, TFTeam_Defenders);
-			Queue_SetPoints(client, 0);
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
-			
-			players.Erase(players.FindValue(client));
-			++iDefenderCount;
-		}
-		else
-		{
-			// Only let parties play if all members have space to join
-			if (iReqDefenderCount - iDefenderCount - party.GetMemberCount(false) < 0)
-				continue;
-			
-			ArrayList members = new ArrayList();
-			party.CollectMembers(members, false);
-			for (int j = 0; j < members.Length; j++)
-			{
-				int member = members.Get(j);
-				
-				TF2_ChangeClientTeam(member, TFTeam_Defenders);
-				Queue_SetPoints(member, 0);
-				CPrintToChat(member, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
-				
-				players.Erase(players.FindValue(member));
-				++iDefenderCount;
-			}
-			delete members;
-		}
-		
-		// If we have enough defenders, early out
-		if (iReqDefenderCount == iDefenderCount)
-			break;
-	}
-	
-	// We have less defenders than we wanted.
-	// Pick random players, regardless of their defender preference.
-	if (iDefenderCount < iReqDefenderCount)
-	{
-		players.Sort(Sort_Random, Sort_Integer);
-		
-		for (int i = 0; i < players.Length; i++)
-		{
-			int client = players.Get(i);
-			
-			if (Player(client).HasPreference(PREF_DISABLE_SPAWNING))
-				continue;
-			
-			// Keep filling slots until our quota is met
-			if (iDefenderCount++ < iReqDefenderCount)
-			{
-				TF2_ChangeClientTeam(client, TFTeam_Defenders);
-				CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender_Forced", redTeamname);
-				
-				players.Erase(i);
-			}
-		}
-	}
-	
-	if (iDefenderCount < iReqDefenderCount)
-	{
-		LogError("Not enough players to meet defender quota (%d/%d)", iDefenderCount, iReqDefenderCount);
-	}
-	
-	// Move everyone else to the spectator team
-	for (int i = 0; i < players.Length; i++)
-	{
-		int client = players.Get(i);
-		
-		TF2_ChangeClientTeam(client, TFTeam_Spectator);
-		
-		// Players who disable being defender don't earn queue points, unless they're in a party
-		if (Player(client).HasPreference(PREF_DISABLE_DEFENDER) && (!Player(client).IsInAParty() || Player(client).GetParty().GetMemberCount() <= 1))
-		{
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader_NoQueue", blueTeamname);
-		}
-		else if (!Player(client).HasPreference(PREF_DISABLE_SPAWNING))
-		{
-			Queue_AddPoints(client, mitm_queue_points.IntValue);
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname, mitm_queue_points.IntValue, Player(client).m_defenderQueuePoints);
-		}
-	}
-	
-	g_bAllowTeamChange = false;
-	
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		if (TF2_GetClientTeam(client) != TFTeam_Defenders)
-			continue;
-		
-		// Show class selection menu
-		if (TF2_GetPlayerClass(client) == TFClass_Unknown)
-		{
-			ShowVGUIPanel(client, "class_red");
-		}
-	}
-	
-	// Free the memory
-	delete players;
-	delete queue;
-}
-
-void FireWeaponAtEnemy(int client, int &buttons)
+static void FireWeaponAtEnemy(int client, int &buttons)
 {
 	if (!IsPlayerAlive(client))
 		return;
@@ -1286,60 +1038,4 @@ void FireWeaponAtEnemy(int client, int &buttons)
 		// We have left the spawn
 		s_isInSpawn[client] = false;
 	}
-}
-
-INextBot CreateNextBotPlayer(Address entity)
-{
-	ToolsNextBotPlayer nextbot = ToolsNextBotPlayer(entity);
-	nextbot.IsDormantWhenDead = false;
-	return nextbot;
-}
-
-static void ConVarChanged_MinPlayersToStart(ConVar convar, const char[] oldValue, const char[] newValue)
-{
-	if (g_bInWaitingForPlayers)
-	{
-		// Don't allow maps to modify this using point_servercommand
-		convar.IntValue = MaxClients + 1;
-	}
-}
-
-static Action OnNormalSoundPlayed(int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH], int &entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
-{
-	if (StrEqual(sample, ")weapons/teleporter_ready.wav"))
-	{
-		if (IsBaseObject(entity) && ((TF2_GetObjectType(entity) == TFObject_Teleporter && TF2_GetObjectMode(entity) == TFObjectMode_Exit) || TF2_GetObjectType(entity) == TFObject_Sapper))
-		{
-			if (view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum")) == TFTeam_Invaders)
-			{
-				// Alert defenders that a robot teleporter is now active
-				EmitSoundToAll(")mvm/mvm_tele_activate.wav", entity, SNDCHAN_STATIC, 150);
-			}
-		}
-	}
-	
-	return Plugin_Continue;
-}
-
-static Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNum, bool reliable, bool init)
-{
-	if (!mitm_rename_robots.BoolValue)
-		return Plugin_Continue;
-	
-	int client = msg.ReadByte();
-	bool bWantsToChat = view_as<bool>(msg.ReadByte());
-	
-	if (!bWantsToChat && Player(client).IsInvader())
-	{
-		char szBuf[MAX_MESSAGE_LENGTH];
-		msg.ReadString(szBuf, sizeof(szBuf));
-		
-		if (StrEqual(szBuf, "#TF_Name_Change"))
-		{
-			// Prevent rename message spam in chat
-			return Plugin_Stop;
-		}
-	}
-	
-	return Plugin_Continue;
 }

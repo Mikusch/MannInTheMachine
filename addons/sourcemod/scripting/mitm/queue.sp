@@ -18,6 +18,13 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+enum struct QueueData
+{
+	int m_points;
+	int m_client;
+	Party m_party;
+}
+
 ArrayList Queue_GetDefenderQueue()
 {
 	ArrayList queue = new ArrayList(sizeof(QueueData));

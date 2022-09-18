@@ -1682,13 +1682,29 @@ methodmap CWaveSpawnPopulator
 		return view_as<CWaveSpawnPopulator>(pThis);
 	}
 	
+	property bool m_bSupportWave
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CWaveSpawnPopulator::m_bSupportWave"), NumberType_Int8);
+		}
+	}
+	
+	property bool m_bLimitedSupport
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CWaveSpawnPopulator::m_bLimitedSupport"), NumberType_Int8);
+		}
+	}
+	
 	public bool IsSupportWave()
 	{
-		return Deref(this + GetOffset("CWaveSpawnPopulator::m_bSupportWave"), NumberType_Int8);
+		return this.m_bSupportWave;
 	}
 	
 	public bool IsLimitedSupportWave()
 	{
-		return Deref(this + GetOffset("CWaveSpawnPopulator::m_bLimitedSupport"), NumberType_Int8);
+		return this.m_bLimitedSupport;
 	}
 }

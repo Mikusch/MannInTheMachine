@@ -42,7 +42,7 @@ static CMissionPopulator s_MissionPopulator;
 static int s_activeMissionMembers;
 static int s_nSniperCount;
 
-// Engineer Teleporter
+// MvM Engineer Teleporter
 static CBaseEntity s_lastTeleporter;
 static float s_flLastTeleportTime;
 
@@ -54,7 +54,7 @@ void DHooks_Init(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CPopulationManager::AllocateBots", DHookCallback_AllocateBots_Pre);
 	CreateDynamicDetour(gamedata, "CPopulationManager::RestoreCheckpoint", DHookCallback_RestoreCheckpoint_Pre);
 	CreateDynamicDetour(gamedata, "CTFBotSpawner::Spawn", DHookCallback_CTFBotSpawnerSpawn_Pre);
-	CreateDynamicDetour(gamedata, "CSquadSpawner::Spawn", _, DHookCallback_CSquadSpawner_Post);
+	CreateDynamicDetour(gamedata, "CSquadSpawner::Spawn", _, DHookCallback_CSquadSpawnerSpawn_Post);
 	CreateDynamicDetour(gamedata, "CPopulationManager::Update", DHookCallback_CPopulationManagerUpdate_Pre, DHookCallback_CPopulationManagerUpdate_Post);
 	CreateDynamicDetour(gamedata, "CPeriodicSpawnPopulator::Update", _, DHookCallback_CPeriodicSpawnPopulatorUpdate_Post);
 	CreateDynamicDetour(gamedata, "CWaveSpawnPopulator::Update", _, DHookCallback_CWaveSpawnPopulatorUpdate_Post);
@@ -513,8 +513,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		
 		if (params.Get(2))
 		{
-			// EntityHandleVector_t
-			CUtlVector result = CUtlVector(params.Get(2));
+			CUtlVector result = CUtlVector(params.Get(2)); // EntityHandleVector_t
 			result.AddToTail(GetEntityHandle(newPlayer));
 		}
 		
@@ -556,7 +555,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_CSquadSpawner_Post(Address pThis, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CSquadSpawnerSpawn_Post(Address pThis, DHookReturn ret, DHookParam params)
 {
 	CSquadSpawner spawner = CSquadSpawner(pThis);
 	CUtlVector result = CUtlVector(params.Get(2));

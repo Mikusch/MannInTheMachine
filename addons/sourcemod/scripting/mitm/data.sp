@@ -614,12 +614,16 @@ methodmap Player
 		strcopy(m_szOldClientName[this._client], sizeof(m_szOldClientName[]), "");
 	}
 	
+	public void SetDifficulty(DifficultyType difficulty)
+	{
+		SetEntProp(this._client, Prop_Send, "m_nBotSkill", difficulty);
+	}
+	
 	public void ModifyMaxHealth(int nNewMaxHealth, bool bSetCurrentHealth = true, bool bAllowModelScaling = true)
 	{
-		int maxHealth = TF2Util_GetEntityMaxHealth(this._client);
-		if (maxHealth != nNewMaxHealth)
+		if (TF2Util_GetEntityMaxHealth(this._client) != nNewMaxHealth)
 		{
-			TF2Attrib_SetByName(this._client, "hidden maxhealth non buffed", float(nNewMaxHealth - maxHealth));
+			TF2Attrib_SetByName(this._client, "hidden maxhealth non buffed", float(nNewMaxHealth - TF2Util_GetEntityMaxHealth(this._client)));
 		}
 		
 		if (bSetCurrentHealth)
@@ -655,11 +659,6 @@ methodmap Player
 			}
 		}
 		return EventChangeAttributes_t(Address_Null);
-	}
-	
-	public void SetDifficulty(DifficultyType difficulty)
-	{
-		SetEntProp(this._client, Prop_Send, "m_nBotSkill", difficulty);
 	}
 	
 	public void OnEventChangeAttributes(EventChangeAttributes_t pEvent)
@@ -762,6 +761,12 @@ methodmap Player
 				
 				this.AddTag(tag);
 			}
+		}
+		
+		// Request to Add in Endless
+		if (GetPopulationManager().IsInEndlessWaves())
+		{
+			GetPopulationManager().EndlessSetAttributesForBot(this._client);
 		}
 	}
 	

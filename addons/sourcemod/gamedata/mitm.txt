@@ -36,6 +36,11 @@
 				"linux"		"@_ZN18CPopulationManager12AllocateBotsEv"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x14\x53\x8B\xD9\x80\xBB\x81\x05\x00\x00\x00"
 			}
+			"CPopulationManager::IsInEndlessWaves"
+			{
+				"linux"		"@_ZN18CPopulationManager16IsInEndlessWavesEv"
+				"windows"	"\x80\xB9\xE2\x05\x00\x00\x00\x75\x2A\xA1\x2A\x2A\x2A\x2A\x83\x78\x30\x00\x74\x2A\x83\xB9\xB4\x05\x00\x00\x00\x7E\x2A\xB0\x01"
+			}
 			"CPopulationManager::GetHealthMultiplier"
 			{
 				"linux"		"@_ZN18CPopulationManager19GetHealthMultiplierEb"
@@ -494,6 +499,11 @@
 				"linux"		"1524"
 				"windows"	"1504"
 			}
+			"CPopulationManager::m_EndlessActiveBotUpgrades"
+			{
+				"linux"		"1548"
+				"windows"	"1528"
+			}
 			"CPopulationManager::m_defaultEventChangeAttributesName"
 			{
 				"linux"		"1760"
@@ -578,6 +588,36 @@
 			{
 				"linux"		"1332"
 				"windows"	"1316"
+			}
+			"CEconItemAttributeDefinition::m_iDescriptionFormat"
+			{
+				"linux"		"32"
+				"windows"	"32"
+			}
+			"sizeof(CMvMBotUpgrade)"
+			{
+				"linux"		"84"
+				"windows"	"148"
+			}
+			"CMvMBotUpgrade::iAttribIndex"
+			{
+				"linux"		"64"
+				"windows"	"128"
+			}
+			"CMvMBotUpgrade::flValue"
+			{
+				"linux"		"68"
+				"windows"	"132"
+			}
+			"CMvMBotUpgrade::bIsBotAttr"
+			{
+				"linux"		"80"
+				"windows"	"144"
+			}
+			"CMvMBotUpgrade::bIsSkillAttr"
+			{
+				"linux"		"81"
+				"windows"	"145"
 			}
 		}
 		"Functions"

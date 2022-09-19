@@ -29,6 +29,7 @@ static Handle g_SDKCallDoAnimationEvent;
 static Handle g_SDKCallPlaySpecificSequence;
 static Handle g_SDKCallDoClassSpecialSkill;
 static Handle g_SDKCallResetRageBuffs;
+static Handle g_SDKCallIsInEndlessWaves;
 static Handle g_SDKCallGetHealthMultiplier;
 static Handle g_SDKCallResetMap;
 static Handle g_SDKCallIsSpaceToSpawnHere;
@@ -74,6 +75,7 @@ void SDKCalls_Init(GameData gamedata)
 	g_SDKCallPlaySpecificSequence = PrepSDKCall_PlaySpecificSequence(gamedata);
 	g_SDKCallDoClassSpecialSkill = PrepSDKCall_DoClassSpecialSkill(gamedata);
 	g_SDKCallResetRageBuffs = PrepSDKCall_ResetRageBuffs(gamedata);
+	g_SDKCallIsInEndlessWaves = PrepSDKCall_IsInEndlessWaves(gamedata);
 	g_SDKCallGetHealthMultiplier = PrepSDKCall_GetHealthMultiplier(gamedata);
 	g_SDKCallResetMap = PrepSDKCall_ResetMap(gamedata);
 	g_SDKCallIsSpaceToSpawnHere = PrepSDKCall_IsSpaceToSpawnHere(gamedata);
@@ -242,6 +244,19 @@ static Handle PrepSDKCall_ResetRageBuffs(GameData gamedata)
 	Handle call = EndPrepSDKCall();
 	if (!call)
 		LogMessage("Failed to create SDKCall: CTFPlayerShared::ResetRageBuffs");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_IsInEndlessWaves(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CPopulationManager::IsInEndlessWaves");
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CPopulationManager::IsInEndlessWaves");
 	
 	return call;
 }
@@ -646,6 +661,14 @@ void SDKCall_ResetRageBuffs(any m_Shared)
 {
 	if (g_SDKCallResetRageBuffs)
 		SDKCall(g_SDKCallResetRageBuffs, m_Shared);
+}
+
+bool SDKCall_IsInEndlessWaves(int populator)
+{
+	if (g_SDKCallIsInEndlessWaves)
+		return SDKCall(g_SDKCallIsInEndlessWaves, populator);
+	
+	return false;
 }
 
 float SDKCall_GetHealthMultiplier(int populator, bool bIsTank = false)

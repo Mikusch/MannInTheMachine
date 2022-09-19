@@ -353,6 +353,12 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 			Player(newPlayer).AddEventChangeAttributes(spawner.m_eventChangeAttributes.Get(i, 108));
 		}
 		
+		// Request to Add in Endless
+		if (GetPopulationManager().IsInEndlessWaves())
+		{
+			GetPopulationManager().EndlessSetAttributesForBot(newPlayer);
+		}
+		
 		Player(newPlayer).SetTeleportWhere(spawner.m_teleportWhereName);
 		
 		if (spawner.m_defaultAttributes.m_attributeFlags & MINIBOSS)

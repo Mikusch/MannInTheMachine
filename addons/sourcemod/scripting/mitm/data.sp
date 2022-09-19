@@ -614,12 +614,16 @@ methodmap Player
 		strcopy(m_szOldClientName[this._client], sizeof(m_szOldClientName[]), "");
 	}
 	
+	public void SetDifficulty(DifficultyType difficulty)
+	{
+		SetEntProp(this._client, Prop_Send, "m_nBotSkill", difficulty);
+	}
+	
 	public void ModifyMaxHealth(int nNewMaxHealth, bool bSetCurrentHealth = true, bool bAllowModelScaling = true)
 	{
-		int maxHealth = TF2Util_GetEntityMaxHealth(this._client);
-		if (maxHealth != nNewMaxHealth)
+		if (TF2Util_GetEntityMaxHealth(this._client) != nNewMaxHealth)
 		{
-			TF2Attrib_SetByName(this._client, "hidden maxhealth non buffed", float(nNewMaxHealth - maxHealth));
+			TF2Attrib_SetByName(this._client, "hidden maxhealth non buffed", float(nNewMaxHealth - TF2Util_GetEntityMaxHealth(this._client)));
 		}
 		
 		if (bSetCurrentHealth)
@@ -661,7 +665,7 @@ methodmap Player
 	{
 		if (pEvent)
 		{
-			SetEntProp(this._client, Prop_Send, "m_nBotSkill", pEvent.m_skill);
+			this.SetDifficulty(pEvent.m_skill);
 			
 			this.ClearWeaponRestrictions();
 			this.SetWeaponRestriction(pEvent.m_weaponRestriction);
@@ -757,6 +761,12 @@ methodmap Player
 				
 				this.AddTag(tag);
 			}
+		}
+		
+		// Request to Add in Endless
+		if (GetPopulationManager().IsInEndlessWaves())
+		{
+			GetPopulationManager().EndlessSetAttributesForBot(this._client);
 		}
 	}
 	
@@ -1558,6 +1568,14 @@ methodmap CPopulationManager
 		}
 	}
 	
+	property CUtlVector m_EndlessActiveBotUpgrades
+	{
+		public get()
+		{
+			return CUtlVector(GetEntityAddress(this._index) + GetOffset("CPopulationManager::m_EndlessActiveBotUpgrades"));
+		}
+	}
+	
 	public bool CanBotsAttackWhileInSpawnRoom()
 	{
 		return this.m_canBotsAttackWhileInSpawnRoom;
@@ -1583,6 +1601,11 @@ methodmap CPopulationManager
 		return CWave(SDKCall_GetCurrentWave(this._index));
 	}
 	
+	public bool IsInEndlessWaves()
+	{
+		return SDKCall_IsInEndlessWaves(this._index);
+	}
+	
 	public float GetHealthMultiplier(bool bIsTank = false)
 	{
 		return SDKCall_GetHealthMultiplier(this._index, bIsTank);
@@ -1591,6 +1614,37 @@ methodmap CPopulationManager
 	public void GetSentryBusterDamageAndKillThreshold(int &nDamage, int &nKills)
 	{
 		SDKCall_GetSentryBusterDamageAndKillThreshold(this._index, nDamage, nKills);
+	}
+	
+	public void EndlessSetAttributesForBot(int player)
+	{
+		for (int i = 0; i < this.m_EndlessActiveBotUpgrades.Count(); ++i)
+		{
+			CMvMBotUpgrade upgrade = this.m_EndlessActiveBotUpgrades.Get(i, GetOffset("sizeof(CMvMBotUpgrade)"));
+			
+			if (upgrade.bIsBotAttr == true)
+			{
+				Player(player).SetAttribute(view_as<AttributeType>(RoundFloat(upgrade.flValue)));
+			}
+			else if (upgrade.bIsSkillAttr == true)
+			{
+				Player(player).SetDifficulty(view_as<DifficultyType>(RoundFloat(upgrade.flValue)));
+			}
+			else
+			{
+				Address pDef = TF2Econ_GetAttributeDefinitionAddress(upgrade.iAttribIndex);
+				if (pDef)
+				{
+					int iFormat = Deref(pDef + GetOffset("CEconItemAttributeDefinition::m_iDescriptionFormat"));
+					float flValue = upgrade.flValue;
+					if (iFormat == ATTDESCFORM_VALUE_IS_PERCENTAGE || iFormat == ATTDESCFORM_VALUE_IS_INVERTED_PERCENTAGE)
+					{
+						flValue += 1.0;
+					}
+					TF2Attrib_SetByDefIndex(player, upgrade.iAttribIndex, flValue);
+				}
+			}
+		}
 	}
 }
 
@@ -1706,5 +1760,45 @@ methodmap CWaveSpawnPopulator
 	public bool IsLimitedSupportWave()
 	{
 		return this.m_bLimitedSupport;
+	}
+}
+
+methodmap CMvMBotUpgrade
+{
+	public CMvMBotUpgrade(Address pThis)
+	{
+		return view_as<CMvMBotUpgrade>(pThis);
+	}
+	
+	property int iAttribIndex
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CMvMBotUpgrade::iAttribIndex"), NumberType_Int16);
+		}
+	}
+	
+	property float flValue
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CMvMBotUpgrade::flValue"));
+		}
+	}
+	
+	property bool bIsBotAttr
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CMvMBotUpgrade::bIsBotAttr"), NumberType_Int8);
+		}
+	}
+	
+	property bool bIsSkillAttr
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CMvMBotUpgrade::bIsSkillAttr"), NumberType_Int8);
+		}
 	}
 }

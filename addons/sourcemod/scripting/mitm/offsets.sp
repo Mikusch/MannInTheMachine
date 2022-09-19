@@ -41,11 +41,18 @@ void Offsets_Init(GameData gamedata)
 	SetOffset(gamedata, "CWaveSpawnPopulator::m_bLimitedSupport");
 	SetOffset(gamedata, "CPopulationManager::m_canBotsAttackWhileInSpawnRoom");
 	SetOffset(gamedata, "CPopulationManager::m_bSpawningPaused");
+	SetOffset(gamedata, "CPopulationManager::m_EndlessActiveBotUpgrades");
 	SetOffset(gamedata, "CPopulationManager::m_defaultEventChangeAttributesName");
 	SetOffset(gamedata, "CWave::m_nSentryBustersSpawned");
 	SetOffset(gamedata, "CWave::m_nNumEngineersTeleportSpawned");
 	SetOffset(gamedata, "IPopulationSpawner::m_spawner");
 	SetOffset(gamedata, "IPopulationSpawner::m_where");
+	
+	SetOffset(gamedata, "sizeof(CMvMBotUpgrade)");
+	SetOffset(gamedata, "CMvMBotUpgrade::iAttribIndex");
+	SetOffset(gamedata, "CMvMBotUpgrade::flValue");
+	SetOffset(gamedata, "CMvMBotUpgrade::bIsBotAttr");
+	SetOffset(gamedata, "CMvMBotUpgrade::bIsSkillAttr");
 	
 	SetOffset(gamedata, "EventChangeAttributes_t::m_eventName");
 	SetOffset(gamedata, "EventChangeAttributes_t::m_skill");
@@ -75,6 +82,7 @@ void Offsets_Init(GameData gamedata)
 	SetOffset(gamedata, "CBaseTFBotHintEntity::m_isDisabled");
 	SetOffset(gamedata, "BombInfo_t::m_flMaxBattleFront");
 	SetOffset(gamedata, "CTFGrenadePipebombProjectile::m_flCreationTime");
+	SetOffset(gamedata, "CEconItemAttributeDefinition::m_iDescriptionFormat");
 }
 
 any GetOffset(const char[] name)

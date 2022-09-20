@@ -68,6 +68,9 @@
 // The maximum length of a single attribute's description
 #define MAX_ATTRIBUTE_DESCRIPTION_LENGTH	256
 
+// 5 bytes are reserved for other parameters
+#define TEXTMSG_MAX_MESSAGE_LENGTH	(MAX_USER_MSG_DATA - 5)
+
 #define MITM_HINT_MASK	(0x10200)	// annotations have id ( MITM_HINT_MASK | entindex )
 
 const TFTeam TFTeam_Defenders = TFTeam_Red;

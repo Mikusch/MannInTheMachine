@@ -169,9 +169,10 @@
 	{
 		"en"		"Next Robot Spawns:"
 	}
-	"Endless_BotUpgradesChanged"
+	"Endless_MoreAttributes"
 	{
-		"en"		"Bot upgrades have changed. Check console for details."
+		"#format"	"{1:d}"
+		"en"		"...and {1} more"
 	}
 	
 	// Party

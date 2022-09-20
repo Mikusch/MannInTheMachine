@@ -55,6 +55,7 @@ void Offsets_Init(GameData gamedata)
 	SetOffset(gamedata, "IPopulationSpawner::m_where");
 	
 	SetOffset(gamedata, "sizeof(CMvMBotUpgrade)");
+	SetOffset(gamedata, "CMvMBotUpgrade::szAttrib");
 	SetOffset(gamedata, "CMvMBotUpgrade::iAttribIndex");
 	SetOffset(gamedata, "CMvMBotUpgrade::flValue");
 	SetOffset(gamedata, "CMvMBotUpgrade::bIsBotAttr");
@@ -95,12 +96,14 @@ void Offsets_Init(GameData gamedata)
 	SetOffset(gamedata, "CCurrencyPack::m_nAmount");
 	SetOffset(gamedata, "CCurrencyPack::m_bTouched");
 	
+	SetOffset(gamedata, "CEconItemAttributeDefinition::m_iDescriptionFormat");
+	SetOffset(gamedata, "CEconItemAttributeDefinition::m_pszDescriptionString");
+	
 	SetOffset(gamedata, "CTakeDamageInfo::m_bForceFriendlyFire");
 	SetOffset(gamedata, "CTFNavArea::m_distanceToBombTarget");
 	SetOffset(gamedata, "CBaseTFBotHintEntity::m_isDisabled");
 	SetOffset(gamedata, "CTFGrenadePipebombProjectile::m_flCreationTime");
 	SetOffset(gamedata, "inputdata_t::value");
-	SetOffset(gamedata, "CEconItemAttributeDefinition::m_iDescriptionFormat");
 	SetOffset(gamedata, "CTraceFilterSimple::m_pPassEnt");
 }
 

@@ -1147,3 +1147,32 @@ bool StrPtrEquals(Address psz1, Address psz2)
 	
 	return strcmp(sz1, sz2, false) == 0;
 }
+
+float TranslateAttributeValue(int iFormat, float flValue)
+{
+	switch (iFormat)
+	{
+		case ATTDESCFORM_VALUE_IS_PERCENTAGE: return (flValue * 100.0);
+		case ATTDESCFORM_VALUE_IS_INVERTED_PERCENTAGE: return flValue > 1.0 ? (flValue * 100.0) : (1.0 - flValue) * 100.0 - 100.0;
+		case ATTDESCFORM_VALUE_IS_ADDITIVE: return flValue;
+		case ATTDESCFORM_VALUE_IS_ADDITIVE_PERCENTAGE: return flValue * 100.0;
+		case ATTDESCFORM_VALUE_IS_OR: return flValue;
+	}
+	
+	return 0.0;
+}
+
+stock void UTIL_ClientPrintAll(int msg_dest, const char[] msg_name, const char[] param1 = "", const char[] param2 = "", const char[] param3 = "", const char[] param4 = "")
+{
+	BfWrite message = UserMessageToBfWrite(StartMessageAll("TextMsg", USERMSG_RELIABLE | USERMSG_BLOCKHOOKS));
+	
+	message.WriteByte(msg_dest);
+	message.WriteString(msg_name);
+	
+	message.WriteString(param1);
+	message.WriteString(param2);
+	message.WriteString(param3);
+	message.WriteString(param4);
+	
+	EndMessage();
+}

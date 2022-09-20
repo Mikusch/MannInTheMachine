@@ -36,6 +36,11 @@
 				"linux"		"@_ZN18CPopulationManager12AllocateBotsEv"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x14\x53\x8B\xD9\x80\xBB\x81\x05\x00\x00\x00"
 			}
+			"CPopulationManager::EndlessRollEscalation"
+			{
+				"linux"		"@_ZN18CPopulationManager21EndlessRollEscalationEv"
+				"windows"	"\x55\x8B\xEC\x81\xEC\xCC\x02\x00\x00"
+			}
 			"CPopulationManager::IsInEndlessWaves"
 			{
 				"linux"		"@_ZN18CPopulationManager16IsInEndlessWavesEv"
@@ -634,11 +639,6 @@
 				"linux"		"8"
 				"windows"	"8"
 			}
-			"CEconItemAttributeDefinition::m_iDescriptionFormat"
-			{
-				"linux"		"36"
-				"windows"	"36"
-			}
 			"CTraceFilterSimple::m_pPassEnt"
 			{
 				"linux"		"4"
@@ -648,6 +648,11 @@
 			{
 				"linux"		"84"
 				"windows"	"148"
+			}
+			"CMvMBotUpgrade::szAttrib"
+			{
+				"linux"		"0"
+				"windows"	"0"
 			}
 			"CMvMBotUpgrade::iAttribIndex"
 			{
@@ -669,6 +674,16 @@
 				"linux"		"81"
 				"windows"	"145"
 			}
+			"CEconItemAttributeDefinition::m_iDescriptionFormat"
+			{
+				"linux"		"36"
+				"windows"	"36"
+			}
+			"CEconItemAttributeDefinition::m_pszDescriptionString"
+			{
+				"linux"		"40"
+				"windows"	"40"
+			}
 		}
 		"Functions"
 		{
@@ -682,6 +697,13 @@
 			"CPopulationManager::AllocateBots"
 			{
 				"signature"	"CPopulationManager::AllocateBots"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
+			}
+			"CPopulationManager::EndlessRollEscalation"
+			{
+				"signature"	"CPopulationManager::EndlessRollEscalation"
 				"callconv"	"thiscall"
 				"return"	"void"
 				"this"		"entity"

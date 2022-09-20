@@ -1770,6 +1770,14 @@ methodmap CMvMBotUpgrade
 		return view_as<CMvMBotUpgrade>(pThis);
 	}
 	
+	property Address szAttrib
+	{
+		public get()
+		{
+			return view_as<Address>(this + GetOffset("CMvMBotUpgrade::szAttrib"));
+		}
+	}
+	
 	property int iAttribIndex
 	{
 		public get()

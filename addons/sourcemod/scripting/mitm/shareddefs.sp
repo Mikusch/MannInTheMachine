@@ -60,6 +60,14 @@
 
 #define SCREENFADE_FRACBITS		9		// which leaves 16-this for the integer part
 
+#define HUD_PRINTNOTIFY		1
+#define HUD_PRINTCONSOLE	2
+#define HUD_PRINTTALK		3
+#define HUD_PRINTCENTER		4
+
+// The maximum length of a single attribute's description
+#define MAX_ATTRIBUTE_DESCRIPTION_LENGTH	256
+
 #define MITM_HINT_MASK	(0x10200)	// annotations have id ( MITM_HINT_MASK | entindex )
 
 const TFTeam TFTeam_Defenders = TFTeam_Red;

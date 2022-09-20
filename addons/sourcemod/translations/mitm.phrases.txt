@@ -169,6 +169,10 @@
 	{
 		"en"		"Next Robot Spawns:"
 	}
+	"Endless_BotUpgradesChanged"
+	{
+		"en"		"Bot upgrades have changed. Check console for details."
+	}
 	
 	// Party
 	

@@ -52,6 +52,7 @@ void DHooks_Init(GameData gamedata)
 	
 	CreateDynamicDetour(gamedata, "CTFGCServerSystem::PreClientUpdate", DHookCallback_PreClientUpdate_Pre, DHookCallback_PreClientUpdate_Post);
 	CreateDynamicDetour(gamedata, "CPopulationManager::AllocateBots", DHookCallback_AllocateBots_Pre);
+	CreateDynamicDetour(gamedata, "CPopulationManager::EndlessRollEscalation", DHookCallback_EndlessRollEscalation_Pre, DHookCallback_EndlessRollEscalation_Post);
 	CreateDynamicDetour(gamedata, "CPopulationManager::RestoreCheckpoint", DHookCallback_RestoreCheckpoint_Pre);
 	CreateDynamicDetour(gamedata, "CTFBotSpawner::Spawn", DHookCallback_CTFBotSpawnerSpawn_Pre);
 	CreateDynamicDetour(gamedata, "CSquadSpawner::Spawn", _, DHookCallback_CSquadSpawnerSpawn_Post);
@@ -210,6 +211,20 @@ static MRESReturn DHookCallback_AllocateBots_Pre(int populator)
 {
 	// Do not allow the populator to allocate bots
 	return MRES_Supercede;
+}
+
+static MRESReturn DHookCallback_EndlessRollEscalation_Pre(int populator)
+{
+	g_bPrintEndlessBotUpgrades = true;
+	
+	return MRES_Ignored;
+}
+
+static MRESReturn DHookCallback_EndlessRollEscalation_Post(int populator)
+{
+	g_bPrintEndlessBotUpgrades = false;
+	
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_RestoreCheckpoint_Pre(int populator)

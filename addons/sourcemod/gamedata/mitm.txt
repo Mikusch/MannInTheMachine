@@ -519,6 +519,11 @@
 				"linux"		"48"
 				"windows"	"48"
 			}
+			"sizeof(EventChangeAttributes_t)"
+			{
+				"linux"		"108"
+				"windows"	"108"
+			}
 			"EventChangeAttributes_t::m_eventName"
 			{
 				"linux"		"0"
@@ -564,6 +569,46 @@
 				"linux"		"88"
 				"windows"	"88"
 			}
+			"sizeof(item_attributes_t)"
+			{
+				"linux"		"28"
+				"windows"	"28"
+			}
+			"item_attributes_t::m_itemName"
+			{
+				"linux"		"0"
+				"windows"	"0"
+			}
+			"item_attributes_t::m_attributes"
+			{
+				"linux"		"8"
+				"windows"	"8"
+			}
+			"sizeof(static_attrib_t)"
+			{
+				"linux"		"8"
+				"windows"	"8"
+			}
+			"static_attrib_t::iDefIndex"
+			{
+				"linux"		"0"
+				"windows"	"0"
+			}
+			"static_attrib_t::m_value"
+			{
+				"linux"		"4"
+				"windows"	"4"
+			}
+			"sizeof(BombInfo_t)"
+			{
+				"linux"		"20"
+				"windows"	"20"
+			}
+			"BombInfo_t::m_flMaxBattleFront"
+			{
+				"linux"		"16"
+				"windows"	"16"
+			}
 			"CTakeDamageInfo::m_bForceFriendlyFire"
 			{
 				"linux"		"92"
@@ -573,11 +618,6 @@
 			{
 				"linux"		"552"
 				"windows"	"548"
-			}
-			"BombInfo_t::m_flMaxBattleFront"
-			{
-				"linux"		"16"
-				"windows"	"16"
 			}
 			"CBaseTFBotHintEntity::m_isDisabled"
 			{
@@ -589,10 +629,20 @@
 				"linux"		"1332"
 				"windows"	"1316"
 			}
+			"inputdata_t::value"
+			{
+				"linux"		"8"
+				"windows"	"8"
+			}
 			"CEconItemAttributeDefinition::m_iDescriptionFormat"
 			{
 				"linux"		"36"
 				"windows"	"36"
+			}
+			"CTraceFilterSimple::m_pPassEnt"
+			{
+				"linux"		"4"
+				"windows"	"4"
 			}
 			"sizeof(CMvMBotUpgrade)"
 			{

@@ -253,7 +253,7 @@ static bool ShouldAdvanceNestSpot(CTFBotMvMEngineerIdle action, int actor)
 		m_reevaluateNestTimer[actor].Invalidate();
 	}
 	
-	BombInfo_t bombInfo = malloc(20); // sizeof(BombInfo_t)
+	BombInfo_t bombInfo = malloc(GetOffset("sizeof(BombInfo_t)"));
 	if (SDKCall_GetBombInfo(bombInfo))
 	{
 		if (IsValidEntity(action.m_nestHint))

@@ -33,18 +33,24 @@ void Offsets_Init(GameData gamedata)
 	SetOffset(gamedata, "CTFBotSpawner::m_name");
 	SetOffset(gamedata, "CTFBotSpawner::m_teleportWhereName");
 	SetOffset(gamedata, "CTFBotSpawner::m_defaultAttributes");
+	
 	SetOffset(gamedata, "CSquadSpawner::m_formationSize");
 	SetOffset(gamedata, "CSquadSpawner::m_bShouldPreserveSquad");
+	
 	SetOffset(gamedata, "CMissionPopulator::m_mission");
 	SetOffset(gamedata, "CMissionPopulator::m_cooldownDuration");
+	
 	SetOffset(gamedata, "CWaveSpawnPopulator::m_bSupportWave");
 	SetOffset(gamedata, "CWaveSpawnPopulator::m_bLimitedSupport");
+	
 	SetOffset(gamedata, "CPopulationManager::m_canBotsAttackWhileInSpawnRoom");
 	SetOffset(gamedata, "CPopulationManager::m_bSpawningPaused");
 	SetOffset(gamedata, "CPopulationManager::m_EndlessActiveBotUpgrades");
 	SetOffset(gamedata, "CPopulationManager::m_defaultEventChangeAttributesName");
+	
 	SetOffset(gamedata, "CWave::m_nSentryBustersSpawned");
 	SetOffset(gamedata, "CWave::m_nNumEngineersTeleportSpawned");
+	
 	SetOffset(gamedata, "IPopulationSpawner::m_spawner");
 	SetOffset(gamedata, "IPopulationSpawner::m_where");
 	
@@ -54,6 +60,7 @@ void Offsets_Init(GameData gamedata)
 	SetOffset(gamedata, "CMvMBotUpgrade::bIsBotAttr");
 	SetOffset(gamedata, "CMvMBotUpgrade::bIsSkillAttr");
 	
+	SetOffset(gamedata, "sizeof(EventChangeAttributes_t)");
 	SetOffset(gamedata, "EventChangeAttributes_t::m_eventName");
 	SetOffset(gamedata, "EventChangeAttributes_t::m_skill");
 	SetOffset(gamedata, "EventChangeAttributes_t::m_weaponRestriction");
@@ -63,6 +70,17 @@ void Offsets_Init(GameData gamedata)
 	SetOffset(gamedata, "EventChangeAttributes_t::m_itemsAttributes");
 	SetOffset(gamedata, "EventChangeAttributes_t::m_characterAttributes");
 	SetOffset(gamedata, "EventChangeAttributes_t::m_tags");
+	
+	SetOffset(gamedata, "sizeof(item_attributes_t)");
+	SetOffset(gamedata, "item_attributes_t::m_itemName");
+	SetOffset(gamedata, "item_attributes_t::m_attributes");
+	
+	SetOffset(gamedata, "sizeof(static_attrib_t)");
+	SetOffset(gamedata, "static_attrib_t::iDefIndex");
+	SetOffset(gamedata, "static_attrib_t::m_value");
+	
+	SetOffset(gamedata, "sizeof(BombInfo_t)");
+	SetOffset(gamedata, "BombInfo_t::m_flMaxBattleFront");
 	
 	SetOffset(gamedata, "CTFPlayer::m_flSpawnTime");
 	SetOffset(gamedata, "CTFPlayer::m_bIsMissionEnemy");
@@ -80,9 +98,10 @@ void Offsets_Init(GameData gamedata)
 	SetOffset(gamedata, "CTakeDamageInfo::m_bForceFriendlyFire");
 	SetOffset(gamedata, "CTFNavArea::m_distanceToBombTarget");
 	SetOffset(gamedata, "CBaseTFBotHintEntity::m_isDisabled");
-	SetOffset(gamedata, "BombInfo_t::m_flMaxBattleFront");
 	SetOffset(gamedata, "CTFGrenadePipebombProjectile::m_flCreationTime");
+	SetOffset(gamedata, "inputdata_t::value");
 	SetOffset(gamedata, "CEconItemAttributeDefinition::m_iDescriptionFormat");
+	SetOffset(gamedata, "CTraceFilterSimple::m_pPassEnt");
 }
 
 any GetOffset(const char[] name)

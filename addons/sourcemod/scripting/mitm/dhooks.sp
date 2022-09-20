@@ -350,7 +350,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		Player(newPlayer).ClearEventChangeAttributes();
 		for (int i = 0; i < spawner.m_eventChangeAttributes.Count(); ++i)
 		{
-			Player(newPlayer).AddEventChangeAttributes(spawner.m_eventChangeAttributes.Get(i, 108));
+			Player(newPlayer).AddEventChangeAttributes(spawner.m_eventChangeAttributes.Get(i, GetOffset("sizeof(EventChangeAttributes_t)")));
 		}
 		
 		Player(newPlayer).SetTeleportWhere(spawner.m_teleportWhereName);
@@ -971,7 +971,7 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Post(Address pThis,
 
 static MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterface, DHookParam params)
 {
-	Address pszEventName = params.GetObjectVar(1, 0x8, ObjectValueType_Int);
+	Address pszEventName = params.GetObjectVar(1, GetOffset("inputdata_t::value"), ObjectValueType_Int);
 	
 	if (IsMannVsMachineMode())
 	{
@@ -1197,7 +1197,7 @@ static MRESReturn DHookCallback_FindSpawnLocation_Post(Address where, DHookRetur
 
 static MRESReturn DHookCallback_ShouldHitEntity_Post(Address pFilter, DHookReturn ret, DHookParam params)
 {
-	int me = GetEntityFromAddress(Deref(pFilter + view_as<Address>(0x4)));
+	int me = GetEntityFromAddress(Deref(pFilter + GetOffset("CTraceFilterSimple::m_pPassEnt")));
 	int entity = GetEntityFromAddress(params.Get(1));
 	
 	if (IsEntityClient(entity))

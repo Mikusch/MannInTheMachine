@@ -690,13 +690,13 @@ methodmap Player
 			// and add ones that we want specifically
 			for (int i = 0; i < pEvent.m_characterAttributes.Count(); i++)
 			{
-				Address characterAttributes = pEvent.m_characterAttributes.Get(i, 8); // static_attrib_t
-				int defIndex = Deref(characterAttributes, NumberType_Int16);
+				Address characterAttributes = pEvent.m_characterAttributes.Get(i, GetOffset("sizeof(static_attrib_t)"));
+				int defIndex = Deref(characterAttributes + GetOffset("static_attrib_t::iDefIndex"), NumberType_Int16);
 				
 				Address pDef = TF2Econ_GetAttributeDefinitionAddress(defIndex);
 				if (pDef)
 				{
-					float flValue = Deref(characterAttributes + view_as<Address>(0x4));
+					float flValue = Deref(characterAttributes + GetOffset("static_attrib_t::m_value"));
 					TF2Attrib_SetByDefIndex(this._client, defIndex, flValue);
 				}
 			}
@@ -716,10 +716,10 @@ methodmap Player
 			
 			for (int i = 0; i < pEvent.m_itemsAttributes.Count(); i++)
 			{
-				Address itemAttributes = pEvent.m_itemsAttributes.Get(i);
+				Address itemAttributes = pEvent.m_itemsAttributes.Get(i, GetOffset("sizeof(item_attributes_t)"));
 				
 				char itemName[64];
-				PtrToString(Deref(itemAttributes), itemName, sizeof(itemName));
+				PtrToString(Deref(itemAttributes + GetOffset("item_attributes_t::m_itemName")), itemName, sizeof(itemName));
 				
 				int itemDef = GetItemDefinitionByName(itemName);
 				
@@ -729,13 +729,13 @@ methodmap Player
 					
 					if (entity != -1 && itemDef == GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"))
 					{
-						CUtlVector m_attributes = CUtlVector(itemAttributes + view_as<Address>(0x8));
-						for (int iAtt = 0; iAtt < m_attributes.Count(); ++iAtt)
+						CUtlVector attributes = CUtlVector(itemAttributes + GetOffset("item_attributes_t::m_attributes"));
+						for (int iAtt = 0; iAtt < attributes.Count(); ++iAtt)
 						{
-							Address attrib = m_attributes.Get(iAtt, 8); // item_attributes_t
+							Address attrib = attributes.Get(iAtt, GetOffset("sizeof(static_attrib_t)"));
 							
-							int defIndex = Deref(attrib, NumberType_Int16);
-							float value = Deref(attrib + view_as<Address>(0x4));
+							int defIndex = Deref(attrib + GetOffset("static_attrib_t::iDefIndex"), NumberType_Int16);
+							float value = Deref(attrib + GetOffset("static_attrib_t::m_value"));
 							
 							TF2Attrib_SetByDefIndex(entity, defIndex, value);
 						}

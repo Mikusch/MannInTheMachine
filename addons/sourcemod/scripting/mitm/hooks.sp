@@ -154,7 +154,7 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 				}
 				else if (TF2Econ_GetAttributeName(upgrade.iAttribIndex, szDescription, sizeof(szDescription)))
 				{
-					Format(szDescription, sizeof(szDescription), "%s [%.1f]", szDescription, upgrade.flValue);
+					Format(szDescription, sizeof(szDescription), "%s [%.2f]", szDescription, upgrade.flValue);
 					
 					if (msg_dest == HUD_PRINTCONSOLE)
 					{

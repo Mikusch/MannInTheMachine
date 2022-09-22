@@ -22,7 +22,7 @@
 
 #define ZERO_VECTOR	{ 0.0, 0.0, 0.0 }
 
-#define DEFINDEX_UNDEFINED	(0xFFFF)
+#define INVALID_ITEM_DEF_INDEX	(0xFFFF)
 
 #define MAX_USER_MSG_DATA	255
 

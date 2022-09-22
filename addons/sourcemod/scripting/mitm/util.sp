@@ -182,52 +182,48 @@ bool IsWearableSlot(int iSlot)
 		|| IsTauntSlot(iSlot);
 }
 
-int CreateRobotItem(int player, int defindex)
+Handle GenerateItem(int player, int itemDefIndex)
 {
-	Handle hItem = TF2Items_CreateItem(PRESERVE_ATTRIBUTES | FORCE_GENERATION);
-	
-	char classname[64];
-	TF2Econ_GetItemClassName(defindex, classname, sizeof(classname));
-	TF2Econ_TranslateWeaponEntForClass(classname, sizeof(classname), TF2_GetPlayerClass(player));
-	
-	TF2Items_SetClassname(hItem, classname);
-	TF2Items_SetItemIndex(hItem, defindex);
-	TF2Items_SetQuality(hItem, 0);
-	TF2Items_SetLevel(hItem, 1);
-	
-	int item = TF2Items_GiveNamedItem(player, hItem);
-	
-	delete hItem;
-	
-	SetEntProp(item, Prop_Send, "m_bValidatedAttachedEntity", true);
-	
+	Handle item = TF2Items_CreateItem(PRESERVE_ATTRIBUTES);
+	if (item)
+	{
+		char classname[64];
+		TF2Econ_GetItemClassName(itemDefIndex, classname, sizeof(classname));
+		TF2Econ_TranslateWeaponEntForClass(classname, sizeof(classname), TF2_GetPlayerClass(player));
+		
+		TF2Items_SetClassname(item, classname);
+		TF2Items_SetItemIndex(item, itemDefIndex);
+	}
 	return item;
 }
 
-int GetItemDefinitionByName(const char[] name)
+int GetItemDefinitionIndexByName(const char[] name)
 {
 	if (!name[0])
 	{
 		return TF_ITEMDEF_DEFAULT;
 	}
 	
+	static StringMap s_itemDefsByName;
+	if (s_itemDefsByName)
+	{
+		int value = TF_ITEMDEF_DEFAULT;
+		return s_itemDefsByName.GetValue(name, value) ? value : TF_ITEMDEF_DEFAULT;
+	}
+	
+	s_itemDefsByName = new StringMap();
+	
 	ArrayList itemList = TF2Econ_GetItemList();
+	char nameBuffer[64];
 	for (int i, nItems = itemList.Length; i < nItems; i++)
 	{
 		int itemdef = itemList.Get(i);
-		
-		char itemName[64];
-		TF2Econ_GetItemName(itemdef, itemName, sizeof(itemName));
-		
-		if (StrEqual(itemName, name, false))
-		{
-			delete itemList;
-			return itemdef;
-		}
+		TF2Econ_GetItemName(itemdef, nameBuffer, sizeof(nameBuffer));
+		s_itemDefsByName.SetValue(nameBuffer, itemdef);
 	}
 	delete itemList;
 	
-	return TF_ITEMDEF_DEFAULT;
+	return GetItemDefinitionIndexByName(name);
 }
 
 void IncrementMannVsMachineWaveClassCount(any iszClassIconName, int iFlags)

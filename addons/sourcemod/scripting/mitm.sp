@@ -268,37 +268,40 @@ public void OnGameFrame()
 	ArrayList queue = GetInvaderQueue();
 	queue.Resize(Min(queue.Length, 8));
 	
-	// Only send the hint if the visible queue has changed
-	if (queue.Length > 0 && s_prevQueue && !ArrayListEquals(s_prevQueue, queue))
+	if (queue.Length > 0)
 	{
-		for (int client = 1; client <= MaxClients; client++)
+		// Only send the hint if the visible queue has changed or we are between waves
+		if (GameRules_GetProp("m_bMannVsMachineBetweenWaves") || (s_prevQueue && !ArrayListEquals(s_prevQueue, queue)))
 		{
-			if (!IsClientInGame(client))
-				continue;
-			
-			if (!Player(client).IsInvader())
-				continue;
-			
-			if (IsPlayerAlive(client))
-				continue;
-			
-			char text[MAX_USER_MSG_DATA];
-			Format(text, sizeof(text), "%T\n", "Invader_Queue_Header", client);
-			
-			for (int i = 0; i < queue.Length; i++)
+			for (int client = 1; client <= MaxClients; client++)
 			{
-				int other = queue.Get(i);
-				if (other == client)
+				if (!IsClientInGame(client))
+					continue;
+				
+				if (!Player(client).IsInvader())
+					continue;
+				
+				if (IsPlayerAlive(client))
+					continue;
+				
+				char text[MAX_USER_MSG_DATA];
+				Format(text, sizeof(text), "%T\n", "Invader_Queue_Header", client);
+				
+				for (int i = 0; i < queue.Length; i++)
 				{
-					Format(text, sizeof(text), "%s\n➤ %N", text, other);
+					int other = queue.Get(i);
+					if (other == client)
+					{
+						Format(text, sizeof(text), "%s\n➤ %N", text, other);
+					}
+					else
+					{
+						Format(text, sizeof(text), "%s\n%N", text, other);
+					}
 				}
-				else
-				{
-					Format(text, sizeof(text), "%s\n%N", text, other);
-				}
+				
+				PrintKeyHintText(client, text);
 			}
-			
-			PrintKeyHintText(client, text);
 		}
 	}
 	

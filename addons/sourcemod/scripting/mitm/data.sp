@@ -761,12 +761,12 @@ methodmap Player
 				
 				this.AddTag(tag);
 			}
-		}
-		
-		// Request to Add in Endless
-		if (GetPopulationManager().IsInEndlessWaves())
-		{
-			GetPopulationManager().EndlessSetAttributesForBot(this._client);
+			
+			// Request to Add in Endless
+			if (GetPopulationManager().IsInEndlessWaves())
+			{
+				GetPopulationManager().EndlessSetAttributesForBot(this._client);
+			}
 		}
 	}
 	
@@ -834,6 +834,7 @@ methodmap Player
 				LogError("CTFBotSpawner::AddItemToBot: Invalid item %s.", szItemName);
 			}
 		}
+		delete item;
 	}
 	
 	public bool IsWeaponRestricted(int weapon)
@@ -1634,6 +1635,9 @@ methodmap CPopulationManager
 	
 	public void EndlessSetAttributesForBot(int player)
 	{
+		int nHealth = GetEntProp(player, Prop_Data, "m_iHealth");
+		int nMaxHealth = TF2Util_GetEntityMaxHealth(player);
+		
 		for (int i = 0; i < this.m_EndlessActiveBotUpgrades.Count(); ++i)
 		{
 			CMvMBotUpgrade upgrade = this.m_EndlessActiveBotUpgrades.Get(i, GetOffset("sizeof(CMvMBotUpgrade)"));
@@ -1651,16 +1655,27 @@ methodmap CPopulationManager
 				Address pDef = TF2Econ_GetAttributeDefinitionAddress(upgrade.iAttribIndex);
 				if (pDef)
 				{
-					int iFormat = Deref(pDef + GetOffset("CEconItemAttributeDefinition::m_iDescriptionFormat"));
-					float flValue = upgrade.flValue;
-					if (iFormat == ATTDESCFORM_VALUE_IS_PERCENTAGE || iFormat == ATTDESCFORM_VALUE_IS_INVERTED_PERCENTAGE)
+					Address pAttrib = TF2Attrib_GetByDefIndex(player, upgrade.iAttribIndex);
+					if (pAttrib)
 					{
-						flValue += 1.0;
+						TF2Attrib_SetValue(pAttrib, TF2Attrib_GetValue(pAttrib) + upgrade.flValue);
 					}
-					TF2Attrib_SetByDefIndex(player, upgrade.iAttribIndex, flValue);
+					else
+					{
+						int iFormat = Deref(pDef + GetOffset("CEconItemAttributeDefinition::m_iDescriptionFormat"));
+						float flValue = upgrade.flValue;
+						if (iFormat == ATTDESCFORM_VALUE_IS_PERCENTAGE || iFormat == ATTDESCFORM_VALUE_IS_INVERTED_PERCENTAGE)
+						{
+							flValue += 1.0;
+						}
+						TF2Attrib_SetByDefIndex(player, upgrade.iAttribIndex, flValue);
+					}
 				}
 			}
 		}
+		
+		int nNewMaxHealth = TF2Util_GetEntityMaxHealth(player);
+		SetEntProp(player, Prop_Data, "m_iHealth", nHealth + nNewMaxHealth - nMaxHealth);
 	}
 }
 

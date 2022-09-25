@@ -55,15 +55,14 @@ static Handle g_SDKCallGetLiveTime;
 
 void SDKCalls_Init(GameData gamedata)
 {
-	g_SDKCallGetClassIconLinux = PrepSDKCall_GetClassIcon_Linux(gamedata);
-	if (!g_SDKCallGetClassIconLinux)
+	int os = gamedata.GetOffset("Operating System");
+	if (os == OS_LINUX)
+	{
+		g_SDKCallGetClassIconLinux = PrepSDKCall_GetClassIcon_Linux(gamedata);
+	}
+	else if (os == OS_WINDOWS)
 	{
 		g_SDKCallGetClassIconWindows = PrepSDKCall_GetClassIcon_Windows(gamedata);
-	}
-	
-	if (!g_SDKCallGetClassIconLinux && !g_SDKCallGetClassIconWindows)
-	{
-		LogMessage("Failed to create SDKCall: CTFBotSpawner::GetClassIcon");
 	}
 	
 	g_SDKCallPlayThrottledAlert = PrepSDKCall_PlayThrottledAlert(gamedata);
@@ -112,7 +111,11 @@ static Handle PrepSDKCall_GetClassIcon_Linux(GameData gamedata)
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // int nSpawnNum
 	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain); // return string_t
 	
-	return EndPrepSDKCall();
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFBotSpawner::GetClassIcon");
+	
+	return call;
 }
 
 static Handle PrepSDKCall_GetClassIcon_Windows(GameData gamedata)
@@ -125,7 +128,11 @@ static Handle PrepSDKCall_GetClassIcon_Windows(GameData gamedata)
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // int nSpawnNum
 	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain); // return string_t
 	
-	return EndPrepSDKCall();
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogMessage("Failed to create SDKCall: CTFBotSpawner::GetClassIcon");
+	
+	return call;
 }
 
 static Handle PrepSDKCall_PlayThrottledAlert(GameData gamedata)

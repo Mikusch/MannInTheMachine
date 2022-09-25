@@ -20,6 +20,9 @@
 
 #define PLUGIN_TAG	"[{orange}MitM{default}]"
 
+#define OS_LINUX	0
+#define OS_WINDOWS	1
+
 #define ZERO_VECTOR	{ 0.0, 0.0, 0.0 }
 
 #define INVALID_ITEM_DEF_INDEX	(0xFFFF)

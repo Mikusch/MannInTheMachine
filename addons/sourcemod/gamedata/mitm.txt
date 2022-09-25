@@ -264,6 +264,11 @@
 		}
 		"Offsets"
 		{
+			"Operating System"
+			{
+				"linux"		"0"
+				"windows"	"1"
+			}
 			"IPopulationSpawner::Spawn"
 			{
 				"linux"		"3"

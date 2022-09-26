@@ -194,13 +194,11 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 					{
 						char strMember[256];
 						
-						if (i == members.Length - 1)
+						Format(strMember, sizeof(strMember), "%N", members.Get(i));
+						
+						if (i < members.Length - 1)
 						{
-							Format(strMember, sizeof(strMember), "{lightgreen}%N", members.Get(i));
-						}
-						else
-						{
-							Format(strMember, sizeof(strMember), "{lightgreen}%N{default}, ", members.Get(i));
+							StrCat(strMember, sizeof(strMember), ", ");
 						}
 						
 						StrCat(strMembers, sizeof(strMembers), strMember);

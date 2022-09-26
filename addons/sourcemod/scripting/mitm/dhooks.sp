@@ -512,15 +512,13 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 				if (spawner.m_scale >= tf_mvm_miniboss_scale.FloatValue || GetEntProp(newPlayer, Prop_Send, "m_bIsMiniBoss") && FileExists(g_szBotBossModels[nClassIndex], true))
 				{
 					SetVariantString(g_szBotBossModels[nClassIndex]);
-					AcceptEntityInput(newPlayer, "SetCustomModel");
-					SetEntProp(newPlayer, Prop_Send, "m_bUseClassAnimations", true);
+					AcceptEntityInput(newPlayer, "SetCustomModelWithClassAnimations");
 					SetEntProp(newPlayer, Prop_Data, "m_bloodColor", DONT_BLEED);
 				}
 				else if (FileExists(g_szBotModels[nClassIndex], true))
 				{
 					SetVariantString(g_szBotModels[nClassIndex]);
-					AcceptEntityInput(newPlayer, "SetCustomModel");
-					SetEntProp(newPlayer, Prop_Send, "m_bUseClassAnimations", true);
+					AcceptEntityInput(newPlayer, "SetCustomModelWithClassAnimations");
 					SetEntProp(newPlayer, Prop_Data, "m_bloodColor", DONT_BLEED);
 				}
 			}
@@ -907,8 +905,7 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 					didSpawn = true;
 					
 					SetVariantString(g_szBotBossSentryBusterModel);
-					AcceptEntityInput(bot, "SetCustomModel");
-					SetEntProp(bot, Prop_Send, "m_bUseClassAnimations", true);
+					AcceptEntityInput(bot, "SetCustomModelWithClassAnimations");
 					SetEntProp(bot, Prop_Data, "m_bloodColor", DONT_BLEED);
 					
 					SetVariantInt(1);

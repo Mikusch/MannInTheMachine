@@ -271,7 +271,7 @@ public void OnGameFrame()
 	if (queue.Length > 0)
 	{
 		// Only send the hint if the visible queue has changed or we are between waves
-		if (GameRules_GetProp("m_bMannVsMachineBetweenWaves") || (s_prevQueue && !ArrayListEquals(s_prevQueue, queue)))
+		if (GetEntProp(GetObjectiveResourceEntity(), Prop_Send, "m_bMannVsMachineBetweenWaves") || (s_prevQueue && !ArrayListEquals(s_prevQueue, queue)))
 		{
 			for (int client = 1; client <= MaxClients; client++)
 			{

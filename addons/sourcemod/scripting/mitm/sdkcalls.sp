@@ -64,6 +64,10 @@ void SDKCalls_Init(GameData gamedata)
 	{
 		g_SDKCallGetClassIconWindows = PrepSDKCall_GetClassIcon_Windows(gamedata);
 	}
+	else
+	{
+		LogError("Unknown operating system %d", os);
+	}
 	
 	g_SDKCallPlayThrottledAlert = PrepSDKCall_PlayThrottledAlert(gamedata);
 	g_SDKCallPostInventoryApplication = PrepSDKCall_PostInventoryApplication(gamedata);
@@ -113,7 +117,7 @@ static Handle PrepSDKCall_GetClassIcon_Linux(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFBotSpawner::GetClassIcon");
+		LogError("Failed to create SDKCall: CTFBotSpawner::GetClassIcon");
 	
 	return call;
 }
@@ -130,7 +134,7 @@ static Handle PrepSDKCall_GetClassIcon_Windows(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFBotSpawner::GetClassIcon");
+		LogError("Failed to create SDKCall: CTFBotSpawner::GetClassIcon");
 	
 	return call;
 }
@@ -146,7 +150,7 @@ static Handle PrepSDKCall_PlayThrottledAlert(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTeamplayRoundBasedRules::PlayThrottledAlert");
+		LogError("Failed to create SDKCall: CTeamplayRoundBasedRules::PlayThrottledAlert");
 	
 	return call;
 }
@@ -158,7 +162,7 @@ static Handle PrepSDKCall_PostInventoryApplication(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFPlayer::PostInventoryApplication");
+		LogError("Failed to create SDKCall: CTFPlayer::PostInventoryApplication");
 	
 	return call;
 }
@@ -170,7 +174,7 @@ static Handle PrepSDKCall_UpdateModelToClass(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CEconEntity::UpdateModelToClass");
+		LogError("Failed to create SDKCall: CEconEntity::UpdateModelToClass");
 	
 	return call;
 }
@@ -184,7 +188,7 @@ static Handle PrepSDKCall_PickUp(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFItem::PickUp");
+		LogError("Failed to create SDKCall: CTFItem::PickUp");
 	
 	return call;
 }
@@ -197,7 +201,7 @@ static Handle PrepSDKCall_Capture(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CCaptureZone::Capture");
+		LogError("Failed to create SDKCall: CCaptureZone::Capture");
 	
 	return call;
 }
@@ -211,7 +215,7 @@ static Handle PrepSDKCall_DoAnimationEvent(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFPlayer::DoAnimationEvent");
+		LogError("Failed to create SDKCall: CTFPlayer::DoAnimationEvent");
 	
 	return call;
 }
@@ -225,7 +229,7 @@ static Handle PrepSDKCall_PlaySpecificSequence(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFPlayer::PlaySpecificSequence");
+		LogError("Failed to create SDKCall: CTFPlayer::PlaySpecificSequence");
 	
 	return call;
 }
@@ -238,7 +242,7 @@ static Handle PrepSDKCall_DoClassSpecialSkill(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFPlayer::DoClassSpecialSkill");
+		LogError("Failed to create SDKCall: CTFPlayer::DoClassSpecialSkill");
 	
 	return call;
 }
@@ -250,7 +254,7 @@ static Handle PrepSDKCall_ResetRageBuffs(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFPlayerShared::ResetRageBuffs");
+		LogError("Failed to create SDKCall: CTFPlayerShared::ResetRageBuffs");
 	
 	return call;
 }
@@ -263,7 +267,7 @@ static Handle PrepSDKCall_IsInEndlessWaves(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CPopulationManager::IsInEndlessWaves");
+		LogError("Failed to create SDKCall: CPopulationManager::IsInEndlessWaves");
 	
 	return call;
 }
@@ -277,7 +281,7 @@ static Handle PrepSDKCall_GetHealthMultiplier(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CPopulationManager::GetHealthMultiplier");
+		LogError("Failed to create SDKCall: CPopulationManager::GetHealthMultiplier");
 	
 	return call;
 }
@@ -289,7 +293,7 @@ static Handle PrepSDKCall_ResetMap(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CPopulationManager::ResetMap");
+		LogError("Failed to create SDKCall: CPopulationManager::ResetMap");
 	
 	return call;
 }
@@ -303,7 +307,7 @@ static Handle PrepSDKCall_IsSpaceToSpawnHere(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: IsSpaceToSpawnHere");
+		LogError("Failed to create SDKCall: IsSpaceToSpawnHere");
 	
 	return call;
 }
@@ -319,7 +323,7 @@ static Handle PrepSDKCall_FindHint(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFBotMvMEngineerHintFinder::FindHint");
+		LogError("Failed to create SDKCall: CTFBotMvMEngineerHintFinder::FindHint");
 	
 	return call;
 }
@@ -336,7 +340,7 @@ static Handle PrepSDKCall_PushAllPlayersAway(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFGameRules::PushAllPlayersAway");
+		LogError("Failed to create SDKCall: CTFGameRules::PushAllPlayersAway");
 	
 	return call;
 }
@@ -355,7 +359,7 @@ static Handle PrepSDKCall_DistributeCurrencyAmount(GameData gamedata)
 	Handle call = EndPrepSDKCall();
 	if (!call)
 	{
-		LogMessage("Failed to create SDKCall: CTFGameRules::DistributeCurrencyAmount");
+		LogError("Failed to create SDKCall: CTFGameRules::DistributeCurrencyAmount");
 	}
 	
 	return call;
@@ -372,7 +376,7 @@ static Handle PrepSDKCall_TeamMayCapturePoint(GameData gamedata)
 	Handle call = EndPrepSDKCall();
 	if (!call)
 	{
-		LogMessage("Failed to create SDKCall: CTFGameRules::TeamMayCapturePoint");
+		LogError("Failed to create SDKCall: CTFGameRules::TeamMayCapturePoint");
 	}
 	
 	return call;
@@ -386,7 +390,7 @@ static Handle PrepSDKCall_GetSentryHint(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFBotHintEngineerNest::GetSentryHint");
+		LogError("Failed to create SDKCall: CTFBotHintEngineerNest::GetSentryHint");
 	
 	return call;
 }
@@ -399,7 +403,7 @@ static Handle PrepSDKCall_GetTeleporterHint(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFBotHintEngineerNest::GetTeleporterHint");
+		LogError("Failed to create SDKCall: CTFBotHintEngineerNest::GetTeleporterHint");
 	
 	return call;
 }
@@ -428,7 +432,7 @@ static Handle PrepSDKCall_GetCurrentWave(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CPopulationManager::GetCurrentWave");
+		LogError("Failed to create SDKCall: CPopulationManager::GetCurrentWave");
 	
 	return call;
 }
@@ -441,7 +445,7 @@ static Handle PrepSDKCall_IsCombatItem(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CBaseEntity::IsCombatItem");
+		LogError("Failed to create SDKCall: CBaseEntity::IsCombatItem");
 	
 	return call;
 }
@@ -454,7 +458,7 @@ static Handle PrepSDKCall_GetMaxHealthForCurrentLevel(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CBaseObject::GetMaxHealthForCurrentLevel");
+		LogError("Failed to create SDKCall: CBaseObject::GetMaxHealthForCurrentLevel");
 	
 	return call;
 }
@@ -467,7 +471,7 @@ static Handle PrepSDKCall_Clip1(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFWeaponBase::Clip1");
+		LogError("Failed to create SDKCall: CTFWeaponBase::Clip1");
 	
 	return call;
 }
@@ -481,7 +485,7 @@ static Handle PrepSDKCall_FindSpawnLocation(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CSpawnLocation::FindSpawnLocation");
+		LogError("Failed to create SDKCall: CSpawnLocation::FindSpawnLocation");
 	
 	return call;
 }
@@ -495,7 +499,7 @@ static Handle PrepSDKCall_GetSentryBusterDamageAndKillThreshold(GameData gamedat
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CPopulationManager::GetSentryBusterDamageAndKillThreshold");
+		LogError("Failed to create SDKCall: CPopulationManager::GetSentryBusterDamageAndKillThreshold");
 	
 	return call;
 }
@@ -510,7 +514,7 @@ static Handle PrepSDKCall_IPopulationSpawnerSpawn(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: IPopulationSpawner::Spawn");
+		LogError("Failed to create SDKCall: IPopulationSpawner::Spawn");
 	
 	return call;
 }
@@ -525,7 +529,7 @@ static Handle PrepSDKCall_WeaponSwitch(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFPlayer::Weapon_Switch");
+		LogError("Failed to create SDKCall: CTFPlayer::Weapon_Switch");
 	
 	return call;
 }
@@ -538,7 +542,7 @@ static Handle PrepSDKCall_RemoveObject(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFPlayer::RemoveObject");
+		LogError("Failed to create SDKCall: CTFPlayer::RemoveObject");
 	
 	return call;
 }
@@ -552,7 +556,7 @@ static Handle PrepSDKCall_GetBombInfo(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: GetBombInfo");
+		LogError("Failed to create SDKCall: GetBombInfo");
 	
 	return call;
 }
@@ -565,7 +569,7 @@ static Handle PrepSDKCall_IsStaleNest(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFBotHintEngineerNest::IsStaleNest");
+		LogError("Failed to create SDKCall: CTFBotHintEngineerNest::IsStaleNest");
 	
 	return call;
 }
@@ -577,7 +581,7 @@ static Handle PrepSDKCall_DetonateStaleNest(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFBotHintEngineerNest::DetonateStaleNest");
+		LogError("Failed to create SDKCall: CTFBotHintEngineerNest::DetonateStaleNest");
 	
 	return call;
 }
@@ -590,7 +594,7 @@ static Handle PrepSDKCall_GetLiveTime(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFGrenadePipebombProjectile::GetLiveTime");
+		LogError("Failed to create SDKCall: CTFGrenadePipebombProjectile::GetLiveTime");
 	
 	return call;
 }

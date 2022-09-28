@@ -59,7 +59,6 @@ ConVar mitm_invader_allow_suicide;
 ConVar mitm_party_max_size;
 
 // Game ConVars
-ConVar tf_avoidteammates_pushaway;
 ConVar tf_deploying_bomb_delay_time;
 ConVar tf_deploying_bomb_time;
 ConVar tf_bot_engineer_building_health_multiplier;

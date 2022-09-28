@@ -523,7 +523,7 @@ int CreateEntityGlow(int entity)
 void RemoveEntityGlow(int entity)
 {
 	// Remove any glows attached to us
-	int prop = MaxClients + 1;
+	int prop = -1;
 	while ((prop = FindEntityByClassname(prop, "tf_taunt_prop")) != -1)
 	{
 		if (GetEntPropEnt(prop, Prop_Data, "m_hEffectEntity") == entity)
@@ -879,7 +879,7 @@ bool FClassnameIs(int entity, const char[] szClassname)
 
 int FindTeleporterHintForPlayer(int player)
 {
-	int hint = MaxClients + 1;
+	int hint = -1;
 	while ((hint = FindEntityByClassname(hint, "bot_hint_engineer_nest")) != -1)
 	{
 		int owner = GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity");
@@ -894,7 +894,7 @@ int FindTeleporterHintForPlayer(int player)
 
 int FindSentryHintForPlayer(int player)
 {
-	int hint = MaxClients + 1;
+	int hint = -1;
 	while ((hint = FindEntityByClassname(hint, "bot_hint_engineer_nest")) != -1)
 	{
 		int owner = GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity");
@@ -949,7 +949,7 @@ void ShowGateBotAnnotation(int client)
 	// Show an annotation for gate bots
 	if (Player(client).HasTag("bot_gatebot"))
 	{
-		int trigger = MaxClients + 1;
+		int trigger = -1;
 		while ((trigger = FindEntityByClassname(trigger, "trigger_*")) != -1)
 		{
 			// Only area capture triggers
@@ -962,7 +962,7 @@ void ShowGateBotAnnotation(int client)
 			char iszCapPointName[64];
 			GetEntPropString(trigger, Prop_Data, "m_iszCapPointName", iszCapPointName, sizeof(iszCapPointName));
 			
-			int point = MaxClients + 1;
+			int point = -1;
 			while ((point = FindEntityByClassname(point, "team_control_point")) != -1)
 			{
 				// Locked, requiring preceding points, etc.

@@ -290,7 +290,7 @@ static void TryToDetonateStaleNest(CTFBotMvMEngineerIdle action)
 	ArrayList activeEngineerNest = new ArrayList();
 	
 	// collect all existing and active teleporter hints
-	int hint = MaxClients + 1;
+	int hint = -1;
 	while ((hint = FindEntityByClassname(hint, "bot_hint_engineer_nest*")) != -1)
 	{
 		if (CBaseTFBotHintEntity(hint).IsEnabled() && GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity") == -1)

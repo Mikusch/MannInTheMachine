@@ -321,7 +321,7 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 	}
 	
 	// objects
-	int obj = MaxClients + 1;
+	int obj = -1;
 	while ((obj = FindEntityByClassname(obj, "obj_*")) != -1)
 	{
 		if (view_as<TFTeam>(GetEntProp(obj, Prop_Data, "m_iTeamNum")) <= TFTeam_Spectator)

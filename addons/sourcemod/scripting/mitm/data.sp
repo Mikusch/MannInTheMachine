@@ -949,7 +949,7 @@ methodmap Player < CBaseCombatCharacter
 		ArrayList flagsList = new ArrayList();
 		
 		// Collect flags
-		int flag = MaxClients + 1;
+		int flag = -1;
 		while ((flag = FindEntityByClassname(flag, "item_teamflag")) != -1)
 		{
 			if (GetEntProp(flag, Prop_Send, "m_bDisabled"))
@@ -1042,7 +1042,7 @@ methodmap Player < CBaseCombatCharacter
 	
 	public int GetFlagCaptureZone()
 	{
-		int zone = MaxClients + 1;
+		int zone = -1;
 		while ((zone = FindEntityByClassname(zone, "func_capturezone")) != -1)
 		{
 			if (GetEntProp(zone, Prop_Data, "m_iTeamNum") == GetClientTeam(this.index))
@@ -1078,7 +1078,7 @@ methodmap Player < CBaseCombatCharacter
 		int captureZone = -1;
 		float flClosestDistance = float(cellmax);
 		
-		int tempCaptureZone = MaxClients + 1;
+		int tempCaptureZone = -1;
 		while ((tempCaptureZone = FindEntityByClassname(tempCaptureZone, "func_capturezone")) != -1)
 		{
 			if (!GetEntProp(tempCaptureZone, Prop_Data, "m_bDisabled") && GetEntProp(tempCaptureZone, Prop_Data, "m_iTeamNum") == GetClientTeam(this.index))

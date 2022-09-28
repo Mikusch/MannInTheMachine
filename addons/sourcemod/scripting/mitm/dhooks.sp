@@ -813,7 +813,7 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 	int nKillLimit = 0;
 	g_pPopulationManager.GetSentryBusterDamageAndKillThreshold(nDmgLimit, nKillLimit);
 	
-	int obj = MaxClients + 1;
+	int obj = -1;
 	while ((obj = FindEntityByClassname(obj, "obj_*")) != -1)
 	{
 		if (TF2_GetObjectType(obj) == TFObject_Sentry)
@@ -1272,7 +1272,7 @@ static MRESReturn DHookCallback_DoTeleporterOverride_Post(DHookReturn ret, DHook
 	
 	ArrayList teleporterList = new ArrayList();
 	
-	int obj = MaxClients + 1;
+	int obj = -1;
 	while ((obj = FindEntityByClassname(obj, "obj_*")) != -1)
 	{
 		if (TF2_GetObjectType(obj) != TFObject_Teleporter)
@@ -1435,7 +1435,7 @@ static MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 			}
 			
 			// unown engineer nest if owned any
-			int hint = MaxClients + 1;
+			int hint = -1;
 			while ((hint = FindEntityByClassname(hint, "bot_hint_*")) != -1)
 			{
 				if (GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity") == player)
@@ -1469,7 +1469,7 @@ static MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 			if (bShouldAnnounceLastEngineerBotDeath)
 			{
 				bool bEngineerTeleporterInTheWorld = false;
-				int obj = MaxClients + 1;
+				int obj = -1;
 				while ((obj = FindEntityByClassname(obj, "obj_teleporter")) != -1)
 				{
 					if (TF2_GetObjectType(obj) == TFObject_Teleporter && view_as<TFTeam>(GetEntProp(obj, Prop_Data, "m_iTeamNum")) == TFTeam_Invaders)

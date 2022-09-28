@@ -84,126 +84,127 @@ static Action OnTextMsg(UserMsg msg_id, BfRead msg, const int[] players, int cli
 
 static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 {
-	CPopulationManager populator = GetPopulationManager();
-	
-	// Reserve enough space, including null terminator and extra char to detect overflow
-	char szMessage[TEXTMSG_MAX_MESSAGE_LENGTH + 2];
-	
-	if (populator.m_EndlessActiveBotUpgrades.Count() >= 1)
+	if (g_pPopulationManager.IsValid())
 	{
+		// Reserve enough space, including null terminator and extra char to detect overflow
+		char szMessage[TEXTMSG_MAX_MESSAGE_LENGTH + 2];
+		
+		if (g_pPopulationManager.m_EndlessActiveBotUpgrades.Count() >= 1)
+		{
+			if (msg_dest == HUD_PRINTCONSOLE)
+			{
+				UTIL_ClientPrintAll(msg_dest, "*** Bot Upgrades");
+			}
+			else if (msg_dest == HUD_PRINTCENTER)
+			{
+				strcopy(szMessage, sizeof(szMessage), "*** Bot Upgrades\n");
+			}
+		}
+		
+		for (int i = 0; i < g_pPopulationManager.m_EndlessActiveBotUpgrades.Count(); ++i)
+		{
+			CMvMBotUpgrade upgrade = g_pPopulationManager.m_EndlessActiveBotUpgrades.Get(i, GetOffset("sizeof(CMvMBotUpgrade)"));
+			
+			if (upgrade.bIsBotAttr == true)
+			{
+				char szAttrib[MAX_ATTRIBUTE_DESCRIPTION_LENGTH];
+				PtrToString(upgrade.szAttrib, szAttrib, sizeof(szAttrib));
+				
+				if (msg_dest == HUD_PRINTCONSOLE)
+				{
+					UTIL_ClientPrintAll(msg_dest, szAttrib);
+				}
+				else if (msg_dest == HUD_PRINTCENTER)
+				{
+					Format(szMessage, sizeof(szMessage), "%s- %s\n", szMessage, szAttrib);
+				}
+			}
+			else if (upgrade.bIsSkillAttr == true)
+			{
+				char szAttrib[MAX_ATTRIBUTE_DESCRIPTION_LENGTH];
+				PtrToString(upgrade.szAttrib, szAttrib, sizeof(szAttrib));
+				
+				if (msg_dest == HUD_PRINTCONSOLE)
+				{
+					UTIL_ClientPrintAll(msg_dest, szAttrib);
+				}
+				else if (msg_dest == HUD_PRINTCENTER)
+				{
+					Format(szMessage, sizeof(szMessage), "%s- %s\n", szMessage, szAttrib);
+				}
+			}
+			else
+			{
+				Address pDef = TF2Econ_GetAttributeDefinitionAddress(upgrade.iAttribIndex);
+				if (pDef)
+				{
+					char szDescription[TEXTMSG_MAX_MESSAGE_LENGTH];
+					PtrToString(Deref(pDef + GetOffset("CEconItemAttributeDefinition::m_pszDescriptionString")), szDescription, sizeof(szDescription));
+					
+					// If there's a localized description, use that, else use the internal attribute name
+					if (szDescription[0] && msg_dest == HUD_PRINTCONSOLE)
+					{
+						int iFormat = Deref(pDef + GetOffset("CEconItemAttributeDefinition::m_iDescriptionFormat"));
+						float flValue = TranslateAttributeValue(iFormat, upgrade.flValue);
+						
+						char szValue[16];
+						IntToString(RoundToFloor(flValue), szValue, sizeof(szValue));
+						
+						UTIL_ClientPrintAll(msg_dest, szDescription, szValue);
+					}
+					else if (TF2Econ_GetAttributeName(upgrade.iAttribIndex, szDescription, sizeof(szDescription)))
+					{
+						Format(szDescription, sizeof(szDescription), "%s [%.2f]", szDescription, upgrade.flValue);
+						
+						if (msg_dest == HUD_PRINTCONSOLE)
+						{
+							UTIL_ClientPrintAll(msg_dest, szDescription);
+						}
+						else if (msg_dest == HUD_PRINTCENTER)
+						{
+							Format(szMessage, sizeof(szMessage), "%s- %s\n", szMessage, szDescription);
+						}
+					}
+				}
+			}
+		}
+		
 		if (msg_dest == HUD_PRINTCONSOLE)
 		{
-			UTIL_ClientPrintAll(msg_dest, "*** Bot Upgrades");
+			UTIL_ClientPrintAll(msg_dest, " ");
 		}
 		else if (msg_dest == HUD_PRINTCENTER)
 		{
-			strcopy(szMessage, sizeof(szMessage), "*** Bot Upgrades\n");
-		}
-	}
-	
-	for (int i = 0; i < populator.m_EndlessActiveBotUpgrades.Count(); ++i)
-	{
-		CMvMBotUpgrade upgrade = populator.m_EndlessActiveBotUpgrades.Get(i, GetOffset("sizeof(CMvMBotUpgrade)"));
-		
-		if (upgrade.bIsBotAttr == true)
-		{
-			char szAttrib[MAX_ATTRIBUTE_DESCRIPTION_LENGTH];
-			PtrToString(upgrade.szAttrib, szAttrib, sizeof(szAttrib));
-			
-			if (msg_dest == HUD_PRINTCONSOLE)
+			// If the text is too long for a single TextMsg, shorten it
+			if (strlen(szMessage) > TEXTMSG_MAX_MESSAGE_LENGTH)
 			{
-				UTIL_ClientPrintAll(msg_dest, szAttrib);
-			}
-			else if (msg_dest == HUD_PRINTCENTER)
-			{
-				Format(szMessage, sizeof(szMessage), "%s- %s\n", szMessage, szAttrib);
-			}
-		}
-		else if (upgrade.bIsSkillAttr == true)
-		{
-			char szAttrib[MAX_ATTRIBUTE_DESCRIPTION_LENGTH];
-			PtrToString(upgrade.szAttrib, szAttrib, sizeof(szAttrib));
-			
-			if (msg_dest == HUD_PRINTCONSOLE)
-			{
-				UTIL_ClientPrintAll(msg_dest, szAttrib);
-			}
-			else if (msg_dest == HUD_PRINTCENTER)
-			{
-				Format(szMessage, sizeof(szMessage), "%s- %s\n", szMessage, szAttrib);
-			}
-		}
-		else
-		{
-			Address pDef = TF2Econ_GetAttributeDefinitionAddress(upgrade.iAttribIndex);
-			if (pDef)
-			{
-				char szDescription[TEXTMSG_MAX_MESSAGE_LENGTH];
-				PtrToString(Deref(pDef + GetOffset("CEconItemAttributeDefinition::m_pszDescriptionString")), szDescription, sizeof(szDescription));
+				char buffers[16][128], szExtra[16];
+				int numStrings = ExplodeString(szMessage, "\n", buffers, sizeof(buffers), sizeof(buffers[]));
 				
-				// If there's a localized description, use that, else use the internal attribute name
-				if (szDescription[0] && msg_dest == HUD_PRINTCONSOLE)
+				// Find out how many parts we can keep
+				int i, length = 0;
+				for (i = 0; i < numStrings; ++i)
 				{
-					int iFormat = Deref(pDef + GetOffset("CEconItemAttributeDefinition::m_iDescriptionFormat"));
-					float flValue = TranslateAttributeValue(iFormat, upgrade.flValue);
+					length += strlen(buffers[i]) + strlen("\n");
 					
-					char szValue[16];
-					IntToString(RoundToFloor(flValue), szValue, sizeof(szValue));
-					
-					UTIL_ClientPrintAll(msg_dest, szDescription, szValue);
+					if (length + sizeof(szExtra) >= TEXTMSG_MAX_MESSAGE_LENGTH)
+						break;
 				}
-				else if (TF2Econ_GetAttributeName(upgrade.iAttribIndex, szDescription, sizeof(szDescription)))
-				{
-					Format(szDescription, sizeof(szDescription), "%s [%.2f]", szDescription, upgrade.flValue);
-					
-					if (msg_dest == HUD_PRINTCONSOLE)
-					{
-						UTIL_ClientPrintAll(msg_dest, szDescription);
-					}
-					else if (msg_dest == HUD_PRINTCENTER)
-					{
-						Format(szMessage, sizeof(szMessage), "%s- %s\n", szMessage, szDescription);
-					}
-				}
-			}
-		}
-	}
-	
-	if (msg_dest == HUD_PRINTCONSOLE)
-	{
-		UTIL_ClientPrintAll(msg_dest, " ");
-	}
-	else if (msg_dest == HUD_PRINTCENTER)
-	{
-		// If the text is too long for a single TextMsg, shorten it
-		if (strlen(szMessage) > TEXTMSG_MAX_MESSAGE_LENGTH)
-		{
-			char buffers[16][128], szExtra[16];
-			int numStrings = ExplodeString(szMessage, "\n", buffers, sizeof(buffers), sizeof(buffers[]));
-			
-			// Find out how many parts we can keep
-			int i, length = 0;
-			for (i = 0; i < numStrings; ++i)
-			{
-				length += strlen(buffers[i]) + strlen("\n");
 				
-				if (length + sizeof(szExtra) >= TEXTMSG_MAX_MESSAGE_LENGTH)
-					break;
+				szMessage[0] = EOS;
+				
+				// Stitch the pieces back together until we reach the byte limit
+				for (int j = 0; j < i; j++)
+				{
+					Format(szMessage, sizeof(szMessage), "%s%s\n", szMessage, buffers[j]);
+				}
+				
+				// Tell players how many are missing from the list
+				Format(szExtra, sizeof(szExtra), "%T", "Endless_MoreAttributes", LANG_SERVER, g_pPopulationManager.m_EndlessActiveBotUpgrades.Count() - (i - 1));
+				Format(szMessage, sizeof(szMessage), "%s%s", szMessage, szExtra);
 			}
 			
-			szMessage[0] = EOS;
-			
-			// Stitch the pieces back together until we reach the byte limit
-			for (int j = 0; j < i; j++)
-			{
-				Format(szMessage, sizeof(szMessage), "%s%s\n", szMessage, buffers[j]);
-			}
-			
-			// Tell players how many are missing from the list
-			Format(szExtra, sizeof(szExtra), "%T", "Endless_MoreAttributes", LANG_SERVER, populator.m_EndlessActiveBotUpgrades.Count() - (i - 1));
-			Format(szMessage, sizeof(szMessage), "%s%s", szMessage, szExtra);
+			UTIL_ClientPrintAll(msg_dest, szMessage);
 		}
-		
-		UTIL_ClientPrintAll(msg_dest, szMessage);
 	}
 }

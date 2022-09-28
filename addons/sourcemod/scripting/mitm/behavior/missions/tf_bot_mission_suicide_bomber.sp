@@ -398,7 +398,7 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 	if (action.m_bWasKilled)
 	{
 		// increment num sentry killed this wave
-		CWave wave = GetPopulationManager().GetCurrentWave();
+		CWave wave = g_pPopulationManager.IsValid() ? g_pPopulationManager.GetCurrentWave() : view_as<CWave>(Address_Null);
 		if (wave)
 		{
 			wave.m_nSentryBustersSpawned++;

@@ -226,69 +226,6 @@ int GetItemDefinitionIndexByName(const char[] name)
 	return GetItemDefinitionIndexByName(name);
 }
 
-void IncrementMannVsMachineWaveClassCount(any iszClassIconName, int iFlags)
-{
-	int objective = GetObjectiveResourceEntity();
-	
-	for (int i = 0; i < GetEntPropArraySize(objective, Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
-	{
-		if (GetEntData(objective, FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames") + (i * 4)) == iszClassIconName && (GetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassFlags", _, i) & iFlags))
-		{
-			SetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts", GetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts", _, i) + 1, _, i);
-			
-			if (GetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts", _, i) <= 0)
-			{
-				SetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts", 1, _, i);
-			}
-			
-			return;
-		}
-	}
-	
-	for (int i = 0; i < GetEntPropArraySize(objective, Prop_Send, "m_iszMannVsMachineWaveClassNames2"); ++i)
-	{
-		if (GetEntData(objective, FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames2") + (i * 4)) == iszClassIconName && (GetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassFlags2", _, i) & iFlags))
-		{
-			SetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts2", GetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts2", _, i) + 1, _, i);
-			
-			if (GetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts2", _, i) <= 0)
-			{
-				SetEntProp(objective, Prop_Send, "m_nMannVsMachineWaveClassCounts2", 1, _, i);
-			}
-			
-			return;
-		}
-	}
-}
-
-void SetMannVsMachineWaveClassActive(any iszClassIconName, bool bActive = true)
-{
-	int objective = GetObjectiveResourceEntity();
-	
-	for (int i = 0; i < GetEntPropArraySize(objective, Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
-	{
-		if (GetEntData(objective, FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames") + (i * 4)) == iszClassIconName)
-		{
-			SetEntProp(objective, Prop_Send, "m_bMannVsMachineWaveClassActive", bActive, _, i);
-			return;
-		}
-	}
-	
-	for (int i = 0; i < GetEntPropArraySize(objective, Prop_Send, "m_iszMannVsMachineWaveClassNames2"); ++i)
-	{
-		if (GetEntData(objective, FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames2") + (i * 4)) == iszClassIconName)
-		{
-			SetEntProp(objective, Prop_Send, "m_bMannVsMachineWaveClassActive2", bActive, _, i);
-			return;
-		}
-	}
-}
-
-int GetObjectiveResourceEntity()
-{
-	return FindEntityByClassname(MaxClients + 1, "tf_objective_resource");
-}
-
 TFTeam GetEnemyTeam(TFTeam team)
 {
 	switch (team)
@@ -799,12 +736,6 @@ float[] Vector(float x, float y, float z)
 	vec[1] = y;
 	vec[2] = z;
 	return vec;
-}
-
-int GetCurrentWaveIndex()
-{
-	int stats = FindEntityByClassname(MaxClients + 1, "tf_mann_vs_machine_stats");
-	return GetEntProp(stats, Prop_Send, "m_iCurrentWaveIdx");
 }
 
 Address GetPlayerShared(int client)

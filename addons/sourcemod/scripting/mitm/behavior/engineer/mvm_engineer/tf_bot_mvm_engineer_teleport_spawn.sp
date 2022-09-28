@@ -112,9 +112,9 @@ static int Update(CTFBotMvMEngineerTeleportSpawn action, int actor, float interv
 			EmitGameSoundToAll("Engineer.MVM_BattleCry07", actor);
 			EmitGameSoundToAll("MVM.Robot_Engineer_Spawn", action.m_hintEntity);
 			
-			if (GetPopulationManager())
+			if (g_pPopulationManager.IsValid())
 			{
-				CWave pWave = GetPopulationManager().GetCurrentWave();
+				CWave pWave = g_pPopulationManager.GetCurrentWave();
 				if (pWave)
 				{
 					if (pWave.m_nNumEngineersTeleportSpawned == 0)

@@ -232,7 +232,7 @@ static void EventHook_ObjectDestroyed(Event event, const char[] name, bool dontB
 
 static void EventHook_TeamplayRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
-	if (GetCurrentWaveIndex() == 0 && !g_hWaitingForPlayersTimer)
+	if (g_pMVMStats.GetCurrentWave() == 0 && !g_hWaitingForPlayersTimer)
 	{
 		g_bInWaitingForPlayers = true;
 		
@@ -281,7 +281,10 @@ static Action Timer_OnWaitingForPlayersEnd(Handle timer)
 	tf_mvm_min_players_to_start.IntValue = 0;
 	g_bInWaitingForPlayers = false;
 	
-	GetPopulationManager().ResetMap();
+	if (g_pPopulationManager.IsValid())
+	{
+		g_pPopulationManager.ResetMap();
+	}
 	
 	return Plugin_Continue;
 }

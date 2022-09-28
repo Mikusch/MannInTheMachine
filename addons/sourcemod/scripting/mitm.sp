@@ -33,7 +33,12 @@
 #include <cbasenpc/tf/nav>
 #include <morecolors>
 
-// Globals
+// Global entities
+CPopulationManager g_pPopulationManager = view_as<CPopulationManager>(INVALID_ENT_REFERENCE);
+CTFObjectiveResource g_pObjectiveResource = view_as<CTFObjectiveResource>(INVALID_ENT_REFERENCE);
+CMannVsMachineStats g_pMVMStats = view_as<CMannVsMachineStats>(INVALID_ENT_REFERENCE);
+
+// Other globals
 Handle g_WarningHudSync;
 Handle g_hWaitingForPlayersTimer;
 bool g_bInWaitingForPlayers;
@@ -186,6 +191,18 @@ public void OnPluginStart()
 			OnClientPutInServer(client);
 		}
 	}
+	
+	for (int entity = MaxClients + 1; entity < GetMaxEntities(); entity++)
+	{
+		if (IsValidEntity(entity))
+		{
+			char classname[64];
+			if (GetEntityClassname(entity, classname, sizeof(classname)))
+			{
+				OnEntityCreated(entity, classname);
+			}
+		}
+	}
 }
 
 public void OnMapStart()
@@ -254,6 +271,20 @@ public void OnEntityCreated(int entity, const char[] classname)
 {
 	DHooks_OnEntityCreated(entity, classname);
 	SDKHooks_OnEntityCreated(entity, classname);
+	
+	// Store the references of entities that should only exist once
+	if (StrEqual(classname, "info_populator"))
+	{
+		g_pPopulationManager = CPopulationManager(EntIndexToEntRef(entity));
+	}
+	else if (StrEqual(classname, "tf_objective_resource"))
+	{
+		g_pObjectiveResource = CTFObjectiveResource(EntIndexToEntRef(entity));
+	}
+	else if (StrEqual(classname, "tf_mann_vs_machine_stats"))
+	{
+		g_pMVMStats = CMannVsMachineStats(EntIndexToEntRef(entity));
+	}
 }
 
 public void OnEntityDestroyed(int entity)
@@ -271,7 +302,7 @@ public void OnGameFrame()
 	if (queue.Length > 0)
 	{
 		// Only send the hint if the visible queue has changed or we are between waves
-		if (GetEntProp(GetObjectiveResourceEntity(), Prop_Send, "m_bMannVsMachineBetweenWaves") || (s_prevQueue && !ArrayListEquals(s_prevQueue, queue)))
+		if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() || (s_prevQueue && !ArrayListEquals(s_prevQueue, queue)))
 		{
 			for (int client = 1; client <= MaxClients; client++)
 			{
@@ -495,37 +526,40 @@ static void FireWeaponAtEnemy(int client, int &buttons)
 		return;
 	}
 	
-	CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(client).GetLastKnownArea());
-	TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(client) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
-	
-	static bool s_isInSpawn[MAXPLAYERS + 1];
-	
-	if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
+	if (g_pPopulationManager.IsValid())
 	{
-		// if I'm in my spawn room, obey the population manager's attack restrictions
-		if (!GetPopulationManager().CanBotsAttackWhileInSpawnRoom())
+		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(client).GetLastKnownArea());
+		TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(client) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
+		
+		static bool s_isInSpawn[MAXPLAYERS + 1];
+		
+		if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
 		{
-			s_isInSpawn[client] = true;
-			
-			LockWeapon(client, myWeapon, buttons);
-			return;
-		}
-	}
-	
-	if (s_isInSpawn[client])
-	{
-		// The active weapon might have switched, remove attributes from all
-		int numWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
-		for (int i = 0; i < numWeapons; i++)
-		{
-			int weapon = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i);
-			if (weapon == -1)
-				continue;
-			
-			UnlockWeapon(weapon);
+			// if I'm in my spawn room, obey the population manager's attack restrictions
+			if (!g_pPopulationManager.CanBotsAttackWhileInSpawnRoom())
+			{
+				s_isInSpawn[client] = true;
+				
+				LockWeapon(client, myWeapon, buttons);
+				return;
+			}
 		}
 		
-		// We have left the spawn
-		s_isInSpawn[client] = false;
+		if (s_isInSpawn[client])
+		{
+			// The active weapon might have switched, remove attributes from all
+			int numWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
+			for (int i = 0; i < numWeapons; i++)
+			{
+				int weapon = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i);
+				if (weapon == -1)
+					continue;
+				
+				UnlockWeapon(weapon);
+			}
+			
+			// We have left the spawn
+			s_isInSpawn[client] = false;
+		}
 	}
 }

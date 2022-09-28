@@ -69,16 +69,22 @@ static int OnStart(CTFBotDeliverFlag action, int actor, NextBotAction priorActio
 	{
 		// Set threat level to max
 		action.m_upgradeLevel = DONT_UPGRADE;
-		SetEntProp(GetObjectiveResourceEntity(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 4);
-		SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMBaseBombUpgradeTime", -1.0);
-		SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMNextBombUpgradeTime", -1.0);
+		if (g_pObjectiveResource.IsValid())
+		{
+			g_pObjectiveResource.SetFlagCarrierUpgradeLevel(4);
+			g_pObjectiveResource.SetBaseMvMBombUpgradeTime(-1.0);
+			g_pObjectiveResource.SetNextMvMBombUpgradeTime(-1.0);
+		}
 	}
 	else
 	{
 		action.m_upgradeLevel = 0;
 		m_upgradeTimer[actor].Start(tf_mvm_bot_flag_carrier_interval_to_1st_upgrade.FloatValue);
-		SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
-		SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
+		if (g_pObjectiveResource.IsValid())
+		{
+			g_pObjectiveResource.SetBaseMvMBombUpgradeTime(GetGameTime());
+			g_pObjectiveResource.SetNextMvMBombUpgradeTime(GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
+		}
 	}
 	
 	return action.Continue();
@@ -119,7 +125,7 @@ static void OnEnd(CTFBotDeliverFlag action, int actor, NextBotAction nextAction)
 
 static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 {
-	if (action.m_upgradeLevel != DONT_UPGRADE)
+	if (IsMannVsMachineMode() && action.m_upgradeLevel != DONT_UPGRADE)
 	{
 		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(actor).GetLastKnownArea());
 		TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(actor) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
@@ -128,8 +134,8 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 		{
 			// don't start counting down until we leave the spawn
 			m_upgradeTimer[actor].Start(tf_mvm_bot_flag_carrier_interval_to_1st_upgrade.FloatValue);
-			SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
-			SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
+			g_pObjectiveResource.SetBaseMvMBombUpgradeTime(GetGameTime());
+			g_pObjectiveResource.SetNextMvMBombUpgradeTime(GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
 		}
 		
 		// do defensive buff effect ourselves (since we're not a soldier)
@@ -178,11 +184,14 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 						// permanent buff banner effect (handled above)
 						
 						// update the objective resource so clients have the information
-						SetEntProp(GetObjectiveResourceEntity(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 1);
-						SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
-						SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
-						HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE1", TFTeam_Defenders);
-						TE_TFParticleEffect("mvm_levelup1", .attachType = PATTACH_POINT_FOLLOW, .entity = actor, .attachPoint = LookupEntityAttachment(actor, "head"));
+						if (g_pObjectiveResource.IsValid())
+						{
+							g_pObjectiveResource.SetFlagCarrierUpgradeLevel(1);
+							g_pObjectiveResource.SetBaseMvMBombUpgradeTime(GetGameTime());
+							g_pObjectiveResource.SetNextMvMBombUpgradeTime(GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
+							HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE1", TFTeam_Defenders);
+							TE_TFParticleEffect("mvm_levelup1", .attachType = PATTACH_POINT_FOLLOW, .entity = actor, .attachPoint = LookupEntityAttachment(actor, "head"));
+						}
 						return true;
 					}
 					
@@ -194,11 +203,14 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 						TF2Attrib_SetByName(actor, "health regen", tf_mvm_bot_flag_carrier_health_regen.FloatValue);
 						
 						// update the objective resource so clients have the information
-						SetEntProp(GetObjectiveResourceEntity(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 2);
-						SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMBaseBombUpgradeTime", GetGameTime());
-						SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMNextBombUpgradeTime", GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
-						HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE2", TFTeam_Defenders);
-						TE_TFParticleEffect("mvm_levelup2", .attachType = PATTACH_POINT_FOLLOW, .entity = actor, .attachPoint = LookupEntityAttachment(actor, "head"));
+						if (g_pObjectiveResource.IsValid())
+						{
+							g_pObjectiveResource.SetFlagCarrierUpgradeLevel(2);
+							g_pObjectiveResource.SetBaseMvMBombUpgradeTime(GetGameTime());
+							g_pObjectiveResource.SetNextMvMBombUpgradeTime(GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
+							HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE2", TFTeam_Defenders);
+							TE_TFParticleEffect("mvm_levelup2", .attachType = PATTACH_POINT_FOLLOW, .entity = actor, .attachPoint = LookupEntityAttachment(actor, "head"));
+						}
 						return true;
 					}
 					
@@ -209,11 +221,14 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 						TF2_AddCondition(actor, TFCond_CritCanteen);
 						
 						// update the objective resource so clients have the information
-						SetEntProp(GetObjectiveResourceEntity(), Prop_Send, "m_nFlagCarrierUpgradeLevel", 3);
-						SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMBaseBombUpgradeTime", -1.0);
-						SetEntPropFloat(GetObjectiveResourceEntity(), Prop_Send, "m_flMvMNextBombUpgradeTime", -1.0);
-						HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE3", TFTeam_Defenders);
-						TE_TFParticleEffect("mvm_levelup3", .attachType = PATTACH_POINT_FOLLOW, .entity = actor, .attachPoint = LookupEntityAttachment(actor, "head"));
+						if (g_pObjectiveResource.IsValid())
+						{
+							g_pObjectiveResource.SetFlagCarrierUpgradeLevel(3);
+							g_pObjectiveResource.SetBaseMvMBombUpgradeTime(-1.0);
+							g_pObjectiveResource.SetNextMvMBombUpgradeTime(-1.0);
+							HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE3", TFTeam_Defenders);
+							TE_TFParticleEffect("mvm_levelup3", .attachType = PATTACH_POINT_FOLLOW, .entity = actor, .attachPoint = LookupEntityAttachment(actor, "head"));
+						}
 						return true;
 					}
 				}

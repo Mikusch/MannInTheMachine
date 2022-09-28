@@ -343,7 +343,8 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 			Player(newPlayer).SetName(name);
 		}
 		
-		DispatchKeyValueVector(g_internalSpawnPoint, "origin", here);
+		CBaseEntity(g_internalSpawnPoint).SetAbsOrigin(here);
+		CBaseEntity(g_internalSpawnPoint).SetLocalAngles(ZERO_VECTOR);
 		Player(newPlayer).SetSpawnPoint(g_internalSpawnPoint);
 		
 		TFTeam team = TFTeam_Red;
@@ -440,7 +441,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 			nHealth = TF2Util_GetEntityMaxHealth(newPlayer);
 		}
 		
-		nHealth = RoundToFloor(float(nHealth) * GetPopulationManager().GetHealthMultiplier(false));
+		nHealth = RoundToFloor(float(nHealth) * g_pPopulationManager.GetHealthMultiplier(false));
 		Player(newPlayer).ModifyMaxHealth(nHealth);
 		
 		Player(newPlayer).StartIdleSound();
@@ -462,7 +463,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 			}
 		}
 		
-		EventChangeAttributes_t pEventChangeAttributes = Player(newPlayer).GetEventChangeAttributes(GetPopulationManager().GetDefaultEventChangeAttributesName());
+		EventChangeAttributes_t pEventChangeAttributes = Player(newPlayer).GetEventChangeAttributes(g_pPopulationManager.GetDefaultEventChangeAttributesName());
 		if (!pEventChangeAttributes)
 		{
 			pEventChangeAttributes = spawner.m_defaultAttributes;
@@ -494,7 +495,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		
 		TFClassType nClassIndex = TF2_GetPlayerClass(newPlayer);
 		
-		if (GetEntProp(GetObjectiveResourceEntity(), Prop_Send, "m_nMvMEventPopfileType") == MVM_EVENT_POPFILE_HALLOWEEN)
+		if (GetEntProp(g_pObjectiveResource.index, Prop_Send, "m_nMvMEventPopfileType") == MVM_EVENT_POPFILE_HALLOWEEN)
 		{
 			// zombies use the original player models
 			SetEntProp(newPlayer, Prop_Send, "m_nSkin", 4);
@@ -640,7 +641,7 @@ static MRESReturn DHookCallback_CWaveSpawnPopulatorUpdate_Post(Address pThis)
 		SetEntData(player, GetOffset("CTFPlayer::m_pWaveSpawnPopulator"), pThis);
 		
 		// Allows client UI to know if a specific spawner is active
-		SetMannVsMachineWaveClassActive(GetEntData(player, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")));
+		g_pObjectiveResource.SetMannVsMachineWaveClassActive(GetEntData(player, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")));
 		
 		if (CWaveSpawnPopulator(pThis).IsSupportWave())
 		{
@@ -751,7 +752,7 @@ static MRESReturn DHookCallback_UpdateMission_Post(Address pThis, DHookReturn re
 		{
 			iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
 		}
-		IncrementMannVsMachineWaveClassCount(GetEntData(player, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")), iFlags);
+		g_pObjectiveResource.IncrementMannVsMachineWaveClassCount(GetEntData(player, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")), iFlags);
 		
 		// Response rules stuff for MvM
 		if (IsMannVsMachineMode())
@@ -797,7 +798,7 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 		return MRES_Supercede;
 	}
 	
-	if (GetPopulationManager().IsSpawningPaused())
+	if (g_pPopulationManager.IsSpawningPaused())
 	{
 		ret.Value = false;
 		return MRES_Supercede;
@@ -810,7 +811,7 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 	
 	int nDmgLimit = 0;
 	int nKillLimit = 0;
-	GetPopulationManager().GetSentryBusterDamageAndKillThreshold(nDmgLimit, nKillLimit);
+	g_pPopulationManager.GetSentryBusterDamageAndKillThreshold(nDmgLimit, nKillLimit);
 	
 	int obj = MaxClients + 1;
 	while ((obj = FindEntityByClassname(obj, "obj_*")) != -1)
@@ -920,7 +921,7 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 					{
 						iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
 					}
-					IncrementMannVsMachineWaveClassCount(CTFBotSpawner(populator.m_spawner).GetClassIcon(k), iFlags);
+					g_pObjectiveResource.IncrementMannVsMachineWaveClassCount(CTFBotSpawner(populator.m_spawner).GetClassIcon(k), iFlags);
 					
 					HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_SENTRY_BUSTER", TFTeam_Defenders);
 					
@@ -945,7 +946,7 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 	{
 		float flCoolDown = populator.m_cooldownDuration;
 		
-		CWave wave = GetPopulationManager().GetCurrentWave();
+		CWave wave = g_pPopulationManager.GetCurrentWave();
 		if (wave)
 		{
 			wave.m_nSentryBustersSpawned++;

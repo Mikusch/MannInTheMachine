@@ -21,6 +21,7 @@
 static DynamicHook g_DHookSetModel;
 static DynamicHook g_DHookCanBeUpgraded;
 static DynamicHook g_DHookComeToRest;
+static DynamicHook g_DHookSetTransmit;
 static DynamicHook g_DHookEventKilled;
 static DynamicHook g_DHookShouldGib;
 static DynamicHook g_DHookIsAllowedToPickUpFlag;
@@ -79,6 +80,7 @@ void DHooks_Init(GameData gamedata)
 	g_DHookSetModel = CreateDynamicHook(gamedata, "CBaseEntity::SetModel");
 	g_DHookCanBeUpgraded = CreateDynamicHook(gamedata, "CBaseObject::CanBeUpgraded");
 	g_DHookComeToRest = CreateDynamicHook(gamedata, "CItem::ComeToRest");
+	g_DHookSetTransmit = CreateDynamicHook(gamedata, "CTFPlayer::ShouldTransmit");
 	g_DHookEventKilled = CreateDynamicHook(gamedata, "CTFPlayer::Event_Killed");
 	g_DHookShouldGib = CreateDynamicHook(gamedata, "CTFPlayer::ShouldGib");
 	g_DHookIsAllowedToPickUpFlag = CreateDynamicHook(gamedata, "CTFPlayer::IsAllowedToPickUpFlag");
@@ -91,6 +93,11 @@ void DHooks_Init(GameData gamedata)
 
 void DHooks_OnClientPutInServer(int client)
 {
+	if (g_DHookSetTransmit)
+	{
+		g_DHookSetTransmit.HookEntity(Hook_Pre, client, DHookCallback_SetTransmit_Pre);
+	}
+	
 	if (g_DHookEventKilled)
 	{
 		g_DHookEventKilled.HookEntity(Hook_Pre, client, DHookCallback_EventKilled_Pre);
@@ -1383,6 +1390,17 @@ void OnBotTeleported(int bot)
 		TF2_AddCondition(bot, TFCond_Ubercharged, flUberTime);
 		TF2_AddCondition(bot, TFCond_UberchargeFading, flUberTime);
 	}
+}
+
+static MRESReturn DHookCallback_SetTransmit_Pre(int player, DHookReturn ret, DHookParam params)
+{
+	if (Player(player).HasAttribute(USE_BOSS_HEALTH_BAR))
+	{
+		ret.Value = FL_EDICT_ALWAYS;
+		return MRES_Supercede;
+	}
+	
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)

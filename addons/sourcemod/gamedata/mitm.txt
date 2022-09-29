@@ -324,6 +324,11 @@
 				// Linux uses signature call CTFBotSpawner::GetClassIcon
 				"windows"	"6"
 			}
+			"CTFPlayer::ShouldTransmit"
+			{
+				"linux"		"19"
+				"windows"	"18"
+			}
 			"CTFPlayer::Event_Killed"
 			{
 				"linux"		"67"
@@ -1073,6 +1078,20 @@
 				"hooktype"	"entity"
 				"return"	"void"
 				"this"		"entity"
+			}
+			"CTFPlayer::ShouldTransmit"
+			{
+				"offset"	"CTFPlayer::ShouldTransmit"
+				"hooktype"	"entity"
+				"return"	"int"
+				"this"		"entity"
+				"arguments"
+				{
+					"pInfo"
+					{
+						"type"	"objectptr"
+					}
+				}
 			}
 			"CTFPlayer::Event_Killed"
 			{

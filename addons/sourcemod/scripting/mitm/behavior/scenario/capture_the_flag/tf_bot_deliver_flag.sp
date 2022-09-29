@@ -64,6 +64,11 @@ static int OnStart(CTFBotDeliverFlag action, int actor, NextBotAction priorActio
 		Player(actor).SetAttribute(SUPPRESS_FIRE);
 	}
 	
+	if (!IsFakeClient(actor))
+	{
+		tf_avoidteammates_pushaway.ReplicateToClient(actor, "0");
+	}
+	
 	// mini-bosses don't upgrade - they are already tough
 	if (GetEntProp(actor, Prop_Send, "m_bIsMiniBoss"))
 	{
@@ -116,6 +121,11 @@ static int Update(CTFBotDeliverFlag action, int actor, float interval)
 static void OnEnd(CTFBotDeliverFlag action, int actor, NextBotAction nextAction)
 {
 	Player(actor).ClearAttribute(SUPPRESS_FIRE);
+	
+	if (!IsFakeClient(actor))
+	{
+		tf_avoidteammates_pushaway.ReplicateToClient(actor, "1");
+	}
 	
 	if (IsMannVsMachineMode())
 	{

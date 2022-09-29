@@ -993,9 +993,9 @@ methodmap Player < CBaseCombatCharacter
 		}
 		
 		int closestFlag = INVALID_ENT_REFERENCE;
-		float flClosestFlagDist = float(cellmax);
+		float flClosestFlagDist = FLT_MAX;
 		int closestUncarriedFlag = INVALID_ENT_REFERENCE;
-		float flClosestUncarriedFlagDist = float(cellmax);
+		float flClosestUncarriedFlagDist = FLT_MAX;
 		
 		if (IsMannVsMachineMode())
 		{
@@ -1076,7 +1076,7 @@ methodmap Player < CBaseCombatCharacter
 	public int GetClosestCaptureZone()
 	{
 		int captureZone = -1;
-		float flClosestDistance = float(cellmax);
+		float flClosestDistance = FLT_MAX;
 		
 		int tempCaptureZone = -1;
 		while ((tempCaptureZone = FindEntityByClassname(tempCaptureZone, "func_capturezone")) != -1)

@@ -234,6 +234,28 @@ methodmap CTFBotSquad
 		return count;
 	}
 	
+	public float GetSlowestMemberSpeed(bool includeLeader = true)
+	{
+		float speed = FLT_MAX;
+		
+		int i = includeLeader ? 0 : 1;
+		
+		for (; i < this.m_roster.Length; ++i)
+		{
+			int member = this.m_roster.Get(i);
+			if (IsClientInGame(member) && IsPlayerAlive(member))
+			{
+				float memberSpeed = GetEntPropFloat(member, Prop_Send, "m_flMaxspeed");
+				if (memberSpeed < speed)
+				{
+					speed = memberSpeed;
+				}
+			}
+		}
+		
+		return speed;
+	}
+	
 	public void DisbandAndDeleteSquad()
 	{
 		// Tell each member of the squad to remove this reference

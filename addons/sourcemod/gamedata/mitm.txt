@@ -314,6 +314,11 @@
 				"linux"		"254"
 				"windows"	"253"
 			}
+			"CBaseTrigger::PassesTriggerFilters"
+			{
+				"linux"		"205"
+				"windows"	"204"
+			}
 			"CItem::ComeToRest"
 			{
 				"linux"		"230"

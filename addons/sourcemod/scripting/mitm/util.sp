@@ -951,46 +951,51 @@ void HideAnnotation(int client, int id)
 
 void ShowGateBotAnnotation(int client)
 {
-	// Show an annotation for gate bots
-	if (Player(client).HasTag("bot_gatebot"))
+	int trigger = -1;
+	while ((trigger = FindEntityByClassname(trigger, "trigger_*")) != -1)
 	{
-		int trigger = -1;
-		while ((trigger = FindEntityByClassname(trigger, "trigger_*")) != -1)
+		// Only area capture triggers
+		if (!HasEntProp(trigger, Prop_Data, "CTriggerAreaCaptureCaptureThink"))
+			continue;
+		
+		if (GetEntProp(trigger, Prop_Data, "m_bDisabled"))
+			continue;
+		
+		if (!SDKCall_PassesTriggerFilters(trigger, client))
+			continue;
+		
+		char iszCapPointName[64];
+		GetEntPropString(trigger, Prop_Data, "m_iszCapPointName", iszCapPointName, sizeof(iszCapPointName));
+		
+		int point = -1;
+		while ((point = FindEntityByClassname(point, "team_control_point")) != -1)
 		{
-			// Only area capture triggers
-			if (!HasEntProp(trigger, Prop_Data, "CTriggerAreaCaptureCaptureThink"))
+			int iPointIndex = GetEntProp(point, Prop_Data, "m_iPointIndex");
+			
+			// Locked, requiring preceding points, etc.
+			if (!SDKCall_TeamMayCapturePoint(TF2_GetClientTeam(client), iPointIndex))
 				continue;
 			
-			if (GetEntProp(trigger, Prop_Data, "m_bDisabled"))
+			// Point already owned
+			if (g_pObjectiveResource.GetOwningTeam(iPointIndex) == TF2_GetClientTeam(client))
 				continue;
 			
-			char iszCapPointName[64];
-			GetEntPropString(trigger, Prop_Data, "m_iszCapPointName", iszCapPointName, sizeof(iszCapPointName));
+			char iName[64];
+			GetEntPropString(point, Prop_Data, "m_iName", iName, sizeof(iName));
 			
-			int point = -1;
-			while ((point = FindEntityByClassname(point, "team_control_point")) != -1)
+			if (StrEqual(iszCapPointName, iName))
 			{
-				// Locked, requiring preceding points, etc.
-				if (!SDKCall_TeamMayCapturePoint(TF2_GetClientTeam(client), GetEntProp(point, Prop_Data, "m_iPointIndex")))
-					continue;
+				char iszPrintName[64];
+				GetEntPropString(point, Prop_Data, "m_iszPrintName", iszPrintName, sizeof(iszPrintName));
 				
-				char iName[64];
-				GetEntPropString(point, Prop_Data, "m_iName", iName, sizeof(iName));
+				float center[3];
+				CBaseEntity(trigger).WorldSpaceCenter(center);
 				
-				if (StrEqual(iszCapPointName, iName))
-				{
-					char iszPrintName[64];
-					GetEntPropString(point, Prop_Data, "m_iszPrintName", iszPrintName, sizeof(iszPrintName));
-					
-					float center[3];
-					CBaseEntity(trigger).WorldSpaceCenter(center);
-					
-					char text[64];
-					Format(text, sizeof(text), "%T", "Invader_CaptureGate_Annotation", client, iszPrintName);
-					
-					ShowAnnotation(client, MITM_HINT_MASK | client, text, 0, center, mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
-					return;
-				}
+				char text[64];
+				Format(text, sizeof(text), "%T", "Invader_CaptureGate_Annotation", client, iszPrintName);
+				
+				ShowAnnotation(client, MITM_HINT_MASK | client, text, 0, center, mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
+				return;
 			}
 		}
 	}

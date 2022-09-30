@@ -1892,6 +1892,14 @@ methodmap CTFObjectiveResource < CBaseEntity
 			}
 		}
 	}
+	
+	public TFTeam GetOwningTeam(int index)
+	{
+		if (index >= this.GetProp(Prop_Send, "m_iNumControlPoints"))
+			return TFTeam_Unassigned;
+		
+		return view_as<TFTeam>(this.GetProp(Prop_Send, "m_iOwner", _, index));
+	}
 }
 
 methodmap CMannVsMachineStats < CBaseEntity

@@ -299,12 +299,10 @@ static Action Timer_CheckGateBotAnnotation(Handle timer, int userid)
 	if (timer != g_annotationTimer[client])
 		return Plugin_Stop;
 	
-	// only alive players
 	if (!IsPlayerAlive(client))
 		return Plugin_Stop;
 	
-	// only gatebots
-	if (!Player(client).HasTag("bot_gatebot"))
+	if (TF2_GetClientTeam(client) != TFTeam_Invaders)
 		return Plugin_Stop;
 	
 	// we are gate stunned - wait until it wears off

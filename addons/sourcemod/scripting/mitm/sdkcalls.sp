@@ -52,6 +52,7 @@ static Handle g_SDKCallGetBombInfo;
 static Handle g_SDKCallIsStaleNest;
 static Handle g_SDKCallDetonateStaleNest;
 static Handle g_SDKCallGetLiveTime;
+static Handle g_SDKCallPassesTriggerFilters;
 
 void SDKCalls_Init(GameData gamedata)
 {
@@ -101,6 +102,7 @@ void SDKCalls_Init(GameData gamedata)
 	g_SDKCallIsStaleNest = PrepSDKCall_IsStaleNest(gamedata);
 	g_SDKCallDetonateStaleNest = PrepSDKCall_DetonateStaleNest(gamedata);
 	g_SDKCallGetLiveTime = PrepSDKCall_GetLiveTime(gamedata);
+	g_SDKCallPassesTriggerFilters = PrepSDKCall_PassesTriggerFilters(gamedata);
 }
 
 static Handle PrepSDKCall_GetClassIcon_Linux(GameData gamedata)
@@ -599,6 +601,20 @@ static Handle PrepSDKCall_GetLiveTime(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_PassesTriggerFilters(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CBaseTrigger::PassesTriggerFilters");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogError("Failed to create SDKCall: CBaseTrigger::PassesTriggerFilters");
+	
+	return call;
+}
+
 Address SDKCall_GetClassIcon(any spawner, int nSpawnNum = -1)
 {
 	Address result;
@@ -840,4 +856,12 @@ float SDKCall_GetLiveTime(int grenade)
 		return SDKCall(g_SDKCallGetLiveTime, grenade);
 	
 	return 0.0;
+}
+
+bool SDKCall_PassesTriggerFilters(int trigger, int other)
+{
+	if (g_SDKCallPassesTriggerFilters)
+		return SDKCall(g_SDKCallPassesTriggerFilters, trigger, other);
+	
+	return false;
 }

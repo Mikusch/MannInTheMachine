@@ -20,27 +20,8 @@
 
 void Hooks_Init()
 {
-	AddNormalSoundHook(OnNormalSoundPlayed);
-	
 	HookUserMessage(GetUserMessageId("SayText2"), OnSayText2, true);
 	HookUserMessage(GetUserMessageId("TextMsg"), OnTextMsg, true);
-}
-
-static Action OnNormalSoundPlayed(int clients[MAXPLAYERS], int &numClients, char sample[PLATFORM_MAX_PATH], int &entity, int &channel, float &volume, int &level, int &pitch, int &flags, char soundEntry[PLATFORM_MAX_PATH], int &seed)
-{
-	if (StrEqual(sample, ")weapons/teleporter_ready.wav"))
-	{
-		if (IsBaseObject(entity) && ((TF2_GetObjectType(entity) == TFObject_Teleporter && TF2_GetObjectMode(entity) == TFObjectMode_Exit) || TF2_GetObjectType(entity) == TFObject_Sapper))
-		{
-			if (view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum")) == TFTeam_Invaders)
-			{
-				// Alert defenders that a robot teleporter is now active
-				EmitSoundToAll(")mvm/mvm_tele_activate.wav", entity, SNDCHAN_STATIC, 150);
-			}
-		}
-	}
-	
-	return Plugin_Continue;
 }
 
 static Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNum, bool reliable, bool init)
@@ -169,11 +150,7 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 			}
 		}
 		
-		if (msg_dest == HUD_PRINTCONSOLE)
-		{
-			UTIL_ClientPrintAll(msg_dest, " ");
-		}
-		else if (msg_dest == HUD_PRINTCENTER)
+		if (msg_dest == HUD_PRINTCENTER)
 		{
 			// If the text is too long for a single TextMsg, shorten it
 			if (strlen(szMessage) > TEXTMSG_MAX_MESSAGE_LENGTH)

@@ -18,16 +18,6 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-enum PreferenceType
-{
-	PREF_DISABLE_DEFENDER = (1 << 0),
-	PREF_DISABLE_SPAWNING = (1 << 1),
-	PREF_DISABLE_GIANT = (1 << 2),
-	PREF_DISABLE_SPAWN_NOTIFICATION = (1 << 3),
-	PREF_DISABLE_ANNOTATIONS = (1 << 4),
-	PREF_IGNORE_PARTY_INVITES = (1 << 5),
-}
-
 char g_PreferenceNames[][] =
 {
 	"Preference_DisableDefender",

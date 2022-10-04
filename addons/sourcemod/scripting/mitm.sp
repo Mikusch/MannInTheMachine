@@ -32,6 +32,7 @@
 #include <cbasenpc>
 #include <cbasenpc/tf/nav>
 #include <morecolors>
+#include <mitm>
 
 // Global entities
 CPopulationManager g_pPopulationManager = view_as<CPopulationManager>(INVALID_ENT_REFERENCE);
@@ -98,6 +99,7 @@ ConVar phys_pushscale;
 #include "mitm/queue.sp"
 #include "mitm/offsets.sp"
 #include "mitm/menus.sp"
+#include "mitm/natives.sp"
 #include "mitm/sdkcalls.sp"
 #include "mitm/sdkhooks.sp"
 #include "mitm/tf_bot_squad.sp"
@@ -204,6 +206,15 @@ public void OnPluginStart()
 			}
 		}
 	}
+}
+
+public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int maxlen)
+{
+	RegPluginLibrary("mitm");
+	
+	Natives_Init();
+	
+	return APLRes_Success;
 }
 
 public void OnMapStart()

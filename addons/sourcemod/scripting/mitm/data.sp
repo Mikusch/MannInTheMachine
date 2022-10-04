@@ -1237,9 +1237,9 @@ methodmap Player < CBaseCombatCharacter
 	
 	public void Init()
 	{
-		this.m_teleportWhereName = new ArrayList(64);
+		this.m_teleportWhereName = new ArrayList(ByteCountToCells(64));
 		this.m_eventChangeAttributes = new ArrayList();
-		this.m_tags = new ArrayList(64);
+		this.m_tags = new ArrayList(ByteCountToCells(64));
 	}
 	
 	public void ResetOnTeamChange()

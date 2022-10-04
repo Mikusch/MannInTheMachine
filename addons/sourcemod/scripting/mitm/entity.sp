@@ -27,7 +27,7 @@ enum struct EntityProperties
 	void Init(int entity)
 	{
 		this.m_index = entity;
-		this.m_teleportWhereName = new ArrayList(64);
+		this.m_teleportWhereName = new ArrayList(ByteCountToCells(64));
 		this.m_glowEntity = INVALID_ENT_REFERENCE;
 	}
 	

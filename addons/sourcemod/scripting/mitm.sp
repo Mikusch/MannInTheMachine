@@ -24,7 +24,6 @@
 #include <clientprefs>
 #include <dhooks>
 #include <tf2attributes>
-#include <smmem/vec>
 #include <tf_econ_data>
 #include <tf2items>
 #include <tf2utils>
@@ -32,6 +31,7 @@
 #include <cbasenpc>
 #include <cbasenpc/tf/nav>
 #include <morecolors>
+#include <smmem>
 #include <mitm>
 
 // Global entities

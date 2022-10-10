@@ -130,6 +130,8 @@ static void OnEnd(CTFBotDeliverFlag action, int actor, NextBotAction nextAction)
 	if (IsMannVsMachineMode())
 	{
 		SDKCall_ResetRageBuffs(GetPlayerShared(actor));
+		TF2Attrib_RemoveByName(actor, "health regen");
+		TF2_RemoveCondition(actor, TFCond_CritCanteen);
 	}
 }
 

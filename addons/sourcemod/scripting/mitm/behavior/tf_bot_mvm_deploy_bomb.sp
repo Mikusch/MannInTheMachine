@@ -51,8 +51,8 @@ static int OnStart(CTFBotMvMDeployBomb action, int actor, NextBotAction priorAct
 	float vecAbsOrigin[3];
 	GetClientAbsOrigin(actor, vecAbsOrigin);
 	action.SetDataVector("m_anchorPos", vecAbsOrigin);
-	TF2_AddCondition(actor, TFCond_FreezeInput);
-	SetEntPropVector(actor, Prop_Data, "m_vecAbsVelocity", ZERO_VECTOR);
+	TeleportEntity(actor, .velocity = ZERO_VECTOR);
+	SetEntityFlags(actor, GetEntityFlags(actor) | FL_FROZEN);
 	
 	if (GetEntProp(actor, Prop_Send, "m_bIsMiniBoss"))
 	{
@@ -168,7 +168,7 @@ static void OnEnd(CTFBotMvMDeployBomb action, int actor, NextBotAction nextActio
 	
 	SetVariantInt(0);
 	AcceptEntityInput(actor, "SetForcedTauntCam");
-	TF2_RemoveCondition(actor, TFCond_FreezeInput);
+	SetEntityFlags(actor, GetEntityFlags(actor) & ~FL_FROZEN);
 }
 
 static int OnContact(CTFBotMvMDeployBomb action, int actor, int other, Address result)

@@ -386,38 +386,38 @@
 			}
 			"CTFPlayer::m_flSpawnTime"
 			{
-				"linux"		"8616"
-				"windows"	"8612"
+				"linux"		"8636"
+				"windows"	"8632"
 			}
 			"CTFPlayer::m_bIsMissionEnemy"
 			{
-				"linux"		"8820"
-				"windows"	"8816"
+				"linux"		"8840"
+				"windows"	"8836"
 			}
 			"CTFPlayer::m_bIsSupportEnemy"
 			{
-				"linux"		"8821"
-				"windows"	"8817"
+				"linux"		"8841"
+				"windows"	"8837"
 			}
 			"CTFPlayer::m_bIsLimitedSupportEnemy"
 			{
-				"linux"		"8822"
-				"windows"	"8818"
+				"linux"		"8842"
+				"windows"	"8838"
 			}
 			"CTFPlayer::m_pWaveSpawnPopulator"
 			{
-				"linux"		"8848"
-				"windows"	"8844"
+				"linux"		"8868"
+				"windows"	"8864"
 			}
 			"CTFPlayer::m_accumulatedSentryGunDamageDealt"
 			{
-				"linux"		"9060"
-				"windows"	"9056"
+				"linux"		"9080"
+				"windows"	"9076"
 			}
 			"CTFPlayer::m_accumulatedSentryGunKillCount"
 			{
-				"linux"		"9064"
-				"windows"	"9060"
+				"linux"		"9084"
+				"windows"	"9080"
 			}
 			"CTFWeaponBase::m_bInAttack2"
 			{

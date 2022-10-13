@@ -210,25 +210,49 @@ int GetItemDefinitionIndexByName(const char[] name)
 	}
 	
 	static StringMap s_itemDefsByName;
-	if (s_itemDefsByName)
+	
+	if (!s_itemDefsByName)
 	{
+		s_itemDefsByName = new StringMap();
+	}
+	
+	if (s_itemDefsByName.ContainsKey(name))
+	{
+		// get cached item def from map
 		int value = TF_ITEMDEF_DEFAULT;
 		return s_itemDefsByName.GetValue(name, value) ? value : TF_ITEMDEF_DEFAULT;
 	}
-	
-	s_itemDefsByName = new StringMap();
-	
-	ArrayList itemList = TF2Econ_GetItemList();
-	char nameBuffer[64];
-	for (int i, nItems = itemList.Length; i < nItems; i++)
+	else
 	{
-		int itemdef = itemList.Get(i);
-		TF2Econ_GetItemName(itemdef, nameBuffer, sizeof(nameBuffer));
-		s_itemDefsByName.SetValue(nameBuffer, itemdef);
+		DataPack data = new DataPack();
+		data.WriteString(name);
+		
+		// search the item list and cache the result
+		ArrayList itemList = TF2Econ_GetItemList(ItemFilterCriteria_FilterByName, data);
+		int itemdef = (itemList.Length > 0) ? itemList.Get(0) : TF_ITEMDEF_DEFAULT;
+		s_itemDefsByName.SetValue(name, itemdef);
+		
+		delete data;
+		delete itemList;
+		
+		return itemdef;
 	}
-	delete itemList;
+}
+
+static bool ItemFilterCriteria_FilterByName(int itemdef, DataPack data)
+{
+	data.Reset();
 	
-	return GetItemDefinitionIndexByName(name);
+	char name1[64];
+	data.ReadString(name1, sizeof(name1));
+	
+	char name2[64];
+	if (TF2Econ_GetItemName(itemdef, name2, sizeof(name2)) && StrEqual(name1, name2, false))
+	{
+		return true;
+	}
+	
+	return false;
 }
 
 TFTeam GetEnemyTeam(TFTeam team)

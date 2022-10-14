@@ -386,8 +386,8 @@
 			}
 			"CTFPlayer::m_flSpawnTime"
 			{
-				"linux"		"8636"
-				"windows"	"8632"
+				"linux"		"8616"
+				"windows"	"8612"
 			}
 			"CTFPlayer::m_bIsMissionEnemy"
 			{

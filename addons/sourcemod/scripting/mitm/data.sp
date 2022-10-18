@@ -435,6 +435,11 @@ methodmap Player < CBaseCombatCharacter
 		return false;
 	}
 	
+	public bool IsDifficulty(DifficultyType skill)
+	{
+		return skill == view_as<DifficultyType>(this.GetProp(Prop_Send, "m_nBotSkill"));
+	}
+	
 	public void GetIdleSound(char[] buffer, int maxlen)
 	{
 		strcopy(buffer, maxlen, m_szIdleSound[this.index]);
@@ -921,6 +926,70 @@ methodmap Player < CBaseCombatCharacter
 		}
 		
 		return false;
+	}
+	
+	public bool ShouldFireCompressionBlast()
+	{
+		if (!tf_bot_pyro_always_reflect.BoolValue)
+		{
+			if (this.IsDifficulty(EASY))
+			{
+				// easy bots can't reflect at all
+				return false;
+			}
+			
+			if (this.IsDifficulty(NORMAL))
+			{
+				// normal bots reflect some of the time
+				if (this.TransientlyConsistentRandomValue(1.0) < 0.5)
+				{
+					return false;
+				}
+			}
+			
+			if (this.IsDifficulty(HARD))
+			{
+				// hard bots reflect most of the time
+				if (this.TransientlyConsistentRandomValue(1.0) < 0.1)
+				{
+					return false;
+				}
+			}
+		}
+		
+		float vecEye[3], rotEye[3];
+		GetClientEyePosition(this.index, vecEye);
+		GetClientEyeAngles(this.index, rotEye);
+		
+		float vecForward[3];
+		GetAngleVectors(rotEye, vecForward, NULL_VECTOR, NULL_VECTOR);
+		
+		float vecCenter[3];
+		ScaleVector(vecForward, 128.0);
+		AddVectors(vecEye, vecForward, vecCenter);
+		float vecSize[3] = { 128.0, 128.0, 64.0 };
+		
+		float vecMins[3], vecMaxs[3];
+		SubtractVectors(vecCenter, vecSize, vecMins);
+		AddVectors(vecCenter, vecSize, vecMaxs);
+		
+		g_bFoundDeflectableEntity = false;
+		TR_EnumerateEntitiesBox(vecMins, vecMaxs, PARTITION_NON_STATIC_EDICTS, TraceEntityEnumerator_EnumerateDeflectables, this.index);
+		
+		return g_bFoundDeflectableEntity;
+	}
+	
+	public float TransientlyConsistentRandomValue(float period = 10.0, int seedValue = 0)
+	{
+		CNavArea area = this.GetLastKnownArea();
+		if (!area)
+		{
+			return 0.0;
+		}
+		
+		// this term stays stable for 'period' seconds, then changes in an unpredictable way
+		int timeMod = RoundToFloor(GetGameTime() / period) + 1;
+		return FloatAbs(Cosine(float(seedValue + (this.index * area.GetID() * timeMod))));
 	}
 	
 	public int GetFlagToFetch()

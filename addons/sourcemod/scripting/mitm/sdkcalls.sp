@@ -43,6 +43,7 @@ static Handle g_SDKCallGetSentryHint;
 static Handle g_SDKCallGetTeleporterHint;
 static Handle g_SDKCallGetCurrentWave;
 static Handle g_SDKCallIsCombatItem;
+static Handle g_SDKCallIsDeflectable;
 static Handle g_SDKCallGetMaxHealthForCurrentLevel;
 static Handle g_SDKCallClip1;
 static Handle g_SDKCallFindSpawnLocation;
@@ -53,6 +54,7 @@ static Handle g_SDKCallIsStaleNest;
 static Handle g_SDKCallDetonateStaleNest;
 static Handle g_SDKCallGetLiveTime;
 static Handle g_SDKCallPassesTriggerFilters;
+static Handle g_SDKCallCanAirBlast;
 
 void SDKCalls_Init(GameData gamedata)
 {
@@ -93,6 +95,7 @@ void SDKCalls_Init(GameData gamedata)
 	g_SDKCallGetTeleporterHint = PrepSDKCall_GetTeleporterHint(gamedata);
 	g_SDKCallGetCurrentWave = PrepSDKCall_GetCurrentWave(gamedata);
 	g_SDKCallIsCombatItem = PrepSDKCall_IsCombatItem(gamedata);
+	g_SDKCallIsDeflectable = PrepSDKCall_IsDeflectable(gamedata);
 	g_SDKCallGetMaxHealthForCurrentLevel = PrepSDKCall_GetMaxHealthForCurrentLevel(gamedata);
 	g_SDKCallClip1 = PrepSDKCall_Clip1(gamedata);
 	g_SDKCallFindSpawnLocation = PrepSDKCall_FindSpawnLocation(gamedata);
@@ -103,6 +106,7 @@ void SDKCalls_Init(GameData gamedata)
 	g_SDKCallDetonateStaleNest = PrepSDKCall_DetonateStaleNest(gamedata);
 	g_SDKCallGetLiveTime = PrepSDKCall_GetLiveTime(gamedata);
 	g_SDKCallPassesTriggerFilters = PrepSDKCall_PassesTriggerFilters(gamedata);
+	g_SDKCallCanAirBlast = PrepSDKCall_CanAirBlast(gamedata);
 }
 
 static Handle PrepSDKCall_GetClassIcon_Linux(GameData gamedata)
@@ -452,6 +456,19 @@ static Handle PrepSDKCall_IsCombatItem(GameData gamedata)
 	return call;
 }
 
+static Handle PrepSDKCall_IsDeflectable(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CBaseEntity::IsDeflectable");
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogError("Failed to create SDKCall: CBaseEntity::IsDeflectable");
+	
+	return call;
+}
+
 static Handle PrepSDKCall_GetMaxHealthForCurrentLevel(GameData gamedata)
 {
 	StartPrepSDKCall(SDKCall_Entity);
@@ -611,6 +628,19 @@ static Handle PrepSDKCall_PassesTriggerFilters(GameData gamedata)
 	Handle call = EndPrepSDKCall();
 	if (!call)
 		LogError("Failed to create SDKCall: CBaseTrigger::PassesTriggerFilters");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_CanAirBlast(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CTFFlameThrower::CanAirBlast");
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogError("Failed to create SDKCall: CTFFlameThrower::CanAirBlast");
 	
 	return call;
 }
@@ -776,6 +806,14 @@ bool SDKCall_IsCombatItem(int entity)
 	return false;
 }
 
+bool SDKCall_IsDeflectable(int entity)
+{
+	if (g_SDKCallIsDeflectable)
+		return SDKCall(g_SDKCallIsDeflectable, entity);
+	
+	return false;
+}
+
 int SDKCall_GetMaxHealthForCurrentLevel(int obj)
 {
 	if (g_SDKCallGetMaxHealthForCurrentLevel)
@@ -862,6 +900,14 @@ bool SDKCall_PassesTriggerFilters(int trigger, int other)
 {
 	if (g_SDKCallPassesTriggerFilters)
 		return SDKCall(g_SDKCallPassesTriggerFilters, trigger, other);
+	
+	return false;
+}
+
+bool SDKCall_CanAirBlast(int flamethrower)
+{
+	if (g_SDKCallCanAirBlast)
+		return SDKCall(g_SDKCallCanAirBlast, flamethrower);
 	
 	return false;
 }

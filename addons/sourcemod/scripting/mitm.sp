@@ -46,6 +46,7 @@ bool g_bInWaitingForPlayers;
 bool g_bAllowTeamChange;
 bool g_bForceFriendlyFire;
 bool g_bPrintEndlessBotUpgrades;
+bool g_bFoundDeflectableEntity;
 float g_flNextRestoreCheckpointTime;
 
 // Plugin ConVars
@@ -79,6 +80,8 @@ ConVar tf_bot_suicide_bomb_friendly_fire;
 ConVar tf_bot_taunt_victim_chance;
 ConVar tf_bot_always_full_reload;
 ConVar tf_bot_flag_kill_on_touch;
+ConVar tf_bot_pyro_always_reflect;
+ConVar tf_bot_pyro_deflect_tolerance;
 ConVar mp_tournament_redteamname;
 ConVar mp_tournament_blueteamname;
 ConVar mp_waitingforplayers_time;
@@ -495,7 +498,19 @@ static void FireWeaponAtEnemy(int client, int &buttons)
 	
 	int weaponID = TF2Util_GetWeaponID(myWeapon);
 	
-	// Vaccinator resistance preference for robot medics
+	if (weaponID == TF_WEAPON_FLAMETHROWER)
+	{
+		// watch for enemy projectiles heading our way
+		if (SDKCall_CanAirBlast(myWeapon) && Player(client).ShouldFireCompressionBlast())
+		{
+			// bounce missiles with compression blast
+			buttons |= IN_ATTACK2;
+		}
+		
+		return;
+	}
+	
+	// vaccinator resistance preference for robot medics
 	if (weaponID == TF_WEAPON_MEDIGUN)
 	{
 		ArrayList attributes = TF2Econ_GetItemStaticAttributes(GetEntProp(myWeapon, Prop_Send, "m_iItemDefinitionIndex"));
@@ -523,17 +538,19 @@ static void FireWeaponAtEnemy(int client, int &buttons)
 			{
 				delete attributes;
 				
-				// Prevent switching resistance types
+				// prevent switching resistance types
 				buttons &= ~IN_RELOAD;
 				return;
 			}
 		}
 		delete attributes;
+		
+		return;
 	}
 	
 	if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_LUNCHBOX || weaponID == TF_WEAPON_BUFF_ITEM || weaponID == TF_WEAPON_BAT_WOOD)
 	{
-		// Allow robots to use certain weapons at all times
+		// allow robots to use certain weapons at all times
 		return;
 	}
 	
@@ -558,7 +575,7 @@ static void FireWeaponAtEnemy(int client, int &buttons)
 		
 		if (s_isInSpawn[client])
 		{
-			// The active weapon might have switched, remove attributes from all
+			// the active weapon might have switched, remove attributes from all
 			int numWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
 			for (int i = 0; i < numWeapons; i++)
 			{
@@ -569,7 +586,7 @@ static void FireWeaponAtEnemy(int client, int &buttons)
 				UnlockWeapon(weapon);
 			}
 			
-			// We have left the spawn
+			// we have left the spawn
 			s_isInSpawn[client] = false;
 		}
 	}

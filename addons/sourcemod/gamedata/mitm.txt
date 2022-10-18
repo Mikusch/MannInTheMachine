@@ -246,6 +246,11 @@
 				"linux"		"@_ZN22CTFBotHintEngineerNest17DetonateStaleNestEv"
 				"windows"	"\x56\x8B\xF1\x8D\x86\x64\x03\x00\x00"
 			}
+			"CTFFlameThrower::CanAirBlast"
+			{
+				"linux"		"@_ZNK15CTFFlameThrower11CanAirBlastEv"
+				"windows"	"\x56\x8B\xF1\xE8\x2A\x2A\x2A\x2A\x85\xC0\x75\x2A\x32\xC0\x5E\xC3\x6A\x01"
+			}
 			"DoTeleporterOverride"
 			{
 				"linux"		"@_Z20DoTeleporterOverrideP11CBaseEntityR6Vectorb"
@@ -293,6 +298,11 @@
 			{
 				"linux"		"86"
 				"windows"	"85"
+			}
+			"CBaseEntity::IsDeflectable"
+			{
+				"linux"		"156"
+				"windows"	"155"
 			}
 			"CBaseObject::CanBeUpgraded"
 			{

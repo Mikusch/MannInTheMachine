@@ -36,6 +36,13 @@
 #define NULL_SQUAD	CTFBotSquad(0)
 #define NULL_PARTY	Party(0)
 
+#define CONTENTS_BLOCKLOS	CONTENTS_MIST
+
+// everything that blocks line of sight for AI
+#define MASK_BLOCKLOS				(CONTENTS_SOLID|CONTENTS_MOVEABLE|CONTENTS_BLOCKLOS)
+// everything that blocks line of sight for AI plus NPCs
+#define MASK_BLOCKLOS_AND_NPCS		(MASK_BLOCKLOS|CONTENTS_MONSTER)
+
 // m_lifeState values
 #define LIFE_ALIVE				0 // alive
 #define LIFE_DYING				1 // playing death animation or still falling off of a ledge waiting to hit ground

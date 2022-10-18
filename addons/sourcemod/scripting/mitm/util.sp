@@ -649,7 +649,17 @@ bool IsLineOfFireClearGivenPlayerAndEntity(int client, int who)
 	return IsLineOfFireClearGivenPointAndEntity(client, pos, who);
 }
 
-bool TraceEntityFilter_IgnoreActorsAndFriendlyCombatItems(int entity, int contentsMask, int m_iIgnoreTeam)
+bool IsLineOfSightClear(int client, const float pos[3])
+{
+	float eyePos[3];
+	GetClientEyePosition(client, eyePos);
+	
+	TR_TraceRayFilter(eyePos, pos, MASK_BLOCKLOS_AND_NPCS | CONTENTS_IGNORE_NODRAW_OPAQUE, RayType_EndPoint, TraceEntityFilter_IgnoreEntity, client);
+	
+	return (TR_GetFraction() >= 1.0 && !TR_StartSolid());
+}
+
+static bool TraceEntityFilter_IgnoreActorsAndFriendlyCombatItems(int entity, int contentsMask, int m_iIgnoreTeam)
 {
 	if (CBaseEntity(entity).MyCombatCharacterPointer())
 		return false;
@@ -661,6 +671,11 @@ bool TraceEntityFilter_IgnoreActorsAndFriendlyCombatItems(int entity, int conten
 	}
 	
 	return true;
+}
+
+static bool TraceEntityFilter_IgnoreEntity(int entity, int contentsMask, int otherEntity)
+{
+	return entity != otherEntity;
 }
 
 void TE_TFParticleEffect(const char[] name, const float vecOrigin[3] = NULL_VECTOR,
@@ -1136,4 +1151,54 @@ stock void UTIL_ClientPrintAll(int msg_dest, const char[] msg_name, const char[]
 	message.WriteString(param4);
 	
 	EndMessage();
+}
+
+bool TraceEntityEnumerator_EnumerateDeflectables(int entity, int client)
+{
+	if (!IsValidEntity(entity))
+		return true;
+	
+	if (GetEntProp(entity, Prop_Data, "m_iTeamNum") == GetClientTeam(client))
+		return true;
+	
+	// should air blast player logic is already done before this loop
+	if (IsEntityClient(entity))
+		return true;
+	
+	// is this something I want to deflect?
+	if (!SDKCall_IsDeflectable(entity))
+		return true;
+	
+	if (FClassnameIs(entity, "tf_projectile_rocket") || FClassnameIs(entity, "tf_projectile_energy_ball"))
+	{
+		// is it headed right for me?
+		float vecThemUnitVel[3];
+		GetEntPropVector(entity, Prop_Data, "m_vecAbsVelocity", vecThemUnitVel);
+		vecThemUnitVel[2] = 0.0;
+		NormalizeVector(vecThemUnitVel, vecThemUnitVel);
+		
+		float rotEye[3], vecForward[3];
+		GetClientEyeAngles(client, rotEye);
+		GetAngleVectors(rotEye, vecForward, NULL_VECTOR, NULL_VECTOR);
+		
+		float horzForward[3];
+		horzForward[0] = vecForward[0];
+		horzForward[1] = vecForward[1];
+		horzForward[2] = 0.0;
+		NormalizeVector(horzForward, horzForward);
+		
+		if (GetVectorDotProduct(horzForward, vecThemUnitVel) > -tf_bot_pyro_deflect_tolerance.FloatValue)
+			return true;
+	}
+	
+	float vecCenter[3];
+	CBaseEntity(entity).WorldSpaceCenter(vecCenter);
+	
+	// can I see it?
+	if (!IsLineOfSightClear(client, vecCenter))
+		return true;
+	
+	// bounce it!
+	g_bFoundDeflectableEntity = true;
+	return false;
 }

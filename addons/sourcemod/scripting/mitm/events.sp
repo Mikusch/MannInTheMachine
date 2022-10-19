@@ -299,6 +299,9 @@ static Action Timer_CheckGateBotAnnotation(Handle timer, int userid)
 	if (timer != g_annotationTimer[client])
 		return Plugin_Stop;
 	
+	if (!IsClientInGame(client))
+		return Plugin_Stop;
+	
 	if (!IsPlayerAlive(client))
 		return Plugin_Stop;
 	

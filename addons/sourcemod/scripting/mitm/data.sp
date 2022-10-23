@@ -692,6 +692,7 @@ methodmap Player < CBaseCombatCharacter
 					TF2Attrib_SetByDefIndex(this.index, defIndex, flValue);
 				}
 			}
+			TF2Attrib_ClearCache(this.index);
 			
 			// set health back to what it was before we clear bot's attributes
 			this.ModifyMaxHealth(nMaxHealth);

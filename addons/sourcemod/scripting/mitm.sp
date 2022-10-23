@@ -224,6 +224,7 @@ public void OnMapStart()
 	g_flNextRestoreCheckpointTime = 0.0;
 	
 	PrecacheSound("ui/system_message_alert.wav");
+	PrecacheSound(")mvm/mvm_tele_activate.wav");
 	
 	DHooks_HookGamerules();
 	

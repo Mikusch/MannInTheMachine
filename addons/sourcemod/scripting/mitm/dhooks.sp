@@ -50,6 +50,8 @@ static float s_flLastTeleportTime;
 void DHooks_Init(GameData gamedata)
 {
 	m_justSpawnedList = new ArrayList();
+	m_cooldownTimer = new CountdownTimer();
+	m_checkForDangerousSentriesTimer = new CountdownTimer();
 	
 	CreateDynamicDetour(gamedata, "CTFGCServerSystem::PreClientUpdate", DHookCallback_PreClientUpdate_Pre, DHookCallback_PreClientUpdate_Post);
 	CreateDynamicDetour(gamedata, "CPopulationManager::AllocateBots", DHookCallback_AllocateBots_Pre);

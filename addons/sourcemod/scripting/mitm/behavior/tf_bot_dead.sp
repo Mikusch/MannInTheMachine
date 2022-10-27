@@ -20,27 +20,41 @@
 
 static NextBotActionFactory ActionFactory;
 
-static IntervalTimer m_deadTimer[MAXPLAYERS + 1];
-
 methodmap CTFBotDead < NextBotAction
 {
 	public static void Init()
 	{
 		ActionFactory = new NextBotActionFactory("Dead");
+		ActionFactory.BeginDataMapDesc()
+			.DefineIntField("m_deadTimer")
+		.EndDataMapDesc();
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
+		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
 	}
 	
 	public CTFBotDead()
 	{
-		return view_as<CTFBotDead>(ActionFactory.Create());
+		CTFBotDead action = view_as<CTFBotDead>(ActionFactory.Create());
+		action.m_deadTimer = new IntervalTimer();
+		return action;
+	}
+	
+	property IntervalTimer m_deadTimer
+	{
+		public get()
+		{
+			return this.GetData("m_deadTimer");
+		}
+		public set(IntervalTimer deadTimer)
+		{
+			this.SetData("m_deadTimer", deadTimer);
+		}
 	}
 }
 
 static int OnStart(CTFBotDead action, int actor, NextBotAction priorAction)
 {
-	m_deadTimer[actor].Start();
-	
 	return action.Continue();
 }
 
@@ -52,7 +66,7 @@ static int Update(CTFBotDead action, int actor, float interval)
 		return action.ChangeTo(CTFBotMainAction(), "This should not happen!");
 	}
 	
-	if (m_deadTimer[actor].IsGreaterThen(5.0))
+	if (action.m_deadTimer.IsGreaterThan(5.0))
 	{
 		if (Player(actor).HasAttribute(REMOVE_ON_DEATH))
 		{
@@ -69,4 +83,9 @@ static int Update(CTFBotDead action, int actor, float interval)
 	}
 	
 	return action.Continue();
+}
+
+static void OnEnd(CTFBotDead action, int actor, NextBotAction nextAction)
+{
+	delete action.m_deadTimer;
 }

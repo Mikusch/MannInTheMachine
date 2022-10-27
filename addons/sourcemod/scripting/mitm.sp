@@ -33,6 +33,7 @@
 #include <morecolors>
 #include <smmem>
 #include <mitm>
+#include <moretimers>
 
 // Global entities
 CPopulationManager g_pPopulationManager = view_as<CPopulationManager>(INVALID_ENT_REFERENCE);

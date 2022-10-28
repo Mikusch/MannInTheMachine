@@ -239,7 +239,7 @@ bool IsWearableSlot(int iSlot)
 
 Handle GenerateItem(int player, int itemDefIndex)
 {
-	Handle item = TF2Items_CreateItem(PRESERVE_ATTRIBUTES);
+	Handle item = TF2Items_CreateItem(PRESERVE_ATTRIBUTES | FORCE_GENERATION);
 	if (item)
 	{
 		char classname[64];

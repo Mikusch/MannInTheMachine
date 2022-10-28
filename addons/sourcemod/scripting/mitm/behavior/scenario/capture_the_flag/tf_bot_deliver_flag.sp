@@ -22,15 +22,14 @@
 
 static NextBotActionFactory ActionFactory;
 
-static CountdownTimer m_upgradeTimer[MAXPLAYERS + 1];
-static CountdownTimer m_buffPulseTimer[MAXPLAYERS + 1];
-
 methodmap CTFBotDeliverFlag < NextBotAction
 {
 	public static void Init()
 	{
 		ActionFactory = new NextBotActionFactory("DeliverFlag");
 		ActionFactory.BeginDataMapDesc()
+			.DefineIntField("m_upgradeTimer")
+			.DefineIntField("m_buffPulseTimer")
 			.DefineIntField("m_upgradeLevel")
 		.EndDataMapDesc();
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
@@ -41,7 +40,34 @@ methodmap CTFBotDeliverFlag < NextBotAction
 	
 	public CTFBotDeliverFlag()
 	{
-		return view_as<CTFBotDeliverFlag>(ActionFactory.Create());
+		CTFBotDeliverFlag action = view_as<CTFBotDeliverFlag>(ActionFactory.Create());
+		action.m_upgradeTimer = new CountdownTimer();
+		action.m_buffPulseTimer = new CountdownTimer();
+		return action;
+	}
+	
+	property CountdownTimer m_upgradeTimer
+	{
+		public get()
+		{
+			return this.GetData("m_upgradeTimer");
+		}
+		public set(CountdownTimer upgradeTimer)
+		{
+			this.SetData("m_upgradeTimer", upgradeTimer);
+		}
+	}
+	
+	property CountdownTimer m_buffPulseTimer
+	{
+		public get()
+		{
+			return this.GetData("m_buffPulseTimer");
+		}
+		public set(CountdownTimer buffPulseTimer)
+		{
+			this.SetData("m_buffPulseTimer", buffPulseTimer);
+		}
 	}
 	
 	property int m_upgradeLevel
@@ -84,11 +110,11 @@ static int OnStart(CTFBotDeliverFlag action, int actor, NextBotAction priorActio
 	else
 	{
 		action.m_upgradeLevel = 0;
-		m_upgradeTimer[actor].Start(tf_mvm_bot_flag_carrier_interval_to_1st_upgrade.FloatValue);
+		action.m_upgradeTimer.Start(tf_mvm_bot_flag_carrier_interval_to_1st_upgrade.FloatValue);
 		if (g_pObjectiveResource.IsValid())
 		{
 			g_pObjectiveResource.SetBaseMvMBombUpgradeTime(GetGameTime());
-			g_pObjectiveResource.SetNextMvMBombUpgradeTime(GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
+			g_pObjectiveResource.SetNextMvMBombUpgradeTime(GetGameTime() + action.m_upgradeTimer.GetRemainingTime());
 		}
 	}
 	
@@ -133,6 +159,9 @@ static void OnEnd(CTFBotDeliverFlag action, int actor, NextBotAction nextAction)
 		TF2Attrib_RemoveByName(actor, "health regen");
 		TF2_RemoveCondition(actor, TFCond_CritCanteen);
 	}
+	
+	delete action.m_upgradeTimer;
+	delete action.m_buffPulseTimer;
 }
 
 static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
@@ -145,15 +174,15 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 		if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
 		{
 			// don't start counting down until we leave the spawn
-			m_upgradeTimer[actor].Start(tf_mvm_bot_flag_carrier_interval_to_1st_upgrade.FloatValue);
+			action.m_upgradeTimer.Start(tf_mvm_bot_flag_carrier_interval_to_1st_upgrade.FloatValue);
 			g_pObjectiveResource.SetBaseMvMBombUpgradeTime(GetGameTime());
-			g_pObjectiveResource.SetNextMvMBombUpgradeTime(GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
+			g_pObjectiveResource.SetNextMvMBombUpgradeTime(GetGameTime() + action.m_upgradeTimer.GetRemainingTime());
 		}
 		
 		// do defensive buff effect ourselves (since we're not a soldier)
-		if (action.m_upgradeLevel > 0 && m_buffPulseTimer[actor].IsElapsed())
+		if (action.m_upgradeLevel > 0 && action.m_buffPulseTimer.IsElapsed())
 		{
-			m_buffPulseTimer[actor].Start(1.0);
+			action.m_buffPulseTimer.Start(1.0);
 			
 			const float buffRadius = 450.0;
 			
@@ -176,7 +205,7 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 		}
 		
 		// the flag carrier gets stronger the longer he holds the flag
-		if (m_upgradeTimer[actor].IsElapsed())
+		if (action.m_upgradeTimer.IsElapsed())
 		{
 			const int maxLevel = 3;
 			
@@ -191,7 +220,7 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 					//---------------------------------------
 					case 1:
 					{
-						m_upgradeTimer[actor].Start(tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade.FloatValue);
+						action.m_upgradeTimer.Start(tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade.FloatValue);
 						
 						// permanent buff banner effect (handled above)
 						
@@ -200,7 +229,7 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 						{
 							g_pObjectiveResource.SetFlagCarrierUpgradeLevel(1);
 							g_pObjectiveResource.SetBaseMvMBombUpgradeTime(GetGameTime());
-							g_pObjectiveResource.SetNextMvMBombUpgradeTime(GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
+							g_pObjectiveResource.SetNextMvMBombUpgradeTime(GetGameTime() + action.m_upgradeTimer.GetRemainingTime());
 							HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE1", TFTeam_Defenders);
 							TE_TFParticleEffect("mvm_levelup1", .attachType = PATTACH_POINT_FOLLOW, .entity = actor, .attachPoint = LookupEntityAttachment(actor, "head"));
 						}
@@ -210,7 +239,7 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 					//---------------------------------------
 					case 2:
 					{
-						m_upgradeTimer[actor].Start(tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade.FloatValue);
+						action.m_upgradeTimer.Start(tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade.FloatValue);
 						
 						TF2Attrib_SetByName(actor, "health regen", tf_mvm_bot_flag_carrier_health_regen.FloatValue);
 						
@@ -219,7 +248,7 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 						{
 							g_pObjectiveResource.SetFlagCarrierUpgradeLevel(2);
 							g_pObjectiveResource.SetBaseMvMBombUpgradeTime(GetGameTime());
-							g_pObjectiveResource.SetNextMvMBombUpgradeTime(GetGameTime() + m_upgradeTimer[actor].GetRemainingTime());
+							g_pObjectiveResource.SetNextMvMBombUpgradeTime(GetGameTime() + action.m_upgradeTimer.GetRemainingTime());
 							HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE2", TFTeam_Defenders);
 							TE_TFParticleEffect("mvm_levelup2", .attachType = PATTACH_POINT_FOLLOW, .entity = actor, .attachPoint = LookupEntityAttachment(actor, "head"));
 						}

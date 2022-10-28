@@ -20,23 +20,37 @@
 
 static NextBotActionFactory ActionFactory;
 
-static CountdownTimer m_waitTimer[MAXPLAYERS + 1];
-
 methodmap CTFBotSpyLeaveSpawnRoom < NextBotAction
 {
 	public static void Init()
 	{
 		ActionFactory = new NextBotActionFactory("SpyLeaveSpawnRoom");
 		ActionFactory.BeginDataMapDesc()
+			.DefineIntField("m_waitTimer")
 			.DefineIntField("m_attempt")
 		.EndDataMapDesc();
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
+		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
 	}
 	
 	public CTFBotSpyLeaveSpawnRoom()
 	{
-		return view_as<CTFBotSpyLeaveSpawnRoom>(ActionFactory.Create());
+		CTFBotSpyLeaveSpawnRoom action = view_as<CTFBotSpyLeaveSpawnRoom>(ActionFactory.Create());
+		action.m_waitTimer = new CountdownTimer();
+		return action;
+	}
+	
+	property CountdownTimer m_waitTimer
+	{
+		public get()
+		{
+			return this.GetData("m_waitTimer");
+		}
+		public set(CountdownTimer waitTimer)
+		{
+			this.SetData("m_waitTimer", waitTimer);
+		}
 	}
 	
 	property int m_attempt
@@ -61,7 +75,7 @@ static int OnStart(CTFBotSpyLeaveSpawnRoom action, int actor, NextBotAction prev
 	SDKCall_DoClassSpecialSkill(actor);
 	
 	// wait a few moments to guarantee a minimum time between announcing Spies and their attack
-	m_waitTimer[actor].Start(2.0 + GetRandomFloat(0.0, 1.0));
+	action.m_waitTimer.Start(2.0 + GetRandomFloat(0.0, 1.0));
 	
 	action.m_attempt = 0;
 	
@@ -70,7 +84,7 @@ static int OnStart(CTFBotSpyLeaveSpawnRoom action, int actor, NextBotAction prev
 
 static int Update(CTFBotSpyLeaveSpawnRoom action, int actor, float interval)
 {
-	if (m_waitTimer[actor].HasStarted() && m_waitTimer[actor].IsElapsed())
+	if (action.m_waitTimer.HasStarted() && action.m_waitTimer.IsElapsed())
 	{
 		int victim = -1;
 		
@@ -116,7 +130,7 @@ static int Update(CTFBotSpyLeaveSpawnRoom action, int actor, float interval)
 		// if we didn't find a victim, try again in a bit
 		if (victim == -1)
 		{
-			m_waitTimer[actor].Start(1.0);
+			action.m_waitTimer.Start(1.0);
 			
 			++action.m_attempt;
 			
@@ -129,6 +143,11 @@ static int Update(CTFBotSpyLeaveSpawnRoom action, int actor, float interval)
 	}
 	
 	return action.Continue();
+}
+
+static void OnEnd(CTFBotSpyLeaveSpawnRoom action, int actor, NextBotAction nextAction)
+{
+	delete action.m_waitTimer;
 }
 
 static bool TeleportNearVictim(int actor, int victim, int attempt)

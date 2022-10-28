@@ -20,14 +20,13 @@
 
 static NextBotActionFactory ActionFactory;
 
-static CountdownTimer m_timer[MAXPLAYERS + 1];
-
 methodmap CTFBotMvMDeployBomb < NextBotAction
 {
 	public static void Init()
 	{
 		ActionFactory = new NextBotActionFactory("MvMDeployBomb");
 		ActionFactory.BeginDataMapDesc()
+			.DefineIntField("m_timer")
 			.DefineVectorField("m_anchorPos")
 		.EndDataMapDesc();
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
@@ -36,16 +35,30 @@ methodmap CTFBotMvMDeployBomb < NextBotAction
 		ActionFactory.SetEventCallback(EventResponderType_OnContact, OnContact);
 	}
 	
+	property CountdownTimer m_timer
+	{
+		public get()
+		{
+			return this.GetData("m_timer");
+		}
+		public set(CountdownTimer timer)
+		{
+			this.SetData("m_timer", timer);
+		}
+	}
+	
 	public CTFBotMvMDeployBomb()
 	{
-		return view_as<CTFBotMvMDeployBomb>(ActionFactory.Create());
+		CTFBotMvMDeployBomb action = view_as<CTFBotMvMDeployBomb>(ActionFactory.Create());
+		action.m_timer = new CountdownTimer();
+		return action;
 	}
 }
 
 static int OnStart(CTFBotMvMDeployBomb action, int actor, NextBotAction priorAction)
 {
 	Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_DELAY);
-	m_timer[actor].Start(tf_deploying_bomb_delay_time.FloatValue);
+	action.m_timer.Start(tf_deploying_bomb_delay_time.FloatValue);
 	
 	// remember where we start deploying
 	float vecAbsOrigin[3];
@@ -105,13 +118,13 @@ static int Update(CTFBotMvMDeployBomb action, int actor, float interval)
 	{
 		case TF_BOMB_DEPLOYING_DELAY:
 		{
-			if (m_timer[actor].IsElapsed())
+			if (action.m_timer.IsElapsed())
 			{
 				SetVariantInt(1);
 				AcceptEntityInput(actor, "SetForcedTauntCam");
 				
 				SDKCall_PlaySpecificSequence(actor, "primary_deploybomb");
-				m_timer[actor].Start(tf_deploying_bomb_time.FloatValue);
+				action.m_timer.Start(tf_deploying_bomb_time.FloatValue);
 				Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_ANIMATING);
 				
 				EmitGameSoundToAll(GetEntProp(actor, Prop_Send, "m_bIsMiniBoss") ? "MVM.DeployBombGiant" : "MVM.DeployBombSmall", actor);
@@ -121,14 +134,14 @@ static int Update(CTFBotMvMDeployBomb action, int actor, float interval)
 		}
 		case TF_BOMB_DEPLOYING_ANIMATING:
 		{
-			if (m_timer[actor].IsElapsed())
+			if (action.m_timer.IsElapsed())
 			{
 				if (IsValidEntity(areaTrigger))
 				{
 					SDKCall_Capture(areaTrigger, actor);
 				}
 				
-				m_timer[actor].Start(2.0);
+				action.m_timer.Start(2.0);
 				BroadcastSound(255, "Announcer.MVM_Robots_Planted");
 				Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_COMPLETE);
 				SetEntProp(actor, Prop_Data, "m_takedamage", DAMAGE_NO);
@@ -138,7 +151,7 @@ static int Update(CTFBotMvMDeployBomb action, int actor, float interval)
 		}
 		case TF_BOMB_DEPLOYING_COMPLETE:
 		{
-			if (m_timer[actor].IsElapsed())
+			if (action.m_timer.IsElapsed())
 			{
 				Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_NONE);
 				SetEntProp(actor, Prop_Data, "m_takedamage", DAMAGE_YES);
@@ -169,6 +182,8 @@ static void OnEnd(CTFBotMvMDeployBomb action, int actor, NextBotAction nextActio
 	SetVariantInt(0);
 	AcceptEntityInput(actor, "SetForcedTauntCam");
 	SetEntityFlags(actor, GetEntityFlags(actor) & ~FL_FROZEN);
+	
+	delete action.m_timer;
 }
 
 static int OnContact(CTFBotMvMDeployBomb action, int actor, int other, Address result)

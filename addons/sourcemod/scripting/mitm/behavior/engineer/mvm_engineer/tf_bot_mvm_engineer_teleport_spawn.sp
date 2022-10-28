@@ -20,27 +20,40 @@
 
 static NextBotActionFactory ActionFactory;
 
-static CountdownTimer m_teleportDelay[MAXPLAYERS + 1];
-
 methodmap CTFBotMvMEngineerTeleportSpawn < NextBotAction
 {
 	public static void Init()
 	{
 		ActionFactory = new NextBotActionFactory("MvMEngineerTeleportSpawn");
 		ActionFactory.BeginDataMapDesc()
+			.DefineIntField("m_teleportDelay")
 			.DefineEntityField("m_hintEntity")
 			.DefineBoolField("m_bFirstTeleportSpawn")
 		.EndDataMapDesc();
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
+		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
 	}
 	
 	public CTFBotMvMEngineerTeleportSpawn(int hint, bool bFirstTeleportSpawn)
 	{
 		CTFBotMvMEngineerTeleportSpawn action = view_as<CTFBotMvMEngineerTeleportSpawn>(ActionFactory.Create());
+		action.m_teleportDelay = new CountdownTimer();
 		action.m_hintEntity = hint;
 		action.m_bFirstTeleportSpawn = bFirstTeleportSpawn;
 		return action;
+	}
+	
+	property CountdownTimer m_teleportDelay
+	{
+		public get()
+		{
+			return this.GetData("m_teleportDelay");
+		}
+		public set(CountdownTimer teleportDelay)
+		{
+			this.SetData("m_teleportDelay", teleportDelay);
+		}
 	}
 	
 	property int m_hintEntity
@@ -80,16 +93,16 @@ static int OnStart(CTFBotMvMEngineerTeleportSpawn action, int actor, NextBotActi
 
 static int Update(CTFBotMvMEngineerTeleportSpawn action, int actor, float interval)
 {
-	if (!m_teleportDelay[actor].HasStarted())
+	if (!action.m_teleportDelay.HasStarted())
 	{
 		float origin[3];
 		GetEntPropVector(action.m_hintEntity, Prop_Data, "m_vecAbsOrigin", origin);
 		
-		m_teleportDelay[actor].Start(0.1);
+		action.m_teleportDelay.Start(0.1);
 		if (IsValidEntity(action.m_hintEntity))
 			SDKCall_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Defenders);
 	}
-	else if (m_teleportDelay[actor].IsElapsed())
+	else if (action.m_teleportDelay.IsElapsed())
 	{
 		if (!IsValidEntity(action.m_hintEntity))
 			return action.Done("Cannot teleport to hint as m_hintEntity is NULL");
@@ -135,4 +148,9 @@ static int Update(CTFBotMvMEngineerTeleportSpawn action, int actor, float interv
 	}
 	
 	return action.Continue();
+}
+
+static void OnEnd(CTFBotMvMEngineerTeleportSpawn action, int actor, NextBotAction nextAction)
+{
+	delete action.m_teleportDelay;
 }

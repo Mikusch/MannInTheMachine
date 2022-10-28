@@ -20,16 +20,19 @@
 
 static NextBotActionFactory ActionFactory;
 
-static IntervalTimer m_undergroundTimer[MAXPLAYERS + 1];
-
 methodmap CTFBotMainAction < NextBotAction
 {
 	public static void Init()
 	{
 		ActionFactory = new NextBotActionFactory("MainAction");
+		ActionFactory.BeginDataMapDesc()
+			.DefineIntField("m_undergroundTimer")
+		.EndDataMapDesc();
 		ActionFactory.SetCallback(NextBotActionCallbackType_InitialContainedAction, InitialContainedAction);
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
+		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
+		ActionFactory.SetCallback(NextBotActionCallbackType_CreateInitialAction, CreateInitialAction);
 		ActionFactory.SetEventCallback(EventResponderType_OnKilled, OnKilled);
 		ActionFactory.SetEventCallback(EventResponderType_OnContact, OnContact);
 		ActionFactory.SetEventCallback(EventResponderType_OnOtherKilled, OnOtherKilled);
@@ -43,6 +46,18 @@ methodmap CTFBotMainAction < NextBotAction
 	public CTFBotMainAction()
 	{
 		return view_as<CTFBotMainAction>(ActionFactory.Create());
+	}
+	
+	property IntervalTimer m_undergroundTimer
+	{
+		public get()
+		{
+			return this.GetData("m_undergroundTimer");
+		}
+		public set(IntervalTimer undergroundTimer)
+		{
+			this.SetData("m_undergroundTimer", undergroundTimer);
+		}
 	}
 }
 
@@ -141,11 +156,11 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 		// watch for bots that have fallen through the ground
 		if (myArea && myArea.GetZVector(origin) - origin[2] > 100.0)
 		{
-			if (!m_undergroundTimer[actor].HasStarted())
+			if (!action.m_undergroundTimer.HasStarted())
 			{
-				m_undergroundTimer[actor].Start();
+				action.m_undergroundTimer.Start();
 			}
-			else if (m_undergroundTimer[actor].IsGreaterThen(3.0))
+			else if (action.m_undergroundTimer.IsGreaterThan(3.0))
 			{
 				char auth[MAX_AUTHID_LENGTH], teamName[MAX_TEAM_NAME_LENGTH];
 				GetClientAuthId(actor, AuthId_Engine, auth, sizeof(auth), false);
@@ -166,11 +181,21 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 		}
 		else
 		{
-			m_undergroundTimer[actor].Invalidate();
+			action.m_undergroundTimer.Invalidate();
 		}
 	}
 	
 	return action.Continue();
+}
+
+static void OnEnd(CTFBotMainAction action, int actor, NextBotAction nextAction)
+{
+	delete action.m_undergroundTimer;
+}
+
+static void CreateInitialAction(CTFBotMainAction action)
+{
+	action.m_undergroundTimer = new IntervalTimer();
 }
 
 static int OnKilled(CTFBotMainAction action, int actor, int attacker, int inflictor, float damage, int damagetype)

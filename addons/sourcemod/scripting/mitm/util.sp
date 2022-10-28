@@ -20,100 +20,150 @@
 
 //--------------------------------------------------------------------------------------------------------------
 /**
- * Simple class for tracking intervals of game time.
+ * Simple methodmap for tracking intervals of game time.
  * Upon creation, the timer is invalidated.  To measure time intervals, start the timer via Start().
  */
-enum struct IntervalTimer
+methodmap IntervalTimer < StringMap
 {
-	float m_timestamp;
+	public IntervalTimer()
+	{
+		return view_as<IntervalTimer>(new StringMap());
+	}
 	
-	void Reset()
+	public void Reset()
 	{
 		this.m_timestamp = GetGameTime();
 	}
 	
-	void Start()
+	public void Start()
 	{
 		this.m_timestamp = GetGameTime();
 	}
 	
-	void Invalidate()
+	public void Invalidate()
 	{
 		this.m_timestamp = -1.0;
 	}
 	
-	bool HasStarted()
+	public bool HasStarted()
 	{
 		return (this.m_timestamp > 0.0);
 	}
 	
 	/// if not started, elapsed time is very large
-	float GetElapsedTime()
+	public float GetElapsedTime()
 	{
 		return (this.HasStarted()) ? (GetGameTime() - this.m_timestamp) : 99999.9;
 	}
 	
-	bool IsLessThen(float duration)
+	public bool IsLessThan(float duration)
 	{
 		return (GetGameTime() - this.m_timestamp < duration) ? true : false;
 	}
 	
-	bool IsGreaterThen(float duration)
+	public bool IsGreaterThan(float duration)
 	{
 		return (GetGameTime() - this.m_timestamp > duration) ? true : false;
+	}
+	
+	property float m_timestamp
+	{
+		public get()
+		{
+			float timestamp = 0.0;
+			this.GetValue("m_timestamp", timestamp);
+			return timestamp;
+		}
+		
+		public set(float timestamp)
+		{
+			this.SetValue("m_timestamp", timestamp);
+		}
 	}
 }
 
 //--------------------------------------------------------------------------------------------------------------
 /**
- * Simple class for counting down a short interval of time.
+ * Simple methodmap for counting down a short interval of time.
  * Upon creation, the timer is invalidated.  Invalidated countdown timers are considered to have elapsed.
  */
-enum struct CountdownTimer
+methodmap CountdownTimer < StringMap
 {
-	float m_timestamp;
-	float m_duration;
+	public CountdownTimer()
+	{
+		return view_as<CountdownTimer>(new StringMap());
+	}
 	
-	void Reset()
+	public void Reset()
 	{
 		this.m_timestamp = GetGameTime() + this.m_duration;
 	}
 	
-	void Start(float duration)
+	public void Start(float duration)
 	{
 		this.m_timestamp = GetGameTime() + duration;
 		this.m_duration = duration;
 	}
 	
-	void Invalidate()
+	public void Invalidate()
 	{
 		this.m_timestamp = -1.0;
 	}
 	
-	bool HasStarted()
+	public bool HasStarted()
 	{
 		return (this.m_timestamp > 0.0);
 	}
 	
-	bool IsElapsed()
+	public bool IsElapsed()
 	{
 		return (GetGameTime() > this.m_timestamp);
 	}
 	
-	float GetElapsedTime()
+	public float GetElapsedTime()
 	{
 		return GetGameTime() - this.m_timestamp + this.m_duration;
 	}
 	
-	float GetRemainingTime()
+	public float GetRemainingTime()
 	{
 		return (this.m_timestamp - GetGameTime());
 	}
 	
 	/// return original countdown time
-	float GetCountdownDuration()
+	public float GetCountdownDuration()
 	{
 		return (this.m_timestamp > 0.0) ? this.m_duration : 0.0;
+	}
+	
+	property float m_timestamp
+	{
+		public get()
+		{
+			float timestamp = 0.0;
+			this.GetValue("m_timestamp", timestamp);
+			return timestamp;
+		}
+		
+		public set(float timestamp)
+		{
+			this.SetValue("m_timestamp", timestamp);
+		}
+	}
+	
+	property float m_duration
+	{
+		public get()
+		{
+			float duration = 0.0;
+			this.GetValue("m_duration", duration);
+			return duration;
+		}
+		
+		public set(float duration)
+		{
+			this.SetValue("m_duration", duration);
+		}
 	}
 }
 

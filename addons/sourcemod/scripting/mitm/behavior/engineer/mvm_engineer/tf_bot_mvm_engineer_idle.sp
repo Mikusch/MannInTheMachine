@@ -20,15 +20,14 @@
 
 static NextBotActionFactory ActionFactory;
 
-static CountdownTimer m_findHintTimer[MAXPLAYERS + 1];
-static CountdownTimer m_reevaluateNestTimer[MAXPLAYERS + 1];
-
 methodmap CTFBotMvMEngineerIdle < NextBotAction
 {
 	public static void Init()
 	{
 		ActionFactory = new NextBotActionFactory("MvMEngineerIdle");
 		ActionFactory.BeginDataMapDesc()
+			.DefineIntField("m_findHintTimer")
+			.DefineIntField("m_reevaluateNestTimer")
 			.DefineEntityField("m_sentryHint")
 			.DefineEntityField("m_teleporterHint")
 			.DefineEntityField("m_nestHint")
@@ -38,11 +37,39 @@ methodmap CTFBotMvMEngineerIdle < NextBotAction
 		.EndDataMapDesc();
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
+		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
 	}
 	
 	public CTFBotMvMEngineerIdle()
 	{
-		return view_as<CTFBotMvMEngineerIdle>(ActionFactory.Create());
+		CTFBotMvMEngineerIdle action = view_as<CTFBotMvMEngineerIdle>(ActionFactory.Create());
+		action.m_findHintTimer = new CountdownTimer();
+		action.m_reevaluateNestTimer = new CountdownTimer();
+		return action;
+	}
+	
+	property CountdownTimer m_findHintTimer
+	{
+		public get()
+		{
+			return this.GetData("m_findHintTimer");
+		}
+		public set(CountdownTimer findHintTimer)
+		{
+			this.SetData("m_findHintTimer", findHintTimer);
+		}
+	}
+	
+	property CountdownTimer m_reevaluateNestTimer
+	{
+		public get()
+		{
+			return this.GetData("m_reevaluateNestTimer");
+		}
+		public set(CountdownTimer reevaluateNestTimer)
+		{
+			this.SetData("m_reevaluateNestTimer", reevaluateNestTimer);
+		}
 	}
 	
 	property int m_sentryHint
@@ -140,13 +167,13 @@ static int Update(CTFBotMvMEngineerIdle action, int actor, float interval)
 	
 	if (!IsValidEntity(action.m_sentryHint) || ShouldAdvanceNestSpot(action, actor))
 	{
-		if (m_findHintTimer[actor].HasStarted() && !m_findHintTimer[actor].IsElapsed())
+		if (action.m_findHintTimer.HasStarted() && !action.m_findHintTimer.IsElapsed())
 		{
 			// too soon
 			return action.Continue();
 		}
 		
-		m_findHintTimer[actor].Start(GetRandomFloat(1.0, 2.0));
+		action.m_findHintTimer.Start(GetRandomFloat(1.0, 2.0));
 		
 		// figure out where to teleport into the map
 		bool bShouldTeleportToHint = Player(actor).HasAttribute(TELEPORT_TO_HINT);
@@ -214,6 +241,12 @@ static int Update(CTFBotMvMEngineerIdle action, int actor, float interval)
 	return action.Continue();
 }
 
+static void OnEnd(CTFBotMvMEngineerIdle action, int actor, NextBotAction nextAction)
+{
+	delete action.m_findHintTimer;
+	delete action.m_reevaluateNestTimer;
+}
+
 static void TakeOverStaleNest(int hint, int actor)
 {
 	if (IsValidEntity(hint) && CBaseTFBotHintEntity(hint).OwnerObjectHasNoOwner())
@@ -231,9 +264,9 @@ static bool ShouldAdvanceNestSpot(CTFBotMvMEngineerIdle action, int actor)
 		return false;
 	}
 	
-	if (!m_reevaluateNestTimer[actor].HasStarted())
+	if (!action.m_reevaluateNestTimer.HasStarted())
 	{
-		m_reevaluateNestTimer[actor].Start(5.0);
+		action.m_reevaluateNestTimer.Start(5.0);
 		return false;
 	}
 	
@@ -243,14 +276,14 @@ static bool ShouldAdvanceNestSpot(CTFBotMvMEngineerIdle action, int actor)
 		if (obj != -1 && GetEntProp(obj, Prop_Data, "m_iHealth") < GetEntProp(obj, Prop_Data, "m_iMaxHealth"))
 		{
 			// if the nest is under attack, don't advance the nest
-			m_reevaluateNestTimer[actor].Start(5.0);
+			action.m_reevaluateNestTimer.Start(5.0);
 			return false;
 		}
 	}
 	
-	if (m_reevaluateNestTimer[actor].IsElapsed())
+	if (action.m_reevaluateNestTimer.IsElapsed())
 	{
-		m_reevaluateNestTimer[actor].Invalidate();
+		action.m_reevaluateNestTimer.Invalidate();
 	}
 	
 	BombInfo_t bombInfo = malloc(GetOffset("sizeof(BombInfo_t)"));

@@ -59,6 +59,18 @@ methodmap Player < CBaseCombatCharacter
 		return view_as<Player>(entity);
 	}
 	
+	property CountdownTimer m_autoJumpTimer
+	{
+		public get()
+		{
+			return m_autoJumpTimer[this.index];
+		}
+		public set(CountdownTimer autoJumpTimer)
+		{
+			m_autoJumpTimer[this.index] = autoJumpTimer;
+		}
+	}
+	
 	property float m_flAutoJumpMin
 	{
 		public get()
@@ -1238,6 +1250,7 @@ methodmap Player < CBaseCombatCharacter
 	
 	public void Init()
 	{
+		this.m_autoJumpTimer = new CountdownTimer();
 		this.m_teleportWhereName = new ArrayList(ByteCountToCells(64));
 		this.m_eventChangeAttributes = new ArrayList();
 		this.m_tags = new ArrayList(ByteCountToCells(64));
@@ -1246,7 +1259,7 @@ methodmap Player < CBaseCombatCharacter
 	public void ResetOnTeamChange()
 	{
 		this.SetAutoJump(0.0, 0.0);
-		m_autoJumpTimer[this.index].Invalidate();
+		this.m_autoJumpTimer.Invalidate();
 		
 		this.ClearTeleportWhere();
 		this.ClearEventChangeAttributes();

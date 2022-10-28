@@ -18,6 +18,155 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+//--------------------------------------------------------------------------------------------------------------
+/**
+ * Simple methodmap for tracking intervals of game time.
+ * Upon creation, the timer is invalidated.  To measure time intervals, start the timer via Start().
+ */
+methodmap IntervalTimer < StringMap
+{
+	public IntervalTimer()
+	{
+		return view_as<IntervalTimer>(new StringMap());
+	}
+	
+	public void Reset()
+	{
+		this.m_timestamp = GetGameTime();
+	}
+	
+	public void Start()
+	{
+		this.m_timestamp = GetGameTime();
+	}
+	
+	public void Invalidate()
+	{
+		this.m_timestamp = -1.0;
+	}
+	
+	public bool HasStarted()
+	{
+		return (this.m_timestamp > 0.0);
+	}
+	
+	/// if not started, elapsed time is very large
+	public float GetElapsedTime()
+	{
+		return (this.HasStarted()) ? (GetGameTime() - this.m_timestamp) : 99999.9;
+	}
+	
+	public bool IsLessThan(float duration)
+	{
+		return (GetGameTime() - this.m_timestamp < duration) ? true : false;
+	}
+	
+	public bool IsGreaterThan(float duration)
+	{
+		return (GetGameTime() - this.m_timestamp > duration) ? true : false;
+	}
+	
+	property float m_timestamp
+	{
+		public get()
+		{
+			float timestamp = 0.0;
+			this.GetValue("m_timestamp", timestamp);
+			return timestamp;
+		}
+		
+		public set(float timestamp)
+		{
+			this.SetValue("m_timestamp", timestamp);
+		}
+	}
+}
+
+//--------------------------------------------------------------------------------------------------------------
+/**
+ * Simple methodmap for counting down a short interval of time.
+ * Upon creation, the timer is invalidated.  Invalidated countdown timers are considered to have elapsed.
+ */
+methodmap CountdownTimer < StringMap
+{
+	public CountdownTimer()
+	{
+		return view_as<CountdownTimer>(new StringMap());
+	}
+	
+	public void Reset()
+	{
+		this.m_timestamp = GetGameTime() + this.m_duration;
+	}
+	
+	public void Start(float duration)
+	{
+		this.m_timestamp = GetGameTime() + duration;
+		this.m_duration = duration;
+	}
+	
+	public void Invalidate()
+	{
+		this.m_timestamp = -1.0;
+	}
+	
+	public bool HasStarted()
+	{
+		return (this.m_timestamp > 0.0);
+	}
+	
+	public bool IsElapsed()
+	{
+		return (GetGameTime() > this.m_timestamp);
+	}
+	
+	public float GetElapsedTime()
+	{
+		return GetGameTime() - this.m_timestamp + this.m_duration;
+	}
+	
+	public float GetRemainingTime()
+	{
+		return (this.m_timestamp - GetGameTime());
+	}
+	
+	/// return original countdown time
+	public float GetCountdownDuration()
+	{
+		return (this.m_timestamp > 0.0) ? this.m_duration : 0.0;
+	}
+	
+	property float m_timestamp
+	{
+		public get()
+		{
+			float timestamp = 0.0;
+			this.GetValue("m_timestamp", timestamp);
+			return timestamp;
+		}
+		
+		public set(float timestamp)
+		{
+			this.SetValue("m_timestamp", timestamp);
+		}
+	}
+	
+	property float m_duration
+	{
+		public get()
+		{
+			float duration = 0.0;
+			this.GetValue("m_duration", duration);
+			return duration;
+		}
+		
+		public set(float duration)
+		{
+			this.SetValue("m_duration", duration);
+		}
+	}
+}
+
 any Min(any a, any b)
 {
 	return (a <= b) ? a : b;

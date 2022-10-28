@@ -117,6 +117,8 @@ static Action SDKHookCB_ReviveMarker_SetTransmit(int entity, int client)
 static Action SDKHookCB_BotHintEngineerNest_Think(int entity)
 {
 	g_bHasActiveTeleporterPre = GetEntProp(entity, Prop_Send, "m_bHasActiveTeleporter") != 0;
+	
+	return Plugin_Continue;
 }
 
 static void SDKHookCB_BotHintEngineerNest_ThinkPost(int entity)

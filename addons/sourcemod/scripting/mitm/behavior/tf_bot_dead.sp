@@ -55,6 +55,8 @@ methodmap CTFBotDead < NextBotAction
 
 static int OnStart(CTFBotDead action, int actor, NextBotAction priorAction)
 {
+	action.m_deadTimer.Start();
+	
 	return action.Continue();
 }
 

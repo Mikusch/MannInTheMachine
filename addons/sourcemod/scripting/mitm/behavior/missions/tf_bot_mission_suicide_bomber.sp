@@ -79,11 +79,11 @@ methodmap CTFBotMissionSuicideBomber < NextBotAction
 	{
 		public get()
 		{
-			return this.GetData("m_detonateTimer");
+			return this.GetData("m_annotationTimer");
 		}
 		public set(CountdownTimer detonateTimer)
 		{
-			this.SetData("m_detonateTimer", detonateTimer);
+			this.SetData("m_annotationTimer", detonateTimer);
 		}
 	}
 	

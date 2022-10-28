@@ -1044,8 +1044,18 @@ static MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 	{
 		if (nDesiredTeam == TFTeam_Spectator && TF2_GetClientTeam(player) == TFTeam_Invaders && !mitm_invader_allow_suicide.BoolValue)
 		{
-			PrintCenterText(player, "%t", "Invader_NotAllowedToSuicide");
+			if (IsPlayerAlive(player))
+			{
+				PrintCenterText(player, "%t", "Invader_NotAllowedToSuicide");
+			}
+			
 			ret.Value = TFTeam_Invaders;
+			return MRES_Supercede;
+		}
+		
+		if (!Forwards_OnIsValidDefender(player))
+		{
+			ret.Value = TFTeam_Spectator;
 			return MRES_Supercede;
 		}
 		

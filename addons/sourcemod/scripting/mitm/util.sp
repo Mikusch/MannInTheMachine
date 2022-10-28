@@ -422,10 +422,14 @@ void SelectNewDefenders()
 		
 		TF2_ChangeClientTeam(client, TFTeam_Spectator);
 		
-		// Players who disable being defender don't earn queue points, unless they're in a party
-		if (Player(client).HasPreference(PREF_DISABLE_DEFENDER) && (!Player(client).IsInAParty() || Player(client).GetParty().GetMemberCount() <= 1))
+		// Do not award queue points if the player can not become a Defender
+		if (!Forwards_OnIsValidDefender(client))
 		{
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader_NoQueue", blueTeamname);
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader_Forced", blueTeamname);
+		}
+		else if (Player(client).HasPreference(PREF_DISABLE_DEFENDER) && (!Player(client).IsInAParty() || Player(client).GetParty().GetMemberCount() <= 1))
+		{
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader_DefenderDisabled", blueTeamname);
 		}
 		else if (!Player(client).HasPreference(PREF_DISABLE_SPAWNING))
 		{
@@ -476,6 +480,9 @@ ArrayList GetInvaderQueue(bool bMiniBoss = false)
 			continue;
 		
 		if (bMiniBoss && Player(client).HasPreference(PREF_DISABLE_GIANT))
+			continue;
+		
+		if (!Forwards_OnIsValidInvader(client, bMiniBoss))
 			continue;
 		
 		queue.Push(client);

@@ -47,6 +47,9 @@ ArrayList Queue_GetDefenderQueue()
 		if (Player(client).m_defenderQueuePoints == -1)
 			continue;
 		
+		if (!Forwards_OnIsValidDefender(client))
+			continue;
+		
 		QueueData data;
 		data.m_points = Player(client).m_defenderQueuePoints;
 		data.m_client = client;

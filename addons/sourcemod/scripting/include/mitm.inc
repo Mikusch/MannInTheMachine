@@ -56,6 +56,23 @@ methodmap MannInTheMachinePlayer < CBaseCombatCharacter
 }
 
 /**
+ * Called when the plugin determines whether a player is allowed to become a Defender.
+ *
+ * @param client		Client index.
+ * @return				True if the player is allowed to become a Defender, false otherwise.
+ */
+forward bool MannInTheMachine_OnIsValidDefender(int client);
+
+/**
+ * Called when the plugin determines whether a player is allowed to become an Invader.
+ *
+ * @param client		Client index.
+ * @param isMiniBoss	True if the next Invader is a Giant.
+ * @return				True if the player is allowed to become an Invader, false otherwise.
+ */
+forward bool MannInTheMachine_OnIsValidInvader(int client, bool isMiniBoss);
+
+/**
  * Returns whether the game is in "Endless Waves" mode.
  *
  * @return		True if the game is in "Endless Waves" mode.

@@ -94,6 +94,7 @@ ConVar phys_pushscale;
 #include "mitm/dhooks.sp"
 #include "mitm/entity.sp"
 #include "mitm/events.sp"
+#include "mitm/forwards.sp"
 #include "mitm/hooks.sp"
 #include "mitm/party.sp"
 #include "mitm/queue.sp"
@@ -165,6 +166,7 @@ public void OnPluginStart()
 	Console_Init();
 	ConVars_Init();
 	Events_Init();
+	Forwards_Init();
 	Hooks_Init();
 	ClientPrefs_Init();
 	Party_Init();

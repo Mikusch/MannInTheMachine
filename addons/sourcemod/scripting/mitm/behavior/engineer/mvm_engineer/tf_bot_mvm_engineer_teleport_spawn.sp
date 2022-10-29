@@ -130,7 +130,7 @@ static int Update(CTFBotMvMEngineerTeleportSpawn action, int actor, float interv
 				CWave pWave = g_pPopulationManager.GetCurrentWave();
 				if (pWave)
 				{
-					if (pWave.m_nNumEngineersTeleportSpawned == 0)
+					if (pWave.NumEngineersTeleportSpawned() == 0)
 					{
 						BroadcastSound(255, "Announcer.MVM_First_Engineer_Teleport_Spawned");
 					}
@@ -139,7 +139,7 @@ static int Update(CTFBotMvMEngineerTeleportSpawn action, int actor, float interv
 						BroadcastSound(255, "Announcer.MVM_Another_Engineer_Teleport_Spawned");
 					}
 					
-					pWave.m_nNumEngineersTeleportSpawned++;
+					pWave.IncrementEngineerTeleportSpawned();
 				}
 			}
 		}

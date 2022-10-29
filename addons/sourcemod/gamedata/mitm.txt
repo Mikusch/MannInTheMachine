@@ -539,6 +539,11 @@
 				"linux"		"48"
 				"windows"	"48"
 			}
+			"CWave::m_nNumSentryBustersKilled"
+			{
+				"linux"		"52"
+				"windows"	"52"
+			}
 			"sizeof(EventChangeAttributes_t)"
 			{
 				"linux"		"108"

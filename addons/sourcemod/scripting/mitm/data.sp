@@ -1539,6 +1539,18 @@ methodmap CWave
 		}
 	}
 	
+	property int m_nNumSentryBustersKilled
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CWave::m_nNumSentryBustersKilled"));
+		}
+		public set(int nNumSentryBustersKilled)
+		{
+			WriteVal(this + GetOffset("CWave::m_nNumSentryBustersKilled"), nNumSentryBustersKilled);
+		}
+	}
+	
 	property int m_nSentryBustersSpawned
 	{
 		public get()
@@ -1549,6 +1561,41 @@ methodmap CWave
 		{
 			WriteVal(this + GetOffset("CWave::m_nSentryBustersSpawned"), nSentryBustersSpawned);
 		}
+	}
+	
+	public int NumSentryBustersSpawned()
+	{
+		return this.m_nSentryBustersSpawned;
+	}
+	
+	public void IncrementSentryBustersSpawned()
+	{
+		this.m_nSentryBustersSpawned++;
+	}
+	
+	public int NumSentryBustersKilled()
+	{
+		return this.m_nNumSentryBustersKilled;
+	}
+	
+	public void IncrementSentryBustersKilled()
+	{
+		this.m_nNumSentryBustersKilled++;
+	}
+	
+	public void ResetSentryBustersKilled()
+	{
+		this.m_nNumSentryBustersKilled = 0;
+	}
+	
+	public int NumEngineersTeleportSpawned()
+	{
+		return this.m_nNumEngineersTeleportSpawned;
+	}
+	
+	public void IncrementEngineerTeleportSpawned()
+	{
+		this.m_nNumEngineersTeleportSpawned++;
 	}
 }
 

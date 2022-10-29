@@ -50,6 +50,7 @@ void Offsets_Init(GameData gamedata)
 	
 	SetOffset(gamedata, "CWave::m_nSentryBustersSpawned");
 	SetOffset(gamedata, "CWave::m_nNumEngineersTeleportSpawned");
+	SetOffset(gamedata, "CWave::m_nNumSentryBustersKilled");
 	
 	SetOffset(gamedata, "IPopulationSpawner::m_spawner");
 	SetOffset(gamedata, "IPopulationSpawner::m_where");

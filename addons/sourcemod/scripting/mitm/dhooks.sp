@@ -958,9 +958,9 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 		CWave wave = g_pPopulationManager.GetCurrentWave();
 		if (wave)
 		{
-			wave.m_nSentryBustersSpawned++;
+			wave.IncrementSentryBustersSpawned();
 			
-			if (wave.m_nSentryBustersSpawned > 1)
+			if (wave.NumSentryBustersSpawned() > 1)
 			{
 				BroadcastSound(255, "Announcer.MVM_Sentry_Buster_Alert_Another");
 			}
@@ -969,9 +969,9 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 				BroadcastSound(255, "Announcer.MVM_Sentry_Buster_Alert");
 			}
 			
-			flCoolDown = populator.m_cooldownDuration + wave.m_nSentryBustersSpawned * populator.m_cooldownDuration;
+			flCoolDown = populator.m_cooldownDuration + wave.NumSentryBustersKilled() * populator.m_cooldownDuration;
 			
-			wave.m_nSentryBustersSpawned = 0;
+			wave.ResetSentryBustersKilled();
 		}
 		
 		m_cooldownTimer.Start(flCoolDown);

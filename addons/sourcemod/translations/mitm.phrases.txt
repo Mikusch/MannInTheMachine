@@ -19,7 +19,7 @@
 {
 	"Menu_Main_Title"
 	{
-		"en"		"Welcome to Mann in the Machine made by Mikusch!\nThis mode is currently in BETA, so expect bugs!"
+		"en"		"Welcome to Mann in the Machine made by Mikusch!"
 	}
 	"Menu_Main_Queue"
 	{

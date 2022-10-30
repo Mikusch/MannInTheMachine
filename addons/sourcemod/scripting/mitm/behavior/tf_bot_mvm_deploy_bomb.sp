@@ -67,7 +67,7 @@ static int OnStart(CTFBotMvMDeployBomb action, int actor, NextBotAction priorAct
 	TeleportEntity(actor, .velocity = ZERO_VECTOR);
 	SetEntityFlags(actor, GetEntityFlags(actor) | FL_FROZEN);
 	
-	if (GetEntProp(actor, Prop_Send, "m_bIsMiniBoss"))
+	if (Player(actor).IsMiniBoss())
 	{
 		TF2Attrib_SetByName(actor, "airblast vertical vulnerability multiplier", 0.0);
 	}
@@ -127,7 +127,7 @@ static int Update(CTFBotMvMDeployBomb action, int actor, float interval)
 				action.m_timer.Start(tf_deploying_bomb_time.FloatValue);
 				Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_ANIMATING);
 				
-				EmitGameSoundToAll(GetEntProp(actor, Prop_Send, "m_bIsMiniBoss") ? "MVM.DeployBombGiant" : "MVM.DeployBombSmall", actor);
+				EmitGameSoundToAll(Player(actor).IsMiniBoss() ? "MVM.DeployBombGiant" : "MVM.DeployBombSmall", actor);
 				
 				SDKCall_PlayThrottledAlert(255, "Announcer.MVM_Bomb_Alert_Deploying", 5.0);
 			}
@@ -172,7 +172,7 @@ static void OnEnd(CTFBotMvMDeployBomb action, int actor, NextBotAction nextActio
 		SDKCall_DoAnimationEvent(actor, PLAYERANIMEVENT_SPAWN);
 	}
 	
-	if (GetEntProp(actor, Prop_Send, "m_bIsMiniBoss"))
+	if (Player(actor).IsMiniBoss())
 	{
 		TF2Attrib_RemoveByName(actor, "airblast vertical vulnerability multiplier");
 	}

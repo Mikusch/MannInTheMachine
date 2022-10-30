@@ -96,7 +96,7 @@ static int OnStart(CTFBotDeliverFlag action, int actor, NextBotAction priorActio
 	}
 	
 	// mini-bosses don't upgrade - they are already tough
-	if (GetEntProp(actor, Prop_Send, "m_bIsMiniBoss"))
+	if (Player(actor).IsMiniBoss())
 	{
 		// Set threat level to max
 		action.m_upgradeLevel = DONT_UPGRADE;

@@ -332,6 +332,16 @@ methodmap Player < CBaseCombatCharacter
 		return (team == TFTeam_Spectator || team == TFTeam_Invaders) && !this.HasPreference(PREF_DISABLE_SPAWNING);
 	}
 	
+	public float GetSpawnTime()
+	{
+		return GetEntDataFloat(this.index, GetOffset("CTFPlayer::m_flSpawnTime"));
+	}
+	
+	public bool IsMiniBoss()
+	{
+		return this.GetProp(Prop_Send, "m_bIsMiniBoss") != 0;
+	}
+	
 	public int GetFlagTarget()
 	{
 		return this.m_hFollowingFlagTarget;
@@ -544,7 +554,7 @@ methodmap Player < CBaseCombatCharacter
 		if (!IsMannVsMachineMode())
 			return;
 		
-		if (this.GetProp(Prop_Send, "m_bIsMiniBoss"))
+		if (this.IsMiniBoss())
 		{
 			char pszSoundName[PLATFORM_MAX_PATH];
 			
@@ -635,7 +645,7 @@ methodmap Player < CBaseCombatCharacter
 			this.SetProp(Prop_Data, "m_iHealth", nNewMaxHealth);
 		}
 		
-		if (bAllowModelScaling && this.GetProp(Prop_Send, "m_bIsMiniBoss"))
+		if (bAllowModelScaling && this.IsMiniBoss())
 		{
 			SetModelScale(this.index, this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : tf_mvm_miniboss_scale.FloatValue);
 		}

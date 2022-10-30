@@ -64,7 +64,7 @@ static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int 
 				Player(attacker).GetPrevMission() == MISSION_DESTROY_SENTRIES &&
 				g_bForceFriendlyFire &&
 				TF2_GetClientTeam(victim) == TF2_GetClientTeam(attacker) &&
-				GetEntProp(victim, Prop_Send, "m_bIsMiniBoss"))
+				Player(victim).IsMiniBoss())
 			{
 				damage = 600.0;
 				return Plugin_Changed;

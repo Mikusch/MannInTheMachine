@@ -519,7 +519,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 			// use the nifty new robot model
 			if (nClassIndex >= TFClass_Scout && nClassIndex <= TFClass_Engineer)
 			{
-				if (spawner.m_scale >= tf_mvm_miniboss_scale.FloatValue || GetEntProp(newPlayer, Prop_Send, "m_bIsMiniBoss") && FileExists(g_szBotBossModels[nClassIndex], true))
+				if (spawner.m_scale >= tf_mvm_miniboss_scale.FloatValue || Player(newPlayer).IsMiniBoss() && FileExists(g_szBotBossModels[nClassIndex], true))
 				{
 					SetVariantString(g_szBotBossModels[nClassIndex]);
 					AcceptEntityInput(newPlayer, "SetCustomModelWithClassAnimations");
@@ -545,7 +545,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		
 		if (IsMannVsMachineMode())
 		{
-			if (GetEntProp(newPlayer, Prop_Send, "m_bIsMiniBoss"))
+			if (Player(newPlayer).IsMiniBoss())
 			{
 				HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_GIANT_CALLOUT", TFTeam_Defenders);
 			}
@@ -753,7 +753,7 @@ static MRESReturn DHookCallback_UpdateMission_Post(Address pThis, DHookReturn re
 		SetEntData(player, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true, 1);
 		
 		int iFlags = MVM_CLASS_FLAG_MISSION;
-		if (GetEntProp(player, Prop_Send, "m_bIsMiniBoss"))
+		if (Player(player).IsMiniBoss())
 		{
 			iFlags |= MVM_CLASS_FLAG_MINIBOSS;
 		}
@@ -922,7 +922,7 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 					AcceptEntityInput(bot, "SetForcedTauntCam");
 					
 					int iFlags = MVM_CLASS_FLAG_MISSION;
-					if (GetEntProp(bot, Prop_Send, "m_bIsMiniBoss"))
+					if (Player(bot).IsMiniBoss())
 					{
 						iFlags |= MVM_CLASS_FLAG_MINIBOSS;
 					}
@@ -1533,7 +1533,7 @@ static MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 static MRESReturn DHookCallback_ShouldGib_Pre(int player, DHookReturn ret, DHookParam params)
 {
 	// only gib giant/miniboss
-	if (IsMannVsMachineMode() && (GetEntProp(player, Prop_Send, "m_bIsMiniBoss") || GetEntPropFloat(player, Prop_Send, "m_flModelScale") > 1.0))
+	if (IsMannVsMachineMode() && (Player(player).IsMiniBoss() || GetEntPropFloat(player, Prop_Send, "m_flModelScale") > 1.0))
 	{
 		ret.Value = true;
 		return MRES_Supercede;

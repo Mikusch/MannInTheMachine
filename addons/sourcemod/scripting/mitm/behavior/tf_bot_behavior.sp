@@ -208,7 +208,7 @@ static int OnContact(CTFBotMainAction action, int actor, int other, Address resu
 	if (IsValidEntity(other) && !(view_as<SolidFlags_t>(GetEntProp(other, Prop_Data, "m_usSolidFlags")) & FSOLID_NOT_SOLID) && other != 0 && !IsEntityClient(other))
 	{
 		// Mini-bosses destroy non-Sentrygun objects they bump into (ie: Dispensers)
-		if (IsMannVsMachineMode() && GetEntProp(actor, Prop_Send, "m_bIsMiniBoss"))
+		if (IsMannVsMachineMode() && Player(actor).IsMiniBoss())
 		{
 			if (IsBaseObject(other))
 			{
@@ -242,7 +242,7 @@ static int OnOtherKilled(CTFBotMainAction action, int actor, int victim, int att
 		{
 			bool isTaunting = !HasTheFlag(attacker) && GetRandomFloat(0.0, 100.0) <= tf_bot_taunt_victim_chance.FloatValue;
 			
-			if (GetEntProp(attacker, Prop_Send, "m_bIsMiniBoss"))
+			if (Player(attacker).IsMiniBoss())
 			{
 				// Bosses don't taunt puny humans
 				isTaunting = false;

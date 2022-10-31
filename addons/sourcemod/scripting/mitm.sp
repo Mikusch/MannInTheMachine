@@ -33,6 +33,9 @@
 #include <morecolors>
 #include <smmem>
 #include <mitm>
+#undef REQUIRE_EXTENSIONS
+#tryinclude <sendproxy>
+#define REQUIRE_EXTENSIONS
 
 // Global entities
 CPopulationManager g_pPopulationManager = view_as<CPopulationManager>(INVALID_ENT_REFERENCE);
@@ -47,6 +50,7 @@ bool g_bAllowTeamChange;
 bool g_bForceFriendlyFire;
 bool g_bPrintEndlessBotUpgrades;
 float g_flNextRestoreCheckpointTime;
+bool g_bSendProxy;
 
 // Plugin ConVars
 ConVar mitm_developer;
@@ -105,6 +109,7 @@ ConVar phys_pushscale;
 #include "mitm/sdkhooks.sp"
 #include "mitm/tf_bot_squad.sp"
 #include "mitm/util.sp"
+#include "mitm/sendproxy.sp"
 
 #include "mitm/behavior/engineer/mvm_engineer/tf_bot_mvm_engineer_idle.sp"
 #include "mitm/behavior/engineer/mvm_engineer/tf_bot_mvm_engineer_teleport_spawn.sp"
@@ -219,6 +224,22 @@ public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int maxlen)
 	return APLRes_Success;
 }
 
+public void OnLibraryAdded(const char[] name)
+{
+	if (StrEqual(name, SENDPROXY_LIB))
+	{
+		g_bSendProxy = true;
+	}
+}
+
+public void OnLibraryRemoved(const char[] name)
+{
+	if (StrEqual(name, SENDPROXY_LIB))
+	{
+		g_bSendProxy = false;
+	}
+}
+
 public void OnMapStart()
 {
 	g_hWaitingForPlayersTimer = null;
@@ -249,6 +270,7 @@ public void OnClientPutInServer(int client)
 {
 	DHooks_OnClientPutInServer(client);
 	SDKHooks_OnClientPutInServer(client);
+	SendProxy_OnClientPutInServer(client);
 	
 	Player(client).Reset();
 	

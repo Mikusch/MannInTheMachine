@@ -337,6 +337,11 @@ methodmap Player < CBaseCombatCharacter
 		return GetEntDataFloat(this.index, GetOffset("CTFPlayer::m_flSpawnTime"));
 	}
 	
+	public TFTeam GetDisguiseTeam()
+	{
+		return view_as<TFTeam>(this.GetProp(Prop_Send, "m_nDisguiseTeam"));
+	}
+	
 	public bool IsMiniBoss()
 	{
 		return this.GetProp(Prop_Send, "m_bIsMiniBoss") != 0;
@@ -872,7 +877,7 @@ methodmap Player < CBaseCombatCharacter
 				// Always allow specific passive weapons
 				return false;
 			}
-			else if (TF2Attrib_GetByName(weapon, "is_passive_weapon"))
+			else if (TF2Attrib_HookValueInt(0, "is_passive_weapon", weapon))
 			{
 				// Always allow weapons with is_passive_weapon attribute
 				return false;

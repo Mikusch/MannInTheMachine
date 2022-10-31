@@ -107,9 +107,9 @@ ConVar phys_pushscale;
 #include "mitm/natives.sp"
 #include "mitm/sdkcalls.sp"
 #include "mitm/sdkhooks.sp"
+#include "mitm/sendproxy.sp"
 #include "mitm/tf_bot_squad.sp"
 #include "mitm/util.sp"
-#include "mitm/sendproxy.sp"
 
 #include "mitm/behavior/engineer/mvm_engineer/tf_bot_mvm_engineer_idle.sp"
 #include "mitm/behavior/engineer/mvm_engineer/tf_bot_mvm_engineer_teleport_spawn.sp"

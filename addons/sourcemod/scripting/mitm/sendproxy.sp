@@ -34,12 +34,14 @@ static Action SendProxyCallback_ModelIndexOverrides(const int entity, const char
 			// appear as a robot when disguised
 			int nDisguiseClass = GetEntProp(entity, Prop_Send, "m_nDisguiseClass");
 			value = PrecacheModel(g_szBotModels[nDisguiseClass]);
+			return Plugin_Changed;
 		}
 		else
 		{
 			value = 0;
+			return Plugin_Changed;
 		}
 	}
 	
-	return Plugin_Changed;
+	return Plugin_Continue;
 }

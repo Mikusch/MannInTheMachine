@@ -25,22 +25,14 @@ void SendProxy_OnClientPutInServer(int client)
 
 static Action SendProxyCallback_ModelIndexOverrides(const int entity, const char[] propName, int &value, const int element, const int client)
 {
-	if (TF2_GetClientTeam(entity) == TFTeam_Defenders)
+	if (TF2_IsPlayerInCondition(entity, TFCond_Disguised) &&
+		Player(entity).GetDisguiseTeam() == TFTeam_Invaders &&
+		GetEnemyTeam(TF2_GetClientTeam(entity)) == TF2_GetClientTeam(client))
 	{
-		if (TF2_IsPlayerInCondition(entity, TFCond_Disguised) &&
-			Player(entity).GetDisguiseTeam() == TFTeam_Invaders &&
-			GetEnemyTeam(TF2_GetClientTeam(entity)) == TF2_GetClientTeam(client))
-		{
-			// appear as a robot when disguised
-			int nDisguiseClass = GetEntProp(entity, Prop_Send, "m_nDisguiseClass");
-			value = PrecacheModel(g_szBotModels[nDisguiseClass]);
-			return Plugin_Changed;
-		}
-		else
-		{
-			value = 0;
-			return Plugin_Changed;
-		}
+		// when disguised as an invader, appear as a robot to enemies
+		int nDisguiseClass = GetEntProp(entity, Prop_Send, "m_nDisguiseClass");
+		value = PrecacheModel(g_szBotModels[nDisguiseClass]);
+		return Plugin_Changed;
 	}
 	
 	return Plugin_Continue;

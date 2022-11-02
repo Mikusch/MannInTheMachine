@@ -122,6 +122,16 @@ methodmap Entity
 		return this.m_teleportWhereName;
 	}
 	
+	public void SetGlowEntity(int hGlowEntity)
+	{
+		this.m_hGlowEntity = hGlowEntity;
+	}
+	
+	public int GetGlowEntity()
+	{
+		return this.m_hGlowEntity;
+	}
+	
 	public void Destroy()
 	{
 		if (this.m_listIndex == -1)

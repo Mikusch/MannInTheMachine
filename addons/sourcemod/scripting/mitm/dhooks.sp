@@ -95,6 +95,11 @@ void DHooks_Init(GameData gamedata)
 
 void DHooks_OnClientPutInServer(int client)
 {
+	if (g_DHookSetModel)
+	{
+		g_DHookSetModel.HookEntity(Hook_Post, client, DHookCallback_SetModel_Post);
+	}
+	
 	if (g_DHookSetTransmit)
 	{
 		g_DHookSetTransmit.HookEntity(Hook_Pre, client, DHookCallback_SetTransmit_Pre);
@@ -1648,16 +1653,16 @@ static MRESReturn DHookCallback_SetModel_Post(int entity, DHookParam params)
 	char szModelName[PLATFORM_MAX_PATH];
 	params.GetString(1, szModelName, sizeof(szModelName));
 	
-	int glow = Entity(entity).m_hGlowEntity;
-	if (IsValidEntity(glow))
+	int hGlowEntity = Entity(entity).GetGlowEntity();
+	if (IsValidEntity(hGlowEntity))
 	{
-		// existing glow, update the model
-		SetEntityModel(glow, szModelName);
+		// we already have a glow, update it with the new model
+		SetEntityModel(hGlowEntity, szModelName);
 	}
 	else
 	{
-		// no existing glow, create one!
-		Entity(entity).m_hGlowEntity = EntRefToEntIndex(CreateEntityGlow(entity));
+		// no existing glow entity, create one
+		Entity(entity).SetGlowEntity(CreateEntityGlow(entity));
 	}
 	
 	return MRES_Handled;

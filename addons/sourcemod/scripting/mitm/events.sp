@@ -37,27 +37,7 @@ static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroad
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
-	{
-		CreateTimer(0.1, Timer_UpdatePlayerGlow, GetClientUserId(client));
-	}
-	
 	g_annotationTimer[client] = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
-}
-
-static Action Timer_UpdatePlayerGlow(Handle timer, int userid)
-{
-	int client = GetClientOfUserId(userid);
-	if (client != 0)
-	{
-		if (TF2_GetClientTeam(client) == TFTeam_Invaders && IsPlayerAlive(client))
-		{
-			// Create a new glow
-			CreateEntityGlow(client);
-		}
-	}
-	
-	return Plugin_Continue;
 }
 
 static void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
@@ -67,9 +47,6 @@ static void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroad
 	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
 	{
 		HideAnnotation(victim, MITM_HINT_MASK | victim);
-		
-		// Remove any glows attached to us
-		RemoveEntityGlow(victim);
 	}
 }
 

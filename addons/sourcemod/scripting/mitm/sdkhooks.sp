@@ -131,20 +131,32 @@ static void SDKHookCB_BotHintEngineerNest_ThinkPost(int entity)
 
 Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)
 {
-	int target = GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity");
+	int hEffectEntity = GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity");
 	
-	if (Player(client).HasMission(MISSION_DESTROY_SENTRIES) && target == Player(client).GetMissionTarget())
+	int hMissionTarget = Player(client).GetMissionTarget();
+	if (IsValidEntity(hMissionTarget) && IsBaseObject(hMissionTarget))
 	{
-		if (IsBaseObject(target) && !GetEntProp(target, Prop_Send, "m_bPlacing") && !GetEntProp(target, Prop_Send, "m_bCarried"))
+		// target sentry - only outline if not carried
+		if (hEffectEntity == hMissionTarget)
 		{
-			// show the glow of our target sentry
-			return Plugin_Continue;
+			if (!GetEntProp(hMissionTarget, Prop_Send, "m_bCarried"))
+			{
+				return Plugin_Continue;
+			}
+		}
+		// player - only outline if carrying target sentry
+		else if (hEffectEntity == GetEntPropEnt(hMissionTarget, Prop_Send, "m_hBuilder"))
+		{
+			if (GetEntProp(hMissionTarget, Prop_Send, "m_bCarried"))
+			{
+				return Plugin_Continue;
+			}
 		}
 	}
 	
 	if (Player(client).IsInASquad())
 	{
-		if (client != target && Player(client).GetSquad().IsLeader(target))
+		if (hEffectEntity != client && Player(client).GetSquad().IsLeader(hEffectEntity))
 		{
 			// show the glow of our squad leader
 			return Plugin_Continue;

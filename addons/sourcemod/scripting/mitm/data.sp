@@ -1284,6 +1284,7 @@ methodmap Player < CBaseCombatCharacter
 		this.ClearIdleSound();
 		this.m_fModelScaleOverride = 0.0;
 		this.m_flRequiredSpawnLeaveTime = 0.0;
+		this.m_missionTarget = INVALID_ENT_REFERENCE;
 		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
 		this.m_hFollowingFlagTarget = INVALID_ENT_REFERENCE;
 	}

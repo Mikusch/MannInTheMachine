@@ -595,7 +595,7 @@ int CreateEntityGlow(int entity)
 			
 			SDKHook(glow, SDKHook_SetTransmit, SDKHookCB_EntityGlow_SetTransmit);
 			
-			return glow;
+			return EntIndexToEntRef(glow);
 		}
 		else
 		{
@@ -603,20 +603,7 @@ int CreateEntityGlow(int entity)
 		}
 	}
 	
-	return -1;
-}
-
-void RemoveEntityGlow(int entity)
-{
-	// Remove any glows attached to us
-	int prop = -1;
-	while ((prop = FindEntityByClassname(prop, "tf_taunt_prop")) != -1)
-	{
-		if (GetEntPropEnt(prop, Prop_Data, "m_hEffectEntity") == entity)
-		{
-			RemoveEntity(prop);
-		}
-	}
+	return INVALID_ENT_REFERENCE;
 }
 
 int Compare(any val1, any val2)

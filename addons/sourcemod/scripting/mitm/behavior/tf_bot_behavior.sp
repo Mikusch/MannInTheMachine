@@ -126,7 +126,7 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 			// pressure them to leave the spawn area
 			if (Player(actor).m_flSpawnTimeLeft > 0.0)
 			{
-				SetHudTextParams(-1.0, 0.7, interval, 255, 255, 255, 255);
+				SetHudTextParams(-1.0, 0.65, interval, 255, 255, 255, 255);
 				ShowSyncHudText(actor, g_WarningHudSync, "%t", "Invader_HurryOutOfSpawn", Player(actor).m_flSpawnTimeLeft);
 			}
 		}

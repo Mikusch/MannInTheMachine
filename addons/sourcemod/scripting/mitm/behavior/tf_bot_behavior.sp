@@ -80,6 +80,9 @@ static int OnStart(CTFBotMainAction action, int actor, NextBotAction priorAction
 		return action.ChangeTo(CTFBotDead(), "I'm actually dead");
 	}
 	
+	// must leave spawn area
+	Player(actor).m_flSpawnTimeLeft = Player(actor).CalculateSpawnTime();
+	
 	return action.Continue();
 }
 
@@ -109,44 +112,26 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 				TF2Attrib_SetByName(actor, "no_jump", 1.0);
 			}
 			
-			if (Player(actor).m_flRequiredSpawnLeaveTime == 0.0)
+			// pause spawn timer while stunned
+			if (!TF2_IsPlayerInCondition(actor, TFCond_Dazed))
 			{
-				float flSpeed = Player(actor).IsInASquad() ? Player(actor).GetSquad().GetSlowestMemberSpeed() : GetEntPropFloat(actor, Prop_Send, "m_flMaxspeed");
+				Player(actor).m_flSpawnTimeLeft -= interval;
 				
-				// determine how much time this robot has to leave the spawn area
-				float flTime = mitm_min_spawn_hurry_time.FloatValue * (400.0 / flSpeed);
-				flTime = Clamp(flTime, mitm_min_spawn_hurry_time.FloatValue, mitm_max_spawn_hurry_time.FloatValue);
-				
-				Player(actor).m_flRequiredSpawnLeaveTime = GetGameTime() + flTime;
+				if (Player(actor).m_flSpawnTimeLeft <= 0.0)
+				{
+					ForcePlayerSuicide(actor);
+				}
 			}
-			else
+			
+			// pressure them to leave the spawn area
+			if (Player(actor).m_flSpawnTimeLeft > 0.0)
 			{
-				if (TF2_IsPlayerInCondition(actor, TFCond_Dazed))
-				{
-					// if we are stunned in spawn, keep adding time
-					Player(actor).m_flRequiredSpawnLeaveTime += interval;
-				}
-				else
-				{
-					float flTimeLeft = Player(actor).m_flRequiredSpawnLeaveTime - GetGameTime();
-					if (flTimeLeft <= 0.0)
-					{
-						ForcePlayerSuicide(actor);
-					}
-					else if (flTimeLeft <= mitm_min_spawn_hurry_time.FloatValue)
-					{
-						// motivate them to leave their spawn
-						SetHudTextParams(-1.0, 0.7, interval, 255, 255, 255, 255);
-						ShowSyncHudText(actor, g_WarningHudSync, "%t", "Invader_HurryOutOfSpawn", flTimeLeft);
-					}
-				}
+				SetHudTextParams(-1.0, 0.7, interval, 255, 255, 255, 255);
+				ShowSyncHudText(actor, g_WarningHudSync, "%t", "Invader_HurryOutOfSpawn", Player(actor).m_flSpawnTimeLeft);
 			}
 		}
 		else
 		{
-			// not in spawn, reset their time
-			Player(actor).m_flRequiredSpawnLeaveTime = 0.0;
-			
 			TF2Attrib_RemoveByName(actor, "no_jump");
 		}
 		

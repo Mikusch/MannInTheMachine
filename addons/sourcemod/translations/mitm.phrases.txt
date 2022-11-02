@@ -156,7 +156,7 @@
 	"Invader_HurryOutOfSpawn"
 	{
 		"#format"	"{1:1.2f}"
-		"en"		"You have {1} seconds to leave the spawn area."
+		"en"		"LEAVE THE SPAWN AREA!\nTime Left: {1} s"
 	}
 	"Invader_CaptureGate_Annotation"
 	{

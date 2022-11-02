@@ -38,7 +38,7 @@ static float m_fModelScaleOverride[MAXPLAYERS + 1];
 static MissionType m_mission[MAXPLAYERS + 1];
 static MissionType m_prevMission[MAXPLAYERS + 1];
 static int m_missionTarget[MAXPLAYERS + 1];
-static float m_flRequiredSpawnLeaveTime[MAXPLAYERS + 1];
+static float m_flSpawnTimeLeft[MAXPLAYERS + 1];
 static int m_spawnPointEntity[MAXPLAYERS + 1];
 static CTFBotSquad m_squad[MAXPLAYERS + 1];
 static int m_hFollowingFlagTarget[MAXPLAYERS + 1];
@@ -191,15 +191,15 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
-	property float m_flRequiredSpawnLeaveTime
+	property float m_flSpawnTimeLeft
 	{
 		public get()
 		{
-			return m_flRequiredSpawnLeaveTime[this.index];
+			return m_flSpawnTimeLeft[this.index];
 		}
-		public set(float flSpawnEnterTime)
+		public set(float flSpawnTimeLeft)
 		{
-			m_flRequiredSpawnLeaveTime[this.index] = flSpawnEnterTime;
+			m_flSpawnTimeLeft[this.index] = flSpawnTimeLeft;
 		}
 	}
 	
@@ -1082,6 +1082,14 @@ methodmap Player < CBaseCombatCharacter
 		return -1;
 	}
 	
+	public float CalculateSpawnTime()
+	{
+		// factor in squad speed
+		float flSpeed = this.IsInASquad() ? this.GetSquad().GetSlowestMemberSpeed() : this.GetPropFloat(Prop_Send, "m_flMaxspeed");
+		float flTime = mitm_min_spawn_hurry_time.FloatValue * (400.0 / flSpeed);
+		return Clamp(flTime, mitm_min_spawn_hurry_time.FloatValue, mitm_max_spawn_hurry_time.FloatValue);
+	}
+	
 	public bool ShouldAutoJump()
 	{
 		if (!this.HasAttribute(AUTO_JUMP))
@@ -1283,7 +1291,7 @@ methodmap Player < CBaseCombatCharacter
 		this.ClearAllAttributes();
 		this.ClearIdleSound();
 		this.m_fModelScaleOverride = 0.0;
-		this.m_flRequiredSpawnLeaveTime = 0.0;
+		this.m_flSpawnTimeLeft = 0.0;
 		this.m_missionTarget = INVALID_ENT_REFERENCE;
 		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
 		this.m_hFollowingFlagTarget = INVALID_ENT_REFERENCE;

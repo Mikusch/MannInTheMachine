@@ -22,13 +22,13 @@ enum struct EntityProperties
 	int m_index;
 	
 	ArrayList m_teleportWhereName;
-	int m_glowEntity;
+	int m_hGlowEntity;
 	
 	void Init(int entity)
 	{
 		this.m_index = entity;
 		this.m_teleportWhereName = new ArrayList(ByteCountToCells(64));
-		this.m_glowEntity = INVALID_ENT_REFERENCE;
+		this.m_hGlowEntity = INVALID_ENT_REFERENCE;
 	}
 	
 	void Destroy()
@@ -92,15 +92,15 @@ methodmap Entity
 		}
 	}
 	
-	property int m_glowEntity
+	property int m_hGlowEntity
 	{
 		public get()
 		{
-			return g_EntityProperties.Get(this.m_listIndex, EntityProperties::m_glowEntity);
+			return g_EntityProperties.Get(this.m_listIndex, EntityProperties::m_hGlowEntity);
 		}
 		public set(int glowEntity)
 		{
-			g_EntityProperties.Set(this.m_listIndex, glowEntity, EntityProperties::m_glowEntity);
+			g_EntityProperties.Set(this.m_listIndex, glowEntity, EntityProperties::m_hGlowEntity);
 		}
 	}
 	

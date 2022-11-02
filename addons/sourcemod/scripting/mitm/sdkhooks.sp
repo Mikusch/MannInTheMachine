@@ -135,8 +135,11 @@ Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)
 	
 	if (Player(client).HasMission(MISSION_DESTROY_SENTRIES) && target == Player(client).GetMissionTarget())
 	{
-		// show the glow of our target sentry
-		return Plugin_Continue;
+		if (IsBaseObject(target) && !GetEntProp(target, Prop_Send, "m_bPlacing") && !GetEntProp(target, Prop_Send, "m_bCarried"))
+		{
+			// show the glow of our target sentry
+			return Plugin_Continue;
+		}
 	}
 	
 	if (Player(client).IsInASquad())

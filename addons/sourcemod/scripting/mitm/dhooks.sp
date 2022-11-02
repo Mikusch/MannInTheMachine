@@ -1648,7 +1648,7 @@ static MRESReturn DHookCallback_SetModel_Post(int entity, DHookParam params)
 	char szModelName[PLATFORM_MAX_PATH];
 	params.GetString(1, szModelName, sizeof(szModelName));
 	
-	int glow = Entity(entity).m_glowEntity;
+	int glow = Entity(entity).m_hGlowEntity;
 	if (IsValidEntity(glow))
 	{
 		// existing glow, update the model
@@ -1657,7 +1657,7 @@ static MRESReturn DHookCallback_SetModel_Post(int entity, DHookParam params)
 	else
 	{
 		// no existing glow, create one!
-		Entity(entity).m_glowEntity = EntRefToEntIndex(CreateEntityGlow(entity));
+		Entity(entity).m_hGlowEntity = EntRefToEntIndex(CreateEntityGlow(entity));
 	}
 	
 	return MRES_Handled;

@@ -17,7 +17,7 @@
 
 void SendProxy_OnClientPutInServer(int client)
 {
-	if (!g_bSendProxy)
+	if (!LibraryExists(SENDPROXY_LIB))
 		return;
 	
 	SendProxy_HookArrayProp(client, "m_nModelIndexOverrides", 0, Prop_Int, SendProxyCallback_ModelIndexOverrides);

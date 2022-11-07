@@ -34,7 +34,7 @@
 #include <smmem>
 #include <mitm>
 #undef REQUIRE_EXTENSIONS
-#tryinclude <sendproxy>
+#include <sendproxy>
 #define REQUIRE_EXTENSIONS
 
 // Global entities
@@ -50,7 +50,6 @@ bool g_bAllowTeamChange;
 bool g_bForceFriendlyFire;
 bool g_bPrintEndlessBotUpgrades;
 float g_flNextRestoreCheckpointTime;
-bool g_bSendProxy;
 
 // Plugin ConVars
 ConVar mitm_developer;
@@ -222,22 +221,6 @@ public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int maxlen)
 	Natives_Init();
 	
 	return APLRes_Success;
-}
-
-public void OnLibraryAdded(const char[] name)
-{
-	if (StrEqual(name, SENDPROXY_LIB))
-	{
-		g_bSendProxy = true;
-	}
-}
-
-public void OnLibraryRemoved(const char[] name)
-{
-	if (StrEqual(name, SENDPROXY_LIB))
-	{
-		g_bSendProxy = false;
-	}
 }
 
 public void OnMapStart()

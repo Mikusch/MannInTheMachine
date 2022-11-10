@@ -18,20 +18,14 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-enum PreferenceType
-{
-	PREF_DONT_BE_DEFENDER = (1 << 0),
-	PREF_NO_SPAWNING = (1 << 1),
-	PREF_NO_GIANT = (1 << 2),
-	PREF_NO_SPAWN_NOTIFICATION = (1 << 3),
-}
-
 char g_PreferenceNames[][] =
 {
-	"Preference_DontBeDefender",
-	"Preference_NoSpawning",
-	"Preference_NoGiant",
-	"Preference_NoSpawnNotification",
+	"Preference_DisableDefender",
+	"Preference_DisableSpawning",
+	"Preference_DisableGiant",
+	"Preference_DisableSpawnNotification",
+	"Preference_DisableAnnotations",
+	"Preference_IgnorePartyInvites",
 };
 
 static Cookie g_cookieQueuePoints;

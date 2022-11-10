@@ -20,16 +20,15 @@
 
 static NextBotActionFactory ActionFactory;
 
-static CountdownTimer m_talkTimer[MAXPLAYERS + 1];
-static CountdownTimer m_detonateTimer[MAXPLAYERS + 1];
-static CountdownTimer m_annotationTimer[MAXPLAYERS + 1];
-
 methodmap CTFBotMissionSuicideBomber < NextBotAction
 {
 	public static void Init()
 	{
 		ActionFactory = new NextBotActionFactory("MissionSuicideBomber");
 		ActionFactory.BeginDataMapDesc()
+			.DefineIntField("m_detonateTimer")
+			.DefineIntField("m_talkTimer")
+			.DefineIntField("m_annotationTimer")
 			.DefineEntityField("m_victim")
 			.DefineVectorField("m_lastKnownVictimPosition")
 			.DefineBoolField("m_bHasDetonated")
@@ -45,7 +44,47 @@ methodmap CTFBotMissionSuicideBomber < NextBotAction
 	
 	public CTFBotMissionSuicideBomber()
 	{
-		return view_as<CTFBotMissionSuicideBomber>(ActionFactory.Create());
+		CTFBotMissionSuicideBomber action = view_as<CTFBotMissionSuicideBomber>(ActionFactory.Create());
+		action.m_detonateTimer = new CountdownTimer();
+		action.m_talkTimer = new CountdownTimer();
+		action.m_annotationTimer = new CountdownTimer();
+		return action;
+	}
+	
+	property CountdownTimer m_detonateTimer
+	{
+		public get()
+		{
+			return this.GetData("m_detonateTimer");
+		}
+		public set(CountdownTimer detonateTimer)
+		{
+			this.SetData("m_detonateTimer", detonateTimer);
+		}
+	}
+	
+	property CountdownTimer m_talkTimer
+	{
+		public get()
+		{
+			return this.GetData("m_talkTimer");
+		}
+		public set(CountdownTimer talkTimer)
+		{
+			this.SetData("m_talkTimer", talkTimer);
+		}
+	}
+	
+	property CountdownTimer m_annotationTimer
+	{
+		public get()
+		{
+			return this.GetData("m_annotationTimer");
+		}
+		public set(CountdownTimer detonateTimer)
+		{
+			this.SetData("m_annotationTimer", detonateTimer);
+		}
 	}
 	
 	property int m_victim
@@ -99,8 +138,8 @@ methodmap CTFBotMissionSuicideBomber < NextBotAction
 
 static int OnStart(CTFBotMissionSuicideBomber action, int actor, NextBotAction priorAction)
 {
-	m_detonateTimer[actor].Invalidate();
-	m_annotationTimer[actor].Invalidate();
+	action.m_detonateTimer.Invalidate();
+	action.m_annotationTimer.Invalidate();
 	action.m_bHasDetonated = false;
 	action.m_bWasSuccessful = false;
 	action.m_bWasKilled = false;
@@ -112,7 +151,7 @@ static int OnStart(CTFBotMissionSuicideBomber action, int actor, NextBotAction p
 		float vecAbsOrigin[3];
 		GetEntPropVector(action.m_victim, Prop_Data, "m_vecAbsOrigin", vecAbsOrigin);
 		action.SetDataVector("m_lastKnownVictimPosition", vecAbsOrigin);
-		m_annotationTimer[actor].Start(0.1);
+		action.m_annotationTimer.Start(0.1);
 	}
 	
 	return action.Continue();
@@ -120,21 +159,21 @@ static int OnStart(CTFBotMissionSuicideBomber action, int actor, NextBotAction p
 
 static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 {
-	if (m_annotationTimer[actor].HasStarted() && m_annotationTimer[actor].IsElapsed())
+	if (action.m_annotationTimer.HasStarted() && action.m_annotationTimer.IsElapsed())
 	{
 		if (IsValidEntity(action.m_victim))
 		{
 			char text[64];
 			Format(text, sizeof(text), "%T", "Invader_DestroySentries_DetonateSentry", actor);
-			CreateAnnotation(actor, TF_MISSION_DESTROY_SENTRIES_HINT_MASK | actor, text, action.m_victim, _, 60.0, "coach/coach_attack_here.wav");
-			m_annotationTimer[actor].Invalidate();
+			ShowAnnotation(actor, MITM_HINT_MASK | actor, text, action.m_victim, _, mitm_annotation_lifetime.FloatValue, "coach/coach_attack_here.wav");
+			action.m_annotationTimer.Invalidate();
 		}
 	}
 	
 	// one we start detonating, there's no turning back
-	if (m_detonateTimer[actor].HasStarted())
+	if (action.m_detonateTimer.HasStarted())
 	{
-		if (m_detonateTimer[actor].IsElapsed())
+		if (action.m_detonateTimer.IsElapsed())
 		{
 			float vecAbsOrigin[3];
 			GetClientAbsOrigin(actor, vecAbsOrigin);
@@ -142,7 +181,7 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 			Detonate(action, actor);
 			
 			// Send out an event
-			if (action.m_bWasSuccessful && IsValidEntity(action.m_victim) && HasEntProp(action.m_victim, Prop_Send, "m_hBuilder"))
+			if (action.m_bWasSuccessful && IsValidEntity(action.m_victim) && IsBaseObject(action.m_victim))
 			{
 				int owner = GetEntPropEnt(action.m_victim, Prop_Send, "m_hBuilder");
 				if (owner != -1)
@@ -188,7 +227,7 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 		}
 		
 		// if the engineer is carrying his sentry, he becomes the victim
-		if (HasEntProp(action.m_victim, Prop_Send, "m_hBuilder"))
+		if (IsBaseObject(action.m_victim))
 		{
 			if (GetEntProp(action.m_victim, Prop_Send, "m_bCarried") && GetEntPropEnt(action.m_victim, Prop_Send, "m_hBuilder") != -1)
 			{
@@ -208,15 +247,15 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 	{
 		float where[3];
 		AddVectors(lastKnownVictimPosition, Vector(0.0, 0.0, sv_stepsize.FloatValue), where);
-		if (IsLineOfFireClear(actor, where))
+		if (IsLineOfFireClearGivenPlayerAndPoint(actor, where))
 		{
 			StartDetonate(action, actor, true);
 		}
 	}
 	
-	if (m_talkTimer[actor].IsElapsed())
+	if (action.m_talkTimer.IsElapsed())
 	{
-		m_talkTimer[actor].Start(4.0);
+		action.m_talkTimer.Start(4.0);
 		EmitGameSoundToAll("MVM.SentryBusterIntro", actor);
 	}
 	
@@ -225,18 +264,22 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 
 static void OnEnd(CTFBotMissionSuicideBomber action, int actor, NextBotAction nextAction)
 {
-	HideAnnotation(actor, TF_MISSION_DESTROY_SENTRIES_HINT_MASK | actor);
+	HideAnnotation(actor, MITM_HINT_MASK | actor);
+	
+	delete action.m_detonateTimer;
+	delete action.m_talkTimer;
+	delete action.m_annotationTimer;
 }
 
 static int OnKilled(CTFBotMissionSuicideBomber action, int actor, int attacker, int inflictor, float damage, int damagetype)
 {
 	if (!action.m_bHasDetonated)
 	{
-		if (!m_detonateTimer[actor].HasStarted())
+		if (!action.m_detonateTimer.HasStarted())
 		{
 			StartDetonate(action, actor);
 		}
-		else if (m_detonateTimer[actor].IsElapsed())
+		else if (action.m_detonateTimer.IsElapsed())
 		{
 			Detonate(action, actor);
 		}
@@ -256,7 +299,7 @@ static int OnKilled(CTFBotMissionSuicideBomber action, int actor, int attacker, 
 
 static void StartDetonate(CTFBotMissionSuicideBomber action, int actor, bool bWasSuccessful = false, bool bWasKilled = false)
 {
-	if (m_detonateTimer[actor].HasStarted())
+	if (action.m_detonateTimer.HasStarted())
 		return;
 	
 	if (!IsPlayerAlive(actor) || GetEntProp(actor, Prop_Data, "m_iHealth") < 1)
@@ -275,7 +318,7 @@ static void StartDetonate(CTFBotMissionSuicideBomber action, int actor, bool bWa
 	
 	FakeClientCommand(actor, "taunt");
 	TF2_AddCondition(actor, TFCond_FreezeInput);
-	m_detonateTimer[actor].Start(2.0);
+	action.m_detonateTimer.Start(2.0);
 	EmitGameSoundToAll("MvM.SentryBusterSpin", actor);
 }
 
@@ -297,7 +340,7 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 	
 	if (!action.m_bWasSuccessful)
 	{
-		if (GameRules_IsMannVsMachineMode())
+		if (IsMannVsMachineMode())
 		{
 			HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_SENTRY_BUSTER_DOWN", TFTeam_Defenders);
 		}
@@ -321,7 +364,7 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 	}
 	
 	// objects
-	int obj = MaxClients + 1;
+	int obj = -1;
 	while ((obj = FindEntityByClassname(obj, "obj_*")) != -1)
 	{
 		if (view_as<TFTeam>(GetEntProp(obj, Prop_Data, "m_iTeamNum")) <= TFTeam_Spectator)
@@ -366,7 +409,7 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 			UTIL_ScreenFade(victim, colorHit, 1.0, 0.1, FFADE_IN);
 		}
 		
-		if (IsLineOfFireClear3(actor, victim))
+		if (IsLineOfFireClearGivenPlayerAndEntity(actor, victim))
 		{
 			NormalizeVector(toVictim, toVictim);
 			
@@ -398,10 +441,10 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 	if (action.m_bWasKilled)
 	{
 		// increment num sentry killed this wave
-		CWave wave = GetPopulationManager().GetCurrentWave();
+		CWave wave = g_pPopulationManager.IsValid() ? g_pPopulationManager.GetCurrentWave() : view_as<CWave>(Address_Null);
 		if (wave)
 		{
-			wave.m_nSentryBustersSpawned++;
+			wave.IncrementSentryBustersKilled();
 		}
 	}
 }

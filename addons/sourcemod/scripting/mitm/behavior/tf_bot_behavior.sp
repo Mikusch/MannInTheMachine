@@ -20,16 +20,19 @@
 
 static NextBotActionFactory ActionFactory;
 
-static IntervalTimer m_undergroundTimer[MAXPLAYERS + 1];
-
 methodmap CTFBotMainAction < NextBotAction
 {
 	public static void Init()
 	{
 		ActionFactory = new NextBotActionFactory("MainAction");
+		ActionFactory.BeginDataMapDesc()
+			.DefineIntField("m_undergroundTimer")
+		.EndDataMapDesc();
 		ActionFactory.SetCallback(NextBotActionCallbackType_InitialContainedAction, InitialContainedAction);
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
+		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
+		ActionFactory.SetCallback(NextBotActionCallbackType_CreateInitialAction, CreateInitialAction);
 		ActionFactory.SetEventCallback(EventResponderType_OnKilled, OnKilled);
 		ActionFactory.SetEventCallback(EventResponderType_OnContact, OnContact);
 		ActionFactory.SetEventCallback(EventResponderType_OnOtherKilled, OnOtherKilled);
@@ -43,6 +46,18 @@ methodmap CTFBotMainAction < NextBotAction
 	public CTFBotMainAction()
 	{
 		return view_as<CTFBotMainAction>(ActionFactory.Create());
+	}
+	
+	property IntervalTimer m_undergroundTimer
+	{
+		public get()
+		{
+			return this.GetData("m_undergroundTimer");
+		}
+		public set(IntervalTimer undergroundTimer)
+		{
+			this.SetData("m_undergroundTimer", undergroundTimer);
+		}
 	}
 }
 
@@ -65,6 +80,9 @@ static int OnStart(CTFBotMainAction action, int actor, NextBotAction priorAction
 		return action.ChangeTo(CTFBotDead(), "I'm actually dead");
 	}
 	
+	// must leave spawn area
+	Player(actor).m_flSpawnTimeLeft = Player(actor).CalculateSpawnTime();
+	
 	return action.Continue();
 }
 
@@ -76,31 +94,8 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 		return action.Done("Not an invader");
 	}
 	
-	if (GameRules_IsMannVsMachineMode() && TF2_GetClientTeam(actor) == TFTeam_Invaders)
+	if (IsMannVsMachineMode() && TF2_GetClientTeam(actor) == TFTeam_Invaders)
 	{
-		char title[64];
-		int color[4];
-		if (Player(actor).HasTag("bot_gatebot"))
-		{
-			Format(title, sizeof(title), "%T", "Invader_CaptureGate", actor);
-			color = { 248, 164, 45, 255 };
-		}
-		else if (SDKCall_IsAllowedToPickUpFlag(actor))
-		{
-			Format(title, sizeof(title), "%T", "Invader_DeliverBomb", actor);
-			color = { 88, 133, 162, 255 };
-		}
-		else
-		{
-			Format(title, sizeof(title), "%T", "Invader_SupportTeam", actor);
-			color = { 255, 255, 255, 255 };
-		}
-		
-		if (title[0])
-		{
-			CreateMsgDialog(actor, title, Player(actor).m_hudMsgLevel--, RoundToCeil(interval), color);
-		}
-		
 		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(actor).GetLastKnownArea());
 		TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(actor) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
 		
@@ -117,45 +112,26 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 				TF2Attrib_SetByName(actor, "no_jump", 1.0);
 			}
 			
-			if (mitm_spawn_hurry_time.FloatValue)
+			// pause spawn timer while stunned
+			if (!TF2_IsPlayerInCondition(actor, TFCond_Dazed))
 			{
-				if (!Player(actor).m_flRequiredSpawnLeaveTime)
+				Player(actor).m_flSpawnTimeLeft -= interval;
+				
+				if (Player(actor).m_flSpawnTimeLeft <= 0.0)
 				{
-					// minibosses and bomb carriers are slow and get more time to leave
-					float flTime = (GetEntProp(actor, Prop_Send, "m_bIsMiniBoss") || HasTheFlag(actor)) ? mitm_spawn_hurry_time.FloatValue * 1.5 : mitm_spawn_hurry_time.FloatValue;
-					Player(actor).m_flRequiredSpawnLeaveTime = GetGameTime() + flTime;
-				}
-				else
-				{
-					if (TF2_IsPlayerInCondition(actor, TFCond_Dazed))
-					{
-						// If we are stunned in our spawn, extend the time
-						Player(actor).m_flRequiredSpawnLeaveTime += interval;
-					}
-					
-					float flTimeLeft = Player(actor).m_flRequiredSpawnLeaveTime - GetGameTime();
-					if (flTimeLeft <= 0.0)
-					{
-						ForcePlayerSuicide(actor);
-					}
-					else if (flTimeLeft <= 15.0)
-					{
-						// motivate them to leave their spawn
-						SetHudTextParams(-1.0, 0.7, interval, 255, 255, 255, 255);
-						ShowSyncHudText(actor, g_WarningHudSync, "%t", "Invader_HurryOutOfSpawn", flTimeLeft);
-					}
+					ForcePlayerSuicide(actor);
 				}
 			}
-			else
+			
+			// pressure them to leave the spawn area
+			if (Player(actor).m_flSpawnTimeLeft > 0.0)
 			{
-				Player(actor).m_flRequiredSpawnLeaveTime = 0.0;
+				SetHudTextParams(-1.0, 0.65, interval, 255, 255, 255, 255);
+				ShowSyncHudText(actor, g_WarningHudSync, "%t", "Invader_HurryOutOfSpawn", Player(actor).m_flSpawnTimeLeft);
 			}
 		}
 		else
 		{
-			// not in spawn, reset their time
-			Player(actor).m_flRequiredSpawnLeaveTime = 0.0;
-			
 			TF2Attrib_RemoveByName(actor, "no_jump");
 		}
 		
@@ -165,11 +141,11 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 		// watch for bots that have fallen through the ground
 		if (myArea && myArea.GetZVector(origin) - origin[2] > 100.0)
 		{
-			if (!m_undergroundTimer[actor].HasStarted())
+			if (!action.m_undergroundTimer.HasStarted())
 			{
-				m_undergroundTimer[actor].Start();
+				action.m_undergroundTimer.Start();
 			}
-			else if (m_undergroundTimer[actor].IsGreaterThen(3.0))
+			else if (action.m_undergroundTimer.IsGreaterThan(3.0))
 			{
 				char auth[MAX_AUTHID_LENGTH], teamName[MAX_TEAM_NAME_LENGTH];
 				GetClientAuthId(actor, AuthId_Engine, auth, sizeof(auth), false);
@@ -190,11 +166,21 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 		}
 		else
 		{
-			m_undergroundTimer[actor].Invalidate();
+			action.m_undergroundTimer.Invalidate();
 		}
 	}
 	
 	return action.Continue();
+}
+
+static void OnEnd(CTFBotMainAction action, int actor, NextBotAction nextAction)
+{
+	delete action.m_undergroundTimer;
+}
+
+static void CreateInitialAction(CTFBotMainAction action)
+{
+	action.m_undergroundTimer = new IntervalTimer();
 }
 
 static int OnKilled(CTFBotMainAction action, int actor, int attacker, int inflictor, float damage, int damagetype)
@@ -207,9 +193,9 @@ static int OnContact(CTFBotMainAction action, int actor, int other, Address resu
 	if (IsValidEntity(other) && !(view_as<SolidFlags_t>(GetEntProp(other, Prop_Data, "m_usSolidFlags")) & FSOLID_NOT_SOLID) && other != 0 && !IsEntityClient(other))
 	{
 		// Mini-bosses destroy non-Sentrygun objects they bump into (ie: Dispensers)
-		if (GameRules_IsMannVsMachineMode() && GetEntProp(actor, Prop_Send, "m_bIsMiniBoss"))
+		if (IsMannVsMachineMode() && Player(actor).IsMiniBoss())
 		{
-			if (HasEntProp(other, Prop_Send, "m_hBuilder"))
+			if (IsBaseObject(other))
 			{
 				if (TF2_GetObjectType(other) != TFObject_Sentry || GetEntProp(other, Prop_Send, "m_bMiniBuilding"))
 				{
@@ -241,7 +227,7 @@ static int OnOtherKilled(CTFBotMainAction action, int actor, int victim, int att
 		{
 			bool isTaunting = !HasTheFlag(attacker) && GetRandomFloat(0.0, 100.0) <= tf_bot_taunt_victim_chance.FloatValue;
 			
-			if (GetEntProp(attacker, Prop_Send, "m_bIsMiniBoss"))
+			if (Player(attacker).IsMiniBoss())
 			{
 				// Bosses don't taunt puny humans
 				isTaunting = false;

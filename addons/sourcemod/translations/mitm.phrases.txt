@@ -1,16 +1,37 @@
+/**
+ * Copyright (C) 2022  Mikusch
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 "Phrases"
 {
 	"Menu_Main_Title"
 	{
-		"en"		"Welcome to Mann in the Machine made by Mikusch!\nThis mode is currently in BETA, so expect bugs!"
+		"en"		"Welcome to Mann in the Machine made by Mikusch!"
 	}
 	"Menu_Main_Queue"
 	{
-		"en"		"View Defender Queue"
+		"en"		"View defender queue"
 	}
 	"Menu_Main_Preferences"
 	{
-		"en"		"Change Preferences"
+		"en"		"Change preferences"
+	}
+	"Menu_Main_Party"
+	{
+		"en"		"Open party menu"
 	}
 	"Menu_Queue_Title"
 	{
@@ -18,8 +39,17 @@
 	}
 	"Menu_Queue_Title_QueuePoints"
 	{
-		"#format"	"{1:d}"
-		"en"		"Your queue points: {1}"
+		"#format"	"{1:d},{2:d}"
+		"en"		"Your queue points: {1} [#{2}]"
+	}
+	"Menu_Queue_Title_PartyQueuePoints"
+	{
+		"#format"	"{1:d},{2:d}"
+		"en"		"Your party's queue points: {1} [#{2}]"
+	}
+	"Menu_Queue_Title_NotInQueue"
+	{
+		"en"		"You are not currently in the queue."
 	}
 	"Menu_Queue_NotLoaded"
 	{
@@ -33,31 +63,39 @@
 	{
 		"en"		"Your preferences are still loading, please wait a moment."
 	}
-	"Preference_DontBeDefender"
+	"Preference_DisableDefender"
 	{
 		"en"		"Don't select me as Defender"
 	}
-	"Preference_NoSpawning"
+	"Preference_DisableSpawning"
 	{
-		"en"		"No spawning (Spectator Mode)"
+		"en"		"Disable spawning (Spectator mode)"
 	}
-	"Preference_NoGiant"
+	"Preference_DisableGiant"
 	{
 		"en"		"Don't spawn me as Giant Robot"
 	}
-	"Preference_NoSpawnNotification"
+	"Preference_DisableSpawnNotification"
 	{
 		"en"		"Disable spawn notification"
+	}
+	"Preference_DisableAnnotations"
+	{
+		"en"		"Disable annotations"
+	}
+	"Preference_IgnorePartyInvites"
+	{
+		"en"		"Ignore party invites"
 	}
 	"Preferences_Enabled"
 	{
 		"#format"	"{1:s}"
-		"en"		"You have enabled the preference {1}."
+		"en"		"You have enabled the preference {cyan}{1}{default}."
 	}
 	"Preferences_Disabled"
 	{
 		"#format"	"{1:s}"
-		"en"		"You have disabled the preference {1}."
+		"en"		"You have disabled the preference {cyan}{1}{default}."
 	}
 	"Queue_NewDefenders"
 	{
@@ -78,10 +116,15 @@
 		"#format"	"{1:s},{2:d},{3:d}"
 		"en"		"You have been assigned to {blue}{1}{default}. You have been awarded {green}{2} {default}queue points (Total: {green}{3}{default})."
 	}
-	"Queue_SelectedAsInvader_NoQueue"
+	"Queue_SelectedAsInvader_Forced"
 	{
 		"#format"	"{1:s}"
-		"en"		"You have been assigned to {blue}{1}{default}. You have not been awarded any queue points based on your preferences."
+		"en"		"You have been forcibly assigned to {blue}{1}{default}. You have not been awarded any queue points."
+	}
+	"Queue_SelectedAsInvader_DefenderDisabled"
+	{
+		"#format"	"{1:s}"
+		"en"		"You have been assigned to {blue}{1}{default}. You have not been awarded any queue points."
 	}
 	"Queue_AddedPoints"
 	{
@@ -113,19 +156,11 @@
 	"Invader_HurryOutOfSpawn"
 	{
 		"#format"	"{1:1.2f}"
-		"en"		"You have {1} seconds to leave the spawn area."
+		"en"		"LEAVE THE SPAWN AREA!\nTime Left: {1} s"
 	}
-	"Invader_CaptureGate"
+	"Invader_CaptureGate_Annotation"
 	{
-		"en"		"Capture the gate!"
-	}
-	"Invader_DeliverBomb"
-	{
-		"en"		"Deliver the bomb to the hatch!"
-	}
-	"Invader_SupportTeam"
-	{
-		"en"		"Help your team deliver the bomb!"
+		"en"		"Capture %s!"
 	}
 	"Invader_DestroySentries_DetonateSentry"
 	{
@@ -135,9 +170,177 @@
 	{
 		"en"		"Detonate here to complete your mission!"
 	}
-	"ConVarQuery_ShowPluginMessages"
+	"Invader_Queue_Header"
 	{
-		"#format"	"{1:s},{2:d}"
-		"en"		"Set {cyan}{1} {default}to {cyan}{2}{default} to receive helpful messages during gameplay."
+		"en"		"Next Robot Spawns:"
+	}
+	"Endless_MoreAttributes"
+	{
+		"#format"	"{1:d}"
+		"en"		"...and {1} more"
+	}
+	
+	// Party
+	
+	"Party_Menu_Title"
+	{
+		"en"		"Party Menu"
+	}
+	"Party_InviteMenu_Title"
+	{
+		"en"		"Pending Party Invites"
+	}
+	"Party_ManageInviteMenu_Title"
+	{
+		"en"		"Invite Players"
+	}
+	"Party_ManageMenu_Title"
+	{
+		"en"		"Manage Party"
+	}
+	"Party_KickMenu_Title"
+	{
+		"en"		"Kick Members"
+	}
+	"Party_KickMenu_NoMembers"
+	{
+		"en"		"No members to kick"
+	}
+	"Party_Menu_CurrentParty"
+	{
+		"#format"	"{1:s}"
+		"en"		"Your party: {1}"
+	}
+	"Party_Menu_Members"
+	{
+		"#format"	"{1:d},{2:d}"
+		"en"		"Members ({1}/{2}):"
+	}
+	"Party_Menu_NotInAParty"
+	{
+		"en"		"You are not in a party."
+	}
+	"Party_Menu_QueuePoints"
+	{
+		"#format"	"{1:d},{2:d}"
+		"en"		"Queue points: {1} [#{2}]"
+	}
+	"Party_Menu_NotEnoughMembersForQueue"
+	{
+		"en"		"Invite players to queue together!"
+	}
+	"Party_Menu_ManageParty"
+	{
+		"en"		"★ Manage party"
+	}
+	"Party_Menu_CreateParty"
+	{
+		"en"		"Create new party"
+	}
+	"Party_Menu_LeaveParty"
+	{
+		"en"		"Leave party"
+	}
+	"Party_Menu_ViewPartyInvites"
+	{
+		"en"		"View pending invites"
+	}
+	"Party_ManageMenu_InviteMembers"
+	{
+		"en"		"★ Invite players"
+	}
+	"Party_ManageMenu_KickMembers"
+	{
+		"en"		"★ Kick members"
+	}
+	"Party_ManageInviteMenu_NoPlayers"
+	{
+		"en"		"No players to invite"
+	}
+	"Party_ManageInviteMenu_AlreadyInvited"
+	{
+		"en"		"(pending)"
+	}
+	"Party_InviteMenu_NoPendingInvites"
+	{
+		"en"		"No pending invites"
+	}
+	"Party_InvitedPlayers"
+	{
+		"#format"	"{1:t},{2:s}"
+		"en"		"You have invited {lightgreen}{1} {default}to {cyan}{2}{default}."
+	}
+	"Party_DoesNotExist"
+	{
+		"en"		"The party does not exist. It may have been deleted."
+	}
+	"Party_AlreadyMember"
+	{
+		"en"		"You are already a member of this party!"
+	}
+	"Party_AlreadyInAParty"
+	{
+		"en"		"You are already in a party!"
+	}
+	"Party_RequireInvite"
+	{
+		"en"		"You need an invite to join this party!"
+	}
+	"Party_MaxMembers"
+	{
+		"en"		"This party is already full and can not accept new members."
+	}
+	"Party_Created"
+	{
+		"#format"	"{1:s}"
+		"en"		"You have created and automatically joined {cyan}{1}{default}."
+	}
+	"Party_Joined"
+	{
+		"#format"	"{1:s}"
+		"en"		"You have joined {cyan}{1}{default}."
+	}
+	"Party_JoinedOther"
+	{
+		"#format"	"{1:N}"
+		"en"		"{lightgreen}{1} {default}has joined the party."
+	}
+	"Party_Left"
+	{
+		"#format"	"{1:s}"
+		"en"		"You have left {cyan}{1}{default}."
+	}
+	"Party_LeftOther"
+	{
+		"#format"	"{1:N}"
+		"en"		"{lightgreen}{1} {default}has left the party."
+	}
+	"Party_Kicked"
+	{
+		"#format"	"{1:s}"
+		"en"		"You have been kicked from {cyan}{1}{default}."
+	}
+	"Party_KickedOther"
+	{
+		"#format"	"{1:N}"
+		"en"		"{lightgreen}{1} {default}has been kicked from the party."
+	}
+	"Party_RequireMember"
+	{
+		"en"		"You need to be in a party to use this."
+	}
+	"Party_RequireLeader"
+	{
+		"en"		"You need to be the party leader to use this."
+	}
+	"Party_Renamed"
+	{
+		"#format"	"{1:s}"
+		"en"		"You have renamed your party to {cyan}{1}{default}."
+	}
+	"Party_IncomingInvite"
+	{
+		"#format"	"{1:s},{2:N}"
+		"en"		"You have been invited to {cyan}{1}{default} by {lightgreen}{2}{default}. Type {yellow}/party {default}to accept."
 	}
 }

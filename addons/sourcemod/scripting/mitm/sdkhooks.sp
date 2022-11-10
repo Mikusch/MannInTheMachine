@@ -18,9 +18,11 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+static bool g_bHasActiveTeleporterPre;
+
 void SDKHooks_OnClientPutInServer(int client)
 {
-	SDKHook(client, SDKHook_OnTakeDamage, SDKHookCB_Client_OnTakeDamage);
+	SDKHook(client, SDKHook_OnTakeDamageAlive, SDKHookCB_Client_OnTakeDamageAlive);
 }
 
 void SDKHooks_OnEntityCreated(int entity, const char[] classname)
@@ -33,9 +35,14 @@ void SDKHooks_OnEntityCreated(int entity, const char[] classname)
 	{
 		SDKHook(entity, SDKHook_SetTransmit, SDKHookCB_ReviveMarker_SetTransmit);
 	}
+	else if (StrEqual(classname, "bot_hint_engineer_nest"))
+	{
+		SDKHook(entity, SDKHook_Think, SDKHookCB_BotHintEngineerNest_Think);
+		SDKHook(entity, SDKHook_ThinkPost, SDKHookCB_BotHintEngineerNest_ThinkPost);
+	}
 }
 
-Action SDKHookCB_Client_OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
 	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
 	{
@@ -57,7 +64,7 @@ Action SDKHookCB_Client_OnTakeDamage(int victim, int &attacker, int &inflictor, 
 				Player(attacker).GetPrevMission() == MISSION_DESTROY_SENTRIES &&
 				g_bForceFriendlyFire &&
 				TF2_GetClientTeam(victim) == TF2_GetClientTeam(attacker) &&
-				GetEntProp(victim, Prop_Send, "m_bIsMiniBoss"))
+				Player(victim).IsMiniBoss())
 			{
 				damage = 600.0;
 				return Plugin_Changed;
@@ -68,9 +75,10 @@ Action SDKHookCB_Client_OnTakeDamage(int victim, int &attacker, int &inflictor, 
 	return Plugin_Continue;
 }
 
-Action SDKHookCB_ProjectilePipeRemote_SetTransmit(int entity, int client)
+static Action SDKHookCB_ProjectilePipeRemote_SetTransmit(int entity, int client)
 {
-	if (view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum")) == TFTeam_Defenders)
+	TFTeam team = view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum"));
+	if (team == TFTeam_Defenders)
 	{
 		// do not show defender stickybombs to the invading team
 		if (Player(client).IsInvader())
@@ -87,33 +95,68 @@ Action SDKHookCB_ProjectilePipeRemote_SetTransmit(int entity, int client)
 	return Plugin_Continue;
 }
 
-Action SDKHookCB_ReviveMarker_SetTransmit(int entity, int client)
+static Action SDKHookCB_ReviveMarker_SetTransmit(int entity, int client)
 {
-	if (view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum")) == TFTeam_Defenders)
+	TFTeam team = view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum"));
+	if (team == TFTeam_Defenders)
 	{
-		if (Player(client).IsInvader())
+		int owner = GetEntProp(entity, Prop_Send, "m_hOwnerEntity");
+		if (IsEntityClient(owner) && TF2_GetPlayerClass(owner) == TFClass_Spy)
 		{
-			// hide revive markers from invaders
-			return Plugin_Handled;
+			if (Player(client).IsInvader())
+			{
+				// hide spy revive markers from invaders
+				return Plugin_Handled;
+			}
 		}
 	}
 	
 	return Plugin_Continue;
 }
 
+static Action SDKHookCB_BotHintEngineerNest_Think(int entity)
+{
+	g_bHasActiveTeleporterPre = GetEntProp(entity, Prop_Send, "m_bHasActiveTeleporter") != 0;
+	
+	return Plugin_Continue;
+}
+
+static void SDKHookCB_BotHintEngineerNest_ThinkPost(int entity)
+{
+	if (!g_bHasActiveTeleporterPre && GetEntProp(entity, Prop_Send, "m_bHasActiveTeleporter"))
+	{
+		EmitSoundToAll(")mvm/mvm_tele_activate.wav", entity, SNDCHAN_STATIC, 155);
+	}
+}
+
 Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)
 {
-	int target = GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity");
+	int hEffectEntity = GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity");
 	
-	if (Player(client).HasMission(MISSION_DESTROY_SENTRIES) && target == Player(client).GetMissionTarget())
+	int hMissionTarget = Player(client).GetMissionTarget();
+	if (IsValidEntity(hMissionTarget) && IsBaseObject(hMissionTarget))
 	{
-		// show the glow of our target sentry
-		return Plugin_Continue;
+		// target sentry - only outline if not carried
+		if (hEffectEntity == hMissionTarget)
+		{
+			if (!GetEntProp(hMissionTarget, Prop_Send, "m_bCarried"))
+			{
+				return Plugin_Continue;
+			}
+		}
+		// player - only outline if carrying target sentry
+		else if (hEffectEntity == GetEntPropEnt(hMissionTarget, Prop_Send, "m_hBuilder"))
+		{
+			if (GetEntProp(hMissionTarget, Prop_Send, "m_bCarried"))
+			{
+				return Plugin_Continue;
+			}
+		}
 	}
 	
 	if (Player(client).IsInASquad())
 	{
-		if (client != target && Player(client).GetSquad().IsLeader(target))
+		if (hEffectEntity != client && Player(client).GetSquad().IsLeader(hEffectEntity))
 		{
 			// show the glow of our squad leader
 			return Plugin_Continue;

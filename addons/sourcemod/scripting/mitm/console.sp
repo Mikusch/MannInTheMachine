@@ -20,9 +20,12 @@
 
 void Console_Init()
 {
-	RegConsoleCmd("mitm", ConCmd_OpenMainMenu, "Opens the main menu.");
-	RegConsoleCmd("queue", ConCmd_OpenQueueMenu, "Opens the queue menu.");
-	RegConsoleCmd("preferences", ConCmd_OpenPreferencesMenu, "Opens the preferences menu.");
+	RegConsoleCmd("sm_mitm", ConCmd_MannInTheMachine, "Opens the main menu.");
+	RegConsoleCmd("sm_queue", ConCmd_Queue, "Opens the queue menu.");
+	RegConsoleCmd("sm_preferences", ConCmd_Settings, "Opens the preferences menu.");
+	RegConsoleCmd("sm_party", ConCmd_Party, "Opens the party menu.");
+	
+	RegAdminCmd("sm_addqueue", ConCmd_AddQueuePoints, ADMFLAG_CHEATS, "Adds defender queue points to a player.");
 	
 	AddCommandListener(CommandListener_Suicide, "explode");
 	AddCommandListener(CommandListener_Suicide, "kill");
@@ -30,7 +33,7 @@ void Console_Init()
 	AddCommandListener(CommandListener_DropItem, "dropitem");
 }
 
-Action ConCmd_OpenMainMenu(int client, int args)
+static Action ConCmd_MannInTheMachine(int client, int args)
 {
 	if (client == 0)
 	{
@@ -42,7 +45,7 @@ Action ConCmd_OpenMainMenu(int client, int args)
 	return Plugin_Handled;
 }
 
-Action ConCmd_OpenQueueMenu(int client, int args)
+static Action ConCmd_Queue(int client, int args)
 {
 	if (client == 0)
 	{
@@ -54,7 +57,7 @@ Action ConCmd_OpenQueueMenu(int client, int args)
 	return Plugin_Handled;
 }
 
-Action ConCmd_OpenPreferencesMenu(int client, int args)
+static Action ConCmd_Settings(int client, int args)
 {
 	if (client == 0)
 	{
@@ -66,9 +69,61 @@ Action ConCmd_OpenPreferencesMenu(int client, int args)
 	return Plugin_Handled;
 }
 
-public Action CommandListener_Suicide(int client, const char[] command, int argc)
+static Action ConCmd_Party(int client, int args)
 {
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	if (client == 0)
+	{
+		ReplyToCommand(client, "%t", "Command is in-game only");
+		return Plugin_Handled;
+	}
+	
+	Menus_DisplayPartyMenu(client);
+	return Plugin_Handled;
+}
+
+static Action ConCmd_AddQueuePoints(int client, int args)
+{
+	if (args < 2)
+	{
+		ReplyToCommand(client, "[SM] Usage: sm_addqueue <#userid|name> <amount>");
+		return Plugin_Handled;
+	}
+	
+	char target[MAX_TARGET_LENGTH];
+	GetCmdArg(1, target, sizeof(target));
+	
+	int amount = GetCmdArgInt(2);
+	
+	char target_name[MAX_TARGET_LENGTH];
+	int target_list[MAXPLAYERS], target_count;
+	bool tn_is_ml;
+	
+	if ((target_count = ProcessTargetString(target, client, target_list, sizeof(target_list), COMMAND_TARGET_NONE, target_name, sizeof(target_name), tn_is_ml)) <= 0)
+	{
+		ReplyToTargetError(client, target_count);
+		return Plugin_Handled;
+	}
+	
+	for (int i = 0; i < target_count; i++)
+	{
+		Queue_AddPoints(target_list[i], amount);
+	}
+	
+	if (tn_is_ml)
+	{
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Queue_AddedPoints", amount, target_name);
+	}
+	else
+	{
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Queue_AddedPoints", amount, "_s", target_name);
+	}
+	
+	return Plugin_Handled;
+}
+
+static Action CommandListener_Suicide(int client, const char[] command, int argc)
+{
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders && !mitm_invader_allow_suicide.BoolValue && !mitm_developer.BoolValue)
 	{
 		// invaders may not suicide
 		PrintCenterText(client, "%t", "Invader_NotAllowedToSuicide");
@@ -78,9 +133,9 @@ public Action CommandListener_Suicide(int client, const char[] command, int argc
 	return Plugin_Continue;
 }
 
-Action CommandListener_Build(int client, const char[] command, int argc)
+static Action CommandListener_Build(int client, const char[] command, int argc)
 {
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders && TF2_GetPlayerClass(client) == TFClass_Engineer)
 	{
 		TFObjectType type = view_as<TFObjectType>(GetCmdArgInt(1));
 		TFObjectMode mode = view_as<TFObjectMode>(GetCmdArgInt(2));
@@ -132,7 +187,7 @@ Action CommandListener_Build(int client, const char[] command, int argc)
 	return Plugin_Continue;
 }
 
-Action CommandListener_DropItem(int client, const char[] command, int argc)
+static Action CommandListener_DropItem(int client, const char[] command, int argc)
 {
 	if (Player(client).GetDeployingBombState() != TF_BOMB_DEPLOYING_NONE)
 	{

@@ -38,7 +38,7 @@ static float m_fModelScaleOverride[MAXPLAYERS + 1];
 static MissionType m_mission[MAXPLAYERS + 1];
 static MissionType m_prevMission[MAXPLAYERS + 1];
 static int m_missionTarget[MAXPLAYERS + 1];
-static float m_flRequiredSpawnLeaveTime[MAXPLAYERS + 1];
+static float m_flSpawnTimeLeft[MAXPLAYERS + 1];
 static int m_spawnPointEntity[MAXPLAYERS + 1];
 static CTFBotSquad m_squad[MAXPLAYERS + 1];
 static int m_hFollowingFlagTarget[MAXPLAYERS + 1];
@@ -50,20 +50,24 @@ static int m_invaderPriority[MAXPLAYERS + 1];
 static bool m_bWasMiniBoss[MAXPLAYERS + 1];
 static int m_defenderQueuePoints[MAXPLAYERS + 1];
 static int m_preferences[MAXPLAYERS + 1];
-static int m_hudMsgLevel[MAXPLAYERS + 1];
+static Party m_party[MAXPLAYERS + 1];
 
-methodmap Player
+methodmap Player < CBaseCombatCharacter
 {
-	public Player(int client)
+	public Player(int entity)
 	{
-		return view_as<Player>(client);
+		return view_as<Player>(entity);
 	}
 	
-	property int _client
+	property CountdownTimer m_autoJumpTimer
 	{
 		public get()
 		{
-			return view_as<int>(this);
+			return m_autoJumpTimer[this.index];
+		}
+		public set(CountdownTimer autoJumpTimer)
+		{
+			m_autoJumpTimer[this.index] = autoJumpTimer;
 		}
 	}
 	
@@ -71,11 +75,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return m_flAutoJumpMin[this._client];
+			return m_flAutoJumpMin[this.index];
 		}
 		public set(float flAutoJumpMin)
 		{
-			m_flAutoJumpMin[this._client] = flAutoJumpMin;
+			m_flAutoJumpMin[this.index] = flAutoJumpMin;
 		}
 	}
 	
@@ -83,11 +87,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return m_flAutoJumpMax[this._client];
+			return m_flAutoJumpMax[this.index];
 		}
 		public set(float flAutoJumpMax)
 		{
-			m_flAutoJumpMax[this._client] = flAutoJumpMax;
+			m_flAutoJumpMax[this.index] = flAutoJumpMax;
 		}
 	}
 	
@@ -95,11 +99,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return m_eventChangeAttributes[this._client];
+			return m_eventChangeAttributes[this.index];
 		}
 		public set(ArrayList attributes)
 		{
-			m_eventChangeAttributes[this._client] = attributes;
+			m_eventChangeAttributes[this.index] = attributes;
 		}
 	}
 	
@@ -107,11 +111,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return m_tags[this._client];
+			return m_tags[this.index];
 		}
 		public set(ArrayList tags)
 		{
-			m_tags[this._client] = tags;
+			m_tags[this.index] = tags;
 		}
 	}
 	
@@ -119,11 +123,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return m_weaponRestrictionFlags[this._client];
+			return m_weaponRestrictionFlags[this.index];
 		}
 		public set(WeaponRestrictionType restrictionFlags)
 		{
-			m_weaponRestrictionFlags[this._client] = restrictionFlags;
+			m_weaponRestrictionFlags[this.index] = restrictionFlags;
 		}
 	}
 	
@@ -131,11 +135,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return m_attributeFlags[this._client];
+			return m_attributeFlags[this.index];
 		}
 		public set(AttributeType attributeFlag)
 		{
-			m_attributeFlags[this._client] = attributeFlag;
+			m_attributeFlags[this.index] = attributeFlag;
 		}
 	}
 	
@@ -143,11 +147,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return m_fModelScaleOverride[this._client];
+			return m_fModelScaleOverride[this.index];
 		}
 		public set(float fScale)
 		{
-			m_fModelScaleOverride[this._client] = fScale;
+			m_fModelScaleOverride[this.index] = fScale;
 		}
 	}
 	
@@ -155,11 +159,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return m_mission[this._client];
+			return m_mission[this.index];
 		}
 		public set(MissionType mission)
 		{
-			m_mission[this._client] = mission;
+			m_mission[this.index] = mission;
 		}
 	}
 	
@@ -167,11 +171,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return m_prevMission[this._client];
+			return m_prevMission[this.index];
 		}
 		public set(MissionType mission)
 		{
-			m_prevMission[this._client] = mission;
+			m_prevMission[this.index] = mission;
 		}
 	}
 	
@@ -179,23 +183,23 @@ methodmap Player
 	{
 		public get()
 		{
-			return m_missionTarget[this._client];
+			return m_missionTarget[this.index];
 		}
 		public set(int missionTarget)
 		{
-			m_missionTarget[this._client] = missionTarget;
+			m_missionTarget[this.index] = missionTarget;
 		}
 	}
 	
-	property float m_flRequiredSpawnLeaveTime
+	property float m_flSpawnTimeLeft
 	{
 		public get()
 		{
-			return m_flRequiredSpawnLeaveTime[this._client];
+			return m_flSpawnTimeLeft[this.index];
 		}
-		public set(float flSpawnEnterTime)
+		public set(float flSpawnTimeLeft)
 		{
-			m_flRequiredSpawnLeaveTime[this._client] = flSpawnEnterTime;
+			m_flSpawnTimeLeft[this.index] = flSpawnTimeLeft;
 		}
 	}
 	
@@ -203,11 +207,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return m_spawnPointEntity[this._client];
+			return m_spawnPointEntity[this.index];
 		}
 		public set(int spawnPoint)
 		{
-			m_spawnPointEntity[this._client] = spawnPoint;
+			m_spawnPointEntity[this.index] = spawnPoint;
 		}
 	}
 	
@@ -215,11 +219,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return m_invaderPriority[this._client];
+			return m_invaderPriority[this.index];
 		}
 		public set(int iPriority)
 		{
-			m_invaderPriority[this._client] = iPriority;
+			m_invaderPriority[this.index] = iPriority;
 		}
 	}
 	
@@ -227,11 +231,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return m_bWasMiniBoss[this._client];
+			return m_bWasMiniBoss[this.index];
 		}
 		public set(bool bWasMiniBoss)
 		{
-			m_bWasMiniBoss[this._client] = bWasMiniBoss;
+			m_bWasMiniBoss[this.index] = bWasMiniBoss;
 		}
 	}
 	
@@ -239,11 +243,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return m_defenderQueuePoints[this._client];
+			return m_defenderQueuePoints[this.index];
 		}
 		public set(int defenderQueuePoints)
 		{
-			m_defenderQueuePoints[this._client] = defenderQueuePoints;
+			m_defenderQueuePoints[this.index] = defenderQueuePoints;
 		}
 	}
 	
@@ -251,23 +255,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return m_preferences[this._client];
+			return m_preferences[this.index];
 		}
 		public set(int preferences)
 		{
-			m_preferences[this._client] = preferences;
-		}
-	}
-	
-	property int m_hudMsgLevel
-	{
-		public get()
-		{
-			return m_hudMsgLevel[this._client];
-		}
-		public set(int hudMsgLevel)
-		{
-			m_hudMsgLevel[this._client] = hudMsgLevel;
+			m_preferences[this.index] = preferences;
 		}
 	}
 	
@@ -275,11 +267,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return m_teleportWhereName[this._client];
+			return m_teleportWhereName[this.index];
 		}
 		public set(ArrayList teleportWhereName)
 		{
-			m_teleportWhereName[this._client] = teleportWhereName;
+			m_teleportWhereName[this.index] = teleportWhereName;
 		}
 	}
 	
@@ -287,11 +279,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return m_squad[this._client];
+			return m_squad[this.index];
 		}
 		public set(CTFBotSquad squad)
 		{
-			m_squad[this._client] = squad;
+			m_squad[this.index] = squad;
 		}
 	}
 	
@@ -299,11 +291,11 @@ methodmap Player
 	{
 		public get()
 		{
-			return m_hFollowingFlagTarget[this._client];
+			return m_hFollowingFlagTarget[this.index];
 		}
 		public set(int hFollowingFlagTarget)
 		{
-			m_hFollowingFlagTarget[this._client] = hFollowingFlagTarget;
+			m_hFollowingFlagTarget[this.index] = hFollowingFlagTarget;
 		}
 	}
 	
@@ -311,21 +303,48 @@ methodmap Player
 	{
 		public get()
 		{
-			return m_nDeployingBombState[this._client];
+			return m_nDeployingBombState[this.index];
 		}
 		public set(BombDeployingState_t nDeployingBombState)
 		{
-			m_nDeployingBombState[this._client] = nDeployingBombState;
+			m_nDeployingBombState[this.index] = nDeployingBombState;
+		}
+	}
+	
+	property Party m_party
+	{
+		public get()
+		{
+			return m_party[this.index];
+		}
+		public set(Party party)
+		{
+			m_party[this.index] = party;
 		}
 	}
 	
 	public bool IsInvader()
 	{
-		if (IsClientSourceTV(this._client))
+		if (IsClientSourceTV(this.index))
 			return false;
 		
-		TFTeam team = TF2_GetClientTeam(this._client);
-		return (team == TFTeam_Spectator || team == TFTeam_Invaders) && !this.HasPreference(PREF_NO_SPAWNING);
+		TFTeam team = TF2_GetClientTeam(this.index);
+		return (team == TFTeam_Spectator || team == TFTeam_Invaders) && !this.HasPreference(PREF_DISABLE_SPAWNING);
+	}
+	
+	public float GetSpawnTime()
+	{
+		return GetEntDataFloat(this.index, GetOffset("CTFPlayer::m_flSpawnTime"));
+	}
+	
+	public TFTeam GetDisguiseTeam()
+	{
+		return view_as<TFTeam>(this.GetProp(Prop_Send, "m_nDisguiseTeam"));
+	}
+	
+	public bool IsMiniBoss()
+	{
+		return this.GetProp(Prop_Send, "m_bIsMiniBoss") != 0;
 	}
 	
 	public int GetFlagTarget()
@@ -340,7 +359,12 @@ methodmap Player
 	
 	public bool HasFlagTarget()
 	{
-		return this.m_hFollowingFlagTarget != -1;
+		return IsValidEntity(this.m_hFollowingFlagTarget);
+	}
+	
+	public void SetSpawnPoint(int spawnPoint)
+	{
+		this.m_spawnPointEntity = spawnPoint;
 	}
 	
 	public BombDeployingState_t GetDeployingBombState()
@@ -440,12 +464,12 @@ methodmap Player
 	
 	public void GetIdleSound(char[] buffer, int maxlen)
 	{
-		strcopy(buffer, maxlen, m_szIdleSound[this._client]);
+		strcopy(buffer, maxlen, m_szIdleSound[this.index]);
 	}
 	
 	public void SetIdleSound(const char[] soundName)
 	{
-		strcopy(m_szIdleSound[this._client], sizeof(m_szIdleSound[]), soundName);
+		strcopy(m_szIdleSound[this.index], sizeof(m_szIdleSound[]), soundName);
 	}
 	
 	public void ClearIdleSound()
@@ -457,7 +481,7 @@ methodmap Player
 	{
 		this.m_fModelScaleOverride = fScale;
 		
-		SetModelScale(this._client, this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : 1.0);
+		SetModelScale(this.index, this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : 1.0);
 	}
 	
 	public MissionType GetPrevMission()
@@ -532,14 +556,14 @@ methodmap Player
 	{
 		this.StopIdleSound();
 		
-		if (!GameRules_IsMannVsMachineMode())
+		if (!IsMannVsMachineMode())
 			return;
 		
-		if (GetEntProp(this._client, Prop_Send, "m_bIsMiniBoss"))
+		if (this.IsMiniBoss())
 		{
 			char pszSoundName[PLATFORM_MAX_PATH];
 			
-			TFClassType class = TF2_GetPlayerClass(this._client);
+			TFClassType class = TF2_GetPlayerClass(this.index);
 			switch (class)
 			{
 				case TFClass_Heavy:
@@ -574,7 +598,7 @@ methodmap Player
 			
 			if (pszSoundName[0])
 			{
-				EmitGameSoundToAll(pszSoundName, this._client);
+				EmitGameSoundToAll(pszSoundName, this.index);
 				this.SetIdleSound(pszSoundName);
 			}
 		}
@@ -587,44 +611,48 @@ methodmap Player
 		
 		if (idleSound[0])
 		{
-			StopGameSound(this._client, idleSound);
+			StopGameSound(this.index, idleSound);
 			this.ClearIdleSound();
 		}
 	}
 	
 	public void SetName(const char[] name)
 	{
-		if (GetClientName(this._client, m_szOldClientName[this._client], sizeof(m_szOldClientName[])))
+		if (GetClientName(this.index, m_szOldClientName[this.index], sizeof(m_szOldClientName[])))
 		{
-			SetClientName(this._client, name);
+			SetClientName(this.index, name);
 		}
 	}
 	
 	public void ResetName()
 	{
-		if (m_szOldClientName[this._client][0] == EOS)
+		if (m_szOldClientName[this.index][0] == EOS)
 			return;
 		
-		SetClientName(this._client, m_szOldClientName[this._client]);
-		strcopy(m_szOldClientName[this._client], sizeof(m_szOldClientName[]), "");
+		SetClientName(this.index, m_szOldClientName[this.index]);
+		strcopy(m_szOldClientName[this.index], sizeof(m_szOldClientName[]), "");
+	}
+	
+	public void SetDifficulty(DifficultyType difficulty)
+	{
+		this.SetProp(Prop_Send, "m_nBotSkill", difficulty);
 	}
 	
 	public void ModifyMaxHealth(int nNewMaxHealth, bool bSetCurrentHealth = true, bool bAllowModelScaling = true)
 	{
-		int maxHealth = TF2Util_GetEntityMaxHealth(this._client);
-		if (maxHealth != nNewMaxHealth)
+		if (TF2Util_GetEntityMaxHealth(this.index) != nNewMaxHealth)
 		{
-			TF2Attrib_SetByName(this._client, "hidden maxhealth non buffed", float(nNewMaxHealth - maxHealth));
+			TF2Attrib_SetByName(this.index, "hidden maxhealth non buffed", float(nNewMaxHealth - TF2Util_GetEntityMaxHealth(this.index)));
 		}
 		
 		if (bSetCurrentHealth)
 		{
-			SetEntProp(this._client, Prop_Data, "m_iHealth", nNewMaxHealth);
+			this.SetProp(Prop_Data, "m_iHealth", nNewMaxHealth);
 		}
 		
-		if (bAllowModelScaling && GetEntProp(this._client, Prop_Send, "m_bIsMiniBoss"))
+		if (bAllowModelScaling && this.IsMiniBoss())
 		{
-			SetModelScale(this._client, this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : tf_mvm_miniboss_scale.FloatValue);
+			SetModelScale(this.index, this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : tf_mvm_miniboss_scale.FloatValue);
 		}
 	}
 	
@@ -638,15 +666,13 @@ methodmap Player
 		this.m_eventChangeAttributes.Push(newEvent);
 	}
 	
-	public EventChangeAttributes_t GetEventChangeAttributes(const char[] pszEventName)
+	public EventChangeAttributes_t GetEventChangeAttributes(Address pszEventName)
 	{
 		for (int i = 0; i < this.m_eventChangeAttributes.Length; ++i)
 		{
 			EventChangeAttributes_t attributes = this.m_eventChangeAttributes.Get(i);
 			
-			char eventName[64];
-			attributes.GetEventName(eventName, sizeof(eventName));
-			if (StrEqual(eventName, pszEventName, false))
+			if (StrPtrEquals(attributes.m_eventName, pszEventName))
 			{
 				return attributes;
 			}
@@ -658,7 +684,7 @@ methodmap Player
 	{
 		if (pEvent)
 		{
-			SetEntProp(this._client, Prop_Send, "m_nBotSkill", pEvent.m_skill);
+			this.SetDifficulty(pEvent.m_skill);
 			
 			this.ClearWeaponRestrictions();
 			this.SetWeaponRestriction(pEvent.m_weaponRestriction);
@@ -668,35 +694,36 @@ methodmap Player
 			this.ClearAllAttributes();
 			this.SetAttribute(pEvent.m_attributeFlags);
 			
-			if (GameRules_IsMannVsMachineMode())
+			if (IsMannVsMachineMode())
 			{
 				this.SetAttribute(BECOME_SPECTATOR_ON_DEATH);
 				this.SetAttribute(RETAIN_BUILDINGS);
 			}
 			
 			// cache off health value before we clear attribute because ModifyMaxHealth adds new attribute and reset the health
-			int nHealth = GetEntProp(this._client, Prop_Data, "m_iHealth");
-			int nMaxHealth = TF2Util_GetEntityMaxHealth(this._client);
+			int nHealth = this.GetProp(Prop_Data, "m_iHealth");
+			int nMaxHealth = TF2Util_GetEntityMaxHealth(this.index);
 			
 			// remove any player attributes
-			TF2Attrib_RemoveAll(this._client);
+			TF2Attrib_RemoveAll(this.index);
 			// and add ones that we want specifically
 			for (int i = 0; i < pEvent.m_characterAttributes.Count(); i++)
 			{
-				Address characterAttributes = pEvent.m_characterAttributes.Get(i, 8); // static_attrib_t
-				int defIndex = Deref(characterAttributes, NumberType_Int16);
+				Address characterAttributes = pEvent.m_characterAttributes.Get(i, GetOffset("sizeof(static_attrib_t)"));
+				int defIndex = Deref(characterAttributes + GetOffset("static_attrib_t::iDefIndex"), NumberType_Int16);
 				
 				Address pDef = TF2Econ_GetAttributeDefinitionAddress(defIndex);
 				if (pDef)
 				{
-					float flValue = Deref(characterAttributes + view_as<Address>(0x4));
-					TF2Attrib_SetByDefIndex(this._client, defIndex, flValue);
+					float flValue = Deref(characterAttributes + GetOffset("static_attrib_t::m_value"));
+					TF2Attrib_SetByDefIndex(this.index, defIndex, flValue);
 				}
 			}
+			TF2Attrib_ClearCache(this.index);
 			
 			// set health back to what it was before we clear bot's attributes
 			this.ModifyMaxHealth(nMaxHealth);
-			SetEntProp(this._client, Prop_Data, "m_iHealth", nHealth);
+			this.SetProp(Prop_Data, "m_iHealth", nHealth);
 			
 			// give items to bot before apply attribute changes
 			for (int i = 0; i < pEvent.m_items.Count(); i++)
@@ -709,26 +736,26 @@ methodmap Player
 			
 			for (int i = 0; i < pEvent.m_itemsAttributes.Count(); i++)
 			{
-				Address itemAttributes = pEvent.m_itemsAttributes.Get(i);
+				Address itemAttributes = pEvent.m_itemsAttributes.Get(i, GetOffset("sizeof(item_attributes_t)"));
 				
 				char itemName[64];
-				PtrToString(Deref(itemAttributes), itemName, sizeof(itemName));
+				PtrToString(Deref(itemAttributes + GetOffset("item_attributes_t::m_itemName")), itemName, sizeof(itemName));
 				
-				int itemDef = GetItemDefinitionByName(itemName);
+				int itemDef = GetItemDefinitionIndexByName(itemName);
 				
 				for (int iItemSlot = LOADOUT_POSITION_PRIMARY; iItemSlot < CLASS_LOADOUT_POSITION_COUNT; iItemSlot++)
 				{
-					int entity = TF2Util_GetPlayerLoadoutEntity(this._client, iItemSlot);
+					int entity = TF2Util_GetPlayerLoadoutEntity(this.index, iItemSlot);
 					
 					if (entity != -1 && itemDef == GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"))
 					{
-						CUtlVector m_attributes = CUtlVector(itemAttributes + view_as<Address>(0x8));
-						for (int iAtt = 0; iAtt < m_attributes.Count(); ++iAtt)
+						CUtlVector attributes = CUtlVector(itemAttributes + GetOffset("item_attributes_t::m_attributes"));
+						for (int iAtt = 0; iAtt < attributes.Count(); ++iAtt)
 						{
-							Address attrib = m_attributes.Get(iAtt, 8); // item_attributes_t
+							Address attrib = attributes.Get(iAtt, GetOffset("sizeof(static_attrib_t)"));
 							
-							int defIndex = Deref(attrib, NumberType_Int16);
-							float value = Deref(attrib + view_as<Address>(0x4));
+							int defIndex = Deref(attrib + GetOffset("static_attrib_t::iDefIndex"), NumberType_Int16);
+							float value = Deref(attrib + GetOffset("static_attrib_t::m_value"));
 							
 							TF2Attrib_SetByDefIndex(entity, defIndex, value);
 						}
@@ -754,57 +781,80 @@ methodmap Player
 				
 				this.AddTag(tag);
 			}
+			
+			// Request to Add in Endless
+			if (g_pPopulationManager.IsInEndlessWaves())
+			{
+				g_pPopulationManager.EndlessSetAttributesForBot(this.index);
+			}
 		}
 	}
 	
-	public void AddItem(const char[] pszItemName)
+	public void AddItem(const char[] szItemName)
 	{
-		int defindex = GetItemDefinitionByName(pszItemName);
+		int itemDefIndex = GetItemDefinitionIndexByName(szItemName);
 		
-		// If we already have an item in that slot, remove it
-		TFClassType class = TF2_GetPlayerClass(this._client);
-		int slot = TF2Econ_GetItemLoadoutSlot(defindex, class);
-		int newItemRegionMask = TF2Econ_GetItemEquipRegionMask(defindex);
-		
-		if (IsWearableSlot(slot))
+		Handle item = GenerateItem(this.index, itemDefIndex);
+		if (item)
 		{
-			// Remove any wearable that has a conflicting equip_region
-			for (int wbl = 0; wbl < TF2Util_GetPlayerWearableCount(this._client); wbl++)
+			// If we already have an item in that slot, remove it
+			TFClassType class = TF2_GetPlayerClass(this.index);
+			int slot = TF2Econ_GetItemLoadoutSlot(itemDefIndex, class);
+			int newItemRegionMask = TF2Econ_GetItemEquipRegionMask(itemDefIndex);
+			
+			if (IsWearableSlot(slot))
 			{
-				int pWearable = TF2Util_GetPlayerWearable(this._client, wbl);
-				if (pWearable == -1)
-					continue;
-				
-				int wearableDefindex = GetEntProp(pWearable, Prop_Send, "m_iItemDefinitionIndex");
-				if (wearableDefindex == DEFINDEX_UNDEFINED)
-					continue;
-				
-				int wearableRegionMask = TF2Econ_GetItemEquipRegionMask(wearableDefindex);
-				
-				if (wearableRegionMask & newItemRegionMask)
+				// Remove any wearable that has a conflicting equip_region
+				for (int wbl = 0; wbl < TF2Util_GetPlayerWearableCount(this.index); wbl++)
 				{
-					TF2_RemoveWearable(this._client, pWearable);
+					int pWearable = TF2Util_GetPlayerWearable(this.index, wbl);
+					if (pWearable == -1)
+						continue;
+					
+					int wearableDefIndex = GetEntProp(pWearable, Prop_Send, "m_iItemDefinitionIndex");
+					if (wearableDefIndex == INVALID_ITEM_DEF_INDEX)
+						continue;
+					
+					int wearableRegionMask = TF2Econ_GetItemEquipRegionMask(wearableDefIndex);
+					if (wearableRegionMask & newItemRegionMask)
+					{
+						TF2_RemoveWearable(this.index, pWearable);
+					}
 				}
 			}
+			else
+			{
+				int entity = TF2Util_GetPlayerLoadoutEntity(this.index, slot);
+				if (entity != -1)
+				{
+					RemovePlayerItem(this.index, entity);
+					RemoveEntity(entity);
+				}
+			}
+			
+			int newItem = TF2Items_GiveNamedItem(this.index, item);
+			if (newItem != -1)
+			{
+				if (TF2Util_IsEntityWearable(newItem))
+				{
+					TF2Util_EquipPlayerWearable(this.index, newItem);
+				}
+				else
+				{
+					EquipPlayerWeapon(this.index, newItem);
+				}
+			}
+			
+			SDKCall_PostInventoryApplication(this.index);
 		}
 		else
 		{
-			int pEntity = TF2Util_GetPlayerLoadoutEntity(this._client, slot);
-			if (pEntity != -1)
+			if (szItemName[0])
 			{
-				RemovePlayerItem(this._client, pEntity);
-				RemoveEntity(pEntity);
+				LogError("CTFBotSpawner::AddItemToBot: Invalid item %s.", szItemName);
 			}
 		}
-		
-		int item = CreateRobotItem(this._client, defindex);
-		
-		if (TF2Util_IsEntityWearable(item))
-			TF2Util_EquipPlayerWearable(this._client, item);
-		else
-			EquipPlayerWeapon(this._client, item);
-		
-		SDKCall_PostInventoryApplication(this._client);
+		delete item;
 	}
 	
 	public bool IsWeaponRestricted(int weapon)
@@ -827,7 +877,7 @@ methodmap Player
 				// Always allow specific passive weapons
 				return false;
 			}
-			else if (TF2Attrib_GetByName(weapon, "is_passive_weapon"))
+			else if (TF2Attrib_HookValueInt(0, "is_passive_weapon", weapon))
 			{
 				// Always allow weapons with is_passive_weapon attribute
 				return false;
@@ -836,7 +886,7 @@ methodmap Player
 		
 		// Get the weapon's loadout slot
 		int itemdef = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
-		int iLoadoutSlot = TF2Econ_GetItemLoadoutSlot(itemdef, TF2_GetPlayerClass(this._client));
+		int iLoadoutSlot = TF2Econ_GetItemLoadoutSlot(itemdef, TF2_GetPlayerClass(this.index));
 		
 		if (this.HasWeaponRestriction(MELEE_ONLY))
 		{
@@ -861,19 +911,19 @@ methodmap Player
 		if (this.HasWeaponRestriction(MELEE_ONLY))
 		{
 			// force use of melee weapons
-			SDKCall_WeaponSwitch(this._client, GetPlayerWeaponSlot(this._client, TFWeaponSlot_Melee));
+			SDKCall_WeaponSwitch(this.index, GetPlayerWeaponSlot(this.index, TFWeaponSlot_Melee));
 			return true;
 		}
 		
 		if (this.HasWeaponRestriction(PRIMARY_ONLY))
 		{
-			SDKCall_WeaponSwitch(this._client, GetPlayerWeaponSlot(this._client, TFWeaponSlot_Primary));
+			SDKCall_WeaponSwitch(this.index, GetPlayerWeaponSlot(this.index, TFWeaponSlot_Primary));
 			return true;
 		}
 		
 		if (this.HasWeaponRestriction(SECONDARY_ONLY))
 		{
-			SDKCall_WeaponSwitch(this._client, GetPlayerWeaponSlot(this._client, TFWeaponSlot_Secondary));
+			SDKCall_WeaponSwitch(this.index, GetPlayerWeaponSlot(this.index, TFWeaponSlot_Secondary));
 			return true;
 		}
 		
@@ -884,7 +934,7 @@ methodmap Player
 	{
 		if (weapon == MY_CURRENT_GUN)
 		{
-			weapon = GetEntPropEnt(this._client, Prop_Send, "m_hActiveWeapon");
+			weapon = this.GetPropEnt(Prop_Send, "m_hActiveWeapon");
 		}
 		
 		if (weapon)
@@ -906,19 +956,19 @@ methodmap Player
 		int nCarriedFlags = 0;
 		
 		// MvM Engineer bot never pick up a flag
-		if (GameRules_IsMannVsMachineMode())
+		if (IsMannVsMachineMode())
 		{
-			if (TF2_GetClientTeam(this._client) == TFTeam_Invaders && TF2_GetPlayerClass(this._client) == TFClass_Engineer)
+			if (TF2_GetClientTeam(this.index) == TFTeam_Invaders && TF2_GetPlayerClass(this.index) == TFClass_Engineer)
 			{
-				return -1;
+				return INVALID_ENT_REFERENCE;
 			}
 			
 			if (this.HasAttribute(IGNORE_FLAG))
 			{
-				return -1;
+				return INVALID_ENT_REFERENCE;
 			}
 			
-			if (GameRules_IsMannVsMachineMode() && this.HasFlagTarget())
+			if (IsMannVsMachineMode() && this.HasFlagTarget())
 			{
 				return this.GetFlagTarget();
 			}
@@ -927,19 +977,19 @@ methodmap Player
 		ArrayList flagsList = new ArrayList();
 		
 		// Collect flags
-		int flag = MaxClients + 1;
+		int flag = -1;
 		while ((flag = FindEntityByClassname(flag, "item_teamflag")) != -1)
 		{
 			if (GetEntProp(flag, Prop_Send, "m_bDisabled"))
 				continue;
 			
 			// If I'm carrying a flag, look for mine and early-out
-			if (HasTheFlag(this._client))
+			if (HasTheFlag(this.index))
 			{
-				if (GetEntPropEnt(flag, Prop_Send, "m_hOwnerEntity") == this._client)
+				if (GetEntPropEnt(flag, Prop_Send, "m_hOwnerEntity") == this.index)
 				{
 					delete flagsList;
-					return flag;
+					return EntIndexToEntRef(flag);
 				}
 			}
 			
@@ -947,7 +997,7 @@ methodmap Player
 			{
 				case TF_FLAGTYPE_CTF:
 				{
-					if (view_as<TFTeam>(GetEntProp(flag, Prop_Send, "m_iTeamNum")) == GetEnemyTeam(TF2_GetClientTeam(this._client)))
+					if (view_as<TFTeam>(GetEntProp(flag, Prop_Send, "m_iTeamNum")) == GetEnemyTeam(TF2_GetClientTeam(this.index)))
 					{
 						// we want to steal the other team's flag
 						flagsList.Push(flag);
@@ -956,7 +1006,7 @@ methodmap Player
 				
 				case TF_FLAGTYPE_ATTACK_DEFEND, TF_FLAGTYPE_TERRITORY_CONTROL, TF_FLAGTYPE_INVADE:
 				{
-					if (view_as<TFTeam>(GetEntProp(flag, Prop_Send, "m_iTeamNum")) != GetEnemyTeam(TF2_GetClientTeam(this._client)))
+					if (view_as<TFTeam>(GetEntProp(flag, Prop_Send, "m_iTeamNum")) != GetEnemyTeam(TF2_GetClientTeam(this.index)))
 					{
 						// we want to move our team's flag or a neutral flag
 						flagsList.Push(flag);
@@ -970,39 +1020,40 @@ methodmap Player
 			}
 		}
 		
-		int pClosestFlag = -1;
-		float flClosestFlagDist = float(cellmax);
-		int pClosestUncarriedFlag = -1;
-		float flClosestUncarriedFlagDist = float(cellmax);
+		int closestFlag = INVALID_ENT_REFERENCE;
+		float flClosestFlagDist = FLT_MAX;
+		int closestUncarriedFlag = INVALID_ENT_REFERENCE;
+		float flClosestUncarriedFlagDist = FLT_MAX;
 		
-		if (GameRules_IsMannVsMachineMode())
+		if (IsMannVsMachineMode())
 		{
 			for (int i = 0; i < flagsList.Length; i++)
 			{
-				flag = flagsList.Get(i);
-				
-				// Find the closest
-				float flagOrigin[3], playerOrigin[3];
-				GetEntPropVector(flag, Prop_Data, "m_vecAbsOrigin", flagOrigin);
-				GetClientAbsOrigin(this._client, playerOrigin);
-				
-				float origins[3];
-				SubtractVectors(flagOrigin, playerOrigin, origins);
-				
-				float flDist = GetVectorLength(origins, true);
-				if (flDist < flClosestFlagDist)
+				if (IsValidEntity(flagsList.Get(i)))
 				{
-					pClosestFlag = flag;
-					flClosestFlagDist = flDist;
-				}
-				
-				// Find the closest uncarried
-				if (nCarriedFlags < flagsList.Length && GetEntProp(flag, Prop_Send, "m_nFlagStatus") != TF_FLAGINFO_STOLEN)
-				{
-					if (flDist < flClosestUncarriedFlagDist)
+					// Find the closest
+					float flagOrigin[3], playerOrigin[3];
+					GetEntPropVector(flagsList.Get(i), Prop_Data, "m_vecAbsOrigin", flagOrigin);
+					this.GetAbsOrigin(playerOrigin);
+					
+					float origins[3];
+					SubtractVectors(flagOrigin, playerOrigin, origins);
+					
+					float flDist = GetVectorLength(origins, true);
+					if (flDist < flClosestFlagDist)
 					{
-						pClosestUncarriedFlag = flag;
-						flClosestUncarriedFlagDist = flDist;
+						closestFlag = EntIndexToEntRef(flagsList.Get(i));
+						flClosestFlagDist = flDist;
+					}
+					
+					// Find the closest uncarried
+					if (nCarriedFlags < flagsList.Length && GetEntProp(flagsList.Get(i), Prop_Send, "m_nFlagStatus") != TF_FLAGINFO_STOLEN)
+					{
+						if (flDist < flClosestUncarriedFlagDist)
+						{
+							closestUncarriedFlag = EntIndexToEntRef(flagsList.Get(i));
+							flClosestUncarriedFlagDist = flDist;
+						}
 					}
 				}
 			}
@@ -1011,18 +1062,18 @@ methodmap Player
 		delete flagsList;
 		
 		// If we have an uncarried flag, prioritize
-		if (pClosestUncarriedFlag != -1)
-			return pClosestUncarriedFlag;
+		if (closestUncarriedFlag != INVALID_ENT_REFERENCE)
+			return closestUncarriedFlag;
 		
-		return pClosestFlag;
+		return closestFlag;
 	}
 	
 	public int GetFlagCaptureZone()
 	{
-		int zone = MaxClients + 1;
+		int zone = -1;
 		while ((zone = FindEntityByClassname(zone, "func_capturezone")) != -1)
 		{
-			if (GetEntProp(zone, Prop_Data, "m_iTeamNum") == GetClientTeam(this._client))
+			if (GetEntProp(zone, Prop_Data, "m_iTeamNum") == GetClientTeam(this.index))
 			{
 				return zone;
 			}
@@ -1031,19 +1082,27 @@ methodmap Player
 		return -1;
 	}
 	
+	public float CalculateSpawnTime()
+	{
+		// factor in squad speed
+		float flSpeed = this.IsInASquad() ? this.GetSquad().GetSlowestMemberSpeed() : this.GetPropFloat(Prop_Send, "m_flMaxspeed");
+		float flTime = mitm_min_spawn_hurry_time.FloatValue * (400.0 / flSpeed);
+		return Clamp(flTime, mitm_min_spawn_hurry_time.FloatValue, mitm_max_spawn_hurry_time.FloatValue);
+	}
+	
 	public bool ShouldAutoJump()
 	{
 		if (!this.HasAttribute(AUTO_JUMP))
 			return false;
 		
-		if (!m_autoJumpTimer[this._client].HasStarted())
+		if (!m_autoJumpTimer[this.index].HasStarted())
 		{
-			m_autoJumpTimer[this._client].Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
+			m_autoJumpTimer[this.index].Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
 			return true;
 		}
-		else if (m_autoJumpTimer[this._client].IsElapsed())
+		else if (m_autoJumpTimer[this.index].IsElapsed())
 		{
-			m_autoJumpTimer[this._client].Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
+			m_autoJumpTimer[this.index].Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
 			return true;
 		}
 		
@@ -1053,15 +1112,15 @@ methodmap Player
 	public int GetClosestCaptureZone()
 	{
 		int captureZone = -1;
-		float flClosestDistance = float(cellmax);
+		float flClosestDistance = FLT_MAX;
 		
-		int tempCaptureZone = MaxClients + 1;
+		int tempCaptureZone = -1;
 		while ((tempCaptureZone = FindEntityByClassname(tempCaptureZone, "func_capturezone")) != -1)
 		{
-			if (!GetEntProp(tempCaptureZone, Prop_Data, "m_bDisabled") && GetEntProp(tempCaptureZone, Prop_Data, "m_iTeamNum") == GetClientTeam(this._client))
+			if (!GetEntProp(tempCaptureZone, Prop_Data, "m_bDisabled") && GetEntProp(tempCaptureZone, Prop_Data, "m_iTeamNum") == GetClientTeam(this.index))
 			{
 				float origin[3], center[3];
-				GetClientAbsOrigin(this._client, origin);
+				this.GetAbsOrigin(origin);
 				CBaseEntity(tempCaptureZone).WorldSpaceCenter(center);
 				
 				float fCurrentDistance = GetVectorDistance(origin, center);
@@ -1085,7 +1144,7 @@ methodmap Player
 			if (!IsClientInGame(client))
 				continue;
 			
-			if (TF2_GetClientTeam(client) == TF2_GetClientTeam(this._client))
+			if (TF2_GetClientTeam(client) == TF2_GetClientTeam(this.index))
 				continue;
 			
 			enemyList.Push(client);
@@ -1098,7 +1157,7 @@ methodmap Player
 			disguise = TF2_GetPlayerClass(enemyList.Get(GetRandomInt(0, enemyList.Length - 1)));
 		}
 		
-		TF2_DisguisePlayer(this._client, GetEnemyTeam(TF2_GetClientTeam(this._client)), disguise);
+		TF2_DisguisePlayer(this.index, GetEnemyTeam(TF2_GetClientTeam(this.index)), disguise);
 		delete enemyList;
 	}
 	
@@ -1117,19 +1176,19 @@ methodmap Player
 		else
 			this.m_preferences &= ~view_as<int>(preference);
 		
-		ClientPrefs_SavePreferences(this._client, this.m_preferences);
+		ClientPrefs_SavePreferences(this.index, this.m_preferences);
 		
 		return true;
 	}
 	
 	public void MarkAsSupportEnemy()
 	{
-		SetEntData(this._client, GetOffset("CTFPlayer::m_bIsSupportEnemy"), true, 1);
+		SetEntData(this.index, GetOffset("CTFPlayer::m_bIsSupportEnemy"), true, 1);
 	}
 	
 	public void MarkAsLimitedSupportEnemy()
 	{
-		SetEntData(this._client, GetOffset("CTFPlayer::m_bIsLimitedSupportEnemy"), true, 1);
+		SetEntData(this.index, GetOffset("CTFPlayer::m_bIsLimitedSupportEnemy"), true, 1);
 	}
 	
 	public CTFBotSquad GetSquad()
@@ -1141,7 +1200,7 @@ methodmap Player
 	{
 		if (squad)
 		{
-			squad.Join(this._client);
+			squad.Join(this.index);
 			this.m_squad = squad;
 		}
 	}
@@ -1150,7 +1209,7 @@ methodmap Player
 	{
 		if (this.m_squad)
 		{
-			this.m_squad.Leave(this._client);
+			this.m_squad.Leave(this.index);
 			this.m_squad = NULL_SQUAD;
 		}
 	}
@@ -1168,17 +1227,62 @@ methodmap Player
 		}
 	}
 	
-	public void Initialize()
+	public Party GetParty()
 	{
-		this.m_teleportWhereName = new ArrayList(64);
+		return this.m_party;
+	}
+	
+	public void InviteToParty(Party party)
+	{
+		if (party)
+		{
+			party.AddInvite(this.index);
+		}
+	}
+	
+	public void JoinParty(Party party)
+	{
+		if (party)
+		{
+			party.Join(this.index);
+			this.m_party = party;
+		}
+	}
+	
+	public void LeaveParty()
+	{
+		if (this.m_party)
+		{
+			this.m_party.Leave(this.index);
+			this.m_party = NULL_PARTY;
+		}
+	}
+	
+	public bool IsInAParty()
+	{
+		return this.m_party == NULL_PARTY ? false : true;
+	}
+	
+	public void DeleteParty()
+	{
+		if (this.m_party)
+		{
+			this.m_party = NULL_PARTY;
+		}
+	}
+	
+	public void Init()
+	{
+		this.m_autoJumpTimer = new CountdownTimer();
+		this.m_teleportWhereName = new ArrayList(ByteCountToCells(64));
 		this.m_eventChangeAttributes = new ArrayList();
-		this.m_tags = new ArrayList(64);
+		this.m_tags = new ArrayList(ByteCountToCells(64));
 	}
 	
 	public void ResetOnTeamChange()
 	{
 		this.SetAutoJump(0.0, 0.0);
-		m_autoJumpTimer[this._client].Invalidate();
+		this.m_autoJumpTimer.Invalidate();
 		
 		this.ClearTeleportWhere();
 		this.ClearEventChangeAttributes();
@@ -1187,9 +1291,10 @@ methodmap Player
 		this.ClearAllAttributes();
 		this.ClearIdleSound();
 		this.m_fModelScaleOverride = 0.0;
-		this.m_flRequiredSpawnLeaveTime = 0.0;
-		this.m_spawnPointEntity = -1;
-		this.m_hFollowingFlagTarget = -1;
+		this.m_flSpawnTimeLeft = 0.0;
+		this.m_missionTarget = INVALID_ENT_REFERENCE;
+		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
+		this.m_hFollowingFlagTarget = INVALID_ENT_REFERENCE;
 	}
 	
 	public void Reset()
@@ -1200,9 +1305,8 @@ methodmap Player
 		this.m_bWasMiniBoss = false;
 		this.m_defenderQueuePoints = -1;
 		this.m_preferences = -1;
-		this.m_hudMsgLevel = cellmax;
 		
-		strcopy(m_szOldClientName[this._client], sizeof(m_szOldClientName[]), "");
+		strcopy(m_szOldClientName[this.index], sizeof(m_szOldClientName[]), "");
 	}
 }
 
@@ -1211,6 +1315,14 @@ methodmap EventChangeAttributes_t
 	public EventChangeAttributes_t(Address address)
 	{
 		return view_as<EventChangeAttributes_t>(address);
+	}
+	
+	property Address m_eventName
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("EventChangeAttributes_t::m_eventName"));
+		}
 	}
 	
 	property DifficultyType m_skill
@@ -1275,11 +1387,6 @@ methodmap EventChangeAttributes_t
 		{
 			return CUtlVector(this + GetOffset("EventChangeAttributes_t::m_tags"));
 		}
-	}
-	
-	public void GetEventName(char[] buffer, int maxlen)
-	{
-		PtrToString(Deref(this + GetOffset("EventChangeAttributes_t::m_eventName")), buffer, maxlen);
 	}
 };
 
@@ -1456,6 +1563,18 @@ methodmap CWave
 		}
 	}
 	
+	property int m_nNumSentryBustersKilled
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CWave::m_nNumSentryBustersKilled"));
+		}
+		public set(int nNumSentryBustersKilled)
+		{
+			WriteVal(this + GetOffset("CWave::m_nNumSentryBustersKilled"), nNumSentryBustersKilled);
+		}
+	}
+	
 	property int m_nSentryBustersSpawned
 	{
 		public get()
@@ -1467,28 +1586,55 @@ methodmap CWave
 			WriteVal(this + GetOffset("CWave::m_nSentryBustersSpawned"), nSentryBustersSpawned);
 		}
 	}
+	
+	public int NumSentryBustersSpawned()
+	{
+		return this.m_nSentryBustersSpawned;
+	}
+	
+	public void IncrementSentryBustersSpawned()
+	{
+		this.m_nSentryBustersSpawned++;
+	}
+	
+	public int NumSentryBustersKilled()
+	{
+		return this.m_nNumSentryBustersKilled;
+	}
+	
+	public void IncrementSentryBustersKilled()
+	{
+		this.m_nNumSentryBustersKilled++;
+	}
+	
+	public void ResetSentryBustersKilled()
+	{
+		this.m_nNumSentryBustersKilled = 0;
+	}
+	
+	public int NumEngineersTeleportSpawned()
+	{
+		return this.m_nNumEngineersTeleportSpawned;
+	}
+	
+	public void IncrementEngineerTeleportSpawned()
+	{
+		this.m_nNumEngineersTeleportSpawned++;
+	}
 }
 
-methodmap CPopulationManager
+methodmap CPopulationManager < CBaseEntity
 {
 	public CPopulationManager(int entity)
 	{
 		return view_as<CPopulationManager>(entity);
 	}
 	
-	property int _index
-	{
-		public get()
-		{
-			return view_as<int>(this);
-		}
-	}
-	
 	property bool m_canBotsAttackWhileInSpawnRoom
 	{
 		public get()
 		{
-			return GetEntData(this._index, GetOffset("CPopulationManager::m_canBotsAttackWhileInSpawnRoom"), 1) != 0;
+			return GetEntData(this.index, GetOffset("CPopulationManager::m_canBotsAttackWhileInSpawnRoom"), 1) != 0;
 		}
 	}
 	
@@ -1496,7 +1642,23 @@ methodmap CPopulationManager
 	{
 		public get()
 		{
-			return GetEntData(this._index, GetOffset("CPopulationManager::m_bSpawningPaused"), 1) != 0;
+			return GetEntData(this.index, GetOffset("CPopulationManager::m_bSpawningPaused"), 1) != 0;
+		}
+	}
+	
+	property Address m_defaultEventChangeAttributesName
+	{
+		public get()
+		{
+			return view_as<Address>(GetEntData(this.index, GetOffset("CPopulationManager::m_defaultEventChangeAttributesName")));
+		}
+	}
+	
+	property CUtlVector m_EndlessActiveBotUpgrades
+	{
+		public get()
+		{
+			return CUtlVector(GetEntityAddress(this.index) + GetOffset("CPopulationManager::m_EndlessActiveBotUpgrades"));
 		}
 	}
 	
@@ -1510,36 +1672,80 @@ methodmap CPopulationManager
 		return this.m_bSpawningPaused;
 	}
 	
+	public Address GetDefaultEventChangeAttributesName()
+	{
+		return this.m_defaultEventChangeAttributesName;
+	}
+	
 	public void ResetMap()
 	{
-		SDKCall_ResetMap(this._index);
+		SDKCall_ResetMap(this.index);
 	}
 	
 	public CWave GetCurrentWave()
 	{
-		return CWave(SDKCall_GetCurrentWave(this._index));
+		return CWave(SDKCall_GetCurrentWave(this.index));
+	}
+	
+	public bool IsInEndlessWaves()
+	{
+		return SDKCall_IsInEndlessWaves(this.index);
 	}
 	
 	public float GetHealthMultiplier(bool bIsTank = false)
 	{
-		return SDKCall_GetHealthMultiplier(this._index, bIsTank);
+		return SDKCall_GetHealthMultiplier(this.index, bIsTank);
 	}
 	
 	public void GetSentryBusterDamageAndKillThreshold(int &nDamage, int &nKills)
 	{
-		SDKCall_GetSentryBusterDamageAndKillThreshold(this._index, nDamage, nKills);
+		SDKCall_GetSentryBusterDamageAndKillThreshold(this.index, nDamage, nKills);
 	}
 	
-	public void GetDefaultEventChangeAttributesName(char[] buffer, int maxlen)
+	public void EndlessSetAttributesForBot(int player)
 	{
-		PtrToString(GetEntData(this._index, GetOffset("CPopulationManager::m_defaultEventChangeAttributesName")), buffer, maxlen);
+		int nHealth = GetEntProp(player, Prop_Data, "m_iHealth");
+		int nMaxHealth = TF2Util_GetEntityMaxHealth(player);
+		
+		for (int i = 0; i < this.m_EndlessActiveBotUpgrades.Count(); ++i)
+		{
+			CMvMBotUpgrade upgrade = this.m_EndlessActiveBotUpgrades.Get(i, GetOffset("sizeof(CMvMBotUpgrade)"));
+			
+			if (upgrade.bIsBotAttr == true)
+			{
+				Player(player).SetAttribute(view_as<AttributeType>(RoundFloat(upgrade.flValue)));
+			}
+			else if (upgrade.bIsSkillAttr == true)
+			{
+				Player(player).SetDifficulty(view_as<DifficultyType>(RoundFloat(upgrade.flValue)));
+			}
+			else
+			{
+				Address pDef = TF2Econ_GetAttributeDefinitionAddress(upgrade.iAttribIndex);
+				if (pDef)
+				{
+					Address pAttrib = TF2Attrib_GetByDefIndex(player, upgrade.iAttribIndex);
+					if (pAttrib)
+					{
+						TF2Attrib_SetValue(pAttrib, TF2Attrib_GetValue(pAttrib) + upgrade.flValue);
+					}
+					else
+					{
+						int iFormat = Deref(pDef + GetOffset("CEconItemAttributeDefinition::m_iDescriptionFormat"));
+						float flValue = upgrade.flValue;
+						if (iFormat == ATTDESCFORM_VALUE_IS_PERCENTAGE || iFormat == ATTDESCFORM_VALUE_IS_INVERTED_PERCENTAGE)
+						{
+							flValue += 1.0;
+						}
+						TF2Attrib_SetByDefIndex(player, upgrade.iAttribIndex, flValue);
+					}
+				}
+			}
+		}
+		
+		int nNewMaxHealth = TF2Util_GetEntityMaxHealth(player);
+		SetEntProp(player, Prop_Data, "m_iHealth", nHealth + nNewMaxHealth - nMaxHealth);
 	}
-}
-
-CPopulationManager GetPopulationManager()
-{
-	// There is only ever one population manager, so this should be safe...
-	return CPopulationManager(FindEntityByClassname(MaxClients + 1, "info_populator"));
 }
 
 methodmap BombInfo_t
@@ -1558,26 +1764,18 @@ methodmap BombInfo_t
 	}
 }
 
-methodmap CBaseTFBotHintEntity
+methodmap CBaseTFBotHintEntity < CBaseEntity
 {
 	public CBaseTFBotHintEntity(int entity)
 	{
 		return view_as<CBaseTFBotHintEntity>(entity);
 	}
 	
-	property int _index
-	{
-		public get()
-		{
-			return view_as<int>(this);
-		}
-	}
-	
 	property bool m_isDisabled
 	{
 		public get()
 		{
-			return GetEntData(this._index, GetOffset("CBaseTFBotHintEntity::m_isDisabled"), 1) != 0;
+			return GetEntData(this.index, GetOffset("CBaseTFBotHintEntity::m_isDisabled"), 1) != 0;
 		}
 	}
 	
@@ -1588,8 +1786,8 @@ methodmap CBaseTFBotHintEntity
 	
 	public bool OwnerObjectHasNoOwner()
 	{
-		int owner = GetEntPropEnt(this._index, Prop_Send, "m_hOwnerEntity");
-		if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
+		int owner = this.GetPropEnt(Prop_Send, "m_hOwnerEntity");
+		if (owner != -1 && IsBaseObject(owner))
 		{
 			if (GetEntPropEnt(owner, Prop_Send, "m_hBuilder") == -1)
 			{
@@ -1608,8 +1806,8 @@ methodmap CBaseTFBotHintEntity
 	
 	public bool OwnerObjectFinishBuilding()
 	{
-		int owner = GetEntPropEnt(this._index, Prop_Send, "m_hOwnerEntity");
-		if (owner != -1 && HasEntProp(owner, Prop_Send, "m_hBuilder"))
+		int owner = this.GetPropEnt(Prop_Send, "m_hOwnerEntity");
+		if (owner != -1 && IsBaseObject(owner))
 		{
 			return !GetEntProp(owner, Prop_Send, "m_bBuilding");
 		}
@@ -1624,13 +1822,180 @@ methodmap CWaveSpawnPopulator
 		return view_as<CWaveSpawnPopulator>(pThis);
 	}
 	
+	property bool m_bSupportWave
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CWaveSpawnPopulator::m_bSupportWave"), NumberType_Int8);
+		}
+	}
+	
+	property bool m_bLimitedSupport
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CWaveSpawnPopulator::m_bLimitedSupport"), NumberType_Int8);
+		}
+	}
+	
 	public bool IsSupportWave()
 	{
-		return Deref(this + GetOffset("CWaveSpawnPopulator::m_bSupportWave"), NumberType_Int8);
+		return this.m_bSupportWave;
 	}
 	
 	public bool IsLimitedSupportWave()
 	{
-		return Deref(this + GetOffset("CWaveSpawnPopulator::m_bLimitedSupport"), NumberType_Int8);
+		return this.m_bLimitedSupport;
+	}
+}
+
+methodmap CMvMBotUpgrade
+{
+	public CMvMBotUpgrade(Address pThis)
+	{
+		return view_as<CMvMBotUpgrade>(pThis);
+	}
+	
+	property Address szAttrib
+	{
+		public get()
+		{
+			return view_as<Address>(this + GetOffset("CMvMBotUpgrade::szAttrib"));
+		}
+	}
+	
+	property int iAttribIndex
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CMvMBotUpgrade::iAttribIndex"), NumberType_Int16);
+		}
+	}
+	
+	property float flValue
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CMvMBotUpgrade::flValue"));
+		}
+	}
+	
+	property bool bIsBotAttr
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CMvMBotUpgrade::bIsBotAttr"), NumberType_Int8);
+		}
+	}
+	
+	property bool bIsSkillAttr
+	{
+		public get()
+		{
+			return Deref(this + GetOffset("CMvMBotUpgrade::bIsSkillAttr"), NumberType_Int8);
+		}
+	}
+}
+
+methodmap CTFObjectiveResource < CBaseEntity
+{
+	public CTFObjectiveResource(int entity)
+	{
+		return view_as<CTFObjectiveResource>(entity);
+	}
+	
+	public void SetFlagCarrierUpgradeLevel(int nLevel)
+	{
+		this.SetProp(Prop_Send, "m_nFlagCarrierUpgradeLevel", nLevel);
+	}
+	
+	public void SetBaseMvMBombUpgradeTime(float nTime)
+	{
+		this.SetPropFloat(Prop_Send, "m_flMvMBaseBombUpgradeTime", nTime);
+	}
+	
+	public void SetNextMvMBombUpgradeTime(float nTime)
+	{
+		this.SetPropFloat(Prop_Send, "m_flMvMNextBombUpgradeTime", nTime);
+	}
+	
+	public bool GetMannVsMachineIsBetweenWaves()
+	{
+		return this.GetProp(Prop_Send, "m_bMannVsMachineBetweenWaves") != 0;
+	}
+	
+	public void IncrementMannVsMachineWaveClassCount(any iszClassIconName, int iFlags)
+	{
+		for (int i = 0; i < this.GetPropArraySize(Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
+		{
+			if (GetEntData(this.index, FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames") + (i * 4)) == iszClassIconName && (this.GetProp(Prop_Send, "m_nMannVsMachineWaveClassFlags", _, i) & iFlags))
+			{
+				this.SetProp(Prop_Send, "m_nMannVsMachineWaveClassCounts", this.GetProp(Prop_Send, "m_nMannVsMachineWaveClassCounts", _, i) + 1, _, i);
+				
+				if (this.GetProp(Prop_Send, "m_nMannVsMachineWaveClassCounts", _, i) <= 0)
+				{
+					this.SetProp(Prop_Send, "m_nMannVsMachineWaveClassCounts", 1, _, i);
+				}
+				
+				return;
+			}
+		}
+		
+		for (int i = 0; i < this.GetPropArraySize(Prop_Send, "m_iszMannVsMachineWaveClassNames2"); ++i)
+		{
+			if (GetEntData(this.index, FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames2") + (i * 4)) == iszClassIconName && (this.GetProp(Prop_Send, "m_nMannVsMachineWaveClassFlags2", _, i) & iFlags))
+			{
+				this.SetProp(Prop_Send, "m_nMannVsMachineWaveClassCounts2", this.GetProp(Prop_Send, "m_nMannVsMachineWaveClassCounts2", _, i) + 1, _, i);
+				
+				if (this.GetProp(Prop_Send, "m_nMannVsMachineWaveClassCounts2", _, i) <= 0)
+				{
+					this.SetProp(Prop_Send, "m_nMannVsMachineWaveClassCounts2", 1, _, i);
+				}
+				
+				return;
+			}
+		}
+	}
+	
+	public void SetMannVsMachineWaveClassActive(any iszClassIconName, bool bActive = true)
+	{
+		for (int i = 0; i < this.GetPropArraySize(Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
+		{
+			if (GetEntData(this.index, FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames") + (i * 4)) == iszClassIconName)
+			{
+				this.SetProp(Prop_Send, "m_bMannVsMachineWaveClassActive", bActive, _, i);
+				return;
+			}
+		}
+		
+		for (int i = 0; i < this.GetPropArraySize(Prop_Send, "m_iszMannVsMachineWaveClassNames2"); ++i)
+		{
+			if (GetEntData(this.index, FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames2") + (i * 4)) == iszClassIconName)
+			{
+				this.SetProp(Prop_Send, "m_bMannVsMachineWaveClassActive2", bActive, _, i);
+				return;
+			}
+		}
+	}
+	
+	public TFTeam GetOwningTeam(int index)
+	{
+		if (index >= this.GetProp(Prop_Send, "m_iNumControlPoints"))
+			return TFTeam_Unassigned;
+		
+		return view_as<TFTeam>(this.GetProp(Prop_Send, "m_iOwner", _, index));
+	}
+}
+
+methodmap CMannVsMachineStats < CBaseEntity
+{
+	public CMannVsMachineStats(int entity)
+	{
+		return view_as<CMannVsMachineStats>(entity);
+	}
+	
+	public int GetCurrentWave()
+	{
+		return this.GetProp(Prop_Send, "m_iCurrentWaveIdx");
 	}
 }

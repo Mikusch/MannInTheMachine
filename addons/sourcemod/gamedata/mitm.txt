@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (C) 2022  Mikusch
  *
  * This program is free software: you can redistribute it and/or modify
@@ -35,6 +35,16 @@
 			{
 				"linux"		"@_ZN18CPopulationManager12AllocateBotsEv"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x14\x53\x8B\xD9\x80\xBB\x81\x05\x00\x00\x00"
+			}
+			"CPopulationManager::EndlessRollEscalation"
+			{
+				"linux"		"@_ZN18CPopulationManager21EndlessRollEscalationEv"
+				"windows"	"\x55\x8B\xEC\x81\xEC\xCC\x02\x00\x00"
+			}
+			"CPopulationManager::IsInEndlessWaves"
+			{
+				"linux"		"@_ZN18CPopulationManager16IsInEndlessWavesEv"
+				"windows"	"\x80\xB9\xE2\x05\x00\x00\x00\x75\x2A\xA1\x2A\x2A\x2A\x2A\x83\x78\x30\x00\x74\x2A\x83\xB9\xB4\x05\x00\x00\x00\x7E\x2A\xB0\x01"
 			}
 			"CPopulationManager::GetHealthMultiplier"
 			{
@@ -264,6 +274,11 @@
 		}
 		"Offsets"
 		{
+			"Operating System"
+			{
+				"linux"		"0"
+				"windows"	"1"
+			}
 			"IPopulationSpawner::Spawn"
 			{
 				"linux"		"3"
@@ -309,6 +324,11 @@
 				"linux"		"254"
 				"windows"	"253"
 			}
+			"CBaseTrigger::PassesTriggerFilters"
+			{
+				"linux"		"205"
+				"windows"	"204"
+			}
 			"CItem::ComeToRest"
 			{
 				"linux"		"230"
@@ -318,6 +338,11 @@
 			{
 				// Linux uses signature call CTFBotSpawner::GetClassIcon
 				"windows"	"6"
+			}
+			"CTFPlayer::ShouldTransmit"
+			{
+				"linux"		"19"
+				"windows"	"18"
 			}
 			"CTFPlayer::Event_Killed"
 			{
@@ -368,6 +393,10 @@
 			{
 				"linux"		"202"
 				"windows"	"200"
+			"CTFGameRules::TeamMayCapturePoint"
+			{
+				"linux"		"155"
+				"windows"	"154"
 			}
 			"CTFPlayer::m_flSpawnTime"
 			{
@@ -376,33 +405,33 @@
 			}
 			"CTFPlayer::m_bIsMissionEnemy"
 			{
-				"linux"		"8820"
-				"windows"	"8816"
+				"linux"		"8840"
+				"windows"	"8836"
 			}
 			"CTFPlayer::m_bIsSupportEnemy"
 			{
-				"linux"		"8821"
-				"windows"	"8817"
+				"linux"		"8841"
+				"windows"	"8837"
 			}
 			"CTFPlayer::m_bIsLimitedSupportEnemy"
 			{
-				"linux"		"8822"
-				"windows"	"8818"
+				"linux"		"8842"
+				"windows"	"8838"
 			}
 			"CTFPlayer::m_pWaveSpawnPopulator"
 			{
-				"linux"		"8848"
-				"windows"	"8844"
+				"linux"		"8868"
+				"windows"	"8864"
 			}
 			"CTFPlayer::m_accumulatedSentryGunDamageDealt"
 			{
-				"linux"		"9060"
-				"windows"	"9056"
+				"linux"		"9080"
+				"windows"	"9076"
 			}
 			"CTFPlayer::m_accumulatedSentryGunKillCount"
 			{
-				"linux"		"9064"
-				"windows"	"9060"
+				"linux"		"9084"
+				"windows"	"9080"
 			}
 			"CTFWeaponBase::m_bInAttack2"
 			{
@@ -504,6 +533,11 @@
 				"linux"		"1524"
 				"windows"	"1504"
 			}
+			"CPopulationManager::m_EndlessActiveBotUpgrades"
+			{
+				"linux"		"1548"
+				"windows"	"1528"
+			}
 			"CPopulationManager::m_defaultEventChangeAttributesName"
 			{
 				"linux"		"1760"
@@ -518,6 +552,16 @@
 			{
 				"linux"		"48"
 				"windows"	"48"
+			}
+			"CWave::m_nNumSentryBustersKilled"
+			{
+				"linux"		"52"
+				"windows"	"52"
+			}
+			"sizeof(EventChangeAttributes_t)"
+			{
+				"linux"		"108"
+				"windows"	"108"
 			}
 			"EventChangeAttributes_t::m_eventName"
 			{
@@ -564,6 +608,46 @@
 				"linux"		"88"
 				"windows"	"88"
 			}
+			"sizeof(item_attributes_t)"
+			{
+				"linux"		"28"
+				"windows"	"28"
+			}
+			"item_attributes_t::m_itemName"
+			{
+				"linux"		"0"
+				"windows"	"0"
+			}
+			"item_attributes_t::m_attributes"
+			{
+				"linux"		"8"
+				"windows"	"8"
+			}
+			"sizeof(static_attrib_t)"
+			{
+				"linux"		"8"
+				"windows"	"8"
+			}
+			"static_attrib_t::iDefIndex"
+			{
+				"linux"		"0"
+				"windows"	"0"
+			}
+			"static_attrib_t::m_value"
+			{
+				"linux"		"4"
+				"windows"	"4"
+			}
+			"sizeof(BombInfo_t)"
+			{
+				"linux"		"20"
+				"windows"	"20"
+			}
+			"BombInfo_t::m_flMaxBattleFront"
+			{
+				"linux"		"16"
+				"windows"	"16"
+			}
 			"CTakeDamageInfo::m_bForceFriendlyFire"
 			{
 				"linux"		"92"
@@ -574,11 +658,6 @@
 				"linux"		"552"
 				"windows"	"548"
 			}
-			"BombInfo_t::m_flMaxBattleFront"
-			{
-				"linux"		"16"
-				"windows"	"16"
-			}
 			"CBaseTFBotHintEntity::m_isDisabled"
 			{
 				"linux"		"880"
@@ -588,6 +667,56 @@
 			{
 				"linux"		"1332"
 				"windows"	"1316"
+			}
+			"inputdata_t::value"
+			{
+				"linux"		"8"
+				"windows"	"8"
+			}
+			"CTraceFilterSimple::m_pPassEnt"
+			{
+				"linux"		"4"
+				"windows"	"4"
+			}
+			"sizeof(CMvMBotUpgrade)"
+			{
+				"linux"		"84"
+				"windows"	"148"
+			}
+			"CMvMBotUpgrade::szAttrib"
+			{
+				"linux"		"0"
+				"windows"	"0"
+			}
+			"CMvMBotUpgrade::iAttribIndex"
+			{
+				"linux"		"64"
+				"windows"	"128"
+			}
+			"CMvMBotUpgrade::flValue"
+			{
+				"linux"		"68"
+				"windows"	"132"
+			}
+			"CMvMBotUpgrade::bIsBotAttr"
+			{
+				"linux"		"80"
+				"windows"	"144"
+			}
+			"CMvMBotUpgrade::bIsSkillAttr"
+			{
+				"linux"		"81"
+				"windows"	"145"
+			}
+			"CEconItemAttributeDefinition::m_iDescriptionFormat"
+			{
+				"linux"		"36"
+				"windows"	"36"
+			}
+			"CEconItemAttributeDefinition::m_pszDescriptionString"
+			{
+				"linux"		"40"
+				"windows"	"40"
 			}
 		}
 		"Functions"
@@ -602,6 +731,13 @@
 			"CPopulationManager::AllocateBots"
 			{
 				"signature"	"CPopulationManager::AllocateBots"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
+			}
+			"CPopulationManager::EndlessRollEscalation"
+			{
+				"signature"	"CPopulationManager::EndlessRollEscalation"
 				"callconv"	"thiscall"
 				"return"	"void"
 				"this"		"entity"
@@ -991,6 +1127,20 @@
 				"hooktype"	"entity"
 				"return"	"void"
 				"this"		"entity"
+			}
+			"CTFPlayer::ShouldTransmit"
+			{
+				"offset"	"CTFPlayer::ShouldTransmit"
+				"hooktype"	"entity"
+				"return"	"int"
+				"this"		"entity"
+				"arguments"
+				{
+					"pInfo"
+					{
+						"type"	"objectptr"
+					}
+				}
 			}
 			"CTFPlayer::Event_Killed"
 			{

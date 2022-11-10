@@ -20,14 +20,13 @@
 
 static NextBotActionFactory ActionFactory;
 
-static CountdownTimer m_timer[MAXPLAYERS + 1];
-
 methodmap CTFBotMvMDeployBomb < NextBotAction
 {
 	public static void Init()
 	{
 		ActionFactory = new NextBotActionFactory("MvMDeployBomb");
 		ActionFactory.BeginDataMapDesc()
+			.DefineIntField("m_timer")
 			.DefineVectorField("m_anchorPos")
 		.EndDataMapDesc();
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
@@ -36,32 +35,41 @@ methodmap CTFBotMvMDeployBomb < NextBotAction
 		ActionFactory.SetEventCallback(EventResponderType_OnContact, OnContact);
 	}
 	
+	property CountdownTimer m_timer
+	{
+		public get()
+		{
+			return this.GetData("m_timer");
+		}
+		public set(CountdownTimer timer)
+		{
+			this.SetData("m_timer", timer);
+		}
+	}
+	
 	public CTFBotMvMDeployBomb()
 	{
-		return view_as<CTFBotMvMDeployBomb>(ActionFactory.Create());
+		CTFBotMvMDeployBomb action = view_as<CTFBotMvMDeployBomb>(ActionFactory.Create());
+		action.m_timer = new CountdownTimer();
+		return action;
 	}
 }
 
 static int OnStart(CTFBotMvMDeployBomb action, int actor, NextBotAction priorAction)
 {
 	Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_DELAY);
-	m_timer[actor].Start(tf_deploying_bomb_delay_time.FloatValue);
+	action.m_timer.Start(tf_deploying_bomb_delay_time.FloatValue);
 	
 	// remember where we start deploying
 	float vecAbsOrigin[3];
 	GetClientAbsOrigin(actor, vecAbsOrigin);
 	action.SetDataVector("m_anchorPos", vecAbsOrigin);
-	TF2_AddCondition(actor, TFCond_FreezeInput);
-	SetEntPropVector(actor, Prop_Data, "m_vecAbsVelocity", ZERO_VECTOR);
+	TeleportEntity(actor, .velocity = ZERO_VECTOR);
+	SetEntityFlags(actor, GetEntityFlags(actor) | FL_FROZEN);
 	
-	if (GetEntProp(actor, Prop_Send, "m_bIsMiniBoss"))
+	if (Player(actor).IsMiniBoss())
 	{
 		TF2Attrib_SetByName(actor, "airblast vertical vulnerability multiplier", 0.0);
-	}
-	
-	if (!IsFakeClient(actor))
-	{
-		tf_avoidteammates_pushaway.ReplicateToClient(actor, "0");
 	}
 	
 	return action.Continue();
@@ -110,31 +118,31 @@ static int Update(CTFBotMvMDeployBomb action, int actor, float interval)
 	{
 		case TF_BOMB_DEPLOYING_DELAY:
 		{
-			if (m_timer[actor].IsElapsed())
+			if (action.m_timer.IsElapsed())
 			{
 				SetVariantInt(1);
 				AcceptEntityInput(actor, "SetForcedTauntCam");
 				
 				SDKCall_PlaySpecificSequence(actor, "primary_deploybomb");
-				m_timer[actor].Start(tf_deploying_bomb_time.FloatValue);
+				action.m_timer.Start(tf_deploying_bomb_time.FloatValue);
 				Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_ANIMATING);
 				
-				EmitGameSoundToAll(GetEntProp(actor, Prop_Send, "m_bIsMiniBoss") ? "MVM.DeployBombGiant" : "MVM.DeployBombSmall", actor);
+				EmitGameSoundToAll(Player(actor).IsMiniBoss() ? "MVM.DeployBombGiant" : "MVM.DeployBombSmall", actor);
 				
 				SDKCall_PlayThrottledAlert(255, "Announcer.MVM_Bomb_Alert_Deploying", 5.0);
 			}
 		}
 		case TF_BOMB_DEPLOYING_ANIMATING:
 		{
-			if (m_timer[actor].IsElapsed())
+			if (action.m_timer.IsElapsed())
 			{
 				if (IsValidEntity(areaTrigger))
 				{
 					SDKCall_Capture(areaTrigger, actor);
 				}
 				
-				m_timer[actor].Start(2.0);
-				TFGameRules_BroadcastSound(255, "Announcer.MVM_Robots_Planted");
+				action.m_timer.Start(2.0);
+				BroadcastSound(255, "Announcer.MVM_Robots_Planted");
 				Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_COMPLETE);
 				SetEntProp(actor, Prop_Data, "m_takedamage", DAMAGE_NO);
 				SetEntProp(actor, Prop_Data, "m_fEffects", GetEntProp(actor, Prop_Data, "m_fEffects") | EF_NODRAW);
@@ -143,7 +151,7 @@ static int Update(CTFBotMvMDeployBomb action, int actor, float interval)
 		}
 		case TF_BOMB_DEPLOYING_COMPLETE:
 		{
-			if (m_timer[actor].IsElapsed())
+			if (action.m_timer.IsElapsed())
 			{
 				Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_NONE);
 				SetEntProp(actor, Prop_Data, "m_takedamage", DAMAGE_YES);
@@ -160,10 +168,11 @@ static void OnEnd(CTFBotMvMDeployBomb action, int actor, NextBotAction nextActio
 {
 	if (Player(actor).GetDeployingBombState() == TF_BOMB_DEPLOYING_ANIMATING)
 	{
+		// reset the in-progress deploy animation
 		SDKCall_DoAnimationEvent(actor, PLAYERANIMEVENT_SPAWN);
 	}
 	
-	if (GetEntProp(actor, Prop_Send, "m_bIsMiniBoss"))
+	if (Player(actor).IsMiniBoss())
 	{
 		TF2Attrib_RemoveByName(actor, "airblast vertical vulnerability multiplier");
 	}
@@ -172,12 +181,9 @@ static void OnEnd(CTFBotMvMDeployBomb action, int actor, NextBotAction nextActio
 	
 	SetVariantInt(0);
 	AcceptEntityInput(actor, "SetForcedTauntCam");
-	TF2_RemoveCondition(actor, TFCond_FreezeInput);
+	SetEntityFlags(actor, GetEntityFlags(actor) & ~FL_FROZEN);
 	
-	if (!IsFakeClient(actor))
-	{
-		tf_avoidteammates_pushaway.ReplicateToClient(actor, "1");
-	}
+	delete action.m_timer;
 }
 
 static int OnContact(CTFBotMvMDeployBomb action, int actor, int other, Address result)

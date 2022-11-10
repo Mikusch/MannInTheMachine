@@ -86,7 +86,7 @@ static NextBotAction DesiredScenarioAndClassAction(int actor)
 			return CTFBotSniperLurk();
 	}
 	
-	if (GameRules_IsMannVsMachineMode())
+	if (IsMannVsMachineMode())
 	{
 		if (TF2_GetPlayerClass(actor) == TFClass_Spy)
 		{

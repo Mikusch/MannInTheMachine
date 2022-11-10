@@ -18,6 +18,8 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+static Handle g_annotationTimer[MAXPLAYERS + 1];
+
 void Events_Init()
 {
 	HookEvent("player_spawn", EventHook_PlayerSpawn);
@@ -28,45 +30,27 @@ void Events_Init()
 	HookEvent("object_destroyed", EventHook_ObjectDestroyed);
 	HookEvent("object_detonated", EventHook_ObjectDestroyed);
 	HookEvent("teamplay_round_start", EventHook_TeamplayRoundStart);
+	HookEvent("teamplay_point_captured", EventHook_TeamplayPointCaptured);
 }
 
-void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
+static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
-	{
-		CreateTimer(0.1, Timer_UpdatePlayerGlow, GetClientUserId(client));
-	}
+	g_annotationTimer[client] = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
 }
 
-Action Timer_UpdatePlayerGlow(Handle timer, int userid)
-{
-	int client = GetClientOfUserId(userid);
-	if (client != 0)
-	{
-		if (TF2_GetClientTeam(client) == TFTeam_Invaders && IsPlayerAlive(client))
-		{
-			// Create a new glow
-			CreateEntityGlow(client);
-		}
-	}
-	
-	return Plugin_Continue;
-}
-
-void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
+static void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 {
 	int victim = GetClientOfUserId(event.GetInt("userid"));
 	
 	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
 	{
-		// Remove any glows attached to us
-		RemoveEntityGlow(victim);
+		HideAnnotation(victim, MITM_HINT_MASK | victim);
 	}
 }
 
-Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
+static Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
@@ -98,7 +82,7 @@ Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 	return Plugin_Changed;
 }
 
-void EventHook_PostInventoryApplication(Event event, const char[] name, bool dontBroadcast)
+static void EventHook_PostInventoryApplication(Event event, const char[] name, bool dontBroadcast)
 {
 	int userid = event.GetInt("userid");
 	int client = GetClientOfUserId(userid);
@@ -110,7 +94,7 @@ void EventHook_PostInventoryApplication(Event event, const char[] name, bool don
 	}
 }
 
-void RequestFrameCallback_ApplyWeaponRestrictions(int userid)
+static void RequestFrameCallback_ApplyWeaponRestrictions(int userid)
 {
 	int client = GetClientOfUserId(userid);
 	if (client)
@@ -150,7 +134,7 @@ void RequestFrameCallback_ApplyWeaponRestrictions(int userid)
 	}
 }
 
-void EventHook_PlayerBuiltObject(Event event, const char[] name, bool dontBroadcast)
+static void EventHook_PlayerBuiltObject(Event event, const char[] name, bool dontBroadcast)
 {
 	int builder = GetClientOfUserId(event.GetInt("userid"));
 	TFObjectType type = view_as<TFObjectType>(event.GetInt("object"));
@@ -198,7 +182,7 @@ void EventHook_PlayerBuiltObject(Event event, const char[] name, bool dontBroadc
 	}
 }
 
-void EventHook_ObjectDestroyed(Event event, const char[] name, bool dontBroadcast)
+static void EventHook_ObjectDestroyed(Event event, const char[] name, bool dontBroadcast)
 {
 	int index = event.GetInt("index");
 	
@@ -218,14 +202,14 @@ void EventHook_ObjectDestroyed(Event event, const char[] name, bool dontBroadcas
 			float worldPos[3];
 			GetEntPropVector(index, Prop_Data, "m_vecAbsOrigin", worldPos);
 			
-			CreateAnnotation(client, TF_MISSION_DESTROY_SENTRIES_HINT_MASK | client, text, _, worldPos, 30.0, "coach/coach_go_here.wav");
+			ShowAnnotation(client, MITM_HINT_MASK | client, text, _, worldPos, mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
 		}
 	}
 }
 
-void EventHook_TeamplayRoundStart(Event event, const char[] name, bool dontBroadcast)
+static void EventHook_TeamplayRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
-	if (GetCurrentWaveIndex() == 0 && !g_hWaitingForPlayersTimer)
+	if (g_pMVMStats.GetCurrentWave() == 0 && !g_hWaitingForPlayersTimer)
 	{
 		g_bInWaitingForPlayers = true;
 		
@@ -236,12 +220,37 @@ void EventHook_TeamplayRoundStart(Event event, const char[] name, bool dontBroad
 	}
 	else
 	{
-		tf_mvm_min_players_to_start.IntValue = 0;
 		g_bInWaitingForPlayers = false;
+		
+		tf_mvm_min_players_to_start.IntValue = 0;
 	}
 }
 
-Action Timer_OnWaitingForPlayersEnd(Handle timer)
+static void EventHook_TeamplayPointCaptured(Event event, const char[] name, bool dontBroadcast)
+{
+	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
+	
+	if (team == TFTeam_Invaders)
+	{
+		for (int client = 1; client <= MaxClients; client++)
+		{
+			if (!IsClientInGame(client))
+				continue;
+			
+			if (!IsPlayerAlive(client))
+				continue;
+			
+			if (TF2_GetClientTeam(client) != team)
+				continue;
+			
+			// hide current annotation and recreate later
+			HideAnnotation(client, MITM_HINT_MASK | client);
+			g_annotationTimer[client] = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
+		}
+	}
+}
+
+static Action Timer_OnWaitingForPlayersEnd(Handle timer)
 {
 	if (!g_bInWaitingForPlayers)
 		return Plugin_Continue;
@@ -249,7 +258,37 @@ Action Timer_OnWaitingForPlayersEnd(Handle timer)
 	tf_mvm_min_players_to_start.IntValue = 0;
 	g_bInWaitingForPlayers = false;
 	
-	GetPopulationManager().ResetMap();
+	if (g_pPopulationManager.IsValid())
+	{
+		g_pPopulationManager.ResetMap();
+	}
 	
 	return Plugin_Continue;
+}
+
+static Action Timer_CheckGateBotAnnotation(Handle timer, int userid)
+{
+	int client = GetClientOfUserId(userid);
+	
+	if (client == 0)
+		return Plugin_Stop;
+	
+	if (timer != g_annotationTimer[client])
+		return Plugin_Stop;
+	
+	if (!IsClientInGame(client))
+		return Plugin_Stop;
+	
+	if (!IsPlayerAlive(client))
+		return Plugin_Stop;
+	
+	if (TF2_GetClientTeam(client) != TFTeam_Invaders)
+		return Plugin_Stop;
+	
+	// we are gate stunned - wait until it wears off
+	if (TF2_IsPlayerInCondition(client, TFCond_MVMBotRadiowave))
+		return Plugin_Continue;
+	
+	ShowGateBotAnnotation(client);
+	return Plugin_Stop;
 }

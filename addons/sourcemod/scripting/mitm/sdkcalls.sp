@@ -29,7 +29,7 @@ static Handle g_SDKCallDoAnimationEvent;
 static Handle g_SDKCallPlaySpecificSequence;
 static Handle g_SDKCallDoClassSpecialSkill;
 static Handle g_SDKCallResetRageBuffs;
-static Handle g_SDKCallIsAllowedToPickUpFlag;
+static Handle g_SDKCallIsInEndlessWaves;
 static Handle g_SDKCallGetHealthMultiplier;
 static Handle g_SDKCallResetMap;
 static Handle g_SDKCallIsSpaceToSpawnHere;
@@ -38,6 +38,7 @@ static Handle g_SDKCallRemoveObject;
 static Handle g_SDKCallFindHint;
 static Handle g_SDKCallPushAllPlayersAway;
 static Handle g_SDKCallDistributeCurrencyAmount;
+static Handle g_SDKCallTeamMayCapturePoint;
 static Handle g_SDKCallGetSentryHint;
 static Handle g_SDKCallGetTeleporterHint;
 static Handle g_SDKCallGetCurrentWave;
@@ -51,18 +52,22 @@ static Handle g_SDKCallGetBombInfo;
 static Handle g_SDKCallIsStaleNest;
 static Handle g_SDKCallDetonateStaleNest;
 static Handle g_SDKCallGetLiveTime;
+static Handle g_SDKCallPassesTriggerFilters;
 
 void SDKCalls_Init(GameData gamedata)
 {
-	g_SDKCallGetClassIconLinux = PrepSDKCall_GetClassIcon_Linux(gamedata);
-	if (!g_SDKCallGetClassIconLinux)
+	int os = gamedata.GetOffset("Operating System");
+	if (os == OS_LINUX)
+	{
+		g_SDKCallGetClassIconLinux = PrepSDKCall_GetClassIcon_Linux(gamedata);
+	}
+	else if (os == OS_WINDOWS)
 	{
 		g_SDKCallGetClassIconWindows = PrepSDKCall_GetClassIcon_Windows(gamedata);
 	}
-	
-	if (!g_SDKCallGetClassIconLinux && !g_SDKCallGetClassIconWindows)
+	else
 	{
-		LogMessage("Failed to create SDKCall: CTFBotSpawner::GetClassIcon");
+		LogError("Unknown operating system %d", os);
 	}
 	
 	g_SDKCallPlayThrottledAlert = PrepSDKCall_PlayThrottledAlert(gamedata);
@@ -74,7 +79,7 @@ void SDKCalls_Init(GameData gamedata)
 	g_SDKCallPlaySpecificSequence = PrepSDKCall_PlaySpecificSequence(gamedata);
 	g_SDKCallDoClassSpecialSkill = PrepSDKCall_DoClassSpecialSkill(gamedata);
 	g_SDKCallResetRageBuffs = PrepSDKCall_ResetRageBuffs(gamedata);
-	g_SDKCallIsAllowedToPickUpFlag = PrepSDKCall_IsAllowedToPickUpFlag(gamedata);
+	g_SDKCallIsInEndlessWaves = PrepSDKCall_IsInEndlessWaves(gamedata);
 	g_SDKCallGetHealthMultiplier = PrepSDKCall_GetHealthMultiplier(gamedata);
 	g_SDKCallResetMap = PrepSDKCall_ResetMap(gamedata);
 	g_SDKCallIsSpaceToSpawnHere = PrepSDKCall_IsSpaceToSpawnHere(gamedata);
@@ -83,6 +88,7 @@ void SDKCalls_Init(GameData gamedata)
 	g_SDKCallFindHint = PrepSDKCall_FindHint(gamedata);
 	g_SDKCallPushAllPlayersAway = PrepSDKCall_PushAllPlayersAway(gamedata);
 	g_SDKCallDistributeCurrencyAmount = PrepSDKCall_DistributeCurrencyAmount(gamedata);
+	g_SDKCallTeamMayCapturePoint = PrepSDKCall_TeamMayCapturePoint(gamedata);
 	g_SDKCallGetSentryHint = PrepSDKCall_GetSentryHint(gamedata);
 	g_SDKCallGetTeleporterHint = PrepSDKCall_GetTeleporterHint(gamedata);
 	g_SDKCallGetCurrentWave = PrepSDKCall_GetCurrentWave(gamedata);
@@ -96,6 +102,7 @@ void SDKCalls_Init(GameData gamedata)
 	g_SDKCallIsStaleNest = PrepSDKCall_IsStaleNest(gamedata);
 	g_SDKCallDetonateStaleNest = PrepSDKCall_DetonateStaleNest(gamedata);
 	g_SDKCallGetLiveTime = PrepSDKCall_GetLiveTime(gamedata);
+	g_SDKCallPassesTriggerFilters = PrepSDKCall_PassesTriggerFilters(gamedata);
 }
 
 static Handle PrepSDKCall_GetClassIcon_Linux(GameData gamedata)
@@ -110,7 +117,11 @@ static Handle PrepSDKCall_GetClassIcon_Linux(GameData gamedata)
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // int nSpawnNum
 	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain); // return string_t
 	
-	return EndPrepSDKCall();
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogError("Failed to create SDKCall: CTFBotSpawner::GetClassIcon");
+	
+	return call;
 }
 
 static Handle PrepSDKCall_GetClassIcon_Windows(GameData gamedata)
@@ -123,7 +134,11 @@ static Handle PrepSDKCall_GetClassIcon_Windows(GameData gamedata)
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // int nSpawnNum
 	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain); // return string_t
 	
-	return EndPrepSDKCall();
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogError("Failed to create SDKCall: CTFBotSpawner::GetClassIcon");
+	
+	return call;
 }
 
 static Handle PrepSDKCall_PlayThrottledAlert(GameData gamedata)
@@ -137,7 +152,7 @@ static Handle PrepSDKCall_PlayThrottledAlert(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTeamplayRoundBasedRules::PlayThrottledAlert");
+		LogError("Failed to create SDKCall: CTeamplayRoundBasedRules::PlayThrottledAlert");
 	
 	return call;
 }
@@ -149,7 +164,7 @@ static Handle PrepSDKCall_PostInventoryApplication(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFPlayer::PostInventoryApplication");
+		LogError("Failed to create SDKCall: CTFPlayer::PostInventoryApplication");
 	
 	return call;
 }
@@ -161,7 +176,7 @@ static Handle PrepSDKCall_UpdateModelToClass(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CEconEntity::UpdateModelToClass");
+		LogError("Failed to create SDKCall: CEconEntity::UpdateModelToClass");
 	
 	return call;
 }
@@ -175,7 +190,7 @@ static Handle PrepSDKCall_PickUp(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFItem::PickUp");
+		LogError("Failed to create SDKCall: CTFItem::PickUp");
 	
 	return call;
 }
@@ -188,7 +203,7 @@ static Handle PrepSDKCall_Capture(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CCaptureZone::Capture");
+		LogError("Failed to create SDKCall: CCaptureZone::Capture");
 	
 	return call;
 }
@@ -202,7 +217,7 @@ static Handle PrepSDKCall_DoAnimationEvent(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFPlayer::DoAnimationEvent");
+		LogError("Failed to create SDKCall: CTFPlayer::DoAnimationEvent");
 	
 	return call;
 }
@@ -216,7 +231,7 @@ static Handle PrepSDKCall_PlaySpecificSequence(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFPlayer::PlaySpecificSequence");
+		LogError("Failed to create SDKCall: CTFPlayer::PlaySpecificSequence");
 	
 	return call;
 }
@@ -229,7 +244,7 @@ static Handle PrepSDKCall_DoClassSpecialSkill(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFPlayer::DoClassSpecialSkill");
+		LogError("Failed to create SDKCall: CTFPlayer::DoClassSpecialSkill");
 	
 	return call;
 }
@@ -241,20 +256,20 @@ static Handle PrepSDKCall_ResetRageBuffs(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFPlayerShared::ResetRageBuffs");
+		LogError("Failed to create SDKCall: CTFPlayerShared::ResetRageBuffs");
 	
 	return call;
 }
 
-static Handle PrepSDKCall_IsAllowedToPickUpFlag(GameData gamedata)
+static Handle PrepSDKCall_IsInEndlessWaves(GameData gamedata)
 {
-	StartPrepSDKCall(SDKCall_Player);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTFPlayer::IsAllowedToPickUpFlag");
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Signature, "CPopulationManager::IsInEndlessWaves");
 	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFPlayer::IsAllowedToPickUpFlag");
+		LogError("Failed to create SDKCall: CPopulationManager::IsInEndlessWaves");
 	
 	return call;
 }
@@ -268,7 +283,7 @@ static Handle PrepSDKCall_GetHealthMultiplier(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CPopulationManager::GetHealthMultiplier");
+		LogError("Failed to create SDKCall: CPopulationManager::GetHealthMultiplier");
 	
 	return call;
 }
@@ -280,7 +295,7 @@ static Handle PrepSDKCall_ResetMap(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CPopulationManager::ResetMap");
+		LogError("Failed to create SDKCall: CPopulationManager::ResetMap");
 	
 	return call;
 }
@@ -294,7 +309,7 @@ static Handle PrepSDKCall_IsSpaceToSpawnHere(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: IsSpaceToSpawnHere");
+		LogError("Failed to create SDKCall: IsSpaceToSpawnHere");
 	
 	return call;
 }
@@ -310,7 +325,7 @@ static Handle PrepSDKCall_FindHint(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFBotMvMEngineerHintFinder::FindHint");
+		LogError("Failed to create SDKCall: CTFBotMvMEngineerHintFinder::FindHint");
 	
 	return call;
 }
@@ -327,7 +342,7 @@ static Handle PrepSDKCall_PushAllPlayersAway(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFGameRules::PushAllPlayersAway");
+		LogError("Failed to create SDKCall: CTFGameRules::PushAllPlayersAway");
 	
 	return call;
 }
@@ -346,7 +361,24 @@ static Handle PrepSDKCall_DistributeCurrencyAmount(GameData gamedata)
 	Handle call = EndPrepSDKCall();
 	if (!call)
 	{
-		LogMessage("Failed to create SDKCall: CTFGameRules::DistributeCurrencyAmount");
+		LogError("Failed to create SDKCall: CTFGameRules::DistributeCurrencyAmount");
+	}
+	
+	return call;
+}
+
+static Handle PrepSDKCall_TeamMayCapturePoint(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_GameRules);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTFGameRules::TeamMayCapturePoint");
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+	{
+		LogError("Failed to create SDKCall: CTFGameRules::TeamMayCapturePoint");
 	}
 	
 	return call;
@@ -360,7 +392,7 @@ static Handle PrepSDKCall_GetSentryHint(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFBotHintEngineerNest::GetSentryHint");
+		LogError("Failed to create SDKCall: CTFBotHintEngineerNest::GetSentryHint");
 	
 	return call;
 }
@@ -373,7 +405,7 @@ static Handle PrepSDKCall_GetTeleporterHint(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFBotHintEngineerNest::GetTeleporterHint");
+		LogError("Failed to create SDKCall: CTFBotHintEngineerNest::GetTeleporterHint");
 	
 	return call;
 }
@@ -402,7 +434,7 @@ static Handle PrepSDKCall_GetCurrentWave(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CPopulationManager::GetCurrentWave");
+		LogError("Failed to create SDKCall: CPopulationManager::GetCurrentWave");
 	
 	return call;
 }
@@ -415,7 +447,7 @@ static Handle PrepSDKCall_IsCombatItem(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CBaseEntity::IsCombatItem");
+		LogError("Failed to create SDKCall: CBaseEntity::IsCombatItem");
 	
 	return call;
 }
@@ -428,7 +460,7 @@ static Handle PrepSDKCall_GetMaxHealthForCurrentLevel(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CBaseObject::GetMaxHealthForCurrentLevel");
+		LogError("Failed to create SDKCall: CBaseObject::GetMaxHealthForCurrentLevel");
 	
 	return call;
 }
@@ -441,7 +473,7 @@ static Handle PrepSDKCall_Clip1(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFWeaponBase::Clip1");
+		LogError("Failed to create SDKCall: CTFWeaponBase::Clip1");
 	
 	return call;
 }
@@ -455,7 +487,7 @@ static Handle PrepSDKCall_FindSpawnLocation(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CSpawnLocation::FindSpawnLocation");
+		LogError("Failed to create SDKCall: CSpawnLocation::FindSpawnLocation");
 	
 	return call;
 }
@@ -469,7 +501,7 @@ static Handle PrepSDKCall_GetSentryBusterDamageAndKillThreshold(GameData gamedat
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CPopulationManager::GetSentryBusterDamageAndKillThreshold");
+		LogError("Failed to create SDKCall: CPopulationManager::GetSentryBusterDamageAndKillThreshold");
 	
 	return call;
 }
@@ -484,7 +516,7 @@ static Handle PrepSDKCall_IPopulationSpawnerSpawn(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: IPopulationSpawner::Spawn");
+		LogError("Failed to create SDKCall: IPopulationSpawner::Spawn");
 	
 	return call;
 }
@@ -499,7 +531,7 @@ static Handle PrepSDKCall_WeaponSwitch(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFPlayer::Weapon_Switch");
+		LogError("Failed to create SDKCall: CTFPlayer::Weapon_Switch");
 	
 	return call;
 }
@@ -512,7 +544,7 @@ static Handle PrepSDKCall_RemoveObject(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFPlayer::RemoveObject");
+		LogError("Failed to create SDKCall: CTFPlayer::RemoveObject");
 	
 	return call;
 }
@@ -526,7 +558,7 @@ static Handle PrepSDKCall_GetBombInfo(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: GetBombInfo");
+		LogError("Failed to create SDKCall: GetBombInfo");
 	
 	return call;
 }
@@ -539,7 +571,7 @@ static Handle PrepSDKCall_IsStaleNest(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFBotHintEngineerNest::IsStaleNest");
+		LogError("Failed to create SDKCall: CTFBotHintEngineerNest::IsStaleNest");
 	
 	return call;
 }
@@ -551,7 +583,7 @@ static Handle PrepSDKCall_DetonateStaleNest(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFBotHintEngineerNest::DetonateStaleNest");
+		LogError("Failed to create SDKCall: CTFBotHintEngineerNest::DetonateStaleNest");
 	
 	return call;
 }
@@ -564,7 +596,21 @@ static Handle PrepSDKCall_GetLiveTime(GameData gamedata)
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogMessage("Failed to create SDKCall: CTFGrenadePipebombProjectile::GetLiveTime");
+		LogError("Failed to create SDKCall: CTFGrenadePipebombProjectile::GetLiveTime");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_PassesTriggerFilters(GameData gamedata)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CBaseTrigger::PassesTriggerFilters");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogError("Failed to create SDKCall: CBaseTrigger::PassesTriggerFilters");
 	
 	return call;
 }
@@ -644,10 +690,10 @@ void SDKCall_ResetRageBuffs(any m_Shared)
 		SDKCall(g_SDKCallResetRageBuffs, m_Shared);
 }
 
-bool SDKCall_IsAllowedToPickUpFlag(int player)
+bool SDKCall_IsInEndlessWaves(int populator)
 {
-	if (g_SDKCallIsAllowedToPickUpFlag)
-		return SDKCall(g_SDKCallIsAllowedToPickUpFlag, player);
+	if (g_SDKCallIsInEndlessWaves)
+		return SDKCall(g_SDKCallIsInEndlessWaves, populator);
 	
 	return false;
 }
@@ -704,6 +750,14 @@ int SDKCall_DistributeCurrencyAmount(int amount, int player = -1, bool shared = 
 		return SDKCall(g_SDKCallDistributeCurrencyAmount, amount, player, shared, countAsDropped, isBonus);
 	
 	return 0;
+}
+
+bool SDKCall_TeamMayCapturePoint(TFTeam team, int pointIndex)
+{
+	if (g_SDKCallTeamMayCapturePoint)
+		return SDKCall(g_SDKCallTeamMayCapturePoint, team, pointIndex);
+	
+	return false;
 }
 
 Address SDKCall_GetCurrentWave(int populator)
@@ -802,4 +856,12 @@ float SDKCall_GetLiveTime(int grenade)
 		return SDKCall(g_SDKCallGetLiveTime, grenade);
 	
 	return 0.0;
+}
+
+bool SDKCall_PassesTriggerFilters(int trigger, int other)
+{
+	if (g_SDKCallPassesTriggerFilters)
+		return SDKCall(g_SDKCallPassesTriggerFilters, trigger, other);
+	
+	return false;
 }

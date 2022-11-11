@@ -393,6 +393,7 @@
 			{
 				"linux"		"202"
 				"windows"	"200"
+			}
 			"CTFGameRules::TeamMayCapturePoint"
 			{
 				"linux"		"155"

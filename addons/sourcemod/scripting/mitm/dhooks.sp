@@ -1732,7 +1732,7 @@ static MRESReturn DHookCallback_FPlayerCanTakeDamage_Pre(DHookReturn ret, DHookP
 	return MRES_Ignored;
 }
 
-MRESReturn DHookCallback_BetweenRoundsStart_Post()
+static MRESReturn DHookCallback_BetweenRoundsStart_Post()
 {
 	if (!g_bInWaitingForPlayers && mitm_setup_time.IntValue > 0)
 	{

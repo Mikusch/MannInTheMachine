@@ -413,6 +413,23 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 	}
 }
 
+public Action OnClientCommand(int client, int args)
+{
+	char cmd[16];
+	GetCmdArg(0, cmd, sizeof(cmd));
+	
+	if (StrEqual(cmd, "td_buyback"))
+	{
+		// Prevent a rare case where robots can buy back into the game
+		if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+		{
+			return Plugin_Handled;
+		}
+	}
+	
+	return Plugin_Continue;
+}
+
 public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname, bool &result)
 {
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)

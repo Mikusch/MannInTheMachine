@@ -494,7 +494,7 @@ ArrayList GetInvaderQueue(bool bMiniBoss = false)
 	return queue;
 }
 
-int GetRobotToSpawn(bool bMiniBoss)
+int FindNextInvader(bool bMiniBoss)
 {
 	ArrayList queue = GetInvaderQueue(bMiniBoss);
 	int priorityClient = -1;

@@ -331,7 +331,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 	}
 	
 	// find dead player we can re-use
-	int newPlayer = GetRobotToSpawn(spawner.m_defaultAttributes.m_attributeFlags & MINIBOSS);
+	int newPlayer = FindNextInvader(spawner.m_defaultAttributes.m_attributeFlags & MINIBOSS);
 	
 	if (newPlayer != -1)
 	{

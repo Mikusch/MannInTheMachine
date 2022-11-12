@@ -631,11 +631,13 @@ static MRESReturn DHookCallback_CPeriodicSpawnPopulatorUpdate_Post(Address pThis
 	for (int i = 0; i < m_justSpawnedList.Length; i++)
 	{
 		int player = m_justSpawnedList.Get(i);
-		
-		// what bot should do after spawning at teleporter exit
-		if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
+		if (IsEntityClient(player))
 		{
-			OnBotTeleported(player);
+			// what bot should do after spawning at teleporter exit
+			if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
+			{
+				OnBotTeleported(player);
+			}
 		}
 	}
 	
@@ -650,27 +652,29 @@ static MRESReturn DHookCallback_CWaveSpawnPopulatorUpdate_Post(Address pThis)
 	for (int i = 0; i < m_justSpawnedList.Length; i++)
 	{
 		int player = m_justSpawnedList.Get(i);
-		
-		SetEntProp(player, Prop_Send, "m_nCurrency", 0);
-		SetEntData(player, GetOffset("CTFPlayer::m_pWaveSpawnPopulator"), pThis);
-		
-		// Allows client UI to know if a specific spawner is active
-		g_pObjectiveResource.SetMannVsMachineWaveClassActive(GetEntData(player, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")));
-		
-		if (CWaveSpawnPopulator(pThis).IsSupportWave())
+		if (IsEntityClient(player))
 		{
-			Player(player).MarkAsSupportEnemy();
-		}
-		
-		if (CWaveSpawnPopulator(pThis).IsLimitedSupportWave())
-		{
-			Player(player).MarkAsLimitedSupportEnemy();
-		}
-		
-		// what bot should do after spawning at teleporter exit
-		if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
-		{
-			OnBotTeleported(player);
+			SetEntProp(player, Prop_Send, "m_nCurrency", 0);
+			SetEntData(player, GetOffset("CTFPlayer::m_pWaveSpawnPopulator"), pThis);
+			
+			// Allows client UI to know if a specific spawner is active
+			g_pObjectiveResource.SetMannVsMachineWaveClassActive(GetEntData(player, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")));
+			
+			if (CWaveSpawnPopulator(pThis).IsSupportWave())
+			{
+				Player(player).MarkAsSupportEnemy();
+			}
+			
+			if (CWaveSpawnPopulator(pThis).IsLimitedSupportWave())
+			{
+				Player(player).MarkAsLimitedSupportEnemy();
+			}
+			
+			// what bot should do after spawning at teleporter exit
+			if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
+			{
+				OnBotTeleported(player);
+			}
 		}
 	}
 	
@@ -752,40 +756,42 @@ static MRESReturn DHookCallback_UpdateMission_Post(Address pThis, DHookReturn re
 	for (int i = 0; i < m_justSpawnedList.Length; i++)
 	{
 		int player = m_justSpawnedList.Get(i);
-		
-		Player(player).SetFlagTarget(INVALID_ENT_REFERENCE);
-		Player(player).SetMission(mission);
-		SetEntData(player, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true, 1);
-		
-		int iFlags = MVM_CLASS_FLAG_MISSION;
-		if (Player(player).IsMiniBoss())
+		if (IsEntityClient(player))
 		{
-			iFlags |= MVM_CLASS_FLAG_MINIBOSS;
-		}
-		else if (Player(player).HasAttribute(ALWAYS_CRIT))
-		{
-			iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
-		}
-		g_pObjectiveResource.IncrementMannVsMachineWaveClassCount(GetEntData(player, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")), iFlags);
-		
-		// Response rules stuff for MvM
-		if (IsMannVsMachineMode())
-		{
-			// Only have defenders announce the arrival of the first enemy Sniper
-			if (Player(player).HasMission(MISSION_SNIPER))
+			Player(player).SetFlagTarget(INVALID_ENT_REFERENCE);
+			Player(player).SetMission(mission);
+			SetEntData(player, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true, 1);
+			
+			int iFlags = MVM_CLASS_FLAG_MISSION;
+			if (Player(player).IsMiniBoss())
 			{
-				s_nSniperCount++;
-				
-				if (s_nSniperCount == 1)
+				iFlags |= MVM_CLASS_FLAG_MINIBOSS;
+			}
+			else if (Player(player).HasAttribute(ALWAYS_CRIT))
+			{
+				iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
+			}
+			g_pObjectiveResource.IncrementMannVsMachineWaveClassCount(GetEntData(player, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")), iFlags);
+			
+			// Response rules stuff for MvM
+			if (IsMannVsMachineMode())
+			{
+				// Only have defenders announce the arrival of the first enemy Sniper
+				if (Player(player).HasMission(MISSION_SNIPER))
 				{
-					HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_SNIPER_CALLOUT", TFTeam_Defenders);
+					s_nSniperCount++;
+					
+					if (s_nSniperCount == 1)
+					{
+						HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_SNIPER_CALLOUT", TFTeam_Defenders);
+					}
 				}
 			}
-		}
-		
-		if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
-		{
-			OnBotTeleported(player);
+			
+			if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
+			{
+				OnBotTeleported(player);
+			}
 		}
 	}
 	

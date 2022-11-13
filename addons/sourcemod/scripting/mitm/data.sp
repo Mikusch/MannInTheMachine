@@ -656,6 +656,16 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
+	public void SetCustomCurrencyWorth(int nAmount)
+	{
+		this.SetProp(Prop_Send, "m_nCurrency", nAmount);
+	}
+	
+	public void SetWaveSpawnPopulator(Address pWave)
+	{
+		SetEntData(this.index, GetOffset("CTFPlayer::m_pWaveSpawnPopulator"), pWave);
+	}
+	
 	public void ClearEventChangeAttributes()
 	{
 		this.m_eventChangeAttributes.Clear();
@@ -1179,6 +1189,11 @@ methodmap Player < CBaseCombatCharacter
 		ClientPrefs_SavePreferences(this.index, this.m_preferences);
 		
 		return true;
+	}
+	
+	public void MarkAsMissionEnemy()
+	{
+		SetEntData(this.index, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true, 1);
 	}
 	
 	public void MarkAsSupportEnemy()

@@ -654,8 +654,8 @@ static MRESReturn DHookCallback_CWaveSpawnPopulatorUpdate_Post(Address pThis)
 		int player = m_justSpawnedList.Get(i);
 		if (IsEntityClient(player))
 		{
-			SetEntProp(player, Prop_Send, "m_nCurrency", 0);
-			SetEntData(player, GetOffset("CTFPlayer::m_pWaveSpawnPopulator"), pThis);
+			Player(player).SetCustomCurrencyWorth(0);
+			Player(player).SetWaveSpawnPopulator(pThis);
 			
 			// Allows client UI to know if a specific spawner is active
 			g_pObjectiveResource.SetMannVsMachineWaveClassActive(GetEntData(player, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")));
@@ -760,7 +760,7 @@ static MRESReturn DHookCallback_UpdateMission_Post(Address pThis, DHookReturn re
 		{
 			Player(player).SetFlagTarget(INVALID_ENT_REFERENCE);
 			Player(player).SetMission(mission);
-			SetEntData(player, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true, 1);
+			Player(player).MarkAsMissionEnemy();
 			
 			int iFlags = MVM_CLASS_FLAG_MISSION;
 			if (Player(player).IsMiniBoss())
@@ -921,7 +921,7 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 					Player(bot).SetMission(MISSION_DESTROY_SENTRIES);
 					Player(bot).SetMissionTarget(targetSentry);
 					
-					SetEntData(bot, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true, 1);
+					Player(bot).MarkAsMissionEnemy();
 					
 					didSpawn = true;
 					

@@ -43,7 +43,8 @@ static int m_spawnPointEntity[MAXPLAYERS + 1];
 static CTFBotSquad m_squad[MAXPLAYERS + 1];
 static int m_hFollowingFlagTarget[MAXPLAYERS + 1];
 static BombDeployingState_t m_nDeployingBombState[MAXPLAYERS + 1];
-static char m_szOldClientName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
+static char m_szInvaderName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
+static char m_szPrevName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
 
 // Non-resetting Properties
 static int m_invaderPriority[MAXPLAYERS + 1];
@@ -474,7 +475,7 @@ methodmap Player < CBaseCombatCharacter
 	
 	public void ClearIdleSound()
 	{
-		this.SetIdleSound("");
+		m_szIdleSound[this.index][0] = EOS;
 	}
 	
 	public void SetScaleOverride(float fScale)
@@ -616,21 +617,31 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
-	public void SetName(const char[] name)
+	public void SetName(const char[] name, bool bSetName)
 	{
-		if (GetClientName(this.index, m_szOldClientName[this.index], sizeof(m_szOldClientName[])))
+		strcopy(m_szInvaderName[this.index], sizeof(m_szInvaderName[]), name);
+		
+		// if requested, change client name
+		if (bSetName && GetClientName(this.index, m_szPrevName[this.index], sizeof(m_szPrevName[])))
 		{
 			SetClientName(this.index, name);
 		}
 	}
 	
+	public int GetName(char[] buffer, int maxlen)
+	{
+		return strcopy(buffer, maxlen, m_szInvaderName[this.index]);
+	}
+	
 	public void ResetName()
 	{
-		if (m_szOldClientName[this.index][0] == EOS)
-			return;
+		m_szInvaderName[this.index][0] = EOS;
 		
-		SetClientName(this.index, m_szOldClientName[this.index]);
-		strcopy(m_szOldClientName[this.index], sizeof(m_szOldClientName[]), "");
+		if (m_szPrevName[this.index][0])
+		{
+			SetClientName(this.index, m_szPrevName[this.index]);
+			m_szPrevName[this.index][0] = EOS;
+		}
 	}
 	
 	public void SetDifficulty(DifficultyType difficulty)
@@ -1306,7 +1317,7 @@ methodmap Player < CBaseCombatCharacter
 		this.ClearAllAttributes();
 		this.ClearIdleSound();
 		this.m_fModelScaleOverride = 0.0;
-		this.m_flSpawnTimeLeft = 0.0;
+		this.m_flSpawnTimeLeft = -1.0;
 		this.m_missionTarget = INVALID_ENT_REFERENCE;
 		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
 		this.m_hFollowingFlagTarget = INVALID_ENT_REFERENCE;
@@ -1321,7 +1332,8 @@ methodmap Player < CBaseCombatCharacter
 		this.m_defenderQueuePoints = -1;
 		this.m_preferences = -1;
 		
-		strcopy(m_szOldClientName[this.index], sizeof(m_szOldClientName[]), "");
+		m_szInvaderName[this.index][0] = EOS;
+		m_szPrevName[this.index][0] = EOS;
 	}
 }
 

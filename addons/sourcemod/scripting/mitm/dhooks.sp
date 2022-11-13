@@ -351,11 +351,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		
 		char name[MAX_NAME_LENGTH];
 		spawner.GetName(name, sizeof(name), "TFBot");
-		
-		if (mitm_rename_robots.BoolValue)
-		{
-			Player(newPlayer).SetName(name);
-		}
+		Player(newPlayer).SetName(name, mitm_rename_robots.BoolValue);
 		
 		CBaseEntity(g_internalSpawnPoint).SetAbsOrigin(here);
 		CBaseEntity(g_internalSpawnPoint).SetLocalAngles(ZERO_VECTOR);
@@ -554,13 +550,6 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 			{
 				HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_GIANT_CALLOUT", TFTeam_Defenders);
 			}
-			
-			if (!Player(newPlayer).HasPreference(PREF_DISABLE_SPAWN_NOTIFICATION))
-			{
-				EmitSoundToClient(newPlayer, "ui/system_message_alert.wav", .channel = SNDCHAN_STATIC);
-			}
-			
-			PrintCenterText(newPlayer, "%t", "Invader_Spawned", name);
 		}
 		
 		if (tf_populator_debug.BoolValue)

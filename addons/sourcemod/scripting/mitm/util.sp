@@ -577,7 +577,7 @@ int CreateEntityGlow(int entity)
 			GetEntPropString(entity, Prop_Send, "m_iszCustomModel", iszModel, sizeof(iszModel));
 		}
 		
-		if (iszModel[0] == EOS)
+		if (!iszModel[0])
 		{
 			GetEntPropString(entity, Prop_Data, "m_ModelName", iszModel, sizeof(iszModel));
 		}

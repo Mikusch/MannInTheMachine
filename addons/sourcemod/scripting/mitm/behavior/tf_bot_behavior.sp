@@ -73,6 +73,12 @@ static NextBotAction InitialContainedAction(CTFBotMainAction action, int actor)
 
 static int OnStart(CTFBotMainAction action, int actor, NextBotAction priorAction)
 {
+	if (TF2_GetClientTeam(actor) != TFTeam_Invaders)
+	{
+		// not an invader - do nothing
+		return action.Done("I'm not an invader!");
+	}
+	
 	// if bot is already dead at this point, make sure it's dead
 	// check for !IsAlive because bot could be DYING
 	if (!IsPlayerAlive(actor))
@@ -80,20 +86,27 @@ static int OnStart(CTFBotMainAction action, int actor, NextBotAction priorAction
 		return action.ChangeTo(CTFBotDead(), "I'm actually dead");
 	}
 	
-	// must leave spawn area
-	Player(actor).m_flSpawnTimeLeft = Player(actor).CalculateSpawnTime();
+	// we just spawned
+	if (GetGameTime() - Player(actor).GetSpawnTime() < 1.0)
+	{
+		// bots must quickly leave their spawn
+		Player(actor).m_flSpawnTimeLeft = Player(actor).CalculateSpawnTime();
+		
+		if (!Player(actor).HasPreference(PREF_DISABLE_SPAWN_NOTIFICATION))
+		{
+			char name[MAX_NAME_LENGTH];
+			Player(actor).GetName(name, sizeof(name));
+			PrintCenterText(actor, "%t", "Invader_Spawned", name);
+			
+			EmitSoundToClient(actor, "ui/system_message_alert.wav", .channel = SNDCHAN_STATIC);
+		}
+	}
 	
 	return action.Continue();
 }
 
 static int Update(CTFBotMainAction action, int actor, float interval)
 {
-	if (TF2_GetClientTeam(actor) != TFTeam_Invaders)
-	{
-		// not an invader - do nothing
-		return action.Done("Not an invader");
-	}
-	
 	if (IsMannVsMachineMode() && TF2_GetClientTeam(actor) == TFTeam_Invaders)
 	{
 		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(actor).GetLastKnownArea());
@@ -112,22 +125,24 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 				TF2Attrib_SetByName(actor, "no_jump", 1.0);
 			}
 			
-			// pause spawn timer while stunned
-			if (!TF2_IsPlayerInCondition(actor, TFCond_Dazed))
+			if (Player(actor).m_flSpawnTimeLeft != -1.0)
 			{
-				Player(actor).m_flSpawnTimeLeft -= interval;
-				
-				if (Player(actor).m_flSpawnTimeLeft <= 0.0)
+				// pause spawn timer while stunned
+				if (!TF2_IsPlayerInCondition(actor, TFCond_Dazed))
 				{
-					ForcePlayerSuicide(actor);
+					Player(actor).m_flSpawnTimeLeft -= interval;
+					
+					if (Player(actor).m_flSpawnTimeLeft <= 0.0)
+					{
+						ForcePlayerSuicide(actor);
+					}
 				}
-			}
-			
-			// pressure them to leave the spawn area
-			if (Player(actor).m_flSpawnTimeLeft > 0.0)
-			{
-				SetHudTextParams(-1.0, 0.65, interval, 255, 255, 255, 255);
-				ShowSyncHudText(actor, g_WarningHudSync, "%t", "Invader_HurryOutOfSpawn", Player(actor).m_flSpawnTimeLeft);
+				
+				if (Player(actor).m_flSpawnTimeLeft > 0.0)
+				{
+					SetHudTextParams(-1.0, 0.65, interval, 255, 255, 255, 255);
+					ShowSyncHudText(actor, g_WarningHudSync, "%t", "Invader_HurryOutOfSpawn", Player(actor).m_flSpawnTimeLeft);
+				}
 			}
 		}
 		else

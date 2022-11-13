@@ -27,7 +27,9 @@ methodmap IntervalTimer < StringMap
 {
 	public IntervalTimer()
 	{
-		return view_as<IntervalTimer>(new StringMap());
+		IntervalTimer timer = view_as<IntervalTimer>(new StringMap());
+		timer.m_timestamp = -1.0;
+		return timer;
 	}
 	
 	public void Reset()
@@ -91,7 +93,10 @@ methodmap CountdownTimer < StringMap
 {
 	public CountdownTimer()
 	{
-		return view_as<CountdownTimer>(new StringMap());
+		CountdownTimer timer = view_as<CountdownTimer>(new StringMap());
+		timer.m_timestamp = -1.0;
+		timer.m_duration = 0.0;
+		return timer;
 	}
 	
 	public void Reset()

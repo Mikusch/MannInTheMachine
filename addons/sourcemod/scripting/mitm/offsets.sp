@@ -106,6 +106,7 @@ void Offsets_Init(GameData gamedata)
 	SetOffset(gamedata, "CTFGrenadePipebombProjectile::m_flCreationTime");
 	SetOffset(gamedata, "inputdata_t::value");
 	SetOffset(gamedata, "CTraceFilterSimple::m_pPassEnt");
+	SetOffset(gamedata, "CTFBotHintEngineerNest::m_teleporters");
 }
 
 any GetOffset(const char[] name)

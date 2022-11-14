@@ -664,6 +664,11 @@
 				"linux"		"4"
 				"windows"	"4"
 			}
+			"CTFBotHintEngineerNest::m_teleporters"
+			{
+				"linux"		"908"
+				"windows"	"888"
+			}
 			"sizeof(CMvMBotUpgrade)"
 			{
 				"linux"		"84"

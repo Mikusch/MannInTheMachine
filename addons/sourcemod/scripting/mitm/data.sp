@@ -52,6 +52,7 @@ static bool m_bWasMiniBoss[MAXPLAYERS + 1];
 static int m_defenderQueuePoints[MAXPLAYERS + 1];
 static int m_preferences[MAXPLAYERS + 1];
 static Party m_party[MAXPLAYERS + 1];
+static bool m_bIsPartyMenuActive[MAXPLAYERS + 1];
 
 methodmap Player < CBaseCombatCharacter
 {
@@ -321,6 +322,18 @@ methodmap Player < CBaseCombatCharacter
 		public set(Party party)
 		{
 			m_party[this.index] = party;
+		}
+	}
+	
+	property bool m_bIsPartyMenuActive
+	{
+		public get()
+		{
+			return m_bIsPartyMenuActive[this.index];
+		}
+		public set(bool bIsPartyMenuActive)
+		{
+			m_bIsPartyMenuActive[this.index] = bIsPartyMenuActive;
 		}
 	}
 	
@@ -1297,6 +1310,16 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
+	public bool IsPartyMenuActive()
+	{
+		return this.m_bIsPartyMenuActive;
+	}
+	
+	public void SetPartyMenuActive(bool bIsPartyMenuActive)
+	{
+		this.m_bIsPartyMenuActive = bIsPartyMenuActive;
+	}
+	
 	public void Init()
 	{
 		this.m_autoJumpTimer = new CountdownTimer();
@@ -1331,6 +1354,8 @@ methodmap Player < CBaseCombatCharacter
 		this.m_bWasMiniBoss = false;
 		this.m_defenderQueuePoints = -1;
 		this.m_preferences = -1;
+		this.m_party = NULL_PARTY;
+		this.m_bIsPartyMenuActive = false;
 		
 		m_szInvaderName[this.index][0] = EOS;
 		m_szPrevName[this.index][0] = EOS;

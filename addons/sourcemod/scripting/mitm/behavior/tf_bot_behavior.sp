@@ -234,15 +234,15 @@ static int OnContact(CTFBotMainAction action, int actor, int other, Address resu
 
 static int OnOtherKilled(CTFBotMainAction action, int actor, int victim, int attacker, int inflictor, float damage, int damagetype)
 {
-	bool do_taunt = IsEntityClient(victim);
+	bool do_taunt = IsValidEntity(victim) && IsEntityClient(victim);
 	
 	if (do_taunt)
 	{
-		if (TF2_GetClientTeam(actor) != TF2_GetClientTeam(victim) && actor == attacker)
+		if (GetClientTeam(actor) != GetClientTeam(victim) && actor == attacker)
 		{
 			bool isTaunting = !HasTheFlag(attacker) && GetRandomFloat(0.0, 100.0) <= tf_bot_taunt_victim_chance.FloatValue;
 			
-			if (Player(attacker).IsMiniBoss())
+			if (IsMannVsMachineMode() && Player(attacker).IsMiniBoss())
 			{
 				// Bosses don't taunt puny humans
 				isTaunting = false;

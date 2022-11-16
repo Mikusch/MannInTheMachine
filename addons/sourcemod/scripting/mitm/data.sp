@@ -1178,7 +1178,7 @@ methodmap Player < CBaseCombatCharacter
 			if (!IsClientInGame(client))
 				continue;
 			
-			if (TF2_GetClientTeam(client) == TF2_GetClientTeam(this.index))
+			if (GetClientTeam(client) == GetClientTeam(this.index))
 				continue;
 			
 			enemyList.Push(client);

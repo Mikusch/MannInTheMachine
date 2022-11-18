@@ -18,6 +18,8 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+#define MAX_PARTY_NAME_LENGTH	48
+
 #define SYMBOL_PARTY_LEADER	"★"
 #define SYMBOL_PARTY_MEMBER	"☆"
 #define SYMBOL_PARTY_OTHER	"◆"
@@ -34,7 +36,7 @@ enum struct PartyInfo
 {
 	int m_id;
 	
-	char name[MAX_NAME_LENGTH];
+	char name[MAX_PARTY_NAME_LENGTH];
 	
 	ArrayList m_members;
 	ArrayList m_invites;
@@ -347,7 +349,7 @@ static Action ConCmd_PartyCreate(int client, int args)
 	{
 		FakeClientCommand(client, "sm_party_join %d", party.m_id);
 		
-		char name[MAX_NAME_LENGTH];
+		char name[MAX_PARTY_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Created", name);
 		ClientCommand(client, "play %s", SOUND_PARTY_UPDATE);
@@ -407,7 +409,7 @@ static Action ConCmd_PartyJoin(int client, int args)
 	{
 		party.RemoveInvite(client);
 		
-		char name[MAX_NAME_LENGTH];
+		char name[MAX_PARTY_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Joined", name);
 		ClientCommand(client, "play %s", SOUND_PARTY_UPDATE);
@@ -450,7 +452,7 @@ static Action ConCmd_PartyLeave(int client, int args)
 	
 	Party party = Player(client).GetParty();
 	
-	char name[MAX_NAME_LENGTH];
+	char name[MAX_PARTY_NAME_LENGTH];
 	party.GetName(name, sizeof(name));
 	
 	Player(client).LeaveParty();
@@ -525,7 +527,7 @@ static Action ConCmd_PartyInvite(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	char name[MAX_NAME_LENGTH];
+	char name[MAX_PARTY_NAME_LENGTH];
 	party.GetName(name, sizeof(name));
 	
 	for (int i = 0; i < target_count; i++)
@@ -622,7 +624,7 @@ static Action ConCmd_PartyKick(int client, int args)
 		
 		CancelClientMenu(target_list[i]);
 		
-		char name[MAX_NAME_LENGTH];
+		char name[MAX_PARTY_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
 		CPrintToChat(target_list[i], "%s %t", PLUGIN_TAG, "Party_Kicked", name);
 		ClientCommand(target_list[i], "play %s", SOUND_PARTY_UPDATE);
@@ -664,7 +666,7 @@ static Action ConCmd_PartyName(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	char name[MAX_NAME_LENGTH];
+	char name[MAX_PARTY_NAME_LENGTH];
 	GetCmdArgString(name, sizeof(name));
 	party.SetName(name);
 	

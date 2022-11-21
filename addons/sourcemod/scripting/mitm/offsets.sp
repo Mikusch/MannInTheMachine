@@ -138,7 +138,7 @@ static void SetOffset(GameData gamedata, const char[] cls, const char[] prop)
 {
 	if (IsNullString(cls))
 	{
-		// Simple key lookup
+		// Simple gamedata key lookup
 		int offset = gamedata.GetOffset(prop);
 		if (offset == -1)
 		{
@@ -149,25 +149,25 @@ static void SetOffset(GameData gamedata, const char[] cls, const char[] prop)
 	}
 	else
 	{
-		// Create gamedata key (e.g. CTFPlayer::m_bIsMiniBoss)
-		char key[64];
+		char key[64], base_key[64], base_prop[64];
 		Format(key, sizeof(key), "%s::%s", cls, prop);
-		
-		// Create base gamedata key (e.g. CTFPlayer_BaseOffset)
-		char base_key[64], base_prop[64];
 		Format(base_key, sizeof(base_key), "%s_BaseOffset", cls);
 		
-		// Get the actual offset, using the base offset if we have one
+		// Get the actual offset, calculated using a base offset if present
 		if (gamedata.GetKeyValue(base_key, base_prop, sizeof(base_prop)))
 		{
 			int base_offset = FindSendPropInfo(cls, base_prop);
 			if (base_offset == -1)
 			{
-				ThrowError("Base offset for '%s' could not be found", cls);
+				// If we found nothing, search on CBaseEntity instead
+				base_offset = FindSendPropInfo("CBaseEntity", base_prop);
+				if (base_offset == -1)
+				{
+					ThrowError("Base offset '%s::%s' could not be found", cls, base_prop);
+				}
 			}
 			
 			int offset = base_offset + gamedata.GetOffset(key);
-			PrintToServer("%s: %d", key, offset);
 			g_offsets.SetValue(key, offset);
 		}
 		else

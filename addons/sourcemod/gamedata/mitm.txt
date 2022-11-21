@@ -46,6 +46,11 @@
 				"linux"		"m_bHasActiveTeleporter"
 				"windows"	"m_bHasActiveTeleporter"
 			}
+			"CPopulationManager_BaseOffset"
+			{
+				"linux"		"m_vecOrigin"
+				"windows"	"m_vecOrigin"
+			}
 		}
 		"Signatures"
 		{
@@ -537,23 +542,23 @@
 			}
 			"CPopulationManager::m_canBotsAttackWhileInSpawnRoom"
 			{
-				"linux"		"1453"
-				"windows"	"1432"
+				"linux"		"641"
+				"windows"	"640"
 			}
 			"CPopulationManager::m_bSpawningPaused"
 			{
-				"linux"		"1524"
-				"windows"	"1504"
+				"linux"		"712"
+				"windows"	"712"
 			}
 			"CPopulationManager::m_EndlessActiveBotUpgrades"
 			{
-				"linux"		"1548"
-				"windows"	"1528"
+				"linux"		"736"
+				"windows"	"736"
 			}
 			"CPopulationManager::m_defaultEventChangeAttributesName"
 			{
-				"linux"		"1760"
-				"windows"	"1740"
+				"linux"		"948"
+				"windows"	"948"
 			}
 			"CWave::m_nSentryBustersSpawned"
 			{

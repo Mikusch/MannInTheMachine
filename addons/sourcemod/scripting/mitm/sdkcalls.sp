@@ -56,18 +56,20 @@ static Handle g_SDKCallPassesTriggerFilters;
 
 void SDKCalls_Init(GameData gamedata)
 {
-	int os = gamedata.GetOffset("Operating System");
-	if (os == OS_LINUX)
+	char platform[64];
+	gamedata.GetKeyValue("Platform", platform, sizeof(platform));
+	
+	if (StrEqual(platform, "linux"))
 	{
 		g_SDKCallGetClassIconLinux = PrepSDKCall_GetClassIcon_Linux(gamedata);
 	}
-	else if (os == OS_WINDOWS)
+	else if (StrEqual(platform, "windows"))
 	{
 		g_SDKCallGetClassIconWindows = PrepSDKCall_GetClassIcon_Windows(gamedata);
 	}
 	else
 	{
-		LogError("Unknown operating system %d", os);
+		LogError("Unknown or unsupported platform '%s'", platform);
 	}
 	
 	g_SDKCallPlayThrottledAlert = PrepSDKCall_PlayThrottledAlert(gamedata);

@@ -36,6 +36,11 @@
 				"linux"		"m_bDistributed"
 				"windows"	"m_bDistributed"
 			}
+			"CPopulationManager_BaseOffset"
+			{
+				"linux"		"m_vecOrigin"
+				"windows"	"m_vecOrigin"
+			}
 			"CTFWeaponBase_BaseOffset"
 			{
 				"linux"		"m_flReloadPriorNextFire"
@@ -46,7 +51,7 @@
 				"linux"		"m_bHasActiveTeleporter"
 				"windows"	"m_bHasActiveTeleporter"
 			}
-			"CPopulationManager_BaseOffset"
+			"CBaseTFBotHintEntity_BaseOffset"
 			{
 				"linux"		"m_vecOrigin"
 				"windows"	"m_vecOrigin"
@@ -677,8 +682,8 @@
 			}
 			"CBaseTFBotHintEntity::m_isDisabled"
 			{
-				"linux"		"880"
-				"windows"	"860"
+				"linux"		"68"
+				"windows"	"68"
 			}
 			"CTFGrenadePipebombProjectile::m_flCreationTime"
 			{

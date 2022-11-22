@@ -57,19 +57,24 @@ static Handle g_SDKCallPassesTriggerFilters;
 void SDKCalls_Init(GameData gamedata)
 {
 	char platform[64];
-	gamedata.GetKeyValue("Platform", platform, sizeof(platform));
-	
-	if (StrEqual(platform, "linux"))
+	if (gamedata.GetKeyValue("Platform", platform, sizeof(platform)))
 	{
-		g_SDKCallGetClassIconLinux = PrepSDKCall_GetClassIcon_Linux(gamedata);
-	}
-	else if (StrEqual(platform, "windows"))
-	{
-		g_SDKCallGetClassIconWindows = PrepSDKCall_GetClassIcon_Windows(gamedata);
+		if (StrEqual(platform, "linux"))
+		{
+			g_SDKCallGetClassIconLinux = PrepSDKCall_GetClassIcon_Linux(gamedata);
+		}
+		else if (StrEqual(platform, "windows"))
+		{
+			g_SDKCallGetClassIconWindows = PrepSDKCall_GetClassIcon_Windows(gamedata);
+		}
+		else
+		{
+			ThrowError("Unknown or unsupported platform '%s'", platform);
+		}
 	}
 	else
 	{
-		LogError("Unknown or unsupported platform '%s'", platform);
+		ThrowError("Could not find 'Platform' key in gamedata");
 	}
 	
 	g_SDKCallPlayThrottledAlert = PrepSDKCall_PlayThrottledAlert(gamedata);

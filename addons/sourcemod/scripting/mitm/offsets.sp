@@ -146,6 +146,8 @@ static void SetOffset(GameData gamedata, const char[] cls, const char[] prop)
 		}
 		
 		g_offsets.SetValue(prop, offset);
+		
+		LogMessage("Found gamedata offset: %s (offset %d)", prop, offset);
 	}
 	else
 	{
@@ -169,6 +171,8 @@ static void SetOffset(GameData gamedata, const char[] cls, const char[] prop)
 			
 			int offset = base_offset + gamedata.GetOffset(key);
 			g_offsets.SetValue(key, offset);
+			
+			LogMessage("Found gamedata offset: %s (offset %d) (base %d)", key, offset, base_offset);
 		}
 		else
 		{
@@ -179,6 +183,8 @@ static void SetOffset(GameData gamedata, const char[] cls, const char[] prop)
 			}
 			
 			g_offsets.SetValue(key, offset);
+			
+			LogMessage("Found gamedata offset: %s (offset %d)", key, offset);
 		}
 	}
 }

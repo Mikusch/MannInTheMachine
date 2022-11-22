@@ -140,7 +140,7 @@ void Menus_DisplayQueueMenu(int client)
 			}
 			else
 			{
-				char name[MAX_PARTY_NAME_LENGTH];
+				char name[MAX_NAME_LENGTH];
 				party.GetName(name, sizeof(name));
 				
 				if (Player(client).IsInAParty() && Player(client).GetParty() == party)
@@ -187,7 +187,7 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 				Party party = Party(id);
 				if (!party.IsNull())
 				{
-					char name[MAX_PARTY_NAME_LENGTH], strMembers[128];
+					char name[MAX_NAME_LENGTH], strMembers[128];
 					party.GetName(name, sizeof(name));
 					
 					ArrayList members = new ArrayList();
@@ -328,7 +328,7 @@ void Menus_DisplayPartyMenu(int client)
 		Party party = Player(client).GetParty();
 		
 		// show party name
-		char name[MAX_PARTY_NAME_LENGTH];
+		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
 		Format(title, sizeof(title), "%s%T\n", title, "Party_Menu_CurrentParty", client, name);
 		
@@ -737,7 +737,7 @@ void Menus_DisplayPartyInviteMenu(int client)
 		char id[32];
 		IntToString(info.m_id, id, sizeof(id));
 		
-		char display[64], name[MAX_PARTY_NAME_LENGTH];
+		char display[64], name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
 		Format(display, sizeof(display), "%s (" ... SYMBOL_PARTY_LEADER ... " %N)", name, party.GetLeader());
 		

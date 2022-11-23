@@ -84,7 +84,7 @@ static Action SDKHookCB_ProjectilePipeRemote_SetTransmit(int entity, int client)
 		if (Player(client).IsInvader())
 		{
 			// only when fully armed
-			float flCreationTime = GetEntDataFloat(entity, GetOffset("CTFGrenadePipebombProjectile::m_flCreationTime"));
+			float flCreationTime = GetEntDataFloat(entity, GetOffset("CTFGrenadePipebombProjectile", "m_flCreationTime"));
 			if ((GetGameTime() - flCreationTime) >= SDKCall_GetLiveTime(entity))
 			{
 				return Plugin_Handled;
@@ -125,7 +125,7 @@ static void SDKHookCB_BotHintEngineerNest_ThinkPost(int entity)
 {
 	if (!g_bHasActiveTeleporterPre && GetEntProp(entity, Prop_Send, "m_bHasActiveTeleporter"))
 	{
-		CUtlVector m_teleporters = CUtlVector(GetEntityAddress(entity) + GetOffset("CTFBotHintEngineerNest::m_teleporters"));
+		CUtlVector m_teleporters = CUtlVector(GetEntityAddress(entity) + GetOffset("CTFBotHintEngineerNest", "m_teleporters"));
 		for (int i = 0; i < m_teleporters.Count(); ++i)
 		{
 			int owner = GetEntPropEnt(GetEntityFromHandle(Deref(m_teleporters.Get(i))), Prop_Send, "m_hOwnerEntity");

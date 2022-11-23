@@ -19,6 +19,44 @@
 {
 	"tf"
 	{
+		"Keys"
+		{
+			"Platform"
+			{
+				"linux"		"linux"
+				"windows"	"windows"
+			}
+			"CTFPlayer_BaseOffset"
+			{
+				"linux"		"m_bIsMiniBoss"
+				"windows"	"m_bIsMiniBoss"
+			}
+			"CCurrencyPack_BaseOffset"
+			{
+				"linux"		"m_bDistributed"
+				"windows"	"m_bDistributed"
+			}
+			"CPopulationManager_BaseOffset"
+			{
+				"linux"		"m_vecOrigin"
+				"windows"	"m_vecOrigin"
+			}
+			"CTFWeaponBase_BaseOffset"
+			{
+				"linux"		"m_flReloadPriorNextFire"
+				"windows"	"m_flReloadPriorNextFire"
+			}
+			"CTFBotHintEngineerNest_BaseOffset"
+			{
+				"linux"		"m_bHasActiveTeleporter"
+				"windows"	"m_bHasActiveTeleporter"
+			}
+			"CBaseTFBotHintEntity_BaseOffset"
+			{
+				"linux"		"m_vecOrigin"
+				"windows"	"m_vecOrigin"
+			}
+		}
 		"Signatures"
 		{
 			"CTFBotSpawner::GetClassIcon"
@@ -264,11 +302,7 @@
 		}
 		"Offsets"
 		{
-			"Operating System"
-			{
-				"linux"		"0"
-				"windows"	"1"
-			}
+			// Virtual Function Offsets
 			"IPopulationSpawner::Spawn"
 			{
 				"linux"		"3"
@@ -384,55 +418,57 @@
 				"linux"		"155"
 				"windows"	"154"
 			}
+			
+			// Data Offsets
 			"CTFPlayer::m_flSpawnTime"
 			{
-				"linux"		"8616"
-				"windows"	"8612"
+				"linux"		"-232"
+				"windows"	"-232"
 			}
 			"CTFPlayer::m_bIsMissionEnemy"
 			{
-				"linux"		"8840"
-				"windows"	"8836"
+				"linux"		"-8"
+				"windows"	"-8"
 			}
 			"CTFPlayer::m_bIsSupportEnemy"
 			{
-				"linux"		"8841"
-				"windows"	"8837"
+				"linux"		"-7"
+				"windows"	"-7"
 			}
 			"CTFPlayer::m_bIsLimitedSupportEnemy"
 			{
-				"linux"		"8842"
-				"windows"	"8838"
+				"linux"		"-6"
+				"windows"	"-6"
 			}
 			"CTFPlayer::m_pWaveSpawnPopulator"
 			{
-				"linux"		"8868"
-				"windows"	"8864"
+				"linux"		"20"
+				"windows"	"20"
 			}
 			"CTFPlayer::m_accumulatedSentryGunDamageDealt"
 			{
-				"linux"		"9080"
-				"windows"	"9076"
+				"linux"		"232"
+				"windows"	"232"
 			}
 			"CTFPlayer::m_accumulatedSentryGunKillCount"
 			{
-				"linux"		"9084"
-				"windows"	"9080"
+				"linux"		"236"
+				"windows"	"236"
 			}
 			"CTFWeaponBase::m_bInAttack2"
 			{
-				"linux"		"1721"
-				"windows"	"1717"
+				"linux"		"9"
+				"windows"	"9"
 			}
 			"CCurrencyPack::m_nAmount"
 			{
-				"linux"		"1276"
-				"windows"	"1256"
+				"linux"		"-26"
+				"windows"	"-26"
 			}
 			"CCurrencyPack::m_bTouched"
 			{
-				"linux"		"1300"
-				"windows"	"1280"
+				"linux"		"-2"
+				"windows"	"-2"
 			}
 			"CTFBotSpawner::m_class"
 			{
@@ -511,23 +547,23 @@
 			}
 			"CPopulationManager::m_canBotsAttackWhileInSpawnRoom"
 			{
-				"linux"		"1453"
-				"windows"	"1432"
+				"linux"		"641"
+				"windows"	"640"
 			}
 			"CPopulationManager::m_bSpawningPaused"
 			{
-				"linux"		"1524"
-				"windows"	"1504"
+				"linux"		"712"
+				"windows"	"712"
 			}
 			"CPopulationManager::m_EndlessActiveBotUpgrades"
 			{
-				"linux"		"1548"
-				"windows"	"1528"
+				"linux"		"736"
+				"windows"	"736"
 			}
 			"CPopulationManager::m_defaultEventChangeAttributesName"
 			{
-				"linux"		"1760"
-				"windows"	"1740"
+				"linux"		"948"
+				"windows"	"948"
 			}
 			"CWave::m_nSentryBustersSpawned"
 			{
@@ -646,8 +682,8 @@
 			}
 			"CBaseTFBotHintEntity::m_isDisabled"
 			{
-				"linux"		"880"
-				"windows"	"860"
+				"linux"		"68"
+				"windows"	"68"
 			}
 			"CTFGrenadePipebombProjectile::m_flCreationTime"
 			{
@@ -666,8 +702,8 @@
 			}
 			"CTFBotHintEngineerNest::m_teleporters"
 			{
-				"linux"		"908"
-				"windows"	"888"
+				"linux"		"-20"
+				"windows"	"-20"
 			}
 			"sizeof(CMvMBotUpgrade)"
 			{

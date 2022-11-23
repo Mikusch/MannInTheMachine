@@ -376,7 +376,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		Player(newPlayer).ClearEventChangeAttributes();
 		for (int i = 0; i < spawner.m_eventChangeAttributes.Count(); ++i)
 		{
-			Player(newPlayer).AddEventChangeAttributes(spawner.m_eventChangeAttributes.Get(i, GetOffset("sizeof(EventChangeAttributes_t)")));
+			Player(newPlayer).AddEventChangeAttributes(spawner.m_eventChangeAttributes.Get(i, GetOffset(NULL_STRING, "sizeof(EventChangeAttributes_t)")));
 		}
 		
 		Player(newPlayer).SetTeleportWhere(spawner.m_teleportWhereName);
@@ -836,8 +836,8 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 				int sentryOwner = GetEntPropEnt(obj, Prop_Send, "m_hBuilder");
 				if (sentryOwner != -1)
 				{
-					int nDmgDone = RoundToFloor(GetEntDataFloat(sentryOwner, GetOffset("CTFPlayer::m_accumulatedSentryGunDamageDealt")));
-					int nKillsMade = GetEntData(sentryOwner, GetOffset("CTFPlayer::m_accumulatedSentryGunKillCount"));
+					int nDmgDone = RoundToFloor(GetEntDataFloat(sentryOwner, GetOffset("CTFPlayer", "m_accumulatedSentryGunDamageDealt")));
+					int nKillsMade = GetEntData(sentryOwner, GetOffset("CTFPlayer", "m_accumulatedSentryGunKillCount"));
 					
 					if (nDmgDone >= nDmgLimit || nKillsMade >= nKillLimit)
 					{
@@ -993,7 +993,7 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Post(Address pThis,
 
 static MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterface, DHookParam params)
 {
-	Address pszEventName = params.GetObjectVar(1, GetOffset("inputdata_t::value"), ObjectValueType_Int);
+	Address pszEventName = params.GetObjectVar(1, GetOffset("inputdata_t", "value"), ObjectValueType_Int);
 	
 	if (IsMannVsMachineMode())
 	{
@@ -1229,7 +1229,7 @@ static MRESReturn DHookCallback_FindSpawnLocation_Post(Address where, DHookRetur
 
 static MRESReturn DHookCallback_ShouldHitEntity_Post(Address pFilter, DHookReturn ret, DHookParam params)
 {
-	int me = GetEntityFromAddress(Deref(pFilter + GetOffset("CTraceFilterSimple::m_pPassEnt")));
+	int me = GetEntityFromAddress(Deref(pFilter + GetOffset("CTraceFilterSimple", "m_pPassEnt")));
 	int entity = GetEntityFromAddress(params.Get(1));
 	
 	if (IsEntityClient(entity))
@@ -1689,8 +1689,8 @@ static MRESReturn DHookCallback_ComeToRest_Pre(int item)
 	
 	if (area && (area.HasAttributeTF(BLUE_SPAWN_ROOM) || area.HasAttributeTF(RED_SPAWN_ROOM)))
 	{
-		SDKCall_DistributeCurrencyAmount(GetEntData(item, GetOffset("CCurrencyPack::m_nAmount")));
-		SetEntData(item, GetOffset("CCurrencyPack::m_bTouched"), true, 1);
+		SDKCall_DistributeCurrencyAmount(GetEntData(item, GetOffset("CCurrencyPack", "m_nAmount")));
+		SetEntData(item, GetOffset("CCurrencyPack", "m_bTouched"), true, 1);
 		RemoveEntity(item);
 		
 		return MRES_Supercede;
@@ -1710,7 +1710,7 @@ static MRESReturn DHookCallback_FPlayerCanTakeDamage_Pre(DHookReturn ret, DHookP
 {
 	if (g_bForceFriendlyFire)
 	{
-		params.SetObjectVar(3, GetOffset("CTakeDamageInfo::m_bForceFriendlyFire"), ObjectValueType_Bool, true);
+		params.SetObjectVar(3, GetOffset("CTakeDamageInfo", "m_bForceFriendlyFire"), ObjectValueType_Bool, true);
 		return MRES_ChangedHandled;
 	}
 	

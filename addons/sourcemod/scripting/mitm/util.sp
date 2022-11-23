@@ -1090,10 +1090,10 @@ void LockWeapon(int client, int weapon, int &buttons)
 		// semi-auto behaviour
 		else
 		{
-			if (view_as<bool>(GetEntData(weapon, GetOffset("CTFWeaponBase::m_bInAttack2"), 1)) == false)
+			if (view_as<bool>(GetEntData(weapon, GetOffset("CTFWeaponBase", "m_bInAttack2"), 1)) == false)
 			{
 				SDKCall_DoClassSpecialSkill(client);
-				SetEntData(weapon, GetOffset("CTFWeaponBase::m_bInAttack2"), true, 1);
+				SetEntData(weapon, GetOffset("CTFWeaponBase", "m_bInAttack2"), true, 1);
 			}
 		}
 	}

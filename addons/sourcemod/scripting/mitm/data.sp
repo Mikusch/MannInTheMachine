@@ -43,7 +43,8 @@ static int m_spawnPointEntity[MAXPLAYERS + 1];
 static CTFBotSquad m_squad[MAXPLAYERS + 1];
 static int m_hFollowingFlagTarget[MAXPLAYERS + 1];
 static BombDeployingState_t m_nDeployingBombState[MAXPLAYERS + 1];
-static char m_szOldClientName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
+static char m_szInvaderName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
+static char m_szPrevName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
 
 // Non-resetting Properties
 static int m_invaderPriority[MAXPLAYERS + 1];
@@ -51,6 +52,7 @@ static bool m_bWasMiniBoss[MAXPLAYERS + 1];
 static int m_defenderQueuePoints[MAXPLAYERS + 1];
 static int m_preferences[MAXPLAYERS + 1];
 static Party m_party[MAXPLAYERS + 1];
+static bool m_bIsPartyMenuActive[MAXPLAYERS + 1];
 
 methodmap Player < CBaseCombatCharacter
 {
@@ -323,6 +325,18 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
+	property bool m_bIsPartyMenuActive
+	{
+		public get()
+		{
+			return m_bIsPartyMenuActive[this.index];
+		}
+		public set(bool bIsPartyMenuActive)
+		{
+			m_bIsPartyMenuActive[this.index] = bIsPartyMenuActive;
+		}
+	}
+	
 	public bool IsInvader()
 	{
 		if (IsClientSourceTV(this.index))
@@ -334,7 +348,7 @@ methodmap Player < CBaseCombatCharacter
 	
 	public float GetSpawnTime()
 	{
-		return GetEntDataFloat(this.index, GetOffset("CTFPlayer::m_flSpawnTime"));
+		return GetEntDataFloat(this.index, GetOffset("CTFPlayer", "m_flSpawnTime"));
 	}
 	
 	public TFTeam GetDisguiseTeam()
@@ -474,7 +488,7 @@ methodmap Player < CBaseCombatCharacter
 	
 	public void ClearIdleSound()
 	{
-		this.SetIdleSound("");
+		m_szIdleSound[this.index][0] = EOS;
 	}
 	
 	public void SetScaleOverride(float fScale)
@@ -616,21 +630,31 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
-	public void SetName(const char[] name)
+	public void SetName(const char[] name, bool bSetName)
 	{
-		if (GetClientName(this.index, m_szOldClientName[this.index], sizeof(m_szOldClientName[])))
+		strcopy(m_szInvaderName[this.index], sizeof(m_szInvaderName[]), name);
+		
+		// if requested, change client name
+		if (bSetName && GetClientName(this.index, m_szPrevName[this.index], sizeof(m_szPrevName[])))
 		{
 			SetClientName(this.index, name);
 		}
 	}
 	
+	public int GetName(char[] buffer, int maxlen)
+	{
+		return strcopy(buffer, maxlen, m_szInvaderName[this.index]);
+	}
+	
 	public void ResetName()
 	{
-		if (m_szOldClientName[this.index][0] == EOS)
-			return;
+		m_szInvaderName[this.index][0] = EOS;
 		
-		SetClientName(this.index, m_szOldClientName[this.index]);
-		strcopy(m_szOldClientName[this.index], sizeof(m_szOldClientName[]), "");
+		if (m_szPrevName[this.index][0])
+		{
+			SetClientName(this.index, m_szPrevName[this.index]);
+			m_szPrevName[this.index][0] = EOS;
+		}
 	}
 	
 	public void SetDifficulty(DifficultyType difficulty)
@@ -654,6 +678,16 @@ methodmap Player < CBaseCombatCharacter
 		{
 			SetModelScale(this.index, this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : tf_mvm_miniboss_scale.FloatValue);
 		}
+	}
+	
+	public void SetCustomCurrencyWorth(int nAmount)
+	{
+		this.SetProp(Prop_Send, "m_nCurrency", nAmount);
+	}
+	
+	public void SetWaveSpawnPopulator(Address pWave)
+	{
+		SetEntData(this.index, GetOffset("CTFPlayer", "m_pWaveSpawnPopulator"), pWave);
 	}
 	
 	public void ClearEventChangeAttributes()
@@ -709,13 +743,13 @@ methodmap Player < CBaseCombatCharacter
 			// and add ones that we want specifically
 			for (int i = 0; i < pEvent.m_characterAttributes.Count(); i++)
 			{
-				Address characterAttributes = pEvent.m_characterAttributes.Get(i, GetOffset("sizeof(static_attrib_t)"));
-				int defIndex = Deref(characterAttributes + GetOffset("static_attrib_t::iDefIndex"), NumberType_Int16);
+				Address characterAttributes = pEvent.m_characterAttributes.Get(i, GetOffset(NULL_STRING, "sizeof(static_attrib_t)"));
+				int defIndex = Deref(characterAttributes + GetOffset("static_attrib_t", "iDefIndex"), NumberType_Int16);
 				
 				Address pDef = TF2Econ_GetAttributeDefinitionAddress(defIndex);
 				if (pDef)
 				{
-					float flValue = Deref(characterAttributes + GetOffset("static_attrib_t::m_value"));
+					float flValue = Deref(characterAttributes + GetOffset("static_attrib_t", "m_value"));
 					TF2Attrib_SetByDefIndex(this.index, defIndex, flValue);
 				}
 			}
@@ -736,10 +770,10 @@ methodmap Player < CBaseCombatCharacter
 			
 			for (int i = 0; i < pEvent.m_itemsAttributes.Count(); i++)
 			{
-				Address itemAttributes = pEvent.m_itemsAttributes.Get(i, GetOffset("sizeof(item_attributes_t)"));
+				Address itemAttributes = pEvent.m_itemsAttributes.Get(i, GetOffset(NULL_STRING, "sizeof(item_attributes_t)"));
 				
 				char itemName[64];
-				PtrToString(Deref(itemAttributes + GetOffset("item_attributes_t::m_itemName")), itemName, sizeof(itemName));
+				PtrToString(Deref(itemAttributes + GetOffset("item_attributes_t", "m_itemName")), itemName, sizeof(itemName));
 				
 				int itemDef = GetItemDefinitionIndexByName(itemName);
 				
@@ -749,13 +783,13 @@ methodmap Player < CBaseCombatCharacter
 					
 					if (entity != -1 && itemDef == GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex"))
 					{
-						CUtlVector attributes = CUtlVector(itemAttributes + GetOffset("item_attributes_t::m_attributes"));
+						CUtlVector attributes = CUtlVector(itemAttributes + GetOffset("item_attributes_t", "m_attributes"));
 						for (int iAtt = 0; iAtt < attributes.Count(); ++iAtt)
 						{
-							Address attrib = attributes.Get(iAtt, GetOffset("sizeof(static_attrib_t)"));
+							Address attrib = attributes.Get(iAtt, GetOffset(NULL_STRING, "sizeof(static_attrib_t)"));
 							
-							int defIndex = Deref(attrib + GetOffset("static_attrib_t::iDefIndex"), NumberType_Int16);
-							float value = Deref(attrib + GetOffset("static_attrib_t::m_value"));
+							int defIndex = Deref(attrib + GetOffset("static_attrib_t", "iDefIndex"), NumberType_Int16);
+							float value = Deref(attrib + GetOffset("static_attrib_t", "m_value"));
 							
 							TF2Attrib_SetByDefIndex(entity, defIndex, value);
 						}
@@ -1144,7 +1178,7 @@ methodmap Player < CBaseCombatCharacter
 			if (!IsClientInGame(client))
 				continue;
 			
-			if (TF2_GetClientTeam(client) == TF2_GetClientTeam(this.index))
+			if (GetClientTeam(client) == GetClientTeam(this.index))
 				continue;
 			
 			enemyList.Push(client);
@@ -1181,14 +1215,19 @@ methodmap Player < CBaseCombatCharacter
 		return true;
 	}
 	
+	public void MarkAsMissionEnemy()
+	{
+		SetEntData(this.index, GetOffset("CTFPlayer", "m_bIsMissionEnemy"), true, 1);
+	}
+	
 	public void MarkAsSupportEnemy()
 	{
-		SetEntData(this.index, GetOffset("CTFPlayer::m_bIsSupportEnemy"), true, 1);
+		SetEntData(this.index, GetOffset("CTFPlayer", "m_bIsSupportEnemy"), true, 1);
 	}
 	
 	public void MarkAsLimitedSupportEnemy()
 	{
-		SetEntData(this.index, GetOffset("CTFPlayer::m_bIsLimitedSupportEnemy"), true, 1);
+		SetEntData(this.index, GetOffset("CTFPlayer", "m_bIsLimitedSupportEnemy"), true, 1);
 	}
 	
 	public CTFBotSquad GetSquad()
@@ -1271,6 +1310,16 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
+	public bool IsPartyMenuActive()
+	{
+		return this.m_bIsPartyMenuActive;
+	}
+	
+	public void SetPartyMenuActive(bool bIsPartyMenuActive)
+	{
+		this.m_bIsPartyMenuActive = bIsPartyMenuActive;
+	}
+	
 	public void Init()
 	{
 		this.m_autoJumpTimer = new CountdownTimer();
@@ -1291,7 +1340,7 @@ methodmap Player < CBaseCombatCharacter
 		this.ClearAllAttributes();
 		this.ClearIdleSound();
 		this.m_fModelScaleOverride = 0.0;
-		this.m_flSpawnTimeLeft = 0.0;
+		this.m_flSpawnTimeLeft = -1.0;
 		this.m_missionTarget = INVALID_ENT_REFERENCE;
 		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
 		this.m_hFollowingFlagTarget = INVALID_ENT_REFERENCE;
@@ -1305,8 +1354,11 @@ methodmap Player < CBaseCombatCharacter
 		this.m_bWasMiniBoss = false;
 		this.m_defenderQueuePoints = -1;
 		this.m_preferences = -1;
+		this.m_party = NULL_PARTY;
+		this.m_bIsPartyMenuActive = false;
 		
-		strcopy(m_szOldClientName[this.index], sizeof(m_szOldClientName[]), "");
+		m_szInvaderName[this.index][0] = EOS;
+		m_szPrevName[this.index][0] = EOS;
 	}
 }
 
@@ -1321,7 +1373,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("EventChangeAttributes_t::m_eventName"));
+			return Deref(this + GetOffset("EventChangeAttributes_t", "m_eventName"));
 		}
 	}
 	
@@ -1329,7 +1381,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("EventChangeAttributes_t::m_skill"));
+			return Deref(this + GetOffset("EventChangeAttributes_t", "m_skill"));
 		}
 	}
 	
@@ -1337,7 +1389,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("EventChangeAttributes_t::m_weaponRestriction"));
+			return Deref(this + GetOffset("EventChangeAttributes_t", "m_weaponRestriction"));
 		}
 	}
 	
@@ -1345,7 +1397,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("EventChangeAttributes_t::m_mission"));
+			return Deref(this + GetOffset("EventChangeAttributes_t", "m_mission"));
 		}
 	}
 	
@@ -1353,7 +1405,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("EventChangeAttributes_t::m_attributeFlags"));
+			return Deref(this + GetOffset("EventChangeAttributes_t", "m_attributeFlags"));
 		}
 	}
 	
@@ -1361,7 +1413,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return CUtlVector(this + GetOffset("EventChangeAttributes_t::m_items"));
+			return CUtlVector(this + GetOffset("EventChangeAttributes_t", "m_items"));
 		}
 	}
 	
@@ -1369,7 +1421,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return CUtlVector(this + GetOffset("EventChangeAttributes_t::m_itemsAttributes"));
+			return CUtlVector(this + GetOffset("EventChangeAttributes_t", "m_itemsAttributes"));
 		}
 	}
 	
@@ -1377,7 +1429,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return CUtlVector(this + GetOffset("EventChangeAttributes_t::m_characterAttributes"));
+			return CUtlVector(this + GetOffset("EventChangeAttributes_t", "m_characterAttributes"));
 		}
 	}
 	
@@ -1385,7 +1437,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return CUtlVector(this + GetOffset("EventChangeAttributes_t::m_tags"));
+			return CUtlVector(this + GetOffset("EventChangeAttributes_t", "m_tags"));
 		}
 	}
 };
@@ -1401,7 +1453,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return view_as<EventChangeAttributes_t>(this + GetOffset("CTFBotSpawner::m_defaultAttributes"));
+			return view_as<EventChangeAttributes_t>(this + GetOffset("CTFBotSpawner", "m_defaultAttributes"));
 		}
 	}
 	
@@ -1409,7 +1461,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return CUtlVector(this + GetOffset("CTFBotSpawner::m_eventChangeAttributes"));
+			return CUtlVector(this + GetOffset("CTFBotSpawner", "m_eventChangeAttributes"));
 		}
 	}
 	
@@ -1417,7 +1469,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CTFBotSpawner::m_health"));
+			return Deref(this + GetOffset("CTFBotSpawner", "m_health"));
 		}
 	}
 	
@@ -1425,7 +1477,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CTFBotSpawner::m_class"));
+			return Deref(this + GetOffset("CTFBotSpawner", "m_class"));
 		}
 	}
 	
@@ -1433,7 +1485,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CTFBotSpawner::m_scale"));
+			return Deref(this + GetOffset("CTFBotSpawner", "m_scale"));
 		}
 	}
 	
@@ -1441,7 +1493,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CTFBotSpawner::m_flAutoJumpMin"));
+			return Deref(this + GetOffset("CTFBotSpawner", "m_flAutoJumpMin"));
 		}
 	}
 	
@@ -1449,7 +1501,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CTFBotSpawner::m_flAutoJumpMax"));
+			return Deref(this + GetOffset("CTFBotSpawner", "m_flAutoJumpMax"));
 		}
 	}
 	
@@ -1457,13 +1509,13 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return CUtlVector(this + GetOffset("CTFBotSpawner::m_teleportWhereName"));
+			return CUtlVector(this + GetOffset("CTFBotSpawner", "m_teleportWhereName"));
 		}
 	}
 	
 	public void GetName(char[] buffer, int maxlen, const char[] defValue = "")
 	{
-		Address m_name = Deref(this + GetOffset("CTFBotSpawner::m_name"));
+		Address m_name = Deref(this + GetOffset("CTFBotSpawner", "m_name"));
 		if (m_name)
 		{
 			PtrToString(m_name, buffer, maxlen);
@@ -1491,7 +1543,7 @@ methodmap CSquadSpawner
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CSquadSpawner::m_formationSize"));
+			return Deref(this + GetOffset("CSquadSpawner", "m_formationSize"));
 		}
 	}
 	
@@ -1499,7 +1551,7 @@ methodmap CSquadSpawner
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CSquadSpawner::m_bShouldPreserveSquad"));
+			return Deref(this + GetOffset("CSquadSpawner", "m_bShouldPreserveSquad"));
 		}
 	}
 }
@@ -1515,7 +1567,7 @@ methodmap CMissionPopulator
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CMissionPopulator::m_mission"));
+			return Deref(this + GetOffset("CMissionPopulator", "m_mission"));
 		}
 	}
 	
@@ -1523,7 +1575,7 @@ methodmap CMissionPopulator
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CMissionPopulator::m_cooldownDuration"));
+			return Deref(this + GetOffset("CMissionPopulator", "m_cooldownDuration"));
 		}
 	}
 	
@@ -1531,7 +1583,7 @@ methodmap CMissionPopulator
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("IPopulationSpawner::m_spawner"));
+			return Deref(this + GetOffset("IPopulationSpawner", "m_spawner"));
 		}
 	}
 	
@@ -1539,7 +1591,7 @@ methodmap CMissionPopulator
 	{
 		public get()
 		{
-			return view_as<Address>(this) + GetOffset("IPopulationSpawner::m_where");
+			return view_as<Address>(this) + GetOffset("IPopulationSpawner", "m_where");
 		}
 	}
 }
@@ -1555,11 +1607,11 @@ methodmap CWave
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CWave::m_nNumEngineersTeleportSpawned"));
+			return Deref(this + GetOffset("CWave", "m_nNumEngineersTeleportSpawned"));
 		}
 		public set(int nNumEngineersTeleportSpawned)
 		{
-			WriteVal(this + GetOffset("CWave::m_nNumEngineersTeleportSpawned"), nNumEngineersTeleportSpawned);
+			WriteVal(this + GetOffset("CWave", "m_nNumEngineersTeleportSpawned"), nNumEngineersTeleportSpawned);
 		}
 	}
 	
@@ -1567,11 +1619,11 @@ methodmap CWave
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CWave::m_nNumSentryBustersKilled"));
+			return Deref(this + GetOffset("CWave", "m_nNumSentryBustersKilled"));
 		}
 		public set(int nNumSentryBustersKilled)
 		{
-			WriteVal(this + GetOffset("CWave::m_nNumSentryBustersKilled"), nNumSentryBustersKilled);
+			WriteVal(this + GetOffset("CWave", "m_nNumSentryBustersKilled"), nNumSentryBustersKilled);
 		}
 	}
 	
@@ -1579,11 +1631,11 @@ methodmap CWave
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CWave::m_nSentryBustersSpawned"));
+			return Deref(this + GetOffset("CWave", "m_nSentryBustersSpawned"));
 		}
 		public set(int nSentryBustersSpawned)
 		{
-			WriteVal(this + GetOffset("CWave::m_nSentryBustersSpawned"), nSentryBustersSpawned);
+			WriteVal(this + GetOffset("CWave", "m_nSentryBustersSpawned"), nSentryBustersSpawned);
 		}
 	}
 	
@@ -1634,7 +1686,7 @@ methodmap CPopulationManager < CBaseEntity
 	{
 		public get()
 		{
-			return GetEntData(this.index, GetOffset("CPopulationManager::m_canBotsAttackWhileInSpawnRoom"), 1) != 0;
+			return GetEntData(this.index, GetOffset("CPopulationManager", "m_canBotsAttackWhileInSpawnRoom"), 1) != 0;
 		}
 	}
 	
@@ -1642,7 +1694,7 @@ methodmap CPopulationManager < CBaseEntity
 	{
 		public get()
 		{
-			return GetEntData(this.index, GetOffset("CPopulationManager::m_bSpawningPaused"), 1) != 0;
+			return GetEntData(this.index, GetOffset("CPopulationManager", "m_bSpawningPaused"), 1) != 0;
 		}
 	}
 	
@@ -1650,7 +1702,7 @@ methodmap CPopulationManager < CBaseEntity
 	{
 		public get()
 		{
-			return view_as<Address>(GetEntData(this.index, GetOffset("CPopulationManager::m_defaultEventChangeAttributesName")));
+			return view_as<Address>(GetEntData(this.index, GetOffset("CPopulationManager", "m_defaultEventChangeAttributesName")));
 		}
 	}
 	
@@ -1658,7 +1710,7 @@ methodmap CPopulationManager < CBaseEntity
 	{
 		public get()
 		{
-			return CUtlVector(GetEntityAddress(this.index) + GetOffset("CPopulationManager::m_EndlessActiveBotUpgrades"));
+			return CUtlVector(GetEntityAddress(this.index) + GetOffset("CPopulationManager", "m_EndlessActiveBotUpgrades"));
 		}
 	}
 	
@@ -1709,7 +1761,7 @@ methodmap CPopulationManager < CBaseEntity
 		
 		for (int i = 0; i < this.m_EndlessActiveBotUpgrades.Count(); ++i)
 		{
-			CMvMBotUpgrade upgrade = this.m_EndlessActiveBotUpgrades.Get(i, GetOffset("sizeof(CMvMBotUpgrade)"));
+			CMvMBotUpgrade upgrade = this.m_EndlessActiveBotUpgrades.Get(i, GetOffset(NULL_STRING, "sizeof(CMvMBotUpgrade)"));
 			
 			if (upgrade.bIsBotAttr == true)
 			{
@@ -1731,7 +1783,7 @@ methodmap CPopulationManager < CBaseEntity
 					}
 					else
 					{
-						int iFormat = Deref(pDef + GetOffset("CEconItemAttributeDefinition::m_iDescriptionFormat"));
+						int iFormat = Deref(pDef + GetOffset("CEconItemAttributeDefinition", "m_iDescriptionFormat"));
 						float flValue = upgrade.flValue;
 						if (iFormat == ATTDESCFORM_VALUE_IS_PERCENTAGE || iFormat == ATTDESCFORM_VALUE_IS_INVERTED_PERCENTAGE)
 						{
@@ -1759,7 +1811,7 @@ methodmap BombInfo_t
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("BombInfo_t::m_flMaxBattleFront"));
+			return Deref(this + GetOffset("BombInfo_t", "m_flMaxBattleFront"));
 		}
 	}
 }
@@ -1775,7 +1827,7 @@ methodmap CBaseTFBotHintEntity < CBaseEntity
 	{
 		public get()
 		{
-			return GetEntData(this.index, GetOffset("CBaseTFBotHintEntity::m_isDisabled"), 1) != 0;
+			return GetEntData(this.index, GetOffset("CBaseTFBotHintEntity", "m_isDisabled"), 1) != 0;
 		}
 	}
 	
@@ -1826,7 +1878,7 @@ methodmap CWaveSpawnPopulator
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CWaveSpawnPopulator::m_bSupportWave"), NumberType_Int8);
+			return Deref(this + GetOffset("CWaveSpawnPopulator", "m_bSupportWave"), NumberType_Int8);
 		}
 	}
 	
@@ -1834,7 +1886,7 @@ methodmap CWaveSpawnPopulator
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CWaveSpawnPopulator::m_bLimitedSupport"), NumberType_Int8);
+			return Deref(this + GetOffset("CWaveSpawnPopulator", "m_bLimitedSupport"), NumberType_Int8);
 		}
 	}
 	
@@ -1860,7 +1912,7 @@ methodmap CMvMBotUpgrade
 	{
 		public get()
 		{
-			return view_as<Address>(this + GetOffset("CMvMBotUpgrade::szAttrib"));
+			return view_as<Address>(this + GetOffset("CMvMBotUpgrade", "szAttrib"));
 		}
 	}
 	
@@ -1868,7 +1920,7 @@ methodmap CMvMBotUpgrade
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CMvMBotUpgrade::iAttribIndex"), NumberType_Int16);
+			return Deref(this + GetOffset("CMvMBotUpgrade", "iAttribIndex"), NumberType_Int16);
 		}
 	}
 	
@@ -1876,7 +1928,7 @@ methodmap CMvMBotUpgrade
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CMvMBotUpgrade::flValue"));
+			return Deref(this + GetOffset("CMvMBotUpgrade", "flValue"));
 		}
 	}
 	
@@ -1884,7 +1936,7 @@ methodmap CMvMBotUpgrade
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CMvMBotUpgrade::bIsBotAttr"), NumberType_Int8);
+			return Deref(this + GetOffset("CMvMBotUpgrade", "bIsBotAttr"), NumberType_Int8);
 		}
 	}
 	
@@ -1892,7 +1944,7 @@ methodmap CMvMBotUpgrade
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CMvMBotUpgrade::bIsSkillAttr"), NumberType_Int8);
+			return Deref(this + GetOffset("CMvMBotUpgrade", "bIsSkillAttr"), NumberType_Int8);
 		}
 	}
 }

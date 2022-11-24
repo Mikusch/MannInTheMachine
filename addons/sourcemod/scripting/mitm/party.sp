@@ -18,9 +18,13 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+#define MAX_PARTY_NAME_LENGTH	32
+
 #define SYMBOL_PARTY_LEADER	"★"
 #define SYMBOL_PARTY_MEMBER	"☆"
 #define SYMBOL_PARTY_OTHER	"◆"
+
+#define SOUND_PARTY_UPDATE	"ui/message_update.wav"
 
 static ArrayList g_parties;
 
@@ -348,7 +352,7 @@ static Action ConCmd_PartyCreate(int client, int args)
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Created", name);
-		ClientCommand(client, "play ui/message_update.wav");
+		ClientCommand(client, "play %s", SOUND_PARTY_UPDATE);
 	}
 	
 	return Plugin_Handled;
@@ -392,24 +396,12 @@ static Action ConCmd_PartyJoin(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	// when in a party already, inform all current members
+	// leave current party
 	if (Player(client).IsInAParty())
 	{
-		ArrayList members = new ArrayList();
-		Player(client).GetParty().CollectMembers(members);
-		for (int i = 0; i < members.Length; i++)
-		{
-			int member = members.Get(i);
-			if (member == client)
-				continue;
-			
-			CPrintToChat(member, "%s %t", PLUGIN_TAG, "Party_LeftOther", client);
-			ClientCommand(member, "play ui/message_update.wav");
-		}
-		delete members;
+		FakeClientCommand(client, "sm_party_leave");
 	}
 	
-	Player(client).LeaveParty();
 	Player(client).JoinParty(party);
 	
 	// notify the new member
@@ -420,8 +412,11 @@ static Action ConCmd_PartyJoin(int client, int args)
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Joined", name);
-		ClientCommand(client, "play ui/message_update.wav");
+		ClientCommand(client, "play %s", SOUND_PARTY_UPDATE);
 	}
+	
+	// display party
+	Menus_DisplayPartyMenu(client);
 	
 	// notify all other members
 	ArrayList members = new ArrayList();
@@ -429,11 +424,18 @@ static Action ConCmd_PartyJoin(int client, int args)
 	for (int i = 0; i < members.Length; i++)
 	{
 		int member = members.Get(i);
+		
 		if (member == client)
 			continue;
 		
+		// refresh party menu if active
+		if (Player(member).IsPartyMenuActive())
+		{
+			Menus_DisplayPartyMenu(member);
+		}
+		
 		CPrintToChat(member, "%s %t", PLUGIN_TAG, "Party_JoinedOther", client);
-		ClientCommand(member, "play ui/message_update.wav");
+		ClientCommand(member, "play %s", SOUND_PARTY_UPDATE);
 	}
 	delete members;
 	
@@ -455,6 +457,8 @@ static Action ConCmd_PartyLeave(int client, int args)
 	
 	Player(client).LeaveParty();
 	
+	CancelClientMenu(client);
+	
 	// party might be gone now
 	if (!party.IsNull())
 	{
@@ -464,14 +468,21 @@ static Action ConCmd_PartyLeave(int client, int args)
 		for (int i = 0; i < members.Length; i++)
 		{
 			int member = members.Get(i);
+			
+			// refresh party menu if active
+			if (Player(member).IsPartyMenuActive())
+			{
+				Menus_DisplayPartyMenu(member);
+			}
+			
 			CPrintToChat(member, "%s %t", PLUGIN_TAG, "Party_LeftOther", client);
-			ClientCommand(member, "play ui/message_update.wav");
+			ClientCommand(member, "play %s", SOUND_PARTY_UPDATE);
 		}
 		delete members;
 	}
 	
 	CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Left", name);
-	ClientCommand(client, "play ui/message_update.wav");
+	ClientCommand(client, "play %s", SOUND_PARTY_UPDATE);
 	return Plugin_Handled;
 }
 
@@ -522,9 +533,6 @@ static Action ConCmd_PartyInvite(int client, int args)
 	for (int i = 0; i < target_count; i++)
 	{
 		if (target_list[i] == client)
-			continue;
-		
-		if (Player(target_list[i]).IsInAParty())
 			continue;
 		
 		if (party.IsInvited(target_list[i]))
@@ -614,10 +622,12 @@ static Action ConCmd_PartyKick(int client, int args)
 		
 		Player(target_list[i]).LeaveParty();
 		
+		CancelClientMenu(target_list[i]);
+		
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
 		CPrintToChat(target_list[i], "%s %t", PLUGIN_TAG, "Party_Kicked", name);
-		ClientCommand(target_list[i], "play ui/message_update.wav");
+		ClientCommand(target_list[i], "play %s", SOUND_PARTY_UPDATE);
 		
 		// notify all other members
 		ArrayList members = new ArrayList();
@@ -626,7 +636,7 @@ static Action ConCmd_PartyKick(int client, int args)
 		{
 			int member = members.Get(j);
 			CPrintToChat(member, "%s %t", PLUGIN_TAG, "Party_KickedOther", target_list[i]);
-			ClientCommand(member, "play ui/message_update.wav");
+			ClientCommand(member, "play %s", SOUND_PARTY_UPDATE);
 		}
 		delete members;
 	}
@@ -658,6 +668,13 @@ static Action ConCmd_PartyName(int client, int args)
 	
 	char name[MAX_NAME_LENGTH];
 	GetCmdArgString(name, sizeof(name));
+	
+	// truncate the name if it's too long
+	if (strlen(name) > MAX_PARTY_NAME_LENGTH)
+	{
+		name[MAX_PARTY_NAME_LENGTH - 1] = '\0';
+	}
+	
 	party.SetName(name);
 	
 	CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Renamed", name);

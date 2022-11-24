@@ -15,6 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma semicolon 1
+#pragma newdecls required
+
 void Menus_DisplayMainMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_MainMenu, MenuAction_Select | MenuAction_End | MenuAction_DrawItem | MenuAction_DisplayItem);
@@ -78,7 +81,7 @@ void Menus_DisplayQueueMenu(int client)
 		Menu menu = new Menu(MenuHandler_QueueMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End);
 		menu.ExitBackButton = true;
 		
-		char title[256];
+		char title[64];
 		Format(title, sizeof(title), "%T", "Menu_Queue_Title", client);
 		
 		if (Player(client).m_defenderQueuePoints != -1)
@@ -192,7 +195,7 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 					
 					for (int i = 0; i < members.Length; i++)
 					{
-						char strMember[256];
+						char strMember[MAX_MESSAGE_LENGTH];
 						
 						Format(strMember, sizeof(strMember), "%N", members.Get(i));
 						
@@ -313,11 +316,11 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 
 void Menus_DisplayPartyMenu(int client)
 {
-	Menu menu = new Menu(MenuHandler_PartyMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
+	Menu menu = new Menu(MenuHandler_PartyMenu, MenuAction_Display | MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
 	menu.ExitBackButton = true;
 	
 	// show title
-	char title[256];
+	char title[512];
 	Format(title, sizeof(title), "%T\n", "Party_Menu_Title", client);
 	
 	if (Player(client).IsInAParty())
@@ -334,13 +337,15 @@ void Menus_DisplayPartyMenu(int client)
 		int index = queue.FindValue(party, QueueData::m_party);
 		if (index != -1)
 		{
-			Format(title, sizeof(title), "%s%T\n \n", title, "Party_Menu_QueuePoints", client, queue.Get(index, QueueData::m_points), index + 1);
+			Format(title, sizeof(title), "%s%T", title, "Party_Menu_QueuePoints", client, queue.Get(index, QueueData::m_points), index + 1);
 		}
 		else
 		{
-			Format(title, sizeof(title), "%s%T\n \n", title, "Party_Menu_NotEnoughMembersForQueue", client);
+			Format(title, sizeof(title), "%s%T", title, "Party_Menu_NotEnoughMembersForQueue", client);
 		}
 		delete queue;
+		
+		StrCat(title, sizeof(title), "\n \n");
 		
 		// show member count
 		Format(title, sizeof(title), "%s%T\n", title, "Party_Menu_Members", client, party.GetMemberCount(), party.GetMaxPlayers());
@@ -368,7 +373,7 @@ void Menus_DisplayPartyMenu(int client)
 	}
 	
 	// final newline so it looks nicer
-	Format(title, sizeof(title), "%s \n", title);
+	StrCat(title, sizeof(title), " \n");
 	
 	menu.SetTitle(title);
 	
@@ -402,19 +407,24 @@ static int MenuHandler_PartyMenu(Menu menu, MenuAction action, int param1, int p
 {
 	switch (action)
 	{
+		case MenuAction_Display:
+		{
+			Player(param1).SetPartyMenuActive(true);
+		}
 		case MenuAction_Select:
 		{
+			Player(param1).SetPartyMenuActive(false);
+			
 			char info[64];
 			menu.GetItem(param2, info, sizeof(info));
 			
 			if (StrEqual(info, "create_party"))
 			{
 				FakeClientCommand(param1, "sm_party_create");
-				Menus_DisplayPartyMenu(param1);
 			}
 			else if (StrEqual(info, "leave_party"))
 			{
-				FakeClientCommand(param1, "sm_party_leave")
+				FakeClientCommand(param1, "sm_party_leave");
 				Menus_DisplayPartyMenu(param1);
 			}
 			else if (StrEqual(info, "manage_party"))
@@ -428,6 +438,8 @@ static int MenuHandler_PartyMenu(Menu menu, MenuAction action, int param1, int p
 		}
 		case MenuAction_Cancel:
 		{
+			Player(param1).SetPartyMenuActive(false);
+			
 			if (param2 == MenuCancel_ExitBack)
 			{
 				Menus_DisplayMainMenu(param1);
@@ -460,7 +472,7 @@ void Menus_DisplayPartyManageMenu(int client)
 	menu.ExitBackButton = true;
 	
 	menu.AddItem("invite_members", "Party_ManageMenu_InviteMembers");
-	menu.AddItem("kick_members", "Party_ManageMenu_KickMembers")
+	menu.AddItem("kick_members", "Party_ManageMenu_KickMembers");
 	
 	menu.Display(client, MENU_TIME_FOREVER);
 }
@@ -526,13 +538,11 @@ void Menus_DisplayPartyManageInviteMenu(int client)
 		
 		Party party = Player(client).GetParty();
 		
-		char userid[32]
+		char userid[32];
 		IntToString(GetClientUserId(other), userid, sizeof(userid));
 		
-		char name[MAX_NAME_LENGTH];
-		GetClientName(other, name, sizeof(name));
-		
 		char display[64];
+		int style = ITEMDRAW_DEFAULT;
 		
 		if (Player(other).IsInAParty())
 		{
@@ -540,25 +550,26 @@ void Menus_DisplayPartyManageInviteMenu(int client)
 			if (Player(other).GetParty() == party)
 			{
 				Format(display, sizeof(display), SYMBOL_PARTY_MEMBER ... " %N", other);
+				style = ITEMDRAW_DISABLED;
 			}
 			else
 			{
 				Format(display, sizeof(display), SYMBOL_PARTY_OTHER ... " %N", other);
 			}
-			
-			menu.AddItem(userid, display, ITEMDRAW_DISABLED);
-		}
-		else if (party.IsInvited(other))
-		{
-			// show already invited
-			Format(display, sizeof(display), "%N %T", other, "Party_ManageInviteMenu_AlreadyInvited", other);
-			menu.AddItem(userid, display, ITEMDRAW_DISABLED);
 		}
 		else
 		{
-			// show everyone else
-			menu.AddItem(userid, name);
+			Format(display, sizeof(display), "%N", other);
 		}
+		
+		if (party.IsInvited(other))
+		{
+			// show already invited
+			Format(display, sizeof(display), "%s %T", display, "Party_ManageInviteMenu_AlreadyInvited", other);
+			style = ITEMDRAW_DISABLED;
+		}
+		
+		menu.AddItem(userid, display, style);
 	}
 	
 	if (menu.ItemCount == 0)
@@ -752,7 +763,6 @@ static int MenuHandler_PartyInviteMenu(Menu menu, MenuAction action, int param1,
 			menu.GetItem(param2, info, sizeof(info));
 			
 			FakeClientCommand(param1, "sm_party_join %s", info);
-			Menus_DisplayPartyMenu(param1);
 		}
 		case MenuAction_Cancel:
 		{

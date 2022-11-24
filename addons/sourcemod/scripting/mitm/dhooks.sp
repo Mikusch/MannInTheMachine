@@ -341,7 +341,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 	}
 	
 	// find dead player we can re-use
-	int newPlayer = GetRobotToSpawn(spawner.m_defaultAttributes.m_attributeFlags & MINIBOSS);
+	int newPlayer = FindNextInvader(spawner.m_defaultAttributes.m_attributeFlags & MINIBOSS);
 	
 	if (newPlayer != -1)
 	{
@@ -361,11 +361,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		
 		char name[MAX_NAME_LENGTH];
 		spawner.GetName(name, sizeof(name), "TFBot");
-		
-		if (mitm_rename_robots.BoolValue)
-		{
-			Player(newPlayer).SetName(name);
-		}
+		Player(newPlayer).SetName(name, mitm_rename_robots.BoolValue);
 		
 		CBaseEntity(g_internalSpawnPoint).SetAbsOrigin(here);
 		CBaseEntity(g_internalSpawnPoint).SetLocalAngles(ZERO_VECTOR);
@@ -390,7 +386,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		Player(newPlayer).ClearEventChangeAttributes();
 		for (int i = 0; i < spawner.m_eventChangeAttributes.Count(); ++i)
 		{
-			Player(newPlayer).AddEventChangeAttributes(spawner.m_eventChangeAttributes.Get(i, GetOffset("sizeof(EventChangeAttributes_t)")));
+			Player(newPlayer).AddEventChangeAttributes(spawner.m_eventChangeAttributes.Get(i, GetOffset(NULL_STRING, "sizeof(EventChangeAttributes_t)")));
 		}
 		
 		Player(newPlayer).SetTeleportWhere(spawner.m_teleportWhereName);
@@ -564,13 +560,6 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 			{
 				HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_GIANT_CALLOUT", TFTeam_Defenders);
 			}
-			
-			if (!Player(newPlayer).HasPreference(PREF_DISABLE_SPAWN_NOTIFICATION))
-			{
-				EmitSoundToClient(newPlayer, "ui/system_message_alert.wav", .channel = SNDCHAN_STATIC);
-			}
-			
-			PrintCenterText(newPlayer, "%t", "Invader_Spawned", name);
 		}
 		
 		if (tf_populator_debug.BoolValue)
@@ -641,11 +630,13 @@ static MRESReturn DHookCallback_CPeriodicSpawnPopulatorUpdate_Post(Address pThis
 	for (int i = 0; i < m_justSpawnedList.Length; i++)
 	{
 		int player = m_justSpawnedList.Get(i);
-		
-		// what bot should do after spawning at teleporter exit
-		if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
+		if (IsEntityClient(player))
 		{
-			OnBotTeleported(player);
+			// what bot should do after spawning at teleporter exit
+			if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
+			{
+				OnBotTeleported(player);
+			}
 		}
 	}
 	
@@ -660,27 +651,29 @@ static MRESReturn DHookCallback_CWaveSpawnPopulatorUpdate_Post(Address pThis)
 	for (int i = 0; i < m_justSpawnedList.Length; i++)
 	{
 		int player = m_justSpawnedList.Get(i);
-		
-		SetEntProp(player, Prop_Send, "m_nCurrency", 0);
-		SetEntData(player, GetOffset("CTFPlayer::m_pWaveSpawnPopulator"), pThis);
-		
-		// Allows client UI to know if a specific spawner is active
-		g_pObjectiveResource.SetMannVsMachineWaveClassActive(GetEntData(player, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")));
-		
-		if (CWaveSpawnPopulator(pThis).IsSupportWave())
+		if (IsEntityClient(player))
 		{
-			Player(player).MarkAsSupportEnemy();
-		}
-		
-		if (CWaveSpawnPopulator(pThis).IsLimitedSupportWave())
-		{
-			Player(player).MarkAsLimitedSupportEnemy();
-		}
-		
-		// what bot should do after spawning at teleporter exit
-		if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
-		{
-			OnBotTeleported(player);
+			Player(player).SetCustomCurrencyWorth(0);
+			Player(player).SetWaveSpawnPopulator(pThis);
+			
+			// Allows client UI to know if a specific spawner is active
+			g_pObjectiveResource.SetMannVsMachineWaveClassActive(GetEntData(player, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")));
+			
+			if (CWaveSpawnPopulator(pThis).IsSupportWave())
+			{
+				Player(player).MarkAsSupportEnemy();
+			}
+			
+			if (CWaveSpawnPopulator(pThis).IsLimitedSupportWave())
+			{
+				Player(player).MarkAsLimitedSupportEnemy();
+			}
+			
+			// what bot should do after spawning at teleporter exit
+			if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
+			{
+				OnBotTeleported(player);
+			}
 		}
 	}
 	
@@ -762,40 +755,42 @@ static MRESReturn DHookCallback_UpdateMission_Post(Address pThis, DHookReturn re
 	for (int i = 0; i < m_justSpawnedList.Length; i++)
 	{
 		int player = m_justSpawnedList.Get(i);
-		
-		Player(player).SetFlagTarget(INVALID_ENT_REFERENCE);
-		Player(player).SetMission(mission);
-		SetEntData(player, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true, 1);
-		
-		int iFlags = MVM_CLASS_FLAG_MISSION;
-		if (Player(player).IsMiniBoss())
+		if (IsEntityClient(player))
 		{
-			iFlags |= MVM_CLASS_FLAG_MINIBOSS;
-		}
-		else if (Player(player).HasAttribute(ALWAYS_CRIT))
-		{
-			iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
-		}
-		g_pObjectiveResource.IncrementMannVsMachineWaveClassCount(GetEntData(player, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")), iFlags);
-		
-		// Response rules stuff for MvM
-		if (IsMannVsMachineMode())
-		{
-			// Only have defenders announce the arrival of the first enemy Sniper
-			if (Player(player).HasMission(MISSION_SNIPER))
+			Player(player).SetFlagTarget(INVALID_ENT_REFERENCE);
+			Player(player).SetMission(mission);
+			Player(player).MarkAsMissionEnemy();
+			
+			int iFlags = MVM_CLASS_FLAG_MISSION;
+			if (Player(player).IsMiniBoss())
 			{
-				s_nSniperCount++;
-				
-				if (s_nSniperCount == 1)
+				iFlags |= MVM_CLASS_FLAG_MINIBOSS;
+			}
+			else if (Player(player).HasAttribute(ALWAYS_CRIT))
+			{
+				iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
+			}
+			g_pObjectiveResource.IncrementMannVsMachineWaveClassCount(GetEntData(player, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")), iFlags);
+			
+			// Response rules stuff for MvM
+			if (IsMannVsMachineMode())
+			{
+				// Only have defenders announce the arrival of the first enemy Sniper
+				if (Player(player).HasMission(MISSION_SNIPER))
 				{
-					HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_SNIPER_CALLOUT", TFTeam_Defenders);
+					s_nSniperCount++;
+					
+					if (s_nSniperCount == 1)
+					{
+						HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_SNIPER_CALLOUT", TFTeam_Defenders);
+					}
 				}
 			}
-		}
-		
-		if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
-		{
-			OnBotTeleported(player);
+			
+			if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
+			{
+				OnBotTeleported(player);
+			}
 		}
 	}
 	
@@ -851,8 +846,8 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 				int sentryOwner = GetEntPropEnt(obj, Prop_Send, "m_hBuilder");
 				if (sentryOwner != -1)
 				{
-					int nDmgDone = RoundToFloor(GetEntDataFloat(sentryOwner, GetOffset("CTFPlayer::m_accumulatedSentryGunDamageDealt")));
-					int nKillsMade = GetEntData(sentryOwner, GetOffset("CTFPlayer::m_accumulatedSentryGunKillCount"));
+					int nDmgDone = RoundToFloor(GetEntDataFloat(sentryOwner, GetOffset("CTFPlayer", "m_accumulatedSentryGunDamageDealt")));
+					int nKillsMade = GetEntData(sentryOwner, GetOffset("CTFPlayer", "m_accumulatedSentryGunKillCount"));
 					
 					if (nDmgDone >= nDmgLimit || nKillsMade >= nKillLimit)
 					{
@@ -925,7 +920,7 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 					Player(bot).SetMission(MISSION_DESTROY_SENTRIES);
 					Player(bot).SetMissionTarget(targetSentry);
 					
-					SetEntData(bot, GetOffset("CTFPlayer::m_bIsMissionEnemy"), true, 1);
+					Player(bot).MarkAsMissionEnemy();
 					
 					didSpawn = true;
 					
@@ -1008,7 +1003,7 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Post(Address pThis,
 
 static MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterface, DHookParam params)
 {
-	Address pszEventName = params.GetObjectVar(1, GetOffset("inputdata_t::value"), ObjectValueType_Int);
+	Address pszEventName = params.GetObjectVar(1, GetOffset("inputdata_t", "value"), ObjectValueType_Int);
 	
 	if (IsMannVsMachineMode())
 	{
@@ -1244,7 +1239,7 @@ static MRESReturn DHookCallback_FindSpawnLocation_Post(Address where, DHookRetur
 
 static MRESReturn DHookCallback_ShouldHitEntity_Post(Address pFilter, DHookReturn ret, DHookParam params)
 {
-	int me = GetEntityFromAddress(Deref(pFilter + GetOffset("CTraceFilterSimple::m_pPassEnt")));
+	int me = GetEntityFromAddress(Deref(pFilter + GetOffset("CTraceFilterSimple", "m_pPassEnt")));
 	int entity = GetEntityFromAddress(params.Get(1));
 	
 	if (IsEntityClient(entity))
@@ -1704,8 +1699,8 @@ static MRESReturn DHookCallback_ComeToRest_Pre(int item)
 	
 	if (area && (area.HasAttributeTF(BLUE_SPAWN_ROOM) || area.HasAttributeTF(RED_SPAWN_ROOM)))
 	{
-		SDKCall_DistributeCurrencyAmount(GetEntData(item, GetOffset("CCurrencyPack::m_nAmount")));
-		SetEntData(item, GetOffset("CCurrencyPack::m_bTouched"), true, 1);
+		SDKCall_DistributeCurrencyAmount(GetEntData(item, GetOffset("CCurrencyPack", "m_nAmount")));
+		SetEntData(item, GetOffset("CCurrencyPack", "m_bTouched"), true, 1);
 		RemoveEntity(item);
 		
 		return MRES_Supercede;
@@ -1725,7 +1720,7 @@ static MRESReturn DHookCallback_FPlayerCanTakeDamage_Pre(DHookReturn ret, DHookP
 {
 	if (g_bForceFriendlyFire)
 	{
-		params.SetObjectVar(3, GetOffset("CTakeDamageInfo::m_bForceFriendlyFire"), ObjectValueType_Bool, true);
+		params.SetObjectVar(3, GetOffset("CTakeDamageInfo", "m_bForceFriendlyFire"), ObjectValueType_Bool, true);
 		return MRES_ChangedHandled;
 	}
 	

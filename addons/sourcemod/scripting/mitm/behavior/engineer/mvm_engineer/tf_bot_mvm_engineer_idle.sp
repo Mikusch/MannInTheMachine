@@ -286,7 +286,7 @@ static bool ShouldAdvanceNestSpot(CTFBotMvMEngineerIdle action, int actor)
 		action.m_reevaluateNestTimer.Invalidate();
 	}
 	
-	BombInfo_t bombInfo = malloc(GetOffset("sizeof(BombInfo_t)"));
+	BombInfo_t bombInfo = malloc(GetOffset(NULL_STRING, "sizeof(BombInfo_t)"));
 	if (SDKCall_GetBombInfo(bombInfo))
 	{
 		if (IsValidEntity(action.m_nestHint))
@@ -297,7 +297,7 @@ static bool ShouldAdvanceNestSpot(CTFBotMvMEngineerIdle action, int actor)
 			CNavArea hintArea = TheNavMesh.GetNearestNavArea(origin, false, 1000.0);
 			if (hintArea)
 			{
-				float hintDistanceToTarget = Deref(hintArea + GetOffset("CTFNavArea::m_distanceToBombTarget"));
+				float hintDistanceToTarget = Deref(hintArea + GetOffset("CTFNavArea", "m_distanceToBombTarget"));
 				
 				bool bShouldAdvance = (hintDistanceToTarget > bombInfo.m_flMaxBattleFront);
 				

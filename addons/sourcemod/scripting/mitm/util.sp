@@ -27,7 +27,9 @@ methodmap IntervalTimer < StringMap
 {
 	public IntervalTimer()
 	{
-		return view_as<IntervalTimer>(new StringMap());
+		IntervalTimer timer = view_as<IntervalTimer>(new StringMap());
+		timer.m_timestamp = -1.0;
+		return timer;
 	}
 	
 	public void Reset()
@@ -91,7 +93,10 @@ methodmap CountdownTimer < StringMap
 {
 	public CountdownTimer()
 	{
-		return view_as<CountdownTimer>(new StringMap());
+		CountdownTimer timer = view_as<CountdownTimer>(new StringMap());
+		timer.m_timestamp = -1.0;
+		timer.m_duration = 0.0;
+		return timer;
 	}
 	
 	public void Reset()
@@ -494,7 +499,7 @@ ArrayList GetInvaderQueue(bool bMiniBoss = false)
 	return queue;
 }
 
-int GetRobotToSpawn(bool bMiniBoss)
+int FindNextInvader(bool bMiniBoss)
 {
 	ArrayList queue = GetInvaderQueue(bMiniBoss);
 	int priorityClient = -1;
@@ -572,7 +577,7 @@ int CreateEntityGlow(int entity)
 			GetEntPropString(entity, Prop_Send, "m_iszCustomModel", iszModel, sizeof(iszModel));
 		}
 		
-		if (iszModel[0] == EOS)
+		if (!iszModel[0])
 		{
 			GetEntPropString(entity, Prop_Data, "m_ModelName", iszModel, sizeof(iszModel));
 		}
@@ -1085,10 +1090,10 @@ void LockWeapon(int client, int weapon, int &buttons)
 		// semi-auto behaviour
 		else
 		{
-			if (view_as<bool>(GetEntData(weapon, GetOffset("CTFWeaponBase::m_bInAttack2"), 1)) == false)
+			if (view_as<bool>(GetEntData(weapon, GetOffset("CTFWeaponBase", "m_bInAttack2"), 1)) == false)
 			{
 				SDKCall_DoClassSpecialSkill(client);
-				SetEntData(weapon, GetOffset("CTFWeaponBase::m_bInAttack2"), true, 1);
+				SetEntData(weapon, GetOffset("CTFWeaponBase", "m_bInAttack2"), true, 1);
 			}
 		}
 	}

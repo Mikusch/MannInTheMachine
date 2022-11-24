@@ -37,6 +37,9 @@
 #include <sendproxy>
 #define REQUIRE_EXTENSIONS
 
+// Uncomment this for diagnostic messages in server console (very verbose)
+// #define DEBUG
+
 // Global entities
 CPopulationManager g_pPopulationManager = view_as<CPopulationManager>(INVALID_ENT_REFERENCE);
 CTFObjectiveResource g_pObjectiveResource = view_as<CTFObjectiveResource>(INVALID_ENT_REFERENCE);

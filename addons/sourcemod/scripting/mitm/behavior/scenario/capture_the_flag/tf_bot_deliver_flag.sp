@@ -191,7 +191,7 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 				if (!IsClientInGame(client))
 					continue;
 				
-				if (TF2_GetClientTeam(client) != TF2_GetClientTeam(actor))
+				if (GetClientTeam(client) != GetClientTeam(actor))
 					continue;
 				
 				if (!IsPlayerAlive(client))

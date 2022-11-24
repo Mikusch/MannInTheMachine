@@ -31,6 +31,8 @@ void Console_Init()
 	AddCommandListener(CommandListener_Suicide, "kill");
 	AddCommandListener(CommandListener_Build, "build");
 	AddCommandListener(CommandListener_DropItem, "dropitem");
+	AddCommandListener(CommandListener_JoinClass, "joinclass");
+	AddCommandListener(CommandListener_Buyback, "td_buyback");
 }
 
 static Action ConCmd_MannInTheMachine(int client, int args)
@@ -192,6 +194,28 @@ static Action CommandListener_DropItem(int client, const char[] command, int arg
 	if (Player(client).GetDeployingBombState() != TF_BOMB_DEPLOYING_NONE)
 	{
 		// do not allow dropping the bomb while deploying
+		return Plugin_Handled;
+	}
+	
+	return Plugin_Continue;
+}
+
+static Action CommandListener_JoinClass(int client, const char[] command, int argc)
+{
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders && IsPlayerAlive(client))
+	{
+		// some maps have a func_respawnroom in robot spawn and allow class switching
+		return Plugin_Handled;
+	}
+	
+	return Plugin_Continue;
+}
+
+static Action CommandListener_Buyback(int client, const char[] command, int argc)
+{
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	{
+		// prevent a rare case where robots can buy back into the game
 		return Plugin_Handled;
 	}
 	

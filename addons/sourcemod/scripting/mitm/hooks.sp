@@ -84,7 +84,7 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 		
 		for (int i = 0; i < g_pPopulationManager.m_EndlessActiveBotUpgrades.Count(); ++i)
 		{
-			CMvMBotUpgrade upgrade = g_pPopulationManager.m_EndlessActiveBotUpgrades.Get(i, GetOffset("sizeof(CMvMBotUpgrade)"));
+			CMvMBotUpgrade upgrade = g_pPopulationManager.m_EndlessActiveBotUpgrades.Get(i, GetOffset(NULL_STRING, "sizeof(CMvMBotUpgrade)"));
 			
 			if (upgrade.bIsBotAttr == true)
 			{
@@ -120,12 +120,12 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 				if (pDef)
 				{
 					char szDescription[TEXTMSG_MAX_MESSAGE_LENGTH];
-					PtrToString(Deref(pDef + GetOffset("CEconItemAttributeDefinition::m_pszDescriptionString")), szDescription, sizeof(szDescription));
+					PtrToString(Deref(pDef + GetOffset("CEconItemAttributeDefinition", "m_pszDescriptionString")), szDescription, sizeof(szDescription));
 					
 					// If there's a localized description, use that, else use the internal attribute name
 					if (szDescription[0] && msg_dest == HUD_PRINTCONSOLE)
 					{
-						int iFormat = Deref(pDef + GetOffset("CEconItemAttributeDefinition::m_iDescriptionFormat"));
+						int iFormat = Deref(pDef + GetOffset("CEconItemAttributeDefinition", "m_iDescriptionFormat"));
 						float flValue = TranslateAttributeValue(iFormat, upgrade.flValue);
 						
 						char szValue[16];

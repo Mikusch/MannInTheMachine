@@ -1027,6 +1027,7 @@ static MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Pre(DHookPar
 	if (mitm_setup_time.IntValue <= 0)
 		return MRES_Ignored;
 	
+	// Save off the old timer value
 	g_flTempRestartRoundTime = GameRules_GetPropFloat("m_flRestartRoundTime");
 	
 	return MRES_Handled;
@@ -1037,10 +1038,10 @@ static MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Post(DHookPa
 	if (mitm_setup_time.IntValue <= 0)
 		return MRES_Ignored;
 	
-	// if m_flRestartRoundTime is -1.0 at this point, all players have toggled off ready
+	// If m_flRestartRoundTime is -1.0 at this point, all players have toggled off ready
 	if (GameRules_GetPropFloat("m_flRestartRoundTime") == -1.0)
 	{
-		// prevent the timer from stopping in this case
+		// Prevent the timer from stopping by setting back the old value
 		GameRules_SetPropFloat("m_flRestartRoundTime", g_flTempRestartRoundTime);
 	}
 	
@@ -1054,9 +1055,11 @@ static MRESReturn DHookCallback_ResetPlayerAndTeamReadyState_Pre()
 	if (FindEntityByClassname(-1, "tf_gamerules") == -1)
 		return MRES_Ignored;
 	
+	// Check if we came from CTFGameRules::PlayerReadyStatus_UpdatePlayerState
 	if (GameRules_GetPropFloat("m_flRestartRoundTime") == -1.0 && g_flTempRestartRoundTime)
 	{
-		// prevent players from continously shortening the timer by toggling ready state
+		// When only one player is ready and they then unready, this function attempts to reset the "was ready before" state.
+		// This would allow players to continously ready up to shorten the timer. Prevent this.
 		return MRES_Supercede;
 	}
 	

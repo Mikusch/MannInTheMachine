@@ -198,7 +198,7 @@ static void EntityOutput_OnStateEnterBetweenRounds(const char[] output, int call
 
 static void RequestFrameCallback_StartReadyTimer()
 {
-	// automatically start the ready timer
+	// Automatically start the ready timer
 	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + mitm_setup_time.FloatValue);
 	GameRules_SetProp("m_bAwaitingReadyRestart", false);
 	

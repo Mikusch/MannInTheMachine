@@ -30,7 +30,6 @@ static DynamicHook g_DHookPassesFilterImpl;
 static DynamicHook g_DHookPickUp;
 static DynamicHook g_DHookClientConnected;
 static DynamicHook g_DHookFPlayerCanTakeDamage;
-static DynamicHook g_DHookBetweenRoundsStart;
 
 static ArrayList m_justSpawnedList;
 
@@ -95,7 +94,6 @@ void DHooks_Init(GameData gamedata)
 	g_DHookPickUp = CreateDynamicHook(gamedata, "CTFItem::PickUp");
 	g_DHookClientConnected = CreateDynamicHook(gamedata, "CTFGameRules::ClientConnected");
 	g_DHookFPlayerCanTakeDamage = CreateDynamicHook(gamedata, "CTFGameRules::FPlayerCanTakeDamage");
-	g_DHookBetweenRoundsStart = CreateDynamicHook(gamedata, "CTeamplayRoundBasedRules::BetweenRounds_Start");
 }
 
 void DHooks_OnClientPutInServer(int client)
@@ -141,11 +139,6 @@ void DHooks_HookGamerules()
 	if (g_DHookFPlayerCanTakeDamage)
 	{
 		g_DHookFPlayerCanTakeDamage.HookGamerules(Hook_Pre, DHookCallback_FPlayerCanTakeDamage_Pre);
-	}
-	
-	if (g_DHookBetweenRoundsStart)
-	{
-		g_DHookBetweenRoundsStart.HookGamerules(Hook_Post, DHookCallback_BetweenRoundsStart_Post);
 	}
 }
 
@@ -1032,9 +1025,7 @@ static MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterf
 static MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Pre(DHookParam params)
 {
 	if (mitm_setup_time.IntValue <= 0)
-	{
 		return MRES_Ignored;
-	}
 	
 	g_flTempRestartRoundTime = GameRules_GetPropFloat("m_flRestartRoundTime");
 	
@@ -1044,9 +1035,7 @@ static MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Pre(DHookPar
 static MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Post(DHookParam params)
 {
 	if (mitm_setup_time.IntValue <= 0)
-	{
 		return MRES_Ignored;
-	}
 	
 	// if m_flRestartRoundTime is -1.0 at this point, all players have toggled off ready
 	if (GameRules_GetPropFloat("m_flRestartRoundTime") == -1.0)
@@ -1062,6 +1051,9 @@ static MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Post(DHookPa
 
 static MRESReturn DHookCallback_ResetPlayerAndTeamReadyState_Pre()
 {
+	if (FindEntityByClassname(-1, "tf_gamerules") == -1)
+		return MRES_Ignored;
+	
 	if (GameRules_GetPropFloat("m_flRestartRoundTime") == -1.0 && g_flTempRestartRoundTime)
 	{
 		// prevent players from continously shortening the timer by toggling ready state
@@ -1767,29 +1759,4 @@ static MRESReturn DHookCallback_FPlayerCanTakeDamage_Pre(DHookReturn ret, DHookP
 	}
 	
 	return MRES_Ignored;
-}
-
-static MRESReturn DHookCallback_BetweenRoundsStart_Post()
-{
-	if (!g_bInWaitingForPlayers && mitm_setup_time.IntValue > 0)
-	{
-		RequestFrame(RequestFrameCallback_StartReadyTimer);
-		return MRES_Handled;
-	}
-	
-	return MRES_Ignored;
-}
-
-static void RequestFrameCallback_StartReadyTimer()
-{
-	// automatically start the ready timer
-	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + mitm_setup_time.FloatValue);
-	GameRules_SetProp("m_bAwaitingReadyRestart", false);
-	
-	Event event = CreateEvent("teamplay_round_restart_seconds");
-	if (event)
-	{
-		event.SetInt("seconds", mitm_setup_time.IntValue);
-		event.Fire();
-	}
 }

@@ -22,6 +22,8 @@ void Hooks_Init()
 {
 	HookUserMessage(GetUserMessageId("SayText2"), OnSayText2, true);
 	HookUserMessage(GetUserMessageId("TextMsg"), OnTextMsg, true);
+	
+	HookEntityOutput("tf_gamerules", "OnStateEnterBetweenRounds", EntityOutput_OnStateEnterBetweenRounds);
 }
 
 static Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNum, bool reliable, bool init)
@@ -183,5 +185,27 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 			
 			UTIL_ClientPrintAll(msg_dest, szMessage);
 		}
+	}
+}
+
+static void EntityOutput_OnStateEnterBetweenRounds(const char[] output, int caller, int activator, float delay)
+{
+	if (!g_bInWaitingForPlayers && mitm_setup_time.IntValue > 0)
+	{
+		RequestFrame(RequestFrameCallback_StartReadyTimer);
+	}
+}
+
+static void RequestFrameCallback_StartReadyTimer()
+{
+	// automatically start the ready timer
+	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + mitm_setup_time.FloatValue);
+	GameRules_SetProp("m_bAwaitingReadyRestart", false);
+	
+	Event event = CreateEvent("teamplay_round_restart_seconds");
+	if (event)
+	{
+		event.SetInt("seconds", mitm_setup_time.IntValue);
+		event.Fire();
 	}
 }

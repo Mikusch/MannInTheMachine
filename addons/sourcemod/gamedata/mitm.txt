@@ -423,11 +423,6 @@
 				"linux"		"64"
 				"windows"	"63"
 			}
-			"CTeamplayRoundBasedRules::BetweenRounds_Start"
-			{
-				"linux"		"202"
-				"windows"	"200"
-			}
 			"CTFGameRules::TeamMayCapturePoint"
 			{
 				"linux"		"155"
@@ -1296,13 +1291,6 @@
 						"type"	"objectptr"
 					}
 				}
-			}
-			"CTeamplayRoundBasedRules::BetweenRounds_Start"
-			{
-				"offset"	"CTeamplayRoundBasedRules::BetweenRounds_Start"
-				"hooktype"	"gamerules"
-				"return"	"void"
-				"this"		"ignore"
 			}
 			"CTFItem::PickUp"
 			{

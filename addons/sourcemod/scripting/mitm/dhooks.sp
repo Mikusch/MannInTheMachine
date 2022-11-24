@@ -35,6 +35,7 @@ static ArrayList m_justSpawnedList;
 
 static int g_internalSpawnPoint = INVALID_ENT_REFERENCE;
 static SpawnLocationResult s_spawnLocationResult = SPAWN_LOCATION_NOT_FOUND;
+static float g_flTempRestartRoundTime;
 
 // CMissionPopulator
 static CountdownTimer m_cooldownTimer;
@@ -66,6 +67,8 @@ void DHooks_Init(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMissionDestroySentries", DHookCallback_UpdateMissionDestroySentries_Pre, DHookCallback_UpdateMissionDestroySentries_Post);
 	CreateDynamicDetour(gamedata, "CPointPopulatorInterface::InputChangeBotAttributes", DHookCallback_InputChangeBotAttributes_Pre);
 	CreateDynamicDetour(gamedata, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_GetTeamAssignmentOverride_Pre, DHookCallback_GetTeamAssignmentOverride_Post);
+	CreateDynamicDetour(gamedata, "CTFGameRules::PlayerReadyStatus_UpdatePlayerState", DHookCallback_PlayerReadyStatus_UpdatePlayerState_Pre, DHookCallback_PlayerReadyStatus_UpdatePlayerState_Post);
+	CreateDynamicDetour(gamedata, "CTeamplayRoundBasedRules::ResetPlayerAndTeamReadyState", DHookCallback_ResetPlayerAndTeamReadyState_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayer::GetLoadoutItem", DHookCallback_GetLoadoutItem_Pre, DHookCallback_GetLoadoutItem_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::CheckInstantLoadoutRespawn", DHookCallback_CheckInstantLoadoutRespawn_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayer::ShouldForceAutoTeam", DHookCallback_ShouldForceAutoTeam_Pre);
@@ -1017,6 +1020,50 @@ static MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterf
 	}
 	
 	return MRES_Supercede;
+}
+
+static MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Pre(DHookParam params)
+{
+	if (mitm_setup_time.IntValue <= 0)
+		return MRES_Ignored;
+	
+	// Save off the old timer value
+	g_flTempRestartRoundTime = GameRules_GetPropFloat("m_flRestartRoundTime");
+	
+	return MRES_Handled;
+}
+
+static MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Post(DHookParam params)
+{
+	if (mitm_setup_time.IntValue <= 0)
+		return MRES_Ignored;
+	
+	// If m_flRestartRoundTime is -1.0 at this point, all players have toggled off ready
+	if (GameRules_GetPropFloat("m_flRestartRoundTime") == -1.0)
+	{
+		// Prevent the timer from stopping by setting back the old value
+		GameRules_SetPropFloat("m_flRestartRoundTime", g_flTempRestartRoundTime);
+	}
+	
+	g_flTempRestartRoundTime = 0.0;
+	
+	return MRES_Handled;
+}
+
+static MRESReturn DHookCallback_ResetPlayerAndTeamReadyState_Pre()
+{
+	if (FindEntityByClassname(-1, "tf_gamerules") == -1)
+		return MRES_Ignored;
+	
+	// Check if we came from CTFGameRules::PlayerReadyStatus_UpdatePlayerState
+	if (GameRules_GetPropFloat("m_flRestartRoundTime") == -1.0 && g_flTempRestartRoundTime)
+	{
+		// When only one player is ready and they then unready, this function attempts to reset the "was ready before" state.
+		// This would allow players to continously ready up to shorten the timer. Prevent this.
+		return MRES_Supercede;
+	}
+	
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, DHookParam params)

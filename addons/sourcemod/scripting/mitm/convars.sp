@@ -30,6 +30,7 @@ void ConVars_Init()
 	mitm_annotation_lifetime = CreateConVar("mitm_annotation_lifetime", "30.0", "The lifetime of annotations shown to clients, in seconds.", _, true, 1.0);
 	mitm_invader_allow_suicide = CreateConVar("mitm_invader_allow_suicide", "0", "Whether to allow invaders to suicide.");
 	mitm_party_max_size = CreateConVar("mitm_party_max_size", "6", "Maximum size of player parties.", _, _, _, true, 10.0);
+	mitm_setup_time = CreateConVar("mitm_setup_time", "150", "Time for defenders to set up before the round automatically starts.");
 	
 	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");

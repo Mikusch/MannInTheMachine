@@ -65,6 +65,7 @@ ConVar mitm_rename_robots;
 ConVar mitm_annotation_lifetime;
 ConVar mitm_invader_allow_suicide;
 ConVar mitm_party_max_size;
+ConVar mitm_setup_time;
 
 // Game ConVars
 ConVar tf_avoidteammates_pushaway;

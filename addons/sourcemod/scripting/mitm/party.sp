@@ -270,6 +270,44 @@ methodmap Party
 		return points;
 	}
 	
+	public void OnPartyMemberLeave(int client)
+	{
+		if (this.m_members.FindValue(client) == -1)
+			return;
+		
+		Player(client).LeaveParty();
+		
+		CancelClientMenu(client);
+		
+		char name[MAX_NAME_LENGTH];
+		this.GetName(name, sizeof(name));
+		
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Left", name);
+		ClientCommand(client, "play %s", SOUND_PARTY_UPDATE);
+		
+		// party might be gone now
+		if (!this.IsNull())
+		{
+			// notify all members
+			ArrayList members = new ArrayList();
+			this.CollectMembers(members);
+			for (int i = 0; i < members.Length; i++)
+			{
+				int member = members.Get(i);
+				
+				// refresh party menu if active
+				if (Player(member).IsPartyMenuActive())
+				{
+					Menus_DisplayPartyMenu(member);
+				}
+				
+				CPrintToChat(member, "%s %t", PLUGIN_TAG, "Party_LeftOther", client);
+				ClientCommand(member, "play %s", SOUND_PARTY_UPDATE);
+			}
+			delete members;
+		}
+	}
+	
 	public bool IsLeader(int client)
 	{
 		return this.m_leader == client;
@@ -451,38 +489,8 @@ static Action ConCmd_PartyLeave(int client, int args)
 	}
 	
 	Party party = Player(client).GetParty();
+	party.OnPartyMemberLeave(client);
 	
-	char name[MAX_NAME_LENGTH];
-	party.GetName(name, sizeof(name));
-	
-	Player(client).LeaveParty();
-	
-	CancelClientMenu(client);
-	
-	// party might be gone now
-	if (!party.IsNull())
-	{
-		// notify all members
-		ArrayList members = new ArrayList();
-		party.CollectMembers(members);
-		for (int i = 0; i < members.Length; i++)
-		{
-			int member = members.Get(i);
-			
-			// refresh party menu if active
-			if (Player(member).IsPartyMenuActive())
-			{
-				Menus_DisplayPartyMenu(member);
-			}
-			
-			CPrintToChat(member, "%s %t", PLUGIN_TAG, "Party_LeftOther", client);
-			ClientCommand(member, "play %s", SOUND_PARTY_UPDATE);
-		}
-		delete members;
-	}
-	
-	CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Left", name);
-	ClientCommand(client, "play %s", SOUND_PARTY_UPDATE);
 	return Plugin_Handled;
 }
 

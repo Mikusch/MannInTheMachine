@@ -279,7 +279,8 @@ public void OnClientDisconnect(int client)
 	
 	if (Player(client).IsInAParty())
 	{
-		FakeClientCommand(client, "sm_party_leave");
+		Party party = Player(client).GetParty(); 
+		party.OnPartyMemberLeave(client);
 	}
 }
 

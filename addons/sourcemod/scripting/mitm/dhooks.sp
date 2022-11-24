@@ -1029,6 +1029,48 @@ static MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterf
 	return MRES_Supercede;
 }
 
+static MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Pre(DHookParam params)
+{
+	if (mitm_setup_time.IntValue <= 0)
+	{
+		return MRES_Ignored;
+	}
+	
+	g_flTempRestartRoundTime = GameRules_GetPropFloat("m_flRestartRoundTime");
+	
+	return MRES_Handled;
+}
+
+static MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Post(DHookParam params)
+{
+	if (mitm_setup_time.IntValue <= 0)
+	{
+		return MRES_Ignored;
+	}
+	
+	// if m_flRestartRoundTime is -1.0 at this point, all players have toggled off ready
+	if (GameRules_GetPropFloat("m_flRestartRoundTime") == -1.0)
+	{
+		// prevent the timer from stopping in this case
+		GameRules_SetPropFloat("m_flRestartRoundTime", g_flTempRestartRoundTime);
+	}
+	
+	g_flTempRestartRoundTime = 0.0;
+	
+	return MRES_Handled;
+}
+
+static MRESReturn DHookCallback_ResetPlayerAndTeamReadyState_Pre()
+{
+	if (GameRules_GetPropFloat("m_flRestartRoundTime") == -1.0 && g_flTempRestartRoundTime)
+	{
+		// prevent players from continously shortening the timer by toggling ready state
+		return MRES_Supercede;
+	}
+	
+	return MRES_Ignored;
+}
+
 static MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, DHookParam params)
 {
 	int player = params.Get(1);

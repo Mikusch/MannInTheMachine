@@ -356,14 +356,8 @@ void Menus_DisplayPartyMenu(int client)
 		for (int i = 0; i < members.Length; i++)
 		{
 			int member = members.Get(i);
-			if (party.IsLeader(member))
-			{
-				Format(title, sizeof(title), "%s" ... SYMBOL_PARTY_LEADER ... " %N\n", title, member);
-			}
-			else
-			{
-				Format(title, sizeof(title), "%s" ... SYMBOL_PARTY_MEMBER ... " %N\n", title, member);
-			}
+			Format(title, sizeof(title), "%s%s %N", title, party.IsLeader(member) ? SYMBOL_PARTY_LEADER : SYMBOL_PARTY_MEMBER, member);
+			Format(title, sizeof(title), "%s (%d)\n", title, Player(member).m_defenderQueuePoints);
 		}
 		delete members;
 	}

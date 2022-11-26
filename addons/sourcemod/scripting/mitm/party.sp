@@ -275,12 +275,13 @@ methodmap Party
 		if (this.m_members.FindValue(client) == -1)
 			return;
 		
+		// get the name while the player is still in the party
+		char name[MAX_NAME_LENGTH];
+		this.GetName(name, sizeof(name));
+		
 		Player(client).LeaveParty();
 		
 		CancelClientMenu(client);
-		
-		char name[MAX_NAME_LENGTH];
-		this.GetName(name, sizeof(name));
 		
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Left", name);
 		ClientCommand(client, "play %s", SOUND_PARTY_UPDATE);

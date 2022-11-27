@@ -530,6 +530,9 @@ void Menus_DisplayPartyManageInviteMenu(int client)
 		if (other == client)
 			continue;
 		
+		if (Player(other).HasPreference(PREF_IGNORE_PARTY_INVITES))
+			continue;
+		
 		Party party = Player(client).GetParty();
 		
 		char userid[32];

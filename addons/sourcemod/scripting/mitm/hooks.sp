@@ -192,11 +192,11 @@ static void EntityOutput_OnStateEnterBetweenRounds(const char[] output, int call
 {
 	if (!g_bInWaitingForPlayers && mitm_setup_time.IntValue > 0)
 	{
-		RequestFrame(RequestFrameCallback_StartReadyTimer);
+		CreateTimer(0.1, Timer_StartReadyTimer);
 	}
 }
 
-static void RequestFrameCallback_StartReadyTimer()
+static Action Timer_StartReadyTimer(Handle timer)
 {
 	// Automatically start the ready timer
 	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + mitm_setup_time.FloatValue);
@@ -208,4 +208,6 @@ static void RequestFrameCallback_StartReadyTimer()
 		event.SetInt("seconds", mitm_setup_time.IntValue);
 		event.Fire();
 	}
+	
+	return Plugin_Continue;
 }

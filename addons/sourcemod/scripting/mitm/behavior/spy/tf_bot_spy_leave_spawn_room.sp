@@ -89,34 +89,10 @@ static int Update(CTFBotSpyLeaveSpawnRoom action, int actor, float interval)
 		int victim = -1;
 		
 		ArrayList enemyList = new ArrayList();
-		
-		for (int client = 1; client <= MaxClients; client++)
-		{
-			if (!IsClientInGame(client))
-				continue;
-			
-			if (TF2_GetClientTeam(client) == TF2_GetClientTeam(actor))
-				continue;
-			
-			if (!IsPlayerAlive(client))
-				continue;
-			
-			enemyList.Push(client);
-		}
+		CollectPlayers(enemyList, GetEnemyTeam(TF2_GetClientTeam(actor)), COLLECT_ONLY_LIVING_PLAYERS);
 		
 		// randomly shuffle our enemies
 		enemyList.Sort(Sort_Random, Sort_Integer);
-		
-		int n = enemyList.Length;
-		while (n > 1)
-		{
-			int k = GetRandomInt(0, n - 1);
-			n--;
-			
-			int tmp = enemyList.Get(n);
-			enemyList.Set(n, enemyList.Get(k));
-			enemyList.Set(k, tmp);
-		}
 		
 		for (int i = 0; i < enemyList.Length; ++i)
 		{
@@ -128,7 +104,7 @@ static int Update(CTFBotSpyLeaveSpawnRoom action, int actor, float interval)
 		}
 		
 		// if we didn't find a victim, try again in a bit
-		if (victim == -1)
+		if (!IsValidEntity(victim))
 		{
 			action.m_waitTimer.Start(1.0);
 			

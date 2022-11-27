@@ -75,6 +75,11 @@
 
 #define MITM_HINT_MASK	(0x10200)	// annotations have id ( MITM_HINT_MASK | entindex )
 
+// CollectPlayers
+#define COLLECT_ONLY_LIVING_PLAYERS true
+#define APPEND_PLAYERS true
+
+const TFTeam TFTeam_Any = view_as<TFTeam>(-2);
 const TFTeam TFTeam_Defenders = TFTeam_Red;
 const TFTeam TFTeam_Invaders = TFTeam_Blue;
 

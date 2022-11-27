@@ -229,6 +229,7 @@ methodmap Party
 		for (int i = 0; i < this.m_members.Length; ++i)
 		{
 			int member = this.m_members.Get(i);
+			
 			if (!IsClientInGame(member))
 				continue;
 			

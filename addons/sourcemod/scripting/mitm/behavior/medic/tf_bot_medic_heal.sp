@@ -93,16 +93,12 @@ static int Update(CTFBotMedicHeal action, int actor, float interval)
 
 static int SelectPatient(int actor)
 {
-	for (int client = 1; client <= MaxClients; client++)
+	ArrayList livePlayerList = new ArrayList();
+	CollectPlayers(livePlayerList, TF2_GetClientTeam(actor), COLLECT_ONLY_LIVING_PLAYERS);
+	
+	for (int i = 0; i < livePlayerList.Length; ++i)
 	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		if (TF2_GetClientTeam(client) != TF2_GetClientTeam(actor))
-			continue;
-		
-		if (!IsPlayerAlive(client))
-			continue;
+		int client = livePlayerList.Get(i);
 		
 		if (client == actor)
 			continue;
@@ -122,8 +118,10 @@ static int SelectPatient(int actor)
 			}
 		}
 		
+		delete livePlayerList;
 		return client;
 	}
 	
+	delete livePlayerList;
 	return -1;
 }

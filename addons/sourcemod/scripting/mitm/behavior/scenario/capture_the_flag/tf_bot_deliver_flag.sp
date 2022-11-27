@@ -186,22 +186,18 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 			
 			const float buffRadius = 450.0;
 			
-			for (int client = 1; client <= MaxClients; client++)
+			ArrayList playerList = new ArrayList();
+			CollectPlayers(playerList, TF2_GetClientTeam(actor), COLLECT_ONLY_LIVING_PLAYERS);
+			
+			for (int i = 0; i < playerList.Length; ++i)
 			{
-				if (!IsClientInGame(client))
-					continue;
-				
-				if (GetClientTeam(client) != GetClientTeam(actor))
-					continue;
-				
-				if (!IsPlayerAlive(client))
-					continue;
-				
-				if (IsRangeLessThan(actor, client, buffRadius))
+				if (IsRangeLessThan(actor, playerList.Get(i), buffRadius))
 				{
-					TF2_AddCondition(client, TFCond_DefenseBuffNoCritBlock, 1.2);
+					TF2_AddCondition(playerList.Get(i), TFCond_DefenseBuffNoCritBlock, 1.2);
 				}
 			}
+			
+			delete playerList;
 		}
 		
 		// the flag carrier gets stronger the longer he holds the flag

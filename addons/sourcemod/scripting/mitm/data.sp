@@ -1172,17 +1172,7 @@ methodmap Player < CBaseCombatCharacter
 	public void DisguiseAsMemberOfEnemyTeam()
 	{
 		ArrayList enemyList = new ArrayList();
-		
-		for (int client = 1; client <= MaxClients; client++)
-		{
-			if (!IsClientInGame(client))
-				continue;
-			
-			if (GetClientTeam(client) == GetClientTeam(this.index))
-				continue;
-			
-			enemyList.Push(client);
-		}
+		CollectPlayers(enemyList, GetEnemyTeam(TF2_GetClientTeam(this.index)));
 		
 		TFClassType disguise = view_as<TFClassType>(GetRandomInt(view_as<int>(TFClass_Scout), view_as<int>(TFClass_Engineer)));
 		

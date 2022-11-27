@@ -349,19 +349,8 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 	ArrayList victimList = new ArrayList();
 	
 	// players
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		if (TF2_GetClientTeam(client) <= TFTeam_Spectator)
-			continue;
-		
-		if (!IsPlayerAlive(client))
-			continue;
-		
-		victimList.Push(client);
-	}
+	CollectPlayers(victimList, TFTeam_Red, COLLECT_ONLY_LIVING_PLAYERS);
+	CollectPlayers(victimList, TFTeam_Blue, COLLECT_ONLY_LIVING_PLAYERS, APPEND_PLAYERS);
 	
 	// objects
 	int obj = -1;

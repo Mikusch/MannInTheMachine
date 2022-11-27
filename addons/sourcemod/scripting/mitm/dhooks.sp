@@ -422,17 +422,19 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 			// announce Spies
 			if (spawner.m_class == TFClass_Spy)
 			{
+				ArrayList playerList = new ArrayList();
+				CollectPlayers(playerList, TFTeam_Invaders, COLLECT_ONLY_LIVING_PLAYERS);
+				
 				int spyCount = 0;
-				for (int client = 1; client <= MaxClients; client++)
+				for (int i = 0; i < playerList.Length; ++i)
 				{
-					if (IsClientInGame(client) && IsPlayerAlive(client) && TF2_GetClientTeam(client) == TFTeam_Invaders)
+					if (TF2_GetPlayerClass(playerList.Get(i)) == TFClass_Spy)
 					{
-						if (TF2_GetPlayerClass(client) == TFClass_Spy)
-						{
-							++spyCount;
-						}
+						++spyCount;
 					}
 				}
+				
+				delete playerList;
 				
 				Event event = CreateEvent("mvm_mission_update");
 				if (event)
@@ -682,24 +684,11 @@ static MRESReturn DHookCallback_UpdateMission_Pre(Address pThis, DHookReturn ret
 	MissionType mission = params.Get(1);
 	
 	ArrayList livePlayerList = new ArrayList();
-	
-	for (int client = 1; client <= MaxClients; ++client)
-	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		if (TF2_GetClientTeam(client) != TFTeam_Invaders)
-			continue;
-		
-		if (!IsPlayerAlive(client))
-			continue;
-		
-		livePlayerList.Push(client);
-	}
+	CollectPlayers(livePlayerList, TFTeam_Invaders, COLLECT_ONLY_LIVING_PLAYERS);
 	
 	s_activeMissionMembers = 0;
 	
-	for (int i = 0; i < livePlayerList.Length; i++)
+	for (int i = 0; i < livePlayerList.Length; ++i)
 	{
 		int player = livePlayerList.Get(i);
 		if (Player(player).HasMission(mission))
@@ -728,7 +717,7 @@ static MRESReturn DHookCallback_UpdateMission_Pre(Address pThis, DHookReturn ret
 	}
 	
 	s_nSniperCount = 0;
-	for (int i = 0; i < livePlayerList.Length; i++)
+	for (int i = 0; i < livePlayerList.Length; ++i)
 	{
 		int liveBot = livePlayerList.Get(i);
 		if (TF2_GetPlayerClass(liveBot) == TFClass_Sniper)
@@ -852,19 +841,7 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 	}
 	
 	ArrayList livePlayerList = new ArrayList();
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		if (TF2_GetClientTeam(client) != TFTeam_Invaders)
-			continue;
-		
-		if (!IsPlayerAlive(client))
-			continue;
-		
-		livePlayerList.Push(client);
-	}
+	CollectPlayers(livePlayerList, TFTeam_Invaders, COLLECT_ONLY_LIVING_PLAYERS);
 	
 	// dispatch a sentry busting squad for each dangerous sentry
 	bool didSpawn = false;
@@ -1000,23 +977,19 @@ static MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterf
 	
 	if (IsMannVsMachineMode())
 	{
-		for (int client = 1; client <= MaxClients; client++)
+		ArrayList botList = new ArrayList();
+		CollectPlayers(botList, TFTeam_Invaders, COLLECT_ONLY_LIVING_PLAYERS);
+		
+		for (int i = 0; i < botList.Length; ++i)
 		{
-			if (!IsClientInGame(client))
-				continue;
-			
-			if (TF2_GetClientTeam(client) != TFTeam_Invaders)
-				continue;
-			
-			if (!IsPlayerAlive(client))
-				continue;
-			
-			EventChangeAttributes_t pEvent = Player(client).GetEventChangeAttributes(pszEventName);
+			EventChangeAttributes_t pEvent = Player(botList.Get(i)).GetEventChangeAttributes(pszEventName);
 			if (pEvent)
 			{
-				Player(client).OnEventChangeAttributes(pEvent);
+				Player(botList.Get(i)).OnEventChangeAttributes(pEvent);
 			}
 		}
+		
+		delete botList;
 	}
 	
 	return MRES_Supercede;
@@ -1470,23 +1443,19 @@ static MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 		// announce Spies
 		if (TF2_GetPlayerClass(player) == TFClass_Spy)
 		{
+			ArrayList playerList = new ArrayList();
+			CollectPlayers(playerList, TFTeam_Invaders, COLLECT_ONLY_LIVING_PLAYERS);
+			
 			int spyCount = 0;
-			for (int client = 1; client <= MaxClients; client++)
+			for (int i = 0; i < playerList.Length; ++i)
 			{
-				if (!IsClientInGame(client))
-					continue;
-				
-				if (TF2_GetClientTeam(client) != TFTeam_Invaders)
-					continue;
-				
-				if (!IsPlayerAlive(client))
-					continue;
-				
-				if (TF2_GetPlayerClass(client) == TFClass_Spy)
+				if (TF2_GetPlayerClass(playerList.Get(i)) == TFClass_Spy)
 				{
 					++spyCount;
 				}
 			}
+			
+			delete playerList;
 			
 			Event event = CreateEvent("mvm_mission_update");
 			if (event)
@@ -1521,27 +1490,21 @@ static MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 				}
 			}
 			
+			ArrayList playerList = new ArrayList();
+			CollectPlayers(playerList, TFTeam_Invaders, COLLECT_ONLY_LIVING_PLAYERS);
 			bool bShouldAnnounceLastEngineerBotDeath = Player(player).HasAttribute(TELEPORT_TO_HINT);
 			if (bShouldAnnounceLastEngineerBotDeath)
 			{
-				for (int client = 1; client <= MaxClients; client++)
+				for (int i = 0; i < playerList.Length; ++i)
 				{
-					if (!IsClientInGame(client))
-						continue;
-					
-					if (TF2_GetClientTeam(client) != TFTeam_Invaders)
-						continue;
-					
-					if (!IsPlayerAlive(client))
-						continue;
-					
-					if (client != player && TF2_GetPlayerClass(client) == TFClass_Engineer)
+					if (playerList.Get(i) != player && TF2_GetPlayerClass(playerList.Get(i)) == TFClass_Engineer)
 					{
 						bShouldAnnounceLastEngineerBotDeath = false;
 						break;
 					}
 				}
 			}
+			delete playerList;
 			
 			if (bShouldAnnounceLastEngineerBotDeath)
 			{

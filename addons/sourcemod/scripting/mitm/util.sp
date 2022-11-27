@@ -766,8 +766,11 @@ void HaveAllPlayersSpeakConceptIfAllowed(const char[] concept, TFTeam team)
 		if (!IsClientInGame(client))
 			continue;
 		
-		if (TF2_GetClientTeam(client) != team)
-			continue;
+		if (team != TFTeam_Unassigned)
+		{
+			if (TF2_GetClientTeam(client) != team)
+				continue;
+		}
 		
 		SetVariantString(concept);
 		AcceptEntityInput(client, "SpeakResponseConcept");
@@ -1172,7 +1175,7 @@ float TranslateAttributeValue(int iFormat, float flValue)
 	return 0.0;
 }
 
-stock void UTIL_ClientPrintAll(int msg_dest, const char[] msg_name, const char[] param1 = "", const char[] param2 = "", const char[] param3 = "", const char[] param4 = "")
+void UTIL_ClientPrintAll(int msg_dest, const char[] msg_name, const char[] param1 = "", const char[] param2 = "", const char[] param3 = "", const char[] param4 = "")
 {
 	BfWrite message = UserMessageToBfWrite(StartMessageAll("TextMsg", USERMSG_RELIABLE | USERMSG_BLOCKHOOKS));
 	
@@ -1185,4 +1188,28 @@ stock void UTIL_ClientPrintAll(int msg_dest, const char[] msg_name, const char[]
 	message.WriteString(param4);
 	
 	EndMessage();
+}
+
+int CollectPlayers(ArrayList &playerList, TFTeam team = TFTeam_Any, bool isAlive = false, bool shouldAppend = false)
+{
+	if (!shouldAppend)
+	{
+		playerList.Clear();
+	}
+	
+	for (int client = 1; client <= MaxClients; ++client)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (team != TFTeam_Any && TF2_GetClientTeam(client) != team)
+			continue;
+		
+		if (isAlive && !IsPlayerAlive(client))
+			continue;
+		
+		playerList.Push(client);
+	}
+	
+	return playerList.Length;
 }

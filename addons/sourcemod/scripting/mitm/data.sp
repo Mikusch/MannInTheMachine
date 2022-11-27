@@ -1289,7 +1289,7 @@ methodmap Player < CBaseCombatCharacter
 	
 	public bool IsInAParty()
 	{
-		return this.m_party == NULL_PARTY ? false : true;
+		return this.m_party.IsValid() ? true : false;
 	}
 	
 	public void DeleteParty()

@@ -355,16 +355,7 @@ void SelectNewDefenders()
 		Party party = queue.Get(i, QueueData::m_party);
 		
 		// All members of a party queue together
-		if (party == NULL_PARTY)
-		{
-			TF2_ChangeClientTeam(client, TFTeam_Defenders);
-			Queue_SetPoints(client, 0);
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
-			
-			players.Erase(players.FindValue(client));
-			++iDefenderCount;
-		}
-		else
+		if (party.IsValid())
 		{
 			// Only let parties play if all members have space to join
 			if (iReqDefenderCount - iDefenderCount - party.GetMemberCount(false) < 0)
@@ -384,6 +375,15 @@ void SelectNewDefenders()
 				++iDefenderCount;
 			}
 			delete members;
+		}
+		else
+		{
+			TF2_ChangeClientTeam(client, TFTeam_Defenders);
+			Queue_SetPoints(client, 0);
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
+			
+			players.Erase(players.FindValue(client));
+			++iDefenderCount;
 		}
 		
 		// If we have enough defenders, early out

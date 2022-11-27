@@ -25,6 +25,7 @@
 #define SYMBOL_PARTY_OTHER	"◆"
 
 #define SOUND_PARTY_UPDATE	"ui/message_update.wav"
+#define SOUND_PARTY_INVITE	"ui/notification_alert.wav"
 
 static ArrayList g_parties;
 
@@ -276,7 +277,7 @@ methodmap Party
 		if (this.m_members.FindValue(client) == -1)
 			return;
 		
-		// get the name while the player is still in the party
+		// fetch the name while the player is still in the party
 		char name[MAX_NAME_LENGTH];
 		this.GetName(name, sizeof(name));
 		
@@ -287,8 +288,8 @@ methodmap Party
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Left", name);
 		ClientCommand(client, "play %s", SOUND_PARTY_UPDATE);
 		
-		// party might be gone now
-		if (!this.IsNull())
+		// the party might be disbanded now
+		if (this.IsValid())
 		{
 			// notify all members
 			ArrayList members = new ArrayList();
@@ -315,9 +316,12 @@ methodmap Party
 		return this.m_leader == client;
 	}
 	
-	public bool IsNull()
+	public bool IsValid()
 	{
-		return this.m_listIndex == -1;
+		if (this == NULL_PARTY)
+			return false;
+		
+		return this.m_listIndex != -1;
 	}
 	
 	public void DisbandAndDeleteParty()
@@ -337,7 +341,7 @@ methodmap Party
 	
 	public void Delete()
 	{
-		if (this.IsNull())
+		if (!this.IsValid())
 			return;
 		
 		PartyInfo info;
@@ -409,7 +413,7 @@ static Action ConCmd_PartyJoin(int client, int args)
 	int id = GetCmdArgInt(1);
 	
 	Party party = Party(id);
-	if (party.IsNull())
+	if (!party.IsValid())
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_DoesNotExist");
 		return Plugin_Handled;
@@ -554,7 +558,7 @@ static Action ConCmd_PartyInvite(int client, int args)
 		Player(target_list[i]).InviteToParty(party);
 		
 		CPrintToChat(target_list[i], "%s %t", PLUGIN_TAG, "Party_IncomingInvite", name, client);
-		ClientCommand(target_list[i], "play ui/notification_alert.wav");
+		ClientCommand(target_list[i], "play %s", SOUND_PARTY_INVITE);
 	}
 	
 	if (tn_is_ml)

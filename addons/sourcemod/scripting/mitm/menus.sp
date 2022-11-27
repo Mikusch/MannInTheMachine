@@ -131,14 +131,7 @@ void Menus_DisplayQueueMenu(int client)
 			
 			char info[32], display[64];
 			
-			if (party == NULL_PARTY)
-			{
-				Format(info, sizeof(info), "player_%d", other);
-				Format(display, sizeof(display), "%N (%d)", other, points);
-				
-				menu.AddItem(info, display, ITEMDRAW_DISABLED);
-			}
-			else
+			if (party.IsValid())
 			{
 				char name[MAX_NAME_LENGTH];
 				party.GetName(name, sizeof(name));
@@ -156,6 +149,13 @@ void Menus_DisplayQueueMenu(int client)
 				Format(display, sizeof(display), "%s %s (%d)", display, name, points);
 				
 				menu.AddItem(info, display, ITEMDRAW_DEFAULT);
+			}
+			else
+			{
+				Format(info, sizeof(info), "player_%d", other);
+				Format(display, sizeof(display), "%N (%d)", other, points);
+				
+				menu.AddItem(info, display, ITEMDRAW_DISABLED);
 			}
 		}
 		
@@ -185,7 +185,7 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 				int id = StringToInt(info);
 				
 				Party party = Party(id);
-				if (!party.IsNull())
+				if (party.IsValid())
 				{
 					char name[MAX_NAME_LENGTH], strMembers[128];
 					party.GetName(name, sizeof(name));

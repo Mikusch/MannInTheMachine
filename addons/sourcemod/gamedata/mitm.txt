@@ -318,55 +318,45 @@
 				"linux"		"3"
 				"windows"	"2"
 			}
-			"IPopulationSpawner::m_spawner"
-			{
-				"linux"		"4"
-				"windows"	"4"
-			}
-			"IPopulationSpawner::m_where"
-			{
-				"linux"		"16"
-				"windows"	"16"
-			}
 			"CBaseEntity::SetModel"
 			{
-				"linux"		"25"
-				"windows"	"24"
+				"linux"		"27"
+				"windows"	"26"
 			}
 			"CBaseEntity::IsCombatItem"
 			{
-				"linux"		"86"
-				"windows"	"85"
+				"linux"		"88"
+				"windows"	"87"
 			}
 			"CBaseObject::CanBeUpgraded"
 			{
-				"linux"		"380"
-				"windows"	"379"
+				"linux"		"383"
+				"windows"	"382"
 			}
 			"CBaseObject::GetMaxHealthForCurrentLevel"
 			{
-				"linux"		"389"
-				"windows"	"387"
+				"linux"		"392"
+				"windows"	"390"
 			}
 			"CTFWeaponBase::Clip1"
 			{
-				"linux"		"347"
-				"windows"	"341"
+				"linux"		"350"
+				"windows"	"344"
 			}
 			"CTFGrenadePipebombProjectile::GetLiveTime"
 			{
-				"linux"		"254"
-				"windows"	"253"
+				"linux"		"257"
+				"windows"	"256"
 			}
 			"CBaseTrigger::PassesTriggerFilters"
 			{
-				"linux"		"205"
-				"windows"	"204"
+				"linux"		"208"
+				"windows"	"207"
 			}
 			"CItem::ComeToRest"
 			{
-				"linux"		"230"
-				"windows"	"227"
+				"linux"		"233"
+				"windows"	"230"
 			}
 			"CTFBotSpawner::GetClassIcon"
 			{
@@ -375,43 +365,43 @@
 			}
 			"CTFPlayer::ShouldTransmit"
 			{
-				"linux"		"19"
-				"windows"	"18"
+				"linux"		"21"
+				"windows"	"20"
 			}
 			"CTFPlayer::Event_Killed"
 			{
-				"linux"		"67"
-				"windows"	"66"
+				"linux"		"69"
+				"windows"	"68"
 			}
 			"CTFPlayer::ShouldGib"
 			{
-				"linux"		"294"
-				"windows"	"293"
+				"linux"		"297"
+				"windows"	"296"
 			}
 			"CTFPlayer::Weapon_Switch"
 			{
-				"linux"		"272"
-				"windows"	"271"
+				"linux"		"275"
+				"windows"	"274"
 			}
 			"CTFPlayer::IsAllowedToPickUpFlag"
 			{
-				"linux"		"481"
-				"windows"	"480"
+				"linux"		"485"
+				"windows"	"484"
 			}
 			"CBasePlayer::EntSelectSpawnPoint"
 			{
-				"linux"		"401"
-				"windows"	"400"
+				"linux"		"404"
+				"windows"	"403"
 			}
 			"CTFItem::PickUp"
 			{
-				"linux"		"266"
-				"windows"	"228"
+				"linux"		"269"
+				"windows"	"231"
 			}
 			"CBaseFilter::PassesFilterImpl"
 			{
-				"linux"		"196"
-				"windows"	"195"
+				"linux"		"199"
+				"windows"	"198"
 			}
 			"CTFGameRules::ClientConnected"
 			{
@@ -425,8 +415,8 @@
 			}
 			"CTFGameRules::TeamMayCapturePoint"
 			{
-				"linux"		"155"
-				"windows"	"154"
+				"linux"		"159"
+				"windows"	"158"
 			}
 			
 			// Data Offsets
@@ -589,6 +579,16 @@
 			{
 				"linux"		"52"
 				"windows"	"52"
+			}
+			"IPopulationSpawner::m_spawner"
+			{
+				"linux"		"4"
+				"windows"	"4"
+			}
+			"IPopulationSpawner::m_where"
+			{
+				"linux"		"16"
+				"windows"	"16"
 			}
 			"sizeof(EventChangeAttributes_t)"
 			{

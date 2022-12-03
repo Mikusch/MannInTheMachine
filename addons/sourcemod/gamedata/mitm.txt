@@ -452,13 +452,13 @@
 			}
 			"CTFPlayer::m_accumulatedSentryGunDamageDealt"
 			{
-				"linux"		"-7648"
-				"windows"	"-7668"
+				"linux"		"232"
+				"windows"	"232"
 			}
 			"CTFPlayer::m_accumulatedSentryGunKillCount"
 			{
-				"linux"		"-7644"
-				"windows"	"-7664"
+				"linux"		"236"
+				"windows"	"236"
 			}
 			"CTFWeaponBase::m_bInAttack2"
 			{

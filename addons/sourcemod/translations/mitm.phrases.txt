@@ -179,6 +179,10 @@
 		"#format"	"{1:d}"
 		"en"		"...and {1} more"
 	}
+	"MvM_Upgrade_Disabled"
+	{
+		"en"	"This upgrade is disabled and can not be purchased."
+	}
 	
 	// Party
 	

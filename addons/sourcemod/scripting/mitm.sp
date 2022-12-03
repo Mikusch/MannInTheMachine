@@ -418,6 +418,27 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 	}
 }
 
+public Action OnClientCommandKeyValues(int client, KeyValues kv)
+{
+	char szSection[16];
+	if (kv.GetSectionName(szSection, sizeof(szSection)) && StrEqual(szSection, "MVM_Upgrade"))
+	{
+		if (kv.JumpToKey("Upgrade"))
+		{
+			int iUpgrade = kv.GetNum("upgrade");
+			int iCount = kv.GetNum("count");
+			
+			if (iUpgrade == UPGRADE_GAS_EXPLODE_ON_IGNITE && iCount > 0)
+			{
+				PrintCenterText(client, "%t", "MvM_Upgrade_Disabled");
+				return Plugin_Handled;
+			}
+		}
+	}
+	
+	return Plugin_Continue;
+}
+
 public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname, bool &result)
 {
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)

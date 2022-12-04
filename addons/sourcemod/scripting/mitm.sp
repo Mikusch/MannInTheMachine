@@ -66,6 +66,7 @@ ConVar mitm_annotation_lifetime;
 ConVar mitm_invader_allow_suicide;
 ConVar mitm_party_max_size;
 ConVar mitm_setup_time;
+ConVar mitm_disable_explosive_gas;
 
 // Game ConVars
 ConVar tf_avoidteammates_pushaway;
@@ -428,7 +429,7 @@ public Action OnClientCommandKeyValues(int client, KeyValues kv)
 			int iUpgrade = kv.GetNum("upgrade");
 			int iCount = kv.GetNum("count");
 			
-			if (iUpgrade == UPGRADE_GAS_EXPLODE_ON_IGNITE && iCount > 0)
+			if (iUpgrade == UPGRADE_GAS_EXPLODE_ON_IGNITE && iCount > 0 && mitm_disable_explosive_gas.BoolValue)
 			{
 				PrintCenterText(client, "%t", "MvM_Upgrade_Disabled");
 				return Plugin_Handled;

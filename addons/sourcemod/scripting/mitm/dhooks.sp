@@ -66,12 +66,11 @@ void DHooks_Init(GameData gamedata)
 	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMission", DHookCallback_UpdateMission_Pre, DHookCallback_UpdateMission_Post);
 	CreateDynamicDetour(gamedata, "CMissionPopulator::UpdateMissionDestroySentries", DHookCallback_UpdateMissionDestroySentries_Pre, DHookCallback_UpdateMissionDestroySentries_Post);
 	CreateDynamicDetour(gamedata, "CPointPopulatorInterface::InputChangeBotAttributes", DHookCallback_InputChangeBotAttributes_Pre);
-	CreateDynamicDetour(gamedata, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_GetTeamAssignmentOverride_Pre, DHookCallback_GetTeamAssignmentOverride_Post);
+	CreateDynamicDetour(gamedata, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_GetTeamAssignmentOverride_Pre);
 	CreateDynamicDetour(gamedata, "CTFGameRules::PlayerReadyStatus_UpdatePlayerState", DHookCallback_PlayerReadyStatus_UpdatePlayerState_Pre, DHookCallback_PlayerReadyStatus_UpdatePlayerState_Post);
 	CreateDynamicDetour(gamedata, "CTeamplayRoundBasedRules::ResetPlayerAndTeamReadyState", DHookCallback_ResetPlayerAndTeamReadyState_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayer::GetLoadoutItem", DHookCallback_GetLoadoutItem_Pre, DHookCallback_GetLoadoutItem_Post);
 	CreateDynamicDetour(gamedata, "CTFPlayer::CheckInstantLoadoutRespawn", DHookCallback_CheckInstantLoadoutRespawn_Pre);
-	CreateDynamicDetour(gamedata, "CTFPlayer::ShouldForceAutoTeam", DHookCallback_ShouldForceAutoTeam_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayer::DoClassSpecialSkill", DHookCallback_DoClassSpecialSkill_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayer::RemoveAllOwnedEntitiesFromWorld", DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre);
 	CreateDynamicDetour(gamedata, "CTFPlayer::CanBuild", DHookCallback_CanBuild_Pre, DHookCallback_CanBuild_Post);
@@ -1057,8 +1056,8 @@ static MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 	else if (g_bAllowTeamChange || (mitm_developer.BoolValue && !IsFakeClient(player)))
 	{
 		// allow player through
-		GameRules_SetProp("m_bPlayingMannVsMachine", false);
-		return MRES_Handled;
+		ret.Value = nDesiredTeam;
+		return MRES_Supercede;
 	}
 	else
 	{
@@ -1112,16 +1111,6 @@ static MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 	}
 }
 
-static MRESReturn DHookCallback_GetTeamAssignmentOverride_Post(DHookReturn ret, DHookParam params)
-{
-	if (g_bAllowTeamChange)
-	{
-		GameRules_SetProp("m_bPlayingMannVsMachine", true);
-	}
-	
-	return MRES_Handled;
-}
-
 static MRESReturn DHookCallback_GetLoadoutItem_Pre(int player, DHookReturn ret, DHookParam params)
 {
 	if (IsClientInGame(player) && TF2_GetClientTeam(player) == TFTeam_Invaders)
@@ -1152,13 +1141,6 @@ static MRESReturn DHookCallback_CheckInstantLoadoutRespawn_Pre(int player)
 	}
 	
 	return MRES_Ignored;
-}
-
-static MRESReturn DHookCallback_ShouldForceAutoTeam_Pre(int player, DHookReturn ret)
-{
-	// don't allow game logic to force players on a team
-	ret.Value = false;
-	return MRES_Supercede;
 }
 
 static MRESReturn DHookCallback_DoClassSpecialSkill_Pre(int player, DHookReturn ret)

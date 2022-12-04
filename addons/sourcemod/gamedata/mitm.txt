@@ -179,11 +179,6 @@
 				"linux"		"@_ZN9CTFPlayer26CheckInstantLoadoutRespawnEv"
 				"windows"	"\x57\x8B\xF9\x8B\x07\x8B\x80\x0C\x01\x00\x00\xFF\xD0\x84\xC0\x0F\x84\x2A\x2A\x2A\x2A\x8B\x07"
 			}
-			"CTFPlayer::ShouldForceAutoTeam"
-			{
-				"linux"		"@_ZN9CTFPlayer19ShouldForceAutoTeamEv"
-				"windows"	"\xA1\x2A\x2A\x2A\x2A\x56\x8B\xF1\x83\x78\x30\x00\x74\x2A\xB0\x01"
-			}
 			"CTFPlayer::DoClassSpecialSkill"
 			{
 				"linux"		"@_ZN9CTFPlayer19DoClassSpecialSkillEv"
@@ -951,13 +946,6 @@
 						"type"	"bool"
 					}
 				}
-			}
-			"CTFPlayer::ShouldForceAutoTeam"
-			{
-				"signature"		"CTFPlayer::ShouldForceAutoTeam"
-				"callconv"		"thiscall"
-				"return"		"bool"
-				"this"			"entity"
 			}
 			"CTFPlayer::DoClassSpecialSkill"
 			{

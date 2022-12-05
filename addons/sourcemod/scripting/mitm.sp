@@ -135,9 +135,9 @@ public Plugin myinfo =
 {
 	name = "Mann in the Machine",
 	author = "Mikusch",
-	description = "Mann vs. Machine but epic",
+	description = "Mann vs. Machine, but as a 32-player PvP gamemode.",
 	version = "1.0.0",
-	url = "https://github.com/Mikusch"
+	url = "https://github.com/Mikusch/MannInTheMachine"
 }
 
 public void OnPluginStart()

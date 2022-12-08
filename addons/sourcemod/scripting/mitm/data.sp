@@ -48,7 +48,7 @@ static char m_szPrevName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
 
 // Non-resetting Properties
 static int m_invaderPriority[MAXPLAYERS + 1];
-static bool m_bWasMiniBoss[MAXPLAYERS + 1];
+static int m_iMiniBossCount[MAXPLAYERS + 1];
 static int m_defenderQueuePoints[MAXPLAYERS + 1];
 static int m_preferences[MAXPLAYERS + 1];
 static Party m_party[MAXPLAYERS + 1];
@@ -230,15 +230,15 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
-	property bool m_bWasMiniBoss
+	property int m_iMiniBossCount
 	{
 		public get()
 		{
-			return m_bWasMiniBoss[this.index];
+			return m_iMiniBossCount[this.index];
 		}
-		public set(bool bWasMiniBoss)
+		public set(int iMiniBossCount)
 		{
-			m_bWasMiniBoss[this.index] = bWasMiniBoss;
+			m_iMiniBossCount[this.index] = iMiniBossCount;
 		}
 	}
 	
@@ -1354,7 +1354,7 @@ methodmap Player < CBaseCombatCharacter
 		this.ResetOnTeamChange();
 		
 		this.m_invaderPriority = 0;
-		this.m_bWasMiniBoss = false;
+		this.m_iMiniBossCount = 0;
 		this.m_defenderQueuePoints = -1;
 		this.m_preferences = -1;
 		this.m_party = NULL_PARTY;

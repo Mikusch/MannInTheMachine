@@ -161,7 +161,7 @@
 	"Invader_SpawnTimerDeath"
 	{
 		"#format"	"{1:d}"
-		"en"		"{red}WARNING: {default}If you die in the spawn area {cyan}{1} {default}more time(s) you will be kicked!"
+		"en"		"{red}WARNING: {default}If you die in the spawn area {cyan}{1} {default}more time(s) you will be kicked from the server!"
 	}
 	"Invader_SpawnTimerKick"
 	{

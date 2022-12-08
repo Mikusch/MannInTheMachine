@@ -515,7 +515,7 @@ int FindNextInvader(bool bMiniBoss)
 			// This player is becoming a miniboss
 			if (bMiniBoss)
 			{
-				Player(client).m_bWasMiniBoss = true;
+				Player(client).m_iMiniBossCount++;
 			}
 		}
 		else
@@ -525,42 +525,6 @@ int FindNextInvader(bool bMiniBoss)
 		}
 	}
 	delete queue;
-	
-	// Check whether every invader has been a miniboss at least once
-	int playerCount = 0, miniBossCount = 0;
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		if (!Player(client).IsInvader())
-			continue;
-		
-		if (Player(client).HasPreference(PREF_DISABLE_GIANT))
-			continue;
-		
-		playerCount++;
-		
-		if (Player(client).m_bWasMiniBoss)
-		{
-			miniBossCount++;
-		}
-	}
-	
-	// If every player has been a miniboss at least once, reset the stat
-	if (playerCount == miniBossCount)
-	{
-		for (int client = 1; client <= MaxClients; client++)
-		{
-			if (!IsClientInGame(client))
-				continue;
-			
-			if (!Player(client).IsInvader())
-				continue;
-			
-			Player(client).m_bWasMiniBoss = false;
-		}
-	}
 	
 	return priorityClient;
 }
@@ -627,18 +591,19 @@ int SortPlayersByPriority(int index1, int index2, Handle array, Handle hndl)
 	int client1 = list.Get(index1);
 	int client2 = list.Get(index2);
 	
-	int c = 0;
-	
 	// Sort by priority
+	int c = Compare(Player(client2).m_invaderPriority, Player(client1).m_invaderPriority);
+	
+	// Sort by death count from spawn timer
 	if (c == 0)
 	{
-		c = Compare(Player(client2).m_invaderPriority, Player(client1).m_invaderPriority);
+		c = Compare(Player(client1).m_iSpawnDeathCount, Player(client2).m_iSpawnDeathCount);
 	}
 	
-	// Sort by players who have not been a miniboss yet
+	// Sort by miniboss spawn count
 	if (c == 0)
 	{
-		c = Compare(Player(client1).m_bWasMiniBoss, Player(client2).m_bWasMiniBoss);
+		c = Compare(Player(client1).m_iMiniBossCount, Player(client2).m_iMiniBossCount);
 	}
 	
 	return c;

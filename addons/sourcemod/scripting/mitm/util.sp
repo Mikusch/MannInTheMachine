@@ -493,8 +493,7 @@ ArrayList GetInvaderQueue(bool bMiniBoss = false)
 		queue.Push(client);
 	}
 	
-	// Sort players by priority
-	queue.SortCustom(SortPlayersByPriority);
+	queue.SortCustom(bMiniBoss ? SortPlayersByMinibossCount : SortPlayersByPriority);
 	
 	return queue;
 }
@@ -591,19 +590,23 @@ int SortPlayersByPriority(int index1, int index2, Handle array, Handle hndl)
 	int client1 = list.Get(index1);
 	int client2 = list.Get(index2);
 	
-	// Sort by priority
-	int c = Compare(Player(client2).m_invaderPriority, Player(client1).m_invaderPriority);
+	// Sort by highest priority
+	return Compare(Player(client2).m_invaderPriority, Player(client1).m_invaderPriority);
+}
+
+int SortPlayersByMinibossCount(int index1, int index2, Handle array, Handle hndl)
+{
+	ArrayList list = view_as<ArrayList>(array);
+	int client1 = list.Get(index1);
+	int client2 = list.Get(index2);
 	
-	// Sort by death count from spawn timer
+	// Sort by miniboss spawns
+	int c = Compare(Player(client1).m_iMiniBossCount, Player(client2).m_iMiniBossCount);
+	
+	// Sort by highest priority
 	if (c == 0)
 	{
-		c = Compare(Player(client1).m_iSpawnDeathCount, Player(client2).m_iSpawnDeathCount);
-	}
-	
-	// Sort by miniboss spawn count
-	if (c == 0)
-	{
-		c = Compare(Player(client1).m_iMiniBossCount, Player(client2).m_iMiniBossCount);
+		c = Compare(Player(client2).m_invaderPriority, Player(client1).m_invaderPriority);
 	}
 	
 	return c;

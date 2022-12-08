@@ -158,6 +158,15 @@
 		"#format"	"{1:1.2f}"
 		"en"		"LEAVE THE SPAWN AREA!\nTime Left: {1} s"
 	}
+	"Invader_SpawnTimerDeath"
+	{
+		"#format"	"{1:d}"
+		"en"		"{red}WARNING: {default}If you die in the spawn area {cyan}{1} {default}more time(s) you will be kicked!"
+	}
+	"Invader_SpawnTimerKick"
+	{
+		"en"		"Too many deaths in spawn area"
+	}
 	"Invader_CaptureGate_Annotation"
 	{
 		"en"		"Capture %s!"

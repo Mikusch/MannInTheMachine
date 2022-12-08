@@ -53,6 +53,7 @@ static int m_defenderQueuePoints[MAXPLAYERS + 1];
 static int m_preferences[MAXPLAYERS + 1];
 static Party m_party[MAXPLAYERS + 1];
 static bool m_bIsPartyMenuActive[MAXPLAYERS + 1];
+static int m_iSpawnDeathCount[MAXPLAYERS + 1];
 
 methodmap Player < CBaseCombatCharacter
 {
@@ -334,6 +335,18 @@ methodmap Player < CBaseCombatCharacter
 		public set(bool bIsPartyMenuActive)
 		{
 			m_bIsPartyMenuActive[this.index] = bIsPartyMenuActive;
+		}
+	}
+	
+	property int m_iSpawnDeathCount
+	{
+		public get()
+		{
+			return m_iSpawnDeathCount[this.index];
+		}
+		public set(int iSpawnDeathCount)
+		{
+			m_iSpawnDeathCount[this.index] = iSpawnDeathCount;
 		}
 	}
 	
@@ -1346,6 +1359,7 @@ methodmap Player < CBaseCombatCharacter
 		this.m_preferences = -1;
 		this.m_party = NULL_PARTY;
 		this.m_bIsPartyMenuActive = false;
+		this.m_iSpawnDeathCount = 0;
 		
 		m_szInvaderName[this.index][0] = EOS;
 		m_szPrevName[this.index][0] = EOS;

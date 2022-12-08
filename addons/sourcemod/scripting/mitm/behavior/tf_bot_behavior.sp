@@ -135,6 +135,20 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 					if (Player(actor).m_flSpawnTimeLeft <= 0.0)
 					{
 						ForcePlayerSuicide(actor);
+						
+						// Kick players for dying to the spawn timer too many times
+						int iMaxDeaths = mitm_max_spawn_deaths.IntValue;
+						if (iMaxDeaths)
+						{
+							if (iMaxDeaths >= ++Player(actor).m_iSpawnDeathCount)
+							{
+								KickClient(actor, "%t", "Invader_SpawnTimerKick");
+							}
+							else
+							{
+								CPrintToChat(actor, "%s %t", PLUGIN_TAG, "Invader_SpawnTimerDeath", iMaxDeaths - Player(actor).m_iSpawnDeathCount);
+							}
+						}
 					}
 				}
 				

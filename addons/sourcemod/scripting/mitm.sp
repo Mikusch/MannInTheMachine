@@ -67,6 +67,7 @@ ConVar mitm_invader_allow_suicide;
 ConVar mitm_party_max_size;
 ConVar mitm_setup_time;
 ConVar mitm_disable_explosive_gas;
+ConVar mitm_max_spawn_deaths;
 
 // Game ConVars
 ConVar tf_avoidteammates_pushaway;

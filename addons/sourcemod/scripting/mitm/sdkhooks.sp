@@ -31,10 +31,6 @@ void SDKHooks_OnEntityCreated(int entity, const char[] classname)
 	{
 		SDKHook(entity, SDKHook_SetTransmit, SDKHookCB_ProjectilePipeRemote_SetTransmit);
 	}
-	else if (StrEqual(classname, "entity_revive_marker"))
-	{
-		SDKHook(entity, SDKHook_SetTransmit, SDKHookCB_ReviveMarker_SetTransmit);
-	}
 	else if (StrEqual(classname, "bot_hint_engineer_nest"))
 	{
 		SDKHook(entity, SDKHook_Think, SDKHookCB_BotHintEngineerNest_Think);
@@ -87,25 +83,6 @@ static Action SDKHookCB_ProjectilePipeRemote_SetTransmit(int entity, int client)
 			float flCreationTime = GetEntDataFloat(entity, GetOffset("CTFGrenadePipebombProjectile", "m_flCreationTime"));
 			if ((GetGameTime() - flCreationTime) >= SDKCall_GetLiveTime(entity))
 			{
-				return Plugin_Handled;
-			}
-		}
-	}
-	
-	return Plugin_Continue;
-}
-
-static Action SDKHookCB_ReviveMarker_SetTransmit(int entity, int client)
-{
-	TFTeam team = view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum"));
-	if (team == TFTeam_Defenders)
-	{
-		int owner = GetEntProp(entity, Prop_Send, "m_hOwnerEntity");
-		if (IsEntityClient(owner) && TF2_GetPlayerClass(owner) == TFClass_Spy)
-		{
-			if (Player(client).IsInvader())
-			{
-				// hide spy revive markers from invaders
 				return Plugin_Handled;
 			}
 		}

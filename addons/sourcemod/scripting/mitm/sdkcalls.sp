@@ -33,7 +33,6 @@ static Handle g_SDKCallIsInEndlessWaves;
 static Handle g_SDKCallGetHealthMultiplier;
 static Handle g_SDKCallResetMap;
 static Handle g_SDKCallIsSpaceToSpawnHere;
-static Handle g_SDKCallWeaponSwitch;
 static Handle g_SDKCallRemoveObject;
 static Handle g_SDKCallFindHint;
 static Handle g_SDKCallPushAllPlayersAway;
@@ -90,7 +89,6 @@ void SDKCalls_Init(GameData gamedata)
 	g_SDKCallGetHealthMultiplier = PrepSDKCall_GetHealthMultiplier(gamedata);
 	g_SDKCallResetMap = PrepSDKCall_ResetMap(gamedata);
 	g_SDKCallIsSpaceToSpawnHere = PrepSDKCall_IsSpaceToSpawnHere(gamedata);
-	g_SDKCallWeaponSwitch = PrepSDKCall_WeaponSwitch(gamedata);
 	g_SDKCallRemoveObject = PrepSDKCall_RemoveObject(gamedata);
 	g_SDKCallFindHint = PrepSDKCall_FindHint(gamedata);
 	g_SDKCallPushAllPlayersAway = PrepSDKCall_PushAllPlayersAway(gamedata);
@@ -528,21 +526,6 @@ static Handle PrepSDKCall_IPopulationSpawnerSpawn(GameData gamedata)
 	return call;
 }
 
-static Handle PrepSDKCall_WeaponSwitch(GameData gamedata)
-{
-	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(gamedata, SDKConf_Virtual, "CTFPlayer::Weapon_Switch");
-	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL);
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
-	
-	Handle call = EndPrepSDKCall();
-	if (!call)
-		LogError("Failed to create SDKCall: CTFPlayer::Weapon_Switch");
-	
-	return call;
-}
-
 static Handle PrepSDKCall_RemoveObject(GameData gamedata)
 {
 	StartPrepSDKCall(SDKCall_Player);
@@ -817,14 +800,6 @@ bool SDKCall_IPopulationSpawnerSpawn(Address pSpawner, const float vSpawnPositio
 {
 	if (g_SDKCallCTFBotSpawnerSpawn)
 		return SDKCall(g_SDKCallCTFBotSpawnerSpawn, pSpawner, vSpawnPosition, spawnVector);
-	
-	return false;
-}
-
-bool SDKCall_WeaponSwitch(int player, int weapon, int viewmodelindex = 0)
-{
-	if (g_SDKCallWeaponSwitch)
-		return SDKCall(g_SDKCallWeaponSwitch, player, weapon, viewmodelindex);
 	
 	return false;
 }

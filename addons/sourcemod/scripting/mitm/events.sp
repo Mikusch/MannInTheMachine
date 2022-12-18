@@ -128,7 +128,7 @@ static void RequestFrameCallback_ApplyWeaponRestrictions(int userid)
 				weaponID == TF_WEAPON_MECHANICAL_ARM ||
 				weaponID == TF_WEAPON_LASER_POINTER)
 			{
-				SDKCall_WeaponSwitch(client, weapon);
+				TF2Util_SetPlayerActiveWeapon(client, weapon);
 			}
 		}
 	}

@@ -958,19 +958,19 @@ methodmap Player < CBaseCombatCharacter
 		if (this.HasWeaponRestriction(MELEE_ONLY))
 		{
 			// force use of melee weapons
-			SDKCall_WeaponSwitch(this.index, GetPlayerWeaponSlot(this.index, TFWeaponSlot_Melee));
+			TF2Util_SetPlayerActiveWeapon(this.index, GetPlayerWeaponSlot(this.index, TFWeaponSlot_Melee));
 			return true;
 		}
 		
 		if (this.HasWeaponRestriction(PRIMARY_ONLY))
 		{
-			SDKCall_WeaponSwitch(this.index, GetPlayerWeaponSlot(this.index, TFWeaponSlot_Primary));
+			TF2Util_SetPlayerActiveWeapon(this.index, GetPlayerWeaponSlot(this.index, TFWeaponSlot_Primary));
 			return true;
 		}
 		
 		if (this.HasWeaponRestriction(SECONDARY_ONLY))
 		{
-			SDKCall_WeaponSwitch(this.index, GetPlayerWeaponSlot(this.index, TFWeaponSlot_Secondary));
+			TF2Util_SetPlayerActiveWeapon(this.index, GetPlayerWeaponSlot(this.index, TFWeaponSlot_Secondary));
 			return true;
 		}
 		

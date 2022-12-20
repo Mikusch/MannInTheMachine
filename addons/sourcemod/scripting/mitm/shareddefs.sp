@@ -102,6 +102,21 @@ char g_aRawPlayerClassNames[][] =
 	"random"
 };
 
+char g_aBotArmModels[][] =
+{
+	"", //TF_CLASS_UNDEFINED
+	
+	"models/weapons/c_models/c_scout_bot_arms.mdl",
+	"models/weapons/c_models/c_sniper_bot_arms.mdl",
+	"models/weapons/c_models/c_soldier_bot_arms.mdl",
+	"models/weapons/c_models/c_demo_bot_arms.mdl",
+	"models/weapons/c_models/c_medic_bot_arms.mdl",
+	"models/weapons/c_models/c_heavy_bot_arms.mdl",
+	"models/weapons/c_models/c_pyro_bot_arms.mdl",
+	"models/weapons/c_models/c_spy_bot_arms.mdl",
+	"models/weapons/c_models/c_engineer_bot_arms.mdl",
+};
+
 char g_aRawPlayerClassNamesShort[][] =
 {
 	"undefined",

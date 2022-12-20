@@ -68,6 +68,7 @@ ConVar mitm_party_max_size;
 ConVar mitm_setup_time;
 ConVar mitm_disable_explosive_gas;
 ConVar mitm_max_spawn_deaths;
+ConVar mitm_use_bot_viewmodels;
 
 // Game ConVars
 ConVar tf_avoidteammates_pushaway;
@@ -235,8 +236,7 @@ public void OnMapStart()
 	g_bInWaitingForPlayers = true;
 	g_flNextRestoreCheckpointTime = 0.0;
 	
-	PrecacheSound("ui/system_message_alert.wav");
-	PrecacheSound(")mvm/mvm_tele_activate.wav");
+	Precache();
 	
 	DHooks_HookGamerules();
 	
@@ -282,7 +282,7 @@ public void OnClientDisconnect(int client)
 	
 	if (Player(client).IsInAParty())
 	{
-		Party party = Player(client).GetParty(); 
+		Party party = Player(client).GetParty();
 		party.OnPartyMemberLeave(client);
 	}
 }
@@ -482,6 +482,49 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 			}
 		}
 	}
+}
+
+static void Precache()
+{
+	SuperPrecacheModel("models/weapons/c_models/c_scout_bot_arms.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_scout_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_sniper_bot_arms.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_sniper_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_soldier_bot_arms.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_soldier_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_demo_bot_arms.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_demo_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_medic_bot_arms.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_medic_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_heavy_bot_arms.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_heavy_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_pyro_bot_arms.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_pyro_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_spy_bot_arms.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_spy_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_engineer_bot_arms.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_engineer_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_engineer_bot_gunslinger.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_engineer_bot_gunslinger_animations.mdl");
+	
+	SuperPrecacheModel("models/weapons/v_models/v_pda_spy_bot.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_pda_spy_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_ttg_watch_spy_bot.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_ttg_watch_spy_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_watch_leather_spy_bot.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_watch_leather_spy_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_watch_pocket_spy_bot.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_watch_pocket_spy_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_watch_spy_bot.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_watch_spy_bot_animations.mdl");
+	
+	AddFileToDownloadsTable("materials/models/bots/spy/spy_bot_arms_blue.vmt");
+	AddFileToDownloadsTable("materials/models/bots/spy/spy_bot_arms_red.vmt");
+	AddFileToDownloadsTable("materials/models/bots/spy/spy_bot_body_blue_unfinished.vtf");
+	AddFileToDownloadsTable("materials/models/bots/spy/spy_bot_body_red_unfinished.vtf");
+	
+	PrecacheSound("ui/system_message_alert.wav");
+	PrecacheSound(")mvm/mvm_tele_activate.wav");
 }
 
 static INextBot CreateNextBotPlayer(Address entity)

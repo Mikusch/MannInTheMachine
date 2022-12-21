@@ -212,7 +212,7 @@ static MRESReturn DHookCallback_PreClientUpdate_Pre()
 	// Allows us to have an MvM server with 32 visible player slots
 	GameRules_SetProp("m_bPlayingMannVsMachine", false);
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_PreClientUpdate_Post()
@@ -220,7 +220,7 @@ static MRESReturn DHookCallback_PreClientUpdate_Post()
 	// Set it back afterwards
 	GameRules_SetProp("m_bPlayingMannVsMachine", true);
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_AllocateBots_Pre(int populator)
@@ -256,7 +256,7 @@ static MRESReturn DHookCallback_RestoreCheckpoint_Pre(int populator)
 		}
 	}
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 /*
@@ -609,14 +609,14 @@ static MRESReturn DHookCallback_CPopulationManagerUpdate_Pre(int populator)
 	// allows spawners to freely switch teams of players
 	g_bAllowTeamChange = true;
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_CPopulationManagerUpdate_Post(int populator)
 {
 	g_bAllowTeamChange = false;
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_CPeriodicSpawnPopulatorUpdate_Post(Address pThis)
@@ -637,7 +637,7 @@ static MRESReturn DHookCallback_CPeriodicSpawnPopulatorUpdate_Post(Address pThis
 	// after we are done, clear the list
 	m_justSpawnedList.Clear();
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_CWaveSpawnPopulatorUpdate_Post(Address pThis)
@@ -674,7 +674,7 @@ static MRESReturn DHookCallback_CWaveSpawnPopulatorUpdate_Post(Address pThis)
 	// after we are done, clear the list
 	m_justSpawnedList.Clear();
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_UpdateMission_Pre(Address pThis, DHookReturn ret, DHookParam params)
@@ -726,7 +726,7 @@ static MRESReturn DHookCallback_UpdateMission_Pre(Address pThis, DHookReturn ret
 	}
 	
 	delete livePlayerList;
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_UpdateMission_Post(Address pThis, DHookReturn ret, DHookParam params)
@@ -778,7 +778,7 @@ static MRESReturn DHookCallback_UpdateMission_Post(Address pThis, DHookReturn re
 	// after we are done, clear the list
 	m_justSpawnedList.Clear();
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, DHookReturn ret)
@@ -967,7 +967,7 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Post(Address pThis,
 {
 	s_MissionPopulator = CMissionPopulator(Address_Null);
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterface, DHookParam params)
@@ -1002,7 +1002,7 @@ static MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Pre(DHookPar
 	// Save off the old timer value
 	g_flTempRestartRoundTime = GameRules_GetPropFloat("m_flRestartRoundTime");
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Post(DHookParam params)
@@ -1019,7 +1019,7 @@ static MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Post(DHookPa
 	
 	g_flTempRestartRoundTime = 0.0;
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_ResetPlayerAndTeamReadyState_Pre()
@@ -1115,7 +1115,7 @@ static MRESReturn DHookCallback_GetLoadoutItem_Pre(int player, DHookReturn ret, 
 		GameRules_SetProp("m_bIsInTraining", true);
 	}
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_GetLoadoutItem_Post(int player, DHookReturn ret, DHookParam params)
@@ -1125,7 +1125,7 @@ static MRESReturn DHookCallback_GetLoadoutItem_Post(int player, DHookReturn ret,
 		GameRules_SetProp("m_bIsInTraining", false);
 	}
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_CheckInstantLoadoutRespawn_Pre(int player)
@@ -1222,7 +1222,7 @@ static MRESReturn DHookCallback_FindSpawnLocation_Post(Address where, DHookRetur
 	// We can't use CWaveSpawnPopulator::m_spawnLocationResult because it gets overridden in some cases.
 	s_spawnLocationResult = ret.Value;
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_ShouldHitEntity_Post(Address pFilter, DHookReturn ret, DHookParam params)
@@ -1515,7 +1515,7 @@ static MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 		Player(player).StopIdleSound();
 	}
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_ShouldGib_Pre(int player, DHookReturn ret, DHookParam params)
@@ -1527,7 +1527,7 @@ static MRESReturn DHookCallback_ShouldGib_Pre(int player, DHookReturn ret, DHook
 		return MRES_Supercede;
 	}
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_IsAllowedToPickUpFlag_Post(int player, DHookReturn ret)
@@ -1648,7 +1648,7 @@ static MRESReturn DHookCallback_SetModel_Post(int entity, DHookParam params)
 		Entity(entity).SetGlowEntity(CreateEntityGlow(entity));
 	}
 	
-	return MRES_Handled;
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_CanBeUpgraded_Pre(int obj, DHookReturn ret, DHookParam params)

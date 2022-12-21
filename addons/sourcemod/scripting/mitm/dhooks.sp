@@ -1078,7 +1078,7 @@ static MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 			return MRES_Supercede;
 		}
 		
-		int iPlayerCount = 0, iDefenderCount = 0;
+		int iDefenderCount = 0, iReqDefenderCount = mitm_defender_count.IntValue;
 		
 		// collect all valid players
 		for (int client = 1; client <= MaxClients; client++)
@@ -1091,11 +1091,7 @@ static MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 			
 			if (TF2_GetClientTeam(client) == TFTeam_Defenders)
 				iDefenderCount++;
-			
-			iPlayerCount++;
 		}
-		
-		int iReqDefenderCount = Max(mitm_defender_min_count.IntValue, RoundToNearest((float(iPlayerCount) / float(MaxClients)) * mitm_defender_max_count.IntValue));
 		
 		// determine whether we need more defenders
 		if (iDefenderCount >= iReqDefenderCount || Player(player).HasPreference(PREF_DISABLE_DEFENDER) || Player(player).HasPreference(PREF_DISABLE_SPAWNING))

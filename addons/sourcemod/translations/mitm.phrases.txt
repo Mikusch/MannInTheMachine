@@ -19,7 +19,7 @@
 {
 	"Menu_Main_Title"
 	{
-		"en"		"Welcome to Mann in the Machine made by Mikusch!"
+		"en"		"Welcome to Mann in the Machine by Mikusch!"
 	}
 	"Menu_Main_Queue"
 	{
@@ -71,7 +71,7 @@
 	{
 		"en"		"Disable spawning (Spectator mode)"
 	}
-	"Preference_DisableGiant"
+	"Preference_DisableMiniBoss"
 	{
 		"en"		"Don't spawn me as Giant Robot"
 	}

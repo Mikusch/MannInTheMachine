@@ -37,6 +37,9 @@ ArrayList Queue_GetDefenderQueue()
 		if (IsClientSourceTV(client))
 			continue;
 		
+		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
+			continue;
+		
 		// ignore players in a party, they get handled separately
 		if (Player(client).IsInAParty() && Player(client).GetParty().GetMemberCount() > 1)
 			continue;

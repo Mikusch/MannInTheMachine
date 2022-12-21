@@ -56,8 +56,7 @@ float g_flNextRestoreCheckpointTime;
 
 // Plugin ConVars
 ConVar mitm_developer;
-ConVar mitm_defender_min_count;
-ConVar mitm_defender_max_count;
+ConVar mitm_defender_count;
 ConVar mitm_min_spawn_hurry_time;
 ConVar mitm_max_spawn_hurry_time;
 ConVar mitm_queue_points;
@@ -282,7 +281,7 @@ public void OnClientDisconnect(int client)
 	
 	if (Player(client).IsInAParty())
 	{
-		Party party = Player(client).GetParty(); 
+		Party party = Player(client).GetParty();
 		party.OnPartyMemberLeave(client);
 	}
 }

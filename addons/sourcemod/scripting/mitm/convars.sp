@@ -21,15 +21,14 @@
 void ConVars_Init()
 {
 	mitm_developer = CreateConVar("mitm_developer", "0", "Toggle plugin developer mode.");
-	mitm_defender_min_count = CreateConVar("mitm_defender_min_count", "6", "Minimum amount of defenders, regardless of player count.", _, _, _, true, 10.0);
-	mitm_defender_max_count = CreateConVar("mitm_defender_max_count", "8", "Maximum amount of defenders on a full server.", _, _, _, true, 10.0);
+	mitm_defender_count = CreateConVar("mitm_defender_count", "6", "Amount of defenders.", _, true, 1.0, true, 10.0);
 	mitm_min_spawn_hurry_time = CreateConVar("mitm_min_spawn_hurry_time", "20.0", "The minimum time invaders have to leave their spawn, in seconds.");
 	mitm_max_spawn_hurry_time = CreateConVar("mitm_max_spawn_hurry_time", "45.0", "The maximum time invaders have to leave their spawn, in seconds.");
 	mitm_queue_points = CreateConVar("mitm_queue_points", "5", "Amount of queue points awarded to players that did not become defenders.", _, true, 1.0);
 	mitm_rename_robots = CreateConVar("mitm_rename_robots", "0", "Whether to rename robots as they spawn.");
 	mitm_annotation_lifetime = CreateConVar("mitm_annotation_lifetime", "30.0", "The lifetime of annotations shown to clients, in seconds.", _, true, 1.0);
 	mitm_invader_allow_suicide = CreateConVar("mitm_invader_allow_suicide", "0", "Whether to allow invaders to suicide.");
-	mitm_party_max_size = CreateConVar("mitm_party_max_size", "6", "Maximum size of player parties.", _, _, _, true, 10.0);
+	mitm_party_max_size = CreateConVar("mitm_party_max_size", "0", "Maximum size of player parties.", _, true, 0.0, true, 10.0);
 	mitm_setup_time = CreateConVar("mitm_setup_time", "150", "Time for defenders to set up before the round automatically starts.");
 	mitm_disable_explosive_gas = CreateConVar("mitm_disable_explosive_gas", "1", "Whether to disable the 'Explode on Ignite' upgrade for the Gas Passer.");
 	mitm_max_spawn_deaths = CreateConVar("mitm_max_spawn_deaths", "2", "How many times a player can die to the spawn timer before getting kicked.");

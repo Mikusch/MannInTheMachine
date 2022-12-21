@@ -341,12 +341,14 @@ void SelectNewDefenders()
 		if (IsClientSourceTV(client))
 			continue;
 		
+		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
+			continue;
+		
 		players.Push(client);
 	}
 	
 	ArrayList queue = Queue_GetDefenderQueue();
-	int iDefenderCount = 0;
-	int iReqDefenderCount = Max(mitm_defender_min_count.IntValue, RoundToNearest((float(players.Length) / float(MaxClients)) * mitm_defender_max_count.IntValue));
+	int iDefenderCount = 0, iReqDefenderCount = mitm_defender_count.IntValue;
 	
 	// Select our defenders
 	for (int i = 0; i < queue.Length; i++)
@@ -387,7 +389,7 @@ void SelectNewDefenders()
 		}
 		
 		// If we have enough defenders, early out
-		if (iReqDefenderCount == iDefenderCount)
+		if (iReqDefenderCount <= iDefenderCount)
 			break;
 	}
 	

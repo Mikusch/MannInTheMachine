@@ -161,7 +161,8 @@ methodmap Party
 	
 	public int GetMaxPlayers()
 	{
-		return Min(mitm_party_max_size.IntValue, mitm_defender_min_count.IntValue);
+		int iMaxPartySize = mitm_party_max_size.IntValue, iDefenderCount = mitm_defender_count.IntValue;
+		return (iMaxPartySize == 0) ? iDefenderCount : Min(iMaxPartySize, iDefenderCount);
 	}
 	
 	public void AddInvite(int client)

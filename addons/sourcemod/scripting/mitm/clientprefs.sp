@@ -22,7 +22,7 @@ char g_PreferenceNames[][] =
 {
 	"Preference_DisableDefender",
 	"Preference_DisableSpawning",
-	"Preference_DisableGiant",
+	"Preference_DisableMiniBoss",
 	"Preference_DisableSpawnNotification",
 	"Preference_DisableAnnotations",
 	"Preference_IgnorePartyInvites",

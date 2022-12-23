@@ -31,6 +31,7 @@ void Console_Init()
 	AddCommandListener(CommandListener_Suicide, "kill");
 	AddCommandListener(CommandListener_Build, "build");
 	AddCommandListener(CommandListener_DropItem, "dropitem");
+	AddCommandListener(CommandListener_JoinTeam, "jointeam");
 	AddCommandListener(CommandListener_JoinClass, "joinclass");
 	AddCommandListener(CommandListener_Buyback, "td_buyback");
 }
@@ -195,6 +196,26 @@ static Action CommandListener_DropItem(int client, const char[] command, int arg
 	{
 		// do not allow dropping the bomb while deploying
 		return Plugin_Handled;
+	}
+	
+	return Plugin_Continue;
+}
+
+static Action CommandListener_JoinTeam(int client, const char[] command, int argc)
+{
+	if (argc >= 1)
+	{
+		char arg[16];
+		GetCmdArg(1, arg, sizeof(arg));
+		
+		if (StrEqual(arg, "spectate", false) || StrEqual(arg, "auto", false))
+		{
+			return Plugin_Continue;
+		}
+		
+		// allow CTFPlayer::GetAutoTeam to set currency for new defenders
+		FakeClientCommand(client, "%s %s", command, "auto");
+		return Plugin_Changed;
 	}
 	
 	return Plugin_Continue;

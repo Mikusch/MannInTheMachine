@@ -486,7 +486,7 @@ ArrayList GetInvaderQueue(bool bMiniBoss = false)
 		if (Player(client).HasPreference(PREF_DISABLE_SPAWNING))
 			continue;
 		
-		if (bMiniBoss && Player(client).HasPreference(PREF_DISABLE_GIANT))
+		if (bMiniBoss && Player(client).HasPreference(PREF_DISABLE_MINIBOSS))
 			continue;
 		
 		if (!Forwards_OnIsValidInvader(client, bMiniBoss))

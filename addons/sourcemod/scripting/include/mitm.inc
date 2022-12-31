@@ -33,7 +33,7 @@ enum PreferenceType
 {
 	PREF_DISABLE_DEFENDER = (1 << 0),			/**< Can not be chosen as Defender. */
 	PREF_DISABLE_SPAWNING = (1 << 1),			/**< Spectator mode. No spawning at all. */
-	PREF_DISABLE_GIANT = (1 << 2),				/**< Can not become a Giant Robot. */
+	PREF_DISABLE_MINIBOSS = (1 << 2),			/**< Can not become a Giant Robot. */
 	PREF_DISABLE_SPAWN_NOTIFICATION = (1 << 3),	/**< Disables clientside sounds when spawning as Robot. */
 	PREF_DISABLE_ANNOTATIONS = (1 << 4),		/**< Disables clientside world annotations e.g. Gate Bot and Sentry Buster hints. */
 	PREF_IGNORE_PARTY_INVITES = (1 << 5),		/**< Can not be invited to parties. */

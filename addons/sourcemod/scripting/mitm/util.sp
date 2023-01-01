@@ -1040,7 +1040,7 @@ void ShowGateBotAnnotation(int client)
 				char text[64];
 				Format(text, sizeof(text), "%T", "Invader_CaptureGate_Annotation", client, iszPrintName);
 				
-				ShowAnnotation(client, MITM_HINT_MASK | client, text, 0, center, mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
+				ShowAnnotation(client, MITM_HINT_MASK | client, text, _, center, mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
 				return;
 			}
 		}

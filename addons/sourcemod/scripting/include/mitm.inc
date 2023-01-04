@@ -37,6 +37,7 @@ enum PreferenceType
 	PREF_DISABLE_SPAWN_NOTIFICATION = (1 << 3),	/**< Disables clientside sounds when spawning as Robot. */
 	PREF_DISABLE_ANNOTATIONS = (1 << 4),		/**< Disables clientside world annotations e.g. Gate Bot and Sentry Buster hints. */
 	PREF_IGNORE_PARTY_INVITES = (1 << 5),		/**< Can not be invited to parties. */
+	PREF_DISABLE_DEFENDER_AUTO = (1 << 6),		/**< Disables being chosen as a replacement if a Defender leaves the game. */
 }
 
 methodmap MannInTheMachinePlayer < CBaseCombatCharacter

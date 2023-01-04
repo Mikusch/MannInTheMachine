@@ -467,6 +467,42 @@ void SelectNewDefenders()
 	delete queue;
 }
 
+void FindReplacementDefender()
+{
+	ArrayList queue = Queue_GetDefenderQueue();
+	for (int i = 0; i < queue.Length; i++)
+	{
+		int client = queue.Get(i, QueueData::m_client);
+		
+		if (!IsEntityClient(client))
+			continue;
+		
+		// Already a defender, skip this player
+		if (TF2_GetClientTeam(client) == TFTeam_Defenders)
+			continue;
+		
+		if (Player(client).HasPreference(PREF_DISABLE_DEFENDER_AUTO))
+			continue;
+		
+		// Don't force switch because we want GetTeamAssignmentOverride to decide
+		TF2_ChangeClientTeam(client, TFTeam_Defenders);
+		
+		// Validate that they were successfully switched
+		if (TF2_GetClientTeam(client) == TFTeam_Defenders)
+		{
+			Queue_SetPoints(client, 0);
+			
+			char redTeamname[MAX_TEAM_NAME_LENGTH];
+			mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
+			
+			break;
+		}
+	}
+	
+	delete queue;
+}
+
 ArrayList GetInvaderQueue(bool bMiniBoss = false)
 {
 	ArrayList queue = new ArrayList();

@@ -1094,7 +1094,10 @@ static MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 		}
 		
 		// determine whether we need more defenders
-		if (iDefenderCount >= iReqDefenderCount || Player(player).HasPreference(PREF_DISABLE_DEFENDER) || Player(player).HasPreference(PREF_DISABLE_SPAWNING))
+		if (iDefenderCount >= iReqDefenderCount ||
+			Player(player).IsInAParty()
+			Player(player).HasPreference(PREF_DISABLE_DEFENDER) ||
+			Player(player).HasPreference(PREF_DISABLE_SPAWNING))
 		{
 			ret.Value = TFTeam_Spectator;
 		}

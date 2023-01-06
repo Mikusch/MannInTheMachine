@@ -206,15 +206,13 @@ public void OnPluginStart()
 		}
 	}
 	
-	for (int entity = MaxClients + 1; entity < GetMaxEntities(); entity++)
+	int entity = -1;
+	while ((entity = FindEntityByClassname(entity, "*")) != -1)
 	{
-		if (IsValidEntity(entity))
+		char classname[64];
+		if (GetEntityClassname(entity, classname, sizeof(classname)))
 		{
-			char classname[64];
-			if (GetEntityClassname(entity, classname, sizeof(classname)))
-			{
-				OnEntityCreated(entity, classname);
-			}
+			OnEntityCreated(entity, classname);
 		}
 	}
 }
@@ -283,6 +281,15 @@ public void OnClientDisconnect(int client)
 	{
 		Party party = Player(client).GetParty();
 		party.OnPartyMemberLeave(client);
+	}
+}
+
+public void OnClientDisconnect_Post(int client)
+{
+	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves())
+	{
+		// Attempt to find replacement defender if needed
+		FindReplacementDefender();
 	}
 }
 

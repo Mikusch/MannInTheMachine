@@ -1566,6 +1566,9 @@ static MRESReturn DHookCallback_EntSelectSpawnPoint_Pre(int player, DHookReturn 
 
 static MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret, DHookParam params)
 {
+	if (params.IsNull(2))
+		return MRES_Ignored;
+	
 	int entity = params.Get(2);
 	
 	if (IsEntityClient(entity) && TF2_GetClientTeam(entity) == TFTeam_Invaders)

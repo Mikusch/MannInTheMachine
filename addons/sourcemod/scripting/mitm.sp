@@ -229,7 +229,7 @@ public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int maxlen)
 public void OnMapStart()
 {
 	g_hWaitingForPlayersTimer = null;
-	g_bInWaitingForPlayers = true;
+	g_bInWaitingForPlayers = false;
 	g_flNextRestoreCheckpointTime = 0.0;
 	
 	PrecacheSound("ui/system_message_alert.wav");

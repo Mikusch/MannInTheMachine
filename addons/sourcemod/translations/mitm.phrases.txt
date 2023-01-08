@@ -157,19 +157,24 @@
 		"#format"	"{1:s}"
 		"en"		"You have spawned as: {1}"
 	}
-	"Invader_HurryOutOfSpawn"
+	"Invader_SpawnTimer_Countdown"
 	{
 		"#format"	"{1:1.2f}"
 		"en"		"LEAVE THE SPAWN AREA!\nTime Left: {1} s"
 	}
-	"Invader_SpawnTimerDeath"
+	"Invader_SpawnTimer_Warning"
 	{
 		"#format"	"{1:d}"
-		"en"		"{red}WARNING: {default}If you die in the spawn area {cyan}{1} {default}more time(s) you will be kicked from the server!"
+		"en"		"{red}WARNING: {default}If you die in the spawn area {cyan}{1} {default}more time(s), you will be kicked from the server!"
 	}
-	"Invader_SpawnTimerKick"
+	"Invader_SpawnTimer_KickReason"
 	{
 		"en"		"Too many deaths in spawn area"
+	}
+	"Invader_SpawnTimer_Kicked"
+	{
+		"#format"	"{1:N}"
+		"en"		"{blue}{1} {default}was kicked for dying in the spawn area too many times."
 	}
 	"Invader_CaptureGate_Annotation"
 	{

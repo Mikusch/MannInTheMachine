@@ -138,15 +138,16 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 						
 						// kick players for dying to the spawn timer too many times
 						int iMaxDeaths = mitm_max_spawn_deaths.IntValue;
-						if (iMaxDeaths)
+						if (iMaxDeaths && !mitm_developer.BoolValue)
 						{
 							if (iMaxDeaths <= ++Player(actor).m_iSpawnDeathCount)
 							{
-								KickClient(actor, "%t", "Invader_SpawnTimerKick");
+								KickClient(actor, "%t", "Invader_SpawnTimer_KickReason");
+								CPrintToChatAll("%s %t", PLUGIN_TAG, "Invader_SpawnTimer_Kicked", actor);
 							}
 							else
 							{
-								CPrintToChat(actor, "%s %t", PLUGIN_TAG, "Invader_SpawnTimerDeath", iMaxDeaths - Player(actor).m_iSpawnDeathCount);
+								CPrintToChat(actor, "%s %t", PLUGIN_TAG, "Invader_SpawnTimer_Warning", iMaxDeaths - Player(actor).m_iSpawnDeathCount);
 							}
 						}
 					}
@@ -155,7 +156,7 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 				if (Player(actor).m_flSpawnTimeLeft > 0.0)
 				{
 					SetHudTextParams(-1.0, 0.65, interval, 255, 255, 255, 255);
-					ShowSyncHudText(actor, g_WarningHudSync, "%t", "Invader_HurryOutOfSpawn", Player(actor).m_flSpawnTimeLeft);
+					ShowSyncHudText(actor, g_WarningHudSync, "%t", "Invader_SpawnTimer_Countdown", Player(actor).m_flSpawnTimeLeft);
 				}
 			}
 		}

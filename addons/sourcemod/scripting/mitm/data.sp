@@ -2055,3 +2055,26 @@ methodmap CMannVsMachineStats < CBaseEntity
 		return this.GetProp(Prop_Send, "m_iCurrentWaveIdx");
 	}
 }
+
+methodmap CTFGameRules < CBaseEntity
+{
+	public CTFGameRules(int entity)
+	{
+		return view_as<CTFGameRules>(entity);
+	}
+	
+	public void SetCustomUpgradesFile(const char[] path)
+	{
+		if (FileExists(path, true, "GAME"))
+		{
+			AddFileToDownloadsTable(path);
+			
+			SetVariantString(path);
+			this.AcceptInput("SetCustomUpgradesFile");
+		}
+		else if (path[0])
+		{
+			LogError("The custom upgrades file '%s' does not exist", path);
+		}
+	}
+}

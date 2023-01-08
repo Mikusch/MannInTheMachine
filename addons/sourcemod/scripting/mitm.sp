@@ -44,6 +44,7 @@
 CPopulationManager g_pPopulationManager = view_as<CPopulationManager>(INVALID_ENT_REFERENCE);
 CTFObjectiveResource g_pObjectiveResource = view_as<CTFObjectiveResource>(INVALID_ENT_REFERENCE);
 CMannVsMachineStats g_pMVMStats = view_as<CMannVsMachineStats>(INVALID_ENT_REFERENCE);
+CTFGameRules g_pGameRules = view_as<CTFGameRules>(INVALID_ENT_REFERENCE);
 
 // Other globals
 Handle g_WarningHudSync;
@@ -57,6 +58,7 @@ float g_flNextRestoreCheckpointTime;
 // Plugin ConVars
 ConVar mitm_developer;
 ConVar mitm_defender_count;
+ConVar mitm_custom_upgrades_file;
 ConVar mitm_min_spawn_hurry_time;
 ConVar mitm_max_spawn_hurry_time;
 ConVar mitm_queue_points;
@@ -251,6 +253,17 @@ public void OnMapStart()
 	delete directory;
 }
 
+public void OnConfigsExecuted()
+{
+	char path[PLATFORM_MAX_PATH];
+	mitm_custom_upgrades_file.GetString(path, sizeof(path));
+	
+	if (path[0] && g_pGameRules.IsValid())
+	{
+		g_pGameRules.SetCustomUpgradesFile(path);
+	}
+}
+
 public void OnClientPutInServer(int client)
 {
 	DHooks_OnClientPutInServer(client);
@@ -315,6 +328,10 @@ public void OnEntityCreated(int entity, const char[] classname)
 	else if (StrEqual(classname, "tf_mann_vs_machine_stats"))
 	{
 		g_pMVMStats = CMannVsMachineStats(EntIndexToEntRef(entity));
+	}
+	else if (StrEqual(classname, "tf_gamerules"))
+	{
+		g_pGameRules = CTFGameRules(EntIndexToEntRef(entity));
 	}
 }
 

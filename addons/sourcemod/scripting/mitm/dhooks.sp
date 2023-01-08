@@ -1024,7 +1024,7 @@ static MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Post(DHookPa
 
 static MRESReturn DHookCallback_ResetPlayerAndTeamReadyState_Pre()
 {
-	if (FindEntityByClassname(-1, "tf_gamerules") == -1)
+	if (!g_pGameRules.IsValid())
 		return MRES_Ignored;
 	
 	// Check if we came from CTFGameRules::PlayerReadyStatus_UpdatePlayerState

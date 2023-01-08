@@ -22,6 +22,7 @@ void ConVars_Init()
 {
 	mitm_developer = CreateConVar("mitm_developer", "0", "Toggle plugin developer mode.");
 	mitm_defender_count = CreateConVar("mitm_defender_count", "6", "Amount of defenders.", _, true, 1.0, true, 10.0);
+	mitm_custom_upgrades_file = CreateConVar("mitm_custom_upgrades_file", "", "Path to custom upgrades file, set to an empty string to use the default.");
 	mitm_min_spawn_hurry_time = CreateConVar("mitm_min_spawn_hurry_time", "20.0", "The minimum time invaders have to leave their spawn, in seconds.");
 	mitm_max_spawn_hurry_time = CreateConVar("mitm_max_spawn_hurry_time", "45.0", "The maximum time invaders have to leave their spawn, in seconds.");
 	mitm_queue_points = CreateConVar("mitm_queue_points", "5", "Amount of queue points awarded to players that did not become defenders.", _, true, 1.0);
@@ -56,7 +57,16 @@ void ConVars_Init()
 	sv_stepsize = FindConVar("sv_stepsize");
 	phys_pushscale = FindConVar("phys_pushscale");
 	
+	mitm_custom_upgrades_file.AddChangeHook(ConVarChanged_CustomUpgradesFile);
 	tf_mvm_min_players_to_start.AddChangeHook(ConVarChanged_MinPlayersToStart);
+}
+
+static void ConVarChanged_CustomUpgradesFile(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	if (g_pGameRules.IsValid())
+	{
+		g_pGameRules.SetCustomUpgradesFile(newValue[0] ? newValue : "scripts/items/mvm_upgrades.txt");
+	}
 }
 
 static void ConVarChanged_MinPlayersToStart(ConVar convar, const char[] oldValue, const char[] newValue)

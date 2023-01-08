@@ -391,6 +391,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 			}
 			else
 			{
+				buttons &= ~IN_JUMP;
 				TF2Attrib_SetByName(client, "no_jump", 1.0);
 			}
 		}

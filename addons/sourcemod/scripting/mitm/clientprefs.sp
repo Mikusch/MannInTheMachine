@@ -26,6 +26,7 @@ char g_PreferenceNames[][] =
 	"Preference_DisableSpawnNotification",
 	"Preference_DisableAnnotations",
 	"Preference_IgnorePartyInvites",
+	"Preference_DisableDefenderAuto",
 };
 
 static Cookie g_cookieQueuePoints;

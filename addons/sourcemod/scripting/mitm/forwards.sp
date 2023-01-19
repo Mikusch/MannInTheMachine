@@ -18,20 +18,20 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static GlobalForward g_forwardOnIsValidDefender;
-static GlobalForward g_forwardOnIsValidInvader;
+static GlobalForward g_hForwardOnIsValidDefender;
+static GlobalForward g_hForwardOnIsValidInvader;
 
 void Forwards_Init()
 {
-	g_forwardOnIsValidDefender = new GlobalForward("MannInTheMachine_OnIsValidDefender", ET_Single, Param_Cell);
-	g_forwardOnIsValidInvader = new GlobalForward("MannInTheMachine_OnIsValidInvader", ET_Single, Param_Cell, Param_Cell);
+	g_hForwardOnIsValidDefender = new GlobalForward("MannInTheMachine_OnIsValidDefender", ET_Single, Param_Cell);
+	g_hForwardOnIsValidInvader = new GlobalForward("MannInTheMachine_OnIsValidInvader", ET_Single, Param_Cell, Param_Cell);
 }
 
 bool Forwards_OnIsValidDefender(int client)
 {
 	bool bReturnVal = true;
 	
-	Call_StartForward(g_forwardOnIsValidDefender);
+	Call_StartForward(g_hForwardOnIsValidDefender);
 	Call_PushCell(client);
 	Call_Finish(bReturnVal);
 	
@@ -42,7 +42,7 @@ bool Forwards_OnIsValidInvader(int client, bool bIsMiniboss)
 {
 	bool bReturnVal = true;
 	
-	Call_StartForward(g_forwardOnIsValidInvader);
+	Call_StartForward(g_hForwardOnIsValidInvader);
 	Call_PushCell(client);
 	Call_PushCell(bIsMiniboss);
 	Call_Finish(bReturnVal);

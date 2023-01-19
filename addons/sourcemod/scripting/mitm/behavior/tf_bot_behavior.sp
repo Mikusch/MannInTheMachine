@@ -156,7 +156,7 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 				if (Player(actor).m_flSpawnTimeLeft > 0.0)
 				{
 					SetHudTextParams(-1.0, 0.65, interval, 255, 255, 255, 255);
-					ShowSyncHudText(actor, g_WarningHudSync, "%t", "Invader_SpawnTimer_Countdown", Player(actor).m_flSpawnTimeLeft);
+					ShowSyncHudText(actor, g_hWarningHudSync, "%t", "Invader_SpawnTimer_Countdown", Player(actor).m_flSpawnTimeLeft);
 				}
 			}
 		}

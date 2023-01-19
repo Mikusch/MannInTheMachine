@@ -47,7 +47,7 @@ CMannVsMachineStats g_pMVMStats = view_as<CMannVsMachineStats>(INVALID_ENT_REFER
 CTFGameRules g_pGameRules = view_as<CTFGameRules>(INVALID_ENT_REFERENCE);
 
 // Other globals
-Handle g_WarningHudSync;
+Handle g_hWarningHudSync;
 Handle g_hWaitingForPlayersTimer;
 bool g_bInWaitingForPlayers;
 bool g_bAllowTeamChange;
@@ -143,7 +143,7 @@ public Plugin myinfo =
 
 public void OnPluginStart()
 {
-	g_WarningHudSync = CreateHudSynchronizer();
+	g_hWarningHudSync = CreateHudSynchronizer();
 	
 	LoadTranslations("common.phrases");
 	LoadTranslations("mitm.phrases");
@@ -166,11 +166,11 @@ public void OnPluginStart()
 	CTFBotTaunt.Init();
 	
 	// Install player action factory
-	CEntityFactory EntityFactory = new CEntityFactory("player");
-	EntityFactory.DeriveFromClass("player");
-	EntityFactory.AttachNextBot(CreateNextBotPlayer);
-	EntityFactory.SetInitialActionFactory(CTFBotMainAction.GetFactory());
-	EntityFactory.Install();
+	CEntityFactory hEntityFactory = new CEntityFactory("player");
+	hEntityFactory.DeriveFromClass("player");
+	hEntityFactory.AttachNextBot(CreateNextBotPlayer);
+	hEntityFactory.SetInitialActionFactory(CTFBotMainAction.GetFactory());
+	hEntityFactory.Install();
 	
 	// Init plugin functions
 	Console_Init();
@@ -181,15 +181,15 @@ public void OnPluginStart()
 	ClientPrefs_Init();
 	Party_Init();
 	
-	GameData gamedata = new GameData("mitm");
-	if (gamedata)
+	GameData hGameData = new GameData("mitm");
+	if (hGameData)
 	{
 		// Init plugin functions requiring gamedata
-		DHooks_Init(gamedata);
-		Offsets_Init(gamedata);
-		SDKCalls_Init(gamedata);
+		DHooks_Init(hGameData);
+		Offsets_Init(hGameData);
+		SDKCalls_Init(hGameData);
 		
-		delete gamedata;
+		delete hGameData;
 	}
 	else
 	{

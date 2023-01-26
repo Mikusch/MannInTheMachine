@@ -506,14 +506,12 @@ static void FireWeaponAtEnemy(int client, int &buttons)
 	{
 		if (Player(client).HasAttribute(HOLD_FIRE_UNTIL_FULL_RELOAD) || tf_bot_always_full_reload.BoolValue)
 		{
-			static int s_isWaitingForFullReload[MAXPLAYERS + 1];
-			
 			if (SDKCall_Clip1(myWeapon) <= 0)
 			{
-				s_isWaitingForFullReload[client] = true;
+				Player(client).m_isWaitingForFullReload = true;
 			}
 			
-			if (s_isWaitingForFullReload[client])
+			if (Player(client).m_isWaitingForFullReload)
 			{
 				if (SDKCall_Clip1(myWeapon) < TF2Util_GetWeaponMaxClip(myWeapon))
 				{
@@ -524,7 +522,7 @@ static void FireWeaponAtEnemy(int client, int &buttons)
 				UnlockWeapon(myWeapon);
 				
 				// we are fully reloaded
-				s_isWaitingForFullReload[client] = false;
+				Player(client).m_isWaitingForFullReload = false;
 			}
 		}
 	}

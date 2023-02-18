@@ -1146,10 +1146,12 @@ methodmap Player < CBaseCombatCharacter
 	
 	public float CalculateSpawnTime()
 	{
+		if (mitm_spawn_hurry_time.FloatValue <= 0.0)
+			return -1.0;
+		
 		// factor in squad speed
 		float flSpeed = this.IsInASquad() ? this.GetSquad().GetSlowestMemberSpeed() : this.GetPropFloat(Prop_Send, "m_flMaxspeed");
-		float flTime = mitm_min_spawn_hurry_time.FloatValue * (400.0 / flSpeed);
-		return Clamp(flTime, mitm_min_spawn_hurry_time.FloatValue, mitm_max_spawn_hurry_time.FloatValue);
+		return mitm_spawn_hurry_time.FloatValue * (400.0 / flSpeed);
 	}
 	
 	public bool ShouldAutoJump()

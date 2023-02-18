@@ -59,8 +59,7 @@ float g_flNextRestoreCheckpointTime;
 ConVar mitm_developer;
 ConVar mitm_defender_count;
 ConVar mitm_custom_upgrades_file;
-ConVar mitm_min_spawn_hurry_time;
-ConVar mitm_max_spawn_hurry_time;
+ConVar mitm_spawn_hurry_time;
 ConVar mitm_queue_points;
 ConVar mitm_rename_robots;
 ConVar mitm_annotation_lifetime;
@@ -479,7 +478,10 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 				if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
 				{
 					// If we are being airblasted in spawn, give more time to leave
-					Player(client).m_flSpawnTimeLeft += 5.0;
+					if (Player(client).m_flSpawnTimeLeft != 1.0)
+					{
+						Player(client).m_flSpawnTimeLeft += 5.0;
+					}
 				}
 			}
 		}

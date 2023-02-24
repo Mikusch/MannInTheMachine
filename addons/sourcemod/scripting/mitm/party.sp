@@ -386,7 +386,7 @@ ArrayList Party_GetAllActiveParties()
 	return g_parties.Clone();
 }
 
-bool Party_RunCommandChecks(int client)
+bool Party_ShouldRunCommand(int client)
 {
 	if (client == 0)
 	{
@@ -405,7 +405,7 @@ bool Party_RunCommandChecks(int client)
 
 static Action ConCmd_PartyCreate(int client, int args)
 {
-	if (!Party_RunCommandChecks(client))
+	if (!Party_ShouldRunCommand(client))
 		return Plugin_Handled;
 	
 	Party party = Party.Create();
@@ -424,7 +424,7 @@ static Action ConCmd_PartyCreate(int client, int args)
 
 static Action ConCmd_PartyJoin(int client, int args)
 {
-	if (!Party_RunCommandChecks(client))
+	if (!Party_ShouldRunCommand(client))
 		return Plugin_Handled;
 	
 	if (args < 1)
@@ -511,7 +511,7 @@ static Action ConCmd_PartyJoin(int client, int args)
 
 static Action ConCmd_PartyLeave(int client, int args)
 {
-	if (!Party_RunCommandChecks(client))
+	if (!Party_ShouldRunCommand(client))
 		return Plugin_Handled;
 	
 	if (!Player(client).IsInAParty())
@@ -528,7 +528,7 @@ static Action ConCmd_PartyLeave(int client, int args)
 
 static Action ConCmd_PartyInvite(int client, int args)
 {
-	if (!Party_RunCommandChecks(client))
+	if (!Party_ShouldRunCommand(client))
 		return Plugin_Handled;
 	
 	if (!Player(client).IsInAParty())
@@ -604,7 +604,7 @@ static Action ConCmd_PartyInvite(int client, int args)
 
 static Action ConCmd_PartyManage(int client, int args)
 {
-	if (!Party_RunCommandChecks(client))
+	if (!Party_ShouldRunCommand(client))
 		return Plugin_Handled;
 	
 	if (!Player(client).IsInAParty())
@@ -625,7 +625,7 @@ static Action ConCmd_PartyManage(int client, int args)
 
 static Action ConCmd_PartyKick(int client, int args)
 {
-	if (!Party_RunCommandChecks(client))
+	if (!Party_ShouldRunCommand(client))
 		return Plugin_Handled;
 	
 	if (!Player(client).IsInAParty())
@@ -695,7 +695,7 @@ static Action ConCmd_PartyKick(int client, int args)
 
 static Action ConCmd_PartyName(int client, int args)
 {
-	if (!Party_RunCommandChecks(client))
+	if (!Party_ShouldRunCommand(client))
 		return Plugin_Handled;
 	
 	if (!Player(client).IsInAParty())

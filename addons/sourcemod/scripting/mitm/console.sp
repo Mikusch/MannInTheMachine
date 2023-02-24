@@ -74,7 +74,7 @@ static Action ConCmd_Settings(int client, int args)
 
 static Action ConCmd_Party(int client, int args)
 {
-	if (!Party_RunCommandChecks(client))
+	if (!Party_ShouldRunCommand(client))
 		return Plugin_Handled;
 	
 	Menus_DisplayPartyMenu(client);

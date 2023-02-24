@@ -283,7 +283,6 @@ methodmap Party
 		this.GetName(name, sizeof(name));
 		
 		Player(client).LeaveParty();
-		
 		CancelClientMenu(client);
 		
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Left", name);
@@ -387,8 +386,28 @@ ArrayList Party_GetAllActiveParties()
 	return g_parties.Clone();
 }
 
+bool Party_RunCommandChecks(int client)
+{
+	if (client == 0)
+	{
+		ReplyToCommand(client, "%t", "Command is in-game only");
+		return false;
+	}
+	
+	if (!mitm_party_enabled.BoolValue)
+	{
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_FeatureDisabled");
+		return false;
+	}
+	
+	return true;
+}
+
 static Action ConCmd_PartyCreate(int client, int args)
 {
+	if (!Party_RunCommandChecks(client))
+		return Plugin_Handled;
+	
 	Party party = Party.Create();
 	if (party)
 	{
@@ -405,6 +424,9 @@ static Action ConCmd_PartyCreate(int client, int args)
 
 static Action ConCmd_PartyJoin(int client, int args)
 {
+	if (!Party_RunCommandChecks(client))
+		return Plugin_Handled;
+	
 	if (args < 1)
 	{
 		Menus_DisplayPartyInviteMenu(client);
@@ -489,6 +511,9 @@ static Action ConCmd_PartyJoin(int client, int args)
 
 static Action ConCmd_PartyLeave(int client, int args)
 {
+	if (!Party_RunCommandChecks(client))
+		return Plugin_Handled;
+	
 	if (!Player(client).IsInAParty())
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireMember");
@@ -503,6 +528,9 @@ static Action ConCmd_PartyLeave(int client, int args)
 
 static Action ConCmd_PartyInvite(int client, int args)
 {
+	if (!Party_RunCommandChecks(client))
+		return Plugin_Handled;
+	
 	if (!Player(client).IsInAParty())
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireMember");
@@ -576,6 +604,9 @@ static Action ConCmd_PartyInvite(int client, int args)
 
 static Action ConCmd_PartyManage(int client, int args)
 {
+	if (!Party_RunCommandChecks(client))
+		return Plugin_Handled;
+	
 	if (!Player(client).IsInAParty())
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireMember");
@@ -594,6 +625,9 @@ static Action ConCmd_PartyManage(int client, int args)
 
 static Action ConCmd_PartyKick(int client, int args)
 {
+	if (!Party_RunCommandChecks(client))
+		return Plugin_Handled;
+	
 	if (!Player(client).IsInAParty())
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireMember");
@@ -661,6 +695,9 @@ static Action ConCmd_PartyKick(int client, int args)
 
 static Action ConCmd_PartyName(int client, int args)
 {
+	if (!Party_RunCommandChecks(client))
+		return Plugin_Handled;
+	
 	if (!Player(client).IsInAParty())
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireMember");

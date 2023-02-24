@@ -287,6 +287,10 @@
 	{
 		"en"		"No pending invites"
 	}
+	"Party_FeatureDisabled"
+	{
+		"en"		"The party system is currently disabled."
+	}
 	"Party_InvitedPlayers"
 	{
 		"#format"	"{1:t},{2:s}"

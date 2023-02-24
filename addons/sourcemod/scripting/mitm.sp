@@ -64,6 +64,7 @@ ConVar mitm_queue_points;
 ConVar mitm_rename_robots;
 ConVar mitm_annotation_lifetime;
 ConVar mitm_invader_allow_suicide;
+ConVar mitm_party_enabled;
 ConVar mitm_party_max_size;
 ConVar mitm_setup_time;
 ConVar mitm_max_spawn_deaths;

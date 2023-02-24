@@ -74,11 +74,8 @@ static Action ConCmd_Settings(int client, int args)
 
 static Action ConCmd_Party(int client, int args)
 {
-	if (client == 0)
-	{
-		ReplyToCommand(client, "%t", "Command is in-game only");
+	if (!Party_RunCommandChecks(client))
 		return Plugin_Handled;
-	}
 	
 	Menus_DisplayPartyMenu(client);
 	return Plugin_Handled;

@@ -28,6 +28,7 @@ void ConVars_Init()
 	mitm_rename_robots = CreateConVar("mitm_rename_robots", "0", "Whether to rename robots as they spawn.");
 	mitm_annotation_lifetime = CreateConVar("mitm_annotation_lifetime", "60", "The lifetime of annotations shown to clients, in seconds.", _, true, 1.0);
 	mitm_invader_allow_suicide = CreateConVar("mitm_invader_allow_suicide", "0", "Whether to allow invaders to suicide.");
+	mitm_party_enabled = CreateConVar("mitm_party_enabled", "1", "Whether to allow players to create and join parties.");
 	mitm_party_max_size = CreateConVar("mitm_party_max_size", "0", "Maximum size of player parties.", _, true, 0.0, true, 10.0);
 	mitm_setup_time = CreateConVar("mitm_setup_time", "150", "Time for defenders to set up before the round automatically starts.");
 	mitm_max_spawn_deaths = CreateConVar("mitm_max_spawn_deaths", "2", "How many times a player can die to the spawn timer before getting kicked.");
@@ -57,22 +58,41 @@ void ConVars_Init()
 	phys_pushscale = FindConVar("phys_pushscale");
 	
 	mitm_custom_upgrades_file.AddChangeHook(ConVarChanged_CustomUpgradesFile);
+	mitm_party_enabled.AddChangeHook(ConVarChanged_PartyEnabled);
 	tf_mvm_min_players_to_start.AddChangeHook(ConVarChanged_MinPlayersToStart);
 }
 
 static void ConVarChanged_CustomUpgradesFile(ConVar convar, const char[] oldValue, const char[] newValue)
 {
-	if (g_pGameRules.IsValid())
+	if (!g_pGameRules.IsValid())
+		return;
+	
+	g_pGameRules.SetCustomUpgradesFile(newValue[0] ? newValue : "scripts/items/mvm_upgrades.txt");
+}
+
+static void ConVarChanged_PartyEnabled(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	if (convar.BoolValue)
+		return;
+	
+	for (int client = 1; client <= MaxClients; client++)
 	{
-		g_pGameRules.SetCustomUpgradesFile(newValue[0] ? newValue : "scripts/items/mvm_upgrades.txt");
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (!Player(client).IsInAParty())
+			continue;
+		
+		Player(client).LeaveParty();
+		CancelClientMenu(client);
 	}
 }
 
 static void ConVarChanged_MinPlayersToStart(ConVar convar, const char[] oldValue, const char[] newValue)
 {
-	if (g_bInWaitingForPlayers)
-	{
-		// Don't allow maps to modify this using point_servercommand
-		convar.IntValue = MaxClients + 1;
-	}
+	if (!g_bInWaitingForPlayers)
+		return;
+	
+	// Don't allow maps to modify this using point_servercommand
+	convar.IntValue = MaxClients + 1;
 }

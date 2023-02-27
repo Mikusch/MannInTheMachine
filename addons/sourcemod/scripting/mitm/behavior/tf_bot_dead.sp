@@ -82,6 +82,19 @@ static int Update(CTFBotDead action, int actor, float interval)
 			g_bAllowTeamChange = false;
 			return action.Done();
 		}
+		
+		ArrayList alivePlayerList = new ArrayList();
+		CollectPlayers(alivePlayerList, TFTeam_Invaders, COLLECT_ONLY_LIVING_PLAYERS);
+		
+		if (alivePlayerList.Length == 1)
+		{
+			char sound[PLATFORM_MAX_PATH];
+			Format(sound, sizeof(sound), "Announcer.AM_LastManAlive%02d", GetRandomInt(1, 4));
+			
+			BroadcastSound(view_as<int>(TFTeam_Invaders), sound);
+		}
+		
+		delete alivePlayerList;
 	}
 	
 	return action.Continue();

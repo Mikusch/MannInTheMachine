@@ -207,7 +207,7 @@
 			"CTFPlayerShared::ResetRageBuffs"
 			{
 				"linux"		"@_ZN15CTFPlayerShared14ResetRageBuffsEv"
-				"windows"	"\xC7\x81\x98\x02\x00\x00\x00\x00\x00\x00"
+				"windows"	"\xC7\x81\x94\x02\x00\x00\x00\x00\x00\x00\xC7\x81\x98\x02\x00\x00\x00\x00\x00\x00"
 			}
 			"CTFPlayer::CanBuild"
 			{
@@ -307,7 +307,7 @@
 			"GetBombInfo"
 			{
 				"linux"		"@_Z11GetBombInfoP10BombInfo_t"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x20\x8B\x15\x2A\x2A\x2A\x2A"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x20\x8B\x15\x2A\x2A\x2A\x2A\x0F\x57\xD2"
 			}
 		}
 		"Offsets"

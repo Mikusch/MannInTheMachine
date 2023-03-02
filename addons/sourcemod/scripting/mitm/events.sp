@@ -255,7 +255,6 @@ static void EventHook_TeamsChanged(Event event, const char[] name, bool dontBroa
 {
 	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves())
 	{
-		// Attempt to find replacement defender if needed
 		RequestFrame(RequestFrameCallback_FindReplacementDefender);
 	}
 }

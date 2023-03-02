@@ -56,6 +56,7 @@ ArrayList Queue_GetDefenderQueue()
 		QueueData data;
 		data.m_points = Player(client).m_defenderQueuePoints;
 		data.m_client = client;
+		data.m_party = NULL_PARTY;
 		
 		queue.PushArray(data);
 	}
@@ -75,6 +76,7 @@ ArrayList Queue_GetDefenderQueue()
 		
 		QueueData data;
 		data.m_points = party.CalculateQueuePoints();
+		data.m_client = -1;
 		data.m_party = party;
 		
 		queue.PushArray(data);

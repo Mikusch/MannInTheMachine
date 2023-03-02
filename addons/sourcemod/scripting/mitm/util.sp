@@ -469,10 +469,10 @@ void FindReplacementDefender()
 	{
 		int client = queue.Get(i, QueueData::m_client);
 		
-		if (!IsEntityClient(client))
+		// Exclude parties in queue
+		if (client == -1 || Player(client).IsInAParty())
 			continue;
 		
-		// Already a defender, skip this player
 		if (TF2_GetClientTeam(client) == TFTeam_Defenders)
 			continue;
 		

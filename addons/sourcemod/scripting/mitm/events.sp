@@ -31,6 +31,7 @@ void Events_Init()
 	HookEvent("object_detonated", EventHook_ObjectDestroyed);
 	HookEvent("teamplay_round_start", EventHook_TeamplayRoundStart);
 	HookEvent("teamplay_point_captured", EventHook_TeamplayPointCaptured);
+	HookEvent("teams_changed", EventHook_TeamsChanged);
 }
 
 static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
@@ -248,6 +249,20 @@ static void EventHook_TeamplayPointCaptured(Event event, const char[] name, bool
 			g_annotationTimer[client] = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
 		}
 	}
+}
+
+static void EventHook_TeamsChanged(Event event, const char[] name, bool dontBroadcast)
+{
+	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves())
+	{
+		// Attempt to find replacement defender if needed
+		RequestFrame(RequestFrameCallback_FindReplacementDefender);
+	}
+}
+
+static void RequestFrameCallback_FindReplacementDefender()
+{
+	FindReplacementDefender();
 }
 
 static Action Timer_OnWaitingForPlayersEnd(Handle timer)

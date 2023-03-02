@@ -296,15 +296,6 @@ public void OnClientDisconnect(int client)
 	}
 }
 
-public void OnClientDisconnect_Post(int client)
-{
-	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves())
-	{
-		// Attempt to find replacement defender if needed
-		FindReplacementDefender();
-	}
-}
-
 public void OnClientCookiesCached(int client)
 {
 	ClientPrefs_RefreshQueue(client);

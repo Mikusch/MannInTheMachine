@@ -118,6 +118,9 @@ Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)
 {
 	int hEffectEntity = GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity");
 	
+	if (!IsValidEntity(hEffectEntity))
+		return Plugin_Handled;
+	
 	int hMissionTarget = Player(client).GetMissionTarget();
 	if (IsValidEntity(hMissionTarget) && IsBaseObject(hMissionTarget))
 	{

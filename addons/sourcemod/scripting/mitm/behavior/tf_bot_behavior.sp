@@ -125,7 +125,7 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 				TF2Attrib_SetByName(actor, "no_jump", 1.0);
 			}
 			
-			if (Player(actor).m_flSpawnTimeLeft != -1.0)
+			if (GameRules_GetRoundState() == RoundState_RoundRunning && Player(actor).m_flSpawnTimeLeft != -1.0)
 			{
 				// pause spawn timer while stunned
 				if (!TF2_IsPlayerInCondition(actor, TFCond_Dazed))

@@ -989,11 +989,6 @@ int FindSentryHintForPlayer(int player)
 	return -1;
 }
 
-bool HasTheFlag(int client)
-{
-	return GetEntPropEnt(client, Prop_Send, "m_hItem") != -1;
-}
-
 void ShowAnnotation(int client, int id, const char[] text, int target = 0, const float worldPos[3] = ZERO_VECTOR, float lifeTime = 10.0, const char[] sound = "ui/hint.wav", bool showDistance = true, bool showEffect = true)
 {
 	if (Player(client).HasPreference(PREF_DISABLE_ANNOTATIONS))

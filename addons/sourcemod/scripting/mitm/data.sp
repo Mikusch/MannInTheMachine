@@ -1013,6 +1013,11 @@ methodmap Player < CBaseCombatCharacter
 		return false;
 	}
 	
+	public bool HasTheFlag()
+	{
+		return this.GetPropEnt(Prop_Send, "m_hItem") != -1;
+	}
+	
 	public int GetFlagToFetch()
 	{
 		int nCarriedFlags = 0;
@@ -1046,7 +1051,7 @@ methodmap Player < CBaseCombatCharacter
 				continue;
 			
 			// If I'm carrying a flag, look for mine and early-out
-			if (HasTheFlag(this.index))
+			if (this.HasTheFlag())
 			{
 				if (GetEntPropEnt(flag, Prop_Send, "m_hOwnerEntity") == this.index)
 				{

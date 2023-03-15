@@ -255,7 +255,7 @@ static int OnOtherKilled(CTFBotMainAction action, int actor, int victim, int att
 	{
 		if (GetClientTeam(actor) != GetClientTeam(victim) && actor == attacker)
 		{
-			bool isTaunting = !HasTheFlag(attacker) && GetRandomFloat(0.0, 100.0) <= tf_bot_taunt_victim_chance.FloatValue;
+			bool isTaunting = !Player(attacker).HasTheFlag() && GetRandomFloat(0.0, 100.0) <= tf_bot_taunt_victim_chance.FloatValue;
 			
 			if (IsMannVsMachineMode() && Player(attacker).IsMiniBoss())
 			{

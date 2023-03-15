@@ -61,7 +61,7 @@ static NextBotAction InitialContainedAction(NextBotAction action, int actor)
 
 static int Update(NextBotAction action, int actor, float interval)
 {
-	if (HasTheFlag(actor))
+	if (Player(actor).HasTheFlag())
 	{
 		if (tf_bot_flag_kill_on_touch.BoolValue)
 		{

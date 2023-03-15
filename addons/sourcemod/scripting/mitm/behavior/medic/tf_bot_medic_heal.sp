@@ -105,7 +105,7 @@ static int SelectPatient(int actor)
 		
 		// always heal the flag carrier, regardless of class
 		// squads always heal the leader
-		if (!HasTheFlag(client) && !Player(actor).IsInASquad())
+		if (!Player(client).HasTheFlag() && !Player(actor).IsInASquad())
 		{
 			TFClassType class = TF2_GetPlayerClass(client);
 			if (class == TFClass_Medic ||

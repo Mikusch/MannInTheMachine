@@ -122,28 +122,16 @@ methodmap Party
 		return this.m_leader;
 	}
 	
-	public void GetName(char[] buffer, int maxlen)
+	public bool GetName(char[] buffer, int maxlen)
 	{
 		PartyInfo info;
 		if (g_parties.GetArray(this.m_listIndex, info) && strlen(info.name) != 0)
 		{
-			strcopy(buffer, maxlen, info.name);
+			return strcopy(buffer, maxlen, info.name) != 0;
 		}
 		else
 		{
-			char name[MAX_NAME_LENGTH];
-			GetClientName(this.GetLeader(), name, sizeof(name));
-			
-			// hardcoded to english language
-			char last = name[strlen(name) - 1];
-			if (last == 'S' || last == 's')
-			{
-				Format(buffer, maxlen, "%s' Party", name);
-			}
-			else
-			{
-				Format(buffer, maxlen, "%s's Party", name);
-			}
+			return Format(buffer, maxlen, "%T", "Party_Name_Default", LANG_SERVER, this.GetLeader()) != 0;
 		}
 	}
 	

@@ -656,7 +656,7 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
-	public void SetName(const char[] name, bool bSetName)
+	public void SetInvaderName(const char[] name, bool bSetName)
 	{
 		strcopy(m_szInvaderName[this.index], sizeof(m_szInvaderName[]), name);
 		
@@ -667,12 +667,12 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
-	public int GetName(char[] buffer, int maxlen)
+	public bool GetInvaderName(char[] buffer, int maxlen)
 	{
-		return strcopy(buffer, maxlen, m_szInvaderName[this.index]);
+		return strcopy(buffer, maxlen, m_szInvaderName[this.index]) != 0;
 	}
 	
-	public void ResetName()
+	public void ResetInvaderName()
 	{
 		m_szInvaderName[this.index][0] = EOS;
 		
@@ -1353,7 +1353,7 @@ methodmap Player < CBaseCombatCharacter
 		this.m_tags = new ArrayList(ByteCountToCells(64));
 	}
 	
-	public void ResetOnTeamChange()
+	public void ResetInvader()
 	{
 		this.SetAutoJump(0.0, 0.0);
 		this.m_autoJumpTimer.Invalidate();
@@ -1364,18 +1364,19 @@ methodmap Player < CBaseCombatCharacter
 		this.ClearWeaponRestrictions();
 		this.ClearAllAttributes();
 		this.ClearIdleSound();
+		
 		this.m_fModelScaleOverride = 0.0;
 		this.m_flSpawnTimeLeft = -1.0;
 		this.m_missionTarget = INVALID_ENT_REFERENCE;
 		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
 		this.m_hFollowingFlagTarget = INVALID_ENT_REFERENCE;
 		this.m_isWaitingForFullReload = false;
+		
+		this.ResetInvaderName();
 	}
 	
 	public void Reset()
 	{
-		this.ResetOnTeamChange();
-		
 		this.m_invaderPriority = 0;
 		this.m_iMiniBossCount = 0;
 		this.m_defenderQueuePoints = -1;

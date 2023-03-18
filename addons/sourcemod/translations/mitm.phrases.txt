@@ -369,4 +369,9 @@
 		"#format"	"{1:s},{2:N}"
 		"en"		"You have been invited to {cyan}{1}{default} by {lightgreen}{2}{default}. Type {yellow}/party {default}to accept."
 	}
+	"Party_Name_Default"
+	{
+		"#format"	"{1:N}"
+		"en"		"{1}'s Party"
+	}
 }

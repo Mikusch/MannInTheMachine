@@ -92,12 +92,12 @@ static int OnStart(CTFBotMainAction action, int actor, NextBotAction priorAction
 		// bots must quickly leave their spawn
 		Player(actor).m_flSpawnTimeLeft = Player(actor).CalculateSpawnTime();
 		
+		char name[MAX_NAME_LENGTH];
+		Player(actor).GetInvaderName(name, sizeof(name));
+		PrintCenterText(actor, "%t", "Invader_Spawned", name);
+		
 		if (!Player(actor).HasPreference(PREF_DISABLE_SPAWN_NOTIFICATION))
 		{
-			char name[MAX_NAME_LENGTH];
-			Player(actor).GetName(name, sizeof(name));
-			PrintCenterText(actor, "%t", "Invader_Spawned", name);
-			
 			EmitSoundToClient(actor, "ui/system_message_alert.wav", .channel = SNDCHAN_STATIC);
 		}
 	}

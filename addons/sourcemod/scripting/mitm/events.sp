@@ -71,8 +71,7 @@ static Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroa
 	}
 	else
 	{
-		Player(client).ResetOnTeamChange();
-		Player(client).ResetName();
+		Player(client).ResetInvader();
 		
 		SetVariantString("");
 		AcceptEntityInput(client, "SetCustomModel");
@@ -253,7 +252,7 @@ static void EventHook_TeamplayPointCaptured(Event event, const char[] name, bool
 
 static void EventHook_TeamsChanged(Event event, const char[] name, bool dontBroadcast)
 {
-	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves())
+	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && !mitm_developer.BoolValue)
 	{
 		RequestFrame(RequestFrameCallback_FindReplacementDefender);
 	}

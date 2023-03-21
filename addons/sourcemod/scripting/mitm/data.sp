@@ -56,6 +56,10 @@ static Party m_party[MAXPLAYERS + 1];
 static bool m_bIsPartyMenuActive[MAXPLAYERS + 1];
 static int m_iSpawnDeathCount[MAXPLAYERS + 1];
 
+methodmap Address
+{
+};
+
 methodmap Player < CBaseCombatCharacter
 {
 	public Player(int entity)
@@ -1390,11 +1394,11 @@ methodmap Player < CBaseCombatCharacter
 	}
 }
 
-methodmap EventChangeAttributes_t
+methodmap EventChangeAttributes_t < Address
 {
-	public EventChangeAttributes_t(Address address)
+	public EventChangeAttributes_t(Address pThis)
 	{
-		return view_as<EventChangeAttributes_t>(address);
+		return view_as<EventChangeAttributes_t>(pThis);
 	}
 	
 	property Address m_eventName
@@ -1470,11 +1474,11 @@ methodmap EventChangeAttributes_t
 	}
 };
 
-methodmap CTFBotSpawner
+methodmap CTFBotSpawner < Address
 {
-	public CTFBotSpawner(Address spawner)
+	public CTFBotSpawner(Address pThis)
 	{
-		return view_as<CTFBotSpawner>(spawner);
+		return view_as<CTFBotSpawner>(pThis);
 	}
 	
 	property EventChangeAttributes_t m_defaultAttributes
@@ -1560,11 +1564,11 @@ methodmap CTFBotSpawner
 	}
 };
 
-methodmap CSquadSpawner
+methodmap CSquadSpawner < Address
 {
-	public CSquadSpawner(Address address)
+	public CSquadSpawner(Address pThis)
 	{
-		return view_as<CSquadSpawner>(address);
+		return view_as<CSquadSpawner>(pThis);
 	}
 	
 	property float m_formationSize
@@ -1584,11 +1588,11 @@ methodmap CSquadSpawner
 	}
 }
 
-methodmap CMissionPopulator
+methodmap CMissionPopulator < Address
 {
-	public CMissionPopulator(Address address)
+	public CMissionPopulator(Address pThis)
 	{
-		return view_as<CMissionPopulator>(address);
+		return view_as<CMissionPopulator>(pThis);
 	}
 	
 	property MissionType m_mission
@@ -1619,16 +1623,16 @@ methodmap CMissionPopulator
 	{
 		public get()
 		{
-			return view_as<Address>(this) + GetOffset("IPopulationSpawner", "m_where");
+			return this + GetOffset("IPopulationSpawner", "m_where");
 		}
 	}
 }
 
-methodmap CWave
+methodmap CWave < Address
 {
-	public CWave(Address address)
+	public CWave(Address pThis)
 	{
-		return view_as<CWave>(address);
+		return view_as<CWave>(pThis);
 	}
 	
 	property int m_nNumEngineersTeleportSpawned
@@ -1828,7 +1832,7 @@ methodmap CPopulationManager < CBaseEntity
 	}
 }
 
-methodmap BombInfo_t
+methodmap BombInfo_t < Address
 {
 	public BombInfo_t(Address pThis)
 	{
@@ -1895,7 +1899,7 @@ methodmap CBaseTFBotHintEntity < CBaseEntity
 	}
 }
 
-methodmap CWaveSpawnPopulator
+methodmap CWaveSpawnPopulator < Address
 {
 	public CWaveSpawnPopulator(Address pThis)
 	{
@@ -1929,7 +1933,7 @@ methodmap CWaveSpawnPopulator
 	}
 }
 
-methodmap CMvMBotUpgrade
+methodmap CMvMBotUpgrade < Address
 {
 	public CMvMBotUpgrade(Address pThis)
 	{
@@ -1940,7 +1944,7 @@ methodmap CMvMBotUpgrade
 	{
 		public get()
 		{
-			return view_as<Address>(this + GetOffset("CMvMBotUpgrade", "szAttrib"));
+			return this + GetOffset("CMvMBotUpgrade", "szAttrib");
 		}
 	}
 	

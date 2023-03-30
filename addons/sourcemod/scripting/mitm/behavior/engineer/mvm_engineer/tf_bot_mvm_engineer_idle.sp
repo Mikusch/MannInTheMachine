@@ -286,7 +286,8 @@ static bool ShouldAdvanceNestSpot(CTFBotMvMEngineerIdle action, int actor)
 		action.m_reevaluateNestTimer.Invalidate();
 	}
 	
-	BombInfo_t bombInfo = malloc(GetOffset(NULL_STRING, "sizeof(BombInfo_t)"));
+	MemoryBlock block = new MemoryBlock(GetOffset(NULL_STRING, "sizeof(BombInfo_t)"));
+	BombInfo_t bombInfo = view_as<BombInfo_t>(block.Address);
 	if (SDKCall_GetBombInfo(bombInfo))
 	{
 		if (IsValidEntity(action.m_nestHint))
@@ -305,7 +306,7 @@ static bool ShouldAdvanceNestSpot(CTFBotMvMEngineerIdle action, int actor)
 			}
 		}
 	}
-	free(bombInfo);
+	delete block;
 	
 	return false;
 }

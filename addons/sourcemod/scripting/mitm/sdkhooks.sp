@@ -105,7 +105,7 @@ static void SDKHookCB_BotHintEngineerNest_ThinkPost(int entity)
 		CUtlVector m_teleporters = CUtlVector(GetEntityAddress(entity) + GetOffset("CTFBotHintEngineerNest", "m_teleporters"));
 		for (int i = 0; i < m_teleporters.Count(); ++i)
 		{
-			int owner = GetEntPropEnt(GetEntityFromHandle(Deref(m_teleporters.Get(i))), Prop_Send, "m_hOwnerEntity");
+			int owner = GetEntPropEnt(LoadEntityFromHandleAddress(m_teleporters.Get(i)), Prop_Send, "m_hOwnerEntity");
 			if (owner != -1 && IsBaseObject(owner))
 			{
 				EmitSoundToAll(")mvm/mvm_tele_activate.wav", owner, SNDCHAN_STATIC, 155);

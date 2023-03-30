@@ -32,6 +32,7 @@
 #include <cbasenpc/tf/nav>
 #include <morecolors>
 #include <smmem>
+#include <sourcescramble>
 #include <mitm>
 #undef REQUIRE_EXTENSIONS
 #include <sendproxy>

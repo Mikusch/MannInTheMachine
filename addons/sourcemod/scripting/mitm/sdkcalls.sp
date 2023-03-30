@@ -714,7 +714,7 @@ bool SDKCall_FindHint(bool bShouldCheckForBlockingObjects, bool bAllowOutOfRange
 {
 	if (g_hSDKCallFindHint)
 	{
-		int pFoundNest;
+		Address pFoundNest;
 		bool result = SDKCall(g_hSDKCallFindHint, bShouldCheckForBlockingObjects, bAllowOutOfRangeNest, pFoundNest);
 		
 		if (pFoundNest)

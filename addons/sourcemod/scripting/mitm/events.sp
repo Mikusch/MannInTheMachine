@@ -263,10 +263,10 @@ static void RequestFrameCallback_FindReplacementDefender()
 	FindReplacementDefender();
 }
 
-static Action Timer_OnWaitingForPlayersEnd(Handle timer)
+static void Timer_OnWaitingForPlayersEnd(Handle timer)
 {
 	if (!g_bInWaitingForPlayers)
-		return Plugin_Continue;
+		return;
 	
 	tf_mvm_min_players_to_start.IntValue = 0;
 	g_bInWaitingForPlayers = false;
@@ -275,8 +275,6 @@ static Action Timer_OnWaitingForPlayersEnd(Handle timer)
 	{
 		g_pPopulationManager.ResetMap();
 	}
-	
-	return Plugin_Continue;
 }
 
 static Action Timer_CheckGateBotAnnotation(Handle timer, int userid)

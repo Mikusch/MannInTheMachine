@@ -196,7 +196,7 @@ static void EntityOutput_OnStateEnterBetweenRounds(const char[] output, int call
 	}
 }
 
-static Action Timer_StartReadyTimer(Handle timer)
+static void Timer_StartReadyTimer(Handle timer)
 {
 	// Automatically start the ready timer
 	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + mitm_setup_time.FloatValue);
@@ -208,6 +208,4 @@ static Action Timer_StartReadyTimer(Handle timer)
 		event.SetInt("seconds", mitm_setup_time.IntValue);
 		event.Fire();
 	}
-	
-	return Plugin_Continue;
 }

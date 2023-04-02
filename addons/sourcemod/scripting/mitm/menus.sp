@@ -20,7 +20,7 @@
 
 void Menus_DisplayMainMenu(int client)
 {
-	Menu menu = new Menu(MenuHandler_MainMenu, MenuAction_Select | MenuAction_End | MenuAction_DrawItem | MenuAction_DisplayItem);
+	Menu menu = new Menu(MenuHandler_MainMenu, MenuAction_Select | MenuAction_End | MenuAction_DisplayItem);
 	
 	menu.SetTitle("%T", "Menu_Main_Title", client);
 	

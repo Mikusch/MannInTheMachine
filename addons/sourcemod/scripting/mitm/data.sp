@@ -367,6 +367,98 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
+	property bool m_bIsMissionEnemy
+	{
+		public get()
+		{
+			return GetEntData(this.index, GetOffset("CTFPlayer", "m_bIsMissionEnemy"), 1) != 0;
+		}
+		public set(bool bIsMissionEnemy)
+		{
+			SetEntData(this.index, GetOffset("CTFPlayer", "m_bIsMissionEnemy"), bIsMissionEnemy, 1);
+		}
+	}
+	
+	property bool m_bIsSupportEnemy
+	{
+		public get()
+		{
+			return GetEntData(this.index, GetOffset("CTFPlayer", "m_bIsSupportEnemy"), 1) != 0;
+		}
+		public set(bool bIsSupportEnemy)
+		{
+			SetEntData(this.index, GetOffset("CTFPlayer", "m_bIsSupportEnemy"), bIsSupportEnemy, 1);
+		}
+	}
+	
+	property bool m_bIsLimitedSupportEnemy
+	{
+		public get()
+		{
+			GetEntData(this.index, GetOffset("CTFPlayer", "m_bIsLimitedSupportEnemy"), 1) != 0;
+		}
+		public set(bool bIsLimitedSupportEnemy)
+		{
+			SetEntData(this.index, GetOffset("CTFPlayer", "m_bIsLimitedSupportEnemy"), bIsLimitedSupportEnemy, 1);
+		}
+	}
+	
+	property float m_accumulatedSentryGunDamageDealt
+	{
+		public get()
+		{
+			return GetEntDataFloat(this.index, GetOffset("CTFPlayer", "m_accumulatedSentryGunDamageDealt"));
+		}
+		public set(float accumulatedSentryGunDamageDealt)
+		{
+			SetEntDataFloat(this.index, GetOffset("CTFPlayer", "m_accumulatedSentryGunDamageDealt"), accumulatedSentryGunDamageDealt);
+		}
+	}
+	
+	property int m_accumulatedSentryGunKillCount
+	{
+		public get()
+		{
+			return GetEntData(this.index, GetOffset("CTFPlayer", "m_accumulatedSentryGunKillCount"));
+		}
+		public set(int accumulatedSentryGunKillCount)
+		{
+			GetEntData(this.index, GetOffset("CTFPlayer", "m_accumulatedSentryGunKillCount"), accumulatedSentryGunKillCount);
+		}
+	}
+	
+	property Address m_iszClassIcon
+	{
+		public get()
+		{
+			return view_as<Address>(GetEntData(this.index, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")));
+		}
+		public set(Address iszClassIcon)
+		{
+			SetEntData(this.index, FindSendPropInfo("CTFPlayer", "m_iszClassIcon"), iszClassIcon);
+		}
+	}
+	
+	property float m_flSpawnTime
+	{
+		public get()
+		{
+			return GetEntDataFloat(this.index, GetOffset("CTFPlayer", "m_flSpawnTime"));
+		}
+		public set(float flSpawnTime)
+		{
+			SetEntDataFloat(this.index, GetOffset("CTFPlayer", "m_flSpawnTime"), flSpawnTime);
+		}
+	}
+	
+	property Address m_pWaveSpawnPopulator
+	{
+		public set(Address pWaveSpawnPopulator)
+		{
+			SetEntData(this.index, GetOffset("CTFPlayer", "m_pWaveSpawnPopulator"), pWaveSpawnPopulator);
+		}
+	}
+	
 	public bool IsInvader()
 	{
 		if (IsClientSourceTV(this.index))
@@ -378,7 +470,7 @@ methodmap Player < CBaseCombatCharacter
 	
 	public float GetSpawnTime()
 	{
-		return GetEntDataFloat(this.index, GetOffset("CTFPlayer", "m_flSpawnTime"));
+		return this.m_flSpawnTime;
 	}
 	
 	public TFTeam GetDisguiseTeam()
@@ -717,7 +809,7 @@ methodmap Player < CBaseCombatCharacter
 	
 	public void SetWaveSpawnPopulator(Address pWave)
 	{
-		SetEntData(this.index, GetOffset("CTFPlayer", "m_pWaveSpawnPopulator"), pWave);
+		this.m_pWaveSpawnPopulator = pWave;
 	}
 	
 	public void ClearEventChangeAttributes()
@@ -1246,17 +1338,27 @@ methodmap Player < CBaseCombatCharacter
 	
 	public void MarkAsMissionEnemy()
 	{
-		SetEntData(this.index, GetOffset("CTFPlayer", "m_bIsMissionEnemy"), true, 1);
+		this.m_bIsMissionEnemy = true;
 	}
 	
 	public void MarkAsSupportEnemy()
 	{
-		SetEntData(this.index, GetOffset("CTFPlayer", "m_bIsSupportEnemy"), true, 1);
+		this.m_bIsSupportEnemy = true;
 	}
 	
 	public void MarkAsLimitedSupportEnemy()
 	{
-		SetEntData(this.index, GetOffset("CTFPlayer", "m_bIsLimitedSupportEnemy"), true, 1);
+		this.m_bIsLimitedSupportEnemy = true;
+	}
+	
+	public Address GetClassIconName()
+	{
+		return this.m_iszClassIcon;
+	}
+	
+	public void SetClassIconName(Address iszClassIcon)
+	{
+		this.m_iszClassIcon = iszClassIcon;
 	}
 	
 	public CTFBotSquad GetSquad()

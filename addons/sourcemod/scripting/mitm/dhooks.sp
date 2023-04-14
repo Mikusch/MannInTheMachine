@@ -373,7 +373,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 		
 		// Set the address of CTFPlayer::m_iszClassIcon from the return value of CTFBotSpawner::GetClassIcon.
 		// Simply setting the value using SetEntPropString leads to segfaults, don't do that!
-		SetEntData(newPlayer, FindSendPropInfo("CTFPlayer", "m_iszClassIcon"), spawner.GetClassIcon());
+		Player(newPlayer).SetClassIconName(spawner.GetClassIcon());
 		
 		Player(newPlayer).ClearEventChangeAttributes();
 		for (int i = 0; i < spawner.m_eventChangeAttributes.Count(); ++i)
@@ -651,7 +651,7 @@ static MRESReturn DHookCallback_CWaveSpawnPopulatorUpdate_Post(Address pThis)
 			Player(player).SetWaveSpawnPopulator(pThis);
 			
 			// Allows client UI to know if a specific spawner is active
-			g_pObjectiveResource.SetMannVsMachineWaveClassActive(GetEntData(player, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")));
+			g_pObjectiveResource.SetMannVsMachineWaveClassActive(Player(player).GetClassIconName());
 			
 			if (CWaveSpawnPopulator(pThis).IsSupportWave())
 			{
@@ -751,7 +751,7 @@ static MRESReturn DHookCallback_UpdateMission_Post(Address pThis, DHookReturn re
 			{
 				iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
 			}
-			g_pObjectiveResource.IncrementMannVsMachineWaveClassCount(GetEntData(player, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")), iFlags);
+			g_pObjectiveResource.IncrementMannVsMachineWaveClassCount(Player(player).GetClassIconName(), iFlags);
 			
 			// Response rules stuff for MvM
 			if (IsMannVsMachineMode())
@@ -827,8 +827,8 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, 
 				int sentryOwner = GetEntPropEnt(obj, Prop_Send, "m_hBuilder");
 				if (sentryOwner != -1)
 				{
-					int nDmgDone = RoundToFloor(GetEntDataFloat(sentryOwner, GetOffset("CTFPlayer", "m_accumulatedSentryGunDamageDealt")));
-					int nKillsMade = GetEntData(sentryOwner, GetOffset("CTFPlayer", "m_accumulatedSentryGunKillCount"));
+					int nDmgDone = RoundToFloor(Player(sentryOwner).m_accumulatedSentryGunDamageDealt);
+					int nKillsMade = Player(sentryOwner).m_accumulatedSentryGunKillCount;
 					
 					if (nDmgDone >= nDmgLimit || nKillsMade >= nKillLimit)
 					{

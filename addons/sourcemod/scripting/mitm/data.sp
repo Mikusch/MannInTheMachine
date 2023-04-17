@@ -1030,7 +1030,7 @@ methodmap Player < CBaseCombatCharacter
 		else
 		{
 			int weaponId = TF2Util_GetWeaponID(weapon);
-			if (weaponId == TF_WEAPON_BUFF_ITEM || weaponId == TF_WEAPON_LUNCHBOX || weaponId == TF_WEAPON_PARACHUTE || weaponId == TF_WEAPON_GRAPPLINGHOOK)
+			if (weaponId == TF_WEAPON_BUFF_ITEM || weaponId == TF_WEAPON_LUNCHBOX || weaponId == TF_WEAPON_PARACHUTE || weaponId == TF_WEAPON_GRAPPLINGHOOK || weaponId == TF_WEAPON_ROCKETPACK)
 			{
 				// Always allow specific passive weapons
 				return false;

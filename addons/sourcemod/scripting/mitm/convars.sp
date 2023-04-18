@@ -51,6 +51,7 @@ void ConVars_Init()
 	tf_bot_taunt_victim_chance = FindConVar("tf_bot_taunt_victim_chance");
 	tf_bot_always_full_reload = FindConVar("tf_bot_always_full_reload");
 	tf_bot_flag_kill_on_touch = FindConVar("tf_bot_flag_kill_on_touch");
+	tf_bot_melee_only = FindConVar("tf_bot_melee_only");
 	mp_tournament_redteamname = FindConVar("mp_tournament_redteamname");
 	mp_tournament_blueteamname = FindConVar("mp_tournament_blueteamname");
 	mp_waitingforplayers_time = FindConVar("mp_waitingforplayers_time");

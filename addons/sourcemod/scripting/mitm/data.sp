@@ -1066,7 +1066,7 @@ methodmap Player < CBaseCombatCharacter
 	
 	public bool EquipRequiredWeapon()
 	{
-		if (this.HasWeaponRestriction(MELEE_ONLY))
+		if (tf_bot_melee_only.BoolValue || GameRules_GetProp("m_bPlayingMedieval") || this.HasWeaponRestriction(MELEE_ONLY))
 		{
 			// force use of melee weapons
 			TF2Util_SetPlayerActiveWeapon(this.index, GetPlayerWeaponSlot(this.index, TFWeaponSlot_Melee));

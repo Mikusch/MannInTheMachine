@@ -89,6 +89,7 @@ ConVar tf_bot_suicide_bomb_friendly_fire;
 ConVar tf_bot_taunt_victim_chance;
 ConVar tf_bot_always_full_reload;
 ConVar tf_bot_flag_kill_on_touch;
+ConVar tf_bot_melee_only;
 ConVar mp_tournament_redteamname;
 ConVar mp_tournament_blueteamname;
 ConVar mp_waitingforplayers_time;

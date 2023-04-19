@@ -74,7 +74,7 @@ static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int 
 
 static Action SDKHookCB_Client_WeaponCanSwitchTo(int client, int weapon)
 {
-	if (Player(client).IsWeaponRestricted(weapon))
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders && Player(client).IsWeaponRestricted(weapon))
 	{
 		EmitGameSoundToClient(client, "Player.DenyWeaponSelection");
 		return Plugin_Handled;

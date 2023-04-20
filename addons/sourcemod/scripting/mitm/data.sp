@@ -569,33 +569,16 @@ methodmap Player < CBaseCombatCharacter
 	
 	public void RemoveTag(const char[] tag)
 	{
-		for (int i = 0; i < this.m_tags.Length; ++i)
+		int index = this.m_tags.FindString(tag);
+		if (index != -1)
 		{
-			char m_tag[64];
-			this.m_tags.GetString(i, m_tag, sizeof(m_tag));
-			
-			if (StrEqual(tag, m_tag))
-			{
-				this.m_tags.Erase(i);
-				return;
-			}
+			this.m_tags.Erase(index);
 		}
 	}
 	
 	public bool HasTag(const char[] tag)
 	{
-		for (int i = 0; i < this.m_tags.Length; ++i)
-		{
-			char m_tag[64];
-			this.m_tags.GetString(i, m_tag, sizeof(m_tag));
-			
-			if (StrEqual(tag, m_tag))
-			{
-				return true;
-			}
-		}
-		
-		return false;
+		return this.m_tags.FindString(tag) != -1;
 	}
 	
 	public void GetIdleSound(char[] buffer, int maxlen)

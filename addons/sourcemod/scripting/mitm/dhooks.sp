@@ -231,14 +231,14 @@ static MRESReturn DHookCallback_AllocateBots_Pre(int populator)
 
 static MRESReturn DHookCallback_EndlessRollEscalation_Pre(int populator)
 {
-	g_bPrintEndlessBotUpgrades = true;
+	g_bInEndlessRollEscalation = true;
 	
 	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_EndlessRollEscalation_Post(int populator)
 {
-	g_bPrintEndlessBotUpgrades = false;
+	g_bInEndlessRollEscalation = false;
 	
 	return MRES_Ignored;
 }

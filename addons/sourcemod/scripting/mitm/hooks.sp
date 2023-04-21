@@ -53,7 +53,7 @@ static Action OnTextMsg(UserMsg msg_id, BfRead msg, const int[] players, int cli
 {
 	int msg_dest = msg.ReadByte();
 	
-	if (g_bPrintEndlessBotUpgrades)
+	if (g_bInEndlessRollEscalation)
 	{
 		// Need to wait a frame to be able to send another UserMsg
 		RequestFrame(RequestFrameCallback_PrintEndlessBotUpgrades, msg_dest);

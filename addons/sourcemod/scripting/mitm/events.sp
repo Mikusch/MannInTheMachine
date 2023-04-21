@@ -89,6 +89,27 @@ static void EventHook_PostInventoryApplication(Event event, const char[] name, b
 	
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
+		// wait a frame before applying weapon restrictions
+		RequestFrame(RequestFrameCallback_ApplyWeaponRestrictions, userid);
+	}
+}
+
+static void RequestFrameCallback_ApplyWeaponRestrictions(int userid)
+{
+	int client = GetClientOfUserId(userid);
+	if (client)
+	{
+		// remove any weapons we aren't supposed to have
+		for (int iItemSlot = LOADOUT_POSITION_PRIMARY; iItemSlot < CLASS_LOADOUT_POSITION_COUNT; iItemSlot++)
+		{
+			int entity = TF2Util_GetPlayerLoadoutEntity(client, iItemSlot);
+			if (Player(client).IsWeaponRestricted(entity))
+			{
+				RemovePlayerItem(client, entity);
+				RemoveEntity(entity);
+			}
+		}
+		
 		// equip our required weapon
 		Player(client).EquipRequiredWeapon();
 		

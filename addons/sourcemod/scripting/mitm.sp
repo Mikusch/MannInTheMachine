@@ -53,7 +53,7 @@ Handle g_hWaitingForPlayersTimer;
 bool g_bInWaitingForPlayers;
 bool g_bAllowTeamChange;
 bool g_bForceFriendlyFire;
-bool g_bPrintEndlessBotUpgrades;
+bool g_bInEndlessRollEscalation;
 float g_flNextRestoreCheckpointTime;
 
 // Plugin ConVars

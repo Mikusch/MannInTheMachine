@@ -100,6 +100,9 @@ void Offsets_Init(GameData hGameData)
 	SetOffset(hGameData, "CEconItemAttributeDefinition", "m_iDescriptionFormat");
 	SetOffset(hGameData, "CEconItemAttributeDefinition", "m_pszDescriptionString");
 	
+	SetOffset(hGameData, NULL_STRING, "sizeof(ScriptFunctionBinding_t)");
+	SetOffset(hGameData, "ScriptClassDesc_t", "m_FunctionBindings");
+	
 	SetOffset(hGameData, "CTakeDamageInfo", "m_bForceFriendlyFire");
 	SetOffset(hGameData, "CTFNavArea", "m_distanceToBombTarget");
 	SetOffset(hGameData, "CBaseTFBotHintEntity", "m_isDisabled");

@@ -56,10 +56,6 @@ static Party m_party[MAXPLAYERS + 1];
 static bool m_bIsPartyMenuActive[MAXPLAYERS + 1];
 static int m_iSpawnDeathCount[MAXPLAYERS + 1];
 
-methodmap Address
-{
-};
-
 methodmap Player < CBaseCombatCharacter
 {
 	public Player(int entity)

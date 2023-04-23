@@ -80,6 +80,7 @@ void DHooks_Init(GameData hGameData)
 	CreateDynamicDetour(hGameData, "CLagCompensationManager::StartLagCompensation", DHookCallback_StartLagCompensation_Pre, DHookCallback_StartLagCompensation_Post);
 	CreateDynamicDetour(hGameData, "DoTeleporterOverride", _, DHookCallback_DoTeleporterOverride_Post);
 	CreateDynamicDetour(hGameData, "OnBotTeleported", DHookCallback_OnBotTeleported_Pre);
+	CreateDynamicDetour(hGameData, "VScriptServerInit", DHookCallback_VScriptServerInit_Pre);
 	
 	g_hDHookSetModel = CreateDynamicHook(hGameData, "CBaseEntity::SetModel");
 	g_hDHookCanBeUpgraded = CreateDynamicHook(hGameData, "CBaseObject::CanBeUpgraded");
@@ -1269,6 +1270,20 @@ static MRESReturn DHookCallback_StartLagCompensation_Pre(DHookParam params)
 	return MRES_Ignored;
 }
 
+static MRESReturn DHooKCallback_HasTag_Pre(int bot, DHookReturn ret, DHookParam params)
+{
+	// script fixup code, only for players
+	if (IsFakeClient(bot))
+		return MRES_Ignored;
+	
+	char tag[64];
+	params.GetString(1, tag, sizeof(tag));
+	
+	ret.Value = Player(bot).HasTag(tag);
+	
+	return MRES_Supercede;
+}
+
 static MRESReturn DHookCallback_StartLagCompensation_Post(DHookParam params)
 {
 	int player = params.Get(1);
@@ -1374,6 +1389,29 @@ static MRESReturn DHookCallback_OnBotTeleported_Pre(DHookParam params)
 {
 	// This crashes our server in local testing due to s_lastTeleporter being null
 	return MRES_Supercede;
+}
+
+static MRESReturn DHookCallback_VScriptServerInit_Pre(DHookReturn ret)
+{
+	// TODO: Generify this.
+	
+	VScriptFunction pFuncHasBotTag = VScript_GetClassFunction("CTFBot", "HasBotTag");
+	CUtlVector m_FunctionBindings = CUtlVector(VScript_GetClass("CTFPlayer") + GetOffset("ScriptClassDesc_t", "m_FunctionBindings"));
+	
+	int size = GetOffset(NULL_STRING, "sizeof(ScriptFunctionBinding_t)");
+	
+	Address pFunctionBinding = m_FunctionBindings.Get(SDKCall_InsertBefore(m_FunctionBindings, m_FunctionBindings.m_Size), size);
+	
+	// copy the entire ScriptClassDesc_t struct
+	for (any i = 0; i < size; i++)
+	{
+		StoreToAddress(pFunctionBinding + i, Deref(pFuncHasBotTag + i), NumberType_Int8);
+	}
+	
+	DynamicDetour detour = pFuncHasBotTag.CreateDetour();
+	detour.Enable(Hook_Pre, DHooKCallback_HasTag_Pre);
+	
+	return MRES_Ignored;
 }
 
 void OnBotTeleported(int bot)

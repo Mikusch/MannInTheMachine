@@ -33,6 +33,7 @@
 #include <morecolors>
 #include <smmem>
 #include <sourcescramble>
+#include <vscript>
 #include <mitm>
 #undef REQUIRE_EXTENSIONS
 #include <sendproxy>

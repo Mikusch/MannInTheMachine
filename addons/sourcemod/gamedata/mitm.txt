@@ -214,6 +214,11 @@
 				"linux"		"@_ZN9CTFPlayer8CanBuildEii"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x0C\x53\x8B\x5D\x08\x57\x8B\xF9\x83\xFB\x03"
 			}
+			"CTFPlayer::ScriptIsBotOfType"
+			{
+				"linux"		"@_ZNK9CTFPlayer17ScriptIsBotOfTypeEi"
+				"windows"	"\x55\x8B\xEC\x8B\x01\x8B\x80\x1C\x07\x00\x00"
+			}
 			"CEconEntity::UpdateModelToClass"
 			{
 				"linux"		"@_ZN11CEconEntity18UpdateModelToClassEv"
@@ -1003,6 +1008,20 @@
 						"type"	"int"
 					}
 					"iObjectMode"
+					{
+						"type"	"int"
+					}
+				}
+			}
+			"CTFPlayer::ScriptIsBotOfType"
+			{
+				"signature"	"CTFPlayer::ScriptIsBotOfType"
+				"callconv"	"thiscall"
+				"return"	"bool"
+				"this"		"entity"
+				"arguments"
+				{
+					"botType"
 					{
 						"type"	"int"
 					}

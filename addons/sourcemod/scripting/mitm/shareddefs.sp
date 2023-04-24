@@ -48,6 +48,8 @@
 #define MVM_CLASS_FLAG_ALWAYSCRIT		(1<<4)
 #define MVM_CLASS_FLAG_SUPPORT_LIMITED	(1<<5)
 
+#define TF_BOT_TYPE	1337
+
 // TF FlagInfo State
 #define TF_FLAGINFO_HOME		0
 #define TF_FLAGINFO_STOLEN		(1<<0)

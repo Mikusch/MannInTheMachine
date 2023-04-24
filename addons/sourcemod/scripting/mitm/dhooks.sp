@@ -74,6 +74,7 @@ void DHooks_Init(GameData hGameData)
 	CreateDynamicDetour(hGameData, "CTFPlayer::DoClassSpecialSkill", DHookCallback_DoClassSpecialSkill_Pre);
 	CreateDynamicDetour(hGameData, "CTFPlayer::RemoveAllOwnedEntitiesFromWorld", DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre);
 	CreateDynamicDetour(hGameData, "CTFPlayer::CanBuild", DHookCallback_CanBuild_Pre, DHookCallback_CanBuild_Post);
+	CreateDynamicDetour(hGameData, "CTFPlayer::ScriptIsBotOfType", DHookCallback_ScriptIsBotOfType_Pre);
 	CreateDynamicDetour(hGameData, "CWeaponMedigun::AllowedToHealTarget", DHookCallback_AllowedToHealTarget_Pre);
 	CreateDynamicDetour(hGameData, "CSpawnLocation::FindSpawnLocation", _, DHookCallback_FindSpawnLocation_Post);
 	CreateDynamicDetour(hGameData, "CTraceFilterObject::ShouldHitEntity", _, DHookCallback_ShouldHitEntity_Post);
@@ -206,6 +207,31 @@ static DynamicHook CreateDynamicHook(GameData hGameData, const char[] name)
 		LogError("Failed to create hook setup handle for %s", name);
 	
 	return hook;
+}
+
+static void CopyScriptFunctionBinding(const char[] sourceClass, const char[] functionName, const char[] targetClass, DHookCallback callback)
+{
+	VScriptFunction pTargetFunc = VScript_GetClassFunction(sourceClass, functionName);
+	CUtlVector pFunctionBindings = CUtlVector(VScript_GetClass(targetClass) + GetOffset("ScriptClassDesc_t", "m_FunctionBindings"));
+	
+	int size = GetOffset(NULL_STRING, "sizeof(ScriptFunctionBinding_t)");
+	Address pFunctionBinding = pFunctionBindings.Get(SDKCall_InsertBefore(pFunctionBindings, pFunctionBindings.m_Size), size);
+	
+	// copy the entire script desc memory (should be safe)
+	for (any i = 0; i < size; i++)
+	{
+		StoreToAddress(pFunctionBinding + i, Deref(pTargetFunc + i), NumberType_Int8);
+	}
+	
+	DynamicDetour detour = pTargetFunc.CreateDetour();
+	if (detour)
+	{
+		detour.Enable(Hook_Pre, callback);
+	}
+	else
+	{
+		LogError("Failed to create detour: %s::%s", targetClass, functionName);
+	}
 }
 
 static MRESReturn DHookCallback_PreClientUpdate_Pre()
@@ -1134,13 +1160,8 @@ static MRESReturn DHookCallback_GetLoadoutItem_Post(int player, DHookReturn ret,
 
 static MRESReturn DHookCallback_CheckInstantLoadoutRespawn_Pre(int player)
 {
-	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
-	{
-		// Never allow invaders to respawn with a new loadout, this breaks spawners
-		return MRES_Supercede;
-	}
-	
-	return MRES_Ignored;
+	// never allow invaders to respawn with a new loadout, this breaks spawners
+	return TF2_GetClientTeam(player) == TFTeam_Invaders ? MRES_Supercede : MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_DoClassSpecialSkill_Pre(int player, DHookReturn ret)
@@ -1162,13 +1183,8 @@ static MRESReturn DHookCallback_DoClassSpecialSkill_Pre(int player, DHookReturn 
 
 static MRESReturn DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre(int player, DHookParam params)
 {
-	if (Player(player).HasAttribute(RETAIN_BUILDINGS))
-	{
-		// keep this bot's buildings
-		return MRES_Supercede;
-	}
-	
-	return MRES_Ignored;
+	// keep this bot's buildings
+	return Player(player).HasAttribute(RETAIN_BUILDINGS) ? MRES_Supercede : MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_CanBuild_Pre(int player, DHookReturn ret, DHookParam params)
@@ -1190,6 +1206,34 @@ static MRESReturn DHookCallback_CanBuild_Post(int player, DHookReturn ret, DHook
 	}
 	
 	return MRES_Ignored;
+}
+
+static MRESReturn DHookCallback_ScriptIsBotOfType_Pre(int player, DHookReturn ret, DHookParam param)
+{
+	int botType = param.Get(1);
+	
+	// make scripts believe that all invaders are TFBots
+	if (botType == TF_BOT_TYPE && Player(player).IsInvader())
+	{
+		ret.Value = true;
+		return MRES_Supercede;
+	}
+	
+	return MRES_Ignored;
+}
+
+static MRESReturn DHooKCallback_HasTag_Pre(int bot, DHookReturn ret, DHookParam params)
+{
+	// script fixup code, only for players
+	if (IsFakeClient(bot))
+		return MRES_Ignored;
+	
+	char tag[64];
+	params.GetString(1, tag, sizeof(tag));
+	
+	ret.Value = Player(bot).HasTag(tag);
+	
+	return MRES_Supercede;
 }
 
 static MRESReturn DHookCallback_AllowedToHealTarget_Pre(int medigun, DHookReturn ret, DHookParam params)
@@ -1268,20 +1312,6 @@ static MRESReturn DHookCallback_StartLagCompensation_Pre(DHookParam params)
 	}
 	
 	return MRES_Ignored;
-}
-
-static MRESReturn DHooKCallback_HasTag_Pre(int bot, DHookReturn ret, DHookParam params)
-{
-	// script fixup code, only for players
-	if (IsFakeClient(bot))
-		return MRES_Ignored;
-	
-	char tag[64];
-	params.GetString(1, tag, sizeof(tag));
-	
-	ret.Value = Player(bot).HasTag(tag);
-	
-	return MRES_Supercede;
 }
 
 static MRESReturn DHookCallback_StartLagCompensation_Post(DHookParam params)
@@ -1393,23 +1423,7 @@ static MRESReturn DHookCallback_OnBotTeleported_Pre(DHookParam params)
 
 static MRESReturn DHookCallback_VScriptServerInit_Pre(DHookReturn ret)
 {
-	// TODO: Generify this.
-	
-	VScriptFunction pFuncHasBotTag = VScript_GetClassFunction("CTFBot", "HasBotTag");
-	CUtlVector m_FunctionBindings = CUtlVector(VScript_GetClass("CTFPlayer") + GetOffset("ScriptClassDesc_t", "m_FunctionBindings"));
-	
-	int size = GetOffset(NULL_STRING, "sizeof(ScriptFunctionBinding_t)");
-	
-	Address pFunctionBinding = m_FunctionBindings.Get(SDKCall_InsertBefore(m_FunctionBindings, m_FunctionBindings.m_Size), size);
-	
-	// copy the entire ScriptClassDesc_t struct
-	for (any i = 0; i < size; i++)
-	{
-		StoreToAddress(pFunctionBinding + i, Deref(pFuncHasBotTag + i), NumberType_Int8);
-	}
-	
-	DynamicDetour detour = pFuncHasBotTag.CreateDetour();
-	detour.Enable(Hook_Pre, DHooKCallback_HasTag_Pre);
+	CopyScriptFunctionBinding("CTFBot", "HasBotTag", "CTFPlayer", DHooKCallback_HasTag_Pre);
 	
 	return MRES_Ignored;
 }

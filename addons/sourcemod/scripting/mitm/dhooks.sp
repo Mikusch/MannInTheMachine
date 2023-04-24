@@ -74,7 +74,6 @@ void DHooks_Init(GameData hGameData)
 	CreateDynamicDetour(hGameData, "CTFPlayer::DoClassSpecialSkill", DHookCallback_DoClassSpecialSkill_Pre);
 	CreateDynamicDetour(hGameData, "CTFPlayer::RemoveAllOwnedEntitiesFromWorld", DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre);
 	CreateDynamicDetour(hGameData, "CTFPlayer::CanBuild", DHookCallback_CanBuild_Pre, DHookCallback_CanBuild_Post);
-	CreateDynamicDetour(hGameData, "CTFPlayer::ScriptIsBotOfType", DHookCallback_ScriptIsBotOfType_Pre);
 	CreateDynamicDetour(hGameData, "CWeaponMedigun::AllowedToHealTarget", DHookCallback_AllowedToHealTarget_Pre);
 	CreateDynamicDetour(hGameData, "CSpawnLocation::FindSpawnLocation", _, DHookCallback_FindSpawnLocation_Post);
 	CreateDynamicDetour(hGameData, "CTraceFilterObject::ShouldHitEntity", _, DHookCallback_ShouldHitEntity_Post);
@@ -82,6 +81,8 @@ void DHooks_Init(GameData hGameData)
 	CreateDynamicDetour(hGameData, "DoTeleporterOverride", _, DHookCallback_DoTeleporterOverride_Post);
 	CreateDynamicDetour(hGameData, "OnBotTeleported", DHookCallback_OnBotTeleported_Pre);
 	CreateDynamicDetour(hGameData, "VScriptServerInit", DHookCallback_VScriptServerInit_Pre);
+	
+	CreateScriptDetour("CTFPlayer", "IsBotOfType", DHookCallback_ScriptIsBotOfType_Pre);
 	
 	g_hDHookSetModel = CreateDynamicHook(hGameData, "CBaseEntity::SetModel");
 	g_hDHookCanBeUpgraded = CreateDynamicHook(hGameData, "CBaseObject::CanBeUpgraded");
@@ -230,7 +231,20 @@ static void CopyScriptFunctionBinding(const char[] sourceClass, const char[] fun
 	}
 	else
 	{
-		LogError("Failed to create detour: %s::%s", targetClass, functionName);
+		LogError("Failed to create script detour: %s::%s", targetClass, functionName);
+	}
+}
+
+static void CreateScriptDetour(const char[] className, const char[] functionName, DHookCallback callback)
+{
+	DynamicDetour detour = VScript_GetClassFunction(className, functionName).CreateDetour();
+	if (detour)
+	{
+		detour.Enable(Hook_Pre, callback);
+	}
+	else
+	{
+		LogError("Failed to create script detour: %s::%s", className, functionName);
 	}
 }
 
@@ -1208,34 +1222,6 @@ static MRESReturn DHookCallback_CanBuild_Post(int player, DHookReturn ret, DHook
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_ScriptIsBotOfType_Pre(int player, DHookReturn ret, DHookParam param)
-{
-	int botType = param.Get(1);
-	
-	// make scripts believe that all invaders are TFBots
-	if (botType == TF_BOT_TYPE && Player(player).IsInvader())
-	{
-		ret.Value = true;
-		return MRES_Supercede;
-	}
-	
-	return MRES_Ignored;
-}
-
-static MRESReturn DHooKCallback_HasTag_Pre(int bot, DHookReturn ret, DHookParam params)
-{
-	// script fixup code, only for players
-	if (IsFakeClient(bot))
-		return MRES_Ignored;
-	
-	char tag[64];
-	params.GetString(1, tag, sizeof(tag));
-	
-	ret.Value = Player(bot).HasTag(tag);
-	
-	return MRES_Supercede;
-}
-
 static MRESReturn DHookCallback_AllowedToHealTarget_Pre(int medigun, DHookReturn ret, DHookParam params)
 {
 	int target = params.Get(1);
@@ -1423,7 +1409,7 @@ static MRESReturn DHookCallback_OnBotTeleported_Pre(DHookParam params)
 
 static MRESReturn DHookCallback_VScriptServerInit_Pre(DHookReturn ret)
 {
-	CopyScriptFunctionBinding("CTFBot", "HasBotTag", "CTFPlayer", DHooKCallback_HasTag_Pre);
+	CopyScriptFunctionBinding("CTFBot", "HasBotTag", "CTFPlayer", DHooKCallback_ScriptHasTag_Pre);
 	
 	return MRES_Ignored;
 }
@@ -1761,4 +1747,32 @@ static MRESReturn DHookCallback_FPlayerCanTakeDamage_Pre(DHookReturn ret, DHookP
 	}
 	
 	return MRES_Ignored;
+}
+
+static MRESReturn DHookCallback_ScriptIsBotOfType_Pre(int player, DHookReturn ret, DHookParam param)
+{
+	int botType = param.Get(1);
+	
+	// make scripts believe that all invaders are TFBots
+	if (botType == TF_BOT_TYPE && Player(player).IsInvader())
+	{
+		ret.Value = true;
+		return MRES_Supercede;
+	}
+	
+	return MRES_Ignored;
+}
+
+static MRESReturn DHooKCallback_ScriptHasTag_Pre(int bot, DHookReturn ret, DHookParam params)
+{
+	// script fixup code, only for players
+	if (IsFakeClient(bot))
+		return MRES_Ignored;
+	
+	char tag[64];
+	params.GetString(1, tag, sizeof(tag));
+	
+	ret.Value = Player(bot).HasTag(tag);
+	
+	return MRES_Supercede;
 }

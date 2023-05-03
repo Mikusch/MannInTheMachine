@@ -82,8 +82,6 @@ void DHooks_Init(GameData hGameData)
 	CreateDynamicDetour(hGameData, "OnBotTeleported", DHookCallback_OnBotTeleported_Pre);
 	CreateDynamicDetour(hGameData, "VScriptServerInit", DHookCallback_VScriptServerInit_Pre);
 	
-	CreateScriptDetour("CTFPlayer", "IsBotOfType", DHookCallback_ScriptIsBotOfType_Pre);
-	
 	g_hDHookSetModel = CreateDynamicHook(hGameData, "CBaseEntity::SetModel");
 	g_hDHookCanBeUpgraded = CreateDynamicHook(hGameData, "CBaseObject::CanBeUpgraded");
 	g_hDHookComeToRest = CreateDynamicHook(hGameData, "CItem::ComeToRest");
@@ -1417,6 +1415,8 @@ static MRESReturn DHookCallback_VScriptServerInit_Pre(DHookReturn ret)
 	CopyScriptFunctionBinding("CTFBot", "HasBotTag", "CTFPlayer", DHookCallback_ScriptHasTag_Pre);
 	CopyScriptFunctionBinding("CTFBot", "RemoveBotAttribute", "CTFPlayer", DHookCallback_ScriptRemoveAttribute_Pre);
 	CopyScriptFunctionBinding("CTFBot", "RemoveBotTag", "CTFPlayer", DHookCallback_ScriptRemoveTag_Pre);
+	
+	CreateScriptDetour("CTFPlayer", "IsBotOfType", DHookCallback_ScriptIsBotOfType_Pre);
 	
 	return MRES_Ignored;
 }

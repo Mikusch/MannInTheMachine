@@ -309,16 +309,6 @@
 				"linux"		"@_Z11GetBombInfoP10BombInfo_t"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x20\x8B\x15\x2A\x2A\x2A\x2A\x0F\x57\xD2"
 			}
-			"VScriptServerInit"
-			{
-				"linux"		"@_Z17VScriptServerInitv"
-				"windows"	"\x55\x8B\xEC\xB8\x54\x2F\x00\x00"
-			}
-			"CUtlVector<ScriptFunctionBinding_t,CUtlMemory<ScriptFunctionBinding_t,int>>::InsertBefore"
-			{
-				"linux"		"@_ZN10CUtlVectorI23ScriptFunctionBinding_t10CUtlMemoryIS0_iEE12InsertBeforeEi"
-				"windows"	"\x55\x8B\xEC\x56\x8B\xF1\x57\x8B\x4E\x0C\x8B\x56\x04\x8D\x41\x01\x3B\xC2\x7E\x2A\x2B\xCA\x41\x51\x8B\xCE\xE8\x2A\x2A\x2A\x2A\xFF\x46\x0C\x8B\x56\x0C\x8B\x7D\x08\x2B\xD7\x8B\x0E\x4A\x89\x4E\x10\x85\xD2\x7E\x2A\x8B\xC7\xC1\xE0\x04\x2B\xC7"
-			}
 		}
 		"Offsets"
 		{
@@ -760,16 +750,6 @@
 				"linux"		"40"
 				"windows"	"40"
 			}
-			"sizeof(ScriptFunctionBinding_t)"
-			{
-				"linux"		"60"
-				"windows"	"60"
-			}
-			"ScriptClassDesc_t::m_FunctionBindings"
-			{
-				"linux"		"16"
-				"windows"	"16"
-			}
 		}
 		"Functions"
 		{
@@ -1137,13 +1117,6 @@
 						"type"	"cbaseentity"
 					}
 				}
-			}
-			"VScriptServerInit"
-			{
-				"signature"		"VScriptServerInit"
-				"callconv"		"cdecl"
-				"return"		"bool"
-				"this"			"ignore"
 			}
 			"CBaseEntity::SetModel"
 			{

@@ -52,7 +52,6 @@ static Handle g_hSDKCallIsStaleNest;
 static Handle g_hSDKCallDetonateStaleNest;
 static Handle g_hSDKCallGetLiveTime;
 static Handle g_hSDKCallPassesTriggerFilters;
-static Handle g_hSDKCallInsertBefore;
 
 void SDKCalls_Init(GameData hGameData)
 {
@@ -109,7 +108,6 @@ void SDKCalls_Init(GameData hGameData)
 	g_hSDKCallDetonateStaleNest = PrepSDKCall_DetonateStaleNest(hGameData);
 	g_hSDKCallGetLiveTime = PrepSDKCall_GetLiveTime(hGameData);
 	g_hSDKCallPassesTriggerFilters = PrepSDKCall_PassesTriggerFilters(hGameData);
-	g_hSDKCallInsertBefore = PrepSDKCall_InsertBefore(hGameData);
 }
 
 static Handle PrepSDKCall_GetClassIcon_Linux(GameData hGameData)
@@ -607,20 +605,6 @@ static Handle PrepSDKCall_PassesTriggerFilters(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_InsertBefore(GameData hGameData)
-{
-	StartPrepSDKCall(SDKCall_Raw);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CUtlVector<ScriptFunctionBinding_t,CUtlMemory<ScriptFunctionBinding_t,int>>::InsertBefore");
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
-	
-	Handle call = EndPrepSDKCall();
-	if (!call)
-		LogError("Failed to create SDKCall: CUtlVector<ScriptFunctionBinding_t,CUtlMemory<ScriptFunctionBinding_t,int>>::InsertBefore");
-	
-	return call;
-}
-
 Address SDKCall_GetClassIcon(any spawner, int nSpawnNum = -1)
 {
 	Address result;
@@ -862,12 +846,4 @@ bool SDKCall_PassesTriggerFilters(int trigger, int other)
 		return SDKCall(g_hSDKCallPassesTriggerFilters, trigger, other);
 	
 	return false;
-}
-
-int SDKCall_InsertBefore(CUtlVector pAddress, int elem)
-{
-	if (g_hSDKCallInsertBefore)
-		return SDKCall(g_hSDKCallInsertBefore, pAddress, elem);
-	
-	return 0;
 }

@@ -80,7 +80,6 @@ void DHooks_Init(GameData hGameData)
 	CreateDynamicDetour(hGameData, "CLagCompensationManager::StartLagCompensation", DHookCallback_StartLagCompensation_Pre, DHookCallback_StartLagCompensation_Post);
 	CreateDynamicDetour(hGameData, "DoTeleporterOverride", _, DHookCallback_DoTeleporterOverride_Post);
 	CreateDynamicDetour(hGameData, "OnBotTeleported", DHookCallback_OnBotTeleported_Pre);
-	CreateDynamicDetour(hGameData, "VScriptServerInit", DHookCallback_VScriptServerInit_Pre);
 	
 	g_hDHookSetModel = CreateDynamicHook(hGameData, "CBaseEntity::SetModel");
 	g_hDHookCanBeUpgraded = CreateDynamicHook(hGameData, "CBaseObject::CanBeUpgraded");
@@ -94,6 +93,19 @@ void DHooks_Init(GameData hGameData)
 	g_hDHookPickUp = CreateDynamicHook(hGameData, "CTFItem::PickUp");
 	g_hDHookClientConnected = CreateDynamicHook(hGameData, "CTFGameRules::ClientConnected");
 	g_hDHookFPlayerCanTakeDamage = CreateDynamicHook(hGameData, "CTFGameRules::FPlayerCanTakeDamage");
+	
+	CopyScriptFunctionBinding("CTFBot", "AddBotAttribute", "CTFPlayer", DHookCallback_ScriptAddAttribute_Pre);
+	CopyScriptFunctionBinding("CTFBot", "AddBotTag", "CTFPlayer", DHookCallback_ScriptAddTag_Pre);
+	CopyScriptFunctionBinding("CTFBot", "ClearAllBotAttributes", "CTFPlayer", DHookCallback_ScriptClearAllAttributes_Pre);
+	CopyScriptFunctionBinding("CTFBot", "ClearAllBotTags", "CTFPlayer", DHookCallback_ScriptClearTags_Pre);
+	CopyScriptFunctionBinding("CTFBot", "HasBotAttribute", "CTFPlayer", DHookCallback_ScriptHasAttribute_Pre);
+	CopyScriptFunctionBinding("CTFBot", "HasBotTag", "CTFPlayer", DHookCallback_ScriptHasTag_Pre);
+	CopyScriptFunctionBinding("CTFBot", "RemoveBotAttribute", "CTFPlayer", DHookCallback_ScriptRemoveAttribute_Pre);
+	CopyScriptFunctionBinding("CTFBot", "RemoveBotTag", "CTFPlayer", DHookCallback_ScriptRemoveTag_Pre);
+	
+	VScript_ResetScriptVM();
+	
+	CreateScriptDetour("CTFPlayer", "IsBotOfType", DHookCallback_ScriptIsBotOfType_Pre);
 }
 
 void DHooks_OnClientPutInServer(int client)
@@ -208,19 +220,20 @@ static DynamicHook CreateDynamicHook(GameData hGameData, const char[] name)
 	return hook;
 }
 
-static void CopyScriptFunctionBinding(const char[] sourceClass, const char[] functionName, const char[] targetClass, DHookCallback callback)
+static void CopyScriptFunctionBinding(const char[] sourceClassName, const char[] functionName, const char[] targetClassName, DHookCallback callback)
 {
-	VScriptFunction pTargetFunc = VScript_GetClassFunction(sourceClass, functionName);
-	CUtlVector pFunctionBindings = CUtlVector(VScript_GetClass(targetClass) + GetOffset("ScriptClassDesc_t", "m_FunctionBindings"));
-	
-	int size = GetOffset(NULL_STRING, "sizeof(ScriptFunctionBinding_t)");
-	Address pFunctionBinding = pFunctionBindings.Get(SDKCall_InsertBefore(pFunctionBindings, pFunctionBindings.m_Size), size);
-	
-	// copy the entire script desc memory (should be safe)
-	for (any i = 0; i < size; i++)
+	VScriptFunction pTargetFunc = VScript_GetClassFunction("CTFPlayer", functionName);
+	if (!pTargetFunc)
 	{
-		StoreToAddress(pFunctionBinding + i, Deref(pTargetFunc + i), NumberType_Int8);
+		VScriptFunction pSourceFunc = VScript_GetClassFunction(sourceClassName, functionName);
+		VScriptClass pTargetClass = VScript_GetClass(targetClassName);
+		
+		pTargetFunc = pTargetClass.CreateFunction();
+		pTargetFunc.CopyFrom(pSourceFunc);
 	}
+	
+	if (callback == INVALID_FUNCTION)
+		return;
 	
 	DynamicDetour detour = pTargetFunc.CreateDetour();
 	if (detour)
@@ -229,7 +242,7 @@ static void CopyScriptFunctionBinding(const char[] sourceClass, const char[] fun
 	}
 	else
 	{
-		LogError("Failed to create script detour: %s::%s", targetClass, functionName);
+		LogError("Failed to create script detour: %s::%s", targetClassName, functionName);
 	}
 }
 
@@ -1403,22 +1416,6 @@ static MRESReturn DHookCallback_OnBotTeleported_Pre(DHookParam params)
 {
 	// This crashes our server in local testing due to s_lastTeleporter being null
 	return MRES_Supercede;
-}
-
-static MRESReturn DHookCallback_VScriptServerInit_Pre(DHookReturn ret)
-{
-	CopyScriptFunctionBinding("CTFBot", "AddBotAttribute", "CTFPlayer", DHookCallback_ScriptAddAttribute_Pre);
-	CopyScriptFunctionBinding("CTFBot", "AddBotTag", "CTFPlayer", DHookCallback_ScriptAddTag_Pre);
-	CopyScriptFunctionBinding("CTFBot", "ClearAllBotAttributes", "CTFPlayer", DHookCallback_ScriptClearAllAttributes_Pre);
-	CopyScriptFunctionBinding("CTFBot", "ClearAllBotTags", "CTFPlayer", DHookCallback_ScriptClearTags_Pre);
-	CopyScriptFunctionBinding("CTFBot", "HasBotAttribute", "CTFPlayer", DHookCallback_ScriptHasAttribute_Pre);
-	CopyScriptFunctionBinding("CTFBot", "HasBotTag", "CTFPlayer", DHookCallback_ScriptHasTag_Pre);
-	CopyScriptFunctionBinding("CTFBot", "RemoveBotAttribute", "CTFPlayer", DHookCallback_ScriptRemoveAttribute_Pre);
-	CopyScriptFunctionBinding("CTFBot", "RemoveBotTag", "CTFPlayer", DHookCallback_ScriptRemoveTag_Pre);
-	
-	CreateScriptDetour("CTFPlayer", "IsBotOfType", DHookCallback_ScriptIsBotOfType_Pre);
-	
-	return MRES_Ignored;
 }
 
 void OnBotTeleported(int bot)

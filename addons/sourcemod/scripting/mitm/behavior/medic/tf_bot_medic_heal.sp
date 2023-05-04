@@ -47,28 +47,26 @@ static int Update(CTFBotMedicHeal action, int actor, float interval)
 		
 		if (!squad.ShouldPreserveSquad())
 		{
-			ArrayList memberList = new ArrayList();
-			squad.CollectMembers(memberList);
+			int[] members = new int[MaxClients];
+			int count = squad.CollectMembers(members, MaxClients);
 			
 			int i;
-			for (i = 0; i < memberList.Length; i++)
+			for (i = 0; i < count; i++)
 			{
-				if (TF2_GetPlayerClass(memberList.Get(i)) != TFClass_Medic)
+				if (TF2_GetPlayerClass(members[i]) != TFClass_Medic)
 				{
 					break;
 				}
 			}
 			
-			if (i == memberList.Length)
+			if (i == count)
 			{
 				// squad is obsolete
-				for (i = 0; i < memberList.Length; ++i)
+				for (i = 0; i < count; ++i)
 				{
-					Player(memberList.Get(i)).LeaveSquad();
+					Player(members[i]).LeaveSquad();
 				}
 			}
-			
-			delete memberList;
 		}
 	}
 	else

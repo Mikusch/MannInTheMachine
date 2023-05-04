@@ -358,11 +358,11 @@ void SelectNewDefenders()
 			if (iReqDefenderCount - iDefenderCount - party.GetMemberCount(false) < 0)
 				continue;
 			
-			ArrayList members = new ArrayList();
-			party.CollectMembers(members, false);
-			for (int j = 0; j < members.Length; j++)
+			int[] members = new int[MaxClients];
+			int count = party.CollectMembers(members, MaxClients, false);
+			for (int j = 0; j < count; j++)
 			{
-				int member = members.Get(j);
+				int member = members[j];
 				
 				TF2_ChangeClientTeam(member, TFTeam_Defenders);
 				Queue_SetPoints(member, 0);
@@ -371,7 +371,6 @@ void SelectNewDefenders()
 				players.Erase(players.FindValue(member));
 				++iDefenderCount;
 			}
-			delete members;
 		}
 		else
 		{

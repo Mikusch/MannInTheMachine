@@ -199,13 +199,11 @@ methodmap Party
 			this.m_leader = -1;
 			
 			// pick the next leader that's left in the party
-			ArrayList members = new ArrayList();
-			this.CollectMembers(members);
-			if (members.Length)
+			int[] members = new int[MaxClients];
+			if (this.CollectMembers(members, MaxClients))
 			{
-				this.m_leader = members.Get(0);
+				this.m_leader = members[0];
 			}
-			delete members;
 		}
 		
 		if (this.GetMemberCount() == 0)
@@ -214,8 +212,10 @@ methodmap Party
 		}
 	}
 	
-	public void CollectMembers(ArrayList &memberList, bool bIncludeSpectators = true)
+	public int CollectMembers(int[] clients, int size, bool bIncludeSpectators = true)
 	{
+		int count = 0;
+		
 		for (int i = 0; i < this.m_members.Length; ++i)
 		{
 			int member = this.m_members.Get(i);
@@ -226,37 +226,34 @@ methodmap Party
 			if (!bIncludeSpectators && Player(member).HasPreference(PREF_DISABLE_SPAWNING))
 				continue;
 			
-			memberList.Push(member);
+			clients[count++] = member;
 		}
+		
+		return count;
 	}
 	
 	public int GetMemberCount(bool bIncludeSpectators = true)
 	{
-		ArrayList members = new ArrayList();
-		this.CollectMembers(members, bIncludeSpectators);
-		int count = members.Length;
-		delete members;
-		return count;
+		int[] members = new int[MaxClients];
+		return this.CollectMembers(members, MaxClients, bIncludeSpectators);
 	}
 	
 	public int CalculateQueuePoints()
 	{
 		int points = 0;
 		
-		ArrayList members = new ArrayList();
-		this.CollectMembers(members, false);
-		for (int i = 0; i < members.Length; ++i)
+		int[] members = new int[MaxClients];
+		int count = this.CollectMembers(members, MaxClients, false);
+		for (int i = 0; i < count; ++i)
 		{
-			int member = members.Get(i);
-			points += Player(member).m_defenderQueuePoints;
+			points += Player(members[i]).m_defenderQueuePoints;
 		}
 		
-		if (members.Length)
+		if (count)
 		{
 			// average of all members queue points
-			points = (points / members.Length);
+			points = (points / count);
 		}
-		delete members;
 		
 		return points;
 	}
@@ -280,11 +277,11 @@ methodmap Party
 		if (this.IsValid())
 		{
 			// notify all members
-			ArrayList members = new ArrayList();
-			this.CollectMembers(members);
-			for (int i = 0; i < members.Length; i++)
+			int[] members = new int[MaxClients];
+			int count = this.CollectMembers(members, MaxClients);
+			for (int i = 0; i < count; ++i)
 			{
-				int member = members.Get(i);
+				int member = members[i];
 				
 				// refresh party menu if active
 				if (Player(member).IsPartyMenuActive())
@@ -295,7 +292,6 @@ methodmap Party
 				CPrintToChat(member, "%s %t", PLUGIN_TAG, "Party_LeftOther", client);
 				ClientCommand(member, "play %s", SOUND_PARTY_UPDATE);
 			}
-			delete members;
 		}
 	}
 	
@@ -474,11 +470,11 @@ static Action ConCmd_PartyJoin(int client, int args)
 	Menus_DisplayPartyMenu(client);
 	
 	// notify all other members
-	ArrayList members = new ArrayList();
-	party.CollectMembers(members);
-	for (int i = 0; i < members.Length; i++)
+	int[] members = new int[MaxClients];
+	int count = party.CollectMembers(members, MaxClients);
+	for (int i = 0; i < count; ++i)
 	{
-		int member = members.Get(i);
+		int member = members[i];
 		
 		if (member == client)
 			continue;
@@ -492,7 +488,6 @@ static Action ConCmd_PartyJoin(int client, int args)
 		CPrintToChat(member, "%s %t", PLUGIN_TAG, "Party_JoinedOther", client);
 		ClientCommand(member, "play %s", SOUND_PARTY_UPDATE);
 	}
-	delete members;
 	
 	return Plugin_Handled;
 }
@@ -561,7 +556,7 @@ static Action ConCmd_PartyInvite(int client, int args)
 	char name[MAX_NAME_LENGTH];
 	party.GetName(name, sizeof(name));
 	
-	for (int i = 0; i < target_count; i++)
+	for (int i = 0; i < target_count; ++i)
 	{
 		if (target_list[i] == client)
 			continue;
@@ -649,7 +644,7 @@ static Action ConCmd_PartyKick(int client, int args)
 	
 	Party party = Player(client).GetParty();
 	
-	for (int i = 0; i < target_count; i++)
+	for (int i = 0; i < target_count; ++i)
 	{
 		if (target_list[i] == client)
 			continue;
@@ -667,15 +662,14 @@ static Action ConCmd_PartyKick(int client, int args)
 		ClientCommand(target_list[i], "play %s", SOUND_PARTY_UPDATE);
 		
 		// notify all other members
-		ArrayList members = new ArrayList();
-		party.CollectMembers(members);
-		for (int j = 0; j < members.Length; j++)
+		int[] members = new int[MaxClients];
+		int count = party.CollectMembers(members, MaxClients);
+		for (int j = 0; j < count; j++)
 		{
-			int member = members.Get(j);
+			int member = members[j];
 			CPrintToChat(member, "%s %t", PLUGIN_TAG, "Party_KickedOther", target_list[i]);
 			ClientCommand(member, "play %s", SOUND_PARTY_UPDATE);
 		}
-		delete members;
 	}
 	
 	return Plugin_Handled;

@@ -190,24 +190,22 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 					char name[MAX_NAME_LENGTH], strMembers[128];
 					party.GetName(name, sizeof(name));
 					
-					ArrayList members = new ArrayList();
-					party.CollectMembers(members);
+					int[] members = new int[MaxClients];
+					int count = party.CollectMembers(members, MaxClients);
 					
-					for (int i = 0; i < members.Length; i++)
+					for (int i = 0; i < count; i++)
 					{
 						char strMember[MAX_MESSAGE_LENGTH];
 						
-						Format(strMember, sizeof(strMember), "%N", members.Get(i));
+						Format(strMember, sizeof(strMember), "%N", members[i]);
 						
-						if (i < members.Length - 1)
+						if (i < count - 1)
 						{
 							StrCat(strMember, sizeof(strMember), ", ");
 						}
 						
 						StrCat(strMembers, sizeof(strMembers), strMember);
 					}
-					
-					delete members;
 					
 					CPrintToChat(param1, "%s {cyan}%s{default}: %s", PLUGIN_TAG, name, strMembers);
 				}
@@ -351,15 +349,14 @@ void Menus_DisplayPartyMenu(int client)
 		Format(title, sizeof(title), "%s%T\n", title, "Party_Menu_Members", client, party.GetMemberCount(), party.GetMaxPlayers());
 		
 		// show party members
-		ArrayList members = new ArrayList();
-		party.CollectMembers(members);
-		for (int i = 0; i < members.Length; i++)
+		int[] members = new int[MaxClients];
+		int count = party.CollectMembers(members, MaxClients);
+		for (int i = 0; i < count; i++)
 		{
-			int member = members.Get(i);
+			int member = members[i];
 			Format(title, sizeof(title), "%s%s %N", title, party.IsLeader(member) ? SYMBOL_PARTY_LEADER : SYMBOL_PARTY_MEMBER, member);
 			Format(title, sizeof(title), "%s (%d)\n", title, Player(member).m_defenderQueuePoints);
 		}
-		delete members;
 	}
 	else
 	{
@@ -635,12 +632,12 @@ void Menus_DisplayPartyManageKickMenu(int client)
 	menu.SetTitle("%T", "Party_KickMenu_Title", client);
 	menu.ExitBackButton = true;
 	
-	ArrayList memberList = new ArrayList();
-	party.CollectMembers(memberList);
+	int[] members = new int[MaxClients];
+	int count = party.CollectMembers(members, MaxClients);
 	
-	for (int i = 0; i < memberList.Length; i++)
+	for (int i = 0; i < count; i++)
 	{
-		int member = memberList.Get(i);
+		int member = members[i];
 		
 		if (member == client)
 			continue;
@@ -653,7 +650,6 @@ void Menus_DisplayPartyManageKickMenu(int client)
 		
 		menu.AddItem(userid, name);
 	}
-	delete memberList;
 	
 	if (menu.ItemCount == 0)
 	{

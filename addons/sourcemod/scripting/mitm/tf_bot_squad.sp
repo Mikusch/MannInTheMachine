@@ -184,13 +184,11 @@ methodmap CTFBotSquad
 			// pick the next living leader that's left in the squad
 			if (this.m_bShouldPreserveSquad)
 			{
-				ArrayList members = new ArrayList();
-				this.CollectMembers(members);
-				if (members.Length)
+				int[] members = new int[MaxClients];
+				if (this.CollectMembers(members, MaxClients))
 				{
-					this.m_leader = members.Get(0);
+					this.m_leader = members[0];
 				}
-				delete members;
 			}
 		}
 		else if (IsMannVsMachineMode())
@@ -208,16 +206,20 @@ methodmap CTFBotSquad
 		}
 	}
 	
-	public void CollectMembers(ArrayList &memberList)
+	public int CollectMembers(int[] clients, int size)
 	{
+		int count = 0;
+		
 		for (int i = 0; i < this.m_roster.Length; ++i)
 		{
 			int member = this.m_roster.Get(i);
 			if (IsClientInGame(member) && IsPlayerAlive(member))
 			{
-				memberList.Push(member);
+				clients[count++] = member;
 			}
 		}
+		
+		return count;
 	}
 	
 	public int GetMemberCount()

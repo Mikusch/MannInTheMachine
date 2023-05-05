@@ -19,9 +19,10 @@
 #pragma newdecls required
 
 static DynamicHook g_hDHookSetModel;
+static DynamicHook g_hDHookIsPlacementPosValid;
 static DynamicHook g_hDHookCanBeUpgraded;
 static DynamicHook g_hDHookComeToRest;
-static DynamicHook g_hDHookSetTransmit;
+static DynamicHook g_hDHookShouldTransmit;
 static DynamicHook g_hDHookEventKilled;
 static DynamicHook g_hDHookShouldGib;
 static DynamicHook g_hDHookIsAllowedToPickUpFlag;
@@ -82,9 +83,10 @@ void DHooks_Init(GameData hGameData)
 	CreateDynamicDetour(hGameData, "OnBotTeleported", DHookCallback_OnBotTeleported_Pre);
 	
 	g_hDHookSetModel = CreateDynamicHook(hGameData, "CBaseEntity::SetModel");
+	g_hDHookIsPlacementPosValid = CreateDynamicHook(hGameData, "CBaseObject::IsPlacementPosValid");
 	g_hDHookCanBeUpgraded = CreateDynamicHook(hGameData, "CBaseObject::CanBeUpgraded");
 	g_hDHookComeToRest = CreateDynamicHook(hGameData, "CItem::ComeToRest");
-	g_hDHookSetTransmit = CreateDynamicHook(hGameData, "CTFPlayer::ShouldTransmit");
+	g_hDHookShouldTransmit = CreateDynamicHook(hGameData, "CBaseEntity::ShouldTransmit");
 	g_hDHookEventKilled = CreateDynamicHook(hGameData, "CTFPlayer::Event_Killed");
 	g_hDHookShouldGib = CreateDynamicHook(hGameData, "CTFPlayer::ShouldGib");
 	g_hDHookIsAllowedToPickUpFlag = CreateDynamicHook(hGameData, "CTFPlayer::IsAllowedToPickUpFlag");
@@ -115,9 +117,9 @@ void DHooks_OnClientPutInServer(int client)
 		g_hDHookSetModel.HookEntity(Hook_Post, client, DHookCallback_SetModel_Post);
 	}
 	
-	if (g_hDHookSetTransmit)
+	if (g_hDHookShouldTransmit)
 	{
-		g_hDHookSetTransmit.HookEntity(Hook_Pre, client, DHookCallback_SetTransmit_Pre);
+		g_hDHookShouldTransmit.HookEntity(Hook_Pre, client, DHookCallback_ShouldTransmit_Pre);
 	}
 	
 	if (g_hDHookEventKilled)
@@ -176,6 +178,11 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 		if (g_hDHookCanBeUpgraded)
 		{
 			g_hDHookCanBeUpgraded.HookEntity(Hook_Pre, entity, DHookCallback_CanBeUpgraded_Pre);
+		}
+		
+		if (g_hDHookIsPlacementPosValid)
+		{
+			g_hDHookIsPlacementPosValid.HookEntity(Hook_Post, entity, DHookCallback_IsPlacementPosValid_Post);
 		}
 	}
 	else if (strncmp(classname, "item_currencypack_", 18) == 0)
@@ -1447,7 +1454,7 @@ void OnBotTeleported(int bot)
 	}
 }
 
-static MRESReturn DHookCallback_SetTransmit_Pre(int player, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_ShouldTransmit_Pre(int player, DHookReturn ret, DHookParam params)
 {
 	if (Player(player).HasAttribute(USE_BOSS_HEALTH_BAR))
 	{
@@ -1697,6 +1704,51 @@ static MRESReturn DHookCallback_SetModel_Post(int entity, DHookParam params)
 	}
 	
 	return MRES_Ignored;
+}
+
+static MRESReturn DHookCallback_IsPlacementPosValid_Post(int obj, DHookReturn ret)
+{
+	if (!ret.Value)
+	{
+		return MRES_Ignored;
+	}
+	
+	if (TF2_GetClientTeam(GetEntPropEnt(obj, Prop_Send, "m_hBuilder")) != TFTeam_Invaders)
+	{
+		return MRES_Ignored;
+	}
+	
+	// m_vecBuildOrigin is the proposed build origin
+	float vecTestPos[3];
+	GetEntDataVector(obj, GetOffset("CBaseObject", "m_vecBuildOrigin"), vecTestPos);
+	vecTestPos[2] += 12.0; // TELEPORTER_MAXS.z
+	
+	float vecHullMins[3] = VEC_HULL_MIN;
+	float vecHullMaxs[3] = VEC_HULL_MAX;
+	
+	// giants don't tend to be bigger than 1.9 scale
+	ScaleVector(vecHullMins, 1.9);
+	ScaleVector(vecHullMaxs, 1.9);
+	
+	// make sure we can fit a giant player on top in this pos
+	TR_TraceHullFilter(vecTestPos, vecTestPos, vecHullMins, vecHullMaxs, MASK_SOLID | CONTENTS_PLAYERCLIP, TraceEntityFilter_IsPlacementPosValid, COLLISION_GROUP_PLAYER_MOVEMENT);
+	
+	ret.Value = TR_GetFraction() >= 1.0;
+	return MRES_Supercede;
+}
+
+static bool TraceEntityFilter_IsPlacementPosValid(int entity, int contentsMask, Collision_Group_t collisionGroup)
+{
+	if (entity == -1)
+		return false;
+	
+	if (!SDKCall_CBaseEntity_ShouldCollide(entity, collisionGroup, contentsMask))
+		return false;
+	
+	if (entity != -1 && !SDKCall_CGameRules_ShouldCollide(collisionGroup, view_as<Collision_Group_t>(GetEntProp(entity, Prop_Send, "m_CollisionGroup"))))
+		return false;
+	
+	return true;
 }
 
 static MRESReturn DHookCallback_CanBeUpgraded_Pre(int obj, DHookReturn ret, DHookParam params)

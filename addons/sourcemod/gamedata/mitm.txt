@@ -318,6 +318,11 @@
 				"linux"		"3"
 				"windows"	"2"
 			}
+			"CBaseEntity::ShouldCollide"
+			{
+				"linux"		"18"
+				"windows"	"17"
+			}
 			"CBaseEntity::SetModel"
 			{
 				"linux"		"27"
@@ -327,6 +332,11 @@
 			{
 				"linux"		"88"
 				"windows"	"87"
+			}
+			"CBaseObject::IsPlacementPosValid"
+			{
+				"linux"		"341"
+				"windows"	"340"
 			}
 			"CBaseObject::CanBeUpgraded"
 			{
@@ -363,7 +373,7 @@
 				// Linux uses signature call CTFBotSpawner::GetClassIcon
 				"windows"	"6"
 			}
-			"CTFPlayer::ShouldTransmit"
+			"CBaseEntity::ShouldTransmit"
 			{
 				"linux"		"21"
 				"windows"	"20"
@@ -397,6 +407,11 @@
 			{
 				"linux"		"199"
 				"windows"	"198"
+			}
+			"CGameRules::ShouldCollide"
+			{
+				"linux"		"30"
+				"windows"	"29"
 			}
 			"CTFGameRules::ClientConnected"
 			{
@@ -694,6 +709,11 @@
 			{
 				"linux"		"4"
 				"windows"	"4"
+			}
+			"CBaseObject::m_vecBuildOrigin"
+			{
+				"linux"		"2348"
+				"windows"	"2324"
 			}
 			"inputdata_t::value"
 			{
@@ -1132,6 +1152,13 @@
 					}
 				}
 			}
+			"CBaseObject::IsPlacementPosValid"
+			{
+				"offset"	"CBaseObject::IsPlacementPosValid"
+				"hooktype"	"entity"
+				"return"	"bool"
+				"this"		"entity"
+			}
 			"CBaseObject::CanBeUpgraded"
 			{
 				"offset"	"CBaseObject::CanBeUpgraded"
@@ -1153,9 +1180,9 @@
 				"return"	"void"
 				"this"		"entity"
 			}
-			"CTFPlayer::ShouldTransmit"
+			"CBaseEntity::ShouldTransmit"
 			{
-				"offset"	"CTFPlayer::ShouldTransmit"
+				"offset"	"CBaseEntity::ShouldTransmit"
 				"hooktype"	"entity"
 				"return"	"int"
 				"this"		"entity"

@@ -37,6 +37,7 @@ static Handle g_hSDKCallRemoveObject;
 static Handle g_hSDKCallFindHint;
 static Handle g_hSDKCallPushAllPlayersAway;
 static Handle g_hSDKCallDistributeCurrencyAmount;
+static Handle g_hSDKCallCGameRulesShouldCollide;
 static Handle g_hSDKCallTeamMayCapturePoint;
 static Handle g_hSDKCallGetSentryHint;
 static Handle g_hSDKCallGetTeleporterHint;
@@ -52,6 +53,7 @@ static Handle g_hSDKCallIsStaleNest;
 static Handle g_hSDKCallDetonateStaleNest;
 static Handle g_hSDKCallGetLiveTime;
 static Handle g_hSDKCallPassesTriggerFilters;
+static Handle g_hSDKCallCBaseEntityShouldCollide;
 
 void SDKCalls_Init(GameData hGameData)
 {
@@ -92,6 +94,7 @@ void SDKCalls_Init(GameData hGameData)
 	g_hSDKCallRemoveObject = PrepSDKCall_RemoveObject(hGameData);
 	g_hSDKCallFindHint = PrepSDKCall_FindHint(hGameData);
 	g_hSDKCallPushAllPlayersAway = PrepSDKCall_PushAllPlayersAway(hGameData);
+	g_hSDKCallCGameRulesShouldCollide = PrepSDKCall_CGameRules_ShouldCollide(hGameData);
 	g_hSDKCallDistributeCurrencyAmount = PrepSDKCall_DistributeCurrencyAmount(hGameData);
 	g_hSDKCallTeamMayCapturePoint = PrepSDKCall_TeamMayCapturePoint(hGameData);
 	g_hSDKCallGetSentryHint = PrepSDKCall_GetSentryHint(hGameData);
@@ -108,6 +111,7 @@ void SDKCalls_Init(GameData hGameData)
 	g_hSDKCallDetonateStaleNest = PrepSDKCall_DetonateStaleNest(hGameData);
 	g_hSDKCallGetLiveTime = PrepSDKCall_GetLiveTime(hGameData);
 	g_hSDKCallPassesTriggerFilters = PrepSDKCall_PassesTriggerFilters(hGameData);
+	g_hSDKCallCGameRulesShouldCollide = PrepSDKCall_CBaseEntity_ShouldCollide(hGameData);
 }
 
 static Handle PrepSDKCall_GetClassIcon_Linux(GameData hGameData)
@@ -372,6 +376,23 @@ static Handle PrepSDKCall_DistributeCurrencyAmount(GameData hGameData)
 	return call;
 }
 
+static Handle PrepSDKCall_CGameRules_ShouldCollide(GameData hGameData)
+{
+	StartPrepSDKCall(SDKCall_GameRules);
+	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "CGameRules::ShouldCollide");
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+	{
+		LogError("Failed to create SDKCall: CGameRules::ShouldCollide");
+	}
+	
+	return call;
+}
+
 static Handle PrepSDKCall_TeamMayCapturePoint(GameData hGameData)
 {
 	StartPrepSDKCall(SDKCall_GameRules);
@@ -440,6 +461,21 @@ static Handle PrepSDKCall_GetCurrentWave(GameData hGameData)
 	Handle call = EndPrepSDKCall();
 	if (!call)
 		LogError("Failed to create SDKCall: CPopulationManager::GetCurrentWave");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_CBaseEntity_ShouldCollide(GameData hGameData)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "CBaseEntity::ShouldCollide");
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogError("Failed to create SDKCall: CBaseEntity::ShouldCollide");
 	
 	return call;
 }
@@ -742,6 +778,14 @@ int SDKCall_DistributeCurrencyAmount(int amount, int player = -1, bool shared = 
 	return 0;
 }
 
+bool SDKCall_CGameRules_ShouldCollide(Collision_Group_t collisionGroup0, Collision_Group_t collisionGroup1)
+{
+	if (g_hSDKCallCGameRulesShouldCollide)
+		return SDKCall(g_hSDKCallCGameRulesShouldCollide, collisionGroup0, collisionGroup1);
+	
+	return false;
+}
+
 bool SDKCall_TeamMayCapturePoint(TFTeam team, int pointIndex)
 {
 	if (g_hSDKCallTeamMayCapturePoint)
@@ -756,6 +800,14 @@ Address SDKCall_GetCurrentWave(int populator)
 		return SDKCall(g_hSDKCallGetCurrentWave, populator);
 	
 	return Address_Null;
+}
+
+bool SDKCall_CBaseEntity_ShouldCollide(int entity, Collision_Group_t collisionGroup, int contentsMask)
+{
+	if (g_hSDKCallCBaseEntityShouldCollide)
+		return SDKCall(g_hSDKCallCBaseEntityShouldCollide, entity, collisionGroup, contentsMask);
+	
+	return false;
 }
 
 bool SDKCall_IsCombatItem(int entity)

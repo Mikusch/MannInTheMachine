@@ -29,7 +29,6 @@ void Console_Init()
 	
 	AddCommandListener(CommandListener_Suicide, "explode");
 	AddCommandListener(CommandListener_Suicide, "kill");
-	AddCommandListener(CommandListener_Build, "build");
 	AddCommandListener(CommandListener_DropItem, "dropitem");
 	AddCommandListener(CommandListener_JoinTeam, "jointeam");
 	AddCommandListener(CommandListener_JoinClass, "joinclass");
@@ -128,60 +127,6 @@ static Action CommandListener_Suicide(int client, const char[] command, int argc
 		// invaders may not suicide
 		PrintCenterText(client, "%t", "Invader_NotAllowedToSuicide");
 		return Plugin_Handled;
-	}
-	
-	return Plugin_Continue;
-}
-
-static Action CommandListener_Build(int client, const char[] command, int argc)
-{
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders && TF2_GetPlayerClass(client) == TFClass_Engineer)
-	{
-		TFObjectType type = view_as<TFObjectType>(GetCmdArgInt(1));
-		TFObjectMode mode = view_as<TFObjectMode>(GetCmdArgInt(2));
-		
-		switch (type)
-		{
-			// Dispenser: Never allow for Engineer Bots
-			case TFObject_Dispenser:
-			{
-				PrintCenterText(client, "%t", "Engineer_NotAllowedToBuild");
-				return Plugin_Handled;
-			}
-			// Teleporter: Never allow entrances, and only allow exits if we have a teleporter hint
-			case TFObject_Teleporter:
-			{
-				if (mode == TFObjectMode_Entrance)
-				{
-					PrintCenterText(client, "%t", "Engineer_NotAllowedToBuild");
-					return Plugin_Handled;
-				}
-				
-				if (FindTeleporterHintForPlayer(client) == -1)
-				{
-					PrintCenterText(client, "%t", "Engineer_NotAllowedToBuild_NoHint");
-					return Plugin_Handled;
-				}
-			}
-			// Sentry Gun: Only allow if we have a sentry hint
-			case TFObject_Sentry:
-			{
-				if (FindSentryHintForPlayer(client) == -1)
-				{
-					PrintCenterText(client, "%t", "Engineer_NotAllowedToBuild_NoHint");
-					return Plugin_Handled;
-				}
-			}
-			// Sapper: Actually a teleporter exit for Engineers, so treat it that way
-			case TFObject_Sapper:
-			{
-				if (TF2_GetPlayerClass(client) == TFClass_Engineer && FindTeleporterHintForPlayer(client) == -1)
-				{
-					PrintCenterText(client, "%t", "Engineer_NotAllowedToBuild_NoHint");
-					return Plugin_Handled;
-				}
-			}
-		}
 	}
 	
 	return Plugin_Continue;

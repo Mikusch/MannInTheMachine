@@ -1221,9 +1221,9 @@ static MRESReturn DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre(int player, 
 
 static MRESReturn DHookCallback_CanBuild_Pre(int player, DHookReturn ret, DHookParam params)
 {
-	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
+	if (TF2_GetClientTeam(player) == TFTeam_Invaders && TF2_GetPlayerClass(player) == TFClass_Engineer)
 	{
-		// disallow human robot engineers from building multiple sentries
+		// prevent human robot engineers from building multiple sentries
 		SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
 	}
 	
@@ -1232,9 +1232,44 @@ static MRESReturn DHookCallback_CanBuild_Pre(int player, DHookReturn ret, DHookP
 
 static MRESReturn DHookCallback_CanBuild_Post(int player, DHookReturn ret, DHookParam params)
 {
-	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
+	if (TF2_GetClientTeam(player) == TFTeam_Invaders && TF2_GetPlayerClass(player) == TFClass_Engineer)
 	{
 		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
+		
+		// early out if we cannot build right now
+		if (ret.Value != CB_CAN_BUILD)
+			return MRES_Ignored;
+		
+		TFObjectType iObjectType = params.Get(1);
+		TFObjectMode iObjectMode = params.Get(2);
+		
+		bool bDisallowBuilding = false;
+		
+		switch (iObjectType)
+		{
+			// dispenser: cannot be built
+			case TFObject_Dispenser:
+			{
+				bDisallowBuilding = true;
+			}
+			// teleporter: only exit can be built with teleporter hint
+			case TFObject_Teleporter, TFObject_Sapper:
+			{
+				bDisallowBuilding = (iObjectMode == TFObjectMode_Entrance) || FindTeleporterHintForPlayer(player) == -1;
+			}
+			// sentry: can only be built with sentry hint
+			case TFObject_Sentry:
+			{
+				bDisallowBuilding = FindSentryHintForPlayer(player) == -1;
+			}
+		}
+		
+		if (bDisallowBuilding)
+		{
+			EmitGameSoundToClient(player, "Player.DenyWeaponSelection");
+			ret.Value = CB_CANNOT_BUILD;
+			return MRES_Supercede;
+		}
 	}
 	
 	return MRES_Ignored;
@@ -1713,7 +1748,8 @@ static MRESReturn DHookCallback_IsPlacementPosValid_Post(int obj, DHookReturn re
 		return MRES_Ignored;
 	}
 	
-	if (TF2_GetClientTeam(GetEntPropEnt(obj, Prop_Send, "m_hBuilder")) != TFTeam_Invaders)
+	int builder = GetEntPropEnt(obj, Prop_Send, "m_hBuilder");
+	if (builder == -1 || TF2_GetClientTeam(builder) != TFTeam_Invaders)
 	{
 		return MRES_Ignored;
 	}
@@ -1723,10 +1759,9 @@ static MRESReturn DHookCallback_IsPlacementPosValid_Post(int obj, DHookReturn re
 	GetEntDataVector(obj, GetOffset("CBaseObject", "m_vecBuildOrigin"), vecTestPos);
 	vecTestPos[2] += 12.0; // TELEPORTER_MAXS.z
 	
+	// giants don't tend to be bigger than 1.9 scale
 	float vecHullMins[3] = VEC_HULL_MIN;
 	float vecHullMaxs[3] = VEC_HULL_MAX;
-	
-	// giants don't tend to be bigger than 1.9 scale
 	ScaleVector(vecHullMins, 1.9);
 	ScaleVector(vecHullMaxs, 1.9);
 	

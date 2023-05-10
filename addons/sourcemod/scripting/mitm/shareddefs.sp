@@ -247,6 +247,20 @@ enum SpawnLocationResult
 	SPAWN_LOCATION_TELEPORTER
 };
 
+//--------------------------------------------------------------------------
+// BUILDING
+//--------------------------------------------------------------------------
+// Build checks will return one of these for a player
+enum
+{
+	CB_CAN_BUILD,			// Player is allowed to build this object
+	CB_CANNOT_BUILD,		// Player is not allowed to build this object
+	CB_LIMIT_REACHED,		// Player has reached the limit of the number of these objects allowed
+	CB_NEED_RESOURCES,		// Player doesn't have enough resources to build this object
+	CB_NEED_ADRENALIN,		// Commando doesn't have enough adrenalin to build a rally flag
+	CB_UNKNOWN_OBJECT,		// Error message, tried to build unknown object
+};
+
 enum taunts_t
 {
 	TAUNT_BASE_WEAPON,		// The standard taunt we shipped with. Taunts based on your currently held weapon

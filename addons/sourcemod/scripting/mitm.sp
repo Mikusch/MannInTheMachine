@@ -35,9 +35,6 @@
 #include <sourcescramble>
 #include <vscript>
 #include <mitm>
-#undef REQUIRE_EXTENSIONS
-#include <sendproxy>
-#define REQUIRE_EXTENSIONS
 
 // Uncomment this for diagnostic messages in server console (very verbose)
 // #define DEBUG
@@ -115,7 +112,6 @@ ConVar phys_pushscale;
 #include "mitm/natives.sp"
 #include "mitm/sdkcalls.sp"
 #include "mitm/sdkhooks.sp"
-#include "mitm/sendproxy.sp"
 #include "mitm/tf_bot_squad.sp"
 #include "mitm/util.sp"
 
@@ -271,7 +267,6 @@ public void OnClientPutInServer(int client)
 {
 	DHooks_OnClientPutInServer(client);
 	SDKHooks_OnClientPutInServer(client);
-	SendProxy_OnClientPutInServer(client);
 	
 	Player(client).Reset();
 	

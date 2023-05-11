@@ -525,7 +525,7 @@ ArrayList GetInvaderQueue(bool bMiniBoss = false)
 		queue.Push(client);
 	}
 	
-	queue.SortCustom(bMiniBoss ? SortPlayersByMinibossCount : SortPlayersByPriority);
+	queue.SortCustom(bMiniBoss ? SortPlayersByMinibossPriority : SortPlayersByPriority);
 	
 	return queue;
 }
@@ -546,13 +546,18 @@ int FindNextInvader(bool bMiniBoss)
 			// This player is becoming a miniboss
 			if (bMiniBoss)
 			{
-				Player(client).m_iMiniBossCount++;
+				Player(client).m_miniBossPriority = 0;
 			}
 		}
 		else
 		{
 			// Every player who doesn't get spawned gets a priority point
 			Player(client).m_invaderPriority++;
+			
+			if (bMiniBoss)
+			{
+				Player(client).m_miniBossPriority++;
+			}
 		}
 	}
 	delete queue;
@@ -626,14 +631,14 @@ int SortPlayersByPriority(int index1, int index2, Handle array, Handle hndl)
 	return Compare(Player(client2).m_invaderPriority, Player(client1).m_invaderPriority);
 }
 
-int SortPlayersByMinibossCount(int index1, int index2, Handle array, Handle hndl)
+int SortPlayersByMinibossPriority(int index1, int index2, Handle array, Handle hndl)
 {
 	ArrayList list = view_as<ArrayList>(array);
 	int client1 = list.Get(index1);
 	int client2 = list.Get(index2);
 	
-	// Sort by miniboss spawns
-	int c = Compare(Player(client1).m_iMiniBossCount, Player(client2).m_iMiniBossCount);
+	// Sort by highest miniboss priority
+	int c = Compare(Player(client2).m_miniBossPriority, Player(client1).m_miniBossPriority);
 	
 	// Sort by highest priority
 	if (c == 0)

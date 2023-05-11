@@ -49,7 +49,7 @@ static bool m_isWaitingForFullReload[MAXPLAYERS + 1];
 
 // Non-resetting Properties
 static int m_invaderPriority[MAXPLAYERS + 1];
-static int m_iMiniBossCount[MAXPLAYERS + 1];
+static int m_miniBossPriority[MAXPLAYERS + 1];
 static int m_defenderQueuePoints[MAXPLAYERS + 1];
 static int m_preferences[MAXPLAYERS + 1];
 static Party m_party[MAXPLAYERS + 1];
@@ -231,15 +231,15 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
-	property int m_iMiniBossCount
+	property int m_miniBossPriority
 	{
 		public get()
 		{
-			return m_iMiniBossCount[this.index];
+			return m_miniBossPriority[this.index];
 		}
-		public set(int iMiniBossCount)
+		public set(int miniBossPriority)
 		{
-			m_iMiniBossCount[this.index] = iMiniBossCount;
+			m_miniBossPriority[this.index] = miniBossPriority;
 		}
 	}
 	
@@ -1463,7 +1463,7 @@ methodmap Player < CBaseCombatCharacter
 	public void Reset()
 	{
 		this.m_invaderPriority = 0;
-		this.m_iMiniBossCount = 0;
+		this.m_miniBossPriority = 0;
 		this.m_defenderQueuePoints = -1;
 		this.m_preferences = -1;
 		this.m_party = NULL_PARTY;

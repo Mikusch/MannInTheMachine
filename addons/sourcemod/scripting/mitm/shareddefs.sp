@@ -26,7 +26,7 @@
 #define VEC_HULL_MAX	{ 24.0, 24.0, 82.0 }
 
 #define INT_MAX	0x7FFFFFFF
-#define FLT_MAX	view_as<float>(INT_MAX)
+#define FLT_MAX	view_as<float>(0x7F7FFFFF)
 
 #define INVALID_ITEM_DEF_INDEX	(0xFFFF)
 

@@ -79,6 +79,7 @@ void DHooks_Init(GameData hGameData)
 	CreateDynamicDetour(hGameData, "CSpawnLocation::FindSpawnLocation", _, DHookCallback_FindSpawnLocation_Post);
 	CreateDynamicDetour(hGameData, "CTraceFilterObject::ShouldHitEntity", _, DHookCallback_ShouldHitEntity_Post);
 	CreateDynamicDetour(hGameData, "CLagCompensationManager::StartLagCompensation", DHookCallback_StartLagCompensation_Pre, DHookCallback_StartLagCompensation_Post);
+	CreateDynamicDetour(hGameData, "CUniformRandomStream::SetSeed", DHookCallback_SetSeed_Pre);
 	CreateDynamicDetour(hGameData, "DoTeleporterOverride", _, DHookCallback_DoTeleporterOverride_Post);
 	CreateDynamicDetour(hGameData, "OnBotTeleported", DHookCallback_OnBotTeleported_Pre);
 	
@@ -1360,6 +1361,18 @@ static MRESReturn DHookCallback_StartLagCompensation_Post(DHookParam params)
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
 		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
+	}
+	
+	return MRES_Ignored;
+}
+
+static MRESReturn DHookCallback_SetSeed_Pre(DHookParam params)
+{
+	if (g_bInEndlessRollEscalation)
+	{
+		// force endless to be truly random
+		params.Set(1, GetRandomInt(0, INT_MAX));
+		return MRES_ChangedHandled;
 	}
 	
 	return MRES_Ignored;

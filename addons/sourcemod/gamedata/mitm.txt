@@ -284,6 +284,12 @@
 				"linux"		"@_ZN23CLagCompensationManager20StartLagCompensationEP11CBasePlayerP8CUserCmd"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x24\x57\x8B\xF9\x89\x7D\xE8"
 			}
+			"CUniformRandomStream::SetSeed"
+			{
+				"library"	"vstdlib"
+				"linux"		"@_ZN20CUniformRandomStream7SetSeedEi"
+				"windows"	"@?SetSeed@CUniformRandomStream@@UAEXH@Z"
+			}
 			"CTFBotHintEngineerNest::IsStaleNest"
 			{
 				"linux"		"@_ZNK22CTFBotHintEngineerNest11IsStaleNestEv"
@@ -1099,6 +1105,20 @@
 					"cmd"
 					{
 						"type"	"objectptr"
+					}
+				}
+			}
+			"CUniformRandomStream::SetSeed"
+			{
+				"signature"	"CUniformRandomStream::SetSeed"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"ignore"
+				"arguments"
+				{
+					"iSeed"
+					{
+						"type"	"int"
 					}
 				}
 			}

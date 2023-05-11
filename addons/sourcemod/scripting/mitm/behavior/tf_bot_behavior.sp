@@ -130,7 +130,12 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 				// pause spawn timer while stunned
 				if (!TF2_IsPlayerInCondition(actor, TFCond_Dazed))
 				{
-					Player(actor).m_flSpawnTimeLeft -= interval;
+					float velocity[3];
+					Player(actor).GetAbsVelocity(velocity);
+					
+					// as long as they are moving, slow down the timer drastically
+					float flTimeToSubtract = GetVectorLength(velocity) >= GetEntPropFloat(actor, Prop_Send, "m_flMaxspeed") ? (interval / 4) : interval;
+					Player(actor).m_flSpawnTimeLeft -= flTimeToSubtract;
 					
 					if (Player(actor).m_flSpawnTimeLeft <= 0.0)
 					{

@@ -23,7 +23,7 @@ void ConVars_Init()
 	mitm_developer = CreateConVar("mitm_developer", "0", "Toggle plugin developer mode.");
 	mitm_defender_count = CreateConVar("mitm_defender_count", "6", "Amount of defenders.", _, true, 1.0, true, 10.0);
 	mitm_custom_upgrades_file = CreateConVar("mitm_custom_upgrades_file", "", "Path to custom upgrades file, set to an empty string to use the default.");
-	mitm_spawn_hurry_time = CreateConVar("mitm_spawn_hurry_time", "20", "The base time invaders have to leave their spawn, in seconds.");
+	mitm_spawn_hurry_time = CreateConVar("mitm_spawn_hurry_time", "10", "The base time invaders have to leave their spawn, in seconds.");
 	mitm_queue_points = CreateConVar("mitm_queue_points", "5", "Amount of queue points awarded to players that did not become defenders.", _, true, 1.0);
 	mitm_rename_robots = CreateConVar("mitm_rename_robots", "0", "Whether to rename robots as they spawn.");
 	mitm_annotation_lifetime = CreateConVar("mitm_annotation_lifetime", "60", "The lifetime of annotations shown to clients, in seconds.", _, true, 1.0);

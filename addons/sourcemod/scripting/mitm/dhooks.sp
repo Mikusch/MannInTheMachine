@@ -1255,12 +1255,12 @@ static MRESReturn DHookCallback_CanBuild_Post(int player, DHookReturn ret, DHook
 			// teleporter: only exit can be built with teleporter hint
 			case TFObject_Teleporter, TFObject_Sapper:
 			{
-				bDisallowBuilding = (iObjectMode == TFObjectMode_Entrance) || FindTeleporterHintForPlayer(player) == -1;
+				bDisallowBuilding = (iObjectMode == TFObjectMode_Entrance) || (FindTeleporterHintForPlayer(player) == -1);
 			}
 			// sentry: can only be built with sentry hint
 			case TFObject_Sentry:
 			{
-				bDisallowBuilding = FindSentryHintForPlayer(player) == -1;
+				bDisallowBuilding = (FindSentryHintForPlayer(player) == -1);
 			}
 		}
 		

@@ -114,6 +114,8 @@ static void SDKHookCB_BotHintEngineerNest_ThinkPost(int entity)
 {
 	if (!g_bHasActiveTeleporterPre && GetEntProp(entity, Prop_Send, "m_bHasActiveTeleporter"))
 	{
+		BroadcastSound(255, "Announcer.MVM_Engineer_Teleporter_Activated");
+		
 		CUtlVector m_teleporters = CUtlVector(GetEntityAddress(entity) + GetOffset("CTFBotHintEngineerNest", "m_teleporters"));
 		for (int i = 0; i < m_teleporters.Count(); ++i)
 		{

@@ -307,7 +307,7 @@ static MRESReturn DHookCallback_RestoreCheckpoint_Pre(int populator)
 {
 	// NOTE: RestoreCheckpoint is called twice after a call to ResetMap().
 	// After waiting for players ends, it will call this function again while `m_bIsInitialized` is `false`, then set it to `true`.
-	// This technically starts waiting for players again, but we force it to terminate immediately on the second call.
+	// This technically starts waiting for players again on the first call, but we force it to terminate immediately on the second call.
 	if (CPopulationManager(populator).m_bIsInitialized)
 	{
 		if (g_bInWaitingForPlayers)

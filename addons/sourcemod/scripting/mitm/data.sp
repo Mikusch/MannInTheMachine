@@ -2152,19 +2152,6 @@ methodmap CTFObjectiveResource < CBaseEntity
 	}
 }
 
-methodmap CMannVsMachineStats < CBaseEntity
-{
-	public CMannVsMachineStats(int entity)
-	{
-		return view_as<CMannVsMachineStats>(entity);
-	}
-	
-	public int GetCurrentWave()
-	{
-		return this.GetProp(Prop_Send, "m_iCurrentWaveIdx");
-	}
-}
-
 methodmap CTFGameRules < CBaseEntity
 {
 	public CTFGameRules(int entity)

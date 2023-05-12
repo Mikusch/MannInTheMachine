@@ -209,14 +209,13 @@ static void EventHook_ObjectDestroyed(Event event, const char[] name, bool dontB
 
 static void EventHook_TeamplayRoundStart(Event event, const char[] name, bool dontBroadcast)
 {
-	if (g_pMVMStats.GetCurrentWave() == 0 && !g_hWaitingForPlayersTimer)
+	if (g_nRoundRestarts++ == 0)
 	{
+		// On first round start, begin waiting for players
 		g_bInWaitingForPlayers = true;
 		
-		// Show the "Waiting For Players" text
 		tf_mvm_min_players_to_start.IntValue = MaxClients + 1;
-		
-		g_hWaitingForPlayersTimer = CreateTimer(mp_waitingforplayers_time.FloatValue, Timer_OnWaitingForPlayersEnd);
+		CreateTimer(mp_waitingforplayers_time.FloatValue, Timer_OnWaitingForPlayersEnd);
 	}
 	else
 	{

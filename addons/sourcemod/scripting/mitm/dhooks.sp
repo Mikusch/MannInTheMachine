@@ -305,9 +305,9 @@ static MRESReturn DHookCallback_EndlessRollEscalation_Post(int populator)
 
 static MRESReturn DHookCallback_RestoreCheckpoint_Pre(int populator)
 {
-	if (!g_bInWaitingForPlayers)
+	if (g_nRoundRestarts > 0)
 	{
-		// The populator calls this multiple times, but we only want it once...
+		// the populator calls this twice for some reason
 		if (g_flNextRestoreCheckpointTime < GetGameTime())
 		{
 			g_flNextRestoreCheckpointTime = GetGameTime() + 0.1;

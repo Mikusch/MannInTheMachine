@@ -42,13 +42,12 @@
 // Global entities
 CPopulationManager g_pPopulationManager = view_as<CPopulationManager>(INVALID_ENT_REFERENCE);
 CTFObjectiveResource g_pObjectiveResource = view_as<CTFObjectiveResource>(INVALID_ENT_REFERENCE);
-CMannVsMachineStats g_pMVMStats = view_as<CMannVsMachineStats>(INVALID_ENT_REFERENCE);
 CTFGameRules g_pGameRules = view_as<CTFGameRules>(INVALID_ENT_REFERENCE);
 
 // Other globals
 Handle g_hWarningHudSync;
-Handle g_hWaitingForPlayersTimer;
 bool g_bInWaitingForPlayers;
+int g_nRoundRestarts;
 bool g_bAllowTeamChange;
 bool g_bForceFriendlyFire;
 bool g_bInEndlessRollEscalation;
@@ -228,8 +227,8 @@ public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int maxlen)
 
 public void OnMapStart()
 {
-	g_hWaitingForPlayersTimer = null;
 	g_bInWaitingForPlayers = false;
+	g_nRoundRestarts = 0;
 	g_flNextRestoreCheckpointTime = 0.0;
 	
 	PrecacheSound("ui/system_message_alert.wav");
@@ -313,10 +312,6 @@ public void OnEntityCreated(int entity, const char[] classname)
 	else if (StrEqual(classname, "tf_objective_resource"))
 	{
 		g_pObjectiveResource = CTFObjectiveResource(EntIndexToEntRef(entity));
-	}
-	else if (StrEqual(classname, "tf_mann_vs_machine_stats"))
-	{
-		g_pMVMStats = CMannVsMachineStats(EntIndexToEntRef(entity));
 	}
 	else if (StrEqual(classname, "tf_gamerules"))
 	{

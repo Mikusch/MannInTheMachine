@@ -561,6 +561,11 @@
 				"linux"		"1229"
 				"windows"	"1229"
 			}
+			"CPopulationManager::m_bIsInitialized"
+			{
+				"linux"		"620"
+				"windows"	"620"
+			}
 			"CPopulationManager::m_canBotsAttackWhileInSpawnRoom"
 			{
 				"linux"		"645"

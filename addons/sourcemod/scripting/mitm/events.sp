@@ -29,7 +29,6 @@ void Events_Init()
 	HookEvent("player_builtobject", EventHook_PlayerBuiltObject);
 	HookEvent("object_destroyed", EventHook_ObjectDestroyed);
 	HookEvent("object_detonated", EventHook_ObjectDestroyed);
-	HookEvent("teamplay_round_start", EventHook_TeamplayRoundStart);
 	HookEvent("teamplay_point_captured", EventHook_TeamplayPointCaptured);
 	HookEvent("teams_changed", EventHook_TeamsChanged);
 }
@@ -207,24 +206,6 @@ static void EventHook_ObjectDestroyed(Event event, const char[] name, bool dontB
 	}
 }
 
-static void EventHook_TeamplayRoundStart(Event event, const char[] name, bool dontBroadcast)
-{
-	if (g_nRoundRestarts++ == 0)
-	{
-		// On first round start, begin waiting for players
-		g_bInWaitingForPlayers = true;
-		
-		tf_mvm_min_players_to_start.IntValue = MaxClients + 1;
-		CreateTimer(mp_waitingforplayers_time.FloatValue, Timer_OnWaitingForPlayersEnd);
-	}
-	else
-	{
-		g_bInWaitingForPlayers = false;
-		
-		tf_mvm_min_players_to_start.IntValue = 0;
-	}
-}
-
 static void EventHook_TeamplayPointCaptured(Event event, const char[] name, bool dontBroadcast)
 {
 	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
@@ -260,20 +241,6 @@ static void EventHook_TeamsChanged(Event event, const char[] name, bool dontBroa
 static void RequestFrameCallback_FindReplacementDefender()
 {
 	FindReplacementDefender();
-}
-
-static void Timer_OnWaitingForPlayersEnd(Handle timer)
-{
-	if (!g_bInWaitingForPlayers)
-		return;
-	
-	tf_mvm_min_players_to_start.IntValue = 0;
-	g_bInWaitingForPlayers = false;
-	
-	if (g_pPopulationManager.IsValid())
-	{
-		g_pPopulationManager.ResetMap();
-	}
 }
 
 static Action Timer_CheckGateBotAnnotation(Handle timer, int userid)

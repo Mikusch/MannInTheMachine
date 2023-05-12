@@ -1795,6 +1795,18 @@ methodmap CPopulationManager < CBaseEntity
 		return view_as<CPopulationManager>(entity);
 	}
 	
+	property bool m_bIsInitialized
+	{
+		public get()
+		{
+			return GetEntData(this.index, GetOffset("CPopulationManager", "m_bIsInitialized"), 1) != 0;
+		}
+		public set(bool bIsInitialized)
+		{
+			SetEntData(this.index, GetOffset("CPopulationManager", "m_bIsInitialized"), bIsInitialized, 1);
+		}
+	}
+	
 	property bool m_canBotsAttackWhileInSpawnRoom
 	{
 		public get()

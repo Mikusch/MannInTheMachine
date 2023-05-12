@@ -305,18 +305,40 @@ static MRESReturn DHookCallback_EndlessRollEscalation_Post(int populator)
 
 static MRESReturn DHookCallback_RestoreCheckpoint_Pre(int populator)
 {
-	if (g_nRoundRestarts > 0)
+	// NOTE: RestoreCheckpoint is called twice after a call to ResetMap().
+	// After waiting for players ends, it will call this function again while `m_bIsInitialized` is `false`, then set it to `true`.
+	// This technically starts waiting for players again, but we force it to terminate immediately on the second call.
+	if (CPopulationManager(populator).m_bIsInitialized)
 	{
-		// the populator calls this twice for some reason
-		if (g_flNextRestoreCheckpointTime < GetGameTime())
+		if (g_bInWaitingForPlayers)
 		{
-			g_flNextRestoreCheckpointTime = GetGameTime() + 0.1;
-			
-			SelectNewDefenders();
+			g_bInWaitingForPlayers = false;
+			tf_mvm_min_players_to_start.IntValue = 0;
 		}
+		
+		SelectNewDefenders();
+	}
+	else
+	{
+		g_bInWaitingForPlayers = true;
+		tf_mvm_min_players_to_start.IntValue = MaxClients + 1;
+		
+		CreateTimer(mp_waitingforplayers_time.FloatValue, Timer_OnWaitingForPlayersEnd);
 	}
 	
 	return MRES_Ignored;
+}
+
+static void Timer_OnWaitingForPlayersEnd(Handle timer)
+{
+	if (!g_bInWaitingForPlayers)
+		return;
+	
+	if (g_pPopulationManager.IsValid())
+	{
+		g_pPopulationManager.m_bIsInitialized = false;
+		g_pPopulationManager.ResetMap();
+	}
 }
 
 /*

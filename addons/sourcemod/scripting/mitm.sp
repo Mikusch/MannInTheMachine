@@ -47,11 +47,9 @@ CTFGameRules g_pGameRules = view_as<CTFGameRules>(INVALID_ENT_REFERENCE);
 // Other globals
 Handle g_hWarningHudSync;
 bool g_bInWaitingForPlayers;
-int g_nRoundRestarts;
 bool g_bAllowTeamChange;
 bool g_bForceFriendlyFire;
 bool g_bInEndlessRollEscalation;
-float g_flNextRestoreCheckpointTime;
 
 // Plugin ConVars
 ConVar mitm_developer;
@@ -228,8 +226,6 @@ public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int maxlen)
 public void OnMapStart()
 {
 	g_bInWaitingForPlayers = false;
-	g_nRoundRestarts = 0;
-	g_flNextRestoreCheckpointTime = 0.0;
 	
 	PrecacheSound("ui/system_message_alert.wav");
 	PrecacheSound(")mvm/mvm_tele_activate.wav");

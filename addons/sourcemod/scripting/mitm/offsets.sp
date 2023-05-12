@@ -43,6 +43,7 @@ void Offsets_Init(GameData hGameData)
 	SetOffset(hGameData, "CWaveSpawnPopulator", "m_bSupportWave");
 	SetOffset(hGameData, "CWaveSpawnPopulator", "m_bLimitedSupport");
 	
+	SetOffset(hGameData, "CPopulationManager", "m_bIsInitialized");
 	SetOffset(hGameData, "CPopulationManager", "m_canBotsAttackWhileInSpawnRoom");
 	SetOffset(hGameData, "CPopulationManager", "m_bSpawningPaused");
 	SetOffset(hGameData, "CPopulationManager", "m_EndlessActiveBotUpgrades");

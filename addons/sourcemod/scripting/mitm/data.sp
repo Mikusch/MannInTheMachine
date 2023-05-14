@@ -786,7 +786,7 @@ methodmap Player < CBaseCombatCharacter
 		this.SetProp(Prop_Send, "m_nCurrency", nAmount);
 	}
 	
-	public void SetWaveSpawnPopulator(Address pWave)
+	public void SetWaveSpawnPopulator(CWaveSpawnPopulator pWave)
 	{
 		this.m_pWaveSpawnPopulator = pWave;
 	}

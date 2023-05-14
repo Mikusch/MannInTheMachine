@@ -341,14 +341,9 @@ static void Timer_OnWaitingForPlayersEnd(Handle timer)
 	}
 }
 
-/*
- * This detour supercedes the original function and recreates it
- * as accurately as possible to spawn players instead of bots.
- */
-static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookReturn ret, DHookParam params)
+// The meat of the spawning logic. Any error happening in here WILL cause bots to spawn!
+static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(CTFBotSpawner spawner, DHookReturn ret, DHookParam params)
 {
-	CTFBotSpawner spawner = CTFBotSpawner(pThis);
-	
 	float rawHere[3];
 	params.GetVector(1, rawHere);
 	
@@ -658,9 +653,8 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(Address pThis, DHookRetur
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_CSquadSpawnerSpawn_Post(Address pThis, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CSquadSpawnerSpawn_Post(CSquadSpawner spawner, DHookReturn ret, DHookParam params)
 {
-	CSquadSpawner spawner = CSquadSpawner(pThis);
 	CUtlVector result = CUtlVector(params.Get(2));
 	
 	if (ret.Value && result)
@@ -722,7 +716,7 @@ static MRESReturn DHookCallback_CPeriodicSpawnPopulatorUpdate_Post(Address pThis
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_CWaveSpawnPopulatorUpdate_Post(Address pThis)
+static MRESReturn DHookCallback_CWaveSpawnPopulatorUpdate_Post(CWaveSpawnPopulator populator)
 {
 	for (int i = 0; i < m_justSpawnedList.Length; i++)
 	{
@@ -730,17 +724,17 @@ static MRESReturn DHookCallback_CWaveSpawnPopulatorUpdate_Post(Address pThis)
 		if (IsEntityClient(player))
 		{
 			Player(player).SetCustomCurrencyWorth(0);
-			Player(player).SetWaveSpawnPopulator(pThis);
+			Player(player).SetWaveSpawnPopulator(populator);
 			
 			// Allows client UI to know if a specific spawner is active
 			g_pObjectiveResource.SetMannVsMachineWaveClassActive(Player(player).GetClassIconName());
 			
-			if (CWaveSpawnPopulator(pThis).IsSupportWave())
+			if (populator.IsSupportWave())
 			{
 				Player(player).MarkAsSupportEnemy();
 			}
 			
-			if (CWaveSpawnPopulator(pThis).IsLimitedSupportWave())
+			if (populator.IsLimitedSupportWave())
 			{
 				Player(player).MarkAsLimitedSupportEnemy();
 			}
@@ -759,9 +753,8 @@ static MRESReturn DHookCallback_CWaveSpawnPopulatorUpdate_Post(Address pThis)
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_UpdateMission_Pre(Address pThis, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_UpdateMission_Pre(CMissionPopulator populator, DHookReturn ret, DHookParam params)
 {
-	CMissionPopulator populator = CMissionPopulator(pThis);
 	MissionType mission = params.Get(1);
 	
 	ArrayList livePlayerList = new ArrayList();
@@ -863,9 +856,8 @@ static MRESReturn DHookCallback_UpdateMission_Post(Address pThis, DHookReturn re
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(Address pThis, DHookReturn ret)
+static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(CMissionPopulator populator, DHookReturn ret)
 {
-	CMissionPopulator populator = CMissionPopulator(pThis);
 	s_MissionPopulator = populator;
 	
 	if (!m_cooldownTimer.IsElapsed())
@@ -1052,7 +1044,7 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Post(Address pThis,
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int populatorInterface, DHookParam params)
+static MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int popInterface, DHookParam params)
 {
 	Address pszEventName = params.GetObjectVar(1, GetOffset("inputdata_t", "value"), ObjectValueType_Int);
 	

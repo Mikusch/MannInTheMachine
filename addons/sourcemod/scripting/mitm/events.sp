@@ -36,6 +36,8 @@ void Events_Init()
 static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
+	if (client == 0)
+		return;
 	
 	g_annotationTimer[client] = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
 }
@@ -43,6 +45,8 @@ static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroad
 static void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 {
 	int victim = GetClientOfUserId(event.GetInt("userid"));
+	if (victim == 0)
+		return;
 	
 	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
 	{
@@ -53,6 +57,9 @@ static void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroad
 static Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
+	if (client == 0)
+		return Plugin_Continue;
+	
 	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
 	
 	// Only show when a new defender joins
@@ -84,7 +91,10 @@ static Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroa
 static void EventHook_PostInventoryApplication(Event event, const char[] name, bool dontBroadcast)
 {
 	int userid = event.GetInt("userid");
+	
 	int client = GetClientOfUserId(userid);
+	if (client == 0)
+		return;
 	
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
@@ -96,39 +106,28 @@ static void EventHook_PostInventoryApplication(Event event, const char[] name, b
 static void RequestFrameCallback_ApplyWeaponRestrictions(int userid)
 {
 	int client = GetClientOfUserId(userid);
-	if (client)
+	if (client == 0)
+		return;
+	
+	// equip our required weapon
+	Player(client).EquipRequiredWeapon();
+	
+	// switch to special secondary weapon if we have one
+	int weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
+	if (weapon != -1)
 	{
-		// remove any weapons we aren't supposed to have
-		for (int iItemSlot = LOADOUT_POSITION_PRIMARY; iItemSlot < CLASS_LOADOUT_POSITION_COUNT; iItemSlot++)
+		int weaponID = TF2Util_GetWeaponID(weapon);
+		if (weaponID == TF_WEAPON_MEDIGUN ||
+			weaponID == TF_WEAPON_BUFF_ITEM ||
+			weaponID == TF_WEAPON_LUNCHBOX ||
+			weaponID == TF_WEAPON_JAR ||
+			weaponID == TF_WEAPON_JAR_MILK ||
+			weaponID == TF_WEAPON_JAR_GAS ||
+			weaponID == TF_WEAPON_ROCKETPACK ||
+			weaponID == TF_WEAPON_MECHANICAL_ARM ||
+			weaponID == TF_WEAPON_LASER_POINTER)
 		{
-			int entity = TF2Util_GetPlayerLoadoutEntity(client, iItemSlot);
-			if (Player(client).IsWeaponRestricted(entity))
-			{
-				RemovePlayerItem(client, entity);
-				RemoveEntity(entity);
-			}
-		}
-		
-		// equip our required weapon
-		Player(client).EquipRequiredWeapon();
-		
-		// switch to special secondary weapon if we have one
-		int weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
-		if (weapon != -1)
-		{
-			int weaponID = TF2Util_GetWeaponID(weapon);
-			if (weaponID == TF_WEAPON_MEDIGUN ||
-				weaponID == TF_WEAPON_BUFF_ITEM ||
-				weaponID == TF_WEAPON_LUNCHBOX ||
-				weaponID == TF_WEAPON_JAR ||
-				weaponID == TF_WEAPON_JAR_MILK ||
-				weaponID == TF_WEAPON_JAR_GAS ||
-				weaponID == TF_WEAPON_ROCKETPACK ||
-				weaponID == TF_WEAPON_MECHANICAL_ARM ||
-				weaponID == TF_WEAPON_LASER_POINTER)
-			{
-				TF2Util_SetPlayerActiveWeapon(client, weapon);
-			}
+			TF2Util_SetPlayerActiveWeapon(client, weapon);
 		}
 	}
 }

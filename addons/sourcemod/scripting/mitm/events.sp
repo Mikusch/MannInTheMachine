@@ -200,7 +200,7 @@ static void EventHook_ObjectDestroyed(Event event, const char[] name, bool dontB
 			float worldPos[3];
 			GetEntPropVector(index, Prop_Data, "m_vecAbsOrigin", worldPos);
 			
-			ShowAnnotation(client, MITM_HINT_MASK | client, text, _, worldPos, mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
+			ShowAnnotation(client, MITM_HINT_MASK | client, text, _, worldPos, sm_mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
 		}
 	}
 }
@@ -231,7 +231,7 @@ static void EventHook_TeamplayPointCaptured(Event event, const char[] name, bool
 
 static void EventHook_TeamsChanged(Event event, const char[] name, bool dontBroadcast)
 {
-	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && !mitm_developer.BoolValue)
+	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && !sm_mitm_developer.BoolValue)
 	{
 		RequestFrame(RequestFrameCallback_FindReplacementDefender);
 	}

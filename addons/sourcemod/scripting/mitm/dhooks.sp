@@ -430,7 +430,7 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 		
 		char name[MAX_NAME_LENGTH];
 		spawner.GetName(name, sizeof(name), "TFBot");
-		Player(newPlayer).SetInvaderName(name, mitm_rename_robots.BoolValue);
+		Player(newPlayer).SetInvaderName(name, sm_mitm_rename_robots.BoolValue);
 		
 		CBaseEntity(g_internalSpawnPoint).SetAbsOrigin(here);
 		CBaseEntity(g_internalSpawnPoint).SetLocalAngles(ZERO_VECTOR);
@@ -1070,7 +1070,7 @@ static MRESReturn DHookCallback_CPointPopulatorInterface_InputChangeBotAttribute
 
 static MRESReturn DHookCallback_CTFGameRules_PlayerReadyStatus_UpdatePlayerState_Pre(DHookParam params)
 {
-	if (mitm_setup_time.IntValue <= 0)
+	if (sm_mitm_setup_time.IntValue <= 0)
 		return MRES_Ignored;
 	
 	// Save off the old timer value
@@ -1081,7 +1081,7 @@ static MRESReturn DHookCallback_CTFGameRules_PlayerReadyStatus_UpdatePlayerState
 
 static MRESReturn DHookCallback_CTFGameRules_PlayerReadyStatus_UpdatePlayerState_Post(DHookParam params)
 {
-	if (mitm_setup_time.IntValue <= 0)
+	if (sm_mitm_setup_time.IntValue <= 0)
 		return MRES_Ignored;
 	
 	// If m_flRestartRoundTime is -1.0 at this point, all players have toggled off ready
@@ -1127,7 +1127,7 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 		ret.Value = TFTeam_Defenders;
 		return MRES_Supercede;
 	}
-	else if (g_bAllowTeamChange || (mitm_developer.BoolValue && !IsFakeClient(player)))
+	else if (g_bAllowTeamChange || (sm_mitm_developer.BoolValue && !IsFakeClient(player)))
 	{
 		// allow player through
 		ret.Value = nDesiredTeam;
@@ -1135,7 +1135,7 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 	}
 	else
 	{
-		if (nDesiredTeam == TFTeam_Spectator && TF2_GetClientTeam(player) == TFTeam_Invaders && !mitm_invader_allow_suicide.BoolValue)
+		if (nDesiredTeam == TFTeam_Spectator && TF2_GetClientTeam(player) == TFTeam_Invaders && !sm_mitm_invader_allow_suicide.BoolValue)
 		{
 			if (IsPlayerAlive(player))
 			{
@@ -1152,7 +1152,7 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 			return MRES_Supercede;
 		}
 		
-		int iDefenderCount = 0, iReqDefenderCount = mitm_defender_count.IntValue;
+		int iDefenderCount = 0, iReqDefenderCount = sm_mitm_defender_count.IntValue;
 		
 		// collect all valid players
 		for (int client = 1; client <= MaxClients; client++)

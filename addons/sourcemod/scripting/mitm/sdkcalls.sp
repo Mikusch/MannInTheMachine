@@ -641,7 +641,7 @@ static Handle PrepSDKCall_CBaseTrigger_PassesTriggerFilters(GameData hGameData)
 	return call;
 }
 
-Address SDKCall_GetClassIcon(any spawner, int nSpawnNum = -1)
+Address SDKCall_GetClassIcon(Address spawner, int nSpawnNum = -1)
 {
 	Address result;
 	
@@ -710,7 +710,7 @@ bool SDKCall_CTFPlayer_DoClassSpecialSkill(int player)
 	return false;
 }
 
-void SDKCall_CTFPlayerShared_ResetRageBuffs(any m_Shared)
+void SDKCall_CTFPlayerShared_ResetRageBuffs(Address m_Shared)
 {
 	if (g_hSDKCall_CTFPlayerShared_ResetRageBuffs)
 		SDKCall(g_hSDKCall_CTFPlayerShared_ResetRageBuffs, m_Shared);
@@ -862,7 +862,7 @@ void SDKCall_CTFPlayer_RemoveObject(int player, int obj)
 		SDKCall(g_hSDKCall_CTFPlayer_RemoveObject, player, obj);
 }
 
-bool SDKCall_GetBombInfo(any pBombInfo = Address_Null)
+bool SDKCall_GetBombInfo(BombInfo_t pBombInfo = view_as<BombInfo_t>(Address_Null))
 {
 	if (g_hSDKCall_GetBombInfo)
 		return SDKCall(g_hSDKCall_GetBombInfo, pBombInfo);

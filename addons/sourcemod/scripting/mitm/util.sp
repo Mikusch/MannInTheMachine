@@ -343,7 +343,7 @@ void SelectNewDefenders()
 	}
 	
 	ArrayList queue = Queue_GetDefenderQueue();
-	int iDefenderCount = 0, iReqDefenderCount = mitm_defender_count.IntValue;
+	int iDefenderCount = 0, iReqDefenderCount = sm_mitm_defender_count.IntValue;
 	
 	// Select our defenders
 	for (int i = 0; i < queue.Length; i++)
@@ -434,8 +434,8 @@ void SelectNewDefenders()
 		}
 		else if (!Player(client).HasPreference(PREF_DISABLE_SPAWNING))
 		{
-			Queue_AddPoints(client, mitm_queue_points.IntValue);
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname, mitm_queue_points.IntValue, Player(client).m_defenderQueuePoints);
+			Queue_AddPoints(client, sm_mitm_queue_points.IntValue);
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname, sm_mitm_queue_points.IntValue, Player(client).m_defenderQueuePoints);
 		}
 	}
 	
@@ -1070,7 +1070,7 @@ void ShowGateBotAnnotation(int client)
 				char text[64];
 				Format(text, sizeof(text), "%T", "Invader_CaptureGate_Annotation", client, iszPrintName);
 				
-				ShowAnnotation(client, MITM_HINT_MASK | client, text, _, center, mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
+				ShowAnnotation(client, MITM_HINT_MASK | client, text, _, center, sm_mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
 				return;
 			}
 		}

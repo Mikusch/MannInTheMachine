@@ -179,7 +179,7 @@ static int Update(CTFBotMvMEngineerIdle action, int actor, float interval)
 		bool bShouldTeleportToHint = Player(actor).HasAttribute(TELEPORT_TO_HINT);
 		bool bShouldCheckForBlockingObject = !action.m_bTeleportedToHint && bShouldTeleportToHint;
 		int newNest = -1;
-		if (!SDKCall_FindHint(bShouldCheckForBlockingObject, !bShouldTeleportToHint, newNest))
+		if (!SDKCall_CTFBotMvMEngineerHintFinder_FindHint(bShouldCheckForBlockingObject, !bShouldTeleportToHint, newNest))
 		{
 			// try again next time
 			return action.Continue();
@@ -193,12 +193,12 @@ static int Update(CTFBotMvMEngineerIdle action, int actor, float interval)
 		
 		action.m_nestHint = newNest;
 		SetEntityOwner(action.m_nestHint, actor);
-		action.m_sentryHint = SDKCall_GetSentryHint(action.m_nestHint);
+		action.m_sentryHint = SDKCall_CTFBotHintEngineerNest_GetSentryHint(action.m_nestHint);
 		TakeOverStaleNest(action.m_sentryHint, actor);
 		
 		if (Player(actor).m_teleportWhereName.Length > 0)
 		{
-			action.m_teleporterHint = SDKCall_GetTeleporterHint(action.m_nestHint);
+			action.m_teleporterHint = SDKCall_CTFBotHintEngineerNest_GetTeleporterHint(action.m_nestHint);
 			TakeOverStaleNest(action.m_teleporterHint, actor);
 		}
 	}
@@ -337,9 +337,9 @@ static void TryToDetonateStaleNest(CTFBotMvMEngineerIdle action)
 	for (int i = 0; i < activeEngineerNest.Length; ++i)
 	{
 		int nest = activeEngineerNest.Get(i);
-		if (SDKCall_IsStaleNest(nest))
+		if (SDKCall_CTFBotHintEngineerNest_IsStaleNest(nest))
 		{
-			SDKCall_DetonateStaleNest(nest);
+			SDKCall_CTFBotHintEngineerNest_DetonateStaleNest(nest);
 		}
 	}
 	

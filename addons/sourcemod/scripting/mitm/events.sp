@@ -146,12 +146,12 @@ static void EventHook_PlayerBuiltObject(Event event, const char[] name, bool don
 		// CTFBotMvMEngineerBuildTeleportExit
 		if (type == TFObject_Teleporter && TF2_GetObjectMode(index) == TFObjectMode_Exit)
 		{
-			SDKCall_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Red);
+			SDKCall_CTFGameRules_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Red);
 			
 			Entity(index).SetTeleportWhere(Player(builder).m_teleportWhereName);
 			
 			// engineer bots create level 1 teleporters with increased health
-			int iHealth = RoundToFloor(SDKCall_GetMaxHealthForCurrentLevel(index) * tf_bot_engineer_building_health_multiplier.FloatValue);
+			int iHealth = RoundToFloor(SDKCall_CBaseObject_GetMaxHealthForCurrentLevel(index) * tf_bot_engineer_building_health_multiplier.FloatValue);
 			SetEntProp(index, Prop_Data, "m_iMaxHealth", iHealth);
 			SetEntProp(index, Prop_Data, "m_iHealth", iHealth);
 			
@@ -165,7 +165,7 @@ static void EventHook_PlayerBuiltObject(Event event, const char[] name, bool don
 		// CTFBotMvMEngineerBuildSentryGun
 		else if (type == TFObject_Sentry)
 		{
-			SDKCall_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Red);
+			SDKCall_CTFGameRules_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Red);
 			
 			// engineer bots create pre-built level 3 sentry guns
 			SetEntProp(index, Prop_Data, "m_nDefaultUpgradeLevel", 2);
@@ -200,7 +200,7 @@ static void EventHook_ObjectDestroyed(Event event, const char[] name, bool dontB
 			float worldPos[3];
 			GetEntPropVector(index, Prop_Data, "m_vecAbsOrigin", worldPos);
 			
-			ShowAnnotation(client, MITM_HINT_MASK | client, text, _, worldPos, mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
+			ShowAnnotation(client, MITM_HINT_MASK | client, text, _, worldPos, sm_mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
 		}
 	}
 }
@@ -231,7 +231,7 @@ static void EventHook_TeamplayPointCaptured(Event event, const char[] name, bool
 
 static void EventHook_TeamsChanged(Event event, const char[] name, bool dontBroadcast)
 {
-	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && !mitm_developer.BoolValue)
+	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && !sm_mitm_developer.BoolValue)
 	{
 		RequestFrame(RequestFrameCallback_FindReplacementDefender);
 	}

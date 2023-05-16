@@ -898,7 +898,7 @@ methodmap Player < CBaseCombatCharacter
 						if (entity != -1)
 						{
 							// update model incase we change style
-							SDKCall_UpdateModelToClass(entity);
+							SDKCall_CEconEntity_UpdateModelToClass(entity);
 						}
 						
 						// move on to the next set of attributes
@@ -981,7 +981,7 @@ methodmap Player < CBaseCombatCharacter
 					}
 				}
 				
-				SDKCall_PostInventoryApplication(this.index);
+				SDKCall_CTFPlayer_PostInventoryApplication(this.index);
 			}
 			delete item;
 		}
@@ -1226,12 +1226,12 @@ methodmap Player < CBaseCombatCharacter
 	
 	public float CalculateSpawnTime()
 	{
-		if (mitm_spawn_hurry_time.FloatValue <= 0.0)
+		if (sm_mitm_spawn_hurry_time.FloatValue <= 0.0)
 			return -1.0;
 		
 		// factor in squad speed
 		float flSpeed = this.IsInASquad() ? this.GetSquad().GetSlowestMemberSpeed() : this.GetPropFloat(Prop_Send, "m_flMaxspeed");
-		return mitm_spawn_hurry_time.FloatValue + (mitm_spawn_hurry_time.FloatValue * (300.0 / flSpeed));
+		return sm_mitm_spawn_hurry_time.FloatValue + (sm_mitm_spawn_hurry_time.FloatValue * (300.0 / flSpeed));
 	}
 	
 	public bool ShouldAutoJump()
@@ -1856,27 +1856,27 @@ methodmap CPopulationManager < CBaseEntity
 	
 	public void ResetMap()
 	{
-		SDKCall_ResetMap(this.index);
+		SDKCall_CPopulationManager_ResetMap(this.index);
 	}
 	
 	public CWave GetCurrentWave()
 	{
-		return CWave(SDKCall_GetCurrentWave(this.index));
+		return CWave(SDKCall_CPopulationManager_GetCurrentWave(this.index));
 	}
 	
 	public bool IsInEndlessWaves()
 	{
-		return SDKCall_IsInEndlessWaves(this.index);
+		return SDKCall_CPopulationManager_IsInEndlessWaves(this.index);
 	}
 	
 	public float GetHealthMultiplier(bool bIsTank = false)
 	{
-		return SDKCall_GetHealthMultiplier(this.index, bIsTank);
+		return SDKCall_CPopulationManager_GetHealthMultiplier(this.index, bIsTank);
 	}
 	
 	public void GetSentryBusterDamageAndKillThreshold(int &nDamage, int &nKills)
 	{
-		SDKCall_GetSentryBusterDamageAndKillThreshold(this.index, nDamage, nKills);
+		SDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold(this.index, nDamage, nKills);
 	}
 	
 	public void EndlessSetAttributesForBot(int player)

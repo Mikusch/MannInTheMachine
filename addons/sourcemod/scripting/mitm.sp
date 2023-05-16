@@ -52,18 +52,18 @@ bool g_bForceFriendlyFire;
 bool g_bInEndlessRollEscalation;
 
 // Plugin ConVars
-ConVar mitm_developer;
-ConVar mitm_defender_count;
-ConVar mitm_custom_upgrades_file;
-ConVar mitm_spawn_hurry_time;
-ConVar mitm_queue_points;
-ConVar mitm_rename_robots;
-ConVar mitm_annotation_lifetime;
-ConVar mitm_invader_allow_suicide;
-ConVar mitm_party_enabled;
-ConVar mitm_party_max_size;
-ConVar mitm_setup_time;
-ConVar mitm_max_spawn_deaths;
+ConVar sm_mitm_developer;
+ConVar sm_mitm_defender_count;
+ConVar sm_mitm_custom_upgrades_file;
+ConVar sm_mitm_spawn_hurry_time;
+ConVar sm_mitm_queue_points;
+ConVar sm_mitm_rename_robots;
+ConVar sm_mitm_annotation_lifetime;
+ConVar sm_mitm_invader_allow_suicide;
+ConVar sm_mitm_party_enabled;
+ConVar sm_mitm_party_max_size;
+ConVar sm_mitm_setup_time;
+ConVar sm_mitm_max_spawn_deaths;
 
 // Game ConVars
 ConVar tf_avoidteammates_pushaway;
@@ -250,7 +250,7 @@ public void OnMapStart()
 public void OnConfigsExecuted()
 {
 	char path[PLATFORM_MAX_PATH];
-	mitm_custom_upgrades_file.GetString(path, sizeof(path));
+	sm_mitm_custom_upgrades_file.GetString(path, sizeof(path));
 	
 	if (path[0] && g_pGameRules.IsValid())
 	{
@@ -489,14 +489,14 @@ static void FireWeaponAtEnemy(int client, int &buttons)
 	{
 		if (Player(client).HasAttribute(HOLD_FIRE_UNTIL_FULL_RELOAD) || tf_bot_always_full_reload.BoolValue)
 		{
-			if (SDKCall_Clip1(myWeapon) <= 0)
+			if (SDKCall_CBaseCombatWeapon_Clip1(myWeapon) <= 0)
 			{
 				Player(client).m_isWaitingForFullReload = true;
 			}
 			
 			if (Player(client).m_isWaitingForFullReload)
 			{
-				if (SDKCall_Clip1(myWeapon) < TF2Util_GetWeaponMaxClip(myWeapon))
+				if (SDKCall_CBaseCombatWeapon_Clip1(myWeapon) < TF2Util_GetWeaponMaxClip(myWeapon))
 				{
 					LockWeapon(client, myWeapon, buttons);
 					return;

@@ -343,7 +343,7 @@ void SelectNewDefenders()
 	}
 	
 	ArrayList queue = Queue_GetDefenderQueue();
-	int iDefenderCount = 0, iReqDefenderCount = mitm_defender_count.IntValue;
+	int iDefenderCount = 0, iReqDefenderCount = sm_mitm_defender_count.IntValue;
 	
 	// Select our defenders
 	for (int i = 0; i < queue.Length; i++)
@@ -434,8 +434,8 @@ void SelectNewDefenders()
 		}
 		else if (!Player(client).HasPreference(PREF_DISABLE_SPAWNING))
 		{
-			Queue_AddPoints(client, mitm_queue_points.IntValue);
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname, mitm_queue_points.IntValue, Player(client).m_defenderQueuePoints);
+			Queue_AddPoints(client, sm_mitm_queue_points.IntValue);
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname, sm_mitm_queue_points.IntValue, Player(client).m_defenderQueuePoints);
 		}
 	}
 	
@@ -708,7 +708,7 @@ bool TraceEntityFilter_IgnoreActorsAndFriendlyCombatItems(int entity, int conten
 	if (CBaseEntity(entity).MyCombatCharacterPointer())
 		return false;
 	
-	if (SDKCall_IsCombatItem(entity))
+	if (SDKCall_CBaseEntity_IsCombatItem(entity))
 	{
 		if (GetEntProp(entity, Prop_Data, "m_iTeamNum") == m_iIgnoreTeam)
 			return false;
@@ -971,7 +971,7 @@ int FindTeleporterHintForPlayer(int player)
 		int owner = GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity");
 		if (owner == player)
 		{
-			return SDKCall_GetTeleporterHint(hint);
+			return SDKCall_CTFBotHintEngineerNest_GetTeleporterHint(hint);
 		}
 	}
 	
@@ -986,7 +986,7 @@ int FindSentryHintForPlayer(int player)
 		int owner = GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity");
 		if (owner == player)
 		{
-			return SDKCall_GetSentryHint(hint);
+			return SDKCall_CTFBotHintEngineerNest_GetSentryHint(hint);
 		}
 	}
 	
@@ -1037,7 +1037,7 @@ void ShowGateBotAnnotation(int client)
 		if (GetEntProp(trigger, Prop_Data, "m_bDisabled"))
 			continue;
 		
-		if (!SDKCall_PassesTriggerFilters(trigger, client))
+		if (!SDKCall_CBaseTrigger_PassesTriggerFilters(trigger, client))
 			continue;
 		
 		char iszCapPointName[64];
@@ -1049,7 +1049,7 @@ void ShowGateBotAnnotation(int client)
 			int iPointIndex = GetEntProp(point, Prop_Data, "m_iPointIndex");
 			
 			// Locked, requiring preceding points, etc.
-			if (!SDKCall_TeamMayCapturePoint(TF2_GetClientTeam(client), iPointIndex))
+			if (!SDKCall_CTeamplayRules_TeamMayCapturePoint(TF2_GetClientTeam(client), iPointIndex))
 				continue;
 			
 			// Point already owned
@@ -1070,7 +1070,7 @@ void ShowGateBotAnnotation(int client)
 				char text[64];
 				Format(text, sizeof(text), "%T", "Invader_CaptureGate_Annotation", client, iszPrintName);
 				
-				ShowAnnotation(client, MITM_HINT_MASK | client, text, _, center, mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
+				ShowAnnotation(client, MITM_HINT_MASK | client, text, _, center, sm_mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
 				return;
 			}
 		}
@@ -1088,14 +1088,14 @@ void LockWeapon(int client, int weapon, int &buttons)
 		// auto behavior
 		if (TF2Util_GetWeaponID(weapon) == TF_WEAPON_GRENADELAUNCHER || GetEntProp(client, Prop_Send, "m_bShieldEquipped"))
 		{
-			SDKCall_DoClassSpecialSkill(client);
+			SDKCall_CTFPlayer_DoClassSpecialSkill(client);
 		}
 		// semi-auto behaviour
 		else
 		{
 			if (view_as<bool>(GetEntData(weapon, GetOffset("CTFWeaponBase", "m_bInAttack2"), 1)) == false)
 			{
-				SDKCall_DoClassSpecialSkill(client);
+				SDKCall_CTFPlayer_DoClassSpecialSkill(client);
 				SetEntData(weapon, GetOffset("CTFWeaponBase", "m_bInAttack2"), true, 1);
 			}
 		}

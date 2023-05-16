@@ -354,7 +354,7 @@
 				"linux"		"392"
 				"windows"	"390"
 			}
-			"CTFWeaponBase::Clip1"
+			"CBaseCombatWeapon::Clip1"
 			{
 				"linux"		"350"
 				"windows"	"344"
@@ -384,12 +384,12 @@
 				"linux"		"21"
 				"windows"	"20"
 			}
-			"CTFPlayer::Event_Killed"
+			"CBaseEntity::Event_Killed"
 			{
 				"linux"		"69"
 				"windows"	"68"
 			}
-			"CTFPlayer::ShouldGib"
+			"CBaseCombatCharacter::ShouldGib"
 			{
 				"linux"		"297"
 				"windows"	"296"
@@ -419,17 +419,17 @@
 				"linux"		"30"
 				"windows"	"29"
 			}
-			"CTFGameRules::ClientConnected"
+			"CGameRules::ClientConnected"
 			{
 				"linux"		"60"
 				"windows"	"59"
 			}
-			"CTFGameRules::FPlayerCanTakeDamage"
+			"CGameRules::FPlayerCanTakeDamage"
 			{
 				"linux"		"64"
 				"windows"	"63"
 			}
-			"CTFGameRules::TeamMayCapturePoint"
+			"CTeamplayRules::TeamMayCapturePoint"
 			{
 				"linux"		"159"
 				"windows"	"158"
@@ -1219,9 +1219,9 @@
 					}
 				}
 			}
-			"CTFPlayer::Event_Killed"
+			"CBaseEntity::Event_Killed"
 			{
-				"offset"	"CTFPlayer::Event_Killed"
+				"offset"	"CBaseEntity::Event_Killed"
 				"hooktype"	"entity"
 				"return"	"void"
 				"this"		"entity"
@@ -1233,9 +1233,9 @@
 					}
 				}
 			}
-			"CTFPlayer::ShouldGib"
+			"CBaseCombatCharacter::ShouldGib"
 			{
-				"offset"	"CTFPlayer::ShouldGib"
+				"offset"	"CBaseCombatCharacter::ShouldGib"
 				"hooktype"	"entity"
 				"return"	"bool"
 				"this"		"entity"
@@ -1279,9 +1279,9 @@
 					}
 				}
 			}
-			"CTFGameRules::ClientConnected"
+			"CGameRules::ClientConnected"
 			{
-				"offset"	"CTFGameRules::ClientConnected"
+				"offset"	"CGameRules::ClientConnected"
 				"hooktype"	"gamerules"
 				"return"	"bool"
 				"this"		"ignore"
@@ -1310,9 +1310,9 @@
 				}
 				
 			}
-			"CTFGameRules::FPlayerCanTakeDamage"
+			"CGameRules::FPlayerCanTakeDamage"
 			{
-				"offset"	"CTFGameRules::FPlayerCanTakeDamage"
+				"offset"	"CGameRules::FPlayerCanTakeDamage"
 				"hooktype"	"gamerules"
 				"return"	"bool"
 				"this"		"ignore"

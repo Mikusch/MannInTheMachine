@@ -93,7 +93,7 @@ static Action SDKHookCB_ProjectilePipeRemote_SetTransmit(int entity, int client)
 		{
 			// only when fully armed
 			float flCreationTime = GetEntDataFloat(entity, GetOffset("CTFGrenadePipebombProjectile", "m_flCreationTime"));
-			if ((GetGameTime() - flCreationTime) >= SDKCall_GetLiveTime(entity))
+			if ((GetGameTime() - flCreationTime) >= SDKCall_CTFGrenadePipebombProjectile_GetLiveTime(entity))
 			{
 				return Plugin_Handled;
 			}

@@ -18,19 +18,19 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static DynamicHook g_hDHookSetModel;
-static DynamicHook g_hDHookIsPlacementPosValid;
-static DynamicHook g_hDHookCanBeUpgraded;
-static DynamicHook g_hDHookComeToRest;
-static DynamicHook g_hDHookShouldTransmit;
-static DynamicHook g_hDHookEventKilled;
-static DynamicHook g_hDHookShouldGib;
-static DynamicHook g_hDHookIsAllowedToPickUpFlag;
-static DynamicHook g_hDHookEntSelectSpawnPoint;
-static DynamicHook g_hDHookPassesFilterImpl;
-static DynamicHook g_hDHookPickUp;
-static DynamicHook g_hDHookClientConnected;
-static DynamicHook g_hDHookFPlayerCanTakeDamage;
+static DynamicHook g_hDHook_CBaseEntity_SetModel;
+static DynamicHook g_hDHook_CBaseObject_IsPlacementPosValid;
+static DynamicHook g_hDHook_CBaseObject_CanBeUpgraded;
+static DynamicHook g_hDHook_CItem_ComeToRest;
+static DynamicHook g_hDHook_CBaseEntity_ShouldTransmit;
+static DynamicHook g_hDHook_CBaseEntity_Event_Killed;
+static DynamicHook g_hDHook_CBaseCombatCharacter_ShouldGib;
+static DynamicHook g_hDHook_CTFPlayer_IsAllowedToPickUpFlag;
+static DynamicHook g_hDHook_CBasePlayer_EntSelectSpawnPoint;
+static DynamicHook g_hDHook_CBaseFilter_PassesFilterImpl;
+static DynamicHook g_hDHook_CTFItem_PickUp;
+static DynamicHook g_hDHook_CGameRules_ClientConnected;
+static DynamicHook g_hDHook_CGameRules_FPlayerCanTakeDamage;
 
 static ArrayList m_justSpawnedList;
 
@@ -55,47 +55,47 @@ void DHooks_Init(GameData hGameData)
 	m_cooldownTimer = new CountdownTimer();
 	m_checkForDangerousSentriesTimer = new CountdownTimer();
 	
-	CreateDynamicDetour(hGameData, "CTFGCServerSystem::PreClientUpdate", DHookCallback_PreClientUpdate_Pre, DHookCallback_PreClientUpdate_Post);
-	CreateDynamicDetour(hGameData, "CPopulationManager::AllocateBots", DHookCallback_AllocateBots_Pre);
-	CreateDynamicDetour(hGameData, "CPopulationManager::EndlessRollEscalation", DHookCallback_EndlessRollEscalation_Pre, DHookCallback_EndlessRollEscalation_Post);
-	CreateDynamicDetour(hGameData, "CPopulationManager::RestoreCheckpoint", DHookCallback_RestoreCheckpoint_Pre);
-	CreateDynamicDetour(hGameData, "CTFBotSpawner::Spawn", DHookCallback_CTFBotSpawnerSpawn_Pre);
-	CreateDynamicDetour(hGameData, "CSquadSpawner::Spawn", _, DHookCallback_CSquadSpawnerSpawn_Post);
-	CreateDynamicDetour(hGameData, "CPopulationManager::Update", DHookCallback_CPopulationManagerUpdate_Pre, DHookCallback_CPopulationManagerUpdate_Post);
-	CreateDynamicDetour(hGameData, "CPeriodicSpawnPopulator::Update", _, DHookCallback_CPeriodicSpawnPopulatorUpdate_Post);
+	CreateDynamicDetour(hGameData, "CTFGCServerSystem::PreClientUpdate", DHookCallback_CTFGCServerSystem_PreClientUpdate_Pre, DHookCallback_CTFGCServerSystem_PreClientUpdate_Post);
+	CreateDynamicDetour(hGameData, "CPopulationManager::AllocateBots", DHookCallback_CPopulationManager_AllocateBots_Pre);
+	CreateDynamicDetour(hGameData, "CPopulationManager::EndlessRollEscalation", DHookCallback_CPopulationManager_EndlessRollEscalation_Pre, DHookCallback_CPopulationManager_EndlessRollEscalation_Post);
+	CreateDynamicDetour(hGameData, "CPopulationManager::RestoreCheckpoint", DHookCallback_CPopulationManager_RestoreCheckpoint_Pre);
+	CreateDynamicDetour(hGameData, "CTFBotSpawner::Spawn", DHookCallback_CTFBotSpawner_Spawn_Pre);
+	CreateDynamicDetour(hGameData, "CSquadSpawner::Spawn", _, DHookCallback_CSquadSpawner_Spawn_Post);
+	CreateDynamicDetour(hGameData, "CPopulationManager::Update", DHookCallback_CPopulationManager_Update_Pre, DHookCallback_CPopulationManager_Update_Post);
+	CreateDynamicDetour(hGameData, "CPeriodicSpawnPopulator::Update", _, DHookCallback_CPeriodicSpawnPopulator_Update_Post);
 	CreateDynamicDetour(hGameData, "CWaveSpawnPopulator::Update", _, DHookCallback_CWaveSpawnPopulatorUpdate_Post);
-	CreateDynamicDetour(hGameData, "CMissionPopulator::UpdateMission", DHookCallback_UpdateMission_Pre, DHookCallback_UpdateMission_Post);
-	CreateDynamicDetour(hGameData, "CMissionPopulator::UpdateMissionDestroySentries", DHookCallback_UpdateMissionDestroySentries_Pre, DHookCallback_UpdateMissionDestroySentries_Post);
-	CreateDynamicDetour(hGameData, "CPointPopulatorInterface::InputChangeBotAttributes", DHookCallback_InputChangeBotAttributes_Pre);
-	CreateDynamicDetour(hGameData, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_GetTeamAssignmentOverride_Pre);
-	CreateDynamicDetour(hGameData, "CTFGameRules::PlayerReadyStatus_UpdatePlayerState", DHookCallback_PlayerReadyStatus_UpdatePlayerState_Pre, DHookCallback_PlayerReadyStatus_UpdatePlayerState_Post);
-	CreateDynamicDetour(hGameData, "CTeamplayRoundBasedRules::ResetPlayerAndTeamReadyState", DHookCallback_ResetPlayerAndTeamReadyState_Pre);
-	CreateDynamicDetour(hGameData, "CTFPlayer::GetLoadoutItem", DHookCallback_GetLoadoutItem_Pre, DHookCallback_GetLoadoutItem_Post);
-	CreateDynamicDetour(hGameData, "CTFPlayer::CheckInstantLoadoutRespawn", DHookCallback_CheckInstantLoadoutRespawn_Pre);
-	CreateDynamicDetour(hGameData, "CTFPlayer::DoClassSpecialSkill", DHookCallback_DoClassSpecialSkill_Pre);
-	CreateDynamicDetour(hGameData, "CTFPlayer::RemoveAllOwnedEntitiesFromWorld", DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre);
-	CreateDynamicDetour(hGameData, "CTFPlayer::CanBuild", DHookCallback_CanBuild_Pre, DHookCallback_CanBuild_Post);
-	CreateDynamicDetour(hGameData, "CWeaponMedigun::AllowedToHealTarget", DHookCallback_AllowedToHealTarget_Pre);
-	CreateDynamicDetour(hGameData, "CSpawnLocation::FindSpawnLocation", _, DHookCallback_FindSpawnLocation_Post);
-	CreateDynamicDetour(hGameData, "CTraceFilterObject::ShouldHitEntity", _, DHookCallback_ShouldHitEntity_Post);
-	CreateDynamicDetour(hGameData, "CLagCompensationManager::StartLagCompensation", DHookCallback_StartLagCompensation_Pre, DHookCallback_StartLagCompensation_Post);
-	CreateDynamicDetour(hGameData, "CUniformRandomStream::SetSeed", DHookCallback_SetSeed_Pre);
+	CreateDynamicDetour(hGameData, "CMissionPopulator::UpdateMission", DHookCallback_CMissionPopulator_UpdateMission_Pre, DHookCallback_CMissionPopulator_UpdateMission_Post);
+	CreateDynamicDetour(hGameData, "CMissionPopulator::UpdateMissionDestroySentries", DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_Pre, DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_Post);
+	CreateDynamicDetour(hGameData, "CPointPopulatorInterface::InputChangeBotAttributes", DHookCallback_CPointPopulatorInterface_InputChangeBotAttributes_Pre);
+	CreateDynamicDetour(hGameData, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre);
+	CreateDynamicDetour(hGameData, "CTFGameRules::PlayerReadyStatus_UpdatePlayerState", DHookCallback_CTFGameRules_PlayerReadyStatus_UpdatePlayerState_Pre, DHookCallback_CTFGameRules_PlayerReadyStatus_UpdatePlayerState_Post);
+	CreateDynamicDetour(hGameData, "CTeamplayRoundBasedRules::ResetPlayerAndTeamReadyState", DHookCallback_CTeamplayRoundBasedRules_ResetPlayerAndTeamReadyState_Pre);
+	CreateDynamicDetour(hGameData, "CTFPlayer::GetLoadoutItem", DHookCallback_CTFPlayer_GetLoadoutItem_Pre, DHookCallback_CTFPlayer_GetLoadoutItem_Post);
+	CreateDynamicDetour(hGameData, "CTFPlayer::CheckInstantLoadoutRespawn", DHookCallback_CTFPlayer_CheckInstantLoadoutRespawn_Pre);
+	CreateDynamicDetour(hGameData, "CTFPlayer::DoClassSpecialSkill", DHookCallback_CTFPlayer_DoClassSpecialSkill_Pre);
+	CreateDynamicDetour(hGameData, "CTFPlayer::RemoveAllOwnedEntitiesFromWorld", DHookCallback_CTFPlayer_RemoveAllOwnedEntitiesFromWorld_Pre);
+	CreateDynamicDetour(hGameData, "CTFPlayer::CanBuild", DHookCallback_CTFPlayer_CanBuild_Pre, DHookCallback_CTFPlayer_CanBuild_Post);
+	CreateDynamicDetour(hGameData, "CWeaponMedigun::AllowedToHealTarget", DHookCallback_CWeaponMedigun_AllowedToHealTarget_Pre);
+	CreateDynamicDetour(hGameData, "CSpawnLocation::FindSpawnLocation", _, DHookCallback_CSpawnLocation_FindSpawnLocation_Post);
+	CreateDynamicDetour(hGameData, "CTraceFilterObject::ShouldHitEntity", _, DHookCallback_CTraceFilterObject_ShouldHitEntity_Post);
+	CreateDynamicDetour(hGameData, "CLagCompensationManager::StartLagCompensation", DHookCallback_CLagCompensationManager_StartLagCompensation_Pre, DHookCallback_CLagCompensationManager_StartLagCompensation_Post);
+	CreateDynamicDetour(hGameData, "CUniformRandomStream::SetSeed", DHookCallback_CUniformRandomStream_SetSeed_Pre);
 	CreateDynamicDetour(hGameData, "DoTeleporterOverride", _, DHookCallback_DoTeleporterOverride_Post);
 	CreateDynamicDetour(hGameData, "OnBotTeleported", DHookCallback_OnBotTeleported_Pre);
 	
-	g_hDHookSetModel = CreateDynamicHook(hGameData, "CBaseEntity::SetModel");
-	g_hDHookIsPlacementPosValid = CreateDynamicHook(hGameData, "CBaseObject::IsPlacementPosValid");
-	g_hDHookCanBeUpgraded = CreateDynamicHook(hGameData, "CBaseObject::CanBeUpgraded");
-	g_hDHookComeToRest = CreateDynamicHook(hGameData, "CItem::ComeToRest");
-	g_hDHookShouldTransmit = CreateDynamicHook(hGameData, "CBaseEntity::ShouldTransmit");
-	g_hDHookEventKilled = CreateDynamicHook(hGameData, "CTFPlayer::Event_Killed");
-	g_hDHookShouldGib = CreateDynamicHook(hGameData, "CTFPlayer::ShouldGib");
-	g_hDHookIsAllowedToPickUpFlag = CreateDynamicHook(hGameData, "CTFPlayer::IsAllowedToPickUpFlag");
-	g_hDHookEntSelectSpawnPoint = CreateDynamicHook(hGameData, "CBasePlayer::EntSelectSpawnPoint");
-	g_hDHookPassesFilterImpl = CreateDynamicHook(hGameData, "CBaseFilter::PassesFilterImpl");
-	g_hDHookPickUp = CreateDynamicHook(hGameData, "CTFItem::PickUp");
-	g_hDHookClientConnected = CreateDynamicHook(hGameData, "CTFGameRules::ClientConnected");
-	g_hDHookFPlayerCanTakeDamage = CreateDynamicHook(hGameData, "CTFGameRules::FPlayerCanTakeDamage");
+	g_hDHook_CBaseEntity_SetModel = CreateDynamicHook(hGameData, "CBaseEntity::SetModel");
+	g_hDHook_CBaseObject_IsPlacementPosValid = CreateDynamicHook(hGameData, "CBaseObject::IsPlacementPosValid");
+	g_hDHook_CBaseObject_CanBeUpgraded = CreateDynamicHook(hGameData, "CBaseObject::CanBeUpgraded");
+	g_hDHook_CItem_ComeToRest = CreateDynamicHook(hGameData, "CItem::ComeToRest");
+	g_hDHook_CBaseEntity_ShouldTransmit = CreateDynamicHook(hGameData, "CBaseEntity::ShouldTransmit");
+	g_hDHook_CBaseEntity_Event_Killed = CreateDynamicHook(hGameData, "CBaseEntity::Event_Killed");
+	g_hDHook_CBaseCombatCharacter_ShouldGib = CreateDynamicHook(hGameData, "CBaseCombatCharacter::ShouldGib");
+	g_hDHook_CTFPlayer_IsAllowedToPickUpFlag = CreateDynamicHook(hGameData, "CTFPlayer::IsAllowedToPickUpFlag");
+	g_hDHook_CBasePlayer_EntSelectSpawnPoint = CreateDynamicHook(hGameData, "CBasePlayer::EntSelectSpawnPoint");
+	g_hDHook_CBaseFilter_PassesFilterImpl = CreateDynamicHook(hGameData, "CBaseFilter::PassesFilterImpl");
+	g_hDHook_CTFItem_PickUp = CreateDynamicHook(hGameData, "CTFItem::PickUp");
+	g_hDHook_CGameRules_ClientConnected = CreateDynamicHook(hGameData, "CGameRules::ClientConnected");
+	g_hDHook_CGameRules_FPlayerCanTakeDamage = CreateDynamicHook(hGameData, "CGameRules::FPlayerCanTakeDamage");
 	
 	CopyScriptFunctionBinding("CTFBot", "AddBotAttribute", "CTFPlayer", DHookCallback_ScriptAddAttribute_Pre);
 	CopyScriptFunctionBinding("CTFBot", "AddBotTag", "CTFPlayer", DHookCallback_ScriptAddTag_Pre);
@@ -113,47 +113,47 @@ void DHooks_Init(GameData hGameData)
 
 void DHooks_OnClientPutInServer(int client)
 {
-	if (g_hDHookSetModel)
+	if (g_hDHook_CBaseEntity_SetModel)
 	{
-		g_hDHookSetModel.HookEntity(Hook_Post, client, DHookCallback_SetModel_Post);
+		g_hDHook_CBaseEntity_SetModel.HookEntity(Hook_Post, client, DHookCallback_SetModel_Post);
 	}
 	
-	if (g_hDHookShouldTransmit)
+	if (g_hDHook_CBaseEntity_ShouldTransmit)
 	{
-		g_hDHookShouldTransmit.HookEntity(Hook_Pre, client, DHookCallback_ShouldTransmit_Pre);
+		g_hDHook_CBaseEntity_ShouldTransmit.HookEntity(Hook_Pre, client, DHookCallback_ShouldTransmit_Pre);
 	}
 	
-	if (g_hDHookEventKilled)
+	if (g_hDHook_CBaseEntity_Event_Killed)
 	{
-		g_hDHookEventKilled.HookEntity(Hook_Pre, client, DHookCallback_EventKilled_Pre);
+		g_hDHook_CBaseEntity_Event_Killed.HookEntity(Hook_Pre, client, DHookCallback_EventKilled_Pre);
 	}
 	
-	if (g_hDHookShouldGib)
+	if (g_hDHook_CBaseCombatCharacter_ShouldGib)
 	{
-		g_hDHookShouldGib.HookEntity(Hook_Pre, client, DHookCallback_ShouldGib_Pre);
+		g_hDHook_CBaseCombatCharacter_ShouldGib.HookEntity(Hook_Pre, client, DHookCallback_ShouldGib_Pre);
 	}
 	
-	if (g_hDHookIsAllowedToPickUpFlag)
+	if (g_hDHook_CTFPlayer_IsAllowedToPickUpFlag)
 	{
-		g_hDHookIsAllowedToPickUpFlag.HookEntity(Hook_Pre, client, DHookCallback_IsAllowedToPickUpFlag_Post);
+		g_hDHook_CTFPlayer_IsAllowedToPickUpFlag.HookEntity(Hook_Pre, client, DHookCallback_IsAllowedToPickUpFlag_Post);
 	}
 	
-	if (g_hDHookEntSelectSpawnPoint)
+	if (g_hDHook_CBasePlayer_EntSelectSpawnPoint)
 	{
-		g_hDHookEntSelectSpawnPoint.HookEntity(Hook_Pre, client, DHookCallback_EntSelectSpawnPoint_Pre);
+		g_hDHook_CBasePlayer_EntSelectSpawnPoint.HookEntity(Hook_Pre, client, DHookCallback_EntSelectSpawnPoint_Pre);
 	}
 }
 
 void DHooks_HookGamerules()
 {
-	if (g_hDHookClientConnected)
+	if (g_hDHook_CGameRules_ClientConnected)
 	{
-		g_hDHookClientConnected.HookGamerules(Hook_Pre, DHookCallback_ClientConnected_Pre);
+		g_hDHook_CGameRules_ClientConnected.HookGamerules(Hook_Pre, DHookCallback_ClientConnected_Pre);
 	}
 	
-	if (g_hDHookFPlayerCanTakeDamage)
+	if (g_hDHook_CGameRules_FPlayerCanTakeDamage)
 	{
-		g_hDHookFPlayerCanTakeDamage.HookGamerules(Hook_Pre, DHookCallback_FPlayerCanTakeDamage_Pre);
+		g_hDHook_CGameRules_FPlayerCanTakeDamage.HookGamerules(Hook_Pre, DHookCallback_FPlayerCanTakeDamage_Pre);
 	}
 }
 
@@ -161,43 +161,43 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 {
 	if (StrEqual(classname, "filter_tf_bot_has_tag"))
 	{
-		if (g_hDHookPassesFilterImpl)
+		if (g_hDHook_CBaseFilter_PassesFilterImpl)
 		{
-			g_hDHookPassesFilterImpl.HookEntity(Hook_Pre, entity, DHookCallback_PassesFilterImpl_Pre);
+			g_hDHook_CBaseFilter_PassesFilterImpl.HookEntity(Hook_Pre, entity, DHookCallback_PassesFilterImpl_Pre);
 		}
 	}
 	else if (StrEqual(classname, "item_teamflag"))
 	{
-		if (g_hDHookPickUp)
+		if (g_hDHook_CTFItem_PickUp)
 		{
-			g_hDHookPickUp.HookEntity(Hook_Pre, entity, DHookCallback_PickUp_Pre);
-			g_hDHookPickUp.HookEntity(Hook_Post, entity, DHookCallback_PickUp_Post);
+			g_hDHook_CTFItem_PickUp.HookEntity(Hook_Pre, entity, DHookCallback_PickUp_Pre);
+			g_hDHook_CTFItem_PickUp.HookEntity(Hook_Post, entity, DHookCallback_PickUp_Post);
 		}
 	}
 	else if (StrEqual(classname, "obj_teleporter"))
 	{
-		if (g_hDHookCanBeUpgraded)
+		if (g_hDHook_CBaseObject_CanBeUpgraded)
 		{
-			g_hDHookCanBeUpgraded.HookEntity(Hook_Pre, entity, DHookCallback_CanBeUpgraded_Pre);
+			g_hDHook_CBaseObject_CanBeUpgraded.HookEntity(Hook_Pre, entity, DHookCallback_CanBeUpgraded_Pre);
 		}
 		
-		if (g_hDHookIsPlacementPosValid)
+		if (g_hDHook_CBaseObject_IsPlacementPosValid)
 		{
-			g_hDHookIsPlacementPosValid.HookEntity(Hook_Post, entity, DHookCallback_IsPlacementPosValid_Post);
+			g_hDHook_CBaseObject_IsPlacementPosValid.HookEntity(Hook_Post, entity, DHookCallback_IsPlacementPosValid_Post);
 		}
 	}
 	else if (strncmp(classname, "item_currencypack_", 18) == 0)
 	{
-		if (g_hDHookComeToRest)
+		if (g_hDHook_CItem_ComeToRest)
 		{
-			g_hDHookComeToRest.HookEntity(Hook_Pre, entity, DHookCallback_ComeToRest_Pre);
+			g_hDHook_CItem_ComeToRest.HookEntity(Hook_Pre, entity, DHookCallback_ComeToRest_Pre);
 		}
 	}
 	else if (StrEqual(classname, "obj_sentrygun"))
 	{
-		if (g_hDHookSetModel)
+		if (g_hDHook_CBaseEntity_SetModel)
 		{
-			g_hDHookSetModel.HookEntity(Hook_Post, entity, DHookCallback_SetModel_Post);
+			g_hDHook_CBaseEntity_SetModel.HookEntity(Hook_Post, entity, DHookCallback_SetModel_Post);
 		}
 	}
 }
@@ -267,7 +267,7 @@ static void CreateScriptDetour(const char[] className, const char[] functionName
 	}
 }
 
-static MRESReturn DHookCallback_PreClientUpdate_Pre()
+static MRESReturn DHookCallback_CTFGCServerSystem_PreClientUpdate_Pre()
 {
 	// Allows us to have an MvM server with 32 visible player slots
 	GameRules_SetProp("m_bPlayingMannVsMachine", false);
@@ -275,7 +275,7 @@ static MRESReturn DHookCallback_PreClientUpdate_Pre()
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_PreClientUpdate_Post()
+static MRESReturn DHookCallback_CTFGCServerSystem_PreClientUpdate_Post()
 {
 	// Set it back afterwards
 	GameRules_SetProp("m_bPlayingMannVsMachine", true);
@@ -283,27 +283,27 @@ static MRESReturn DHookCallback_PreClientUpdate_Post()
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_AllocateBots_Pre(int populator)
+static MRESReturn DHookCallback_CPopulationManager_AllocateBots_Pre(int populator)
 {
 	// Do not allow the populator to allocate bots
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_EndlessRollEscalation_Pre(int populator)
+static MRESReturn DHookCallback_CPopulationManager_EndlessRollEscalation_Pre(int populator)
 {
 	g_bInEndlessRollEscalation = true;
 	
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_EndlessRollEscalation_Post(int populator)
+static MRESReturn DHookCallback_CPopulationManager_EndlessRollEscalation_Post(int populator)
 {
 	g_bInEndlessRollEscalation = false;
 	
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_RestoreCheckpoint_Pre(int populator)
+static MRESReturn DHookCallback_CPopulationManager_RestoreCheckpoint_Pre(int populator)
 {
 	// NOTE: RestoreCheckpoint is called twice after a call to ResetMap().
 	// After waiting for players ends, it will call this function again while `m_bIsInitialized` is `false`, then set it to `true`.
@@ -342,7 +342,7 @@ static void Timer_OnWaitingForPlayersEnd(Handle timer)
 }
 
 // The meat of the spawning logic. Any error happening in here WILL cause bots to spawn!
-static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(CTFBotSpawner spawner, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, DHookReturn ret, DHookParam params)
 {
 	float rawHere[3];
 	params.GetVector(1, rawHere);
@@ -397,7 +397,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(CTFBotSpawner spawner, DH
 	
 	if (IsMannVsMachineMode())
 	{
-		if (spawner.m_class == TFClass_Engineer && spawner.m_defaultAttributes.m_attributeFlags & TELEPORT_TO_HINT && SDKCall_FindHint(true, false) == false)
+		if (spawner.m_class == TFClass_Engineer && spawner.m_defaultAttributes.m_attributeFlags & TELEPORT_TO_HINT && SDKCall_CTFBotMvMEngineerHintFinder_FindHint(true, false) == false)
 		{
 			if (tf_populator_debug.BoolValue)
 			{
@@ -653,7 +653,7 @@ static MRESReturn DHookCallback_CTFBotSpawnerSpawn_Pre(CTFBotSpawner spawner, DH
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_CSquadSpawnerSpawn_Post(CSquadSpawner spawner, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CSquadSpawner_Spawn_Post(CSquadSpawner spawner, DHookReturn ret, DHookParam params)
 {
 	CUtlVector result = CUtlVector(params.Get(2));
 	
@@ -680,7 +680,7 @@ static MRESReturn DHookCallback_CSquadSpawnerSpawn_Post(CSquadSpawner spawner, D
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_CPopulationManagerUpdate_Pre(int populator)
+static MRESReturn DHookCallback_CPopulationManager_Update_Pre(int populator)
 {
 	// allows spawners to freely switch teams of players
 	g_bAllowTeamChange = true;
@@ -688,14 +688,14 @@ static MRESReturn DHookCallback_CPopulationManagerUpdate_Pre(int populator)
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_CPopulationManagerUpdate_Post(int populator)
+static MRESReturn DHookCallback_CPopulationManager_Update_Post(int populator)
 {
 	g_bAllowTeamChange = false;
 	
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_CPeriodicSpawnPopulatorUpdate_Post(Address pThis)
+static MRESReturn DHookCallback_CPeriodicSpawnPopulator_Update_Post(Address pThis)
 {
 	for (int i = 0; i < m_justSpawnedList.Length; i++)
 	{
@@ -753,7 +753,7 @@ static MRESReturn DHookCallback_CWaveSpawnPopulatorUpdate_Post(CWaveSpawnPopulat
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_UpdateMission_Pre(CMissionPopulator populator, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CMissionPopulator_UpdateMission_Pre(CMissionPopulator populator, DHookReturn ret, DHookParam params)
 {
 	MissionType mission = params.Get(1);
 	
@@ -804,7 +804,7 @@ static MRESReturn DHookCallback_UpdateMission_Pre(CMissionPopulator populator, D
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_UpdateMission_Post(Address pThis, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CMissionPopulator_UpdateMission_Post(Address pThis, DHookReturn ret, DHookParam params)
 {
 	MissionType mission = params.Get(1);
 	
@@ -856,7 +856,7 @@ static MRESReturn DHookCallback_UpdateMission_Post(Address pThis, DHookReturn re
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(CMissionPopulator populator, DHookReturn ret)
+static MRESReturn DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_Pre(CMissionPopulator populator, DHookReturn ret)
 {
 	s_MissionPopulator = populator;
 	
@@ -942,12 +942,12 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(CMissionPopulat
 		
 		// spawn a sentry buster squad to destroy this sentry
 		float vSpawnPosition[3];
-		SpawnLocationResult spawnLocationResult = SDKCall_FindSpawnLocation(populator.m_where, vSpawnPosition);
+		SpawnLocationResult spawnLocationResult = SDKCall_CSpawnLocation_FindSpawnLocation(populator.m_where, vSpawnPosition);
 		if (spawnLocationResult != SPAWN_LOCATION_NOT_FOUND)
 		{
 			// We don't actually pass a CUtlVector because it would require fetching or creating one in memory.
 			// This is very tedious, so we just use our temporary list hack.
-			if (populator.m_spawner && SDKCall_IPopulationSpawnerSpawn(populator.m_spawner, vSpawnPosition))
+			if (populator.m_spawner && SDKCall_IPopulationSpawner_Spawn(populator.m_spawner, vSpawnPosition))
 			{
 				// success
 				if (tf_populator_debug.BoolValue)
@@ -1037,14 +1037,14 @@ static MRESReturn DHookCallback_UpdateMissionDestroySentries_Pre(CMissionPopulat
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_UpdateMissionDestroySentries_Post(Address pThis, DHookReturn ret)
+static MRESReturn DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_Post(Address pThis, DHookReturn ret)
 {
 	s_MissionPopulator = CMissionPopulator(Address_Null);
 	
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int popInterface, DHookParam params)
+static MRESReturn DHookCallback_CPointPopulatorInterface_InputChangeBotAttributes_Pre(int popInterface, DHookParam params)
 {
 	Address pszEventName = params.GetObjectVar(1, GetOffset("inputdata_t", "value"), ObjectValueType_Int);
 	
@@ -1068,7 +1068,7 @@ static MRESReturn DHookCallback_InputChangeBotAttributes_Pre(int popInterface, D
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Pre(DHookParam params)
+static MRESReturn DHookCallback_CTFGameRules_PlayerReadyStatus_UpdatePlayerState_Pre(DHookParam params)
 {
 	if (mitm_setup_time.IntValue <= 0)
 		return MRES_Ignored;
@@ -1079,7 +1079,7 @@ static MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Pre(DHookPar
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Post(DHookParam params)
+static MRESReturn DHookCallback_CTFGameRules_PlayerReadyStatus_UpdatePlayerState_Post(DHookParam params)
 {
 	if (mitm_setup_time.IntValue <= 0)
 		return MRES_Ignored;
@@ -1096,7 +1096,7 @@ static MRESReturn DHookCallback_PlayerReadyStatus_UpdatePlayerState_Post(DHookPa
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_ResetPlayerAndTeamReadyState_Pre()
+static MRESReturn DHookCallback_CTeamplayRoundBasedRules_ResetPlayerAndTeamReadyState_Pre()
 {
 	if (!g_pGameRules.IsValid())
 		return MRES_Ignored;
@@ -1112,7 +1112,7 @@ static MRESReturn DHookCallback_ResetPlayerAndTeamReadyState_Pre()
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHookReturn ret, DHookParam params)
 {
 	int player = params.Get(1);
 	TFTeam nDesiredTeam = params.Get(2);
@@ -1184,7 +1184,7 @@ static MRESReturn DHookCallback_GetTeamAssignmentOverride_Pre(DHookReturn ret, D
 	}
 }
 
-static MRESReturn DHookCallback_GetLoadoutItem_Pre(int player, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CTFPlayer_GetLoadoutItem_Pre(int player, DHookReturn ret, DHookParam params)
 {
 	if (IsClientInGame(player) && TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
@@ -1195,7 +1195,7 @@ static MRESReturn DHookCallback_GetLoadoutItem_Pre(int player, DHookReturn ret, 
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_GetLoadoutItem_Post(int player, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CTFPlayer_GetLoadoutItem_Post(int player, DHookReturn ret, DHookParam params)
 {
 	if (IsClientInGame(player) && TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
@@ -1205,13 +1205,13 @@ static MRESReturn DHookCallback_GetLoadoutItem_Post(int player, DHookReturn ret,
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_CheckInstantLoadoutRespawn_Pre(int player)
+static MRESReturn DHookCallback_CTFPlayer_CheckInstantLoadoutRespawn_Pre(int player)
 {
 	// never allow invaders to respawn with a new loadout, this breaks spawners
 	return TF2_GetClientTeam(player) == TFTeam_Invaders ? MRES_Supercede : MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_DoClassSpecialSkill_Pre(int player, DHookReturn ret)
+static MRESReturn DHookCallback_CTFPlayer_DoClassSpecialSkill_Pre(int player, DHookReturn ret)
 {
 	if (TF2_GetPlayerClass(player) == TFClass_DemoMan && GetEntProp(player, Prop_Send, "m_bShieldEquipped"))
 	{
@@ -1228,13 +1228,13 @@ static MRESReturn DHookCallback_DoClassSpecialSkill_Pre(int player, DHookReturn 
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_RemoveAllOwnedEntitiesFromWorld_Pre(int player, DHookParam params)
+static MRESReturn DHookCallback_CTFPlayer_RemoveAllOwnedEntitiesFromWorld_Pre(int player, DHookParam params)
 {
 	// keep this bot's buildings
 	return Player(player).HasAttribute(RETAIN_BUILDINGS) ? MRES_Supercede : MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_CanBuild_Pre(int player, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CTFPlayer_CanBuild_Pre(int player, DHookReturn ret, DHookParam params)
 {
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders && TF2_GetPlayerClass(player) == TFClass_Engineer)
 	{
@@ -1245,7 +1245,7 @@ static MRESReturn DHookCallback_CanBuild_Pre(int player, DHookReturn ret, DHookP
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_CanBuild_Post(int player, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CTFPlayer_CanBuild_Post(int player, DHookReturn ret, DHookParam params)
 {
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders && TF2_GetPlayerClass(player) == TFClass_Engineer)
 	{
@@ -1290,7 +1290,7 @@ static MRESReturn DHookCallback_CanBuild_Post(int player, DHookReturn ret, DHook
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_AllowedToHealTarget_Pre(int medigun, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CWeaponMedigun_AllowedToHealTarget_Pre(int medigun, DHookReturn ret, DHookParam params)
 {
 	int target = params.Get(1);
 	int owner = GetEntPropEnt(medigun, Prop_Send, "m_hOwnerEntity");
@@ -1318,7 +1318,7 @@ static MRESReturn DHookCallback_AllowedToHealTarget_Pre(int medigun, DHookReturn
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_FindSpawnLocation_Post(Address where, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CSpawnLocation_FindSpawnLocation_Post(Address where, DHookReturn ret, DHookParam params)
 {
 	// Store for use in populator callbacks.
 	// We can't use CWaveSpawnPopulator::m_spawnLocationResult because it gets overridden in some cases.
@@ -1327,7 +1327,7 @@ static MRESReturn DHookCallback_FindSpawnLocation_Post(Address where, DHookRetur
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_ShouldHitEntity_Post(Address pFilter, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CTraceFilterObject_ShouldHitEntity_Post(Address pFilter, DHookReturn ret, DHookParam params)
 {
 	int me = GetEntityFromAddress(Deref(pFilter + GetOffset("CTraceFilterSimple", "m_pPassEnt")));
 	int entity = GetEntityFromAddress(params.Get(1));
@@ -1355,7 +1355,7 @@ static MRESReturn DHookCallback_ShouldHitEntity_Post(Address pFilter, DHookRetur
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_StartLagCompensation_Pre(DHookParam params)
+static MRESReturn DHookCallback_CLagCompensationManager_StartLagCompensation_Pre(DHookParam params)
 {
 	int player = params.Get(1);
 	
@@ -1368,7 +1368,7 @@ static MRESReturn DHookCallback_StartLagCompensation_Pre(DHookParam params)
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_StartLagCompensation_Post(DHookParam params)
+static MRESReturn DHookCallback_CLagCompensationManager_StartLagCompensation_Post(DHookParam params)
 {
 	int player = params.Get(1);
 	
@@ -1380,7 +1380,7 @@ static MRESReturn DHookCallback_StartLagCompensation_Post(DHookParam params)
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_SetSeed_Pre(DHookParam params)
+static MRESReturn DHookCallback_CUniformRandomStream_SetSeed_Pre(DHookParam params)
 {
 	if (g_bInEndlessRollEscalation)
 	{
@@ -1569,7 +1569,7 @@ static MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 					SetEntityOwner(obj, -1);
 					SetEntPropEnt(obj, Prop_Send, "m_hBuilder", -1);
 				}
-				SDKCall_RemoveObject(player, obj);
+				SDKCall_CTFPlayer_RemoveObject(player, obj);
 			}
 			
 			// unown engineer nest if owned any
@@ -1839,7 +1839,7 @@ static MRESReturn DHookCallback_ComeToRest_Pre(int item)
 	
 	if (area && (area.HasAttributeTF(BLUE_SPAWN_ROOM) || area.HasAttributeTF(RED_SPAWN_ROOM)))
 	{
-		SDKCall_DistributeCurrencyAmount(GetEntData(item, GetOffset("CCurrencyPack", "m_nAmount")));
+		SDKCall_CTFGameRules_DistributeCurrencyAmount(GetEntData(item, GetOffset("CCurrencyPack", "m_nAmount")));
 		SetEntData(item, GetOffset("CCurrencyPack", "m_bTouched"), true, 1);
 		RemoveEntity(item);
 		

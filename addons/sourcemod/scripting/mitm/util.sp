@@ -546,7 +546,7 @@ int FindNextInvader(bool bMiniBoss)
 			// This player is becoming a miniboss
 			if (bMiniBoss)
 			{
-				Player(client).m_miniBossPriority = 0;
+				Player(client).m_invaderMiniBossPriority = 0;
 			}
 		}
 		else
@@ -556,7 +556,7 @@ int FindNextInvader(bool bMiniBoss)
 			
 			if (bMiniBoss)
 			{
-				Player(client).m_miniBossPriority++;
+				Player(client).m_invaderMiniBossPriority++;
 			}
 		}
 	}
@@ -638,7 +638,7 @@ int SortPlayersByMinibossPriority(int index1, int index2, Handle array, Handle h
 	int client2 = list.Get(index2);
 	
 	// Sort by highest miniboss priority
-	int c = Compare(Player(client2).m_miniBossPriority, Player(client1).m_miniBossPriority);
+	int c = Compare(Player(client2).m_invaderMiniBossPriority, Player(client1).m_invaderMiniBossPriority);
 	
 	// Sort by highest priority
 	if (c == 0)

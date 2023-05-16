@@ -49,7 +49,7 @@ static bool m_isWaitingForFullReload[MAXPLAYERS + 1];
 
 // Non-resetting Properties
 static int m_invaderPriority[MAXPLAYERS + 1];
-static int m_miniBossPriority[MAXPLAYERS + 1];
+static int m_invaderMiniBossPriority[MAXPLAYERS + 1];
 static int m_defenderQueuePoints[MAXPLAYERS + 1];
 static int m_preferences[MAXPLAYERS + 1];
 static Party m_party[MAXPLAYERS + 1];
@@ -225,21 +225,21 @@ methodmap Player < CBaseCombatCharacter
 		{
 			return m_invaderPriority[this.index];
 		}
-		public set(int iPriority)
+		public set(int invaderPriority)
 		{
-			m_invaderPriority[this.index] = iPriority;
+			m_invaderPriority[this.index] = invaderPriority;
 		}
 	}
 	
-	property int m_miniBossPriority
+	property int m_invaderMiniBossPriority
 	{
 		public get()
 		{
-			return m_miniBossPriority[this.index];
+			return m_invaderMiniBossPriority[this.index];
 		}
-		public set(int miniBossPriority)
+		public set(int invaderMiniBossPriority)
 		{
-			m_miniBossPriority[this.index] = miniBossPriority;
+			m_invaderMiniBossPriority[this.index] = invaderMiniBossPriority;
 		}
 	}
 	
@@ -1074,7 +1074,7 @@ methodmap Player < CBaseCombatCharacter
 			weapon = this.GetPropEnt(Prop_Send, "m_hActiveWeapon");
 		}
 		
-		if (weapon)
+		if (weapon != -1)
 		{
 			switch (TF2Util_GetWeaponID(weapon))
 			{
@@ -1463,7 +1463,7 @@ methodmap Player < CBaseCombatCharacter
 	public void Reset()
 	{
 		this.m_invaderPriority = 0;
-		this.m_miniBossPriority = 0;
+		this.m_invaderMiniBossPriority = 0;
 		this.m_defenderQueuePoints = -1;
 		this.m_preferences = -1;
 		this.m_party = NULL_PARTY;

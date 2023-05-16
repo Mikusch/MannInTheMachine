@@ -1876,7 +1876,7 @@ methodmap CPopulationManager < CBaseEntity
 	
 	public void GetSentryBusterDamageAndKillThreshold(int &nDamage, int &nKills)
 	{
-		PrepSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold(this.index, nDamage, nKills);
+		SDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold(this.index, nDamage, nKills);
 	}
 	
 	public void EndlessSetAttributesForBot(int player)

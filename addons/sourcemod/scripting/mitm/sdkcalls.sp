@@ -104,7 +104,7 @@ void SDKCalls_Init(GameData hGameData)
 	g_hSDKCall_CBaseObject_GetMaxHealthForCurrentLevel = PrepSDKCall_CBaseObject_GetMaxHealthForCurrentLevel(hGameData);
 	g_hSDKCall_CBaseCombatWeapon_Clip1 = PrepSDKCall_CBaseCombatWeapon_Clip1(hGameData);
 	g_hSDKCall_CSpawnLocation_FindSpawnLocation = PrepSDKCall_CSpawnLocation_FindSpawnLocation(hGameData);
-	g_hSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold = PrepPrepSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold(hGameData);
+	g_hSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold = PrepSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold(hGameData);
 	g_hSDKCall_IPopulationSpawner_Spawn = PrepSDKCall_IPopulationSpawner_Spawn(hGameData);
 	g_hSDKCall_GetBombInfo = PrepSDKCall_GetBombInfo(hGameData);
 	g_hSDKCall_CTFBotHintEngineerNest_IsStaleNest = PrepSDKCall_CTFBotHintEngineerNest_IsStaleNest(hGameData);
@@ -533,7 +533,7 @@ static Handle PrepSDKCall_CSpawnLocation_FindSpawnLocation(GameData hGameData)
 	return call;
 }
 
-static Handle PrepPrepSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold(GameData hGameData)
+static Handle PrepSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold(GameData hGameData)
 {
 	StartPrepSDKCall(SDKCall_Entity);
 	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CPopulationManager::GetSentryBusterDamageAndKillThreshold");

@@ -298,7 +298,7 @@ static bool ShouldAdvanceNestSpot(CTFBotMvMEngineerIdle action, int actor)
 			CNavArea hintArea = TheNavMesh.GetNearestNavArea(origin, false, 1000.0);
 			if (hintArea)
 			{
-				float hintDistanceToTarget = Deref(hintArea + GetOffset("CTFNavArea", "m_distanceToBombTarget"));
+				float hintDistanceToTarget = LoadFromAddress(view_as<Address>(hintArea) + GetOffset("CTFNavArea", "m_distanceToBombTarget"), NumberType_Int32);
 				
 				bool bShouldAdvance = (hintDistanceToTarget > bombInfo.m_flMaxBattleFront);
 				

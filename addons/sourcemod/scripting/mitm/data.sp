@@ -651,7 +651,7 @@ methodmap Player < CBaseCombatCharacter
 		for (int i = 0; i < teleportWhereName.Count(); ++i)
 		{
 			char name[64];
-			PtrToString(Deref(teleportWhereName.Get(i)), name, sizeof(name));
+			PtrToString(LoadFromAddress(teleportWhereName.Get(i), NumberType_Int32), name, sizeof(name));
 			
 			this.m_teleportWhereName.PushString(name);
 		}
@@ -845,12 +845,12 @@ methodmap Player < CBaseCombatCharacter
 			for (int i = 0; i < pEvent.m_characterAttributes.Count(); i++)
 			{
 				Address characterAttributes = pEvent.m_characterAttributes.Get(i, GetOffset(NULL_STRING, "sizeof(static_attrib_t)"));
-				int defIndex = Deref(characterAttributes + GetOffset("static_attrib_t", "iDefIndex"), NumberType_Int16);
+				int defIndex = LoadFromAddress(characterAttributes + GetOffset("static_attrib_t", "iDefIndex"), NumberType_Int16);
 				
 				Address pDef = TF2Econ_GetAttributeDefinitionAddress(defIndex);
 				if (pDef)
 				{
-					float flValue = Deref(characterAttributes + GetOffset("static_attrib_t", "m_value"));
+					float flValue = LoadFromAddress(characterAttributes + GetOffset("static_attrib_t", "m_value"), NumberType_Int32);
 					TF2Attrib_SetByDefIndex(this.index, defIndex, flValue);
 				}
 			}
@@ -864,7 +864,7 @@ methodmap Player < CBaseCombatCharacter
 			for (int i = 0; i < pEvent.m_items.Count(); i++)
 			{
 				char item[64];
-				PtrToString(Deref(pEvent.m_items.Get(i)), item, sizeof(item));
+				PtrToString(LoadFromAddress(pEvent.m_items.Get(i), NumberType_Int32), item, sizeof(item));
 				
 				this.AddItem(item);
 			}
@@ -874,7 +874,7 @@ methodmap Player < CBaseCombatCharacter
 				Address itemAttributes = pEvent.m_itemsAttributes.Get(i, GetOffset(NULL_STRING, "sizeof(item_attributes_t)"));
 				
 				char itemName[64];
-				PtrToString(Deref(itemAttributes + GetOffset("item_attributes_t", "m_itemName")), itemName, sizeof(itemName));
+				PtrToString(LoadFromAddress(itemAttributes + GetOffset("item_attributes_t", "m_itemName"), NumberType_Int32), itemName, sizeof(itemName));
 				
 				int itemDef = GetItemDefinitionIndexByName(itemName);
 				
@@ -889,8 +889,8 @@ methodmap Player < CBaseCombatCharacter
 						{
 							Address attrib = attributes.Get(iAtt, GetOffset(NULL_STRING, "sizeof(static_attrib_t)"));
 							
-							int defIndex = Deref(attrib + GetOffset("static_attrib_t", "iDefIndex"), NumberType_Int16);
-							float value = Deref(attrib + GetOffset("static_attrib_t", "m_value"));
+							int defIndex = LoadFromAddress(attrib + GetOffset("static_attrib_t", "iDefIndex"), NumberType_Int16);
+							float value = LoadFromAddress(attrib + GetOffset("static_attrib_t", "m_value"), NumberType_Int32);
 							
 							TF2Attrib_SetByDefIndex(entity, defIndex, value);
 						}
@@ -912,7 +912,7 @@ methodmap Player < CBaseCombatCharacter
 			for (int i = 0; i < pEvent.m_tags.Count(); ++i)
 			{
 				char tag[64];
-				PtrToString(Deref(pEvent.m_tags.Get(i)), tag, sizeof(tag));
+				PtrToString(LoadFromAddress(pEvent.m_tags.Get(i), NumberType_Int32), tag, sizeof(tag));
 				
 				this.AddTag(tag);
 			}
@@ -1486,7 +1486,7 @@ methodmap EventChangeAttributes_t < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("EventChangeAttributes_t", "m_eventName"));
+			return LoadFromAddress(this + GetOffset("EventChangeAttributes_t", "m_eventName"), NumberType_Int32);
 		}
 	}
 	
@@ -1494,7 +1494,7 @@ methodmap EventChangeAttributes_t < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("EventChangeAttributes_t", "m_skill"));
+			return LoadFromAddress(this + GetOffset("EventChangeAttributes_t", "m_skill"), NumberType_Int32);
 		}
 	}
 	
@@ -1502,7 +1502,7 @@ methodmap EventChangeAttributes_t < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("EventChangeAttributes_t", "m_weaponRestriction"));
+			return LoadFromAddress(this + GetOffset("EventChangeAttributes_t", "m_weaponRestriction"), NumberType_Int32);
 		}
 	}
 	
@@ -1510,7 +1510,7 @@ methodmap EventChangeAttributes_t < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("EventChangeAttributes_t", "m_mission"));
+			return LoadFromAddress(this + GetOffset("EventChangeAttributes_t", "m_mission"), NumberType_Int32);
 		}
 	}
 	
@@ -1518,7 +1518,7 @@ methodmap EventChangeAttributes_t < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("EventChangeAttributes_t", "m_attributeFlags"));
+			return LoadFromAddress(this + GetOffset("EventChangeAttributes_t", "m_attributeFlags"), NumberType_Int32);
 		}
 	}
 	
@@ -1582,7 +1582,7 @@ methodmap CTFBotSpawner < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CTFBotSpawner", "m_health"));
+			return LoadFromAddress(this + GetOffset("CTFBotSpawner", "m_health"), NumberType_Int32);
 		}
 	}
 	
@@ -1590,7 +1590,7 @@ methodmap CTFBotSpawner < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CTFBotSpawner", "m_class"));
+			return LoadFromAddress(this + GetOffset("CTFBotSpawner", "m_class"), NumberType_Int32);
 		}
 	}
 	
@@ -1598,7 +1598,7 @@ methodmap CTFBotSpawner < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CTFBotSpawner", "m_scale"));
+			return LoadFromAddress(this + GetOffset("CTFBotSpawner", "m_scale"), NumberType_Int32);
 		}
 	}
 	
@@ -1606,7 +1606,7 @@ methodmap CTFBotSpawner < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CTFBotSpawner", "m_flAutoJumpMin"));
+			return LoadFromAddress(this + GetOffset("CTFBotSpawner", "m_flAutoJumpMin"), NumberType_Int32);
 		}
 	}
 	
@@ -1614,7 +1614,7 @@ methodmap CTFBotSpawner < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CTFBotSpawner", "m_flAutoJumpMax"));
+			return LoadFromAddress(this + GetOffset("CTFBotSpawner", "m_flAutoJumpMax"), NumberType_Int32);
 		}
 	}
 	
@@ -1628,7 +1628,7 @@ methodmap CTFBotSpawner < Address
 	
 	public void GetName(char[] buffer, int maxlen, const char[] defValue = "")
 	{
-		Address m_name = Deref(this + GetOffset("CTFBotSpawner", "m_name"));
+		Address m_name = LoadFromAddress(this + GetOffset("CTFBotSpawner", "m_name"), NumberType_Int32);
 		if (m_name)
 		{
 			PtrToString(m_name, buffer, maxlen);
@@ -1641,7 +1641,7 @@ methodmap CTFBotSpawner < Address
 	
 	public Address GetClassIcon(int nSpawnNum = -1)
 	{
-		return Deref(SDKCall_GetClassIcon(this, nSpawnNum));
+		return LoadFromAddress(SDKCall_GetClassIcon(this, nSpawnNum), NumberType_Int32);
 	}
 };
 
@@ -1656,7 +1656,7 @@ methodmap CSquadSpawner < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CSquadSpawner", "m_formationSize"));
+			return LoadFromAddress(this + GetOffset("CSquadSpawner", "m_formationSize"), NumberType_Int32);
 		}
 	}
 	
@@ -1664,7 +1664,7 @@ methodmap CSquadSpawner < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CSquadSpawner", "m_bShouldPreserveSquad"));
+			return LoadFromAddress(this + GetOffset("CSquadSpawner", "m_bShouldPreserveSquad"), NumberType_Int32);
 		}
 	}
 }
@@ -1680,7 +1680,7 @@ methodmap CMissionPopulator < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CMissionPopulator", "m_mission"));
+			return LoadFromAddress(this + GetOffset("CMissionPopulator", "m_mission"), NumberType_Int32);
 		}
 	}
 	
@@ -1688,7 +1688,7 @@ methodmap CMissionPopulator < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CMissionPopulator", "m_cooldownDuration"));
+			return LoadFromAddress(this + GetOffset("CMissionPopulator", "m_cooldownDuration"), NumberType_Int32);
 		}
 	}
 	
@@ -1696,7 +1696,7 @@ methodmap CMissionPopulator < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("IPopulationSpawner", "m_spawner"));
+			return LoadFromAddress(this + GetOffset("IPopulationSpawner", "m_spawner"), NumberType_Int32);
 		}
 	}
 	
@@ -1720,7 +1720,7 @@ methodmap CWave < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CWave", "m_nNumEngineersTeleportSpawned"));
+			return LoadFromAddress(this + GetOffset("CWave", "m_nNumEngineersTeleportSpawned"), NumberType_Int32);
 		}
 		public set(int nNumEngineersTeleportSpawned)
 		{
@@ -1732,7 +1732,7 @@ methodmap CWave < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CWave", "m_nNumSentryBustersKilled"));
+			return LoadFromAddress(this + GetOffset("CWave", "m_nNumSentryBustersKilled"), NumberType_Int32);
 		}
 		public set(int nNumSentryBustersKilled)
 		{
@@ -1744,7 +1744,7 @@ methodmap CWave < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CWave", "m_nSentryBustersSpawned"));
+			return LoadFromAddress(this + GetOffset("CWave", "m_nSentryBustersSpawned"), NumberType_Int32);
 		}
 		public set(int nSentryBustersSpawned)
 		{
@@ -1908,7 +1908,7 @@ methodmap CPopulationManager < CBaseEntity
 					}
 					else
 					{
-						int iFormat = Deref(pDef + GetOffset("CEconItemAttributeDefinition", "m_iDescriptionFormat"));
+						int iFormat = LoadFromAddress(pDef + GetOffset("CEconItemAttributeDefinition", "m_iDescriptionFormat"), NumberType_Int32);
 						float flValue = upgrade.flValue;
 						if (iFormat == ATTDESCFORM_VALUE_IS_PERCENTAGE || iFormat == ATTDESCFORM_VALUE_IS_INVERTED_PERCENTAGE)
 						{
@@ -1936,7 +1936,7 @@ methodmap BombInfo_t < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("BombInfo_t", "m_flMaxBattleFront"));
+			return LoadFromAddress(this + GetOffset("BombInfo_t", "m_flMaxBattleFront"), NumberType_Int32);
 		}
 	}
 }
@@ -2003,7 +2003,7 @@ methodmap CWaveSpawnPopulator < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CWaveSpawnPopulator", "m_bSupportWave"), NumberType_Int8);
+			return LoadFromAddress(this + GetOffset("CWaveSpawnPopulator", "m_bSupportWave"), NumberType_Int8);
 		}
 	}
 	
@@ -2011,7 +2011,7 @@ methodmap CWaveSpawnPopulator < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CWaveSpawnPopulator", "m_bLimitedSupport"), NumberType_Int8);
+			return LoadFromAddress(this + GetOffset("CWaveSpawnPopulator", "m_bLimitedSupport"), NumberType_Int8);
 		}
 	}
 	
@@ -2045,7 +2045,7 @@ methodmap CMvMBotUpgrade < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CMvMBotUpgrade", "iAttribIndex"), NumberType_Int16);
+			return LoadFromAddress(this + GetOffset("CMvMBotUpgrade", "iAttribIndex"), NumberType_Int16);
 		}
 	}
 	
@@ -2053,7 +2053,7 @@ methodmap CMvMBotUpgrade < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CMvMBotUpgrade", "flValue"));
+			return LoadFromAddress(this + GetOffset("CMvMBotUpgrade", "flValue"), NumberType_Int32);
 		}
 	}
 	
@@ -2061,7 +2061,7 @@ methodmap CMvMBotUpgrade < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CMvMBotUpgrade", "bIsBotAttr"), NumberType_Int8);
+			return LoadFromAddress(this + GetOffset("CMvMBotUpgrade", "bIsBotAttr"), NumberType_Int8);
 		}
 	}
 	
@@ -2069,7 +2069,7 @@ methodmap CMvMBotUpgrade < Address
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CMvMBotUpgrade", "bIsSkillAttr"), NumberType_Int8);
+			return LoadFromAddress(this + GetOffset("CMvMBotUpgrade", "bIsSkillAttr"), NumberType_Int8);
 		}
 	}
 }

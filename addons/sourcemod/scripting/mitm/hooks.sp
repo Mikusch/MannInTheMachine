@@ -122,12 +122,12 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 				if (pDef)
 				{
 					char szDescription[TEXTMSG_MAX_MESSAGE_LENGTH];
-					PtrToString(Deref(pDef + GetOffset("CEconItemAttributeDefinition", "m_pszDescriptionString")), szDescription, sizeof(szDescription));
+					PtrToString(LoadFromAddress(pDef + GetOffset("CEconItemAttributeDefinition", "m_pszDescriptionString"), NumberType_Int32), szDescription, sizeof(szDescription));
 					
 					// If there's a localized description, use that, else use the internal attribute name
 					if (szDescription[0] && msg_dest == HUD_PRINTCONSOLE)
 					{
-						int iFormat = Deref(pDef + GetOffset("CEconItemAttributeDefinition", "m_iDescriptionFormat"));
+						int iFormat = LoadFromAddress(pDef + GetOffset("CEconItemAttributeDefinition", "m_iDescriptionFormat"), NumberType_Int32);
 						float flValue = TranslateAttributeValue(iFormat, upgrade.flValue);
 						
 						char szValue[16];

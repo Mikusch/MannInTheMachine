@@ -99,12 +99,19 @@ void DHooks_Init(GameData hGameData)
 	
 	CopyScriptFunctionBinding("CTFBot", "AddBotAttribute", "CTFPlayer", DHookCallback_ScriptAddAttribute_Pre);
 	CopyScriptFunctionBinding("CTFBot", "AddBotTag", "CTFPlayer", DHookCallback_ScriptAddTag_Pre);
+	CopyScriptFunctionBinding("CTFBot", "AddWeaponRestriction", "CTFPlayer", DHookCallback_ScriptSetWeaponRestriction_Pre);
 	CopyScriptFunctionBinding("CTFBot", "ClearAllBotAttributes", "CTFPlayer", DHookCallback_ScriptClearAllAttributes_Pre);
 	CopyScriptFunctionBinding("CTFBot", "ClearAllBotTags", "CTFPlayer", DHookCallback_ScriptClearTags_Pre);
+	CopyScriptFunctionBinding("CTFBot", "ClearAllWeaponRestrictions", "CTFPlayer", DHookCallback_ScriptClearWeaponRestrictions);
+	CopyScriptFunctionBinding("CTFBot", "DisbandCurrentSquad", "CTFPlayer", DHookCallback_ScriptDisbandAndDeleteSquad);
 	CopyScriptFunctionBinding("CTFBot", "HasBotAttribute", "CTFPlayer", DHookCallback_ScriptHasAttribute_Pre);
 	CopyScriptFunctionBinding("CTFBot", "HasBotTag", "CTFPlayer", DHookCallback_ScriptHasTag_Pre);
+	CopyScriptFunctionBinding("CTFBot", "IsInASquad", "CTFPlayer", DHookCallback_ScriptIsInASquad_Pre);
+	CopyScriptFunctionBinding("CTFBot", "LeaveSquad", "CTFPlayer", DHookCallback_ScriptLeaveSquad_Pre);
+	CopyScriptFunctionBinding("CTFBot", "HasWeaponRestriction", "CTFPlayer", DHookCallback_ScriptHasWeaponRestriction_Pre);
 	CopyScriptFunctionBinding("CTFBot", "RemoveBotAttribute", "CTFPlayer", DHookCallback_ScriptRemoveAttribute_Pre);
 	CopyScriptFunctionBinding("CTFBot", "RemoveBotTag", "CTFPlayer", DHookCallback_ScriptRemoveTag_Pre);
+	CopyScriptFunctionBinding("CTFBot", "RemoveWeaponRestriction", "CTFPlayer", DHookCallback_ScriptRemoveWeaponRestriction_Pre);
 	
 	VScript_ResetScriptVM();
 	
@@ -1904,6 +1911,16 @@ static MRESReturn DHookCallback_ScriptAddTag_Pre(int bot, DHookParam params)
 	return MRES_Supercede;
 }
 
+static MRESReturn DHookCallback_ScriptSetWeaponRestriction_Pre(int bot, DHookParam params)
+{
+	if (IsFakeClient(bot))
+		return MRES_Ignored;
+	
+	Player(bot).SetWeaponRestriction(params.Get(1));
+	
+	return MRES_Supercede;
+}
+
 static MRESReturn DHookCallback_ScriptClearAllAttributes_Pre(int bot)
 {
 	if (IsFakeClient(bot))
@@ -1920,6 +1937,30 @@ static MRESReturn DHookCallback_ScriptClearTags_Pre(int bot)
 		return MRES_Ignored;
 	
 	Player(bot).ClearTags();
+	
+	return MRES_Supercede;
+}
+
+static MRESReturn DHookCallback_ScriptClearWeaponRestrictions(int bot)
+{
+	if (IsFakeClient(bot))
+		return MRES_Ignored;
+	
+	Player(bot).ClearWeaponRestrictions();
+	
+	return MRES_Supercede;
+}
+
+static MRESReturn DHookCallback_ScriptDisbandAndDeleteSquad(int bot)
+{
+	if (IsFakeClient(bot))
+		return MRES_Ignored;
+	
+	CTFBotSquad squad = Player(bot).GetSquad();
+	if (squad)
+	{
+		squad.DisbandAndDeleteSquad();
+	}
 	
 	return MRES_Supercede;
 }
@@ -1947,6 +1988,36 @@ static MRESReturn DHookCallback_ScriptHasTag_Pre(int bot, DHookReturn ret, DHook
 	return MRES_Supercede;
 }
 
+static MRESReturn DHookCallback_ScriptIsInASquad_Pre(int bot, DHookReturn ret)
+{
+	if (IsFakeClient(bot))
+		return MRES_Ignored;
+	
+	ret.Value = Player(bot).IsInASquad();
+	
+	return MRES_Supercede;
+}
+
+static MRESReturn DHookCallback_ScriptLeaveSquad_Pre(int bot)
+{
+	if (IsFakeClient(bot))
+		return MRES_Ignored;
+	
+	Player(bot).LeaveSquad();
+	
+	return MRES_Supercede;
+}
+
+static MRESReturn DHookCallback_ScriptHasWeaponRestriction_Pre(int bot, DHookReturn ret, DHookParam params)
+{
+	if (IsFakeClient(bot))
+		return MRES_Ignored;
+	
+	ret.Value = Player(bot).HasWeaponRestriction(params.Get(1));
+	
+	return MRES_Supercede;
+}
+
 static MRESReturn DHookCallback_ScriptRemoveAttribute_Pre(int bot, DHookParam params)
 {
 	if (IsFakeClient(bot))
@@ -1966,6 +2037,16 @@ static MRESReturn DHookCallback_ScriptRemoveTag_Pre(int bot, DHookParam params)
 	params.GetString(1, tag, sizeof(tag));
 	
 	Player(bot).RemoveTag(tag);
+	
+	return MRES_Supercede;
+}
+
+static MRESReturn DHookCallback_ScriptRemoveWeaponRestriction_Pre(int bot, DHookParam params)
+{
+	if (IsFakeClient(bot))
+		return MRES_Ignored;
+	
+	Player(bot).RemoveWeaponRestriction(params.Get(1));
 	
 	return MRES_Supercede;
 }

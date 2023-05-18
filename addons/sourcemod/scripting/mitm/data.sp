@@ -525,6 +525,11 @@ methodmap Player < CBaseCombatCharacter
 		this.m_weaponRestrictionFlags |= restrictionFlags;
 	}
 	
+	public void RemoveWeaponRestriction(WeaponRestrictionType restrictionFlags)
+	{
+		this.m_weaponRestrictionFlags &= ~restrictionFlags;
+	}
+	
 	public bool HasWeaponRestriction(WeaponRestrictionType restrictionFlags)
 	{
 		return this.m_weaponRestrictionFlags & restrictionFlags ? true : false;

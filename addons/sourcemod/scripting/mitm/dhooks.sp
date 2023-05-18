@@ -123,32 +123,32 @@ void DHooks_OnClientPutInServer(int client)
 {
 	if (g_hDHook_CBaseEntity_SetModel)
 	{
-		g_hDHook_CBaseEntity_SetModel.HookEntity(Hook_Post, client, DHookCallback_SetModel_Post);
+		g_hDHook_CBaseEntity_SetModel.HookEntity(Hook_Post, client, DHookCallback_CBaseEntity_SetModel_Post);
 	}
 	
 	if (g_hDHook_CBaseEntity_ShouldTransmit)
 	{
-		g_hDHook_CBaseEntity_ShouldTransmit.HookEntity(Hook_Pre, client, DHookCallback_ShouldTransmit_Pre);
+		g_hDHook_CBaseEntity_ShouldTransmit.HookEntity(Hook_Pre, client, DHookCallback_CTFPlayer_ShouldTransmit_Pre);
 	}
 	
 	if (g_hDHook_CBaseEntity_Event_Killed)
 	{
-		g_hDHook_CBaseEntity_Event_Killed.HookEntity(Hook_Pre, client, DHookCallback_EventKilled_Pre);
+		g_hDHook_CBaseEntity_Event_Killed.HookEntity(Hook_Pre, client, DHookCallback_CTFPlayer_EventKilled_Pre);
 	}
 	
 	if (g_hDHook_CBaseCombatCharacter_ShouldGib)
 	{
-		g_hDHook_CBaseCombatCharacter_ShouldGib.HookEntity(Hook_Pre, client, DHookCallback_ShouldGib_Pre);
+		g_hDHook_CBaseCombatCharacter_ShouldGib.HookEntity(Hook_Pre, client, DHookCallback_CTFPlayer_ShouldGib_Pre);
 	}
 	
 	if (g_hDHook_CTFPlayer_IsAllowedToPickUpFlag)
 	{
-		g_hDHook_CTFPlayer_IsAllowedToPickUpFlag.HookEntity(Hook_Pre, client, DHookCallback_IsAllowedToPickUpFlag_Post);
+		g_hDHook_CTFPlayer_IsAllowedToPickUpFlag.HookEntity(Hook_Pre, client, DHookCallback_CTFPlayer_IsAllowedToPickUpFlag_Post);
 	}
 	
 	if (g_hDHook_CBasePlayer_EntSelectSpawnPoint)
 	{
-		g_hDHook_CBasePlayer_EntSelectSpawnPoint.HookEntity(Hook_Pre, client, DHookCallback_EntSelectSpawnPoint_Pre);
+		g_hDHook_CBasePlayer_EntSelectSpawnPoint.HookEntity(Hook_Pre, client, DHookCallback_CTFPlayer_EntSelectSpawnPoint_Pre);
 	}
 }
 
@@ -156,12 +156,12 @@ void DHooks_HookGamerules()
 {
 	if (g_hDHook_CGameRules_ClientConnected)
 	{
-		g_hDHook_CGameRules_ClientConnected.HookGamerules(Hook_Pre, DHookCallback_ClientConnected_Pre);
+		g_hDHook_CGameRules_ClientConnected.HookGamerules(Hook_Pre, DHookCallback_CTFGameRules_ClientConnected_Pre);
 	}
 	
 	if (g_hDHook_CGameRules_FPlayerCanTakeDamage)
 	{
-		g_hDHook_CGameRules_FPlayerCanTakeDamage.HookGamerules(Hook_Pre, DHookCallback_FPlayerCanTakeDamage_Pre);
+		g_hDHook_CGameRules_FPlayerCanTakeDamage.HookGamerules(Hook_Pre, DHookCallback_CTFGameRules_FPlayerCanTakeDamage_Pre);
 	}
 }
 
@@ -171,41 +171,41 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 	{
 		if (g_hDHook_CBaseFilter_PassesFilterImpl)
 		{
-			g_hDHook_CBaseFilter_PassesFilterImpl.HookEntity(Hook_Pre, entity, DHookCallback_PassesFilterImpl_Pre);
+			g_hDHook_CBaseFilter_PassesFilterImpl.HookEntity(Hook_Pre, entity, DHookCallback_CFilterTFBotHasTag_PassesFilterImpl_Pre);
 		}
 	}
 	else if (StrEqual(classname, "item_teamflag"))
 	{
 		if (g_hDHook_CTFItem_PickUp)
 		{
-			g_hDHook_CTFItem_PickUp.HookEntity(Hook_Pre, entity, DHookCallback_PickUp_Pre);
-			g_hDHook_CTFItem_PickUp.HookEntity(Hook_Post, entity, DHookCallback_PickUp_Post);
+			g_hDHook_CTFItem_PickUp.HookEntity(Hook_Pre, entity, DHookCallback_CCaptureFlag_Pre);
+			g_hDHook_CTFItem_PickUp.HookEntity(Hook_Post, entity, DHookCallback_CCaptureFlag_Post);
 		}
 	}
 	else if (StrEqual(classname, "obj_teleporter"))
 	{
 		if (g_hDHook_CBaseObject_CanBeUpgraded)
 		{
-			g_hDHook_CBaseObject_CanBeUpgraded.HookEntity(Hook_Pre, entity, DHookCallback_CanBeUpgraded_Pre);
+			g_hDHook_CBaseObject_CanBeUpgraded.HookEntity(Hook_Pre, entity, DHookCallback_CObjectTeleporter_CanBeUpgraded_Pre);
 		}
 		
 		if (g_hDHook_CBaseObject_IsPlacementPosValid)
 		{
-			g_hDHook_CBaseObject_IsPlacementPosValid.HookEntity(Hook_Post, entity, DHookCallback_IsPlacementPosValid_Post);
+			g_hDHook_CBaseObject_IsPlacementPosValid.HookEntity(Hook_Post, entity, DHookCallback_CObjectTeleporter_IsPlacementPosValid_Post);
 		}
 	}
 	else if (strncmp(classname, "item_currencypack_", 18) == 0)
 	{
 		if (g_hDHook_CItem_ComeToRest)
 		{
-			g_hDHook_CItem_ComeToRest.HookEntity(Hook_Pre, entity, DHookCallback_ComeToRest_Pre);
+			g_hDHook_CItem_ComeToRest.HookEntity(Hook_Pre, entity, DHookCallback_CCurrencyPack_ComeToRest_Pre);
 		}
 	}
 	else if (StrEqual(classname, "obj_sentrygun"))
 	{
 		if (g_hDHook_CBaseEntity_SetModel)
 		{
-			g_hDHook_CBaseEntity_SetModel.HookEntity(Hook_Post, entity, DHookCallback_SetModel_Post);
+			g_hDHook_CBaseEntity_SetModel.HookEntity(Hook_Post, entity, DHookCallback_CBaseEntity_SetModel_Post);
 		}
 	}
 }
@@ -1524,7 +1524,7 @@ void OnBotTeleported(int bot)
 	}
 }
 
-static MRESReturn DHookCallback_ShouldTransmit_Pre(int player, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CTFPlayer_ShouldTransmit_Pre(int player, DHookReturn ret, DHookParam params)
 {
 	if (Player(player).HasAttribute(USE_BOSS_HEALTH_BAR))
 	{
@@ -1535,7 +1535,7 @@ static MRESReturn DHookCallback_ShouldTransmit_Pre(int player, DHookReturn ret, 
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
+static MRESReturn DHookCallback_CTFPlayer_EventKilled_Pre(int player, DHookParam params)
 {
 	// Replicate behavior of CTFBot::Event_Killed
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
@@ -1640,7 +1640,7 @@ static MRESReturn DHookCallback_EventKilled_Pre(int player, DHookParam params)
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_ShouldGib_Pre(int player, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CTFPlayer_ShouldGib_Pre(int player, DHookReturn ret, DHookParam params)
 {
 	// only gib giant/miniboss
 	if (IsMannVsMachineMode() && (Player(player).IsMiniBoss() || GetEntPropFloat(player, Prop_Send, "m_flModelScale") > 1.0))
@@ -1652,7 +1652,7 @@ static MRESReturn DHookCallback_ShouldGib_Pre(int player, DHookReturn ret, DHook
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_IsAllowedToPickUpFlag_Post(int player, DHookReturn ret)
+static MRESReturn DHookCallback_CTFPlayer_IsAllowedToPickUpFlag_Post(int player, DHookReturn ret)
 {
 	// only the leader of a squad can pick up the flag
 	if (Player(player).IsInASquad() && !Player(player).GetSquad().IsLeader(player))
@@ -1671,7 +1671,7 @@ static MRESReturn DHookCallback_IsAllowedToPickUpFlag_Post(int player, DHookRetu
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_EntSelectSpawnPoint_Pre(int player, DHookReturn ret)
+static MRESReturn DHookCallback_CTFPlayer_EntSelectSpawnPoint_Pre(int player, DHookReturn ret)
 {
 	// override normal spawn behavior to spawn robots at the right place
 	if (IsValidEntity(Player(player).m_spawnPointEntity))
@@ -1683,7 +1683,7 @@ static MRESReturn DHookCallback_EntSelectSpawnPoint_Pre(int player, DHookReturn 
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CFilterTFBotHasTag_PassesFilterImpl_Pre(int filter, DHookReturn ret, DHookParam params)
 {
 	if (params.IsNull(2))
 		return MRES_Ignored;
@@ -1726,7 +1726,7 @@ static MRESReturn DHookCallback_PassesFilterImpl_Pre(int filter, DHookReturn ret
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
+static MRESReturn DHookCallback_CCaptureFlag_Pre(int item, DHookParam params)
 {
 	int player = params.Get(1);
 	
@@ -1744,7 +1744,7 @@ static MRESReturn DHookCallback_PickUp_Pre(int item, DHookParam params)
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_PickUp_Post(int item, DHookParam params)
+static MRESReturn DHookCallback_CCaptureFlag_Post(int item, DHookParam params)
 {
 	int player = params.Get(1);
 	
@@ -1756,7 +1756,7 @@ static MRESReturn DHookCallback_PickUp_Post(int item, DHookParam params)
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_SetModel_Post(int entity, DHookParam params)
+static MRESReturn DHookCallback_CBaseEntity_SetModel_Post(int entity, DHookParam params)
 {
 	char szModelName[PLATFORM_MAX_PATH];
 	params.GetString(1, szModelName, sizeof(szModelName));
@@ -1776,7 +1776,7 @@ static MRESReturn DHookCallback_SetModel_Post(int entity, DHookParam params)
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_IsPlacementPosValid_Post(int obj, DHookReturn ret)
+static MRESReturn DHookCallback_CObjectTeleporter_IsPlacementPosValid_Post(int obj, DHookReturn ret)
 {
 	if (!ret.Value)
 	{
@@ -1821,7 +1821,7 @@ static bool TraceEntityFilter_IsPlacementPosValid(int entity, int contentsMask, 
 	return true;
 }
 
-static MRESReturn DHookCallback_CanBeUpgraded_Pre(int obj, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CObjectTeleporter_CanBeUpgraded_Pre(int obj, DHookReturn ret, DHookParam params)
 {
 	int player = params.Get(1);
 	
@@ -1837,7 +1837,7 @@ static MRESReturn DHookCallback_CanBeUpgraded_Pre(int obj, DHookReturn ret, DHoo
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_ComeToRest_Pre(int item)
+static MRESReturn DHookCallback_CCurrencyPack_ComeToRest_Pre(int item)
 {
 	float origin[3];
 	GetEntPropVector(item, Prop_Data, "m_vecAbsOrigin", origin);
@@ -1857,14 +1857,14 @@ static MRESReturn DHookCallback_ComeToRest_Pre(int item)
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_ClientConnected_Pre(DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CTFGameRules_ClientConnected_Pre(DHookReturn ret, DHookParam params)
 {
 	// MvM will start rejecting connections if the server has 10 humans
 	ret.Value = true;
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_FPlayerCanTakeDamage_Pre(DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CTFGameRules_FPlayerCanTakeDamage_Pre(DHookReturn ret, DHookParam params)
 {
 	if (g_bForceFriendlyFire)
 	{

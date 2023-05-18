@@ -21,7 +21,6 @@
 static Handle g_hSDKCallGetClassIconLinux;
 static Handle g_hSDKCallGetClassIconWindows;
 static Handle g_hSDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert;
-static Handle g_hSDKCall_CTFPlayer_PostInventoryApplication;
 static Handle g_hSDKCall_CEconEntity_UpdateModelToClass;
 static Handle g_hSDKCall_CTFItem_PickUp;
 static Handle g_hSDKCall_CCaptureZone_Capture;
@@ -48,6 +47,7 @@ static Handle g_hSDKCall_CBaseCombatWeapon_Clip1;
 static Handle g_hSDKCall_CSpawnLocation_FindSpawnLocation;
 static Handle g_hSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold;
 static Handle g_hSDKCall_IPopulationSpawner_Spawn;
+static Handle g_hSDKCall_BotGenerateAndWearItem;
 static Handle g_hSDKCall_GetBombInfo;
 static Handle g_hSDKCall_CTFBotHintEngineerNest_IsStaleNest;
 static Handle g_hSDKCall_CTFBotHintEngineerNest_DetonateStaleNest;
@@ -79,7 +79,6 @@ void SDKCalls_Init(GameData hGameData)
 	}
 	
 	g_hSDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert = PrepSDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert(hGameData);
-	g_hSDKCall_CTFPlayer_PostInventoryApplication = PrepSDKCall_CTFPlayer_PostInventoryApplication(hGameData);
 	g_hSDKCall_CEconEntity_UpdateModelToClass = PrepSDKCall_CEconEntity_UpdateModelToClass(hGameData);
 	g_hSDKCall_CTFItem_PickUp = PrepSDKCall_CTFItem_PickUp(hGameData);
 	g_hSDKCall_CCaptureZone_Capture = PrepSDKCall_CCaptureZone_Capture(hGameData);
@@ -106,6 +105,7 @@ void SDKCalls_Init(GameData hGameData)
 	g_hSDKCall_CSpawnLocation_FindSpawnLocation = PrepSDKCall_CSpawnLocation_FindSpawnLocation(hGameData);
 	g_hSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold = PrepSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold(hGameData);
 	g_hSDKCall_IPopulationSpawner_Spawn = PrepSDKCall_IPopulationSpawner_Spawn(hGameData);
+	g_hSDKCall_BotGenerateAndWearItem = PrepSDKCall_BotGenerateAndWearItem(hGameData);
 	g_hSDKCall_GetBombInfo = PrepSDKCall_GetBombInfo(hGameData);
 	g_hSDKCall_CTFBotHintEngineerNest_IsStaleNest = PrepSDKCall_CTFBotHintEngineerNest_IsStaleNest(hGameData);
 	g_hSDKCall_CTFBotHintEngineerNest_DetonateStaleNest = PrepSDKCall_CTFBotHintEngineerNest_DetonateStaleNest(hGameData);
@@ -162,18 +162,6 @@ static Handle PrepSDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert(GameData h
 	Handle call = EndPrepSDKCall();
 	if (!call)
 		LogError("Failed to create SDKCall: CTeamplayRoundBasedRules::PlayThrottledAlert");
-	
-	return call;
-}
-
-static Handle PrepSDKCall_CTFPlayer_PostInventoryApplication(GameData hGameData)
-{
-	StartPrepSDKCall(SDKCall_Player);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTFPlayer::PostInventoryApplication");
-	
-	Handle call = EndPrepSDKCall();
-	if (!call)
-		LogError("Failed to create SDKCall: CTFPlayer::PostInventoryApplication");
 	
 	return call;
 }
@@ -575,6 +563,20 @@ static Handle PrepSDKCall_CTFPlayer_RemoveObject(GameData hGameData)
 	return call;
 }
 
+static Handle PrepSDKCall_BotGenerateAndWearItem(GameData hGameData)
+{
+	StartPrepSDKCall(SDKCall_Static);
+	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "BotGenerateAndWearItem");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
+	PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogError("Failed to create SDKCall: BotGenerateAndWearItem");
+	
+	return call;
+}
+
 static Handle PrepSDKCall_GetBombInfo(GameData hGameData)
 {
 	StartPrepSDKCall(SDKCall_Static);
@@ -665,12 +667,6 @@ bool SDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert(int iTeam, const char[]
 		return SDKCall(g_hSDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert, iTeam, sound, fDelayBeforeNext);
 	
 	return false;
-}
-
-void SDKCall_CTFPlayer_PostInventoryApplication(int player)
-{
-	if (g_hSDKCall_CTFPlayer_PostInventoryApplication)
-		SDKCall(g_hSDKCall_CTFPlayer_PostInventoryApplication, player);
 }
 
 void SDKCall_CEconEntity_UpdateModelToClass(int entity)
@@ -860,6 +856,12 @@ void SDKCall_CTFPlayer_RemoveObject(int player, int obj)
 {
 	if (g_hSDKCall_CTFPlayer_RemoveObject)
 		SDKCall(g_hSDKCall_CTFPlayer_RemoveObject, player, obj);
+}
+
+void SDKCall_BotGenerateAndWearItem(int player, const char[] itemName)
+{
+	if (g_hSDKCall_BotGenerateAndWearItem)
+		 SDKCall(g_hSDKCall_BotGenerateAndWearItem, player, itemName);
 }
 
 bool SDKCall_GetBombInfo(BombInfo_t pBombInfo = view_as<BombInfo_t>(Address_Null))

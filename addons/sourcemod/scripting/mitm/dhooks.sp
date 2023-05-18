@@ -104,6 +104,7 @@ void DHooks_Init(GameData hGameData)
 	CopyScriptFunctionBinding("CTFBot", "ClearAllBotTags", "CTFPlayer", DHookCallback_ScriptClearTags_Pre);
 	CopyScriptFunctionBinding("CTFBot", "ClearAllWeaponRestrictions", "CTFPlayer", DHookCallback_ScriptClearWeaponRestrictions);
 	CopyScriptFunctionBinding("CTFBot", "DisbandCurrentSquad", "CTFPlayer", DHookCallback_ScriptDisbandAndDeleteSquad);
+	CopyScriptFunctionBinding("CTFBot", "GenerateAndWearItem", "CTFPlayer");
 	CopyScriptFunctionBinding("CTFBot", "HasBotAttribute", "CTFPlayer", DHookCallback_ScriptHasAttribute_Pre);
 	CopyScriptFunctionBinding("CTFBot", "HasBotTag", "CTFPlayer", DHookCallback_ScriptHasTag_Pre);
 	CopyScriptFunctionBinding("CTFBot", "IsInASquad", "CTFPlayer", DHookCallback_ScriptIsInASquad_Pre);
@@ -235,7 +236,7 @@ static DynamicHook CreateDynamicHook(GameData hGameData, const char[] name)
 	return hook;
 }
 
-static void CopyScriptFunctionBinding(const char[] sourceClassName, const char[] functionName, const char[] targetClassName, DHookCallback callback)
+static void CopyScriptFunctionBinding(const char[] sourceClassName, const char[] functionName, const char[] targetClassName, DHookCallback callback = INVALID_FUNCTION)
 {
 	VScriptFunction pTargetFunc = VScript_GetClassFunction("CTFPlayer", functionName);
 	if (!pTargetFunc)

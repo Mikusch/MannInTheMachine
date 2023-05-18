@@ -930,60 +930,42 @@ methodmap Player < CBaseCombatCharacter
 		int itemDefIndex = GetItemDefinitionIndexByName(szItemName);
 		if (itemDefIndex != TF_ITEMDEF_DEFAULT)
 		{
-			Handle item = GenerateItem(this.index, itemDefIndex);
-			if (item)
+			// If we already have an item in that slot, remove it
+			TFClassType class = TF2_GetPlayerClass(this.index);
+			int slot = TF2Econ_GetItemLoadoutSlot(itemDefIndex, class);
+			int newItemRegionMask = TF2Econ_GetItemEquipRegionMask(itemDefIndex);
+			
+			if (IsWearableSlot(slot))
 			{
-				// If we already have an item in that slot, remove it
-				TFClassType class = TF2_GetPlayerClass(this.index);
-				int slot = TF2Econ_GetItemLoadoutSlot(itemDefIndex, class);
-				int newItemRegionMask = TF2Econ_GetItemEquipRegionMask(itemDefIndex);
-				
-				if (IsWearableSlot(slot))
+				// Remove any wearable that has a conflicting equip_region
+				for (int wbl = 0; wbl < TF2Util_GetPlayerWearableCount(this.index); wbl++)
 				{
-					// Remove any wearable that has a conflicting equip_region
-					for (int wbl = 0; wbl < TF2Util_GetPlayerWearableCount(this.index); wbl++)
+					int pWearable = TF2Util_GetPlayerWearable(this.index, wbl);
+					if (pWearable == -1)
+						continue;
+					
+					int wearableDefIndex = GetEntProp(pWearable, Prop_Send, "m_iItemDefinitionIndex");
+					if (wearableDefIndex == INVALID_ITEM_DEF_INDEX)
+						continue;
+					
+					int wearableRegionMask = TF2Econ_GetItemEquipRegionMask(wearableDefIndex);
+					if (wearableRegionMask & newItemRegionMask)
 					{
-						int pWearable = TF2Util_GetPlayerWearable(this.index, wbl);
-						if (pWearable == -1)
-							continue;
-						
-						int wearableDefIndex = GetEntProp(pWearable, Prop_Send, "m_iItemDefinitionIndex");
-						if (wearableDefIndex == INVALID_ITEM_DEF_INDEX)
-							continue;
-						
-						int wearableRegionMask = TF2Econ_GetItemEquipRegionMask(wearableDefIndex);
-						if (wearableRegionMask & newItemRegionMask)
-						{
-							TF2_RemoveWearable(this.index, pWearable);
-						}
+						TF2_RemoveWearable(this.index, pWearable);
 					}
 				}
-				else
-				{
-					int entity = TF2Util_GetPlayerLoadoutEntity(this.index, slot);
-					if (entity != -1)
-					{
-						RemovePlayerItem(this.index, entity);
-						RemoveEntity(entity);
-					}
-				}
-				
-				int newItem = TF2Items_GiveNamedItem(this.index, item);
-				if (newItem != -1)
-				{
-					if (TF2Util_IsEntityWearable(newItem))
-					{
-						TF2Util_EquipPlayerWearable(this.index, newItem);
-					}
-					else if (TF2Util_IsEntityWeapon(newItem))
-					{
-						EquipPlayerWeapon(this.index, newItem);
-					}
-				}
-				
-				SDKCall_CTFPlayer_PostInventoryApplication(this.index);
 			}
-			delete item;
+			else
+			{
+				int entity = TF2Util_GetPlayerLoadoutEntity(this.index, slot);
+				if (entity != -1)
+				{
+					RemovePlayerItem(this.index, entity);
+					RemoveEntity(entity);
+				}
+			}
+			
+			SDKCall_BotGenerateAndWearItem(this.index, szItemName);
 		}
 		else
 		{

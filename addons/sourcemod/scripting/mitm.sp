@@ -25,7 +25,6 @@
 #include <dhooks>
 #include <tf2attributes>
 #include <tf_econ_data>
-#include <tf2items>
 #include <tf2utils>
 #include <loadsoundscript>
 #include <cbasenpc>

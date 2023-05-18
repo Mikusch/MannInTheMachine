@@ -237,21 +237,6 @@ bool IsWearableSlot(int iSlot)
 		|| IsTauntSlot(iSlot);
 }
 
-Handle GenerateItem(int player, int itemDefIndex)
-{
-	Handle item = TF2Items_CreateItem(PRESERVE_ATTRIBUTES | FORCE_GENERATION);
-	if (item)
-	{
-		char classname[64];
-		TF2Econ_GetItemClassName(itemDefIndex, classname, sizeof(classname));
-		TF2Econ_TranslateWeaponEntForClass(classname, sizeof(classname), TF2_GetPlayerClass(player));
-		
-		TF2Items_SetClassname(item, classname);
-		TF2Items_SetItemIndex(item, itemDefIndex);
-	}
-	return item;
-}
-
 int GetItemDefinitionIndexByName(const char[] name)
 {
 	if (!name[0])

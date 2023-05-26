@@ -49,7 +49,8 @@ static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int 
 			if ((float(GetEntProp(victim, Prop_Data, "m_iHealth")) - damage) <= 0.0)
 			{
 				SetEntityHealth(victim, 1);
-				return Plugin_Handled;
+				damage = 0.0;
+				return Plugin_Changed;
 			}
 		}
 		
@@ -64,6 +65,28 @@ static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int 
 				Player(victim).IsMiniBoss())
 			{
 				damage = 600.0;
+				return Plugin_Changed;
+			}
+		}
+	}
+	
+	if (victim != attacker && TF2_GetClientTeam(victim) == TFTeam_Defenders && TF2_GetClientTeam(attacker) == TFTeam_Invaders)
+	{
+		switch (Player(victim).GetDifficulty())
+		{
+			case EASY:
+			{
+				damage *= 0.9;
+				return Plugin_Changed;
+			}
+			case HARD:
+			{
+				damage *= 1.1;
+				return Plugin_Changed;
+			}
+			case EXPERT:
+			{
+				damage *= 1.25;
 				return Plugin_Changed;
 			}
 		}

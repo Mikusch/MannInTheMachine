@@ -33,6 +33,7 @@ static ArrayList m_eventChangeAttributes[MAXPLAYERS + 1];
 static ArrayList m_tags[MAXPLAYERS + 1];
 static WeaponRestrictionType m_weaponRestrictionFlags[MAXPLAYERS + 1];
 static AttributeType m_attributeFlags[MAXPLAYERS + 1];
+static DifficultyType m_difficulty[MAXPLAYERS + 1];
 static char m_szIdleSound[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
 static float m_fModelScaleOverride[MAXPLAYERS + 1];
 static MissionType m_mission[MAXPLAYERS + 1];
@@ -144,6 +145,18 @@ methodmap Player < CBaseCombatCharacter
 		public set(AttributeType attributeFlag)
 		{
 			m_attributeFlags[this.index] = attributeFlag;
+		}
+	}
+	
+	property DifficultyType m_difficulty
+	{
+		public get()
+		{
+			return m_difficulty[this.index];
+		}
+		public set(DifficultyType difficulty)
+		{
+			m_difficulty[this.index] = difficulty;
 		}
 	}
 	
@@ -763,9 +776,21 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
+	public DifficultyType GetDifficulty()
+	{
+		return this.m_difficulty;
+	}
+	
 	public void SetDifficulty(DifficultyType difficulty)
 	{
+		this.m_difficulty = difficulty;
+		
 		this.SetProp(Prop_Send, "m_nBotSkill", difficulty);
+	}
+	
+	public bool IsDifficulty(DifficultyType skill)
+	{
+		return skill == this.m_difficulty;
 	}
 	
 	public void ModifyMaxHealth(int nNewMaxHealth, bool bSetCurrentHealth = true, bool bAllowModelScaling = true)

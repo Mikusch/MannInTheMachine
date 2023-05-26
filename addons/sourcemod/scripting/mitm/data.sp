@@ -1014,14 +1014,12 @@ methodmap Player < CBaseCombatCharacter
 	
 	public void SetSkillAttributes()
 	{
-		TFClassType nClass = TF2_GetPlayerClass(this.index);
-		
-		// average skill of a human player matches HARD bot
+		// average skill of a human player matches HARD bots
 		switch (this.GetDifficulty())
 		{
 			case EASY:
 			{
-				if (nClass == TFClass_Pyro)
+				if (TF2_GetPlayerClass(this.index) == TFClass_Pyro)
 				{
 					int weapon = TF2Util_GetPlayerLoadoutEntity(this.index, LOADOUT_POSITION_PRIMARY);
 					if (weapon != -1)

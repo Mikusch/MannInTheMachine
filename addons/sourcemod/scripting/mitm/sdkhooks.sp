@@ -72,7 +72,7 @@ static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int 
 	
 	if (victim != attacker && TF2_GetClientTeam(victim) == TFTeam_Defenders && TF2_GetClientTeam(attacker) == TFTeam_Invaders)
 	{
-		switch (Player(victim).GetDifficulty())
+		switch (Player(attacker).GetDifficulty())
 		{
 			case EASY:
 			{

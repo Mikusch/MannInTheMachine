@@ -70,27 +70,7 @@ static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int 
 		}
 	}
 	
-	if (victim != attacker && TF2_GetClientTeam(victim) == TFTeam_Defenders && TF2_GetClientTeam(attacker) == TFTeam_Invaders)
-	{
-		switch (Player(attacker).GetDifficulty())
-		{
-			case EASY:
-			{
-				damage *= 0.9;
-				return Plugin_Changed;
-			}
-			case HARD:
-			{
-				damage *= 1.1;
-				return Plugin_Changed;
-			}
-			case EXPERT:
-			{
-				damage *= 1.25;
-				return Plugin_Changed;
-			}
-		}
-	}
+	PrintToServer("%f", damage);
 	
 	return Plugin_Continue;
 }

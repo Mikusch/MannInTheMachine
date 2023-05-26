@@ -947,6 +947,12 @@ methodmap Player < CBaseCombatCharacter
 				this.AddTag(tag);
 			}
 			
+			// human skill attributes
+			if (!IsFakeClient(this.index))
+			{
+				this.SetSkillAttributes();
+			}
+			
 			// Request to Add in Endless
 			if (g_pPopulationManager.IsInEndlessWaves())
 			{
@@ -1002,6 +1008,37 @@ methodmap Player < CBaseCombatCharacter
 			if (szItemName[0])
 			{
 				LogError("CTFBotSpawner::AddItemToBot: Invalid item %s.", szItemName);
+			}
+		}
+	}
+	
+	public void SetSkillAttributes()
+	{
+		TFClassType nClass = TF2_GetPlayerClass(this.index);
+		
+		// average skill of a human player matches HARD bot
+		switch (this.GetDifficulty())
+		{
+			case EASY:
+			{
+				if (nClass == TFClass_Pyro)
+				{
+					int weapon = TF2Util_GetPlayerLoadoutEntity(this.index, LOADOUT_POSITION_PRIMARY);
+					if (weapon != -1)
+					{
+						TF2Attrib_SetByName(weapon, "airblast disabled", 1.0);
+					}
+				}
+				
+				TF2Attrib_SetByName(this.index, "damage penalty", 0.75);
+			}
+			case NORMAL:
+			{
+				TF2Attrib_SetByName(this.index, "damage penalty", 0.9);
+			}
+			case EXPERT:
+			{
+				TF2Attrib_SetByName(this.index, "damage penalty", 1.1);
 			}
 		}
 	}

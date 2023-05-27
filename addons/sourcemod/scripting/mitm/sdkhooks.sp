@@ -70,8 +70,6 @@ static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int 
 		}
 	}
 	
-	PrintToServer("%f", damage);
-	
 	return Plugin_Continue;
 }
 

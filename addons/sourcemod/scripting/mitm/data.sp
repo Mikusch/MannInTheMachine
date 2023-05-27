@@ -1036,7 +1036,7 @@ methodmap Player < CBaseCombatCharacter
 			}
 			case EXPERT:
 			{
-				TF2Attrib_SetByName(this.index, "damage penalty", 1.1);
+				TF2Attrib_SetByName(this.index, "damage bonus", 1.1);
 			}
 		}
 	}

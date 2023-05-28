@@ -1028,15 +1028,15 @@ methodmap Player < CBaseCombatCharacter
 					}
 				}
 				
-				TF2Attrib_SetByName(this.index, "damage penalty", 0.75);
+				MultiplyAttributeValue(this.index, "damage penalty", 0.75);
 			}
 			case NORMAL:
 			{
-				TF2Attrib_SetByName(this.index, "damage penalty", 0.9);
+				MultiplyAttributeValue(this.index, "damage penalty", 0.9);
 			}
 			case EXPERT:
 			{
-				TF2Attrib_SetByName(this.index, "damage bonus", 1.1);
+				MultiplyAttributeValue(this.index, "damage bonus", 1.1);
 			}
 		}
 	}

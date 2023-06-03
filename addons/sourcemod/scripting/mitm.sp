@@ -36,7 +36,7 @@
 #include <mitm>
 
 // Uncomment this for diagnostic messages in server console (very verbose)
-// #define DEBUG
+#define DEBUG
 
 // Global entities
 CPopulationManager g_pPopulationManager = view_as<CPopulationManager>(INVALID_ENT_REFERENCE);

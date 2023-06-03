@@ -158,6 +158,10 @@ methodmap CTFBotSquad
 	
 	public void Join(int bot)
 	{
+#if defined DEBUG
+		LogMessage("CTFBotSquad: Player %L joined Squad<%d>", bot, this.m_id);
+#endif
+		
 		// first member is the leader
 		if (this.m_roster.Length == 0)
 		{
@@ -173,6 +177,10 @@ methodmap CTFBotSquad
 	
 	public void Leave(int bot)
 	{
+#if defined DEBUG
+		LogMessage("CTFBotSquad: Player %L left Squad<%d>", bot, this.m_id);
+#endif
+		
 		int index = this.m_roster.FindValue(bot);
 		if (index != -1)
 			this.m_roster.Erase(index);
@@ -260,6 +268,10 @@ methodmap CTFBotSquad
 	
 	public void DisbandAndDeleteSquad()
 	{
+#if defined DEBUG
+		LogMessage("CTFBotSquad: Disbanding Squad<%d>", this.m_id);
+#endif
+		
 		// Tell each member of the squad to remove this reference
 		for (int i = 0; i < this.m_roster.Length; ++i)
 		{
@@ -300,11 +312,14 @@ methodmap CTFBotSquad
 			id++;
 		}
 		
-		// fill basic properties
 		CTFBotSquadInfo properties;
 		properties.Init(id);
 		
 		g_squads.PushArray(properties);
+		
+#if defined DEBUG
+		LogMessage("CTFBotSquad: Created Squad<%d>", id);
+#endif
 		
 		return CTFBotSquad(id);
 	}

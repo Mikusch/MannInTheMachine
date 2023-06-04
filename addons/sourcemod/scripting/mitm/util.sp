@@ -199,16 +199,6 @@ void BroadcastSound(int iTeam, const char[] sound, int iAdditionalSoundFlags = 0
 	}
 }
 
-void SetModelScale(int entity, float scale, float duration = 0.0)
-{
-	float vecScale[3];
-	vecScale[0] = scale;
-	vecScale[1] = duration;
-	
-	SetVariantVector3D(vecScale);
-	AcceptEntityInput(entity, "SetModelScale");
-}
-
 bool IsMiscSlot(int iSlot)
 {
 	return iSlot == LOADOUT_POSITION_MISC

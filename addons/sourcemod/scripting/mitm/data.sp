@@ -614,7 +614,7 @@ methodmap Player < CBaseCombatCharacter
 	{
 		this.m_fModelScaleOverride = fScale;
 		
-		SetModelScale(this.index, this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : 1.0);
+		this.SetModelScale(this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : 1.0);
 	}
 	
 	public MissionType GetPrevMission()
@@ -807,7 +807,7 @@ methodmap Player < CBaseCombatCharacter
 		
 		if (bAllowModelScaling && this.IsMiniBoss())
 		{
-			SetModelScale(this.index, this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : tf_mvm_miniboss_scale.FloatValue);
+			this.SetModelScale(this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : tf_mvm_miniboss_scale.FloatValue);
 		}
 	}
 	
@@ -1133,6 +1133,16 @@ methodmap Player < CBaseCombatCharacter
 		}
 		
 		return false;
+	}
+	
+	public void SetModelScale(float scale, float change_duration = 0.0)
+	{
+		float vecScale[3];
+		vecScale[0] = scale;
+		vecScale[1] = change_duration;
+		
+		SetVariantVector3D(vecScale);
+		this.AcceptInput("SetModelScale");
 	}
 	
 	public bool HasTheFlag()

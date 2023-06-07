@@ -1351,5 +1351,24 @@
 				}
 			}
 		}
+		"MemPatches"
+		{
+			"CTFGameRules::GetTeamAssignmentOverride::kMVM_DefendersTeamSize"
+			{
+				"signature" "CTFGameRules::GetTeamAssignmentOverride"
+				"linux"
+				{
+					"offset"	"1D0d"
+					"verify"	"\xB8\x06"
+					"patch"		"\xB8\x20"
+				}
+				"windows"
+				{
+					"offset"	"14Ch"
+					"verify"	"\xB8\x06"
+					"patch"		"\xB8\x20"
+				}
+			}
+		}
 	}
 }

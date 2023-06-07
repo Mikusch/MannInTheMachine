@@ -1131,13 +1131,16 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 	}
 	else if (g_bInWaitingForPlayers)
 	{
-		// funnel players into defender team during waiting for players so they can run around
-		ret.Value = TFTeam_Defenders;
-		return MRES_Supercede;
+		// funnel players into the defender team during waiting for players
+		params.Set(2, TFTeam_Defenders);
+		return MRES_ChangedHandled;
 	}
 	else if (g_bAllowTeamChange || (sm_mitm_developer.BoolValue && !IsFakeClient(player)))
 	{
 		// allow player through
+		if (nDesiredTeam == TFTeam_Spectator || nDesiredTeam == TFTeam_Defenders)
+			return MRES_Ignored;
+		
 		ret.Value = nDesiredTeam;
 		return MRES_Supercede;
 	}
@@ -1156,8 +1159,8 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 		
 		if (!Forwards_OnIsValidDefender(player))
 		{
-			ret.Value = TFTeam_Spectator;
-			return MRES_Supercede;
+			params.Set(2, TFTeam_Spectator);
+			return MRES_ChangedHandled;
 		}
 		
 		int iDefenderCount = 0, iReqDefenderCount = sm_mitm_defender_count.IntValue;
@@ -1181,14 +1184,14 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 			Player(player).HasPreference(PREF_DISABLE_DEFENDER) ||
 			Player(player).HasPreference(PREF_DISABLE_SPAWNING))
 		{
-			ret.Value = TFTeam_Spectator;
+			params.Set(2, TFTeam_Spectator);
+			return MRES_ChangedHandled;
 		}
 		else
 		{
-			ret.Value = TFTeam_Defenders;
+			params.Set(2, TFTeam_Defenders);
+			return MRES_ChangedHandled;
 		}
-		
-		return MRES_Supercede;
 	}
 }
 

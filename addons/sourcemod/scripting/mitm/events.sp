@@ -64,7 +64,7 @@ static Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroa
 	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
 	
 	// Only show when a new defender joins
-	bool bSilent = (team == TFTeam_Spectator) || (team == TFTeam_Invaders);
+	bool bSilent = (team != TFTeam_Defender)
 	event.SetInt("silent", bSilent);
 	
 	Player(client).SetPrevMission(NO_MISSION);

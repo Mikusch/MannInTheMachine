@@ -236,7 +236,7 @@ void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool dontBroadc
 	
 	if (team == TFTeam_Invaders && eventtype == TF_FLAGEVENT_CAPTURED)
 	{
-		CPrintToChatAll("%s %t", PLUGIN_TAG, "Invader_Deployed", player, GetEntProp(player, Prop_Data, "m_iHealth"), GetEntProp(player, Prop_Data, "m_iMaxHealth"));
+		CPrintToChatAll("%s %t", PLUGIN_TAG, "Invader_Deployed", player, GetEntProp(player, Prop_Data, "m_iHealth"), TF2Util_GetEntityMaxHealth(player));
 	}
 }
 

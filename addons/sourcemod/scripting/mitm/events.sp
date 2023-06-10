@@ -18,8 +18,6 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static Handle g_annotationTimer[MAXPLAYERS + 1];
-
 void Events_Init()
 {
 	HookEvent("player_spawn", EventHook_PlayerSpawn);
@@ -30,6 +28,7 @@ void Events_Init()
 	HookEvent("object_destroyed", EventHook_ObjectDestroyed);
 	HookEvent("object_detonated", EventHook_ObjectDestroyed);
 	HookEvent("teamplay_point_captured", EventHook_TeamplayPointCaptured);
+	HookEvent("teamplay_flag_event", EventHook_TeamplayFlagEvent);
 	HookEvent("teams_changed", EventHook_TeamsChanged);
 }
 
@@ -39,7 +38,7 @@ static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroad
 	if (client == 0)
 		return;
 	
-	g_annotationTimer[client] = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
+	Player(client).m_annotationTimer = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
 }
 
 static void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
@@ -63,7 +62,7 @@ static Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroa
 	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
 	
 	// Only show when a new defender joins
-	bool bSilent = (team == TFTeam_Spectator) || (team == TFTeam_Invaders);
+	bool bSilent = team != TFTeam_Defenders;
 	event.SetInt("silent", bSilent);
 	
 	Player(client).SetPrevMission(NO_MISSION);
@@ -224,8 +223,20 @@ static void EventHook_TeamplayPointCaptured(Event event, const char[] name, bool
 			
 			// hide current annotation and recreate later
 			HideAnnotation(client, MITM_HINT_MASK | client);
-			g_annotationTimer[client] = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
+			Player(client).m_annotationTimer = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
 		}
+	}
+}
+
+void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool dontBroadcast)
+{
+	int player = event.GetInt("player");
+	int eventtype = event.GetInt("eventtype");
+	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
+	
+	if (team == TFTeam_Invaders && eventtype == TF_FLAGEVENT_CAPTURED)
+	{
+		CPrintToChatAll("%s %t", PLUGIN_TAG, "Invader_Deployed", player, GetEntProp(player, Prop_Data, "m_iHealth"), GetEntProp(player, Prop_Data, "m_iMaxHealth"));
 	}
 }
 
@@ -249,7 +260,7 @@ static Action Timer_CheckGateBotAnnotation(Handle timer, int userid)
 	if (client == 0)
 		return Plugin_Stop;
 	
-	if (timer != g_annotationTimer[client])
+	if (timer != Player(client).m_annotationTimer)
 		return Plugin_Stop;
 	
 	if (!IsClientInGame(client))

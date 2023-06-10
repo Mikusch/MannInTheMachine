@@ -47,6 +47,7 @@ static BombDeployingState_t m_nDeployingBombState[MAXPLAYERS + 1];
 static char m_szInvaderName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
 static char m_szPrevName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
 static bool m_isWaitingForFullReload[MAXPLAYERS + 1];
+static Handle m_annotationTimer[MAXPLAYERS + 1];
 
 // Non-resetting Properties
 static int m_invaderPriority[MAXPLAYERS + 1];
@@ -337,6 +338,18 @@ methodmap Player < CBaseCombatCharacter
 		public set(bool isWaitingForFullReload)
 		{
 			m_isWaitingForFullReload[this.index] = isWaitingForFullReload;
+		}
+	}
+	
+	property Handle m_annotationTimer
+	{
+		public get()
+		{
+			return m_annotationTimer[this.index];
+		}
+		public set(Handle annotationTimer)
+		{
+			m_annotationTimer[this.index] = annotationTimer;
 		}
 	}
 	
@@ -1513,6 +1526,7 @@ methodmap Player < CBaseCombatCharacter
 		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
 		this.m_hFollowingFlagTarget = INVALID_ENT_REFERENCE;
 		this.m_isWaitingForFullReload = false;
+		this.m_annotationTimer = null;
 		
 		this.ResetInvaderName();
 	}

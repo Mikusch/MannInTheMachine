@@ -18,8 +18,6 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static Handle g_annotationTimer[MAXPLAYERS + 1];
-
 void Events_Init()
 {
 	HookEvent("player_spawn", EventHook_PlayerSpawn);
@@ -40,7 +38,7 @@ static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroad
 	if (client == 0)
 		return;
 	
-	g_annotationTimer[client] = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
+	Player(client).m_annotationTimer = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
 }
 
 static void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
@@ -64,7 +62,7 @@ static Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroa
 	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
 	
 	// Only show when a new defender joins
-	bool bSilent = (team != TFTeam_Defender)
+	bool bSilent = team != TFTeam_Defenders;
 	event.SetInt("silent", bSilent);
 	
 	Player(client).SetPrevMission(NO_MISSION);
@@ -225,7 +223,7 @@ static void EventHook_TeamplayPointCaptured(Event event, const char[] name, bool
 			
 			// hide current annotation and recreate later
 			HideAnnotation(client, MITM_HINT_MASK | client);
-			g_annotationTimer[client] = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
+			Player(client).m_annotationTimer = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
 		}
 	}
 }
@@ -262,7 +260,7 @@ static Action Timer_CheckGateBotAnnotation(Handle timer, int userid)
 	if (client == 0)
 		return Plugin_Stop;
 	
-	if (timer != g_annotationTimer[client])
+	if (timer != Player(client).m_annotationTimer)
 		return Plugin_Stop;
 	
 	if (!IsClientInGame(client))

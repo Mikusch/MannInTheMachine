@@ -1358,7 +1358,7 @@
 				"signature" "CTFGameRules::GetTeamAssignmentOverride"
 				"linux"
 				{
-					"offset"	"1D0d"
+					"offset"	"1D0h"
 					"verify"	"\xB8\x06"
 					"patch"		"\xB8\x20"
 				}

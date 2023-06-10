@@ -67,7 +67,7 @@ void DHooks_Init(GameData hGameData)
 	CreateDynamicDetour(hGameData, "CMissionPopulator::UpdateMission", DHookCallback_CMissionPopulator_UpdateMission_Pre, DHookCallback_CMissionPopulator_UpdateMission_Post);
 	CreateDynamicDetour(hGameData, "CMissionPopulator::UpdateMissionDestroySentries", DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_Pre, DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_Post);
 	CreateDynamicDetour(hGameData, "CPointPopulatorInterface::InputChangeBotAttributes", DHookCallback_CPointPopulatorInterface_InputChangeBotAttributes_Pre);
-	CreateDynamicDetour(hGameData, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre);
+	CreateDynamicDetour(hGameData, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre, DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Post);
 	CreateDynamicDetour(hGameData, "CTFGameRules::PlayerReadyStatus_UpdatePlayerState", DHookCallback_CTFGameRules_PlayerReadyStatus_UpdatePlayerState_Pre, DHookCallback_CTFGameRules_PlayerReadyStatus_UpdatePlayerState_Post);
 	CreateDynamicDetour(hGameData, "CTeamplayRoundBasedRules::ResetPlayerAndTeamReadyState", DHookCallback_CTeamplayRoundBasedRules_ResetPlayerAndTeamReadyState_Pre);
 	CreateDynamicDetour(hGameData, "CTFPlayer::GetLoadoutItem", DHookCallback_CTFPlayer_GetLoadoutItem_Pre, DHookCallback_CTFPlayer_GetLoadoutItem_Post);
@@ -1126,18 +1126,18 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 	TFTeam nDesiredTeam = params.Get(2);
 	
 	if (IsClientSourceTV(player))
-	{
 		return MRES_Ignored;
-	}
-	else if (g_bInWaitingForPlayers)
+	
+	// currency is only set properly when joining defenders as a non-bot, remove the flag
+	SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
+	
+	if (g_bInWaitingForPlayers)
 	{
-		// funnel players into the defender team during waiting for players
 		params.Set(2, TFTeam_Defenders);
 		return MRES_ChangedHandled;
 	}
 	else if (g_bAllowTeamChange || (sm_mitm_developer.BoolValue && !IsFakeClient(player)))
 	{
-		// allow player through
 		if (nDesiredTeam == TFTeam_Spectator || nDesiredTeam == TFTeam_Defenders)
 			return MRES_Ignored;
 		
@@ -1146,6 +1146,7 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 	}
 	else
 	{
+		// player is trying to switch from robot team to spectate
 		if (nDesiredTeam == TFTeam_Spectator && TF2_GetClientTeam(player) == TFTeam_Invaders && !sm_mitm_invader_allow_suicide.BoolValue)
 		{
 			if (IsPlayerAlive(player))
@@ -1195,11 +1196,27 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 	}
 }
 
+static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Post(DHookReturn ret, DHookParam params)
+{
+	int player = params.Get(1);
+	
+	if (IsClientSourceTV(player))
+		return MRES_Ignored;
+	
+	if (ret.Value == TFTeam_Invaders)
+	{
+		// ensure that anyone joining the invader team has the FL_FAKECLIENT flag
+		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
+	}
+	
+	return MRES_Ignored;
+}
+
 static MRESReturn DHookCallback_CTFPlayer_GetLoadoutItem_Pre(int player, DHookReturn ret, DHookParam params)
 {
 	if (IsClientInGame(player) && TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
-		// Generate base items for robot players
+		// generate base items for robot players
 		GameRules_SetProp("m_bIsInTraining", true);
 	}
 	

@@ -30,6 +30,7 @@ void Events_Init()
 	HookEvent("object_destroyed", EventHook_ObjectDestroyed);
 	HookEvent("object_detonated", EventHook_ObjectDestroyed);
 	HookEvent("teamplay_point_captured", EventHook_TeamplayPointCaptured);
+	HookEvent("teamplay_flag_event", EventHook_TeamplayFlagEvent);
 	HookEvent("teams_changed", EventHook_TeamsChanged);
 }
 
@@ -226,6 +227,18 @@ static void EventHook_TeamplayPointCaptured(Event event, const char[] name, bool
 			HideAnnotation(client, MITM_HINT_MASK | client);
 			g_annotationTimer[client] = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
 		}
+	}
+}
+
+void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool dontBroadcast)
+{
+	int player = event.GetInt("player");
+	int eventtype = event.GetInt("eventtype");
+	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
+	
+	if (team == TFTeam_Invaders && eventtype == TF_FLAGEVENT_CAPTURED)
+	{
+		CPrintToChatAll("%s %t", PLUGIN_TAG, "Invader_Deployed", player, GetEntProp(player, Prop_Data, "m_iHealth"), GetEntProp(player, Prop_Data, "m_iMaxHealth"));
 	}
 }
 

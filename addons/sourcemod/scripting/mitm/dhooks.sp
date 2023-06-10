@@ -178,8 +178,8 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 	{
 		if (g_hDHook_CTFItem_PickUp)
 		{
-			g_hDHook_CTFItem_PickUp.HookEntity(Hook_Pre, entity, DHookCallback_CCaptureFlag_Pre);
-			g_hDHook_CTFItem_PickUp.HookEntity(Hook_Post, entity, DHookCallback_CCaptureFlag_Post);
+			g_hDHook_CTFItem_PickUp.HookEntity(Hook_Pre, entity, DHookCallback_CCaptureFlag_PickUp_Pre);
+			g_hDHook_CTFItem_PickUp.HookEntity(Hook_Post, entity, DHookCallback_CCaptureFlag_PickUp_Post);
 		}
 	}
 	else if (StrEqual(classname, "obj_teleporter"))
@@ -1726,7 +1726,7 @@ static MRESReturn DHookCallback_CFilterTFBotHasTag_PassesFilterImpl_Pre(int filt
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_CCaptureFlag_Pre(int item, DHookParam params)
+static MRESReturn DHookCallback_CCaptureFlag_PickUp_Pre(int item, DHookParam params)
 {
 	int player = params.Get(1);
 	
@@ -1744,7 +1744,7 @@ static MRESReturn DHookCallback_CCaptureFlag_Pre(int item, DHookParam params)
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_CCaptureFlag_Post(int item, DHookParam params)
+static MRESReturn DHookCallback_CCaptureFlag_PickUp_Post(int item, DHookParam params)
 {
 	int player = params.Get(1);
 	

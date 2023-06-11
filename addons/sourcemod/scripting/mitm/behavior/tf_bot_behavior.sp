@@ -182,16 +182,7 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 			}
 			else if (action.m_undergroundTimer.IsGreaterThan(3.0))
 			{
-				char auth[MAX_AUTHID_LENGTH], teamName[MAX_TEAM_NAME_LENGTH];
-				GetClientAuthId(actor, AuthId_Engine, auth, sizeof(auth), false);
-				GetTeamName(GetClientTeam(actor), teamName, sizeof(teamName));
-				
-				LogMessage("\"%N<%i><%s><%s>\" underground (position \"%3.2f %3.2f %3.2f\")",
-						   actor,
-						   GetClientUserId(actor),
-						   auth,
-						   teamName,
-						   origin[0], origin[1], origin[2]);
+				LogMessage("\"%L\" underground (position \"%3.2f %3.2f %3.2f\")", actor, origin[0], origin[1], origin[2]);
 				
 				// teleport bot to a reasonable place
 				float center[3];

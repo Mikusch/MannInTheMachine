@@ -101,6 +101,7 @@ ConVar phys_pushscale;
 #include "mitm/events.sp"
 #include "mitm/forwards.sp"
 #include "mitm/hooks.sp"
+#include "mitm/mempatches.sp"
 #include "mitm/party.sp"
 #include "mitm/queue.sp"
 #include "mitm/offsets.sp"
@@ -181,6 +182,7 @@ public void OnPluginStart()
 	{
 		// Init plugin functions requiring gamedata
 		DHooks_Init(hGameData);
+		MemPatches_Init(hGameData);
 		Offsets_Init(hGameData);
 		SDKCalls_Init(hGameData);
 		

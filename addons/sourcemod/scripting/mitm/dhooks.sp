@@ -67,7 +67,7 @@ void DHooks_Init(GameData hGameData)
 	CreateDynamicDetour(hGameData, "CMissionPopulator::UpdateMission", DHookCallback_CMissionPopulator_UpdateMission_Pre, DHookCallback_CMissionPopulator_UpdateMission_Post);
 	CreateDynamicDetour(hGameData, "CMissionPopulator::UpdateMissionDestroySentries", DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_Pre, DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_Post);
 	CreateDynamicDetour(hGameData, "CPointPopulatorInterface::InputChangeBotAttributes", DHookCallback_CPointPopulatorInterface_InputChangeBotAttributes_Pre);
-	CreateDynamicDetour(hGameData, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre);
+	CreateDynamicDetour(hGameData, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre, DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Post);
 	CreateDynamicDetour(hGameData, "CTFGameRules::PlayerReadyStatus_UpdatePlayerState", DHookCallback_CTFGameRules_PlayerReadyStatus_UpdatePlayerState_Pre, DHookCallback_CTFGameRules_PlayerReadyStatus_UpdatePlayerState_Post);
 	CreateDynamicDetour(hGameData, "CTeamplayRoundBasedRules::ResetPlayerAndTeamReadyState", DHookCallback_CTeamplayRoundBasedRules_ResetPlayerAndTeamReadyState_Pre);
 	CreateDynamicDetour(hGameData, "CTFPlayer::GetLoadoutItem", DHookCallback_CTFPlayer_GetLoadoutItem_Pre, DHookCallback_CTFPlayer_GetLoadoutItem_Post);
@@ -1126,77 +1126,87 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 	TFTeam nDesiredTeam = params.Get(2);
 	
 	if (IsClientSourceTV(player))
-	{
 		return MRES_Ignored;
-	}
-	else if (g_bInWaitingForPlayers)
+	
+	// allow this function to set each player's team and currency
+	CBaseEntity(player).RemoveFlag(FL_FAKECLIENT);
+	
+	if (g_bInWaitingForPlayers)
 	{
-		// funnel players into defender team during waiting for players so they can run around
-		ret.Value = TFTeam_Defenders;
-		return MRES_Supercede;
+		params.Set(2, TFTeam_Defenders);
+		return MRES_ChangedHandled;
 	}
 	else if (g_bAllowTeamChange || (sm_mitm_developer.BoolValue && !IsFakeClient(player)))
 	{
-		// allow player through
+		if (nDesiredTeam == TFTeam_Spectator || nDesiredTeam == TFTeam_Defenders)
+			return MRES_Ignored;
+		
 		ret.Value = nDesiredTeam;
 		return MRES_Supercede;
 	}
 	else
 	{
+		// player is trying to switch from invaders to spectate
 		if (nDesiredTeam == TFTeam_Spectator && TF2_GetClientTeam(player) == TFTeam_Invaders && !sm_mitm_invader_allow_suicide.BoolValue)
 		{
 			if (IsPlayerAlive(player))
-			{
 				PrintCenterText(player, "%t", "Invader_NotAllowedToSuicide");
-			}
 			
-			ret.Value = TFTeam_Invaders;
+			ret.Value = TF2_GetClientTeam(player);
 			return MRES_Supercede;
 		}
 		
 		if (!Forwards_OnIsValidDefender(player))
 		{
-			ret.Value = TFTeam_Spectator;
-			return MRES_Supercede;
+			params.Set(2, TFTeam_Spectator);
+			return MRES_ChangedHandled;
 		}
 		
-		int iDefenderCount = 0, iReqDefenderCount = sm_mitm_defender_count.IntValue;
+		int iDefenderCount = 0;
 		
-		// collect all valid players
 		for (int client = 1; client <= MaxClients; client++)
 		{
 			if (!IsClientInGame(client))
-				continue;
-			
-			if (IsClientSourceTV(client))
 				continue;
 			
 			if (TF2_GetClientTeam(client) == TFTeam_Defenders)
 				iDefenderCount++;
 		}
 		
-		// determine whether we need more defenders
-		if (iDefenderCount >= iReqDefenderCount ||
+		// players can join defenders freely if a slot is open
+		if (iDefenderCount >= sm_mitm_defender_count.IntValue ||
 			Player(player).IsInAParty() ||
 			Player(player).HasPreference(PREF_DISABLE_DEFENDER) ||
 			Player(player).HasPreference(PREF_DISABLE_SPAWNING))
 		{
-			ret.Value = TFTeam_Spectator;
+			params.Set(2, TFTeam_Spectator);
+			return MRES_ChangedHandled;
 		}
 		else
 		{
-			ret.Value = TFTeam_Defenders;
+			params.Set(2, TFTeam_Defenders);
+			return MRES_ChangedHandled;
 		}
-		
-		return MRES_Supercede;
 	}
+}
+
+static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Post(DHookReturn ret, DHookParam params)
+{
+	if (ret.Value == TFTeam_Invaders)
+	{
+		// mark all invaders as bots
+		int player = params.Get(1);
+		CBaseEntity(player).AddFlag(FL_FAKECLIENT);
+	}
+	
+	return MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_CTFPlayer_GetLoadoutItem_Pre(int player, DHookReturn ret, DHookParam params)
 {
 	if (IsClientInGame(player) && TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
-		// Generate base items for robot players
+		// generate base items for robot players
 		GameRules_SetProp("m_bIsInTraining", true);
 	}
 	
@@ -1246,8 +1256,8 @@ static MRESReturn DHookCallback_CTFPlayer_CanBuild_Pre(int player, DHookReturn r
 {
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders && TF2_GetPlayerClass(player) == TFClass_Engineer)
 	{
-		// prevent human robot engineers from building multiple sentries
-		SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
+		// prevent invaders from building multiple sentries
+		CBaseEntity(player).RemoveFlag(FL_FAKECLIENT);
 	}
 	
 	return MRES_Ignored;
@@ -1257,7 +1267,7 @@ static MRESReturn DHookCallback_CTFPlayer_CanBuild_Post(int player, DHookReturn 
 {
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders && TF2_GetPlayerClass(player) == TFClass_Engineer)
 	{
-		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
+		CBaseEntity(player).AddFlag(FL_FAKECLIENT);
 		
 		// early out if we cannot build right now
 		if (ret.Value != CB_CAN_BUILD)
@@ -1369,8 +1379,8 @@ static MRESReturn DHookCallback_CLagCompensationManager_StartLagCompensation_Pre
 	
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
-		// re-enable lag compensation for our "human bots"
-		SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
+		// re-enable lag compensation for invaders
+		CBaseEntity(player).RemoveFlag(FL_FAKECLIENT);
 	}
 	
 	return MRES_Ignored;
@@ -1382,7 +1392,7 @@ static MRESReturn DHookCallback_CLagCompensationManager_StartLagCompensation_Pos
 	
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
-		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
+		CBaseEntity(player).AddFlag(FL_FAKECLIENT);
 	}
 	
 	return MRES_Ignored;
@@ -1733,7 +1743,7 @@ static MRESReturn DHookCallback_CCaptureFlag_PickUp_Pre(int item, DHookParam par
 	if (IsMannVsMachineMode() && TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
 		// do not trip up the assert_cast< CTFBot* >
-		SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
+		CBaseEntity(player).RemoveFlag(FL_FAKECLIENT);
 		
 		if (Player(player).HasAttribute(IGNORE_FLAG))
 			return MRES_Supercede;
@@ -1750,7 +1760,7 @@ static MRESReturn DHookCallback_CCaptureFlag_PickUp_Post(int item, DHookParam pa
 	
 	if (IsMannVsMachineMode() && TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
-		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
+		CBaseEntity(player).AddFlag(FL_FAKECLIENT);
 	}
 	
 	return MRES_Ignored;

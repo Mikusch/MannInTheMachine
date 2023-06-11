@@ -187,7 +187,7 @@
 	"Invader_Deployed"
 	{
 		"#format"	"{1:N},{2:d},{3:d}"
-		"en"		"{blue}{1} {default}deployed the bomb with {green}{2}{default}/{green}{3} {default}HP."
+		"en"		"{blue}{1} {default}deployed the bomb with {lightgreen}{2}{default}/{lightgreen}{3} {default}HP left."
 	}
 	"Endless_MoreAttributes"
 	{

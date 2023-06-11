@@ -1129,7 +1129,7 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 		return MRES_Ignored;
 	
 	// allow this function to set each player's team and currency
-	SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
+	CBaseEntity(player).RemoveFlag(FL_FAKECLIENT);
 	
 	if (g_bInWaitingForPlayers)
 	{
@@ -1194,9 +1194,9 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Post(DHoo
 {
 	if (ret.Value == TFTeam_Invaders)
 	{
-		// any player joining the invader team needs to be marked as a bot
+		// mark all invaders as bots
 		int player = params.Get(1);
-		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
+		CBaseEntity(player).AddFlag(FL_FAKECLIENT);
 	}
 	
 	return MRES_Ignored;
@@ -1256,8 +1256,8 @@ static MRESReturn DHookCallback_CTFPlayer_CanBuild_Pre(int player, DHookReturn r
 {
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders && TF2_GetPlayerClass(player) == TFClass_Engineer)
 	{
-		// prevent human robot engineers from building multiple sentries
-		SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
+		// prevent invaders from building multiple sentries
+		CBaseEntity(player).RemoveFlag(FL_FAKECLIENT);
 	}
 	
 	return MRES_Ignored;
@@ -1267,7 +1267,7 @@ static MRESReturn DHookCallback_CTFPlayer_CanBuild_Post(int player, DHookReturn 
 {
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders && TF2_GetPlayerClass(player) == TFClass_Engineer)
 	{
-		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
+		CBaseEntity(player).AddFlag(FL_FAKECLIENT);
 		
 		// early out if we cannot build right now
 		if (ret.Value != CB_CAN_BUILD)
@@ -1379,8 +1379,8 @@ static MRESReturn DHookCallback_CLagCompensationManager_StartLagCompensation_Pre
 	
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
-		// re-enable lag compensation for our "human bots"
-		SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
+		// re-enable lag compensation for invaders
+		CBaseEntity(player).RemoveFlag(FL_FAKECLIENT);
 	}
 	
 	return MRES_Ignored;
@@ -1392,7 +1392,7 @@ static MRESReturn DHookCallback_CLagCompensationManager_StartLagCompensation_Pos
 	
 	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
-		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
+		CBaseEntity(player).AddFlag(FL_FAKECLIENT);
 	}
 	
 	return MRES_Ignored;
@@ -1743,7 +1743,7 @@ static MRESReturn DHookCallback_CCaptureFlag_PickUp_Pre(int item, DHookParam par
 	if (IsMannVsMachineMode() && TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
 		// do not trip up the assert_cast< CTFBot* >
-		SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
+		CBaseEntity(player).RemoveFlag(FL_FAKECLIENT);
 		
 		if (Player(player).HasAttribute(IGNORE_FLAG))
 			return MRES_Supercede;
@@ -1760,7 +1760,7 @@ static MRESReturn DHookCallback_CCaptureFlag_PickUp_Post(int item, DHookParam pa
 	
 	if (IsMannVsMachineMode() && TF2_GetClientTeam(player) == TFTeam_Invaders)
 	{
-		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
+		CBaseEntity(player).AddFlag(FL_FAKECLIENT);
 	}
 	
 	return MRES_Ignored;

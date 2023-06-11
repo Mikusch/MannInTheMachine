@@ -65,23 +65,20 @@ static Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroa
 	bool bSilent = team != TFTeam_Defenders;
 	event.SetInt("silent", bSilent);
 	
-	Player(client).SetPrevMission(NO_MISSION);
-	TF2Attrib_RemoveAll(client);
-	// Clear Sound
-	Player(client).StopIdleSound();
-	
-	if (team == TFTeam_Invaders)
+	if (IsMannVsMachineMode())
 	{
-		SetEntityFlags(client, GetEntityFlags(client) | FL_FAKECLIENT);
+		Player(client).SetPrevMission(NO_MISSION);
+		TF2Attrib_RemoveAll(client);
+		// Clear Sound
+		Player(client).StopIdleSound();
 	}
-	else
+	
+	if (team != TFTeam_Invaders)
 	{
 		Player(client).ResetInvader();
 		
 		SetVariantString("");
 		AcceptEntityInput(client, "SetCustomModel");
-		
-		SetEntityFlags(client, GetEntityFlags(client) & ~FL_FAKECLIENT);
 	}
 	
 	return Plugin_Changed;

@@ -1128,7 +1128,7 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 	if (IsClientSourceTV(player))
 		return MRES_Ignored;
 	
-	// currency is only set properly when joining defenders as a non-bot, remove the flag
+	// allow this function to set each player's team and currency
 	SetEntityFlags(player, GetEntityFlags(player) & ~FL_FAKECLIENT);
 	
 	if (g_bInWaitingForPlayers)
@@ -1146,15 +1146,13 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 	}
 	else
 	{
-		// player is trying to switch from robot team to spectate
+		// player is trying to switch from invaders to spectate
 		if (nDesiredTeam == TFTeam_Spectator && TF2_GetClientTeam(player) == TFTeam_Invaders && !sm_mitm_invader_allow_suicide.BoolValue)
 		{
 			if (IsPlayerAlive(player))
-			{
 				PrintCenterText(player, "%t", "Invader_NotAllowedToSuicide");
-			}
 			
-			ret.Value = TFTeam_Invaders;
+			ret.Value = TF2_GetClientTeam(player);
 			return MRES_Supercede;
 		}
 		
@@ -1164,23 +1162,19 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 			return MRES_ChangedHandled;
 		}
 		
-		int iDefenderCount = 0, iReqDefenderCount = sm_mitm_defender_count.IntValue;
+		int iDefenderCount = 0;
 		
-		// collect all valid players
 		for (int client = 1; client <= MaxClients; client++)
 		{
 			if (!IsClientInGame(client))
-				continue;
-			
-			if (IsClientSourceTV(client))
 				continue;
 			
 			if (TF2_GetClientTeam(client) == TFTeam_Defenders)
 				iDefenderCount++;
 		}
 		
-		// determine whether we need more defenders
-		if (iDefenderCount >= iReqDefenderCount ||
+		// players can join defenders freely if a slot is open
+		if (iDefenderCount >= sm_mitm_defender_count.IntValue ||
 			Player(player).IsInAParty() ||
 			Player(player).HasPreference(PREF_DISABLE_DEFENDER) ||
 			Player(player).HasPreference(PREF_DISABLE_SPAWNING))
@@ -1198,14 +1192,10 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 
 static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Post(DHookReturn ret, DHookParam params)
 {
-	int player = params.Get(1);
-	
-	if (IsClientSourceTV(player))
-		return MRES_Ignored;
-	
 	if (ret.Value == TFTeam_Invaders)
 	{
-		// ensure that anyone joining the invader team has the FL_FAKECLIENT flag
+		// any player joining the invader team needs to be marked as a bot
+		int player = params.Get(1);
 		SetEntityFlags(player, GetEntityFlags(player) | FL_FAKECLIENT);
 	}
 	

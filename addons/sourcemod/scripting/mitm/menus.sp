@@ -267,7 +267,7 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 			menu.GetItem(param2, info, sizeof(info));
 			
 			int i = StringToInt(info);
-			PreferenceType preference = view_as<PreferenceType>(RoundToNearest(Pow(2.0, float(i))));
+			PreferenceType preference = view_as<PreferenceType>(1 << i);
 			
 			Player(param1).SetPreference(preference, !Player(param1).HasPreference(preference));
 			
@@ -298,7 +298,7 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
 			
 			int i = StringToInt(info);
-			PreferenceType preference = view_as<PreferenceType>(RoundToNearest(Pow(2.0, float(i))));
+			PreferenceType preference = view_as<PreferenceType>(1 << i);
 			
 			if (Player(param1).HasPreference(preference))
 				Format(display, sizeof(display), "☑ %T", g_PreferenceNames[i], param1);

@@ -197,7 +197,7 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 					{
 						char strMember[MAX_MESSAGE_LENGTH];
 						
-						Format(strMember, sizeof(strMember), "%N", members[i]);
+						Format(strMember, sizeof(strMember), "%N (%d)", members[i], Player(members[i]).m_defenderQueuePoints);
 						
 						if (i < count - 1)
 						{

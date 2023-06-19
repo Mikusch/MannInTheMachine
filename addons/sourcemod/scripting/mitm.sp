@@ -378,19 +378,9 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
-		if (Player(client).HasAttribute(AUTO_JUMP))
+		if (Player(client).HasAttribute(AUTO_JUMP) && Player(client).ShouldAutoJump())
 		{
-			// AutoJump robots are not allowed to jump manually
-			if (Player(client).ShouldAutoJump())
-			{
-				buttons |= IN_JUMP;
-				TF2Attrib_RemoveByName(client, "no_jump");
-			}
-			else
-			{
-				buttons &= ~IN_JUMP;
-				TF2Attrib_SetByName(client, "no_jump", 1.0);
-			}
+			buttons |= IN_JUMP;
 		}
 		
 		FireWeaponAtEnemy(client, buttons);

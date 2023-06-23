@@ -110,6 +110,7 @@ void DHooks_Init(GameData hGameData)
 	CopyScriptFunctionBinding("CTFBot", "IsInASquad", "CTFPlayer", DHookCallback_ScriptIsInASquad_Pre);
 	CopyScriptFunctionBinding("CTFBot", "LeaveSquad", "CTFPlayer", DHookCallback_ScriptLeaveSquad_Pre);
 	CopyScriptFunctionBinding("CTFBot", "HasWeaponRestriction", "CTFPlayer", DHookCallback_ScriptHasWeaponRestriction_Pre);
+	CopyScriptFunctionBinding("CTFBot", "PressAltFireButton", "CTFPlayer", DHookCallback_ScriptPressAltFireButton_Pre);
 	CopyScriptFunctionBinding("CTFBot", "RemoveBotAttribute", "CTFPlayer", DHookCallback_ScriptRemoveAttribute_Pre);
 	CopyScriptFunctionBinding("CTFBot", "RemoveBotTag", "CTFPlayer", DHookCallback_ScriptRemoveTag_Pre);
 	CopyScriptFunctionBinding("CTFBot", "RemoveWeaponRestriction", "CTFPlayer", DHookCallback_ScriptRemoveWeaponRestriction_Pre);
@@ -2026,6 +2027,11 @@ static MRESReturn DHookCallback_ScriptHasWeaponRestriction_Pre(int bot, DHookRet
 	
 	ret.Value = Player(bot).HasWeaponRestriction(params.Get(1));
 	
+	return MRES_Supercede;
+}
+
+static MRESReturn DHookCallback_ScriptPressAltFireButton_Pre(int bot, DHookParam params)
+{
 	return MRES_Supercede;
 }
 

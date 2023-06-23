@@ -118,6 +118,7 @@ void DHooks_Init(GameData hGameData)
 	VScript_ResetScriptVM();
 	
 	CreateScriptDetour("CTFPlayer", "IsBotOfType", DHookCallback_CTFBot_ScriptIsBotOfType_Pre);
+	CreateScriptDetour(NULL_STRING, "IsPlayerABot", DHookCallback_IsPlayerABot_Pre);
 }
 
 void DHooks_OnClientPutInServer(int client)
@@ -265,7 +266,17 @@ static void CopyScriptFunctionBinding(const char[] sourceClassName, const char[]
 
 static void CreateScriptDetour(const char[] className, const char[] functionName, DHookCallback callback)
 {
-	DynamicDetour detour = VScript_GetClassFunction(className, functionName).CreateDetour();
+	DynamicDetour detour;
+	
+	if (className[0])
+	{
+		detour = VScript_GetClassFunction(className, functionName).CreateDetour();
+	}
+	else
+	{
+		detour = VScript_GetGlobalFunction(functionName).CreateDetour();
+	}
+	
 	if (detour)
 	{
 		detour.Enable(Hook_Pre, callback);
@@ -1886,20 +1897,6 @@ static MRESReturn DHookCallback_CTFGameRules_FPlayerCanTakeDamage_Pre(DHookRetur
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_CTFBot_ScriptIsBotOfType_Pre(int player, DHookReturn ret, DHookParam param)
-{
-	int botType = param.Get(1);
-	
-	// make scripts believe that all invaders are TFBots
-	if (botType == TF_BOT_TYPE && Player(player).IsInvader())
-	{
-		ret.Value = true;
-		return MRES_Supercede;
-	}
-	
-	return MRES_Ignored;
-}
-
 static MRESReturn DHookCallback_CTFBot_ScriptAddAttribute_Pre(int bot, DHookParam params)
 {
 	if (IsFakeClient(bot))
@@ -2066,4 +2063,31 @@ static MRESReturn DHookCallback_CTFBot_ScriptRemoveWeaponRestriction_Pre(int bot
 	Player(bot).RemoveWeaponRestriction(params.Get(1));
 	
 	return MRES_Supercede;
+}
+
+static MRESReturn DHookCallback_CTFBot_ScriptIsBotOfType_Pre(int player, DHookReturn ret, DHookParam params)
+{
+	int botType = params.Get(1);
+	
+	// make scripts believe that all invaders are TFBots
+	if (botType == TF_BOT_TYPE && Player(player).IsInvader())
+	{
+		ret.Value = true;
+		return MRES_Supercede;
+	}
+	
+	return MRES_Ignored;
+}
+
+static MRESReturn DHookCallback_IsPlayerABot_Pre(DHookReturn ret, DHookParam params)
+{
+	int player = VScript_HScriptToEntity(params.Get(1));
+	
+	if (player != -1 && Player(player).IsInvader())
+	{
+		ret.Value = true;
+		return MRES_Supercede;
+	}
+	
+	return MRES_Ignored;
 }

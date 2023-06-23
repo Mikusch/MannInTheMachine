@@ -20,6 +20,7 @@
 
 void ConVars_Init()
 {
+	CreateConVar("sm_mitm_version", PLUGIN_VERSION, "Plugin version.", FCVAR_SPONLY | FCVAR_REPLICATED | FCVAR_NOTIFY | FCVAR_DONTRECORD);
 	sm_mitm_developer = CreateConVar("sm_mitm_developer", "0", "Toggle plugin developer mode.");
 	sm_mitm_defender_count = CreateConVar("sm_mitm_defender_count", "6", "Amount of defenders.", _, true, 1.0, true, 10.0);
 	sm_mitm_custom_upgrades_file = CreateConVar("sm_mitm_custom_upgrades_file", "", "Path to custom upgrades file, set to an empty string to use the default.");

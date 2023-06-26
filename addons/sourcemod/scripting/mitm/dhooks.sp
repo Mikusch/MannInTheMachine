@@ -97,27 +97,27 @@ void DHooks_Init(GameData hGameData)
 	g_hDHook_CGameRules_ClientConnected = CreateDynamicHook(hGameData, "CGameRules::ClientConnected");
 	g_hDHook_CGameRules_FPlayerCanTakeDamage = CreateDynamicHook(hGameData, "CGameRules::FPlayerCanTakeDamage");
 	
-	CopyScriptFunctionBinding("CTFBot", "AddBotAttribute", "CTFPlayer", DHookCallback_CTFBot_ScriptAddAttribute_Pre);
-	CopyScriptFunctionBinding("CTFBot", "AddBotTag", "CTFPlayer", DHookCallback_CTFBot_ScriptAddTag_Pre);
-	CopyScriptFunctionBinding("CTFBot", "AddWeaponRestriction", "CTFPlayer", DHookCallback_CTFBot_ScriptSetWeaponRestriction_Pre);
-	CopyScriptFunctionBinding("CTFBot", "ClearAllBotAttributes", "CTFPlayer", DHookCallback_CTFBot_ScriptClearAllAttributes_Pre);
-	CopyScriptFunctionBinding("CTFBot", "ClearAllBotTags", "CTFPlayer", DHookCallback_CTFBot_ScriptClearTags_Pre);
-	CopyScriptFunctionBinding("CTFBot", "ClearAllWeaponRestrictions", "CTFPlayer", DHookCallback_CTFBot_ScriptClearWeaponRestrictions);
-	CopyScriptFunctionBinding("CTFBot", "DisbandCurrentSquad", "CTFPlayer", DHookCallback_CTFBot_ScriptDisbandAndDeleteSquad);
-	CopyScriptFunctionBinding("CTFBot", "HasBotAttribute", "CTFPlayer", DHookCallback_CTFBot_ScriptHasAttribute_Pre);
-	CopyScriptFunctionBinding("CTFBot", "HasBotTag", "CTFPlayer", DHookCallback_CTFBot_ScriptHasTag_Pre);
-	CopyScriptFunctionBinding("CTFBot", "IsInASquad", "CTFPlayer", DHookCallback_CTFBot_ScriptIsInASquad_Pre);
-	CopyScriptFunctionBinding("CTFBot", "LeaveSquad", "CTFPlayer", DHookCallback_CTFBot_ScriptLeaveSquad_Pre);
-	CopyScriptFunctionBinding("CTFBot", "HasWeaponRestriction", "CTFPlayer", DHookCallback_CTFBot_ScriptHasWeaponRestriction_Pre);
-	CopyScriptFunctionBinding("CTFBot", "PressAltFireButton", "CTFPlayer", DHookCallback_CTFBot_ScriptPressAltFireButton_Pre);
-	CopyScriptFunctionBinding("CTFBot", "RemoveBotAttribute", "CTFPlayer", DHookCallback_CTFBot_ScriptRemoveAttribute_Pre);
-	CopyScriptFunctionBinding("CTFBot", "RemoveBotTag", "CTFPlayer", DHookCallback_CTFBot_ScriptRemoveTag_Pre);
-	CopyScriptFunctionBinding("CTFBot", "RemoveWeaponRestriction", "CTFPlayer", DHookCallback_CTFBot_ScriptRemoveWeaponRestriction_Pre);
+	CopyScriptFunctionBinding("CTFBot", "AddBotAttribute", "CTFPlayer", DHookCallback_CTFBot_AddAttribute_Pre);
+	CopyScriptFunctionBinding("CTFBot", "AddBotTag", "CTFPlayer", DHookCallback_CTFBot_AddTag_Pre);
+	CopyScriptFunctionBinding("CTFBot", "AddWeaponRestriction", "CTFPlayer", DHookCallback_CTFBot_SetWeaponRestriction_Pre);
+	CopyScriptFunctionBinding("CTFBot", "ClearAllBotAttributes", "CTFPlayer", DHookCallback_CTFBot_ClearAllAttributes_Pre);
+	CopyScriptFunctionBinding("CTFBot", "ClearAllBotTags", "CTFPlayer", DHookCallback_CTFBot_ClearTags_Pre);
+	CopyScriptFunctionBinding("CTFBot", "ClearAllWeaponRestrictions", "CTFPlayer", DHookCallback_CTFBot_ClearWeaponRestrictions);
+	CopyScriptFunctionBinding("CTFBot", "DisbandCurrentSquad", "CTFPlayer", DHookCallback_CTFBot_DisbandAndDeleteSquad);
+	CopyScriptFunctionBinding("CTFBot", "HasBotAttribute", "CTFPlayer", DHookCallback_CTFBot_HasAttribute_Pre);
+	CopyScriptFunctionBinding("CTFBot", "HasBotTag", "CTFPlayer", DHookCallback_CTFBot_HasTag_Pre);
+	CopyScriptFunctionBinding("CTFBot", "IsInASquad", "CTFPlayer", DHookCallback_CTFBot_IsInASquad_Pre);
+	CopyScriptFunctionBinding("CTFBot", "LeaveSquad", "CTFPlayer", DHookCallback_CTFBot_LeaveSquad_Pre);
+	CopyScriptFunctionBinding("CTFBot", "HasWeaponRestriction", "CTFPlayer", DHookCallback_CTFBot_HasWeaponRestriction_Pre);
+	CopyScriptFunctionBinding("CTFBot", "RemoveBotAttribute", "CTFPlayer", DHookCallback_CTFBot_RemoveAttribute_Pre);
+	CopyScriptFunctionBinding("CTFBot", "RemoveBotTag", "CTFPlayer", DHookCallback_CTFBot_RemoveTag_Pre);
+	CopyScriptFunctionBinding("CTFBot", "RemoveWeaponRestriction", "CTFPlayer", DHookCallback_CTFBot_RemoveWeaponRestriction_Pre);
 	CopyScriptFunctionBinding("CTFBot", "GenerateAndWearItem", "CTFPlayer");
+	CopyScriptFunctionBinding("CTFBot", "PressAltFireButton", "CTFPlayer", _, true);
 	
 	VScript_ResetScriptVM();
 	
-	CreateScriptDetour("CTFPlayer", "IsBotOfType", DHookCallback_CTFBot_ScriptIsBotOfType_Pre);
+	CreateScriptDetour("CTFPlayer", "IsBotOfType", DHookCallback_CTFBot_IsBotOfType_Pre);
 	CreateScriptDetour(NULL_STRING, "IsPlayerABot", DHookCallback_IsPlayerABot_Pre);
 }
 
@@ -238,52 +238,55 @@ static DynamicHook CreateDynamicHook(GameData hGameData, const char[] name)
 	return hook;
 }
 
-static void CopyScriptFunctionBinding(const char[] sourceClassName, const char[] functionName, const char[] targetClassName, DHookCallback callback = INVALID_FUNCTION)
+static void CopyScriptFunctionBinding(const char[] szSourceClassName, const char[] szFunctionName, const char[] szTargetClassName, DHookCallback fnCallback = INVALID_FUNCTION, bool bEmpty = false)
 {
-	VScriptFunction pTargetFunc = VScript_GetClassFunction("CTFPlayer", functionName);
+	VScriptFunction pTargetFunc = VScript_GetClassFunction(szTargetClassName, szFunctionName);
 	if (!pTargetFunc)
 	{
-		VScriptFunction pSourceFunc = VScript_GetClassFunction(sourceClassName, functionName);
-		VScriptClass pTargetClass = VScript_GetClass(targetClassName);
+		VScriptFunction pSourceFunc = VScript_GetClassFunction(szSourceClassName, szFunctionName);
+		VScriptClass pTargetClass = VScript_GetClass(szTargetClassName);
 		
 		pTargetFunc = pTargetClass.CreateFunction();
 		pTargetFunc.CopyFrom(pSourceFunc);
 	}
 	
-	if (callback == INVALID_FUNCTION)
+	if (bEmpty)
+		pTargetFunc.SetFunctionEmpty();
+	
+	if (fnCallback == INVALID_FUNCTION)
 		return;
 	
 	DynamicDetour detour = pTargetFunc.CreateDetour();
 	if (detour)
 	{
-		detour.Enable(Hook_Pre, callback);
+		detour.Enable(Hook_Pre, fnCallback);
 	}
 	else
 	{
-		LogError("Failed to create script detour: %s::%s", targetClassName, functionName);
+		LogError("Failed to create script detour: %s::%s", szTargetClassName, szFunctionName);
 	}
 }
 
-static void CreateScriptDetour(const char[] className, const char[] functionName, DHookCallback callback)
+static void CreateScriptDetour(const char[] szClassName, const char[] szFunctionName, DHookCallback fnCallback)
 {
 	DynamicDetour detour;
 	
-	if (className[0])
+	if (szClassName[0])
 	{
-		detour = VScript_GetClassFunction(className, functionName).CreateDetour();
+		detour = VScript_GetClassFunction(szClassName, szFunctionName).CreateDetour();
 	}
 	else
 	{
-		detour = VScript_GetGlobalFunction(functionName).CreateDetour();
+		detour = VScript_GetGlobalFunction(szFunctionName).CreateDetour();
 	}
 	
 	if (detour)
 	{
-		detour.Enable(Hook_Pre, callback);
+		detour.Enable(Hook_Pre, fnCallback);
 	}
 	else
 	{
-		LogError("Failed to create script detour: %s::%s", className, functionName);
+		LogError("Failed to create script detour: %s::%s", szClassName, szFunctionName);
 	}
 }
 
@@ -1186,9 +1189,9 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 		}
 		
 		// players can join defenders freely if a slot is open
-		if (iDefenderCount >= sm_mitm_defender_count.IntValue ||
-			Player(player).IsInAParty() ||
-			Player(player).HasPreference(PREF_DISABLE_DEFENDER) ||
+		if (iDefenderCount >= sm_mitm_defender_count.IntValue || 
+			Player(player).IsInAParty() || 
+			Player(player).HasPreference(PREF_DISABLE_DEFENDER) || 
 			Player(player).HasPreference(PREF_DISABLE_SPAWNING))
 		{
 			params.Set(2, TFTeam_Spectator);
@@ -1897,7 +1900,7 @@ static MRESReturn DHookCallback_CTFGameRules_FPlayerCanTakeDamage_Pre(DHookRetur
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_CTFBot_ScriptAddAttribute_Pre(int bot, DHookParam params)
+static MRESReturn DHookCallback_CTFBot_AddAttribute_Pre(int bot, DHookParam params)
 {
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
@@ -1907,7 +1910,7 @@ static MRESReturn DHookCallback_CTFBot_ScriptAddAttribute_Pre(int bot, DHookPara
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_CTFBot_ScriptAddTag_Pre(int bot, DHookParam params)
+static MRESReturn DHookCallback_CTFBot_AddTag_Pre(int bot, DHookParam params)
 {
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
@@ -1920,7 +1923,7 @@ static MRESReturn DHookCallback_CTFBot_ScriptAddTag_Pre(int bot, DHookParam para
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_CTFBot_ScriptSetWeaponRestriction_Pre(int bot, DHookParam params)
+static MRESReturn DHookCallback_CTFBot_SetWeaponRestriction_Pre(int bot, DHookParam params)
 {
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
@@ -1930,7 +1933,7 @@ static MRESReturn DHookCallback_CTFBot_ScriptSetWeaponRestriction_Pre(int bot, D
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_CTFBot_ScriptClearAllAttributes_Pre(int bot)
+static MRESReturn DHookCallback_CTFBot_ClearAllAttributes_Pre(int bot)
 {
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
@@ -1940,7 +1943,7 @@ static MRESReturn DHookCallback_CTFBot_ScriptClearAllAttributes_Pre(int bot)
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_CTFBot_ScriptClearTags_Pre(int bot)
+static MRESReturn DHookCallback_CTFBot_ClearTags_Pre(int bot)
 {
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
@@ -1950,7 +1953,7 @@ static MRESReturn DHookCallback_CTFBot_ScriptClearTags_Pre(int bot)
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_CTFBot_ScriptClearWeaponRestrictions(int bot)
+static MRESReturn DHookCallback_CTFBot_ClearWeaponRestrictions(int bot)
 {
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
@@ -1960,7 +1963,7 @@ static MRESReturn DHookCallback_CTFBot_ScriptClearWeaponRestrictions(int bot)
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_CTFBot_ScriptDisbandAndDeleteSquad(int bot)
+static MRESReturn DHookCallback_CTFBot_DisbandAndDeleteSquad(int bot)
 {
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
@@ -1974,7 +1977,7 @@ static MRESReturn DHookCallback_CTFBot_ScriptDisbandAndDeleteSquad(int bot)
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_CTFBot_ScriptHasAttribute_Pre(int bot, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CTFBot_HasAttribute_Pre(int bot, DHookReturn ret, DHookParam params)
 {
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
@@ -1984,7 +1987,7 @@ static MRESReturn DHookCallback_CTFBot_ScriptHasAttribute_Pre(int bot, DHookRetu
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_CTFBot_ScriptHasTag_Pre(int bot, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CTFBot_HasTag_Pre(int bot, DHookReturn ret, DHookParam params)
 {
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
@@ -1997,7 +2000,7 @@ static MRESReturn DHookCallback_CTFBot_ScriptHasTag_Pre(int bot, DHookReturn ret
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_CTFBot_ScriptIsInASquad_Pre(int bot, DHookReturn ret)
+static MRESReturn DHookCallback_CTFBot_IsInASquad_Pre(int bot, DHookReturn ret)
 {
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
@@ -2007,7 +2010,7 @@ static MRESReturn DHookCallback_CTFBot_ScriptIsInASquad_Pre(int bot, DHookReturn
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_CTFBot_ScriptLeaveSquad_Pre(int bot)
+static MRESReturn DHookCallback_CTFBot_LeaveSquad_Pre(int bot)
 {
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
@@ -2017,7 +2020,7 @@ static MRESReturn DHookCallback_CTFBot_ScriptLeaveSquad_Pre(int bot)
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_CTFBot_ScriptHasWeaponRestriction_Pre(int bot, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CTFBot_HasWeaponRestriction_Pre(int bot, DHookReturn ret, DHookParam params)
 {
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
@@ -2027,12 +2030,7 @@ static MRESReturn DHookCallback_CTFBot_ScriptHasWeaponRestriction_Pre(int bot, D
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_CTFBot_ScriptPressAltFireButton_Pre(int bot, DHookParam params)
-{
-	return MRES_Supercede;
-}
-
-static MRESReturn DHookCallback_CTFBot_ScriptRemoveAttribute_Pre(int bot, DHookParam params)
+static MRESReturn DHookCallback_CTFBot_RemoveAttribute_Pre(int bot, DHookParam params)
 {
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
@@ -2042,7 +2040,7 @@ static MRESReturn DHookCallback_CTFBot_ScriptRemoveAttribute_Pre(int bot, DHookP
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_CTFBot_ScriptRemoveTag_Pre(int bot, DHookParam params)
+static MRESReturn DHookCallback_CTFBot_RemoveTag_Pre(int bot, DHookParam params)
 {
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
@@ -2055,7 +2053,7 @@ static MRESReturn DHookCallback_CTFBot_ScriptRemoveTag_Pre(int bot, DHookParam p
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_CTFBot_ScriptRemoveWeaponRestriction_Pre(int bot, DHookParam params)
+static MRESReturn DHookCallback_CTFBot_RemoveWeaponRestriction_Pre(int bot, DHookParam params)
 {
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
@@ -2065,7 +2063,7 @@ static MRESReturn DHookCallback_CTFBot_ScriptRemoveWeaponRestriction_Pre(int bot
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_CTFBot_ScriptIsBotOfType_Pre(int player, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CTFBot_IsBotOfType_Pre(int player, DHookReturn ret, DHookParam params)
 {
 	int botType = params.Get(1);
 	

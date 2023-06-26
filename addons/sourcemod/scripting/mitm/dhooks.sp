@@ -248,10 +248,10 @@ static void CopyScriptFunctionBinding(const char[] szSourceClassName, const char
 		
 		pTargetFunc = pTargetClass.CreateFunction();
 		pTargetFunc.CopyFrom(pSourceFunc);
+		
+		if (bEmpty)
+			pTargetFunc.SetFunctionEmpty();
 	}
-	
-	if (bEmpty)
-		pTargetFunc.SetFunctionEmpty();
 	
 	if (fnCallback == INVALID_FUNCTION)
 		return;

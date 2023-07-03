@@ -441,6 +441,11 @@
 				"linux"		"-232"
 				"windows"	"-232"
 			}
+			"CTFPlayer::m_nDeployingBombState"
+			{
+				"linux"		"-12"
+				"windows"	"-12"
+			}
 			"CTFPlayer::m_bIsMissionEnemy"
 			{
 				"linux"		"-8"

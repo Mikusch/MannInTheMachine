@@ -43,7 +43,6 @@ static float m_flSpawnTimeLeft[MAXPLAYERS + 1];
 static int m_spawnPointEntity[MAXPLAYERS + 1];
 static CTFBotSquad m_squad[MAXPLAYERS + 1];
 static int m_hFollowingFlagTarget[MAXPLAYERS + 1];
-static BombDeployingState_t m_nDeployingBombState[MAXPLAYERS + 1];
 static char m_szInvaderName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
 static char m_szPrevName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
 static bool m_isWaitingForFullReload[MAXPLAYERS + 1];
@@ -317,18 +316,6 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
-	property BombDeployingState_t m_nDeployingBombState
-	{
-		public get()
-		{
-			return m_nDeployingBombState[this.index];
-		}
-		public set(BombDeployingState_t nDeployingBombState)
-		{
-			m_nDeployingBombState[this.index] = nDeployingBombState;
-		}
-	}
-	
 	property bool m_isWaitingForFullReload
 	{
 		public get()
@@ -386,6 +373,18 @@ methodmap Player < CBaseCombatCharacter
 		public set(int iSpawnDeathCount)
 		{
 			m_iSpawnDeathCount[this.index] = iSpawnDeathCount;
+		}
+	}
+	
+	property BombDeployingState_t m_nDeployingBombState
+	{
+		public get()
+		{
+			return view_as<BombDeployingState_t>(GetEntData(this.index, GetOffset("CTFPlayer", "m_nDeployingBombState")));
+		}
+		public set(BombDeployingState_t nDeployingBombState)
+		{
+			SetEntData(this.index, GetOffset("CTFPlayer", "m_nDeployingBombState"), nDeployingBombState);
 		}
 	}
 	

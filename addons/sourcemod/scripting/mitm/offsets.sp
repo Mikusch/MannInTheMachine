@@ -86,6 +86,7 @@ void Offsets_Init(GameData hGameData)
 	SetOffset(hGameData, "BombInfo_t", "m_flMaxBattleFront");
 	
 	SetOffset(hGameData, "CTFPlayer", "m_flSpawnTime");
+	SetOffset(hGameData, "CTFPlayer", "m_nDeployingBombState");
 	SetOffset(hGameData, "CTFPlayer", "m_bIsMissionEnemy");
 	SetOffset(hGameData, "CTFPlayer", "m_bIsSupportEnemy");
 	SetOffset(hGameData, "CTFPlayer", "m_bIsLimitedSupportEnemy");

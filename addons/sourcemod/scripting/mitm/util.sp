@@ -938,7 +938,7 @@ bool FClassnameIs(int entity, const char[] szClassname)
 	return GetEntityClassname(entity, m_iClassname, sizeof(m_iClassname)) && StrEqual(szClassname, m_iClassname);
 }
 
-int FindTeleporterHintForCTFPlayer(int player)
+int FindTeleporterHintForPlayer(int player)
 {
 	int hint = -1;
 	while ((hint = FindEntityByClassname(hint, "bot_hint_engineer_nest")) != -1)
@@ -953,7 +953,7 @@ int FindTeleporterHintForCTFPlayer(int player)
 	return -1;
 }
 
-int FindSentryHintForCTFPlayer(int player)
+int FindSentryHintForPlayer(int player)
 {
 	int hint = -1;
 	while ((hint = FindEntityByClassname(hint, "bot_hint_engineer_nest")) != -1)

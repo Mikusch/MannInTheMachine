@@ -432,18 +432,18 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 		}
 	}
 	
-	// find dead player we can re-use
-	int newPlayer = FindNextInvader(spawner.m_defaultAttributes.m_attributeFlags & MINIBOSS);
+	// find dead bot we can re-use
+	CTFPlayer newBot = CTFPlayer(FindNextInvader(spawner.m_defaultAttributes.m_attributeFlags & MINIBOSS));
 	
-	if (newPlayer != -1)
+	if (newBot.IsValid())
 	{
-		CTFPlayer(newPlayer).ClearAllAttributes();
+		newBot.ClearAllAttributes();
 		
-		// Remove any player attributes
-		TF2Attrib_RemoveAll(newPlayer);
+		// remove any player attributes
+		TF2Attrib_RemoveAll(newBot.index);
 		
 		// clear any old TeleportWhere settings 
-		CTFPlayer(newPlayer).ClearTeleportWhere();
+		newBot.ClearTeleportWhere();
 		
 		if (g_internalSpawnPoint == INVALID_ENT_REFERENCE || EntRefToEntIndex(g_internalSpawnPoint) == -1)
 		{
@@ -451,13 +451,14 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 			DispatchSpawn(g_internalSpawnPoint);
 		}
 		
+		// set name
 		char name[MAX_NAME_LENGTH];
 		spawner.GetName(name, sizeof(name), "TFBot");
-		CTFPlayer(newPlayer).SetInvaderName(name, sm_mitm_rename_robots.BoolValue);
+		newBot.SetInvaderName(name, sm_mitm_rename_robots.BoolValue);
 		
 		CBaseEntity(g_internalSpawnPoint).SetAbsOrigin(here);
 		CBaseEntity(g_internalSpawnPoint).SetLocalAngles(ZERO_VECTOR);
-		CTFPlayer(newPlayer).SetSpawnPoint(g_internalSpawnPoint);
+		newBot.SetSpawnPoint(g_internalSpawnPoint);
 		
 		TFTeam team = TFTeam_Red;
 		
@@ -466,57 +467,57 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 			team = TFTeam_Invaders;
 		}
 		
-		TF2_ChangeClientTeam(newPlayer, team);
+		TF2_ChangeClientTeam(newBot.index, team);
 		
-		SetEntProp(newPlayer, Prop_Data, "m_bAllowInstantSpawn", true);
-		FakeClientCommand(newPlayer, "joinclass %s", g_aRawPlayerClassNames[spawner.m_class]);
+		newBot.SetProp(Prop_Data, "m_bAllowInstantSpawn", true);
+		FakeClientCommand(newBot.index, "joinclass %s", g_aRawPlayerClassNames[spawner.m_class]);
 		
 		// Set the address of CTFPlayer::m_iszClassIcon from the return value of CTFBotSpawner::GetClassIcon.
 		// Simply setting the value using SetEntPropString leads to segfaults, don't do that!
-		CTFPlayer(newPlayer).SetClassIconName(spawner.GetClassIcon());
+		newBot.SetClassIconName(spawner.GetClassIcon());
 		
-		CTFPlayer(newPlayer).ClearEventChangeAttributes();
+		newBot.ClearEventChangeAttributes();
 		for (int i = 0; i < spawner.m_eventChangeAttributes.Count(); ++i)
 		{
-			CTFPlayer(newPlayer).AddEventChangeAttributes(spawner.m_eventChangeAttributes.Get(i, GetOffset(NULL_STRING, "sizeof(EventChangeAttributes_t)")));
+			newBot.AddEventChangeAttributes(spawner.m_eventChangeAttributes.Get(i, GetOffset(NULL_STRING, "sizeof(EventChangeAttributes_t)")));
 		}
 		
-		CTFPlayer(newPlayer).SetTeleportWhere(spawner.m_teleportWhereName);
+		newBot.SetTeleportWhere(spawner.m_teleportWhereName);
 		
 		if (spawner.m_defaultAttributes.m_attributeFlags & MINIBOSS)
 		{
-			SetEntProp(newPlayer, Prop_Send, "m_bIsMiniBoss", true);
+			newBot.SetProp(Prop_Send, "m_bIsMiniBoss", true);
 		}
 		
 		if (spawner.m_defaultAttributes.m_attributeFlags & USE_BOSS_HEALTH_BAR)
 		{
-			SetEntProp(newPlayer, Prop_Send, "m_bUseBossHealthBar", true);
+			newBot.SetProp(Prop_Send, "m_bUseBossHealthBar", true);
 		}
 		
 		if (spawner.m_defaultAttributes.m_attributeFlags & AUTO_JUMP)
 		{
-			CTFPlayer(newPlayer).SetAutoJump(spawner.m_flAutoJumpMin, spawner.m_flAutoJumpMax);
+			newBot.SetAutoJump(spawner.m_flAutoJumpMin, spawner.m_flAutoJumpMax);
 		}
 		
 		if (spawner.m_defaultAttributes.m_attributeFlags & BULLET_IMMUNE)
 		{
-			TF2_AddCondition(newPlayer, TFCond_BulletImmune);
+			TF2_AddCondition(newBot.index, TFCond_BulletImmune);
 		}
 		
 		if (spawner.m_defaultAttributes.m_attributeFlags & BLAST_IMMUNE)
 		{
-			TF2_AddCondition(newPlayer, TFCond_BlastImmune);
+			TF2_AddCondition(newBot.index, TFCond_BlastImmune);
 		}
 		
 		if (spawner.m_defaultAttributes.m_attributeFlags & FIRE_IMMUNE)
 		{
-			TF2_AddCondition(newPlayer, TFCond_FireImmune);
+			TF2_AddCondition(newBot.index, TFCond_FireImmune);
 		}
 		
 		if (IsMannVsMachineMode())
 		{
 			// initialize currency to be dropped on death to zero
-			SetEntProp(newPlayer, Prop_Send, "m_nCurrency", 0);
+			newBot.SetProp(Prop_Send, "m_nCurrency", 0);
 			
 			// announce Spies
 			if (spawner.m_class == TFClass_Spy)
@@ -546,95 +547,95 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 			
 		}
 		
-		CTFPlayer(newPlayer).SetScaleOverride(spawner.m_scale);
+		newBot.SetScaleOverride(spawner.m_scale);
 		
 		int nHealth = spawner.m_health;
 		
 		if (nHealth <= 0.0)
 		{
-			nHealth = TF2Util_GetEntityMaxHealth(newPlayer);
+			nHealth = TF2Util_GetEntityMaxHealth(newBot.index);
 		}
 		
 		nHealth = RoundToFloor(float(nHealth) * g_pPopulationManager.GetHealthMultiplier(false));
-		CTFPlayer(newPlayer).ModifyMaxHealth(nHealth);
+		newBot.ModifyMaxHealth(nHealth);
 		
-		CTFPlayer(newPlayer).StartIdleSound();
+		newBot.StartIdleSound();
 		
 		// Add our items first, they'll get replaced below by the normal MvM items if any are needed
-		if (IsMannVsMachineMode() && (TF2_GetClientTeam(newPlayer) == TFTeam_Invaders))
+		if (IsMannVsMachineMode() && (TF2_GetClientTeam(newBot.index) == TFTeam_Invaders))
 		{
 			// Apply the Rome 2 promo items to each player. They'll be 
 			// filtered out for clients that do not have Romevision.
 			CMissionPopulator pMission = s_MissionPopulator;
 			if (pMission && pMission.m_mission == MISSION_DESTROY_SENTRIES)
 			{
-				CTFPlayer(newPlayer).AddItem("tw_sentrybuster");
+				newBot.AddItem("tw_sentrybuster");
 			}
 			else
 			{
-				CTFPlayer(newPlayer).AddItem(g_szRomePromoItems_Hat[spawner.m_class]);
-				CTFPlayer(newPlayer).AddItem(g_szRomePromoItems_Misc[spawner.m_class]);
+				newBot.AddItem(g_szRomePromoItems_Hat[spawner.m_class]);
+				newBot.AddItem(g_szRomePromoItems_Misc[spawner.m_class]);
 			}
 		}
 		
-		EventChangeAttributes_t pEventChangeAttributes = CTFPlayer(newPlayer).GetEventChangeAttributes(g_pPopulationManager.GetDefaultEventChangeAttributesName());
+		EventChangeAttributes_t pEventChangeAttributes = newBot.GetEventChangeAttributes(g_pPopulationManager.GetDefaultEventChangeAttributesName());
 		if (!pEventChangeAttributes)
 		{
 			pEventChangeAttributes = spawner.m_defaultAttributes;
 		}
-		CTFPlayer(newPlayer).OnEventChangeAttributes(pEventChangeAttributes);
+		newBot.OnEventChangeAttributes(pEventChangeAttributes);
 		
-		int flag = CTFPlayer(newPlayer).GetFlagToFetch();
+		int flag = newBot.GetFlagToFetch();
 		if (IsValidEntity(flag))
 		{
-			CTFPlayer(newPlayer).SetFlagTarget(flag);
+			newBot.SetFlagTarget(flag);
 		}
 		
-		if (CTFPlayer(newPlayer).HasAttribute(SPAWN_WITH_FULL_CHARGE))
+		if (newBot.HasAttribute(SPAWN_WITH_FULL_CHARGE))
 		{
 			// charge up our weapons
 			
 			// Medigun Ubercharge
-			int weapon = GetPlayerWeaponSlot(newPlayer, TFWeaponSlot_Secondary);
+			int weapon = GetPlayerWeaponSlot(newBot.index, TFWeaponSlot_Secondary);
 			if (weapon != -1 && HasEntProp(weapon, Prop_Send, "m_flChargeLevel"))
 			{
 				SetEntPropFloat(weapon, Prop_Send, "m_flChargeLevel", 1.0);
 			}
 			
-			if (TF2_GetPlayerClass(newPlayer) != TFClass_Medic || CTFPlayer(newPlayer).HasAttribute(PROJECTILE_SHIELD))
+			if (TF2_GetPlayerClass(newBot.index) != TFClass_Medic || newBot.HasAttribute(PROJECTILE_SHIELD))
 			{
-				SetEntPropFloat(newPlayer, Prop_Send, "m_flRageMeter", 100.0);
+				newBot.SetPropFloat(Prop_Send, "m_flRageMeter", 100.0);
 			}
 		}
 		
-		TFClassType nClassIndex = TF2_GetPlayerClass(newPlayer);
+		TFClassType nClassIndex = TF2_GetPlayerClass(newBot.index);
 		
 		if (g_pObjectiveResource.IsValid() && g_pObjectiveResource.IsPopFileEventType(MVM_EVENT_POPFILE_HALLOWEEN))
 		{
 			// zombies use the original player models
-			SetEntProp(newPlayer, Prop_Send, "m_nSkin", 4);
+			newBot.SetProp(Prop_Send, "m_nSkin", 4);
 			
 			char item[64];
 			Format(item, sizeof(item), "Zombie %s", g_aRawPlayerClassNamesShort[nClassIndex]);
 			
-			CTFPlayer(newPlayer).AddItem(item);
+			newBot.AddItem(item);
 		}
 		else
 		{
 			// use the nifty new robot model
 			if (nClassIndex >= TFClass_Scout && nClassIndex <= TFClass_Engineer)
 			{
-				if (spawner.m_scale >= tf_mvm_miniboss_scale.FloatValue || CTFPlayer(newPlayer).IsMiniBoss() && FileExists(g_szBotBossModels[nClassIndex], true))
+				if (spawner.m_scale >= tf_mvm_miniboss_scale.FloatValue || newBot.IsMiniBoss() && FileExists(g_szBotBossModels[nClassIndex], true))
 				{
 					SetVariantString(g_szBotBossModels[nClassIndex]);
-					AcceptEntityInput(newPlayer, "SetCustomModelWithClassAnimations");
-					SetEntProp(newPlayer, Prop_Data, "m_bloodColor", DONT_BLEED);
+					newBot.AcceptInput("SetCustomModelWithClassAnimations");
+					newBot.SetProp(Prop_Data, "m_bloodColor", DONT_BLEED);
 				}
 				else if (FileExists(g_szBotModels[nClassIndex], true))
 				{
 					SetVariantString(g_szBotModels[nClassIndex]);
-					AcceptEntityInput(newPlayer, "SetCustomModelWithClassAnimations");
-					SetEntProp(newPlayer, Prop_Data, "m_bloodColor", DONT_BLEED);
+					newBot.AcceptInput("SetCustomModelWithClassAnimations");
+					newBot.SetProp(Prop_Data, "m_bloodColor", DONT_BLEED);
 				}
 			}
 		}
@@ -642,15 +643,15 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 		if (params.Get(2))
 		{
 			CUtlVector result = CUtlVector(params.Get(2)); // EntityHandleVector_t
-			result.AddToTail(GetEntityHandle(newPlayer));
+			result.AddToTail(GetEntityHandle(newBot.index));
 		}
 		
 		// for easy access in populator spawner callbacks
-		m_justSpawnedList.Push(newPlayer);
+		m_justSpawnedList.Push(newBot);
 		
 		if (IsMannVsMachineMode())
 		{
-			if (CTFPlayer(newPlayer).IsMiniBoss())
+			if (newBot.IsMiniBoss())
 			{
 				HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_GIANT_CALLOUT", TFTeam_Defenders);
 			}
@@ -658,7 +659,7 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 		
 		if (tf_populator_debug.BoolValue)
 		{
-			LogMessage("%3.2f: Spawned player '%N'", GetGameTime(), newPlayer);
+			LogMessage("%3.2f: Spawned player '%N'", GetGameTime(), newBot);
 		}
 	}
 	else
@@ -692,7 +693,7 @@ static MRESReturn DHookCallback_CSquadSpawner_Spawn_Post(CSquadSpawner spawner, 
 			for (int i = 0; i < result.Count(); ++i)
 			{
 				int bot = LoadEntityFromHandleAddress(result.Get(i));
-				if (IsEntityClient(bot))
+				if (IsValidEntity(bot) && IsEntityClient(bot))
 				{
 					CTFPlayer(bot).JoinSquad(squad);
 				}
@@ -722,13 +723,13 @@ static MRESReturn DHookCallback_CPeriodicSpawnPopulator_Update_Post(Address pThi
 {
 	for (int i = 0; i < m_justSpawnedList.Length; i++)
 	{
-		int player = m_justSpawnedList.Get(i);
-		if (IsEntityClient(player))
+		CTFPlayer bot = m_justSpawnedList.Get(i);
+		if (bot.IsValid())
 		{
 			// what bot should do after spawning at teleporter exit
 			if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
 			{
-				OnBotTeleported(player);
+				OnBotTeleported(bot.index);
 			}
 		}
 	}
@@ -743,29 +744,29 @@ static MRESReturn DHookCallback_CWaveSpawnPopulator_Update_Post(CWaveSpawnPopula
 {
 	for (int i = 0; i < m_justSpawnedList.Length; i++)
 	{
-		int player = m_justSpawnedList.Get(i);
-		if (IsEntityClient(player))
+		CTFPlayer bot = m_justSpawnedList.Get(i);
+		if (bot.IsValid())
 		{
-			CTFPlayer(player).SetCustomCurrencyWorth(0);
-			CTFPlayer(player).SetWaveSpawnPopulator(populator);
+			bot.SetCustomCurrencyWorth(0);
+			bot.SetWaveSpawnPopulator(populator);
 			
 			// Allows client UI to know if a specific spawner is active
-			g_pObjectiveResource.SetMannVsMachineWaveClassActive(CTFPlayer(player).GetClassIconName());
+			g_pObjectiveResource.SetMannVsMachineWaveClassActive(bot.GetClassIconName());
 			
 			if (populator.IsSupportWave())
 			{
-				CTFPlayer(player).MarkAsSupportEnemy();
+				bot.MarkAsSupportEnemy();
 			}
 			
 			if (populator.IsLimitedSupportWave())
 			{
-				CTFPlayer(player).MarkAsLimitedSupportEnemy();
+				bot.MarkAsLimitedSupportEnemy();
 			}
 			
 			// what bot should do after spawning at teleporter exit
 			if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
 			{
-				OnBotTeleported(player);
+				OnBotTeleported(bot.index);
 			}
 		}
 	}
@@ -787,8 +788,8 @@ static MRESReturn DHookCallback_CMissionPopulator_UpdateMission_Pre(CMissionPopu
 	
 	for (int i = 0; i < livePlayerList.Length; ++i)
 	{
-		int player = livePlayerList.Get(i);
-		if (CTFPlayer(player).HasMission(mission))
+		CTFPlayer player = livePlayerList.Get(i);
+		if (player.HasMission(mission))
 		{
 			++s_activeMissionMembers;
 		}
@@ -836,32 +837,32 @@ static MRESReturn DHookCallback_CMissionPopulator_UpdateMission_Post(Address pTh
 	
 	for (int i = 0; i < m_justSpawnedList.Length; i++)
 	{
-		int player = m_justSpawnedList.Get(i);
-		if (IsEntityClient(player))
+		CTFPlayer bot = m_justSpawnedList.Get(i);
+		if (bot.IsValid())
 		{
-			CTFPlayer(player).SetFlagTarget(INVALID_ENT_REFERENCE);
-			CTFPlayer(player).SetMission(mission);
-			CTFPlayer(player).MarkAsMissionEnemy();
+			bot.SetFlagTarget(INVALID_ENT_REFERENCE);
+			bot.SetMission(mission);
+			bot.MarkAsMissionEnemy();
 			
 			if (g_pObjectiveResource.IsValid())
 			{
 				int iFlags = MVM_CLASS_FLAG_MISSION;
-				if (CTFPlayer(player).IsMiniBoss())
+				if (bot.IsMiniBoss())
 				{
 					iFlags |= MVM_CLASS_FLAG_MINIBOSS;
 				}
-				else if (CTFPlayer(player).HasAttribute(ALWAYS_CRIT))
+				else if (bot.HasAttribute(ALWAYS_CRIT))
 				{
 					iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
 				}
-				g_pObjectiveResource.IncrementMannVsMachineWaveClassCount(CTFPlayer(player).GetClassIconName(), iFlags);
+				g_pObjectiveResource.IncrementMannVsMachineWaveClassCount(bot.GetClassIconName(), iFlags);
 			}
 			
 			// Response rules stuff for MvM
 			if (IsMannVsMachineMode())
 			{
 				// Only have defenders announce the arrival of the first enemy Sniper
-				if (CTFPlayer(player).HasMission(MISSION_SNIPER))
+				if (bot.HasMission(MISSION_SNIPER))
 				{
 					s_nSniperCount++;
 					
@@ -875,7 +876,7 @@ static MRESReturn DHookCallback_CMissionPopulator_UpdateMission_Post(Address pTh
 			// what bot should do after spawning at teleporter exit
 			if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
 			{
-				OnBotTeleported(player);
+				OnBotTeleported(bot.index);
 			}
 		}
 	}
@@ -928,11 +929,11 @@ static MRESReturn DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_P
 			
 			if (view_as<TFTeam>(GetEntProp(obj, Prop_Data, "m_iTeamNum")) == TFTeam_Defenders)
 			{
-				int sentryOwner = GetEntPropEnt(obj, Prop_Send, "m_hBuilder");
-				if (sentryOwner != -1)
+				CTFPlayer sentryOwner = CTFPlayer(GetEntPropEnt(obj, Prop_Send, "m_hBuilder"));
+				if (sentryOwner.IsValid())
 				{
-					int nDmgDone = RoundToFloor(CTFPlayer(sentryOwner).m_accumulatedSentryGunDamageDealt);
-					int nKillsMade = CTFPlayer(sentryOwner).m_accumulatedSentryGunKillCount;
+					int nDmgDone = RoundToFloor(sentryOwner.m_accumulatedSentryGunDamageDealt);
+					int nKillsMade = sentryOwner.m_accumulatedSentryGunKillCount;
 					
 					if (nDmgDone >= nDmgLimit || nKillsMade >= nKillLimit)
 					{
@@ -957,8 +958,8 @@ static MRESReturn DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_P
 		int j;
 		for (j = 0; j < livePlayerList.Length; ++j)
 		{
-			int bot = livePlayerList.Get(j);
-			if (CTFPlayer(bot).HasMission(MISSION_DESTROY_SENTRIES) && CTFPlayer(bot).GetMissionTarget() == targetSentry)
+			CTFPlayer bot = livePlayerList.Get(j);
+			if (bot.HasMission(MISSION_DESTROY_SENTRIES) && bot.GetMissionTarget() == targetSentry)
 			{
 				// there is already a sentry busting squad active for this sentry
 				break;
@@ -987,43 +988,45 @@ static MRESReturn DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_P
 				
 				for (int k = 0; k < m_justSpawnedList.Length; ++k)
 				{
-					int bot = m_justSpawnedList.Get(k);
-					
-					CTFPlayer(bot).SetFlagTarget(INVALID_ENT_REFERENCE);
-					CTFPlayer(bot).SetMission(MISSION_DESTROY_SENTRIES);
-					CTFPlayer(bot).SetMissionTarget(targetSentry);
-					
-					CTFPlayer(bot).MarkAsMissionEnemy();
-					
-					didSpawn = true;
-					
-					SetVariantString(g_szBotBossSentryBusterModel);
-					AcceptEntityInput(bot, "SetCustomModelWithClassAnimations");
-					SetEntProp(bot, Prop_Data, "m_bloodColor", DONT_BLEED);
-					
-					SetVariantInt(1);
-					AcceptEntityInput(bot, "SetForcedTauntCam");
-					
-					if (g_pObjectiveResource.IsValid())
+					CTFPlayer bot = m_justSpawnedList.Get(k);
+					if (bot.IsValid())
 					{
-						int iFlags = MVM_CLASS_FLAG_MISSION;
-						if (CTFPlayer(bot).IsMiniBoss())
+						bot.SetFlagTarget(INVALID_ENT_REFERENCE);
+						bot.SetMission(MISSION_DESTROY_SENTRIES);
+						bot.SetMissionTarget(targetSentry);
+						
+						bot.MarkAsMissionEnemy();
+						
+						didSpawn = true;
+						
+						SetVariantString(g_szBotBossSentryBusterModel);
+						bot.AcceptInput("SetCustomModelWithClassAnimations");
+						bot.SetProp(Prop_Data, "m_bloodColor", DONT_BLEED);
+						
+						SetVariantInt(1);
+						bot.AcceptInput("SetForcedTauntCam");
+						
+						if (g_pObjectiveResource.IsValid())
 						{
-							iFlags |= MVM_CLASS_FLAG_MINIBOSS;
+							int iFlags = MVM_CLASS_FLAG_MISSION;
+							if (bot.IsMiniBoss())
+							{
+								iFlags |= MVM_CLASS_FLAG_MINIBOSS;
+							}
+							if (bot.HasAttribute(ALWAYS_CRIT))
+							{
+								iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
+							}
+							g_pObjectiveResource.IncrementMannVsMachineWaveClassCount(CTFBotSpawner(populator.m_spawner).GetClassIcon(k), iFlags);
 						}
-						if (CTFPlayer(bot).HasAttribute(ALWAYS_CRIT))
+						
+						HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_SENTRY_BUSTER", TFTeam_Defenders);
+						
+						// what bot should do after spawning at teleporter exit
+						if (spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
 						{
-							iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
+							OnBotTeleported(bot.index);
 						}
-						g_pObjectiveResource.IncrementMannVsMachineWaveClassCount(CTFBotSpawner(populator.m_spawner).GetClassIcon(k), iFlags);
-					}
-					
-					HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_SENTRY_BUSTER", TFTeam_Defenders);
-					
-					// what bot should do after spawning at teleporter exit
-					if (spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
-					{
-						OnBotTeleported(bot);
 					}
 				}
 				
@@ -1313,12 +1316,12 @@ static MRESReturn DHookCallback_CTFPlayer_CanBuild_Post(int player, DHookReturn 
 			// teleporter: only exit can be built with teleporter hint
 			case TFObject_Teleporter, TFObject_Sapper:
 			{
-				bDisallowBuilding = (iObjectMode == TFObjectMode_Entrance) || (FindTeleporterHintForCTFPlayer(player) == -1);
+				bDisallowBuilding = (iObjectMode == TFObjectMode_Entrance) || (FindTeleporterHintForPlayer(player) == -1);
 			}
 			// sentry: can only be built with sentry hint
 			case TFObject_Sentry:
 			{
-				bDisallowBuilding = (FindSentryHintForCTFPlayer(player) == -1);
+				bDisallowBuilding = (FindSentryHintForPlayer(player) == -1);
 			}
 		}
 		
@@ -2091,7 +2094,7 @@ static MRESReturn DHookCallback_IsPlayerABot_Pre(DHookReturn ret, DHookParam par
 {
 	int player = VScript_HScriptToEntity(params.Get(1));
 	
-	if (player != -1 && CTFPlayer(player).IsInvader())
+	if (IsValidEntity(player) && CTFPlayer(player).IsInvader())
 	{
 		ret.Value = true;
 		return MRES_Supercede;

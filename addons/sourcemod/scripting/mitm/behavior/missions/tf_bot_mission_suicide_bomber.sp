@@ -144,7 +144,7 @@ static int OnStart(CTFBotMissionSuicideBomber action, int actor, NextBotAction p
 	action.m_bWasSuccessful = false;
 	action.m_bWasKilled = false;
 	
-	action.m_victim = Player(actor).GetMissionTarget();
+	action.m_victim = CTFPlayer(actor).GetMissionTarget();
 	
 	if (IsValidEntity(action.m_victim))
 	{
@@ -374,7 +374,7 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 	}
 	
 	// Clear my mission before we have everyone take damage so I will die with the rest
-	Player(actor).SetMission(NO_MISSION);
+	CTFPlayer(actor).SetMission(NO_MISSION);
 	SetEntProp(actor, Prop_Data, "m_takedamage", DAMAGE_YES);
 	
 	// kill victims (including me)

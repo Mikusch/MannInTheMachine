@@ -57,7 +57,7 @@ methodmap CTFBotMvMDeployBomb < NextBotAction
 
 static int OnStart(CTFBotMvMDeployBomb action, int actor, NextBotAction priorAction)
 {
-	Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_DELAY);
+	CTFPlayer(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_DELAY);
 	action.m_timer.Start(tf_deploying_bomb_delay_time.FloatValue);
 	
 	// remember where we start deploying
@@ -67,7 +67,7 @@ static int OnStart(CTFBotMvMDeployBomb action, int actor, NextBotAction priorAct
 	TeleportEntity(actor, .velocity = ZERO_VECTOR);
 	SetEntityFlags(actor, GetEntityFlags(actor) | FL_FROZEN);
 	
-	if (Player(actor).IsMiniBoss())
+	if (CTFPlayer(actor).IsMiniBoss())
 	{
 		TF2Attrib_SetByName(actor, "airblast vertical vulnerability multiplier", 0.0);
 	}
@@ -79,9 +79,9 @@ static int Update(CTFBotMvMDeployBomb action, int actor, float interval)
 {
 	int areaTrigger = -1;
 	
-	if (Player(actor).GetDeployingBombState() != TF_BOMB_DEPLOYING_COMPLETE)
+	if (CTFPlayer(actor).GetDeployingBombState() != TF_BOMB_DEPLOYING_COMPLETE)
 	{
-		areaTrigger = Player(actor).GetClosestCaptureZone();
+		areaTrigger = CTFPlayer(actor).GetClosestCaptureZone();
 		if (!IsValidEntity(areaTrigger))
 		{
 			return action.Done("No capture zone!");
@@ -114,7 +114,7 @@ static int Update(CTFBotMvMDeployBomb action, int actor, float interval)
 		TeleportEntity(actor, .angles = desiredAngles);
 	}
 	
-	switch (Player(actor).GetDeployingBombState())
+	switch (CTFPlayer(actor).GetDeployingBombState())
 	{
 		case TF_BOMB_DEPLOYING_DELAY:
 		{
@@ -125,9 +125,9 @@ static int Update(CTFBotMvMDeployBomb action, int actor, float interval)
 				
 				SDKCall_CTFPlayer_PlaySpecificSequence(actor, "primary_deploybomb");
 				action.m_timer.Start(tf_deploying_bomb_time.FloatValue);
-				Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_ANIMATING);
+				CTFPlayer(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_ANIMATING);
 				
-				EmitGameSoundToAll(Player(actor).IsMiniBoss() ? "MVM.DeployBombGiant" : "MVM.DeployBombSmall", actor);
+				EmitGameSoundToAll(CTFPlayer(actor).IsMiniBoss() ? "MVM.DeployBombGiant" : "MVM.DeployBombSmall", actor);
 				
 				SDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert(255, "Announcer.MVM_Bomb_Alert_Deploying", 5.0);
 			}
@@ -143,7 +143,7 @@ static int Update(CTFBotMvMDeployBomb action, int actor, float interval)
 				
 				action.m_timer.Start(2.0);
 				BroadcastSound(255, "Announcer.MVM_Robots_Planted");
-				Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_COMPLETE);
+				CTFPlayer(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_COMPLETE);
 				SetEntProp(actor, Prop_Data, "m_takedamage", DAMAGE_NO);
 				SetEntProp(actor, Prop_Data, "m_fEffects", GetEntProp(actor, Prop_Data, "m_fEffects") | EF_NODRAW);
 				TF2_RemoveAllWeapons(actor);
@@ -153,7 +153,7 @@ static int Update(CTFBotMvMDeployBomb action, int actor, float interval)
 		{
 			if (action.m_timer.IsElapsed())
 			{
-				Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_NONE);
+				CTFPlayer(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_NONE);
 				SetEntProp(actor, Prop_Data, "m_takedamage", DAMAGE_YES);
 				SDKHooks_TakeDamage(actor, actor, actor, 99999.9, DMG_CRUSH);
 				return action.Done("I've deployed successfully");
@@ -166,18 +166,18 @@ static int Update(CTFBotMvMDeployBomb action, int actor, float interval)
 
 static void OnEnd(CTFBotMvMDeployBomb action, int actor, NextBotAction nextAction)
 {
-	if (Player(actor).GetDeployingBombState() == TF_BOMB_DEPLOYING_ANIMATING)
+	if (CTFPlayer(actor).GetDeployingBombState() == TF_BOMB_DEPLOYING_ANIMATING)
 	{
 		// reset the in-progress deploy animation
 		SDKCall_CTFPlayer_DoAnimationEvent(actor, PLAYERANIMEVENT_SPAWN);
 	}
 	
-	if (Player(actor).IsMiniBoss())
+	if (CTFPlayer(actor).IsMiniBoss())
 	{
 		TF2Attrib_RemoveByName(actor, "airblast vertical vulnerability multiplier");
 	}
 	
-	Player(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_NONE);
+	CTFPlayer(actor).SetDeployingBombState(TF_BOMB_DEPLOYING_NONE);
 	
 	SetVariantInt(0);
 	AcceptEntityInput(actor, "SetForcedTauntCam");

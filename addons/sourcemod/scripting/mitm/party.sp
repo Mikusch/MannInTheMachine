@@ -223,7 +223,7 @@ methodmap Party
 			if (!IsClientInGame(member))
 				continue;
 			
-			if (!bIncludeSpectators && Player(member).HasPreference(PREF_DISABLE_SPAWNING))
+			if (!bIncludeSpectators && CTFPlayer(member).HasPreference(PREF_DISABLE_SPAWNING))
 				continue;
 			
 			clients[count++] = member;
@@ -246,7 +246,7 @@ methodmap Party
 		int count = this.CollectMembers(members, MaxClients, false);
 		for (int i = 0; i < count; ++i)
 		{
-			points += Player(members[i]).m_defenderQueuePoints;
+			points += CTFPlayer(members[i]).m_defenderQueuePoints;
 		}
 		
 		if (count)
@@ -267,7 +267,7 @@ methodmap Party
 		char name[MAX_NAME_LENGTH];
 		this.GetName(name, sizeof(name));
 		
-		Player(client).LeaveParty();
+		CTFPlayer(client).LeaveParty();
 		CancelClientMenu(client);
 		
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Left", name);
@@ -284,7 +284,7 @@ methodmap Party
 				int member = members[i];
 				
 				// refresh party menu if active
-				if (Player(member).IsPartyMenuActive())
+				if (CTFPlayer(member).IsPartyMenuActive())
 				{
 					Menus_DisplayPartyMenu(member);
 				}
@@ -316,7 +316,7 @@ methodmap Party
 			int member = this.m_members.Get(i);
 			if (IsClientInGame(member))
 			{
-				Player(member).DeleteParty();
+				CTFPlayer(member).DeleteParty();
 			}
 		}
 		
@@ -426,7 +426,7 @@ static Action ConCmd_PartyJoin(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	if (Player(client).m_party == party)
+	if (CTFPlayer(client).m_party == party)
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_AlreadyMember");
 		return Plugin_Handled;
@@ -448,12 +448,12 @@ static Action ConCmd_PartyJoin(int client, int args)
 	}
 	
 	// leave current party
-	if (Player(client).IsInAParty())
+	if (CTFPlayer(client).IsInAParty())
 	{
 		FakeClientCommand(client, "sm_party_leave");
 	}
 	
-	Player(client).JoinParty(party);
+	CTFPlayer(client).JoinParty(party);
 	
 	// notify the new member
 	if (!party.IsLeader(client))
@@ -480,7 +480,7 @@ static Action ConCmd_PartyJoin(int client, int args)
 			continue;
 		
 		// refresh party menu if active
-		if (Player(member).IsPartyMenuActive())
+		if (CTFPlayer(member).IsPartyMenuActive())
 		{
 			Menus_DisplayPartyMenu(member);
 		}
@@ -497,13 +497,13 @@ static Action ConCmd_PartyLeave(int client, int args)
 	if (!Party_ShouldRunCommand(client))
 		return Plugin_Handled;
 	
-	if (!Player(client).IsInAParty())
+	if (!CTFPlayer(client).IsInAParty())
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireMember");
 		return Plugin_Handled;
 	}
 	
-	Party party = Player(client).GetParty();
+	Party party = CTFPlayer(client).GetParty();
 	party.OnPartyMemberLeave(client);
 	
 	return Plugin_Handled;
@@ -514,13 +514,13 @@ static Action ConCmd_PartyInvite(int client, int args)
 	if (!Party_ShouldRunCommand(client))
 		return Plugin_Handled;
 	
-	if (!Player(client).IsInAParty())
+	if (!CTFPlayer(client).IsInAParty())
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireMember");
 		return Plugin_Handled;
 	}
 	
-	Party party = Player(client).GetParty();
+	Party party = CTFPlayer(client).GetParty();
 	
 	if (!party.IsLeader(client))
 	{
@@ -564,10 +564,10 @@ static Action ConCmd_PartyInvite(int client, int args)
 		if (party.IsInvited(target_list[i]))
 			continue;
 		
-		if (Player(target_list[i]).HasPreference(PREF_IGNORE_PARTY_INVITES))
+		if (CTFPlayer(target_list[i]).HasPreference(PREF_IGNORE_PARTY_INVITES))
 			continue;
 		
-		Player(target_list[i]).InviteToParty(party);
+		CTFPlayer(target_list[i]).InviteToParty(party);
 		
 		CPrintToChat(target_list[i], "%s %t", PLUGIN_TAG, "Party_IncomingInvite", name, client);
 		ClientCommand(target_list[i], "play %s", SOUND_PARTY_INVITE);
@@ -590,13 +590,13 @@ static Action ConCmd_PartyManage(int client, int args)
 	if (!Party_ShouldRunCommand(client))
 		return Plugin_Handled;
 	
-	if (!Player(client).IsInAParty())
+	if (!CTFPlayer(client).IsInAParty())
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireMember");
 		return Plugin_Handled;
 	}
 	
-	if (!Player(client).GetParty().IsLeader(client))
+	if (!CTFPlayer(client).GetParty().IsLeader(client))
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireLeader");
 		return Plugin_Handled;
@@ -611,13 +611,13 @@ static Action ConCmd_PartyKick(int client, int args)
 	if (!Party_ShouldRunCommand(client))
 		return Plugin_Handled;
 	
-	if (!Player(client).IsInAParty())
+	if (!CTFPlayer(client).IsInAParty())
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireMember");
 		return Plugin_Handled;
 	}
 	
-	if (!Player(client).GetParty().IsLeader(client))
+	if (!CTFPlayer(client).GetParty().IsLeader(client))
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireLeader");
 		return Plugin_Handled;
@@ -642,17 +642,17 @@ static Action ConCmd_PartyKick(int client, int args)
 		return Plugin_Handled;
 	}
 	
-	Party party = Player(client).GetParty();
+	Party party = CTFPlayer(client).GetParty();
 	
 	for (int i = 0; i < target_count; ++i)
 	{
 		if (target_list[i] == client)
 			continue;
 		
-		if (Player(target_list[i]).GetParty() != party)
+		if (CTFPlayer(target_list[i]).GetParty() != party)
 			continue;
 		
-		Player(target_list[i]).LeaveParty();
+		CTFPlayer(target_list[i]).LeaveParty();
 		
 		CancelClientMenu(target_list[i]);
 		
@@ -680,13 +680,13 @@ static Action ConCmd_PartyName(int client, int args)
 	if (!Party_ShouldRunCommand(client))
 		return Plugin_Handled;
 	
-	if (!Player(client).IsInAParty())
+	if (!CTFPlayer(client).IsInAParty())
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_RequireMember");
 		return Plugin_Handled;
 	}
 	
-	Party party = Player(client).GetParty();
+	Party party = CTFPlayer(client).GetParty();
 	
 	if (!party.IsLeader(client))
 	{

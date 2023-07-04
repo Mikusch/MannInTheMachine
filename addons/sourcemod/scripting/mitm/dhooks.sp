@@ -437,13 +437,13 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 	
 	if (newPlayer != -1)
 	{
-		Player(newPlayer).ClearAllAttributes();
+		CTFPlayer(newPlayer).ClearAllAttributes();
 		
 		// Remove any player attributes
 		TF2Attrib_RemoveAll(newPlayer);
 		
 		// clear any old TeleportWhere settings 
-		Player(newPlayer).ClearTeleportWhere();
+		CTFPlayer(newPlayer).ClearTeleportWhere();
 		
 		if (g_internalSpawnPoint == INVALID_ENT_REFERENCE || EntRefToEntIndex(g_internalSpawnPoint) == -1)
 		{
@@ -453,11 +453,11 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 		
 		char name[MAX_NAME_LENGTH];
 		spawner.GetName(name, sizeof(name), "TFBot");
-		Player(newPlayer).SetInvaderName(name, sm_mitm_rename_robots.BoolValue);
+		CTFPlayer(newPlayer).SetInvaderName(name, sm_mitm_rename_robots.BoolValue);
 		
 		CBaseEntity(g_internalSpawnPoint).SetAbsOrigin(here);
 		CBaseEntity(g_internalSpawnPoint).SetLocalAngles(ZERO_VECTOR);
-		Player(newPlayer).SetSpawnPoint(g_internalSpawnPoint);
+		CTFPlayer(newPlayer).SetSpawnPoint(g_internalSpawnPoint);
 		
 		TFTeam team = TFTeam_Red;
 		
@@ -473,15 +473,15 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 		
 		// Set the address of CTFPlayer::m_iszClassIcon from the return value of CTFBotSpawner::GetClassIcon.
 		// Simply setting the value using SetEntPropString leads to segfaults, don't do that!
-		Player(newPlayer).SetClassIconName(spawner.GetClassIcon());
+		CTFPlayer(newPlayer).SetClassIconName(spawner.GetClassIcon());
 		
-		Player(newPlayer).ClearEventChangeAttributes();
+		CTFPlayer(newPlayer).ClearEventChangeAttributes();
 		for (int i = 0; i < spawner.m_eventChangeAttributes.Count(); ++i)
 		{
-			Player(newPlayer).AddEventChangeAttributes(spawner.m_eventChangeAttributes.Get(i, GetOffset(NULL_STRING, "sizeof(EventChangeAttributes_t)")));
+			CTFPlayer(newPlayer).AddEventChangeAttributes(spawner.m_eventChangeAttributes.Get(i, GetOffset(NULL_STRING, "sizeof(EventChangeAttributes_t)")));
 		}
 		
-		Player(newPlayer).SetTeleportWhere(spawner.m_teleportWhereName);
+		CTFPlayer(newPlayer).SetTeleportWhere(spawner.m_teleportWhereName);
 		
 		if (spawner.m_defaultAttributes.m_attributeFlags & MINIBOSS)
 		{
@@ -495,7 +495,7 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 		
 		if (spawner.m_defaultAttributes.m_attributeFlags & AUTO_JUMP)
 		{
-			Player(newPlayer).SetAutoJump(spawner.m_flAutoJumpMin, spawner.m_flAutoJumpMax);
+			CTFPlayer(newPlayer).SetAutoJump(spawner.m_flAutoJumpMin, spawner.m_flAutoJumpMax);
 		}
 		
 		if (spawner.m_defaultAttributes.m_attributeFlags & BULLET_IMMUNE)
@@ -546,7 +546,7 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 			
 		}
 		
-		Player(newPlayer).SetScaleOverride(spawner.m_scale);
+		CTFPlayer(newPlayer).SetScaleOverride(spawner.m_scale);
 		
 		int nHealth = spawner.m_health;
 		
@@ -556,9 +556,9 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 		}
 		
 		nHealth = RoundToFloor(float(nHealth) * g_pPopulationManager.GetHealthMultiplier(false));
-		Player(newPlayer).ModifyMaxHealth(nHealth);
+		CTFPlayer(newPlayer).ModifyMaxHealth(nHealth);
 		
-		Player(newPlayer).StartIdleSound();
+		CTFPlayer(newPlayer).StartIdleSound();
 		
 		// Add our items first, they'll get replaced below by the normal MvM items if any are needed
 		if (IsMannVsMachineMode() && (TF2_GetClientTeam(newPlayer) == TFTeam_Invaders))
@@ -568,29 +568,29 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 			CMissionPopulator pMission = s_MissionPopulator;
 			if (pMission && pMission.m_mission == MISSION_DESTROY_SENTRIES)
 			{
-				Player(newPlayer).AddItem("tw_sentrybuster");
+				CTFPlayer(newPlayer).AddItem("tw_sentrybuster");
 			}
 			else
 			{
-				Player(newPlayer).AddItem(g_szRomePromoItems_Hat[spawner.m_class]);
-				Player(newPlayer).AddItem(g_szRomePromoItems_Misc[spawner.m_class]);
+				CTFPlayer(newPlayer).AddItem(g_szRomePromoItems_Hat[spawner.m_class]);
+				CTFPlayer(newPlayer).AddItem(g_szRomePromoItems_Misc[spawner.m_class]);
 			}
 		}
 		
-		EventChangeAttributes_t pEventChangeAttributes = Player(newPlayer).GetEventChangeAttributes(g_pPopulationManager.GetDefaultEventChangeAttributesName());
+		EventChangeAttributes_t pEventChangeAttributes = CTFPlayer(newPlayer).GetEventChangeAttributes(g_pPopulationManager.GetDefaultEventChangeAttributesName());
 		if (!pEventChangeAttributes)
 		{
 			pEventChangeAttributes = spawner.m_defaultAttributes;
 		}
-		Player(newPlayer).OnEventChangeAttributes(pEventChangeAttributes);
+		CTFPlayer(newPlayer).OnEventChangeAttributes(pEventChangeAttributes);
 		
-		int flag = Player(newPlayer).GetFlagToFetch();
+		int flag = CTFPlayer(newPlayer).GetFlagToFetch();
 		if (IsValidEntity(flag))
 		{
-			Player(newPlayer).SetFlagTarget(flag);
+			CTFPlayer(newPlayer).SetFlagTarget(flag);
 		}
 		
-		if (Player(newPlayer).HasAttribute(SPAWN_WITH_FULL_CHARGE))
+		if (CTFPlayer(newPlayer).HasAttribute(SPAWN_WITH_FULL_CHARGE))
 		{
 			// charge up our weapons
 			
@@ -601,7 +601,7 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 				SetEntPropFloat(weapon, Prop_Send, "m_flChargeLevel", 1.0);
 			}
 			
-			if (TF2_GetPlayerClass(newPlayer) != TFClass_Medic || Player(newPlayer).HasAttribute(PROJECTILE_SHIELD))
+			if (TF2_GetPlayerClass(newPlayer) != TFClass_Medic || CTFPlayer(newPlayer).HasAttribute(PROJECTILE_SHIELD))
 			{
 				SetEntPropFloat(newPlayer, Prop_Send, "m_flRageMeter", 100.0);
 			}
@@ -617,14 +617,14 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 			char item[64];
 			Format(item, sizeof(item), "Zombie %s", g_aRawPlayerClassNamesShort[nClassIndex]);
 			
-			Player(newPlayer).AddItem(item);
+			CTFPlayer(newPlayer).AddItem(item);
 		}
 		else
 		{
 			// use the nifty new robot model
 			if (nClassIndex >= TFClass_Scout && nClassIndex <= TFClass_Engineer)
 			{
-				if (spawner.m_scale >= tf_mvm_miniboss_scale.FloatValue || Player(newPlayer).IsMiniBoss() && FileExists(g_szBotBossModels[nClassIndex], true))
+				if (spawner.m_scale >= tf_mvm_miniboss_scale.FloatValue || CTFPlayer(newPlayer).IsMiniBoss() && FileExists(g_szBotBossModels[nClassIndex], true))
 				{
 					SetVariantString(g_szBotBossModels[nClassIndex]);
 					AcceptEntityInput(newPlayer, "SetCustomModelWithClassAnimations");
@@ -650,7 +650,7 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 		
 		if (IsMannVsMachineMode())
 		{
-			if (Player(newPlayer).IsMiniBoss())
+			if (CTFPlayer(newPlayer).IsMiniBoss())
 			{
 				HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_GIANT_CALLOUT", TFTeam_Defenders);
 			}
@@ -694,7 +694,7 @@ static MRESReturn DHookCallback_CSquadSpawner_Spawn_Post(CSquadSpawner spawner, 
 				int bot = LoadEntityFromHandleAddress(result.Get(i));
 				if (IsEntityClient(bot))
 				{
-					Player(bot).JoinSquad(squad);
+					CTFPlayer(bot).JoinSquad(squad);
 				}
 			}
 		}
@@ -746,20 +746,20 @@ static MRESReturn DHookCallback_CWaveSpawnPopulator_Update_Post(CWaveSpawnPopula
 		int player = m_justSpawnedList.Get(i);
 		if (IsEntityClient(player))
 		{
-			Player(player).SetCustomCurrencyWorth(0);
-			Player(player).SetWaveSpawnPopulator(populator);
+			CTFPlayer(player).SetCustomCurrencyWorth(0);
+			CTFPlayer(player).SetWaveSpawnPopulator(populator);
 			
 			// Allows client UI to know if a specific spawner is active
-			g_pObjectiveResource.SetMannVsMachineWaveClassActive(Player(player).GetClassIconName());
+			g_pObjectiveResource.SetMannVsMachineWaveClassActive(CTFPlayer(player).GetClassIconName());
 			
 			if (populator.IsSupportWave())
 			{
-				Player(player).MarkAsSupportEnemy();
+				CTFPlayer(player).MarkAsSupportEnemy();
 			}
 			
 			if (populator.IsLimitedSupportWave())
 			{
-				Player(player).MarkAsLimitedSupportEnemy();
+				CTFPlayer(player).MarkAsLimitedSupportEnemy();
 			}
 			
 			// what bot should do after spawning at teleporter exit
@@ -788,7 +788,7 @@ static MRESReturn DHookCallback_CMissionPopulator_UpdateMission_Pre(CMissionPopu
 	for (int i = 0; i < livePlayerList.Length; ++i)
 	{
 		int player = livePlayerList.Get(i);
-		if (Player(player).HasMission(mission))
+		if (CTFPlayer(player).HasMission(mission))
 		{
 			++s_activeMissionMembers;
 		}
@@ -839,29 +839,29 @@ static MRESReturn DHookCallback_CMissionPopulator_UpdateMission_Post(Address pTh
 		int player = m_justSpawnedList.Get(i);
 		if (IsEntityClient(player))
 		{
-			Player(player).SetFlagTarget(INVALID_ENT_REFERENCE);
-			Player(player).SetMission(mission);
-			Player(player).MarkAsMissionEnemy();
+			CTFPlayer(player).SetFlagTarget(INVALID_ENT_REFERENCE);
+			CTFPlayer(player).SetMission(mission);
+			CTFPlayer(player).MarkAsMissionEnemy();
 			
 			if (g_pObjectiveResource.IsValid())
 			{
 				int iFlags = MVM_CLASS_FLAG_MISSION;
-				if (Player(player).IsMiniBoss())
+				if (CTFPlayer(player).IsMiniBoss())
 				{
 					iFlags |= MVM_CLASS_FLAG_MINIBOSS;
 				}
-				else if (Player(player).HasAttribute(ALWAYS_CRIT))
+				else if (CTFPlayer(player).HasAttribute(ALWAYS_CRIT))
 				{
 					iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
 				}
-				g_pObjectiveResource.IncrementMannVsMachineWaveClassCount(Player(player).GetClassIconName(), iFlags);
+				g_pObjectiveResource.IncrementMannVsMachineWaveClassCount(CTFPlayer(player).GetClassIconName(), iFlags);
 			}
 			
 			// Response rules stuff for MvM
 			if (IsMannVsMachineMode())
 			{
 				// Only have defenders announce the arrival of the first enemy Sniper
-				if (Player(player).HasMission(MISSION_SNIPER))
+				if (CTFPlayer(player).HasMission(MISSION_SNIPER))
 				{
 					s_nSniperCount++;
 					
@@ -931,8 +931,8 @@ static MRESReturn DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_P
 				int sentryOwner = GetEntPropEnt(obj, Prop_Send, "m_hBuilder");
 				if (sentryOwner != -1)
 				{
-					int nDmgDone = RoundToFloor(Player(sentryOwner).m_accumulatedSentryGunDamageDealt);
-					int nKillsMade = Player(sentryOwner).m_accumulatedSentryGunKillCount;
+					int nDmgDone = RoundToFloor(CTFPlayer(sentryOwner).m_accumulatedSentryGunDamageDealt);
+					int nKillsMade = CTFPlayer(sentryOwner).m_accumulatedSentryGunKillCount;
 					
 					if (nDmgDone >= nDmgLimit || nKillsMade >= nKillLimit)
 					{
@@ -958,7 +958,7 @@ static MRESReturn DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_P
 		for (j = 0; j < livePlayerList.Length; ++j)
 		{
 			int bot = livePlayerList.Get(j);
-			if (Player(bot).HasMission(MISSION_DESTROY_SENTRIES) && Player(bot).GetMissionTarget() == targetSentry)
+			if (CTFPlayer(bot).HasMission(MISSION_DESTROY_SENTRIES) && CTFPlayer(bot).GetMissionTarget() == targetSentry)
 			{
 				// there is already a sentry busting squad active for this sentry
 				break;
@@ -989,11 +989,11 @@ static MRESReturn DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_P
 				{
 					int bot = m_justSpawnedList.Get(k);
 					
-					Player(bot).SetFlagTarget(INVALID_ENT_REFERENCE);
-					Player(bot).SetMission(MISSION_DESTROY_SENTRIES);
-					Player(bot).SetMissionTarget(targetSentry);
+					CTFPlayer(bot).SetFlagTarget(INVALID_ENT_REFERENCE);
+					CTFPlayer(bot).SetMission(MISSION_DESTROY_SENTRIES);
+					CTFPlayer(bot).SetMissionTarget(targetSentry);
 					
-					Player(bot).MarkAsMissionEnemy();
+					CTFPlayer(bot).MarkAsMissionEnemy();
 					
 					didSpawn = true;
 					
@@ -1007,11 +1007,11 @@ static MRESReturn DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_P
 					if (g_pObjectiveResource.IsValid())
 					{
 						int iFlags = MVM_CLASS_FLAG_MISSION;
-						if (Player(bot).IsMiniBoss())
+						if (CTFPlayer(bot).IsMiniBoss())
 						{
 							iFlags |= MVM_CLASS_FLAG_MINIBOSS;
 						}
-						if (Player(bot).HasAttribute(ALWAYS_CRIT))
+						if (CTFPlayer(bot).HasAttribute(ALWAYS_CRIT))
 						{
 							iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
 						}
@@ -1088,10 +1088,10 @@ static MRESReturn DHookCallback_CPointPopulatorInterface_InputChangeBotAttribute
 		
 		for (int i = 0; i < botList.Length; ++i)
 		{
-			EventChangeAttributes_t pEvent = Player(botList.Get(i)).GetEventChangeAttributes(pszEventName);
+			EventChangeAttributes_t pEvent = CTFPlayer(botList.Get(i)).GetEventChangeAttributes(pszEventName);
 			if (pEvent)
 			{
-				Player(botList.Get(i)).OnEventChangeAttributes(pEvent);
+				CTFPlayer(botList.Get(i)).OnEventChangeAttributes(pEvent);
 			}
 		}
 		
@@ -1200,9 +1200,9 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 		
 		// players can join defenders freely if a slot is open
 		if (iDefenderCount >= sm_mitm_defender_count.IntValue || 
-			Player(player).IsInAParty() || 
-			Player(player).HasPreference(PREF_DISABLE_DEFENDER) || 
-			Player(player).HasPreference(PREF_DISABLE_SPAWNING))
+			CTFPlayer(player).IsInAParty() || 
+			CTFPlayer(player).HasPreference(PREF_DISABLE_DEFENDER) || 
+			CTFPlayer(player).HasPreference(PREF_DISABLE_SPAWNING))
 		{
 			params.Set(2, TFTeam_Spectator);
 			return MRES_ChangedHandled;
@@ -1261,7 +1261,7 @@ static MRESReturn DHookCallback_CTFPlayer_DoClassSpecialSkill_Pre(int player, DH
 		float velocity[3];
 		GetEntPropVector(player, Prop_Data, "m_vecAbsVelocity", velocity);
 		
-		if (Player(player).HasAttribute(AIR_CHARGE_ONLY) && (GetEntPropEnt(player, Prop_Send, "m_hGroundEntity") != -1 || velocity[2] > 0.0))
+		if (CTFPlayer(player).HasAttribute(AIR_CHARGE_ONLY) && (GetEntPropEnt(player, Prop_Send, "m_hGroundEntity") != -1 || velocity[2] > 0.0))
 		{
 			ret.Value = false;
 			return MRES_Supercede;
@@ -1274,7 +1274,7 @@ static MRESReturn DHookCallback_CTFPlayer_DoClassSpecialSkill_Pre(int player, DH
 static MRESReturn DHookCallback_CTFPlayer_RemoveAllOwnedEntitiesFromWorld_Pre(int player, DHookParam params)
 {
 	// keep this bot's buildings
-	return Player(player).HasAttribute(RETAIN_BUILDINGS) ? MRES_Supercede : MRES_Ignored;
+	return CTFPlayer(player).HasAttribute(RETAIN_BUILDINGS) ? MRES_Supercede : MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_CTFPlayer_CanBuild_Pre(int player, DHookReturn ret, DHookParam params)
@@ -1313,12 +1313,12 @@ static MRESReturn DHookCallback_CTFPlayer_CanBuild_Post(int player, DHookReturn 
 			// teleporter: only exit can be built with teleporter hint
 			case TFObject_Teleporter, TFObject_Sapper:
 			{
-				bDisallowBuilding = (iObjectMode == TFObjectMode_Entrance) || (FindTeleporterHintForPlayer(player) == -1);
+				bDisallowBuilding = (iObjectMode == TFObjectMode_Entrance) || (FindTeleporterHintForCTFPlayer(player) == -1);
 			}
 			// sentry: can only be built with sentry hint
 			case TFObject_Sentry:
 			{
-				bDisallowBuilding = (FindSentryHintForPlayer(player) == -1);
+				bDisallowBuilding = (FindSentryHintForCTFPlayer(player) == -1);
 			}
 		}
 		
@@ -1341,9 +1341,9 @@ static MRESReturn DHookCallback_CWeaponMedigun_AllowedToHealTarget_Pre(int medig
 	if (TF2_GetClientTeam(owner) == TFTeam_Invaders)
 	{
 		// medics in a squad should only ever heal their squad leader
-		if (Player(owner).IsInASquad() && Player(owner).GetSquad().GetLeader() != -1)
+		if (CTFPlayer(owner).IsInASquad() && CTFPlayer(owner).GetSquad().GetLeader() != -1)
 		{
-			CTFBotSquad squad = Player(owner).GetSquad();
+			CTFBotSquad squad = CTFPlayer(owner).GetSquad();
 			if (squad.IsLeader(owner) || squad.IsLeader(target))
 			{
 				// allow healing the squad leader, or everyone if we are the leader
@@ -1379,14 +1379,14 @@ static MRESReturn DHookCallback_CTraceFilterObject_ShouldHitEntity_Post(Address 
 	{
 		if (IsMannVsMachineMode())
 		{
-			if (Player(entity).HasMission(MISSION_DESTROY_SENTRIES))
+			if (CTFPlayer(entity).HasMission(MISSION_DESTROY_SENTRIES))
 			{
 				// Don't collide with sentry busters since they don't collide with us
 				ret.Value = false;
 				return MRES_Supercede;
 			}
 			
-			if (Player(me).HasMission(MISSION_DESTROY_SENTRIES))
+			if (CTFPlayer(me).HasMission(MISSION_DESTROY_SENTRIES))
 			{
 				// Sentry Busters don't collide with enemies (so they can't be body-blocked)
 				ret.Value = false;
@@ -1561,7 +1561,7 @@ void OnBotTeleported(int bot)
 
 static MRESReturn DHookCallback_CTFPlayer_ShouldTransmit_Pre(int player, DHookReturn ret, DHookParam params)
 {
-	if (Player(player).HasAttribute(USE_BOSS_HEALTH_BAR))
+	if (CTFPlayer(player).HasAttribute(USE_BOSS_HEALTH_BAR))
 	{
 		ret.Value = FL_EDICT_ALWAYS;
 		return MRES_Supercede;
@@ -1627,7 +1627,7 @@ static MRESReturn DHookCallback_CTFPlayer_EventKilled_Pre(int player, DHookParam
 			
 			ArrayList playerList = new ArrayList();
 			CollectPlayers(playerList, TFTeam_Invaders, COLLECT_ONLY_LIVING_PLAYERS);
-			bool bShouldAnnounceLastEngineerBotDeath = Player(player).HasAttribute(TELEPORT_TO_HINT);
+			bool bShouldAnnounceLastEngineerBotDeath = CTFPlayer(player).HasAttribute(TELEPORT_TO_HINT);
 			if (bShouldAnnounceLastEngineerBotDeath)
 			{
 				for (int i = 0; i < playerList.Length; ++i)
@@ -1664,12 +1664,12 @@ static MRESReturn DHookCallback_CTFPlayer_EventKilled_Pre(int player, DHookParam
 			}
 		}
 		
-		if (Player(player).IsInASquad())
+		if (CTFPlayer(player).IsInASquad())
 		{
-			Player(player).LeaveSquad();
+			CTFPlayer(player).LeaveSquad();
 		}
 		
-		Player(player).StopIdleSound();
+		CTFPlayer(player).StopIdleSound();
 	}
 	
 	return MRES_Ignored;
@@ -1678,7 +1678,7 @@ static MRESReturn DHookCallback_CTFPlayer_EventKilled_Pre(int player, DHookParam
 static MRESReturn DHookCallback_CTFPlayer_ShouldGib_Pre(int player, DHookReturn ret, DHookParam params)
 {
 	// only gib giant/miniboss
-	if (IsMannVsMachineMode() && (Player(player).IsMiniBoss() || GetEntPropFloat(player, Prop_Send, "m_flModelScale") > 1.0))
+	if (IsMannVsMachineMode() && (CTFPlayer(player).IsMiniBoss() || GetEntPropFloat(player, Prop_Send, "m_flModelScale") > 1.0))
 	{
 		ret.Value = true;
 		return MRES_Supercede;
@@ -1690,14 +1690,14 @@ static MRESReturn DHookCallback_CTFPlayer_ShouldGib_Pre(int player, DHookReturn 
 static MRESReturn DHookCallback_CTFPlayer_IsAllowedToPickUpFlag_Post(int player, DHookReturn ret)
 {
 	// only the leader of a squad can pick up the flag
-	if (Player(player).IsInASquad() && !Player(player).GetSquad().IsLeader(player))
+	if (CTFPlayer(player).IsInASquad() && !CTFPlayer(player).GetSquad().IsLeader(player))
 	{
 		ret.Value = false;
 		return MRES_Supercede;
 	}
 	
 	// mission bots can't pick up the flag
-	if (Player(player).IsOnAnyMission())
+	if (CTFPlayer(player).IsOnAnyMission())
 	{
 		ret.Value = false;
 		return MRES_Supercede;
@@ -1709,9 +1709,9 @@ static MRESReturn DHookCallback_CTFPlayer_IsAllowedToPickUpFlag_Post(int player,
 static MRESReturn DHookCallback_CTFPlayer_EntSelectSpawnPoint_Pre(int player, DHookReturn ret)
 {
 	// override normal spawn behavior to spawn robots at the right place
-	if (IsValidEntity(Player(player).m_spawnPointEntity))
+	if (IsValidEntity(CTFPlayer(player).m_spawnPointEntity))
 	{
-		ret.Value = Player(player).m_spawnPointEntity;
+		ret.Value = CTFPlayer(player).m_spawnPointEntity;
 		return MRES_Supercede;
 	}
 	
@@ -1739,7 +1739,7 @@ static MRESReturn DHookCallback_CFilterTFBotHasTag_PassesFilterImpl_Pre(int filt
 		bool bPasses = false;
 		for (int i = 0; i < count; ++i)
 		{
-			if (Player(entity).HasTag(tags[i]))
+			if (CTFPlayer(entity).HasTag(tags[i]))
 			{
 				bPasses = true;
 				if (!bRequireAllTags)
@@ -1770,10 +1770,10 @@ static MRESReturn DHookCallback_CCaptureFlag_PickUp_Pre(int item, DHookParam par
 		// do not trip up the assert_cast< CTFBot* >
 		CBaseEntity(player).RemoveFlag(FL_FAKECLIENT);
 		
-		if (Player(player).HasAttribute(IGNORE_FLAG))
+		if (CTFPlayer(player).HasAttribute(IGNORE_FLAG))
 			return MRES_Supercede;
 		
-		Player(player).SetFlagTarget(EntIndexToEntRef(item));
+		CTFPlayer(player).SetFlagTarget(EntIndexToEntRef(item));
 	}
 	
 	return MRES_Ignored;
@@ -1915,7 +1915,7 @@ static MRESReturn DHookCallback_CTFBot_AddAttribute_Pre(int bot, DHookParam para
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
 	
-	Player(bot).SetAttribute(params.Get(1));
+	CTFPlayer(bot).SetAttribute(params.Get(1));
 	
 	return MRES_Supercede;
 }
@@ -1928,7 +1928,7 @@ static MRESReturn DHookCallback_CTFBot_AddTag_Pre(int bot, DHookParam params)
 	char tag[64];
 	params.GetString(1, tag, sizeof(tag));
 	
-	Player(bot).AddTag(tag);
+	CTFPlayer(bot).AddTag(tag);
 	
 	return MRES_Supercede;
 }
@@ -1938,7 +1938,7 @@ static MRESReturn DHookCallback_CTFBot_SetWeaponRestriction_Pre(int bot, DHookPa
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
 	
-	Player(bot).SetWeaponRestriction(params.Get(1));
+	CTFPlayer(bot).SetWeaponRestriction(params.Get(1));
 	
 	return MRES_Supercede;
 }
@@ -1948,7 +1948,7 @@ static MRESReturn DHookCallback_CTFBot_ClearAllAttributes_Pre(int bot)
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
 	
-	Player(bot).ClearAllAttributes();
+	CTFPlayer(bot).ClearAllAttributes();
 	
 	return MRES_Supercede;
 }
@@ -1958,7 +1958,7 @@ static MRESReturn DHookCallback_CTFBot_ClearTags_Pre(int bot)
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
 	
-	Player(bot).ClearTags();
+	CTFPlayer(bot).ClearTags();
 	
 	return MRES_Supercede;
 }
@@ -1968,7 +1968,7 @@ static MRESReturn DHookCallback_CTFBot_ClearWeaponRestrictions(int bot)
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
 	
-	Player(bot).ClearWeaponRestrictions();
+	CTFPlayer(bot).ClearWeaponRestrictions();
 	
 	return MRES_Supercede;
 }
@@ -1978,7 +1978,7 @@ static MRESReturn DHookCallback_CTFBot_DisbandAndDeleteSquad(int bot)
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
 	
-	CTFBotSquad squad = Player(bot).GetSquad();
+	CTFBotSquad squad = CTFPlayer(bot).GetSquad();
 	if (squad)
 	{
 		squad.DisbandAndDeleteSquad();
@@ -1992,7 +1992,7 @@ static MRESReturn DHookCallback_CTFBot_HasAttribute_Pre(int bot, DHookReturn ret
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
 	
-	ret.Value = Player(bot).HasAttribute(params.Get(1));
+	ret.Value = CTFPlayer(bot).HasAttribute(params.Get(1));
 	
 	return MRES_Supercede;
 }
@@ -2005,7 +2005,7 @@ static MRESReturn DHookCallback_CTFBot_HasTag_Pre(int bot, DHookReturn ret, DHoo
 	char tag[64];
 	params.GetString(1, tag, sizeof(tag));
 	
-	ret.Value = Player(bot).HasTag(tag);
+	ret.Value = CTFPlayer(bot).HasTag(tag);
 	
 	return MRES_Supercede;
 }
@@ -2015,7 +2015,7 @@ static MRESReturn DHookCallback_CTFBot_IsInASquad_Pre(int bot, DHookReturn ret)
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
 	
-	ret.Value = Player(bot).IsInASquad();
+	ret.Value = CTFPlayer(bot).IsInASquad();
 	
 	return MRES_Supercede;
 }
@@ -2025,7 +2025,7 @@ static MRESReturn DHookCallback_CTFBot_LeaveSquad_Pre(int bot)
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
 	
-	Player(bot).LeaveSquad();
+	CTFPlayer(bot).LeaveSquad();
 	
 	return MRES_Supercede;
 }
@@ -2035,7 +2035,7 @@ static MRESReturn DHookCallback_CTFBot_HasWeaponRestriction_Pre(int bot, DHookRe
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
 	
-	ret.Value = Player(bot).HasWeaponRestriction(params.Get(1));
+	ret.Value = CTFPlayer(bot).HasWeaponRestriction(params.Get(1));
 	
 	return MRES_Supercede;
 }
@@ -2045,7 +2045,7 @@ static MRESReturn DHookCallback_CTFBot_RemoveAttribute_Pre(int bot, DHookParam p
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
 	
-	Player(bot).ClearAttribute(params.Get(1));
+	CTFPlayer(bot).ClearAttribute(params.Get(1));
 	
 	return MRES_Supercede;
 }
@@ -2058,7 +2058,7 @@ static MRESReturn DHookCallback_CTFBot_RemoveTag_Pre(int bot, DHookParam params)
 	char tag[64];
 	params.GetString(1, tag, sizeof(tag));
 	
-	Player(bot).RemoveTag(tag);
+	CTFPlayer(bot).RemoveTag(tag);
 	
 	return MRES_Supercede;
 }
@@ -2068,7 +2068,7 @@ static MRESReturn DHookCallback_CTFBot_RemoveWeaponRestriction_Pre(int bot, DHoo
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
 	
-	Player(bot).RemoveWeaponRestriction(params.Get(1));
+	CTFPlayer(bot).RemoveWeaponRestriction(params.Get(1));
 	
 	return MRES_Supercede;
 }
@@ -2078,7 +2078,7 @@ static MRESReturn DHookCallback_CTFBot_IsBotOfType_Pre(int player, DHookReturn r
 	int botType = params.Get(1);
 	
 	// make scripts believe that all invaders are TFBots
-	if (botType == TF_BOT_TYPE && Player(player).IsInvader())
+	if (botType == TF_BOT_TYPE && CTFPlayer(player).IsInvader())
 	{
 		ret.Value = true;
 		return MRES_Supercede;
@@ -2091,7 +2091,7 @@ static MRESReturn DHookCallback_IsPlayerABot_Pre(DHookReturn ret, DHookParam par
 {
 	int player = VScript_HScriptToEntity(params.Get(1));
 	
-	if (player != -1 && Player(player).IsInvader())
+	if (player != -1 && CTFPlayer(player).IsInvader())
 	{
 		ret.Value = true;
 		return MRES_Supercede;

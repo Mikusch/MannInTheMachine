@@ -30,7 +30,7 @@ static int Native_HasPreference(Handle plugin, int numParams)
 	int client = GetNativeInGameClient(1);
 	PreferenceType preference = GetNativeCell(2);
 	
-	return Player(client).HasPreference(preference);
+	return CTFPlayer(client).HasPreference(preference);
 }
 
 static int Native_IsInEndlessWaves(Handle plugin, int numParams)

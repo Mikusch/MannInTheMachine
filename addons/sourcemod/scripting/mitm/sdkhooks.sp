@@ -44,7 +44,7 @@ static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int 
 	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
 	{
 		// Don't let Sentry Busters die until they've done their spin-up
-		if (Player(victim).HasMission(MISSION_DESTROY_SENTRIES))
+		if (CTFPlayer(victim).HasMission(MISSION_DESTROY_SENTRIES))
 		{
 			if ((float(GetEntProp(victim, Prop_Data, "m_iHealth")) - damage) <= 0.0)
 			{
@@ -59,10 +59,10 @@ static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int 
 		if (IsEntityClient(attacker) && TF2_GetClientTeam(attacker) == TFTeam_Invaders)
 		{
 			if ((attacker != victim) &&
-				Player(attacker).GetPrevMission() == MISSION_DESTROY_SENTRIES &&
+				CTFPlayer(attacker).GetPrevMission() == MISSION_DESTROY_SENTRIES &&
 				g_bForceFriendlyFire &&
 				TF2_GetClientTeam(victim) == TF2_GetClientTeam(attacker) &&
-				Player(victim).IsMiniBoss())
+				CTFPlayer(victim).IsMiniBoss())
 			{
 				damage = 600.0;
 				return Plugin_Changed;
@@ -75,7 +75,7 @@ static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int 
 
 static Action SDKHookCB_Client_WeaponCanSwitchTo(int client, int weapon)
 {
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders && Player(client).IsWeaponRestricted(weapon))
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders && CTFPlayer(client).IsWeaponRestricted(weapon))
 	{
 		EmitGameSoundToClient(client, "Player.DenyWeaponSelection");
 		return Plugin_Handled;
@@ -90,7 +90,7 @@ static Action SDKHookCB_ProjectilePipeRemote_SetTransmit(int entity, int client)
 	if (team == TFTeam_Defenders)
 	{
 		// do not show defender stickybombs to the invading team
-		if (Player(client).IsInvader())
+		if (CTFPlayer(client).IsInvader())
 		{
 			// only when fully armed
 			float flCreationTime = GetEntDataFloat(entity, GetOffset("CTFGrenadePipebombProjectile", "m_flCreationTime"));
@@ -136,7 +136,7 @@ Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)
 	if (!IsValidEntity(hEffectEntity))
 		return Plugin_Handled;
 	
-	int hMissionTarget = Player(client).GetMissionTarget();
+	int hMissionTarget = CTFPlayer(client).GetMissionTarget();
 	if (IsValidEntity(hMissionTarget) && IsBaseObject(hMissionTarget))
 	{
 		// target sentry - only outline if not carried
@@ -157,9 +157,9 @@ Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)
 		}
 	}
 	
-	if (Player(client).IsInASquad())
+	if (CTFPlayer(client).IsInASquad())
 	{
-		if (hEffectEntity != client && Player(client).GetSquad().IsLeader(hEffectEntity))
+		if (hEffectEntity != client && CTFPlayer(client).GetSquad().IsLeader(hEffectEntity))
 		{
 			// show the glow of our squad leader
 			return Plugin_Continue;

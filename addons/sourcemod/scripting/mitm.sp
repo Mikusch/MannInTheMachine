@@ -198,7 +198,7 @@ public void OnPluginStart()
 	for (int client = 1; client <= MaxClients; client++)
 	{
 		// Init player properties
-		Player(client).Init();
+		CTFPlayer(client).Init();
 		
 		if (IsClientInGame(client))
 		{
@@ -266,7 +266,7 @@ public void OnClientPutInServer(int client)
 	DHooks_OnClientPutInServer(client);
 	SDKHooks_OnClientPutInServer(client);
 	
-	Player(client).Reset();
+	CTFPlayer(client).Reset();
 	
 	if (AreClientCookiesCached(client))
 	{
@@ -285,9 +285,9 @@ public void OnClientDisconnect(int client)
 		ForcePlayerSuicide(client);
 	}
 	
-	if (Player(client).IsInAParty())
+	if (CTFPlayer(client).IsInAParty())
 	{
-		Party party = Player(client).GetParty();
+		Party party = CTFPlayer(client).GetParty();
 		party.OnPartyMemberLeave(client);
 	}
 }
@@ -340,7 +340,7 @@ public void OnGameFrame()
 				if (!IsClientInGame(client))
 					continue;
 				
-				if (!Player(client).IsInvader())
+				if (!CTFPlayer(client).IsInvader())
 					continue;
 				
 				if (IsPlayerAlive(client))
@@ -380,7 +380,7 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
-		if (Player(client).HasAttribute(AUTO_JUMP) && Player(client).ShouldAutoJump())
+		if (CTFPlayer(client).HasAttribute(AUTO_JUMP) && CTFPlayer(client).ShouldAutoJump())
 		{
 			buttons |= IN_JUMP;
 		}
@@ -400,17 +400,17 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 	
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
-		if (Player(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
+		if (CTFPlayer(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
 		{
 			TF2_AddCondition(client, TFCond_CritCanteen);
 		}
 		
-		if (Player(client).IsInASquad())
+		if (CTFPlayer(client).IsInASquad())
 		{
-			if (Player(client).GetSquad().GetMemberCount() <= 1 || Player(client).GetSquad().GetLeader() == -1)
+			if (CTFPlayer(client).GetSquad().GetMemberCount() <= 1 || CTFPlayer(client).GetSquad().GetLeader() == -1)
 			{
 				// squad has collapsed - disband it
-				Player(client).LeaveSquad();
+				CTFPlayer(client).LeaveSquad();
 			}
 		}
 	}
@@ -420,7 +420,7 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 {
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
-		if (Player(client).HasAttribute(ALWAYS_CRIT))
+		if (CTFPlayer(client).HasAttribute(ALWAYS_CRIT))
 		{
 			result = true;
 			return Plugin_Changed;
@@ -452,9 +452,9 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 				if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
 				{
 					// If we are being airblasted in spawn, give more time to leave
-					if (Player(client).m_flSpawnTimeLeft != 1.0)
+					if (CTFPlayer(client).m_flSpawnTimeLeft != 1.0)
 					{
-						Player(client).m_flSpawnTimeLeft += 5.0;
+						CTFPlayer(client).m_flSpawnTimeLeft += 5.0;
 					}
 				}
 			}
@@ -478,16 +478,16 @@ static void FireWeaponAtEnemy(int client, int &buttons)
 	if (myWeapon == -1)
 		return;
 	
-	if (Player(client).IsBarrageAndReloadWeapon(myWeapon))
+	if (CTFPlayer(client).IsBarrageAndReloadWeapon(myWeapon))
 	{
-		if (Player(client).HasAttribute(HOLD_FIRE_UNTIL_FULL_RELOAD) || tf_bot_always_full_reload.BoolValue)
+		if (CTFPlayer(client).HasAttribute(HOLD_FIRE_UNTIL_FULL_RELOAD) || tf_bot_always_full_reload.BoolValue)
 		{
 			if (SDKCall_CBaseCombatWeapon_Clip1(myWeapon) <= 0)
 			{
-				Player(client).m_isWaitingForFullReload = true;
+				CTFPlayer(client).m_isWaitingForFullReload = true;
 			}
 			
-			if (Player(client).m_isWaitingForFullReload)
+			if (CTFPlayer(client).m_isWaitingForFullReload)
 			{
 				if (SDKCall_CBaseCombatWeapon_Clip1(myWeapon) < TF2Util_GetWeaponMaxClip(myWeapon))
 				{
@@ -498,23 +498,23 @@ static void FireWeaponAtEnemy(int client, int &buttons)
 				UnlockWeapon(myWeapon);
 				
 				// we are fully reloaded
-				Player(client).m_isWaitingForFullReload = false;
+				CTFPlayer(client).m_isWaitingForFullReload = false;
 			}
 		}
 	}
 	
-	if (Player(client).HasAttribute(ALWAYS_FIRE_WEAPON))
+	if (CTFPlayer(client).HasAttribute(ALWAYS_FIRE_WEAPON))
 	{
 		buttons |= IN_ATTACK;
 		return;
 	}
 	
-	if (Player(client).HasMission(MISSION_DESTROY_SENTRIES))
+	if (CTFPlayer(client).HasMission(MISSION_DESTROY_SENTRIES))
 	{
 		LockWeapon(client, myWeapon, buttons);
 		return;
 	}
-	else if (Player(client).GetPrevMission() == MISSION_DESTROY_SENTRIES)
+	else if (CTFPlayer(client).GetPrevMission() == MISSION_DESTROY_SENTRIES)
 	{
 		UnlockWeapon(myWeapon);
 	}
@@ -528,9 +528,9 @@ static void FireWeaponAtEnemy(int client, int &buttons)
 		int index = attributes.FindValue(144); // set_weapon_mode
 		if (index != -1 && attributes.Get(index, 1) == float(MEDIGUN_RESIST))
 		{
-			bool preferBullets = Player(client).HasAttribute(PREFER_VACCINATOR_BULLETS);
-			bool preferBlast = Player(client).HasAttribute(PREFER_VACCINATOR_BLAST);
-			bool preferFire = Player(client).HasAttribute(PREFER_VACCINATOR_FIRE);
+			bool preferBullets = CTFPlayer(client).HasAttribute(PREFER_VACCINATOR_BULLETS);
+			bool preferBlast = CTFPlayer(client).HasAttribute(PREFER_VACCINATOR_BLAST);
+			bool preferFire = CTFPlayer(client).HasAttribute(PREFER_VACCINATOR_FIRE);
 			
 			if (preferBullets)
 			{

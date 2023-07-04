@@ -176,7 +176,7 @@ static int Update(CTFBotMvMEngineerIdle action, int actor, float interval)
 		action.m_findHintTimer.Start(GetRandomFloat(1.0, 2.0));
 		
 		// figure out where to teleport into the map
-		bool bShouldTeleportToHint = Player(actor).HasAttribute(TELEPORT_TO_HINT);
+		bool bShouldTeleportToHint = CTFPlayer(actor).HasAttribute(TELEPORT_TO_HINT);
 		bool bShouldCheckForBlockingObject = !action.m_bTeleportedToHint && bShouldTeleportToHint;
 		int newNest = -1;
 		if (!SDKCall_CTFBotMvMEngineerHintFinder_FindHint(bShouldCheckForBlockingObject, !bShouldTeleportToHint, newNest))
@@ -196,14 +196,14 @@ static int Update(CTFBotMvMEngineerIdle action, int actor, float interval)
 		action.m_sentryHint = SDKCall_CTFBotHintEngineerNest_GetSentryHint(action.m_nestHint);
 		TakeOverStaleNest(action.m_sentryHint, actor);
 		
-		if (Player(actor).m_teleportWhereName.Length > 0)
+		if (CTFPlayer(actor).m_teleportWhereName.Length > 0)
 		{
 			action.m_teleporterHint = SDKCall_CTFBotHintEngineerNest_GetTeleporterHint(action.m_nestHint);
 			TakeOverStaleNest(action.m_teleporterHint, actor);
 		}
 	}
 	
-	if (!action.m_bTeleportedToHint && Player(actor).HasAttribute(TELEPORT_TO_HINT))
+	if (!action.m_bTeleportedToHint && CTFPlayer(actor).HasAttribute(TELEPORT_TO_HINT))
 	{
 		action.m_nTeleportedCount++;
 		bool bFirstTeleportSpawn = action.m_nTeleportedCount == 1;

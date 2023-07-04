@@ -57,11 +57,11 @@ static Party m_party[MAXPLAYERS + 1];
 static bool m_bIsPartyMenuActive[MAXPLAYERS + 1];
 static int m_iSpawnDeathCount[MAXPLAYERS + 1];
 
-methodmap Player < CBaseCombatCharacter
+methodmap CTFPlayer < CBaseCombatCharacter
 {
-	public Player(int entity)
+	public CTFPlayer(int entity)
 	{
-		return view_as<Player>(entity);
+		return view_as<CTFPlayer>(entity);
 	}
 	
 	property CountdownTimer m_autoJumpTimer
@@ -1960,11 +1960,11 @@ methodmap CPopulationManager < CBaseEntity
 			
 			if (upgrade.bIsBotAttr == true)
 			{
-				Player(player).SetAttribute(view_as<AttributeType>(RoundFloat(upgrade.flValue)));
+				CTFPlayer(player).SetAttribute(view_as<AttributeType>(RoundFloat(upgrade.flValue)));
 			}
 			else if (upgrade.bIsSkillAttr == true)
 			{
-				Player(player).SetDifficulty(view_as<DifficultyType>(RoundFloat(upgrade.flValue)));
+				CTFPlayer(player).SetDifficulty(view_as<DifficultyType>(RoundFloat(upgrade.flValue)));
 			}
 			else
 			{

@@ -42,14 +42,14 @@ void ClientPrefs_RefreshQueue(int client)
 {
 	char szValue[12];
 	g_hCookieQueuePoints.Get(client, szValue, sizeof(szValue));
-	Player(client).m_defenderQueuePoints = StringToInt(szValue);
+	CTFPlayer(client).m_defenderQueuePoints = StringToInt(szValue);
 }
 
 void ClientPrefs_RefreshPreferences(int client)
 {
 	char szValue[12];
 	g_hCookiePreferences.Get(client, szValue, sizeof(szValue));
-	Player(client).m_preferences = StringToInt(szValue);
+	CTFPlayer(client).m_preferences = StringToInt(szValue);
 }
 
 void ClientPrefs_SaveQueue(int client, int value)

@@ -41,20 +41,20 @@ ArrayList Queue_GetDefenderQueue()
 			continue;
 		
 		// ignore players in a party, they get handled separately
-		if (Player(client).IsInAParty() && Player(client).GetParty().GetMemberCount() > 1)
+		if (CTFPlayer(client).IsInAParty() && CTFPlayer(client).GetParty().GetMemberCount() > 1)
 			continue;
 		
-		if (Player(client).HasPreference(PREF_DISABLE_DEFENDER) || Player(client).HasPreference(PREF_DISABLE_SPAWNING))
+		if (CTFPlayer(client).HasPreference(PREF_DISABLE_DEFENDER) || CTFPlayer(client).HasPreference(PREF_DISABLE_SPAWNING))
 			continue;
 		
-		if (Player(client).m_defenderQueuePoints == -1)
+		if (CTFPlayer(client).m_defenderQueuePoints == -1)
 			continue;
 		
 		if (!Forwards_OnIsValidDefender(client))
 			continue;
 		
 		QueueData data;
-		data.m_points = Player(client).m_defenderQueuePoints;
+		data.m_points = CTFPlayer(client).m_defenderQueuePoints;
 		data.m_client = client;
 		data.m_party = NULL_PARTY;
 		
@@ -91,12 +91,12 @@ ArrayList Queue_GetDefenderQueue()
 
 void Queue_AddPoints(int client, int points)
 {
-	Player(client).m_defenderQueuePoints += points;
-	ClientPrefs_SaveQueue(client, Player(client).m_defenderQueuePoints);
+	CTFPlayer(client).m_defenderQueuePoints += points;
+	ClientPrefs_SaveQueue(client, CTFPlayer(client).m_defenderQueuePoints);
 }
 
 void Queue_SetPoints(int client, int points)
 {
-	Player(client).m_defenderQueuePoints = points;
-	ClientPrefs_SaveQueue(client, Player(client).m_defenderQueuePoints);
+	CTFPlayer(client).m_defenderQueuePoints = points;
+	ClientPrefs_SaveQueue(client, CTFPlayer(client).m_defenderQueuePoints);
 }

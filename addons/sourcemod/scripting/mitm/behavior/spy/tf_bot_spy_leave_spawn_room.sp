@@ -69,7 +69,7 @@ methodmap CTFBotSpyLeaveSpawnRoom < NextBotAction
 static int OnStart(CTFBotSpyLeaveSpawnRoom action, int actor, NextBotAction prevAction)
 {
 	// disguise as enemy team
-	Player(actor).DisguiseAsMemberOfEnemyTeam();
+	CTFPlayer(actor).DisguiseAsMemberOfEnemyTeam();
 	
 	// cloak
 	SDKCall_CTFPlayer_DoClassSpecialSkill(actor);

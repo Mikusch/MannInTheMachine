@@ -169,7 +169,7 @@ methodmap CTFBotSquad
 		}
 		else if (IsMannVsMachineMode())
 		{
-			Player(bot).SetFlagTarget(INVALID_ENT_REFERENCE);
+			CTFPlayer(bot).SetFlagTarget(INVALID_ENT_REFERENCE);
 		}
 		
 		this.m_roster.Push(bot);
@@ -201,10 +201,10 @@ methodmap CTFBotSquad
 		}
 		else if (IsMannVsMachineMode())
 		{
-			int flag = Player(bot).GetFlagToFetch();
+			int flag = CTFPlayer(bot).GetFlagToFetch();
 			if (flag != -1)
 			{
-				Player(bot).SetFlagTarget(flag);
+				CTFPlayer(bot).SetFlagTarget(flag);
 			}
 		}
 		
@@ -278,7 +278,7 @@ methodmap CTFBotSquad
 			int member = this.m_roster.Get(i);
 			if (IsClientInGame(member))
 			{
-				Player(member).DeleteSquad();
+				CTFPlayer(member).DeleteSquad();
 			}
 		}
 		

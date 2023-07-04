@@ -70,12 +70,12 @@ static int Update(CTFBotDead action, int actor, float interval)
 	
 	if (action.m_deadTimer.IsGreaterThan(5.0))
 	{
-		if (Player(actor).HasAttribute(REMOVE_ON_DEATH))
+		if (CTFPlayer(actor).HasAttribute(REMOVE_ON_DEATH))
 		{
 			// remove dead bots
 			ServerCommand("kickid %d", GetClientUserId(actor));
 		}
-		else if (Player(actor).HasAttribute(BECOME_SPECTATOR_ON_DEATH))
+		else if (CTFPlayer(actor).HasAttribute(BECOME_SPECTATOR_ON_DEATH))
 		{
 			g_bAllowTeamChange = true;
 			TF2_ChangeClientTeam(actor, TFTeam_Spectator);

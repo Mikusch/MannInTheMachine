@@ -83,7 +83,7 @@ methodmap CTFBotMvMEngineerTeleportSpawn < NextBotAction
 
 static int OnStart(CTFBotMvMEngineerTeleportSpawn action, int actor, NextBotAction priorAction)
 {
-	if (!Player(actor).HasAttribute(TELEPORT_TO_HINT))
+	if (!CTFPlayer(actor).HasAttribute(TELEPORT_TO_HINT))
 	{
 		return action.Done("Cannot teleport to hint with out Attributes TeleportToHint");
 	}

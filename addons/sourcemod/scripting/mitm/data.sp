@@ -2225,6 +2225,11 @@ methodmap CTFObjectiveResource < CBaseEntity
 		}
 	}
 	
+	public bool IsPopFileEventType(int fileType)
+	{
+		return this.GetProp(Prop_Send, "m_nMvMEventPopfileType") == fileType;
+	}
+	
 	public TFTeam GetOwningTeam(int index)
 	{
 		if (index >= this.GetProp(Prop_Send, "m_iNumControlPoints"))

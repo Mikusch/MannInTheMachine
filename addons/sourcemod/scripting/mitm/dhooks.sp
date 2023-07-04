@@ -63,7 +63,7 @@ void DHooks_Init(GameData hGameData)
 	CreateDynamicDetour(hGameData, "CSquadSpawner::Spawn", _, DHookCallback_CSquadSpawner_Spawn_Post);
 	CreateDynamicDetour(hGameData, "CPopulationManager::Update", DHookCallback_CPopulationManager_Update_Pre, DHookCallback_CPopulationManager_Update_Post);
 	CreateDynamicDetour(hGameData, "CPeriodicSpawnPopulator::Update", _, DHookCallback_CPeriodicSpawnPopulator_Update_Post);
-	CreateDynamicDetour(hGameData, "CWaveSpawnPopulator::Update", _, DHookCallback_CWaveSpawnPopulatorUpdate_Post);
+	CreateDynamicDetour(hGameData, "CWaveSpawnPopulator::Update", _, DHookCallback_CWaveSpawnPopulator_Update_Post);
 	CreateDynamicDetour(hGameData, "CMissionPopulator::UpdateMission", DHookCallback_CMissionPopulator_UpdateMission_Pre, DHookCallback_CMissionPopulator_UpdateMission_Post);
 	CreateDynamicDetour(hGameData, "CMissionPopulator::UpdateMissionDestroySentries", DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_Pre, DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_Post);
 	CreateDynamicDetour(hGameData, "CPointPopulatorInterface::InputChangeBotAttributes", DHookCallback_CPointPopulatorInterface_InputChangeBotAttributes_Pre);
@@ -609,7 +609,7 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 		
 		TFClassType nClassIndex = TF2_GetPlayerClass(newPlayer);
 		
-		if (GetEntProp(g_pObjectiveResource.index, Prop_Send, "m_nMvMEventPopfileType") == MVM_EVENT_POPFILE_HALLOWEEN)
+		if (g_pObjectiveResource.IsValid() && g_pObjectiveResource.IsPopFileEventType(MVM_EVENT_POPFILE_HALLOWEEN))
 		{
 			// zombies use the original player models
 			SetEntProp(newPlayer, Prop_Send, "m_nSkin", 4);
@@ -739,7 +739,7 @@ static MRESReturn DHookCallback_CPeriodicSpawnPopulator_Update_Post(Address pThi
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_CWaveSpawnPopulatorUpdate_Post(CWaveSpawnPopulator populator)
+static MRESReturn DHookCallback_CWaveSpawnPopulator_Update_Post(CWaveSpawnPopulator populator)
 {
 	for (int i = 0; i < m_justSpawnedList.Length; i++)
 	{
@@ -829,6 +829,9 @@ static MRESReturn DHookCallback_CMissionPopulator_UpdateMission_Pre(CMissionPopu
 
 static MRESReturn DHookCallback_CMissionPopulator_UpdateMission_Post(Address pThis, DHookReturn ret, DHookParam params)
 {
+	if (!ret.Value)
+		return MRES_Ignored;
+	
 	MissionType mission = params.Get(1);
 	
 	for (int i = 0; i < m_justSpawnedList.Length; i++)
@@ -840,16 +843,19 @@ static MRESReturn DHookCallback_CMissionPopulator_UpdateMission_Post(Address pTh
 			Player(player).SetMission(mission);
 			Player(player).MarkAsMissionEnemy();
 			
-			int iFlags = MVM_CLASS_FLAG_MISSION;
-			if (Player(player).IsMiniBoss())
+			if (g_pObjectiveResource.IsValid())
 			{
-				iFlags |= MVM_CLASS_FLAG_MINIBOSS;
+				int iFlags = MVM_CLASS_FLAG_MISSION;
+				if (Player(player).IsMiniBoss())
+				{
+					iFlags |= MVM_CLASS_FLAG_MINIBOSS;
+				}
+				else if (Player(player).HasAttribute(ALWAYS_CRIT))
+				{
+					iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
+				}
+				g_pObjectiveResource.IncrementMannVsMachineWaveClassCount(Player(player).GetClassIconName(), iFlags);
 			}
-			else if (Player(player).HasAttribute(ALWAYS_CRIT))
-			{
-				iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
-			}
-			g_pObjectiveResource.IncrementMannVsMachineWaveClassCount(Player(player).GetClassIconName(), iFlags);
 			
 			// Response rules stuff for MvM
 			if (IsMannVsMachineMode())
@@ -866,6 +872,7 @@ static MRESReturn DHookCallback_CMissionPopulator_UpdateMission_Post(Address pTh
 				}
 			}
 			
+			// what bot should do after spawning at teleporter exit
 			if (s_spawnLocationResult == SPAWN_LOCATION_TELEPORTER)
 			{
 				OnBotTeleported(player);
@@ -997,16 +1004,19 @@ static MRESReturn DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_P
 					SetVariantInt(1);
 					AcceptEntityInput(bot, "SetForcedTauntCam");
 					
-					int iFlags = MVM_CLASS_FLAG_MISSION;
-					if (Player(bot).IsMiniBoss())
+					if (g_pObjectiveResource.IsValid())
 					{
-						iFlags |= MVM_CLASS_FLAG_MINIBOSS;
+						int iFlags = MVM_CLASS_FLAG_MISSION;
+						if (Player(bot).IsMiniBoss())
+						{
+							iFlags |= MVM_CLASS_FLAG_MINIBOSS;
+						}
+						if (Player(bot).HasAttribute(ALWAYS_CRIT))
+						{
+							iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
+						}
+						g_pObjectiveResource.IncrementMannVsMachineWaveClassCount(CTFBotSpawner(populator.m_spawner).GetClassIcon(k), iFlags);
 					}
-					if (Player(bot).HasAttribute(ALWAYS_CRIT))
-					{
-						iFlags |= MVM_CLASS_FLAG_ALWAYSCRIT;
-					}
-					g_pObjectiveResource.IncrementMannVsMachineWaveClassCount(CTFBotSpawner(populator.m_spawner).GetClassIcon(k), iFlags);
 					
 					HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_SENTRY_BUSTER", TFTeam_Defenders);
 					

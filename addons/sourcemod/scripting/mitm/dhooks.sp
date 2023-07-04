@@ -706,7 +706,7 @@ static MRESReturn DHookCallback_CSquadSpawner_Spawn_Post(CSquadSpawner spawner, 
 
 static MRESReturn DHookCallback_CPopulationManager_Update_Pre(int populator)
 {
-	// allows spawners to freely switch teams of players
+	// allow populators/spawners to freely switch player's teams
 	g_bAllowTeamChange = true;
 	
 	return MRES_Ignored;

@@ -69,6 +69,7 @@ static int OnStart(CTFBotMvMDeployBomb action, int actor, NextBotAction priorAct
 	
 	if (CTFPlayer(actor).IsMiniBoss())
 	{
+		// Minibosses can't be pushed once they start deploying
 		TF2Attrib_SetByName(actor, "airblast vertical vulnerability multiplier", 0.0);
 	}
 	

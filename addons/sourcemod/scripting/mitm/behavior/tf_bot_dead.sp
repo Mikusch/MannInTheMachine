@@ -77,9 +77,8 @@ static int Update(CTFBotDead action, int actor, float interval)
 		}
 		else if (CTFPlayer(actor).HasAttribute(BECOME_SPECTATOR_ON_DEATH))
 		{
-			g_bAllowTeamChange = true;
-			TF2_ChangeClientTeam(actor, TFTeam_Spectator);
-			g_bAllowTeamChange = false;
+			TF2_ForceChangeClientTeam(actor, TFTeam_Spectator);
+			SetEntProp(actor, Prop_Send, "m_bUseBossHealthBar", false);
 			return action.Done();
 		}
 	}

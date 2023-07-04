@@ -48,7 +48,7 @@ CTFGameRules g_pGameRules = view_as<CTFGameRules>(INVALID_ENT_REFERENCE);
 // Other globals
 Handle g_hWarningHudSync;
 bool g_bInWaitingForPlayers;
-bool g_bAllowTeamChange;
+bool g_bAllowTeamChange;	// Bypass CTFGameRules::GetTeamAssignmentOverride?
 bool g_bForceFriendlyFire;
 bool g_bInEndlessRollEscalation;
 

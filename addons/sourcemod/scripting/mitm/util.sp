@@ -298,8 +298,6 @@ void SelectNewDefenders()
 	mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
 	mp_tournament_blueteamname.GetString(blueTeamname, sizeof(blueTeamname));
 	
-	g_bAllowTeamChange = true;
-	
 	ArrayList players = new ArrayList();
 	
 	// Collect all valid players
@@ -339,7 +337,7 @@ void SelectNewDefenders()
 			{
 				int member = members[j];
 				
-				TF2_ChangeClientTeam(member, TFTeam_Defenders);
+				TF2_ForceChangeClientTeam(member, TFTeam_Defenders);
 				Queue_SetPoints(member, 0);
 				CPrintToChat(member, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
 				
@@ -349,7 +347,7 @@ void SelectNewDefenders()
 		}
 		else
 		{
-			TF2_ChangeClientTeam(client, TFTeam_Defenders);
+			TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
 			Queue_SetPoints(client, 0);
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
 			
@@ -378,7 +376,7 @@ void SelectNewDefenders()
 			// Keep filling slots until our quota is met
 			if (iDefenderCount++ < iReqDefenderCount)
 			{
-				TF2_ChangeClientTeam(client, TFTeam_Defenders);
+				TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
 				CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender_Forced", redTeamname);
 				
 				players.Erase(i);
@@ -396,7 +394,7 @@ void SelectNewDefenders()
 	{
 		int client = players.Get(i);
 		
-		TF2_ChangeClientTeam(client, TFTeam_Spectator);
+		TF2_ForceChangeClientTeam(client, TFTeam_Spectator);
 		
 		// Do not award queue points if the player can not become a Defender
 		if (!Forwards_OnIsValidDefender(client))
@@ -413,8 +411,6 @@ void SelectNewDefenders()
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname, sm_mitm_queue_points.IntValue, CTFPlayer(client).m_defenderQueuePoints);
 		}
 	}
-	
-	g_bAllowTeamChange = false;
 	
 	for (int client = 1; client <= MaxClients; client++)
 	{
@@ -1200,4 +1196,11 @@ int CollectPlayers(ArrayList &playerList, TFTeam team = TFTeam_Any, bool isAlive
 	}
 	
 	return playerList.Length;
+}
+
+void TF2_ForceChangeClientTeam(int client, TFTeam team)
+{
+	g_bAllowTeamChange = true;
+	TF2_ChangeClientTeam(client, team);
+	g_bAllowTeamChange = false;
 }

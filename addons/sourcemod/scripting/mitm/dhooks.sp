@@ -659,7 +659,7 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 		
 		if (tf_populator_debug.BoolValue)
 		{
-			LogMessage("%3.2f: Spawned player '%N'", GetGameTime(), newBot);
+			LogMessage("%3.2f: Spawned player '%L'", GetGameTime(), newBot);
 		}
 	}
 	else

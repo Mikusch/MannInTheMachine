@@ -486,7 +486,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 			return false;
 		
 		TFTeam team = TF2_GetClientTeam(this.index);
-		return (team == TFTeam_Spectator || team == TFTeam_Invaders) && !this.HasPreference(PREF_DISABLE_SPAWNING);
+		return (team == TFTeam_Spectator || team == TFTeam_Invaders) && !this.HasPreference(PREF_SPECTATOR_MODE);
 	}
 	
 	public float GetSpawnTime()
@@ -1364,12 +1364,12 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		delete enemyList;
 	}
 	
-	public bool HasPreference(PreferenceType preference)
+	public bool HasPreference(MannInTheMachinePreference preference)
 	{
 		return this.m_preferences != -1 && this.m_preferences & view_as<int>(preference) != 0;
 	}
 	
-	public bool SetPreference(PreferenceType preference, bool enable)
+	public bool SetPreference(MannInTheMachinePreference preference, bool enable)
 	{
 		if (this.m_preferences == -1)
 			return false;

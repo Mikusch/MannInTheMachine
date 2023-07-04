@@ -223,7 +223,7 @@ methodmap Party
 			if (!IsClientInGame(member))
 				continue;
 			
-			if (!bIncludeSpectators && CTFPlayer(member).HasPreference(PREF_DISABLE_SPAWNING))
+			if (!bIncludeSpectators && CTFPlayer(member).HasPreference(PREF_SPECTATOR_MODE))
 				continue;
 			
 			clients[count++] = member;

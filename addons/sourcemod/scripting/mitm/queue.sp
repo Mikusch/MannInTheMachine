@@ -44,7 +44,7 @@ ArrayList Queue_GetDefenderQueue()
 		if (CTFPlayer(client).IsInAParty() && CTFPlayer(client).GetParty().GetMemberCount() > 1)
 			continue;
 		
-		if (CTFPlayer(client).HasPreference(PREF_DISABLE_DEFENDER) || CTFPlayer(client).HasPreference(PREF_DISABLE_SPAWNING))
+		if (CTFPlayer(client).HasPreference(PREF_DEFENDER_DISABLE_QUEUE) || CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 			continue;
 		
 		if (CTFPlayer(client).m_defenderQueuePoints == -1)

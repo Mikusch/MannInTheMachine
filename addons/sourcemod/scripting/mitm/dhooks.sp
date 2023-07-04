@@ -1204,8 +1204,8 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 		// players can join defenders freely if a slot is open
 		if (iDefenderCount >= sm_mitm_defender_count.IntValue || 
 			CTFPlayer(player).IsInAParty() || 
-			CTFPlayer(player).HasPreference(PREF_DISABLE_DEFENDER) || 
-			CTFPlayer(player).HasPreference(PREF_DISABLE_SPAWNING))
+			CTFPlayer(player).HasPreference(PREF_DEFENDER_DISABLE_QUEUE) || 
+			CTFPlayer(player).HasPreference(PREF_SPECTATOR_MODE))
 		{
 			params.Set(2, TFTeam_Spectator);
 			return MRES_ChangedHandled;

@@ -21,12 +21,11 @@
 char g_PreferenceNames[][] =
 {
 	"Preference_DisableDefender",
-	"Preference_DisableSpawning",
+	"Preference_SpectatorMode",
 	"Preference_DisableMiniBoss",
-	"Preference_DisableSpawnNotification",
 	"Preference_DisableAnnotations",
 	"Preference_IgnorePartyInvites",
-	"Preference_DisableDefenderAuto",
+	"Preference_DisableDefenderReplacement",
 };
 
 static Cookie g_hCookieQueuePoints;

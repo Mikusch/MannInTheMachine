@@ -29,15 +29,14 @@
 /**
  * Preference types.
  */
-enum PreferenceType
+enum MannInTheMachinePreference
 {
-	PREF_DISABLE_DEFENDER = (1 << 0),			/**< Can not be chosen as Defender. */
-	PREF_DISABLE_SPAWNING = (1 << 1),			/**< Spectator mode. No spawning at all. */
-	PREF_DISABLE_MINIBOSS = (1 << 2),			/**< Can not become a Giant Robot. */
-	PREF_DISABLE_SPAWN_NOTIFICATION = (1 << 3),	/**< Disables clientside sounds when spawning as Robot. */
-	PREF_DISABLE_ANNOTATIONS = (1 << 4),		/**< Disables clientside world annotations e.g. Gate Bot and Sentry Buster hints. */
-	PREF_IGNORE_PARTY_INVITES = (1 << 5),		/**< Can not be invited to parties. */
-	PREF_DISABLE_DEFENDER_AUTO = (1 << 6),		/**< Disables being chosen as a replacement if a Defender leaves the game. */
+	PREF_DEFENDER_DISABLE_QUEUE =		(1 << 0),	/**< Can not be chosen as defender from queue */
+	PREF_SPECTATOR_MODE =				(1 << 1),	/**< Spectator mode, no spawning */
+	PREF_INVADER_DISABLE_MINIBOSS =		(1 << 2),	/**< Can not become a giant robot */
+	PREF_DISABLE_ANNOTATIONS =			(1 << 3),	/**< Disables clientside world annotations e.g. gate bot and sentry buster hints */
+	PREF_IGNORE_PARTY_INVITES =			(1 << 4),	/**< Can not be invited to any parties */
+	PREF_DEFENDER_DISABLE_REPLACEMENT =	(1 << 5),	/**< Can not be chosen as a replacement defender */
 }
 
 methodmap MannInTheMachinePlayer < CBaseCombatCharacter
@@ -53,23 +52,23 @@ methodmap MannInTheMachinePlayer < CBaseCombatCharacter
 	 * @param preference	Preference bits to check.
 	 * @return				True if the player has the given preferences enabled.
 	 */
-	public native bool HasPreference(PreferenceType preference);
+	public native bool HasPreference(MannInTheMachinePreference preference);
 }
 
 /**
- * Called when the plugin determines whether a player is allowed to become a Defender.
+ * Called when the plugin determines whether a player is allowed to become a defender.
  *
  * @param client		Client index.
- * @return				True if the player is allowed to become a Defender, false otherwise.
+ * @return				True if the player is allowed to become a defender, false otherwise.
  */
 forward bool MannInTheMachine_OnIsValidDefender(int client);
 
 /**
- * Called when the plugin determines whether a player is allowed to become an Invader.
+ * Called when the plugin determines whether a player is allowed to become an invader.
  *
  * @param client		Client index.
- * @param isMiniBoss	True if the next Invader is a Giant.
- * @return				True if the player is allowed to become an Invader, false otherwise.
+ * @param isMiniBoss	True if the next invader is a miniboss.
+ * @return				True if the player is allowed to become an invader, false otherwise.
  */
 forward bool MannInTheMachine_OnIsValidInvader(int client, bool isMiniBoss);
 

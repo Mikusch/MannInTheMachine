@@ -28,7 +28,7 @@ void Natives_Init()
 static int Native_HasPreference(Handle plugin, int numParams)
 {
 	int client = GetNativeInGameClient(1);
-	PreferenceType preference = GetNativeCell(2);
+	MannInTheMachinePreference preference = GetNativeCell(2);
 	
 	return CTFPlayer(client).HasPreference(preference);
 }

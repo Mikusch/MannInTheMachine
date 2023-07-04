@@ -96,10 +96,7 @@ static int OnStart(CTFBotMainAction action, int actor, NextBotAction priorAction
 		CTFPlayer(actor).GetInvaderName(name, sizeof(name));
 		PrintCenterText(actor, "%t", "Invader_Spawned", name);
 		
-		if (!CTFPlayer(actor).HasPreference(PREF_DISABLE_SPAWN_NOTIFICATION))
-		{
-			EmitSoundToClient(actor, "ui/system_message_alert.wav", .channel = SNDCHAN_STATIC);
-		}
+		EmitSoundToClient(actor, "ui/system_message_alert.wav", .channel = SNDCHAN_STATIC);
 	}
 	
 	return action.Continue();

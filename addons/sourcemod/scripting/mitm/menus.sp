@@ -267,7 +267,7 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 			menu.GetItem(param2, info, sizeof(info));
 			
 			int i = StringToInt(info);
-			PreferenceType preference = view_as<PreferenceType>(1 << i);
+			MannInTheMachinePreference preference = view_as<MannInTheMachinePreference>(1 << i);
 			
 			CTFPlayer(param1).SetPreference(preference, !CTFPlayer(param1).HasPreference(preference));
 			
@@ -298,7 +298,7 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
 			
 			int i = StringToInt(info);
-			PreferenceType preference = view_as<PreferenceType>(1 << i);
+			MannInTheMachinePreference preference = view_as<MannInTheMachinePreference>(1 << i);
 			
 			if (CTFPlayer(param1).HasPreference(preference))
 				Format(display, sizeof(display), "☑ %T", g_PreferenceNames[i], param1);

@@ -65,31 +65,27 @@
 	}
 	"Preference_DisableDefender"
 	{
-		"en"		"Don't select me as Defender"
+		"en"		"Don't select me as defender"
 	}
-	"Preference_DisableSpawning"
+	"Preference_SpectatorMode"
 	{
-		"en"		"Disable spawning (Spectator mode)"
+		"en"		"Spectator mode (no spawning)"
 	}
 	"Preference_DisableMiniBoss"
 	{
-		"en"		"Don't spawn me as Giant Robot"
-	}
-	"Preference_DisableSpawnNotification"
-	{
-		"en"		"Disable spawn notification"
+		"en"		"Don't select me as a giant robot"
 	}
 	"Preference_DisableAnnotations"
 	{
-		"en"		"Disable annotations"
+		"en"		"Disable hint annotations"
 	}
 	"Preference_IgnorePartyInvites"
 	{
 		"en"		"Ignore party invites"
 	}
-	"Preference_DisableDefenderAuto"
+	"Preference_DisableDefenderReplacement"
 	{
-		"en"		"Don't select me as a replacement Defender"
+		"en"		"Don't select me as replacement defender"
 	}
 	"Preferences_Enabled"
 	{

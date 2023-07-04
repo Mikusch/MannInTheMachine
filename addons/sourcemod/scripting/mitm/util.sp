@@ -370,7 +370,7 @@ void SelectNewDefenders()
 		{
 			int client = players.Get(i);
 			
-			if (CTFPlayer(client).HasPreference(PREF_DISABLE_SPAWNING))
+			if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 				continue;
 			
 			// Keep filling slots until our quota is met
@@ -401,11 +401,11 @@ void SelectNewDefenders()
 		{
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader_Forced", blueTeamname);
 		}
-		else if (CTFPlayer(client).HasPreference(PREF_DISABLE_DEFENDER) && (!CTFPlayer(client).IsInAParty() || CTFPlayer(client).GetParty().GetMemberCount() <= 1))
+		else if (CTFPlayer(client).HasPreference(PREF_DEFENDER_DISABLE_QUEUE) && (!CTFPlayer(client).IsInAParty() || CTFPlayer(client).GetParty().GetMemberCount() <= 1))
 		{
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader_DefenderDisabled", blueTeamname);
 		}
-		else if (!CTFPlayer(client).HasPreference(PREF_DISABLE_SPAWNING))
+		else if (!CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 		{
 			Queue_AddPoints(client, sm_mitm_queue_points.IntValue);
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname, sm_mitm_queue_points.IntValue, CTFPlayer(client).m_defenderQueuePoints);
@@ -446,7 +446,7 @@ void FindReplacementDefender()
 		if (TF2_GetClientTeam(client) == TFTeam_Defenders)
 			continue;
 		
-		if (CTFPlayer(client).HasPreference(PREF_DISABLE_DEFENDER_AUTO))
+		if (CTFPlayer(client).HasPreference(PREF_DEFENDER_DISABLE_REPLACEMENT))
 			continue;
 		
 		// Don't force switch because we want GetTeamAssignmentOverride to decide
@@ -484,10 +484,10 @@ ArrayList GetInvaderQueue(bool bMiniBoss = false)
 		if (TF2_GetClientTeam(client) != TFTeam_Spectator)
 			continue;
 		
-		if (CTFPlayer(client).HasPreference(PREF_DISABLE_SPAWNING))
+		if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 			continue;
 		
-		if (bMiniBoss && CTFPlayer(client).HasPreference(PREF_DISABLE_MINIBOSS))
+		if (bMiniBoss && CTFPlayer(client).HasPreference(PREF_INVADER_DISABLE_MINIBOSS))
 			continue;
 		
 		if (!Forwards_OnIsValidInvader(client, bMiniBoss))

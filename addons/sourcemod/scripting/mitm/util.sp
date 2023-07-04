@@ -298,8 +298,6 @@ void SelectNewDefenders()
 	mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
 	mp_tournament_blueteamname.GetString(blueTeamname, sizeof(blueTeamname));
 	
-	g_bAllowTeamChange = true;
-	
 	ArrayList players = new ArrayList();
 	
 	// Collect all valid players
@@ -339,7 +337,7 @@ void SelectNewDefenders()
 			{
 				int member = members[j];
 				
-				TF2_ChangeClientTeam(member, TFTeam_Defenders);
+				TF2_ForceChangeClientTeam(member, TFTeam_Defenders);
 				Queue_SetPoints(member, 0);
 				CPrintToChat(member, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
 				
@@ -349,7 +347,7 @@ void SelectNewDefenders()
 		}
 		else
 		{
-			TF2_ChangeClientTeam(client, TFTeam_Defenders);
+			TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
 			Queue_SetPoints(client, 0);
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
 			
@@ -372,13 +370,13 @@ void SelectNewDefenders()
 		{
 			int client = players.Get(i);
 			
-			if (Player(client).HasPreference(PREF_DISABLE_SPAWNING))
+			if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 				continue;
 			
 			// Keep filling slots until our quota is met
 			if (iDefenderCount++ < iReqDefenderCount)
 			{
-				TF2_ChangeClientTeam(client, TFTeam_Defenders);
+				TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
 				CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender_Forced", redTeamname);
 				
 				players.Erase(i);
@@ -396,25 +394,23 @@ void SelectNewDefenders()
 	{
 		int client = players.Get(i);
 		
-		TF2_ChangeClientTeam(client, TFTeam_Spectator);
+		TF2_ForceChangeClientTeam(client, TFTeam_Spectator);
 		
 		// Do not award queue points if the player can not become a Defender
 		if (!Forwards_OnIsValidDefender(client))
 		{
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader_Forced", blueTeamname);
 		}
-		else if (Player(client).HasPreference(PREF_DISABLE_DEFENDER) && (!Player(client).IsInAParty() || Player(client).GetParty().GetMemberCount() <= 1))
+		else if (CTFPlayer(client).HasPreference(PREF_DEFENDER_DISABLE_QUEUE) && (!CTFPlayer(client).IsInAParty() || CTFPlayer(client).GetParty().GetMemberCount() <= 1))
 		{
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader_DefenderDisabled", blueTeamname);
 		}
-		else if (!Player(client).HasPreference(PREF_DISABLE_SPAWNING))
+		else if (!CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 		{
 			Queue_AddPoints(client, sm_mitm_queue_points.IntValue);
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname, sm_mitm_queue_points.IntValue, Player(client).m_defenderQueuePoints);
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname, sm_mitm_queue_points.IntValue, CTFPlayer(client).m_defenderQueuePoints);
 		}
 	}
-	
-	g_bAllowTeamChange = false;
 	
 	for (int client = 1; client <= MaxClients; client++)
 	{
@@ -444,13 +440,13 @@ void FindReplacementDefender()
 		int client = queue.Get(i, QueueData::m_client);
 		
 		// Exclude parties in queue
-		if (client == -1 || Player(client).IsInAParty())
+		if (client == -1 || CTFPlayer(client).IsInAParty())
 			continue;
 		
 		if (TF2_GetClientTeam(client) == TFTeam_Defenders)
 			continue;
 		
-		if (Player(client).HasPreference(PREF_DISABLE_DEFENDER_AUTO))
+		if (CTFPlayer(client).HasPreference(PREF_DEFENDER_DISABLE_REPLACEMENT))
 			continue;
 		
 		// Don't force switch because we want GetTeamAssignmentOverride to decide
@@ -488,10 +484,10 @@ ArrayList GetInvaderQueue(bool bMiniBoss = false)
 		if (TF2_GetClientTeam(client) != TFTeam_Spectator)
 			continue;
 		
-		if (Player(client).HasPreference(PREF_DISABLE_SPAWNING))
+		if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 			continue;
 		
-		if (bMiniBoss && Player(client).HasPreference(PREF_DISABLE_MINIBOSS))
+		if (bMiniBoss && CTFPlayer(client).HasPreference(PREF_INVADER_DISABLE_MINIBOSS))
 			continue;
 		
 		if (!Forwards_OnIsValidInvader(client, bMiniBoss))
@@ -516,22 +512,22 @@ int FindNextInvader(bool bMiniBoss)
 		{
 			// Remember the player and reset priority
 			priorityClient = client;
-			Player(client).m_invaderPriority = 0;
+			CTFPlayer(client).m_invaderPriority = 0;
 			
 			// This player is becoming a miniboss
 			if (bMiniBoss)
 			{
-				Player(client).m_invaderMiniBossPriority = 0;
+				CTFPlayer(client).m_invaderMiniBossPriority = 0;
 			}
 		}
 		else
 		{
 			// Every player who doesn't get spawned gets a priority point
-			Player(client).m_invaderPriority++;
+			CTFPlayer(client).m_invaderPriority++;
 			
 			if (bMiniBoss)
 			{
-				Player(client).m_invaderMiniBossPriority++;
+				CTFPlayer(client).m_invaderMiniBossPriority++;
 			}
 		}
 	}
@@ -603,7 +599,7 @@ int SortPlayersByPriority(int index1, int index2, Handle array, Handle hndl)
 	int client2 = list.Get(index2);
 	
 	// Sort by highest priority
-	return Compare(Player(client2).m_invaderPriority, Player(client1).m_invaderPriority);
+	return Compare(CTFPlayer(client2).m_invaderPriority, CTFPlayer(client1).m_invaderPriority);
 }
 
 int SortPlayersByMinibossPriority(int index1, int index2, Handle array, Handle hndl)
@@ -613,12 +609,12 @@ int SortPlayersByMinibossPriority(int index1, int index2, Handle array, Handle h
 	int client2 = list.Get(index2);
 	
 	// Sort by highest miniboss priority
-	int c = Compare(Player(client2).m_invaderMiniBossPriority, Player(client1).m_invaderMiniBossPriority);
+	int c = Compare(CTFPlayer(client2).m_invaderMiniBossPriority, CTFPlayer(client1).m_invaderMiniBossPriority);
 	
 	// Sort by highest priority
 	if (c == 0)
 	{
-		c = Compare(Player(client2).m_invaderPriority, Player(client1).m_invaderPriority);
+		c = Compare(CTFPlayer(client2).m_invaderPriority, CTFPlayer(client1).m_invaderPriority);
 	}
 	
 	return c;
@@ -970,7 +966,7 @@ int FindSentryHintForPlayer(int player)
 
 void ShowAnnotation(int client, int id, const char[] text, int target = 0, const float worldPos[3] = ZERO_VECTOR, float lifeTime = 10.0, const char[] sound = "ui/hint.wav", bool showDistance = true, bool showEffect = true)
 {
-	if (Player(client).HasPreference(PREF_DISABLE_ANNOTATIONS))
+	if (CTFPlayer(client).HasPreference(PREF_DISABLE_ANNOTATIONS))
 		return;
 	
 	Event event = CreateEvent("show_annotation");
@@ -1200,4 +1196,11 @@ int CollectPlayers(ArrayList &playerList, TFTeam team = TFTeam_Any, bool isAlive
 	}
 	
 	return playerList.Length;
+}
+
+void TF2_ForceChangeClientTeam(int client, TFTeam team)
+{
+	g_bAllowTeamChange = true;
+	TF2_ChangeClientTeam(client, team);
+	g_bAllowTeamChange = false;
 }

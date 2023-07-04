@@ -37,9 +37,9 @@ methodmap CTFBotScenarioMonitor < NextBotAction
 
 static NextBotAction InitialContainedAction(NextBotAction action, int actor)
 {
-	if (Player(actor).IsInASquad())
+	if (CTFPlayer(actor).IsInASquad())
 	{
-		if (Player(actor).GetSquad().IsLeader(actor))
+		if (CTFPlayer(actor).GetSquad().IsLeader(actor))
 		{
 			// I'm the leader of this Squad, so I can do what I want and the other Squaddies will support actor
 			return DesiredScenarioAndClassAction(actor);
@@ -61,7 +61,7 @@ static NextBotAction InitialContainedAction(NextBotAction action, int actor)
 
 static int Update(NextBotAction action, int actor, float interval)
 {
-	if (Player(actor).HasTheFlag())
+	if (CTFPlayer(actor).HasTheFlag())
 	{
 		if (tf_bot_flag_kill_on_touch.BoolValue)
 		{
@@ -77,7 +77,7 @@ static int Update(NextBotAction action, int actor, float interval)
 
 static NextBotAction DesiredScenarioAndClassAction(int actor)
 {
-	switch (Player(actor).GetMission())
+	switch (CTFPlayer(actor).GetMission())
 	{
 		case MISSION_DESTROY_SENTRIES:
 			return CTFBotMissionSuicideBomber();
@@ -119,7 +119,7 @@ static NextBotAction DesiredScenarioAndClassAction(int actor)
 			return CTFBotMvMEngineerIdle();
 		}
 		
-		if (Player(actor).HasAttribute(AGGRESSIVE))
+		if (CTFPlayer(actor).HasAttribute(AGGRESSIVE))
 		{
 			// push for the point first, then attack
 			return CTFBotPushToCapturePoint(CTFBotFetchFlag());

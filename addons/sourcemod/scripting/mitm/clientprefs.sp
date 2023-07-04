@@ -21,42 +21,41 @@
 char g_PreferenceNames[][] =
 {
 	"Preference_DisableDefender",
-	"Preference_DisableSpawning",
+	"Preference_SpectatorMode",
 	"Preference_DisableMiniBoss",
-	"Preference_DisableSpawnNotification",
 	"Preference_DisableAnnotations",
 	"Preference_IgnorePartyInvites",
-	"Preference_DisableDefenderAuto",
+	"Preference_DisableDefenderReplacement",
 };
 
-static Cookie g_hCookieQueuePoints;
+static Cookie g_hCookieQueue;
 static Cookie g_hCookiePreferences;
 
 void ClientPrefs_Init()
 {
-	g_hCookieQueuePoints = new Cookie("mitm_queue", "Mann in the Machine: Queue Points", CookieAccess_Protected);
-	g_hCookiePreferences = new Cookie("mitm_prefs", "Mann in the Machine: Preferences", CookieAccess_Protected);
+	g_hCookieQueue = new Cookie("mitm_queue", "Mann in the Machine: Queue Points", CookieAccess_Protected);
+	g_hCookiePreferences = new Cookie("mitm_preferences", "Mann in the Machine: Preferences", CookieAccess_Protected);
 }
 
 void ClientPrefs_RefreshQueue(int client)
 {
 	char szValue[12];
-	g_hCookieQueuePoints.Get(client, szValue, sizeof(szValue));
-	Player(client).m_defenderQueuePoints = StringToInt(szValue);
+	g_hCookieQueue.Get(client, szValue, sizeof(szValue));
+	CTFPlayer(client).m_defenderQueuePoints = StringToInt(szValue);
 }
 
 void ClientPrefs_RefreshPreferences(int client)
 {
 	char szValue[12];
 	g_hCookiePreferences.Get(client, szValue, sizeof(szValue));
-	Player(client).m_preferences = StringToInt(szValue);
+	CTFPlayer(client).m_preferences = StringToInt(szValue);
 }
 
 void ClientPrefs_SaveQueue(int client, int value)
 {
 	char szValue[12];
 	IntToString(value, szValue, sizeof(szValue));
-	g_hCookieQueuePoints.Set(client, szValue);
+	g_hCookieQueue.Set(client, szValue);
 }
 
 void ClientPrefs_SavePreferences(int client, int value)

@@ -37,9 +37,9 @@ methodmap CTFBotMedicHeal < NextBotAction
 static int Update(CTFBotMedicHeal action, int actor, float interval)
 {
 	// if we're in a squad, and the only other members are medics, disband the squad
-	if (Player(actor).IsInASquad())
+	if (CTFPlayer(actor).IsInASquad())
 	{
-		CTFBotSquad squad = Player(actor).GetSquad();
+		CTFBotSquad squad = CTFPlayer(actor).GetSquad();
 		if (IsMannVsMachineMode() && squad.IsLeader(actor))
 		{
 			return action.ChangeTo(CTFBotFetchFlag(), "I'm now a squad leader! Going for the flag!");
@@ -64,7 +64,7 @@ static int Update(CTFBotMedicHeal action, int actor, float interval)
 				// squad is obsolete
 				for (i = 0; i < count; ++i)
 				{
-					Player(members[i]).LeaveSquad();
+					CTFPlayer(members[i]).LeaveSquad();
 				}
 			}
 		}
@@ -72,7 +72,7 @@ static int Update(CTFBotMedicHeal action, int actor, float interval)
 	else
 	{
 		// not in a squad - for now, assume whatever mission I was on is over
-		Player(actor).SetMission(NO_MISSION);
+		CTFPlayer(actor).SetMission(NO_MISSION);
 	}
 	
 	if (SelectPatient(actor) == -1)
@@ -103,7 +103,7 @@ static int SelectPatient(int actor)
 		
 		// always heal the flag carrier, regardless of class
 		// squads always heal the leader
-		if (!Player(client).HasTheFlag() && !Player(actor).IsInASquad())
+		if (!CTFPlayer(client).HasTheFlag() && !CTFPlayer(actor).IsInASquad())
 		{
 			TFClassType class = TF2_GetPlayerClass(client);
 			if (class == TFClass_Medic ||

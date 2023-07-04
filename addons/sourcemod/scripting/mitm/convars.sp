@@ -82,10 +82,10 @@ static void ConVarChanged_PartyEnabled(ConVar convar, const char[] oldValue, con
 		if (!IsClientInGame(client))
 			continue;
 		
-		if (!Player(client).IsInAParty())
+		if (!CTFPlayer(client).IsInAParty())
 			continue;
 		
-		Player(client).LeaveParty();
+		CTFPlayer(client).LeaveParty();
 		CancelClientMenu(client);
 	}
 }

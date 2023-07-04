@@ -57,11 +57,11 @@ static Party m_party[MAXPLAYERS + 1];
 static bool m_bIsPartyMenuActive[MAXPLAYERS + 1];
 static int m_iSpawnDeathCount[MAXPLAYERS + 1];
 
-methodmap Player < CBaseCombatCharacter
+methodmap CTFPlayer < CBaseCombatCharacter
 {
-	public Player(int entity)
+	public CTFPlayer(int entity)
 	{
-		return view_as<Player>(entity);
+		return view_as<CTFPlayer>(entity);
 	}
 	
 	property CountdownTimer m_autoJumpTimer
@@ -486,7 +486,7 @@ methodmap Player < CBaseCombatCharacter
 			return false;
 		
 		TFTeam team = TF2_GetClientTeam(this.index);
-		return (team == TFTeam_Spectator || team == TFTeam_Invaders) && !this.HasPreference(PREF_DISABLE_SPAWNING);
+		return (team == TFTeam_Spectator || team == TFTeam_Invaders) && !this.HasPreference(PREF_SPECTATOR_MODE);
 	}
 	
 	public float GetSpawnTime()
@@ -1364,12 +1364,12 @@ methodmap Player < CBaseCombatCharacter
 		delete enemyList;
 	}
 	
-	public bool HasPreference(PreferenceType preference)
+	public bool HasPreference(MannInTheMachinePreference preference)
 	{
 		return this.m_preferences != -1 && this.m_preferences & view_as<int>(preference) != 0;
 	}
 	
-	public bool SetPreference(PreferenceType preference, bool enable)
+	public bool SetPreference(MannInTheMachinePreference preference, bool enable)
 	{
 		if (this.m_preferences == -1)
 			return false;
@@ -1960,11 +1960,11 @@ methodmap CPopulationManager < CBaseEntity
 			
 			if (upgrade.bIsBotAttr == true)
 			{
-				Player(player).SetAttribute(view_as<AttributeType>(RoundFloat(upgrade.flValue)));
+				CTFPlayer(player).SetAttribute(view_as<AttributeType>(RoundFloat(upgrade.flValue)));
 			}
 			else if (upgrade.bIsSkillAttr == true)
 			{
-				Player(player).SetDifficulty(view_as<DifficultyType>(RoundFloat(upgrade.flValue)));
+				CTFPlayer(player).SetDifficulty(view_as<DifficultyType>(RoundFloat(upgrade.flValue)));
 			}
 			else
 			{
@@ -2223,6 +2223,11 @@ methodmap CTFObjectiveResource < CBaseEntity
 				return;
 			}
 		}
+	}
+	
+	public bool IsPopFileEventType(int fileType)
+	{
+		return this.GetProp(Prop_Send, "m_nMvMEventPopfileType") == fileType;
 	}
 	
 	public TFTeam GetOwningTeam(int index)

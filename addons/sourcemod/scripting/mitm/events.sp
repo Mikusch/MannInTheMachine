@@ -38,7 +38,7 @@ static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroad
 	if (client == 0)
 		return;
 	
-	Player(client).m_annotationTimer = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
+	CTFPlayer(client).m_annotationTimer = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
 }
 
 static void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
@@ -67,15 +67,15 @@ static Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroa
 	
 	if (IsMannVsMachineMode())
 	{
-		Player(client).SetPrevMission(NO_MISSION);
+		CTFPlayer(client).SetPrevMission(NO_MISSION);
 		TF2Attrib_RemoveAll(client);
 		// Clear Sound
-		Player(client).StopIdleSound();
+		CTFPlayer(client).StopIdleSound();
 	}
 	
 	if (team != TFTeam_Invaders)
 	{
-		Player(client).ResetInvader();
+		CTFPlayer(client).ResetInvader();
 		
 		SetVariantString("");
 		AcceptEntityInput(client, "SetCustomModel");
@@ -106,7 +106,7 @@ static void RequestFrameCallback_ApplyWeaponRestrictions(int userid)
 		return;
 	
 	// equip our required weapon
-	Player(client).EquipRequiredWeapon();
+	CTFPlayer(client).EquipRequiredWeapon();
 	
 	// switch to special secondary weapon if we have one
 	int weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
@@ -144,7 +144,7 @@ static void EventHook_PlayerBuiltObject(Event event, const char[] name, bool don
 		{
 			SDKCall_CTFGameRules_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Red);
 			
-			Entity(index).SetTeleportWhere(Player(builder).m_teleportWhereName);
+			Entity(index).SetTeleportWhere(CTFPlayer(builder).m_teleportWhereName);
 			
 			// engineer bots create level 1 teleporters with increased health
 			int iHealth = RoundToFloor(SDKCall_CBaseObject_GetMaxHealthForCurrentLevel(index) * tf_bot_engineer_building_health_multiplier.FloatValue);
@@ -188,7 +188,7 @@ static void EventHook_ObjectDestroyed(Event event, const char[] name, bool dontB
 		if (!IsPlayerAlive(client))
 			continue;
 		
-		if (Player(client).HasMission(MISSION_DESTROY_SENTRIES) && index == Player(client).GetMissionTarget())
+		if (CTFPlayer(client).HasMission(MISSION_DESTROY_SENTRIES) && index == CTFPlayer(client).GetMissionTarget())
 		{
 			char text[64];
 			Format(text, sizeof(text), "%T", "Invader_DestroySentries_DetonateHere", client);
@@ -220,7 +220,7 @@ static void EventHook_TeamplayPointCaptured(Event event, const char[] name, bool
 			
 			// hide current annotation and recreate later
 			HideAnnotation(client, MITM_HINT_MASK | client);
-			Player(client).m_annotationTimer = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
+			CTFPlayer(client).m_annotationTimer = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
 		}
 	}
 }
@@ -257,7 +257,7 @@ static Action Timer_CheckGateBotAnnotation(Handle timer, int userid)
 	if (client == 0)
 		return Plugin_Stop;
 	
-	if (timer != Player(client).m_annotationTimer)
+	if (timer != CTFPlayer(client).m_annotationTimer)
 		return Plugin_Stop;
 	
 	if (!IsClientInGame(client))

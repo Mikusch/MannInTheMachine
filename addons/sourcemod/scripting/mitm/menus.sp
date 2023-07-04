@@ -84,7 +84,7 @@ void Menus_DisplayQueueMenu(int client)
 		char title[64];
 		Format(title, sizeof(title), "%T", "Menu_Queue_Title", client);
 		
-		if (Player(client).m_defenderQueuePoints != -1)
+		if (CTFPlayer(client).m_defenderQueuePoints != -1)
 		{
 			int index = queue.FindValue(client, QueueData::m_client);
 			if (index != -1)
@@ -94,9 +94,9 @@ void Menus_DisplayQueueMenu(int client)
 			}
 			else
 			{
-				if (Player(client).IsInAParty())
+				if (CTFPlayer(client).IsInAParty())
 				{
-					index = queue.FindValue(Player(client).GetParty(), QueueData::m_party);
+					index = queue.FindValue(CTFPlayer(client).GetParty(), QueueData::m_party);
 					if (index != -1)
 					{
 						// player is in a party and queuing with others
@@ -136,7 +136,7 @@ void Menus_DisplayQueueMenu(int client)
 				char name[MAX_NAME_LENGTH];
 				party.GetName(name, sizeof(name));
 				
-				if (Player(client).IsInAParty() && Player(client).GetParty() == party)
+				if (CTFPlayer(client).IsInAParty() && CTFPlayer(client).GetParty() == party)
 				{
 					strcopy(display, sizeof(display), party.IsLeader(client) ? SYMBOL_PARTY_LEADER : SYMBOL_PARTY_MEMBER);
 				}
@@ -197,7 +197,7 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 					{
 						char strMember[MAX_MESSAGE_LENGTH];
 						
-						Format(strMember, sizeof(strMember), "%N (%d)", members[i], Player(members[i]).m_defenderQueuePoints);
+						Format(strMember, sizeof(strMember), "%N (%d)", members[i], CTFPlayer(members[i]).m_defenderQueuePoints);
 						
 						if (i < count - 1)
 						{
@@ -235,7 +235,7 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 
 void Menus_DisplayPreferencesMenu(int client)
 {
-	if (Player(client).m_preferences != -1)
+	if (CTFPlayer(client).m_preferences != -1)
 	{
 		Menu menu = new Menu(MenuHandler_PreferencesMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
 		menu.SetTitle("%T", "Menu_Preferences_Title", client);
@@ -267,14 +267,14 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 			menu.GetItem(param2, info, sizeof(info));
 			
 			int i = StringToInt(info);
-			PreferenceType preference = view_as<PreferenceType>(1 << i);
+			MannInTheMachinePreference preference = view_as<MannInTheMachinePreference>(1 << i);
 			
-			Player(param1).SetPreference(preference, !Player(param1).HasPreference(preference));
+			CTFPlayer(param1).SetPreference(preference, !CTFPlayer(param1).HasPreference(preference));
 			
 			char name[64];
 			Format(name, sizeof(name), "%T", g_PreferenceNames[i], param1);
 			
-			if (Player(param1).HasPreference(preference))
+			if (CTFPlayer(param1).HasPreference(preference))
 				CPrintToChat(param1, "%s %t", PLUGIN_TAG, "Preferences_Enabled", name);
 			else
 				CPrintToChat(param1, "%s %t", PLUGIN_TAG, "Preferences_Disabled", name);
@@ -298,9 +298,9 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
 			
 			int i = StringToInt(info);
-			PreferenceType preference = view_as<PreferenceType>(1 << i);
+			MannInTheMachinePreference preference = view_as<MannInTheMachinePreference>(1 << i);
 			
-			if (Player(param1).HasPreference(preference))
+			if (CTFPlayer(param1).HasPreference(preference))
 				Format(display, sizeof(display), "☑ %T", g_PreferenceNames[i], param1);
 			else
 				Format(display, sizeof(display), "☐ %T", g_PreferenceNames[i], param1);
@@ -321,9 +321,9 @@ void Menus_DisplayPartyMenu(int client)
 	char title[512];
 	Format(title, sizeof(title), "%T\n", "Party_Menu_Title", client);
 	
-	if (Player(client).IsInAParty())
+	if (CTFPlayer(client).IsInAParty())
 	{
-		Party party = Player(client).GetParty();
+		Party party = CTFPlayer(client).GetParty();
 		
 		// show party name
 		char name[MAX_NAME_LENGTH];
@@ -355,7 +355,7 @@ void Menus_DisplayPartyMenu(int client)
 		{
 			int member = members[i];
 			Format(title, sizeof(title), "%s%s %N", title, party.IsLeader(member) ? SYMBOL_PARTY_LEADER : SYMBOL_PARTY_MEMBER, member);
-			Format(title, sizeof(title), "%s (%d)\n", title, Player(member).m_defenderQueuePoints);
+			Format(title, sizeof(title), "%s (%d)\n", title, CTFPlayer(member).m_defenderQueuePoints);
 		}
 	}
 	else
@@ -368,10 +368,10 @@ void Menus_DisplayPartyMenu(int client)
 	
 	menu.SetTitle(title);
 	
-	if (Player(client).IsInAParty())
+	if (CTFPlayer(client).IsInAParty())
 	{
 		// party leader options come first
-		if (Player(client).GetParty().IsLeader(client))
+		if (CTFPlayer(client).GetParty().IsLeader(client))
 		{
 			menu.AddItem("manage_party", "Party_Menu_ManageParty");
 		}
@@ -381,7 +381,7 @@ void Menus_DisplayPartyMenu(int client)
 		menu.AddItem("create_party", "Party_Menu_CreateParty");
 	}
 	
-	if (Player(client).IsInAParty())
+	if (CTFPlayer(client).IsInAParty())
 	{
 		menu.AddItem(NULL_STRING, NULL_STRING, ITEMDRAW_SPACER);
 		menu.AddItem("leave_party", "Party_Menu_LeaveParty");
@@ -400,11 +400,11 @@ static int MenuHandler_PartyMenu(Menu menu, MenuAction action, int param1, int p
 	{
 		case MenuAction_Display:
 		{
-			Player(param1).SetPartyMenuActive(true);
+			CTFPlayer(param1).SetPartyMenuActive(true);
 		}
 		case MenuAction_Select:
 		{
-			Player(param1).SetPartyMenuActive(false);
+			CTFPlayer(param1).SetPartyMenuActive(false);
 			
 			char info[64];
 			menu.GetItem(param2, info, sizeof(info));
@@ -429,7 +429,7 @@ static int MenuHandler_PartyMenu(Menu menu, MenuAction action, int param1, int p
 		}
 		case MenuAction_Cancel:
 		{
-			Player(param1).SetPartyMenuActive(false);
+			CTFPlayer(param1).SetPartyMenuActive(false);
 			
 			if (param2 == MenuCancel_ExitBack)
 			{
@@ -527,10 +527,10 @@ void Menus_DisplayPartyManageInviteMenu(int client)
 		if (other == client)
 			continue;
 		
-		if (Player(other).HasPreference(PREF_IGNORE_PARTY_INVITES))
+		if (CTFPlayer(other).HasPreference(PREF_IGNORE_PARTY_INVITES))
 			continue;
 		
-		Party party = Player(client).GetParty();
+		Party party = CTFPlayer(client).GetParty();
 		
 		char userid[32];
 		IntToString(GetClientUserId(other), userid, sizeof(userid));
@@ -538,10 +538,10 @@ void Menus_DisplayPartyManageInviteMenu(int client)
 		char display[64];
 		int style = ITEMDRAW_DEFAULT;
 		
-		if (Player(other).IsInAParty())
+		if (CTFPlayer(other).IsInAParty())
 		{
 			// show party members (including others)
-			if (Player(other).GetParty() == party)
+			if (CTFPlayer(other).GetParty() == party)
 			{
 				Format(display, sizeof(display), SYMBOL_PARTY_MEMBER ... " %N", other);
 				style = ITEMDRAW_DISABLED;
@@ -626,7 +626,7 @@ static int MenuHandler_PartyManageInviteMenu(Menu menu, MenuAction action, int p
 
 void Menus_DisplayPartyManageKickMenu(int client)
 {
-	Party party = Player(client).GetParty();
+	Party party = CTFPlayer(client).GetParty();
 	
 	Menu menu = new Menu(MenuHandler_PartyKickMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
 	menu.SetTitle("%T", "Party_KickMenu_Title", client);

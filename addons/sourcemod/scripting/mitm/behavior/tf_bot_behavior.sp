@@ -87,19 +87,16 @@ static int OnStart(CTFBotMainAction action, int actor, NextBotAction priorAction
 	}
 	
 	// we just spawned
-	if (GetGameTime() - Player(actor).GetSpawnTime() < 1.0)
+	if (GetGameTime() - CTFPlayer(actor).GetSpawnTime() < 1.0)
 	{
 		// bots must quickly leave their spawn
-		Player(actor).m_flSpawnTimeLeft = Player(actor).CalculateSpawnTime();
+		CTFPlayer(actor).m_flSpawnTimeLeft = CTFPlayer(actor).CalculateSpawnTime();
 		
 		char name[MAX_NAME_LENGTH];
-		Player(actor).GetInvaderName(name, sizeof(name));
+		CTFPlayer(actor).GetInvaderName(name, sizeof(name));
 		PrintCenterText(actor, "%t", "Invader_Spawned", name);
 		
-		if (!Player(actor).HasPreference(PREF_DISABLE_SPAWN_NOTIFICATION))
-		{
-			EmitSoundToClient(actor, "ui/system_message_alert.wav", .channel = SNDCHAN_STATIC);
-		}
+		EmitSoundToClient(actor, "ui/system_message_alert.wav", .channel = SNDCHAN_STATIC);
 	}
 	
 	return action.Continue();
@@ -120,24 +117,24 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 			TF2_AddCondition(actor, TFCond_UberchargeFading, 0.5);
 			
 			// force bots to walk out of spawn
-			if (!Player(actor).HasAttribute(AUTO_JUMP))
+			if (!CTFPlayer(actor).HasAttribute(AUTO_JUMP))
 			{
 				TF2Attrib_SetByName(actor, "no_jump", 1.0);
 			}
 			
-			if (GameRules_GetRoundState() == RoundState_RoundRunning && Player(actor).m_flSpawnTimeLeft != -1.0)
+			if (GameRules_GetRoundState() == RoundState_RoundRunning && CTFPlayer(actor).m_flSpawnTimeLeft != -1.0)
 			{
 				// pause spawn timer while stunned
 				if (!TF2_IsPlayerInCondition(actor, TFCond_Dazed))
 				{
 					float velocity[3];
-					Player(actor).GetAbsVelocity(velocity);
+					CTFPlayer(actor).GetAbsVelocity(velocity);
 					
 					// as long as they are moving, slow down the timer drastically
 					float flTimeToSubtract = GetVectorLength(velocity) >= GetEntPropFloat(actor, Prop_Send, "m_flMaxspeed") ? (interval / 4) : interval;
-					Player(actor).m_flSpawnTimeLeft -= flTimeToSubtract;
+					CTFPlayer(actor).m_flSpawnTimeLeft -= flTimeToSubtract;
 					
-					if (Player(actor).m_flSpawnTimeLeft <= 0.0)
+					if (CTFPlayer(actor).m_flSpawnTimeLeft <= 0.0)
 					{
 						ForcePlayerSuicide(actor);
 						
@@ -145,23 +142,23 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 						int iMaxDeaths = sm_mitm_max_spawn_deaths.IntValue;
 						if (iMaxDeaths && !sm_mitm_developer.BoolValue)
 						{
-							if (iMaxDeaths <= ++Player(actor).m_iSpawnDeathCount)
+							if (iMaxDeaths <= ++CTFPlayer(actor).m_iSpawnDeathCount)
 							{
 								KickClient(actor, "%t", "Invader_SpawnTimer_KickReason");
 								CPrintToChatAll("%s %t", PLUGIN_TAG, "Invader_SpawnTimer_Kicked", actor);
 							}
 							else
 							{
-								CPrintToChat(actor, "%s %t", PLUGIN_TAG, "Invader_SpawnTimer_Warning", iMaxDeaths - Player(actor).m_iSpawnDeathCount);
+								CPrintToChat(actor, "%s %t", PLUGIN_TAG, "Invader_SpawnTimer_Warning", iMaxDeaths - CTFPlayer(actor).m_iSpawnDeathCount);
 							}
 						}
 					}
 				}
 				
-				if (Player(actor).m_flSpawnTimeLeft > 0.0)
+				if (CTFPlayer(actor).m_flSpawnTimeLeft > 0.0)
 				{
 					SetHudTextParams(-1.0, 0.65, interval, 255, 255, 255, 255);
-					ShowSyncHudText(actor, g_hWarningHudSync, "%t", "Invader_SpawnTimer_Countdown", Player(actor).m_flSpawnTimeLeft);
+					ShowSyncHudText(actor, g_hWarningHudSync, "%t", "Invader_SpawnTimer_Countdown", CTFPlayer(actor).m_flSpawnTimeLeft);
 				}
 			}
 		}
@@ -219,7 +216,7 @@ static int OnContact(CTFBotMainAction action, int actor, int other, Address resu
 	if (IsValidEntity(other) && !(view_as<SolidFlags_t>(GetEntProp(other, Prop_Data, "m_usSolidFlags")) & FSOLID_NOT_SOLID) && other != 0 && !IsEntityClient(other))
 	{
 		// Mini-bosses destroy non-Sentrygun objects they bump into (ie: Dispensers)
-		if (IsMannVsMachineMode() && Player(actor).IsMiniBoss())
+		if (IsMannVsMachineMode() && CTFPlayer(actor).IsMiniBoss())
 		{
 			if (IsBaseObject(other))
 			{
@@ -251,9 +248,9 @@ static int OnOtherKilled(CTFBotMainAction action, int actor, int victim, int att
 	{
 		if (GetClientTeam(actor) != GetClientTeam(victim) && actor == attacker)
 		{
-			bool isTaunting = !Player(attacker).HasTheFlag() && GetRandomFloat(0.0, 100.0) <= tf_bot_taunt_victim_chance.FloatValue;
+			bool isTaunting = !CTFPlayer(attacker).HasTheFlag() && GetRandomFloat(0.0, 100.0) <= tf_bot_taunt_victim_chance.FloatValue;
 			
-			if (IsMannVsMachineMode() && Player(attacker).IsMiniBoss())
+			if (IsMannVsMachineMode() && CTFPlayer(attacker).IsMiniBoss())
 			{
 				// Bosses don't taunt puny humans
 				isTaunting = false;

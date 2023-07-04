@@ -55,7 +55,7 @@ static int Update(CTFBotPushToCapturePoint action, int actor, float interval)
 {
 	// flag collection and delivery is handled by our parent behavior, ScenarioMonitor
 	
-	int zone = Player(actor).GetFlagCaptureZone();
+	int zone = CTFPlayer(actor).GetFlagCaptureZone();
 	
 	if (!IsValidEntity(zone))
 	{

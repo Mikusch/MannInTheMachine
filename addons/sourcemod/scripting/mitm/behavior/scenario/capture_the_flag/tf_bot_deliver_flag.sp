@@ -87,7 +87,7 @@ static int OnStart(CTFBotDeliverFlag action, int actor, NextBotAction priorActio
 {
 	if (!tf_mvm_bot_allow_flag_carrier_to_fight.BoolValue)
 	{
-		Player(actor).SetAttribute(SUPPRESS_FIRE);
+		CTFPlayer(actor).SetAttribute(SUPPRESS_FIRE);
 	}
 	
 	if (!IsFakeClient(actor))
@@ -96,7 +96,7 @@ static int OnStart(CTFBotDeliverFlag action, int actor, NextBotAction priorActio
 	}
 	
 	// mini-bosses don't upgrade - they are already tough
-	if (Player(actor).IsMiniBoss())
+	if (CTFPlayer(actor).IsMiniBoss())
 	{
 		// Set threat level to max
 		action.m_upgradeLevel = DONT_UPGRADE;
@@ -123,7 +123,7 @@ static int OnStart(CTFBotDeliverFlag action, int actor, NextBotAction priorActio
 
 static int Update(CTFBotDeliverFlag action, int actor, float interval)
 {
-	int flag = Player(actor).GetFlagToFetch();
+	int flag = CTFPlayer(actor).GetFlagToFetch();
 	
 	if (!IsValidEntity(flag))
 	{
@@ -146,7 +146,7 @@ static int Update(CTFBotDeliverFlag action, int actor, float interval)
 
 static void OnEnd(CTFBotDeliverFlag action, int actor, NextBotAction nextAction)
 {
-	Player(actor).ClearAttribute(SUPPRESS_FIRE);
+	CTFPlayer(actor).ClearAttribute(SUPPRESS_FIRE);
 	
 	if (!IsFakeClient(actor))
 	{

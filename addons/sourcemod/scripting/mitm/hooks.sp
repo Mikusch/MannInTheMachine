@@ -34,7 +34,7 @@ static Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int cl
 	int client = msg.ReadByte();
 	bool bWantsToChat = view_as<bool>(msg.ReadByte());
 	
-	if (!bWantsToChat && Player(client).IsInvader())
+	if (!bWantsToChat && CTFPlayer(client).IsInvader())
 	{
 		char szBuf[MAX_MESSAGE_LENGTH];
 		msg.ReadString(szBuf, sizeof(szBuf));

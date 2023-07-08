@@ -443,7 +443,7 @@ void FindReplacementDefender()
 		if (client == -1 || CTFPlayer(client).IsInAParty())
 			continue;
 		
-		if (TF2_GetClientTeam(client) == TFTeam_Defenders)
+		if (TF2_GetClientTeam(client) != TFTeam_Spectator)
 			continue;
 		
 		if (CTFPlayer(client).HasPreference(PREF_DEFENDER_DISABLE_REPLACEMENT))

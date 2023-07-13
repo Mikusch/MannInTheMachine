@@ -455,6 +455,7 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 					if (CTFPlayer(client).m_flSpawnTimeLeft != 1.0)
 					{
 						CTFPlayer(client).m_flSpawnTimeLeft += 5.0;
+						CTFPlayer(client).m_flSpawnTimeLeftMax += 5.0;
 					}
 				}
 			}

@@ -40,6 +40,7 @@ static MissionType m_mission[MAXPLAYERS + 1];
 static MissionType m_prevMission[MAXPLAYERS + 1];
 static int m_missionTarget[MAXPLAYERS + 1];
 static float m_flSpawnTimeLeft[MAXPLAYERS + 1];
+static float m_flSpawnTimeLeftMax[MAXPLAYERS + 1];
 static int m_spawnPointEntity[MAXPLAYERS + 1];
 static CTFBotSquad m_squad[MAXPLAYERS + 1];
 static int m_hFollowingFlagTarget[MAXPLAYERS + 1];
@@ -217,6 +218,18 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		public set(float flSpawnTimeLeft)
 		{
 			m_flSpawnTimeLeft[this.index] = flSpawnTimeLeft;
+		}
+	}
+	
+	property float m_flSpawnTimeLeftMax
+	{
+		public get()
+		{
+			return m_flSpawnTimeLeftMax[this.index];
+		}
+		public set(float flSpawnTimeLeftMax)
+		{
+			m_flSpawnTimeLeftMax[this.index] = flSpawnTimeLeftMax;
 		}
 	}
 	
@@ -1521,6 +1534,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		
 		this.m_fModelScaleOverride = 0.0;
 		this.m_flSpawnTimeLeft = -1.0;
+		this.m_flSpawnTimeLeftMax = -1.0;
 		this.m_missionTarget = INVALID_ENT_REFERENCE;
 		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
 		this.m_hFollowingFlagTarget = INVALID_ENT_REFERENCE;

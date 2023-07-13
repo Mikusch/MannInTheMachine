@@ -147,8 +147,8 @@
 	}
 	"Invader_SpawnTimer_Countdown"
 	{
-		"#format"	"{1:1.2f}"
-		"en"		"LEAVE THE SPAWN AREA!\nTime Left: {1} s"
+		"#format"	"{1:s}"
+		"en"		"Leave the spawn area!\n{1}"
 	}
 	"Invader_SpawnTimer_Warning"
 	{

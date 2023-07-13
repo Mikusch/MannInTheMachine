@@ -78,6 +78,10 @@
 // 5 bytes are reserved for other parameters
 #define TEXTMSG_MAX_MESSAGE_LENGTH	(MAX_USER_MSG_DATA - 5)
 
+#define PROGRESS_BAR_NUM_BLOCKS	10
+#define PROGRESS_BAR_CHAR_FILLED	"▰"
+#define PROGRESS_BAR_CHAR_EMPTY	"▱"
+
 #define MITM_HINT_MASK	(0x10200)	// annotations have id ( MITM_HINT_MASK | entindex )
 
 // CollectPlayers

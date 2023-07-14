@@ -152,7 +152,7 @@
 			"CTFGameRules::PlayerReadyStatus_UpdatePlayerState"
 			{
 				"linux"		"@_ZN12CTFGameRules35PlayerReadyStatus_UpdatePlayerStateEP9CTFPlayerb"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x10\x53\x8B\xD9\x80\xBB\x86\x09\x00\x00\x00\x75\x2A"
+				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x83\xEC\x10\x83\x78\x30\x00\x53\x8B\xD9"
 			}
 			"CTeamplayRoundBasedRules::ResetPlayerAndTeamReadyState"
 			{

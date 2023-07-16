@@ -37,9 +37,9 @@ methodmap CTFBotMedicHeal < NextBotAction
 static int Update(CTFBotMedicHeal action, int actor, float interval)
 {
 	// if we're in a squad, and the only other members are medics, disband the squad
-	if (Player(actor).IsInASquad())
+	if (CTFPlayer(actor).IsInASquad())
 	{
-		CTFBotSquad squad = Player(actor).GetSquad();
+		CTFBotSquad squad = CTFPlayer(actor).GetSquad();
 		if (IsMannVsMachineMode() && squad.IsLeader(actor))
 		{
 			return action.ChangeTo(CTFBotFetchFlag(), "I'm now a squad leader! Going for the flag!");
@@ -47,34 +47,32 @@ static int Update(CTFBotMedicHeal action, int actor, float interval)
 		
 		if (!squad.ShouldPreserveSquad())
 		{
-			ArrayList memberList = new ArrayList();
-			squad.CollectMembers(memberList);
+			int[] members = new int[MaxClients];
+			int count = squad.CollectMembers(members, MaxClients);
 			
 			int i;
-			for (i = 0; i < memberList.Length; i++)
+			for (i = 0; i < count; i++)
 			{
-				if (TF2_GetPlayerClass(memberList.Get(i)) != TFClass_Medic)
+				if (TF2_GetPlayerClass(members[i]) != TFClass_Medic)
 				{
 					break;
 				}
 			}
 			
-			if (i == memberList.Length)
+			if (i == count)
 			{
 				// squad is obsolete
-				for (i = 0; i < memberList.Length; ++i)
+				for (i = 0; i < count; ++i)
 				{
-					Player(memberList.Get(i)).LeaveSquad();
+					CTFPlayer(members[i]).LeaveSquad();
 				}
 			}
-			
-			delete memberList;
 		}
 	}
 	else
 	{
 		// not in a squad - for now, assume whatever mission I was on is over
-		Player(actor).SetMission(NO_MISSION);
+		CTFPlayer(actor).SetMission(NO_MISSION);
 	}
 	
 	if (SelectPatient(actor) == -1)
@@ -105,7 +103,7 @@ static int SelectPatient(int actor)
 		
 		// always heal the flag carrier, regardless of class
 		// squads always heal the leader
-		if (!HasTheFlag(client) && !Player(actor).IsInASquad())
+		if (!CTFPlayer(client).HasTheFlag() && !CTFPlayer(actor).IsInASquad())
 		{
 			TFClassType class = TF2_GetPlayerClass(client);
 			if (class == TFClass_Medic ||

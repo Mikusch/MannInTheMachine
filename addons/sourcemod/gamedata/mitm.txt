@@ -152,7 +152,7 @@
 			"CTFGameRules::PlayerReadyStatus_UpdatePlayerState"
 			{
 				"linux"		"@_ZN12CTFGameRules35PlayerReadyStatus_UpdatePlayerStateEP9CTFPlayerb"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x10\x57\x8B\xF9\x80\xBF\x7A\x09\x00\x00\x00"
+				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x83\xEC\x10\x83\x78\x30\x00\x53\x8B\xD9"
 			}
 			"CTeamplayRoundBasedRules::ResetPlayerAndTeamReadyState"
 			{
@@ -163,11 +163,6 @@
 			{
 				"linux"		"@_ZN24CTeamplayRoundBasedRules18PlayThrottledAlertEiPKcf"
 				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x56\x8B\xF1\xF3\x0F\x10\x40\x0C"
-			}
-			"CTFPlayer::PostInventoryApplication"
-			{
-				"linux"		"@_ZN9CTFPlayer24PostInventoryApplicationEv"
-				"windows"	"\x55\x8B\xEC\x51\x53\x8B\xD9\x56\x57\x8D\x8B\xE0\x1A\x00\x00"
 			}
 			"CTFPlayer::GetLoadoutItem"
 			{
@@ -207,7 +202,7 @@
 			"CTFPlayerShared::ResetRageBuffs"
 			{
 				"linux"		"@_ZN15CTFPlayerShared14ResetRageBuffsEv"
-				"windows"	"\xC7\x81\x98\x02\x00\x00\x00\x00\x00\x00"
+				"windows"	"\xC7\x81\x94\x02\x00\x00\x00\x00\x00\x00\xC7\x81\x98\x02\x00\x00\x00\x00\x00\x00"
 			}
 			"CTFPlayer::CanBuild"
 			{
@@ -284,6 +279,12 @@
 				"linux"		"@_ZN23CLagCompensationManager20StartLagCompensationEP11CBasePlayerP8CUserCmd"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x24\x57\x8B\xF9\x89\x7D\xE8"
 			}
+			"CUniformRandomStream::SetSeed"
+			{
+				"library"	"vstdlib"
+				"linux"		"@_ZN20CUniformRandomStream7SetSeedEi"
+				"windows"	"@?SetSeed@CUniformRandomStream@@UAEXH@Z"
+			}
 			"CTFBotHintEngineerNest::IsStaleNest"
 			{
 				"linux"		"@_ZNK22CTFBotHintEngineerNest11IsStaleNestEv"
@@ -304,10 +305,15 @@
 				"linux"		"@_Z15OnBotTeleportedP6CTFBot"
 				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x83\xEC\x40\x56\x85\xC0"
 			}
+			"BotGenerateAndWearItem"
+			{
+				"linux"		"@_Z22BotGenerateAndWearItemP9CTFPlayerPKc"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x58\x53\x8B\x5D\x08\x85\xDB"
+			}
 			"GetBombInfo"
 			{
 				"linux"		"@_Z11GetBombInfoP10BombInfo_t"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x20\x8B\x15\x2A\x2A\x2A\x2A"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x20\x8B\x15\x2A\x2A\x2A\x2A\x0F\x57\xD2"
 			}
 		}
 		"Offsets"
@@ -317,6 +323,11 @@
 			{
 				"linux"		"3"
 				"windows"	"2"
+			}
+			"CBaseEntity::ShouldCollide"
+			{
+				"linux"		"18"
+				"windows"	"17"
 			}
 			"CBaseEntity::SetModel"
 			{
@@ -328,6 +339,11 @@
 				"linux"		"88"
 				"windows"	"87"
 			}
+			"CBaseObject::IsPlacementPosValid"
+			{
+				"linux"		"341"
+				"windows"	"340"
+			}
 			"CBaseObject::CanBeUpgraded"
 			{
 				"linux"		"383"
@@ -338,7 +354,7 @@
 				"linux"		"392"
 				"windows"	"390"
 			}
-			"CTFWeaponBase::Clip1"
+			"CBaseCombatWeapon::Clip1"
 			{
 				"linux"		"350"
 				"windows"	"344"
@@ -363,17 +379,17 @@
 				// Linux uses signature call CTFBotSpawner::GetClassIcon
 				"windows"	"6"
 			}
-			"CTFPlayer::ShouldTransmit"
+			"CBaseEntity::ShouldTransmit"
 			{
 				"linux"		"21"
 				"windows"	"20"
 			}
-			"CTFPlayer::Event_Killed"
+			"CBaseEntity::Event_Killed"
 			{
 				"linux"		"69"
 				"windows"	"68"
 			}
-			"CTFPlayer::ShouldGib"
+			"CBaseCombatCharacter::ShouldGib"
 			{
 				"linux"		"297"
 				"windows"	"296"
@@ -398,17 +414,22 @@
 				"linux"		"199"
 				"windows"	"198"
 			}
-			"CTFGameRules::ClientConnected"
+			"CGameRules::ShouldCollide"
+			{
+				"linux"		"30"
+				"windows"	"29"
+			}
+			"CGameRules::ClientConnected"
 			{
 				"linux"		"60"
 				"windows"	"59"
 			}
-			"CTFGameRules::FPlayerCanTakeDamage"
+			"CGameRules::FPlayerCanTakeDamage"
 			{
 				"linux"		"64"
 				"windows"	"63"
 			}
-			"CTFGameRules::TeamMayCapturePoint"
+			"CTeamplayRules::TeamMayCapturePoint"
 			{
 				"linux"		"159"
 				"windows"	"158"
@@ -419,6 +440,11 @@
 			{
 				"linux"		"-232"
 				"windows"	"-232"
+			}
+			"CTFPlayer::m_nDeployingBombState"
+			{
+				"linux"		"-12"
+				"windows"	"-12"
 			}
 			"CTFPlayer::m_bIsMissionEnemy"
 			{
@@ -539,6 +565,11 @@
 			{
 				"linux"		"1229"
 				"windows"	"1229"
+			}
+			"CPopulationManager::m_bIsInitialized"
+			{
+				"linux"		"620"
+				"windows"	"620"
 			}
 			"CPopulationManager::m_canBotsAttackWhileInSpawnRoom"
 			{
@@ -694,6 +725,11 @@
 			{
 				"linux"		"4"
 				"windows"	"4"
+			}
+			"CBaseObject::m_vecBuildOrigin"
+			{
+				"linux"		"2348"
+				"windows"	"2324"
 			}
 			"inputdata_t::value"
 			{
@@ -1082,6 +1118,20 @@
 					}
 				}
 			}
+			"CUniformRandomStream::SetSeed"
+			{
+				"signature"	"CUniformRandomStream::SetSeed"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"ignore"
+				"arguments"
+				{
+					"iSeed"
+					{
+						"type"	"int"
+					}
+				}
+			}
 			"DoTeleporterOverride"
 			{
 				"signature"		"DoTeleporterOverride"
@@ -1132,6 +1182,13 @@
 					}
 				}
 			}
+			"CBaseObject::IsPlacementPosValid"
+			{
+				"offset"	"CBaseObject::IsPlacementPosValid"
+				"hooktype"	"entity"
+				"return"	"bool"
+				"this"		"entity"
+			}
 			"CBaseObject::CanBeUpgraded"
 			{
 				"offset"	"CBaseObject::CanBeUpgraded"
@@ -1153,9 +1210,9 @@
 				"return"	"void"
 				"this"		"entity"
 			}
-			"CTFPlayer::ShouldTransmit"
+			"CBaseEntity::ShouldTransmit"
 			{
-				"offset"	"CTFPlayer::ShouldTransmit"
+				"offset"	"CBaseEntity::ShouldTransmit"
 				"hooktype"	"entity"
 				"return"	"int"
 				"this"		"entity"
@@ -1167,9 +1224,9 @@
 					}
 				}
 			}
-			"CTFPlayer::Event_Killed"
+			"CBaseEntity::Event_Killed"
 			{
-				"offset"	"CTFPlayer::Event_Killed"
+				"offset"	"CBaseEntity::Event_Killed"
 				"hooktype"	"entity"
 				"return"	"void"
 				"this"		"entity"
@@ -1181,9 +1238,9 @@
 					}
 				}
 			}
-			"CTFPlayer::ShouldGib"
+			"CBaseCombatCharacter::ShouldGib"
 			{
-				"offset"	"CTFPlayer::ShouldGib"
+				"offset"	"CBaseCombatCharacter::ShouldGib"
 				"hooktype"	"entity"
 				"return"	"bool"
 				"this"		"entity"
@@ -1227,9 +1284,9 @@
 					}
 				}
 			}
-			"CTFGameRules::ClientConnected"
+			"CGameRules::ClientConnected"
 			{
-				"offset"	"CTFGameRules::ClientConnected"
+				"offset"	"CGameRules::ClientConnected"
 				"hooktype"	"gamerules"
 				"return"	"bool"
 				"this"		"ignore"
@@ -1258,9 +1315,9 @@
 				}
 				
 			}
-			"CTFGameRules::FPlayerCanTakeDamage"
+			"CGameRules::FPlayerCanTakeDamage"
 			{
-				"offset"	"CTFGameRules::FPlayerCanTakeDamage"
+				"offset"	"CGameRules::FPlayerCanTakeDamage"
 				"hooktype"	"gamerules"
 				"return"	"bool"
 				"this"		"ignore"
@@ -1296,6 +1353,25 @@
 					{
 						"type"	"bool"
 					}
+				}
+			}
+		}
+		"MemPatches"
+		{
+			"CTFGameRules::GetTeamAssignmentOverride::kMVM_DefendersTeamSize"
+			{
+				"signature" "CTFGameRules::GetTeamAssignmentOverride"
+				"linux"
+				{
+					"offset"	"1D0h"
+					"verify"	"\xB8\x06"
+					"patch"		"\xB8\x20"
+				}
+				"windows"
+				{
+					"offset"	"14Ch"
+					"verify"	"\xB8\x06"
+					"patch"		"\xB8\x20"
 				}
 			}
 		}

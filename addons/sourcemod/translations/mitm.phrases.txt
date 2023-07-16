@@ -19,7 +19,7 @@
 {
 	"Menu_Main_Title"
 	{
-		"en"		"Welcome to Mann in the Machine made by Mikusch!"
+		"en"		"Welcome to Mann in the Machine by Mikusch!"
 	}
 	"Menu_Main_Queue"
 	{
@@ -65,27 +65,27 @@
 	}
 	"Preference_DisableDefender"
 	{
-		"en"		"Don't select me as Defender"
+		"en"		"Don't select me as defender"
 	}
-	"Preference_DisableSpawning"
+	"Preference_SpectatorMode"
 	{
-		"en"		"Disable spawning (Spectator mode)"
+		"en"		"Spectator mode (no spawning)"
 	}
-	"Preference_DisableGiant"
+	"Preference_DisableMiniBoss"
 	{
-		"en"		"Don't spawn me as Giant Robot"
-	}
-	"Preference_DisableSpawnNotification"
-	{
-		"en"		"Disable spawn notification"
+		"en"		"Don't select me as a giant robot"
 	}
 	"Preference_DisableAnnotations"
 	{
-		"en"		"Disable annotations"
+		"en"		"Disable hint annotations"
 	}
 	"Preference_IgnorePartyInvites"
 	{
 		"en"		"Ignore party invites"
+	}
+	"Preference_DisableDefenderReplacement"
+	{
+		"en"		"Don't select me as replacement defender"
 	}
 	"Preferences_Enabled"
 	{
@@ -104,7 +104,7 @@
 	"Queue_SelectedAsDefender"
 	{
 		"#format"	"{1:s}"
-		"en"		"You have been assigned to {red}{1}{default}. Your queue points have been reset."
+		"en"		"You have been automatically assigned to {red}{1}{default}. Your queue points have been reset."
 	}
 	"Queue_SelectedAsDefender_Forced"
 	{
@@ -114,7 +114,7 @@
 	"Queue_SelectedAsInvader"
 	{
 		"#format"	"{1:s},{2:d},{3:d}"
-		"en"		"You have been assigned to {blue}{1}{default}. You have been awarded {green}{2} {default}queue points (Total: {green}{3}{default})."
+		"en"		"You have been automatically assigned to {blue}{1}{default}. You have been awarded {green}{2} {default}queue points (Total: {green}{3}{default})."
 	}
 	"Queue_SelectedAsInvader_Forced"
 	{
@@ -131,14 +131,6 @@
 		"#format"	"{1:d},{2:t}"
 		"en"		"Added {green}{1} {default}queue points to {cyan}{2}{default}."
 	}
-	"Engineer_NotAllowedToBuild"
-	{
-		"en"		"You are not allowed to build this."
-	}
-	"Engineer_NotAllowedToBuild_NoHint"
-	{
-		"en"		"You are not allowed to build this right now."
-	}
 	"Medic_Squad_NotAllowedToHeal"
 	{
 		"#format"	"{1:N}"
@@ -153,19 +145,24 @@
 		"#format"	"{1:s}"
 		"en"		"You have spawned as: {1}"
 	}
-	"Invader_HurryOutOfSpawn"
+	"Invader_SpawnTimer_Countdown"
 	{
-		"#format"	"{1:1.2f}"
-		"en"		"LEAVE THE SPAWN AREA!\nTime Left: {1} s"
+		"#format"	"{1:s}"
+		"en"		"Leave the spawn area!\n{1}"
 	}
-	"Invader_SpawnTimerDeath"
+	"Invader_SpawnTimer_Warning"
 	{
 		"#format"	"{1:d}"
-		"en"		"{red}WARNING: {default}If you die in the spawn area {cyan}{1} {default}more time(s) you will be kicked from the server!"
+		"en"		"{red}WARNING: {default}If you die in the spawn area {cyan}{1} {default}more time(s), you will be kicked from the server!"
 	}
-	"Invader_SpawnTimerKick"
+	"Invader_SpawnTimer_KickReason"
 	{
 		"en"		"Too many deaths in spawn area"
+	}
+	"Invader_SpawnTimer_Kicked"
+	{
+		"#format"	"{1:N}"
+		"en"		"{blue}{1} {default}was kicked for dying in the spawn area too many times."
 	}
 	"Invader_CaptureGate_Annotation"
 	{
@@ -182,6 +179,11 @@
 	"Invader_Queue_Header"
 	{
 		"en"		"Next Robot Spawns:"
+	}
+	"Invader_Deployed"
+	{
+		"#format"	"{1:N},{2:d},{3:d}"
+		"en"		"{blue}{1} {default}deployed the bomb with {lightgreen}{2}{default}/{lightgreen}{3} {default}HP left."
 	}
 	"Endless_MoreAttributes"
 	{
@@ -278,6 +280,10 @@
 	{
 		"en"		"No pending invites"
 	}
+	"Party_FeatureDisabled"
+	{
+		"en"		"The party system is currently disabled."
+	}
 	"Party_InvitedPlayers"
 	{
 		"#format"	"{1:t},{2:s}"
@@ -355,5 +361,10 @@
 	{
 		"#format"	"{1:s},{2:N}"
 		"en"		"You have been invited to {cyan}{1}{default} by {lightgreen}{2}{default}. Type {yellow}/party {default}to accept."
+	}
+	"Party_Name_Default"
+	{
+		"#format"	"{1:N}"
+		"en"		"{1}'s Party"
 	}
 }

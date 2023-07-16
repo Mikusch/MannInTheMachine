@@ -20,93 +20,96 @@
 
 static StringMap g_offsets;
 
-void Offsets_Init(GameData gamedata)
+void Offsets_Init(GameData hGameData)
 {
 	g_offsets = new StringMap();
 	
-	SetOffset(gamedata, "CTFBotSpawner", "m_class");
-	SetOffset(gamedata, "CTFBotSpawner", "m_health");
-	SetOffset(gamedata, "CTFBotSpawner", "m_scale");
-	SetOffset(gamedata, "CTFBotSpawner", "m_flAutoJumpMin");
-	SetOffset(gamedata, "CTFBotSpawner", "m_flAutoJumpMax");
-	SetOffset(gamedata, "CTFBotSpawner", "m_eventChangeAttributes");
-	SetOffset(gamedata, "CTFBotSpawner", "m_name");
-	SetOffset(gamedata, "CTFBotSpawner", "m_teleportWhereName");
-	SetOffset(gamedata, "CTFBotSpawner", "m_defaultAttributes");
+	SetOffset(hGameData, "CTFBotSpawner", "m_class");
+	SetOffset(hGameData, "CTFBotSpawner", "m_health");
+	SetOffset(hGameData, "CTFBotSpawner", "m_scale");
+	SetOffset(hGameData, "CTFBotSpawner", "m_flAutoJumpMin");
+	SetOffset(hGameData, "CTFBotSpawner", "m_flAutoJumpMax");
+	SetOffset(hGameData, "CTFBotSpawner", "m_eventChangeAttributes");
+	SetOffset(hGameData, "CTFBotSpawner", "m_name");
+	SetOffset(hGameData, "CTFBotSpawner", "m_teleportWhereName");
+	SetOffset(hGameData, "CTFBotSpawner", "m_defaultAttributes");
 	
-	SetOffset(gamedata, "CSquadSpawner", "m_formationSize");
-	SetOffset(gamedata, "CSquadSpawner", "m_bShouldPreserveSquad");
+	SetOffset(hGameData, "CSquadSpawner", "m_formationSize");
+	SetOffset(hGameData, "CSquadSpawner", "m_bShouldPreserveSquad");
 	
-	SetOffset(gamedata, "CMissionPopulator", "m_mission");
-	SetOffset(gamedata, "CMissionPopulator", "m_cooldownDuration");
+	SetOffset(hGameData, "CMissionPopulator", "m_mission");
+	SetOffset(hGameData, "CMissionPopulator", "m_cooldownDuration");
 	
-	SetOffset(gamedata, "CWaveSpawnPopulator", "m_bSupportWave");
-	SetOffset(gamedata, "CWaveSpawnPopulator", "m_bLimitedSupport");
+	SetOffset(hGameData, "CWaveSpawnPopulator", "m_bSupportWave");
+	SetOffset(hGameData, "CWaveSpawnPopulator", "m_bLimitedSupport");
 	
-	SetOffset(gamedata, "CPopulationManager", "m_canBotsAttackWhileInSpawnRoom");
-	SetOffset(gamedata, "CPopulationManager", "m_bSpawningPaused");
-	SetOffset(gamedata, "CPopulationManager", "m_EndlessActiveBotUpgrades");
-	SetOffset(gamedata, "CPopulationManager", "m_defaultEventChangeAttributesName");
+	SetOffset(hGameData, "CPopulationManager", "m_bIsInitialized");
+	SetOffset(hGameData, "CPopulationManager", "m_canBotsAttackWhileInSpawnRoom");
+	SetOffset(hGameData, "CPopulationManager", "m_bSpawningPaused");
+	SetOffset(hGameData, "CPopulationManager", "m_EndlessActiveBotUpgrades");
+	SetOffset(hGameData, "CPopulationManager", "m_defaultEventChangeAttributesName");
 	
-	SetOffset(gamedata, "CWave", "m_nSentryBustersSpawned");
-	SetOffset(gamedata, "CWave", "m_nNumEngineersTeleportSpawned");
-	SetOffset(gamedata, "CWave", "m_nNumSentryBustersKilled");
+	SetOffset(hGameData, "CWave", "m_nSentryBustersSpawned");
+	SetOffset(hGameData, "CWave", "m_nNumEngineersTeleportSpawned");
+	SetOffset(hGameData, "CWave", "m_nNumSentryBustersKilled");
 	
-	SetOffset(gamedata, "IPopulationSpawner", "m_spawner");
-	SetOffset(gamedata, "IPopulationSpawner", "m_where");
+	SetOffset(hGameData, "IPopulationSpawner", "m_spawner");
+	SetOffset(hGameData, "IPopulationSpawner", "m_where");
 	
-	SetOffset(gamedata, NULL_STRING, "sizeof(CMvMBotUpgrade)");
-	SetOffset(gamedata, "CMvMBotUpgrade", "szAttrib");
-	SetOffset(gamedata, "CMvMBotUpgrade", "iAttribIndex");
-	SetOffset(gamedata, "CMvMBotUpgrade", "flValue");
-	SetOffset(gamedata, "CMvMBotUpgrade", "bIsBotAttr");
-	SetOffset(gamedata, "CMvMBotUpgrade", "bIsSkillAttr");
+	SetOffset(hGameData, NULL_STRING, "sizeof(CMvMBotUpgrade)");
+	SetOffset(hGameData, "CMvMBotUpgrade", "szAttrib");
+	SetOffset(hGameData, "CMvMBotUpgrade", "iAttribIndex");
+	SetOffset(hGameData, "CMvMBotUpgrade", "flValue");
+	SetOffset(hGameData, "CMvMBotUpgrade", "bIsBotAttr");
+	SetOffset(hGameData, "CMvMBotUpgrade", "bIsSkillAttr");
 	
-	SetOffset(gamedata, NULL_STRING, "sizeof(EventChangeAttributes_t)");
-	SetOffset(gamedata, "EventChangeAttributes_t", "m_eventName");
-	SetOffset(gamedata, "EventChangeAttributes_t", "m_skill");
-	SetOffset(gamedata, "EventChangeAttributes_t", "m_weaponRestriction");
-	SetOffset(gamedata, "EventChangeAttributes_t", "m_mission");
-	SetOffset(gamedata, "EventChangeAttributes_t", "m_attributeFlags");
-	SetOffset(gamedata, "EventChangeAttributes_t", "m_items");
-	SetOffset(gamedata, "EventChangeAttributes_t", "m_itemsAttributes");
-	SetOffset(gamedata, "EventChangeAttributes_t", "m_characterAttributes");
-	SetOffset(gamedata, "EventChangeAttributes_t", "m_tags");
+	SetOffset(hGameData, NULL_STRING, "sizeof(EventChangeAttributes_t)");
+	SetOffset(hGameData, "EventChangeAttributes_t", "m_eventName");
+	SetOffset(hGameData, "EventChangeAttributes_t", "m_skill");
+	SetOffset(hGameData, "EventChangeAttributes_t", "m_weaponRestriction");
+	SetOffset(hGameData, "EventChangeAttributes_t", "m_mission");
+	SetOffset(hGameData, "EventChangeAttributes_t", "m_attributeFlags");
+	SetOffset(hGameData, "EventChangeAttributes_t", "m_items");
+	SetOffset(hGameData, "EventChangeAttributes_t", "m_itemsAttributes");
+	SetOffset(hGameData, "EventChangeAttributes_t", "m_characterAttributes");
+	SetOffset(hGameData, "EventChangeAttributes_t", "m_tags");
 	
-	SetOffset(gamedata, NULL_STRING, "sizeof(item_attributes_t)");
-	SetOffset(gamedata, "item_attributes_t", "m_itemName");
-	SetOffset(gamedata, "item_attributes_t", "m_attributes");
+	SetOffset(hGameData, NULL_STRING, "sizeof(item_attributes_t)");
+	SetOffset(hGameData, "item_attributes_t", "m_itemName");
+	SetOffset(hGameData, "item_attributes_t", "m_attributes");
 	
-	SetOffset(gamedata, NULL_STRING, "sizeof(static_attrib_t)");
-	SetOffset(gamedata, "static_attrib_t", "iDefIndex");
-	SetOffset(gamedata, "static_attrib_t", "m_value");
+	SetOffset(hGameData, NULL_STRING, "sizeof(static_attrib_t)");
+	SetOffset(hGameData, "static_attrib_t", "iDefIndex");
+	SetOffset(hGameData, "static_attrib_t", "m_value");
 	
-	SetOffset(gamedata, NULL_STRING, "sizeof(BombInfo_t)");
-	SetOffset(gamedata, "BombInfo_t", "m_flMaxBattleFront");
+	SetOffset(hGameData, NULL_STRING, "sizeof(BombInfo_t)");
+	SetOffset(hGameData, "BombInfo_t", "m_flMaxBattleFront");
 	
-	SetOffset(gamedata, "CTFPlayer", "m_flSpawnTime");
-	SetOffset(gamedata, "CTFPlayer", "m_bIsMissionEnemy");
-	SetOffset(gamedata, "CTFPlayer", "m_bIsSupportEnemy");
-	SetOffset(gamedata, "CTFPlayer", "m_bIsLimitedSupportEnemy");
-	SetOffset(gamedata, "CTFPlayer", "m_pWaveSpawnPopulator");
-	SetOffset(gamedata, "CTFPlayer", "m_accumulatedSentryGunDamageDealt");
-	SetOffset(gamedata, "CTFPlayer", "m_accumulatedSentryGunKillCount");
+	SetOffset(hGameData, "CTFPlayer", "m_flSpawnTime");
+	SetOffset(hGameData, "CTFPlayer", "m_nDeployingBombState");
+	SetOffset(hGameData, "CTFPlayer", "m_bIsMissionEnemy");
+	SetOffset(hGameData, "CTFPlayer", "m_bIsSupportEnemy");
+	SetOffset(hGameData, "CTFPlayer", "m_bIsLimitedSupportEnemy");
+	SetOffset(hGameData, "CTFPlayer", "m_pWaveSpawnPopulator");
+	SetOffset(hGameData, "CTFPlayer", "m_accumulatedSentryGunDamageDealt");
+	SetOffset(hGameData, "CTFPlayer", "m_accumulatedSentryGunKillCount");
 	
-	SetOffset(gamedata, "CTFWeaponBase", "m_bInAttack2");
+	SetOffset(hGameData, "CTFWeaponBase", "m_bInAttack2");
 	
-	SetOffset(gamedata, "CCurrencyPack", "m_nAmount");
-	SetOffset(gamedata, "CCurrencyPack", "m_bTouched");
+	SetOffset(hGameData, "CCurrencyPack", "m_nAmount");
+	SetOffset(hGameData, "CCurrencyPack", "m_bTouched");
 	
-	SetOffset(gamedata, "CEconItemAttributeDefinition", "m_iDescriptionFormat");
-	SetOffset(gamedata, "CEconItemAttributeDefinition", "m_pszDescriptionString");
+	SetOffset(hGameData, "CEconItemAttributeDefinition", "m_iDescriptionFormat");
+	SetOffset(hGameData, "CEconItemAttributeDefinition", "m_pszDescriptionString");
 	
-	SetOffset(gamedata, "CTakeDamageInfo", "m_bForceFriendlyFire");
-	SetOffset(gamedata, "CTFNavArea", "m_distanceToBombTarget");
-	SetOffset(gamedata, "CBaseTFBotHintEntity", "m_isDisabled");
-	SetOffset(gamedata, "CTFGrenadePipebombProjectile", "m_flCreationTime");
-	SetOffset(gamedata, "inputdata_t", "value");
-	SetOffset(gamedata, "CTraceFilterSimple", "m_pPassEnt");
-	SetOffset(gamedata, "CTFBotHintEngineerNest", "m_teleporters");
+	SetOffset(hGameData, "CTakeDamageInfo", "m_bForceFriendlyFire");
+	SetOffset(hGameData, "CTFNavArea", "m_distanceToBombTarget");
+	SetOffset(hGameData, "CBaseTFBotHintEntity", "m_isDisabled");
+	SetOffset(hGameData, "CTFGrenadePipebombProjectile", "m_flCreationTime");
+	SetOffset(hGameData, "CBaseObject", "m_vecBuildOrigin");
+	SetOffset(hGameData, "inputdata_t", "value");
+	SetOffset(hGameData, "CTraceFilterSimple", "m_pPassEnt");
+	SetOffset(hGameData, "CTFBotHintEngineerNest", "m_teleporters");
 }
 
 any GetOffset(const char[] cls, const char[] prop)
@@ -134,12 +137,12 @@ any GetOffset(const char[] cls, const char[] prop)
 	return offset;
 }
 
-static void SetOffset(GameData gamedata, const char[] cls, const char[] prop)
+static void SetOffset(GameData hGameData, const char[] cls, const char[] prop)
 {
 	if (IsNullString(cls))
 	{
 		// Simple gamedata key lookup
-		int offset = gamedata.GetOffset(prop);
+		int offset = hGameData.GetOffset(prop);
 		if (offset == -1)
 		{
 			ThrowError("Offset '%s' could not be found", prop);
@@ -158,7 +161,7 @@ static void SetOffset(GameData gamedata, const char[] cls, const char[] prop)
 		Format(base_key, sizeof(base_key), "%s_BaseOffset", cls);
 		
 		// Get the actual offset, calculated using a base offset if present
-		if (gamedata.GetKeyValue(base_key, base_prop, sizeof(base_prop)))
+		if (hGameData.GetKeyValue(base_key, base_prop, sizeof(base_prop)))
 		{
 			int base_offset = FindSendPropInfo(cls, base_prop);
 			if (base_offset == -1)
@@ -171,7 +174,7 @@ static void SetOffset(GameData gamedata, const char[] cls, const char[] prop)
 				}
 			}
 			
-			int offset = base_offset + gamedata.GetOffset(key);
+			int offset = base_offset + hGameData.GetOffset(key);
 			g_offsets.SetValue(key, offset);
 			
 #if defined DEBUG
@@ -180,7 +183,7 @@ static void SetOffset(GameData gamedata, const char[] cls, const char[] prop)
 		}
 		else
 		{
-			int offset = gamedata.GetOffset(key);
+			int offset = hGameData.GetOffset(key);
 			if (offset == -1)
 			{
 				ThrowError("Offset '%s' could not be found", key);

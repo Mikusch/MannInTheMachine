@@ -58,7 +58,7 @@ static int Update(CTFBotEscortSquadLeader action, int actor, float interval)
 		return action.Continue();
 	}
 	
-	CTFBotSquad squad = Player(actor).GetSquad();
+	CTFBotSquad squad = CTFPlayer(actor).GetSquad();
 	if (!squad)
 	{
 		if (action.m_actionToDoAfterSquadDisbands)
@@ -72,7 +72,7 @@ static int Update(CTFBotEscortSquadLeader action, int actor, float interval)
 	int leader = squad.GetLeader();
 	if (leader == -1 || !IsPlayerAlive(leader))
 	{
-		Player(actor).LeaveSquad();
+		CTFPlayer(actor).LeaveSquad();
 		
 		if (action.m_actionToDoAfterSquadDisbands)
 		{
@@ -85,7 +85,7 @@ static int Update(CTFBotEscortSquadLeader action, int actor, float interval)
 	if (IsMannVsMachineMode() && leader == actor)
 	{
 		char[] szNowLeader = "I'm now the squad leader! Going for the flag!";
-		if (Player(actor).HasAttribute(AGGRESSIVE))
+		if (CTFPlayer(actor).HasAttribute(AGGRESSIVE))
 		{
 			// push for the point first, then attack
 			return action.ChangeTo(CTFBotPushToCapturePoint(CTFBotFetchFlag()), szNowLeader);

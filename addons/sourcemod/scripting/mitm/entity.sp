@@ -19,14 +19,14 @@ static ArrayList g_EntityProperties;
 
 enum struct EntityProperties
 {
-	int m_index;
+	int m_ref;
 	
 	ArrayList m_teleportWhereName;
 	int m_hGlowEntity;
 	
-	void Init(int entity)
+	void Init(int ref)
 	{
-		this.m_index = entity;
+		this.m_ref = ref;
 		this.m_teleportWhereName = new ArrayList(ByteCountToCells(64));
 		this.m_hGlowEntity = INVALID_ENT_REFERENCE;
 	}
@@ -58,25 +58,25 @@ methodmap Entity
 		}
 		
 		// doubly convert it to ensure we store it as an entity reference
-		entity = EntIndexToEntRef(EntRefToEntIndex(entity));
+		int ref = EntIndexToEntRef(EntRefToEntIndex(entity));
 		
-		if (g_EntityProperties.FindValue(entity, EntityProperties::m_index) == -1)
+		if (g_EntityProperties.FindValue(ref, EntityProperties::m_ref) == -1)
 		{
 			// fill basic properties
 			EntityProperties properties;
-			properties.Init(entity);
+			properties.Init(ref);
 			
 			g_EntityProperties.PushArray(properties);
 		}
 		
-		return view_as<Entity>(entity);
+		return view_as<Entity>(ref);
 	}
 	
 	property int m_listIndex
 	{
 		public get()
 		{
-			return g_EntityProperties.FindValue(view_as<int>(this), EntityProperties::m_index);
+			return g_EntityProperties.FindValue(view_as<int>(this), EntityProperties::m_ref);
 		}
 	}
 	

@@ -14,53 +14,53 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 #pragma semicolon 1
 #pragma newdecls required
 
 char g_PreferenceNames[][] =
 {
 	"Preference_DisableDefender",
-	"Preference_DisableSpawning",
-	"Preference_DisableGiant",
-	"Preference_DisableSpawnNotification",
+	"Preference_SpectatorMode",
+	"Preference_DisableMiniBoss",
 	"Preference_DisableAnnotations",
 	"Preference_IgnorePartyInvites",
+	"Preference_DisableDefenderReplacement",
 };
 
-static Cookie g_cookieQueuePoints;
-static Cookie g_cookiePreferences;
+static Cookie g_hCookieQueue;
+static Cookie g_hCookiePreferences;
 
 void ClientPrefs_Init()
 {
-	g_cookieQueuePoints = new Cookie("mitm_queue", "Mann in the Machine: Queue Points", CookieAccess_Protected);
-	g_cookiePreferences = new Cookie("mitm_prefs", "Mann in the Machine: Preferences", CookieAccess_Protected);
+	g_hCookieQueue = new Cookie("mitm_queue", "Mann in the Machine: Queue Points", CookieAccess_Protected);
+	g_hCookiePreferences = new Cookie("mitm_preferences", "Mann in the Machine: Preferences", CookieAccess_Protected);
 }
 
 void ClientPrefs_RefreshQueue(int client)
 {
 	char szValue[12];
-	g_cookieQueuePoints.Get(client, szValue, sizeof(szValue));
-	Player(client).m_defenderQueuePoints = StringToInt(szValue);
+	g_hCookieQueue.Get(client, szValue, sizeof(szValue));
+	CTFPlayer(client).m_defenderQueuePoints = StringToInt(szValue);
 }
 
 void ClientPrefs_RefreshPreferences(int client)
 {
 	char szValue[12];
-	g_cookiePreferences.Get(client, szValue, sizeof(szValue));
-	Player(client).m_preferences = StringToInt(szValue);
+	g_hCookiePreferences.Get(client, szValue, sizeof(szValue));
+	CTFPlayer(client).m_preferences = StringToInt(szValue);
 }
 
 void ClientPrefs_SaveQueue(int client, int value)
 {
 	char szValue[12];
 	IntToString(value, szValue, sizeof(szValue));
-	g_cookieQueuePoints.Set(client, szValue);
+	g_hCookieQueue.Set(client, szValue);
 }
 
 void ClientPrefs_SavePreferences(int client, int value)
 {
 	char szValue[12];
 	IntToString(value, szValue, sizeof(szValue));
-	g_cookiePreferences.Set(client, szValue);
+	g_hCookiePreferences.Set(client, szValue);
 }

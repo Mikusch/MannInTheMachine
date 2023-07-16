@@ -176,10 +176,10 @@ static int Update(CTFBotMvMEngineerIdle action, int actor, float interval)
 		action.m_findHintTimer.Start(GetRandomFloat(1.0, 2.0));
 		
 		// figure out where to teleport into the map
-		bool bShouldTeleportToHint = Player(actor).HasAttribute(TELEPORT_TO_HINT);
+		bool bShouldTeleportToHint = CTFPlayer(actor).HasAttribute(TELEPORT_TO_HINT);
 		bool bShouldCheckForBlockingObject = !action.m_bTeleportedToHint && bShouldTeleportToHint;
 		int newNest = -1;
-		if (!SDKCall_FindHint(bShouldCheckForBlockingObject, !bShouldTeleportToHint, newNest))
+		if (!SDKCall_CTFBotMvMEngineerHintFinder_FindHint(bShouldCheckForBlockingObject, !bShouldTeleportToHint, newNest))
 		{
 			// try again next time
 			return action.Continue();
@@ -193,17 +193,17 @@ static int Update(CTFBotMvMEngineerIdle action, int actor, float interval)
 		
 		action.m_nestHint = newNest;
 		SetEntityOwner(action.m_nestHint, actor);
-		action.m_sentryHint = SDKCall_GetSentryHint(action.m_nestHint);
+		action.m_sentryHint = SDKCall_CTFBotHintEngineerNest_GetSentryHint(action.m_nestHint);
 		TakeOverStaleNest(action.m_sentryHint, actor);
 		
-		if (Player(actor).m_teleportWhereName.Length > 0)
+		if (CTFPlayer(actor).m_teleportWhereName.Length > 0)
 		{
-			action.m_teleporterHint = SDKCall_GetTeleporterHint(action.m_nestHint);
+			action.m_teleporterHint = SDKCall_CTFBotHintEngineerNest_GetTeleporterHint(action.m_nestHint);
 			TakeOverStaleNest(action.m_teleporterHint, actor);
 		}
 	}
 	
-	if (!action.m_bTeleportedToHint && Player(actor).HasAttribute(TELEPORT_TO_HINT))
+	if (!action.m_bTeleportedToHint && CTFPlayer(actor).HasAttribute(TELEPORT_TO_HINT))
 	{
 		action.m_nTeleportedCount++;
 		bool bFirstTeleportSpawn = action.m_nTeleportedCount == 1;
@@ -286,7 +286,8 @@ static bool ShouldAdvanceNestSpot(CTFBotMvMEngineerIdle action, int actor)
 		action.m_reevaluateNestTimer.Invalidate();
 	}
 	
-	BombInfo_t bombInfo = malloc(GetOffset(NULL_STRING, "sizeof(BombInfo_t)"));
+	MemoryBlock block = new MemoryBlock(GetOffset(NULL_STRING, "sizeof(BombInfo_t)"));
+	BombInfo_t bombInfo = view_as<BombInfo_t>(block.Address);
 	if (SDKCall_GetBombInfo(bombInfo))
 	{
 		if (IsValidEntity(action.m_nestHint))
@@ -297,7 +298,7 @@ static bool ShouldAdvanceNestSpot(CTFBotMvMEngineerIdle action, int actor)
 			CNavArea hintArea = TheNavMesh.GetNearestNavArea(origin, false, 1000.0);
 			if (hintArea)
 			{
-				float hintDistanceToTarget = Deref(hintArea + GetOffset("CTFNavArea", "m_distanceToBombTarget"));
+				float hintDistanceToTarget = LoadFromAddress(view_as<Address>(hintArea) + GetOffset("CTFNavArea", "m_distanceToBombTarget"), NumberType_Int32);
 				
 				bool bShouldAdvance = (hintDistanceToTarget > bombInfo.m_flMaxBattleFront);
 				
@@ -305,7 +306,7 @@ static bool ShouldAdvanceNestSpot(CTFBotMvMEngineerIdle action, int actor)
 			}
 		}
 	}
-	free(bombInfo);
+	delete block;
 	
 	return false;
 }
@@ -336,9 +337,9 @@ static void TryToDetonateStaleNest(CTFBotMvMEngineerIdle action)
 	for (int i = 0; i < activeEngineerNest.Length; ++i)
 	{
 		int nest = activeEngineerNest.Get(i);
-		if (SDKCall_IsStaleNest(nest))
+		if (SDKCall_CTFBotHintEngineerNest_IsStaleNest(nest))
 		{
-			SDKCall_DetonateStaleNest(nest);
+			SDKCall_CTFBotHintEngineerNest_DetonateStaleNest(nest);
 		}
 	}
 	

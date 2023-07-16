@@ -25,49 +25,46 @@
 #include <dhooks>
 #include <tf2attributes>
 #include <tf_econ_data>
-#include <tf2items>
 #include <tf2utils>
 #include <loadsoundscript>
 #include <cbasenpc>
 #include <cbasenpc/tf/nav>
 #include <morecolors>
 #include <smmem>
+#include <sourcescramble>
+#include <vscript>
 #include <mitm>
-#undef REQUIRE_EXTENSIONS
-#include <sendproxy>
-#define REQUIRE_EXTENSIONS
 
 // Uncomment this for diagnostic messages in server console (very verbose)
 // #define DEBUG
 
+#define PLUGIN_VERSION	"1.0.0"
+
 // Global entities
 CPopulationManager g_pPopulationManager = view_as<CPopulationManager>(INVALID_ENT_REFERENCE);
 CTFObjectiveResource g_pObjectiveResource = view_as<CTFObjectiveResource>(INVALID_ENT_REFERENCE);
-CMannVsMachineStats g_pMVMStats = view_as<CMannVsMachineStats>(INVALID_ENT_REFERENCE);
+CTFGameRules g_pGameRules = view_as<CTFGameRules>(INVALID_ENT_REFERENCE);
 
 // Other globals
-Handle g_WarningHudSync;
-Handle g_hWaitingForPlayersTimer;
+Handle g_hWarningHudSync;
 bool g_bInWaitingForPlayers;
-bool g_bAllowTeamChange;
+bool g_bAllowTeamChange;	// Bypass CTFGameRules::GetTeamAssignmentOverride?
 bool g_bForceFriendlyFire;
-bool g_bPrintEndlessBotUpgrades;
-float g_flNextRestoreCheckpointTime;
+bool g_bInEndlessRollEscalation;
 
 // Plugin ConVars
-ConVar mitm_developer;
-ConVar mitm_defender_min_count;
-ConVar mitm_defender_max_count;
-ConVar mitm_min_spawn_hurry_time;
-ConVar mitm_max_spawn_hurry_time;
-ConVar mitm_queue_points;
-ConVar mitm_rename_robots;
-ConVar mitm_annotation_lifetime;
-ConVar mitm_invader_allow_suicide;
-ConVar mitm_party_max_size;
-ConVar mitm_setup_time;
-ConVar mitm_disable_explosive_gas;
-ConVar mitm_max_spawn_deaths;
+ConVar sm_mitm_developer;
+ConVar sm_mitm_defender_count;
+ConVar sm_mitm_custom_upgrades_file;
+ConVar sm_mitm_spawn_hurry_time;
+ConVar sm_mitm_queue_points;
+ConVar sm_mitm_rename_robots;
+ConVar sm_mitm_annotation_lifetime;
+ConVar sm_mitm_invader_allow_suicide;
+ConVar sm_mitm_party_enabled;
+ConVar sm_mitm_party_max_size;
+ConVar sm_mitm_setup_time;
+ConVar sm_mitm_max_spawn_deaths;
 ConVar mitm_use_bot_viewmodels;
 
 // Game ConVars
@@ -89,6 +86,7 @@ ConVar tf_bot_suicide_bomb_friendly_fire;
 ConVar tf_bot_taunt_victim_chance;
 ConVar tf_bot_always_full_reload;
 ConVar tf_bot_flag_kill_on_touch;
+ConVar tf_bot_melee_only;
 ConVar mp_tournament_redteamname;
 ConVar mp_tournament_blueteamname;
 ConVar mp_waitingforplayers_time;
@@ -106,6 +104,7 @@ ConVar phys_pushscale;
 #include "mitm/events.sp"
 #include "mitm/forwards.sp"
 #include "mitm/hooks.sp"
+#include "mitm/mempatches.sp"
 #include "mitm/party.sp"
 #include "mitm/queue.sp"
 #include "mitm/offsets.sp"
@@ -113,7 +112,6 @@ ConVar phys_pushscale;
 #include "mitm/natives.sp"
 #include "mitm/sdkcalls.sp"
 #include "mitm/sdkhooks.sp"
-#include "mitm/sendproxy.sp"
 #include "mitm/tf_bot_squad.sp"
 #include "mitm/util.sp"
 
@@ -138,13 +136,13 @@ public Plugin myinfo =
 	name = "Mann in the Machine",
 	author = "Mikusch",
 	description = "Mann vs. Machine, but as a 32-player PvP gamemode.",
-	version = "1.0.0",
+	version = PLUGIN_VERSION,
 	url = "https://github.com/Mikusch/MannInTheMachine"
 }
 
 public void OnPluginStart()
 {
-	g_WarningHudSync = CreateHudSynchronizer();
+	g_hWarningHudSync = CreateHudSynchronizer();
 	
 	LoadTranslations("common.phrases");
 	LoadTranslations("mitm.phrases");
@@ -167,11 +165,11 @@ public void OnPluginStart()
 	CTFBotTaunt.Init();
 	
 	// Install player action factory
-	CEntityFactory EntityFactory = new CEntityFactory("player");
-	EntityFactory.DeriveFromClass("player");
-	EntityFactory.AttachNextBot(CreateNextBotPlayer);
-	EntityFactory.SetInitialActionFactory(CTFBotMainAction.GetFactory());
-	EntityFactory.Install();
+	CEntityFactory hEntityFactory = new CEntityFactory("player");
+	hEntityFactory.DeriveFromClass("player");
+	hEntityFactory.AttachNextBot(CreateNextBotPlayer);
+	hEntityFactory.SetInitialActionFactory(CTFBotMainAction.GetFactory());
+	hEntityFactory.Install();
 	
 	// Init plugin functions
 	Console_Init();
@@ -182,15 +180,16 @@ public void OnPluginStart()
 	ClientPrefs_Init();
 	Party_Init();
 	
-	GameData gamedata = new GameData("mitm");
-	if (gamedata)
+	GameData hGameData = new GameData("mitm");
+	if (hGameData)
 	{
 		// Init plugin functions requiring gamedata
-		DHooks_Init(gamedata);
-		Offsets_Init(gamedata);
-		SDKCalls_Init(gamedata);
+		DHooks_Init(hGameData);
+		MemPatches_Init(hGameData);
+		Offsets_Init(hGameData);
+		SDKCalls_Init(hGameData);
 		
-		delete gamedata;
+		delete hGameData;
 	}
 	else
 	{
@@ -200,7 +199,7 @@ public void OnPluginStart()
 	for (int client = 1; client <= MaxClients; client++)
 	{
 		// Init player properties
-		Player(client).Init();
+		CTFPlayer(client).Init();
 		
 		if (IsClientInGame(client))
 		{
@@ -208,15 +207,13 @@ public void OnPluginStart()
 		}
 	}
 	
-	for (int entity = MaxClients + 1; entity < GetMaxEntities(); entity++)
+	int entity = -1;
+	while ((entity = FindEntityByClassname(entity, "*")) != -1)
 	{
-		if (IsValidEntity(entity))
+		char classname[64];
+		if (GetEntityClassname(entity, classname, sizeof(classname)))
 		{
-			char classname[64];
-			if (GetEntityClassname(entity, classname, sizeof(classname)))
-			{
-				OnEntityCreated(entity, classname);
-			}
+			OnEntityCreated(entity, classname);
 		}
 	}
 }
@@ -232,9 +229,7 @@ public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int maxlen)
 
 public void OnMapStart()
 {
-	g_hWaitingForPlayersTimer = null;
-	g_bInWaitingForPlayers = true;
-	g_flNextRestoreCheckpointTime = 0.0;
+	g_bInWaitingForPlayers = false;
 	
 	Precache();
 	
@@ -255,13 +250,23 @@ public void OnMapStart()
 	delete directory;
 }
 
+public void OnConfigsExecuted()
+{
+	char path[PLATFORM_MAX_PATH];
+	sm_mitm_custom_upgrades_file.GetString(path, sizeof(path));
+	
+	if (path[0] && g_pGameRules.IsValid())
+	{
+		g_pGameRules.SetCustomUpgradesFile(path);
+	}
+}
+
 public void OnClientPutInServer(int client)
 {
 	DHooks_OnClientPutInServer(client);
 	SDKHooks_OnClientPutInServer(client);
-	SendProxy_OnClientPutInServer(client);
 	
-	Player(client).Reset();
+	CTFPlayer(client).Reset();
 	
 	if (AreClientCookiesCached(client))
 	{
@@ -280,9 +285,9 @@ public void OnClientDisconnect(int client)
 		ForcePlayerSuicide(client);
 	}
 	
-	if (Player(client).IsInAParty())
+	if (CTFPlayer(client).IsInAParty())
 	{
-		Party party = Player(client).GetParty();
+		Party party = CTFPlayer(client).GetParty();
 		party.OnPartyMemberLeave(client);
 	}
 }
@@ -307,9 +312,9 @@ public void OnEntityCreated(int entity, const char[] classname)
 	{
 		g_pObjectiveResource = CTFObjectiveResource(EntIndexToEntRef(entity));
 	}
-	else if (StrEqual(classname, "tf_mann_vs_machine_stats"))
+	else if (StrEqual(classname, "tf_gamerules"))
 	{
-		g_pMVMStats = CMannVsMachineStats(EntIndexToEntRef(entity));
+		g_pGameRules = CTFGameRules(EntIndexToEntRef(entity));
 	}
 }
 
@@ -335,7 +340,7 @@ public void OnGameFrame()
 				if (!IsClientInGame(client))
 					continue;
 				
-				if (!Player(client).IsInvader())
+				if (!CTFPlayer(client).IsInvader())
 					continue;
 				
 				if (IsPlayerAlive(client))
@@ -375,18 +380,9 @@ public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3
 	
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
-		if (Player(client).HasAttribute(AUTO_JUMP))
+		if (CTFPlayer(client).HasAttribute(AUTO_JUMP) && CTFPlayer(client).ShouldAutoJump())
 		{
-			// AutoJump robots are not allowed to jump manually
-			if (Player(client).ShouldAutoJump())
-			{
-				buttons |= IN_JUMP;
-				TF2Attrib_RemoveByName(client, "no_jump");
-			}
-			else
-			{
-				TF2Attrib_SetByName(client, "no_jump", 1.0);
-			}
+			buttons |= IN_JUMP;
 		}
 		
 		FireWeaponAtEnemy(client, buttons);
@@ -404,48 +400,27 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 	
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
-		if (Player(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
+		if (CTFPlayer(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
 		{
 			TF2_AddCondition(client, TFCond_CritCanteen);
 		}
 		
-		if (Player(client).IsInASquad())
+		if (CTFPlayer(client).IsInASquad())
 		{
-			if (Player(client).GetSquad().GetMemberCount() <= 1 || Player(client).GetSquad().GetLeader() == -1)
+			if (CTFPlayer(client).GetSquad().GetMemberCount() <= 1 || CTFPlayer(client).GetSquad().GetLeader() == -1)
 			{
 				// squad has collapsed - disband it
-				Player(client).LeaveSquad();
+				CTFPlayer(client).LeaveSquad();
 			}
 		}
 	}
-}
-
-public Action OnClientCommandKeyValues(int client, KeyValues kv)
-{
-	char szSection[16];
-	if (kv.GetSectionName(szSection, sizeof(szSection)) && StrEqual(szSection, "MVM_Upgrade"))
-	{
-		if (kv.JumpToKey("Upgrade"))
-		{
-			int iUpgrade = kv.GetNum("upgrade");
-			int iCount = kv.GetNum("count");
-			
-			if (iUpgrade == UPGRADE_GAS_EXPLODE_ON_IGNITE && iCount > 0 && mitm_disable_explosive_gas.BoolValue)
-			{
-				PrintCenterText(client, "%t", "MvM_Upgrade_Disabled");
-				return Plugin_Handled;
-			}
-		}
-	}
-	
-	return Plugin_Continue;
 }
 
 public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname, bool &result)
 {
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
-		if (Player(client).HasAttribute(ALWAYS_CRIT))
+		if (CTFPlayer(client).HasAttribute(ALWAYS_CRIT))
 		{
 			result = true;
 			return Plugin_Changed;
@@ -477,7 +452,11 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 				if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
 				{
 					// If we are being airblasted in spawn, give more time to leave
-					Player(client).m_flSpawnTimeLeft += 5.0;
+					if (CTFPlayer(client).m_flSpawnTimeLeft != 1.0)
+					{
+						CTFPlayer(client).m_flSpawnTimeLeft += 5.0;
+						CTFPlayer(client).m_flSpawnTimeLeftMax += 5.0;
+					}
 				}
 			}
 		}
@@ -543,20 +522,18 @@ static void FireWeaponAtEnemy(int client, int &buttons)
 	if (myWeapon == -1)
 		return;
 	
-	if (Player(client).IsBarrageAndReloadWeapon(myWeapon))
+	if (CTFPlayer(client).IsBarrageAndReloadWeapon(myWeapon))
 	{
-		if (Player(client).HasAttribute(HOLD_FIRE_UNTIL_FULL_RELOAD) || tf_bot_always_full_reload.BoolValue)
+		if (CTFPlayer(client).HasAttribute(HOLD_FIRE_UNTIL_FULL_RELOAD) || tf_bot_always_full_reload.BoolValue)
 		{
-			static int s_isWaitingForFullReload[MAXPLAYERS + 1];
-			
-			if (SDKCall_Clip1(myWeapon) <= 0)
+			if (SDKCall_CBaseCombatWeapon_Clip1(myWeapon) <= 0)
 			{
-				s_isWaitingForFullReload[client] = true;
+				CTFPlayer(client).m_isWaitingForFullReload = true;
 			}
 			
-			if (s_isWaitingForFullReload[client])
+			if (CTFPlayer(client).m_isWaitingForFullReload)
 			{
-				if (SDKCall_Clip1(myWeapon) < TF2Util_GetWeaponMaxClip(myWeapon))
+				if (SDKCall_CBaseCombatWeapon_Clip1(myWeapon) < TF2Util_GetWeaponMaxClip(myWeapon))
 				{
 					LockWeapon(client, myWeapon, buttons);
 					return;
@@ -565,23 +542,23 @@ static void FireWeaponAtEnemy(int client, int &buttons)
 				UnlockWeapon(myWeapon);
 				
 				// we are fully reloaded
-				s_isWaitingForFullReload[client] = false;
+				CTFPlayer(client).m_isWaitingForFullReload = false;
 			}
 		}
 	}
 	
-	if (Player(client).HasAttribute(ALWAYS_FIRE_WEAPON))
+	if (CTFPlayer(client).HasAttribute(ALWAYS_FIRE_WEAPON))
 	{
 		buttons |= IN_ATTACK;
 		return;
 	}
 	
-	if (Player(client).HasMission(MISSION_DESTROY_SENTRIES))
+	if (CTFPlayer(client).HasMission(MISSION_DESTROY_SENTRIES))
 	{
 		LockWeapon(client, myWeapon, buttons);
 		return;
 	}
-	else if (Player(client).GetPrevMission() == MISSION_DESTROY_SENTRIES)
+	else if (CTFPlayer(client).GetPrevMission() == MISSION_DESTROY_SENTRIES)
 	{
 		UnlockWeapon(myWeapon);
 	}
@@ -595,9 +572,9 @@ static void FireWeaponAtEnemy(int client, int &buttons)
 		int index = attributes.FindValue(144); // set_weapon_mode
 		if (index != -1 && attributes.Get(index, 1) == float(MEDIGUN_RESIST))
 		{
-			bool preferBullets = Player(client).HasAttribute(PREFER_VACCINATOR_BULLETS);
-			bool preferBlast = Player(client).HasAttribute(PREFER_VACCINATOR_BLAST);
-			bool preferFire = Player(client).HasAttribute(PREFER_VACCINATOR_FIRE);
+			bool preferBullets = CTFPlayer(client).HasAttribute(PREFER_VACCINATOR_BULLETS);
+			bool preferBlast = CTFPlayer(client).HasAttribute(PREFER_VACCINATOR_BLAST);
+			bool preferFire = CTFPlayer(client).HasAttribute(PREFER_VACCINATOR_FIRE);
 			
 			if (preferBullets)
 			{

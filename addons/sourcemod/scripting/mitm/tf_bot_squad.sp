@@ -158,6 +158,10 @@ methodmap CTFBotSquad
 	
 	public void Join(int bot)
 	{
+#if defined DEBUG
+		LogMessage("CTFBotSquad: \"%L\" joined \"Squad<%d>\"", bot, this.m_id);
+#endif
+		
 		// first member is the leader
 		if (this.m_roster.Length == 0)
 		{
@@ -165,7 +169,7 @@ methodmap CTFBotSquad
 		}
 		else if (IsMannVsMachineMode())
 		{
-			Player(bot).SetFlagTarget(INVALID_ENT_REFERENCE);
+			CTFPlayer(bot).SetFlagTarget(INVALID_ENT_REFERENCE);
 		}
 		
 		this.m_roster.Push(bot);
@@ -173,6 +177,10 @@ methodmap CTFBotSquad
 	
 	public void Leave(int bot)
 	{
+#if defined DEBUG
+		LogMessage("CTFBotSquad: \"%L\" left \"Squad<%d>\"", bot, this.m_id);
+#endif
+		
 		int index = this.m_roster.FindValue(bot);
 		if (index != -1)
 			this.m_roster.Erase(index);
@@ -184,21 +192,19 @@ methodmap CTFBotSquad
 			// pick the next living leader that's left in the squad
 			if (this.m_bShouldPreserveSquad)
 			{
-				ArrayList members = new ArrayList();
-				this.CollectMembers(members);
-				if (members.Length)
+				int[] members = new int[MaxClients];
+				if (this.CollectMembers(members, MaxClients))
 				{
-					this.m_leader = members.Get(0);
+					this.m_leader = members[0];
 				}
-				delete members;
 			}
 		}
 		else if (IsMannVsMachineMode())
 		{
-			int flag = Player(bot).GetFlagToFetch();
+			int flag = CTFPlayer(bot).GetFlagToFetch();
 			if (flag != -1)
 			{
-				Player(bot).SetFlagTarget(flag);
+				CTFPlayer(bot).SetFlagTarget(flag);
 			}
 		}
 		
@@ -208,16 +214,20 @@ methodmap CTFBotSquad
 		}
 	}
 	
-	public void CollectMembers(ArrayList &memberList)
+	public int CollectMembers(int[] clients, int size)
 	{
+		int count = 0;
+		
 		for (int i = 0; i < this.m_roster.Length; ++i)
 		{
 			int member = this.m_roster.Get(i);
 			if (IsClientInGame(member) && IsPlayerAlive(member))
 			{
-				memberList.Push(member);
+				clients[count++] = member;
 			}
 		}
+		
+		return count;
 	}
 	
 	public int GetMemberCount()
@@ -258,13 +268,17 @@ methodmap CTFBotSquad
 	
 	public void DisbandAndDeleteSquad()
 	{
+#if defined DEBUG
+		LogMessage("CTFBotSquad: Disbanding \"Squad<%d>\"", this.m_id);
+#endif
+		
 		// Tell each member of the squad to remove this reference
 		for (int i = 0; i < this.m_roster.Length; ++i)
 		{
 			int member = this.m_roster.Get(i);
 			if (IsClientInGame(member))
 			{
-				Player(member).DeleteSquad();
+				CTFPlayer(member).DeleteSquad();
 			}
 		}
 		
@@ -298,11 +312,14 @@ methodmap CTFBotSquad
 			id++;
 		}
 		
-		// fill basic properties
 		CTFBotSquadInfo properties;
 		properties.Init(id);
 		
 		g_squads.PushArray(properties);
+		
+#if defined DEBUG
+		LogMessage("CTFBotSquad: Created \"Squad<%d>\"", id);
+#endif
 		
 		return CTFBotSquad(id);
 	}

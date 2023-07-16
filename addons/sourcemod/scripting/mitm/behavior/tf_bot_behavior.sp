@@ -87,19 +87,17 @@ static int OnStart(CTFBotMainAction action, int actor, NextBotAction priorAction
 	}
 	
 	// we just spawned
-	if (GetGameTime() - Player(actor).GetSpawnTime() < 1.0)
+	if (GetGameTime() - CTFPlayer(actor).GetSpawnTime() < 1.0)
 	{
 		// bots must quickly leave their spawn
-		Player(actor).m_flSpawnTimeLeft = Player(actor).CalculateSpawnTime();
+		CTFPlayer(actor).m_flSpawnTimeLeft = CTFPlayer(actor).CalculateSpawnTime();
+		CTFPlayer(actor).m_flSpawnTimeLeftMax = CTFPlayer(actor).m_flSpawnTimeLeft;
 		
-		if (!Player(actor).HasPreference(PREF_DISABLE_SPAWN_NOTIFICATION))
-		{
-			char name[MAX_NAME_LENGTH];
-			Player(actor).GetName(name, sizeof(name));
-			PrintCenterText(actor, "%t", "Invader_Spawned", name);
-			
-			EmitSoundToClient(actor, "ui/system_message_alert.wav", .channel = SNDCHAN_STATIC);
-		}
+		char name[MAX_NAME_LENGTH];
+		CTFPlayer(actor).GetInvaderName(name, sizeof(name));
+		PrintCenterText(actor, "%t", "Invader_Spawned", name);
+		
+		EmitSoundToClient(actor, "ui/system_message_alert.wav", .channel = SNDCHAN_STATIC);
 	}
 	
 	return action.Continue();
@@ -120,42 +118,57 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 			TF2_AddCondition(actor, TFCond_UberchargeFading, 0.5);
 			
 			// force bots to walk out of spawn
-			if (!Player(actor).HasAttribute(AUTO_JUMP))
+			if (!CTFPlayer(actor).HasAttribute(AUTO_JUMP))
 			{
 				TF2Attrib_SetByName(actor, "no_jump", 1.0);
 			}
 			
-			if (Player(actor).m_flSpawnTimeLeft != -1.0)
+			if (GameRules_GetRoundState() == RoundState_RoundRunning && CTFPlayer(actor).m_flSpawnTimeLeft != -1.0)
 			{
 				// pause spawn timer while stunned
 				if (!TF2_IsPlayerInCondition(actor, TFCond_Dazed))
 				{
-					Player(actor).m_flSpawnTimeLeft -= interval;
+					float velocity[3];
+					CTFPlayer(actor).GetAbsVelocity(velocity);
 					
-					if (Player(actor).m_flSpawnTimeLeft <= 0.0)
+					// as long as they are moving, slow down the timer drastically
+					float flTimeToSubtract = GetVectorLength(velocity) >= GetEntPropFloat(actor, Prop_Send, "m_flMaxspeed") ? (interval / 4) : interval;
+					CTFPlayer(actor).m_flSpawnTimeLeft -= flTimeToSubtract;
+					
+					if (CTFPlayer(actor).m_flSpawnTimeLeft <= 0.0)
 					{
 						ForcePlayerSuicide(actor);
 						
 						// kick players for dying to the spawn timer too many times
-						int iMaxDeaths = mitm_max_spawn_deaths.IntValue;
-						if (iMaxDeaths)
+						int iMaxDeaths = sm_mitm_max_spawn_deaths.IntValue;
+						if (iMaxDeaths && !sm_mitm_developer.BoolValue)
 						{
-							if (iMaxDeaths <= ++Player(actor).m_iSpawnDeathCount)
+							if (iMaxDeaths <= ++CTFPlayer(actor).m_iSpawnDeathCount)
 							{
-								KickClient(actor, "%t", "Invader_SpawnTimerKick");
+								KickClient(actor, "%t", "Invader_SpawnTimer_KickReason");
+								CPrintToChatAll("%s %t", PLUGIN_TAG, "Invader_SpawnTimer_Kicked", actor);
 							}
 							else
 							{
-								CPrintToChat(actor, "%s %t", PLUGIN_TAG, "Invader_SpawnTimerDeath", iMaxDeaths - Player(actor).m_iSpawnDeathCount);
+								CPrintToChat(actor, "%s %t", PLUGIN_TAG, "Invader_SpawnTimer_Warning", iMaxDeaths - CTFPlayer(actor).m_iSpawnDeathCount);
 							}
 						}
 					}
 				}
 				
-				if (Player(actor).m_flSpawnTimeLeft > 0.0)
+				if (CTFPlayer(actor).m_flSpawnTimeLeft > 0.0)
 				{
+					float flProgress = CTFPlayer(actor).m_flSpawnTimeLeft / CTFPlayer(actor).m_flSpawnTimeLeftMax;
+					
+					char szProgressBar[64];
+					for (int i = 0; i < PROGRESS_BAR_NUM_BLOCKS; ++i)
+					{
+						bool bFilled = float(i) / PROGRESS_BAR_NUM_BLOCKS < flProgress;
+						StrCat(szProgressBar, sizeof(szProgressBar), bFilled ? PROGRESS_BAR_CHAR_FILLED : PROGRESS_BAR_CHAR_EMPTY);
+					}
+					
 					SetHudTextParams(-1.0, 0.65, interval, 255, 255, 255, 255);
-					ShowSyncHudText(actor, g_WarningHudSync, "%t", "Invader_HurryOutOfSpawn", Player(actor).m_flSpawnTimeLeft);
+					ShowSyncHudText(actor, g_hWarningHudSync, "%t", "Invader_SpawnTimer_Countdown", szProgressBar);
 				}
 			}
 		}
@@ -176,16 +189,7 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 			}
 			else if (action.m_undergroundTimer.IsGreaterThan(3.0))
 			{
-				char auth[MAX_AUTHID_LENGTH], teamName[MAX_TEAM_NAME_LENGTH];
-				GetClientAuthId(actor, AuthId_Engine, auth, sizeof(auth), false);
-				GetTeamName(GetClientTeam(actor), teamName, sizeof(teamName));
-				
-				LogMessage("\"%N<%i><%s><%s>\" underground (position \"%3.2f %3.2f %3.2f\")",
-						   actor,
-						   GetClientUserId(actor),
-						   auth,
-						   teamName,
-						   origin[0], origin[1], origin[2]);
+				LogMessage("\"%L\" underground (position \"%3.2f %3.2f %3.2f\")", actor, origin[0], origin[1], origin[2]);
 				
 				// teleport bot to a reasonable place
 				float center[3];
@@ -222,7 +226,7 @@ static int OnContact(CTFBotMainAction action, int actor, int other, Address resu
 	if (IsValidEntity(other) && !(view_as<SolidFlags_t>(GetEntProp(other, Prop_Data, "m_usSolidFlags")) & FSOLID_NOT_SOLID) && other != 0 && !IsEntityClient(other))
 	{
 		// Mini-bosses destroy non-Sentrygun objects they bump into (ie: Dispensers)
-		if (IsMannVsMachineMode() && Player(actor).IsMiniBoss())
+		if (IsMannVsMachineMode() && CTFPlayer(actor).IsMiniBoss())
 		{
 			if (IsBaseObject(other))
 			{
@@ -254,9 +258,9 @@ static int OnOtherKilled(CTFBotMainAction action, int actor, int victim, int att
 	{
 		if (GetClientTeam(actor) != GetClientTeam(victim) && actor == attacker)
 		{
-			bool isTaunting = !HasTheFlag(attacker) && GetRandomFloat(0.0, 100.0) <= tf_bot_taunt_victim_chance.FloatValue;
+			bool isTaunting = !CTFPlayer(attacker).HasTheFlag() && GetRandomFloat(0.0, 100.0) <= tf_bot_taunt_victim_chance.FloatValue;
 			
-			if (IsMannVsMachineMode() && Player(attacker).IsMiniBoss())
+			if (IsMannVsMachineMode() && CTFPlayer(attacker).IsMiniBoss())
 			{
 				// Bosses don't taunt puny humans
 				isTaunting = false;

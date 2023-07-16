@@ -18,8 +18,6 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static Handle g_annotationTimer[MAXPLAYERS + 1];
-
 void Events_Init()
 {
 	HookEvent("player_spawn", EventHook_PlayerSpawn);
@@ -29,20 +27,25 @@ void Events_Init()
 	HookEvent("player_builtobject", EventHook_PlayerBuiltObject);
 	HookEvent("object_destroyed", EventHook_ObjectDestroyed);
 	HookEvent("object_detonated", EventHook_ObjectDestroyed);
-	HookEvent("teamplay_round_start", EventHook_TeamplayRoundStart);
 	HookEvent("teamplay_point_captured", EventHook_TeamplayPointCaptured);
+	HookEvent("teamplay_flag_event", EventHook_TeamplayFlagEvent);
+	HookEvent("teams_changed", EventHook_TeamsChanged);
 }
 
 static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
+	if (client == 0)
+		return;
 	
-	g_annotationTimer[client] = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
+	CTFPlayer(client).m_annotationTimer = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
 }
 
 static void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
 {
 	int victim = GetClientOfUserId(event.GetInt("userid"));
+	if (victim == 0)
+		return;
 	
 	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
 	{
@@ -53,30 +56,29 @@ static void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroad
 static Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 {
 	int client = GetClientOfUserId(event.GetInt("userid"));
+	if (client == 0)
+		return Plugin_Continue;
+	
 	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
 	
 	// Only show when a new defender joins
-	bool bSilent = (team == TFTeam_Spectator) || (team == TFTeam_Invaders);
+	bool bSilent = team != TFTeam_Defenders;
 	event.SetInt("silent", bSilent);
 	
-	Player(client).SetPrevMission(NO_MISSION);
-	TF2Attrib_RemoveAll(client);
-	// Clear Sound
-	Player(client).StopIdleSound();
-	
-	if (team == TFTeam_Invaders)
+	if (IsMannVsMachineMode())
 	{
-		SetEntityFlags(client, GetEntityFlags(client) | FL_FAKECLIENT);
+		CTFPlayer(client).SetPrevMission(NO_MISSION);
+		TF2Attrib_RemoveAll(client);
+		// Clear Sound
+		CTFPlayer(client).StopIdleSound();
 	}
-	else
+	
+	if (team != TFTeam_Invaders)
 	{
-		Player(client).ResetOnTeamChange();
-		Player(client).ResetName();
+		CTFPlayer(client).ResetInvader();
 		
 		SetVariantString("");
 		AcceptEntityInput(client, "SetCustomModel");
-		
-		SetEntityFlags(client, GetEntityFlags(client) & ~FL_FAKECLIENT);
 	}
 	
 	return Plugin_Changed;
@@ -85,7 +87,10 @@ static Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroa
 static void EventHook_PostInventoryApplication(Event event, const char[] name, bool dontBroadcast)
 {
 	int userid = event.GetInt("userid");
+	
 	int client = GetClientOfUserId(userid);
+	if (client == 0)
+		return;
 	
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
@@ -97,39 +102,28 @@ static void EventHook_PostInventoryApplication(Event event, const char[] name, b
 static void RequestFrameCallback_ApplyWeaponRestrictions(int userid)
 {
 	int client = GetClientOfUserId(userid);
-	if (client)
+	if (client == 0)
+		return;
+	
+	// equip our required weapon
+	CTFPlayer(client).EquipRequiredWeapon();
+	
+	// switch to special secondary weapon if we have one
+	int weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
+	if (weapon != -1)
 	{
-		// remove any weapons we aren't supposed to have
-		for (int iItemSlot = LOADOUT_POSITION_PRIMARY; iItemSlot < CLASS_LOADOUT_POSITION_COUNT; iItemSlot++)
+		int weaponID = TF2Util_GetWeaponID(weapon);
+		if (weaponID == TF_WEAPON_MEDIGUN ||
+			weaponID == TF_WEAPON_BUFF_ITEM ||
+			weaponID == TF_WEAPON_LUNCHBOX ||
+			weaponID == TF_WEAPON_JAR ||
+			weaponID == TF_WEAPON_JAR_MILK ||
+			weaponID == TF_WEAPON_JAR_GAS ||
+			weaponID == TF_WEAPON_ROCKETPACK ||
+			weaponID == TF_WEAPON_MECHANICAL_ARM ||
+			weaponID == TF_WEAPON_LASER_POINTER)
 		{
-			int entity = TF2Util_GetPlayerLoadoutEntity(client, iItemSlot);
-			if (Player(client).IsWeaponRestricted(entity))
-			{
-				RemovePlayerItem(client, entity);
-				RemoveEntity(entity);
-			}
-		}
-		
-		// equip our required weapon
-		Player(client).EquipRequiredWeapon();
-		
-		// switch to special secondary weapon if we have one
-		int weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
-		if (weapon != -1)
-		{
-			int weaponID = TF2Util_GetWeaponID(weapon);
-			if (weaponID == TF_WEAPON_MEDIGUN ||
-				weaponID == TF_WEAPON_BUFF_ITEM ||
-				weaponID == TF_WEAPON_LUNCHBOX ||
-				weaponID == TF_WEAPON_JAR ||
-				weaponID == TF_WEAPON_JAR_MILK ||
-				weaponID == TF_WEAPON_JAR_GAS ||
-				weaponID == TF_WEAPON_ROCKETPACK ||
-				weaponID == TF_WEAPON_MECHANICAL_ARM ||
-				weaponID == TF_WEAPON_LASER_POINTER)
-			{
-				TF2Util_SetPlayerActiveWeapon(client, weapon);
-			}
+			TF2Util_SetPlayerActiveWeapon(client, weapon);
 		}
 	}
 }
@@ -148,12 +142,12 @@ static void EventHook_PlayerBuiltObject(Event event, const char[] name, bool don
 		// CTFBotMvMEngineerBuildTeleportExit
 		if (type == TFObject_Teleporter && TF2_GetObjectMode(index) == TFObjectMode_Exit)
 		{
-			SDKCall_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Red);
+			SDKCall_CTFGameRules_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Red);
 			
-			Entity(index).SetTeleportWhere(Player(builder).m_teleportWhereName);
+			Entity(index).SetTeleportWhere(CTFPlayer(builder).m_teleportWhereName);
 			
 			// engineer bots create level 1 teleporters with increased health
-			int iHealth = RoundToFloor(SDKCall_GetMaxHealthForCurrentLevel(index) * tf_bot_engineer_building_health_multiplier.FloatValue);
+			int iHealth = RoundToFloor(SDKCall_CBaseObject_GetMaxHealthForCurrentLevel(index) * tf_bot_engineer_building_health_multiplier.FloatValue);
 			SetEntProp(index, Prop_Data, "m_iMaxHealth", iHealth);
 			SetEntProp(index, Prop_Data, "m_iHealth", iHealth);
 			
@@ -167,7 +161,7 @@ static void EventHook_PlayerBuiltObject(Event event, const char[] name, bool don
 		// CTFBotMvMEngineerBuildSentryGun
 		else if (type == TFObject_Sentry)
 		{
-			SDKCall_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Red);
+			SDKCall_CTFGameRules_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Red);
 			
 			// engineer bots create pre-built level 3 sentry guns
 			SetEntProp(index, Prop_Data, "m_nDefaultUpgradeLevel", 2);
@@ -194,7 +188,7 @@ static void EventHook_ObjectDestroyed(Event event, const char[] name, bool dontB
 		if (!IsPlayerAlive(client))
 			continue;
 		
-		if (Player(client).HasMission(MISSION_DESTROY_SENTRIES) && index == Player(client).GetMissionTarget())
+		if (CTFPlayer(client).HasMission(MISSION_DESTROY_SENTRIES) && index == CTFPlayer(client).GetMissionTarget())
 		{
 			char text[64];
 			Format(text, sizeof(text), "%T", "Invader_DestroySentries_DetonateHere", client);
@@ -202,27 +196,8 @@ static void EventHook_ObjectDestroyed(Event event, const char[] name, bool dontB
 			float worldPos[3];
 			GetEntPropVector(index, Prop_Data, "m_vecAbsOrigin", worldPos);
 			
-			ShowAnnotation(client, MITM_HINT_MASK | client, text, _, worldPos, mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
+			ShowAnnotation(client, MITM_HINT_MASK | client, text, _, worldPos, sm_mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
 		}
-	}
-}
-
-static void EventHook_TeamplayRoundStart(Event event, const char[] name, bool dontBroadcast)
-{
-	if (g_pMVMStats.GetCurrentWave() == 0 && !g_hWaitingForPlayersTimer)
-	{
-		g_bInWaitingForPlayers = true;
-		
-		// Show the "Waiting For Players" text
-		tf_mvm_min_players_to_start.IntValue = MaxClients + 1;
-		
-		g_hWaitingForPlayersTimer = CreateTimer(mp_waitingforplayers_time.FloatValue, Timer_OnWaitingForPlayersEnd);
-	}
-	else
-	{
-		g_bInWaitingForPlayers = false;
-		
-		tf_mvm_min_players_to_start.IntValue = 0;
 	}
 }
 
@@ -245,25 +220,34 @@ static void EventHook_TeamplayPointCaptured(Event event, const char[] name, bool
 			
 			// hide current annotation and recreate later
 			HideAnnotation(client, MITM_HINT_MASK | client);
-			g_annotationTimer[client] = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
+			CTFPlayer(client).m_annotationTimer = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
 		}
 	}
 }
 
-static Action Timer_OnWaitingForPlayersEnd(Handle timer)
+void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool dontBroadcast)
 {
-	if (!g_bInWaitingForPlayers)
-		return Plugin_Continue;
+	int player = event.GetInt("player");
+	int eventtype = event.GetInt("eventtype");
+	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
 	
-	tf_mvm_min_players_to_start.IntValue = 0;
-	g_bInWaitingForPlayers = false;
-	
-	if (g_pPopulationManager.IsValid())
+	if (team == TFTeam_Invaders && eventtype == TF_FLAGEVENT_CAPTURED)
 	{
-		g_pPopulationManager.ResetMap();
+		CPrintToChatAll("%s %t", PLUGIN_TAG, "Invader_Deployed", player, GetEntProp(player, Prop_Data, "m_iHealth"), TF2Util_GetEntityMaxHealth(player));
 	}
-	
-	return Plugin_Continue;
+}
+
+static void EventHook_TeamsChanged(Event event, const char[] name, bool dontBroadcast)
+{
+	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && !sm_mitm_developer.BoolValue)
+	{
+		RequestFrame(RequestFrameCallback_FindReplacementDefender);
+	}
+}
+
+static void RequestFrameCallback_FindReplacementDefender()
+{
+	FindReplacementDefender();
 }
 
 static Action Timer_CheckGateBotAnnotation(Handle timer, int userid)
@@ -273,7 +257,7 @@ static Action Timer_CheckGateBotAnnotation(Handle timer, int userid)
 	if (client == 0)
 		return Plugin_Stop;
 	
-	if (timer != g_annotationTimer[client])
+	if (timer != CTFPlayer(client).m_annotationTimer)
 		return Plugin_Stop;
 	
 	if (!IsClientInGame(client))

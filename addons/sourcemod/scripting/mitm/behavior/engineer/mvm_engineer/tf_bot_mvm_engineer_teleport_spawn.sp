@@ -83,7 +83,7 @@ methodmap CTFBotMvMEngineerTeleportSpawn < NextBotAction
 
 static int OnStart(CTFBotMvMEngineerTeleportSpawn action, int actor, NextBotAction priorAction)
 {
-	if (!Player(actor).HasAttribute(TELEPORT_TO_HINT))
+	if (!CTFPlayer(actor).HasAttribute(TELEPORT_TO_HINT))
 	{
 		return action.Done("Cannot teleport to hint with out Attributes TeleportToHint");
 	}
@@ -100,7 +100,7 @@ static int Update(CTFBotMvMEngineerTeleportSpawn action, int actor, float interv
 		
 		action.m_teleportDelay.Start(0.1);
 		if (IsValidEntity(action.m_hintEntity))
-			SDKCall_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Defenders);
+			SDKCall_CTFGameRules_PushAllPlayersAway(origin, 400.0, 500.0, TFTeam_Defenders);
 	}
 	else if (action.m_teleportDelay.IsElapsed())
 	{

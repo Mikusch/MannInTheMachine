@@ -53,7 +53,7 @@ methodmap CTFBotFetchFlag < NextBotAction
 
 static int Update(CTFBotFetchFlag action, int actor, float interval)
 {
-	int flag = Player(actor).GetFlagToFetch();
+	int flag = CTFPlayer(actor).GetFlagToFetch();
 	
 	if (!IsValidEntity(flag))
 	{
@@ -62,10 +62,10 @@ static int Update(CTFBotFetchFlag action, int actor, float interval)
 	
 	if (IsMannVsMachineMode() && GetEntProp(flag, Prop_Send, "m_nFlagStatus") == TF_FLAGINFO_HOME)
 	{
-		if (GetGameTime() - Player(actor).GetSpawnTime() < 1.0 && TF2_GetClientTeam(actor) != TFTeam_Spectator)
+		if (GetGameTime() - CTFPlayer(actor).GetSpawnTime() < 1.0 && TF2_GetClientTeam(actor) != TFTeam_Spectator)
 		{
 			// we just spawned - give us the flag
-			SDKCall_PickUp(flag, actor, true);
+			SDKCall_CTFItem_PickUp(flag, actor, true);
 		}
 		else
 		{

@@ -28,13 +28,13 @@ void Hooks_Init()
 
 static Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNum, bool reliable, bool init)
 {
-	if (!mitm_rename_robots.BoolValue)
+	if (!sm_mitm_rename_robots.BoolValue)
 		return Plugin_Continue;
 	
 	int client = msg.ReadByte();
 	bool bWantsToChat = view_as<bool>(msg.ReadByte());
 	
-	if (!bWantsToChat && Player(client).IsInvader())
+	if (!bWantsToChat && CTFPlayer(client).IsInvader())
 	{
 		char szBuf[MAX_MESSAGE_LENGTH];
 		msg.ReadString(szBuf, sizeof(szBuf));
@@ -53,7 +53,7 @@ static Action OnTextMsg(UserMsg msg_id, BfRead msg, const int[] players, int cli
 {
 	int msg_dest = msg.ReadByte();
 	
-	if (g_bPrintEndlessBotUpgrades)
+	if (g_bInEndlessRollEscalation)
 	{
 		// Need to wait a frame to be able to send another UserMsg
 		RequestFrame(RequestFrameCallback_PrintEndlessBotUpgrades, msg_dest);
@@ -122,12 +122,12 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 				if (pDef)
 				{
 					char szDescription[TEXTMSG_MAX_MESSAGE_LENGTH];
-					PtrToString(Deref(pDef + GetOffset("CEconItemAttributeDefinition", "m_pszDescriptionString")), szDescription, sizeof(szDescription));
+					PtrToString(LoadFromAddress(pDef + GetOffset("CEconItemAttributeDefinition", "m_pszDescriptionString"), NumberType_Int32), szDescription, sizeof(szDescription));
 					
 					// If there's a localized description, use that, else use the internal attribute name
 					if (szDescription[0] && msg_dest == HUD_PRINTCONSOLE)
 					{
-						int iFormat = Deref(pDef + GetOffset("CEconItemAttributeDefinition", "m_iDescriptionFormat"));
+						int iFormat = LoadFromAddress(pDef + GetOffset("CEconItemAttributeDefinition", "m_iDescriptionFormat"), NumberType_Int32);
 						float flValue = TranslateAttributeValue(iFormat, upgrade.flValue);
 						
 						char szValue[16];
@@ -190,24 +190,22 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 
 static void EntityOutput_OnStateEnterBetweenRounds(const char[] output, int caller, int activator, float delay)
 {
-	if (!g_bInWaitingForPlayers && mitm_setup_time.IntValue > 0)
+	if (!g_bInWaitingForPlayers && sm_mitm_setup_time.IntValue > 0)
 	{
 		CreateTimer(0.1, Timer_StartReadyTimer);
 	}
 }
 
-static Action Timer_StartReadyTimer(Handle timer)
+static void Timer_StartReadyTimer(Handle timer)
 {
 	// Automatically start the ready timer
-	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + mitm_setup_time.FloatValue);
+	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + sm_mitm_setup_time.FloatValue);
 	GameRules_SetProp("m_bAwaitingReadyRestart", false);
 	
 	Event event = CreateEvent("teamplay_round_restart_seconds");
 	if (event)
 	{
-		event.SetInt("seconds", mitm_setup_time.IntValue);
+		event.SetInt("seconds", sm_mitm_setup_time.IntValue);
 		event.Fire();
 	}
-	
-	return Plugin_Continue;
 }

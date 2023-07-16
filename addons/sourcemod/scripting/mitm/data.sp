@@ -33,33 +33,36 @@ static ArrayList m_eventChangeAttributes[MAXPLAYERS + 1];
 static ArrayList m_tags[MAXPLAYERS + 1];
 static WeaponRestrictionType m_weaponRestrictionFlags[MAXPLAYERS + 1];
 static AttributeType m_attributeFlags[MAXPLAYERS + 1];
+static DifficultyType m_difficulty[MAXPLAYERS + 1];
 static char m_szIdleSound[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
 static float m_fModelScaleOverride[MAXPLAYERS + 1];
 static MissionType m_mission[MAXPLAYERS + 1];
 static MissionType m_prevMission[MAXPLAYERS + 1];
 static int m_missionTarget[MAXPLAYERS + 1];
 static float m_flSpawnTimeLeft[MAXPLAYERS + 1];
+static float m_flSpawnTimeLeftMax[MAXPLAYERS + 1];
 static int m_spawnPointEntity[MAXPLAYERS + 1];
 static CTFBotSquad m_squad[MAXPLAYERS + 1];
 static int m_hFollowingFlagTarget[MAXPLAYERS + 1];
-static BombDeployingState_t m_nDeployingBombState[MAXPLAYERS + 1];
 static char m_szInvaderName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
 static char m_szPrevName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
+static bool m_isWaitingForFullReload[MAXPLAYERS + 1];
+static Handle m_annotationTimer[MAXPLAYERS + 1];
 
 // Non-resetting Properties
 static int m_invaderPriority[MAXPLAYERS + 1];
-static int m_iMiniBossCount[MAXPLAYERS + 1];
+static int m_invaderMiniBossPriority[MAXPLAYERS + 1];
 static int m_defenderQueuePoints[MAXPLAYERS + 1];
 static int m_preferences[MAXPLAYERS + 1];
 static Party m_party[MAXPLAYERS + 1];
 static bool m_bIsPartyMenuActive[MAXPLAYERS + 1];
 static int m_iSpawnDeathCount[MAXPLAYERS + 1];
 
-methodmap Player < CBaseCombatCharacter
+methodmap CTFPlayer < CBaseCombatCharacter
 {
-	public Player(int entity)
+	public CTFPlayer(int entity)
 	{
-		return view_as<Player>(entity);
+		return view_as<CTFPlayer>(entity);
 	}
 	
 	property CountdownTimer m_autoJumpTimer
@@ -146,6 +149,18 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
+	property DifficultyType m_difficulty
+	{
+		public get()
+		{
+			return m_difficulty[this.index];
+		}
+		public set(DifficultyType difficulty)
+		{
+			m_difficulty[this.index] = difficulty;
+		}
+	}
+	
 	property float m_fModelScaleOverride
 	{
 		public get()
@@ -206,6 +221,18 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
+	property float m_flSpawnTimeLeftMax
+	{
+		public get()
+		{
+			return m_flSpawnTimeLeftMax[this.index];
+		}
+		public set(float flSpawnTimeLeftMax)
+		{
+			m_flSpawnTimeLeftMax[this.index] = flSpawnTimeLeftMax;
+		}
+	}
+	
 	property int m_spawnPointEntity
 	{
 		public get()
@@ -224,21 +251,21 @@ methodmap Player < CBaseCombatCharacter
 		{
 			return m_invaderPriority[this.index];
 		}
-		public set(int iPriority)
+		public set(int invaderPriority)
 		{
-			m_invaderPriority[this.index] = iPriority;
+			m_invaderPriority[this.index] = invaderPriority;
 		}
 	}
 	
-	property int m_iMiniBossCount
+	property int m_invaderMiniBossPriority
 	{
 		public get()
 		{
-			return m_iMiniBossCount[this.index];
+			return m_invaderMiniBossPriority[this.index];
 		}
-		public set(int iMiniBossCount)
+		public set(int invaderMiniBossPriority)
 		{
-			m_iMiniBossCount[this.index] = iMiniBossCount;
+			m_invaderMiniBossPriority[this.index] = invaderMiniBossPriority;
 		}
 	}
 	
@@ -302,15 +329,27 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
-	property BombDeployingState_t m_nDeployingBombState
+	property bool m_isWaitingForFullReload
 	{
 		public get()
 		{
-			return m_nDeployingBombState[this.index];
+			return m_isWaitingForFullReload[this.index];
 		}
-		public set(BombDeployingState_t nDeployingBombState)
+		public set(bool isWaitingForFullReload)
 		{
-			m_nDeployingBombState[this.index] = nDeployingBombState;
+			m_isWaitingForFullReload[this.index] = isWaitingForFullReload;
+		}
+	}
+	
+	property Handle m_annotationTimer
+	{
+		public get()
+		{
+			return m_annotationTimer[this.index];
+		}
+		public set(Handle annotationTimer)
+		{
+			m_annotationTimer[this.index] = annotationTimer;
 		}
 	}
 	
@@ -350,18 +389,122 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
+	property BombDeployingState_t m_nDeployingBombState
+	{
+		public get()
+		{
+			return view_as<BombDeployingState_t>(GetEntData(this.index, GetOffset("CTFPlayer", "m_nDeployingBombState")));
+		}
+		public set(BombDeployingState_t nDeployingBombState)
+		{
+			SetEntData(this.index, GetOffset("CTFPlayer", "m_nDeployingBombState"), nDeployingBombState);
+		}
+	}
+	
+	property bool m_bIsMissionEnemy
+	{
+		public get()
+		{
+			return GetEntData(this.index, GetOffset("CTFPlayer", "m_bIsMissionEnemy"), 1) != 0;
+		}
+		public set(bool bIsMissionEnemy)
+		{
+			SetEntData(this.index, GetOffset("CTFPlayer", "m_bIsMissionEnemy"), bIsMissionEnemy, 1);
+		}
+	}
+	
+	property bool m_bIsSupportEnemy
+	{
+		public get()
+		{
+			return GetEntData(this.index, GetOffset("CTFPlayer", "m_bIsSupportEnemy"), 1) != 0;
+		}
+		public set(bool bIsSupportEnemy)
+		{
+			SetEntData(this.index, GetOffset("CTFPlayer", "m_bIsSupportEnemy"), bIsSupportEnemy, 1);
+		}
+	}
+	
+	property bool m_bIsLimitedSupportEnemy
+	{
+		public get()
+		{
+			GetEntData(this.index, GetOffset("CTFPlayer", "m_bIsLimitedSupportEnemy"), 1) != 0;
+		}
+		public set(bool bIsLimitedSupportEnemy)
+		{
+			SetEntData(this.index, GetOffset("CTFPlayer", "m_bIsLimitedSupportEnemy"), bIsLimitedSupportEnemy, 1);
+		}
+	}
+	
+	property float m_accumulatedSentryGunDamageDealt
+	{
+		public get()
+		{
+			return GetEntDataFloat(this.index, GetOffset("CTFPlayer", "m_accumulatedSentryGunDamageDealt"));
+		}
+		public set(float accumulatedSentryGunDamageDealt)
+		{
+			SetEntDataFloat(this.index, GetOffset("CTFPlayer", "m_accumulatedSentryGunDamageDealt"), accumulatedSentryGunDamageDealt);
+		}
+	}
+	
+	property int m_accumulatedSentryGunKillCount
+	{
+		public get()
+		{
+			return GetEntData(this.index, GetOffset("CTFPlayer", "m_accumulatedSentryGunKillCount"));
+		}
+		public set(int accumulatedSentryGunKillCount)
+		{
+			GetEntData(this.index, GetOffset("CTFPlayer", "m_accumulatedSentryGunKillCount"), accumulatedSentryGunKillCount);
+		}
+	}
+	
+	property Address m_iszClassIcon
+	{
+		public get()
+		{
+			return view_as<Address>(GetEntData(this.index, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")));
+		}
+		public set(Address iszClassIcon)
+		{
+			SetEntData(this.index, FindSendPropInfo("CTFPlayer", "m_iszClassIcon"), iszClassIcon);
+		}
+	}
+	
+	property float m_flSpawnTime
+	{
+		public get()
+		{
+			return GetEntDataFloat(this.index, GetOffset("CTFPlayer", "m_flSpawnTime"));
+		}
+		public set(float flSpawnTime)
+		{
+			SetEntDataFloat(this.index, GetOffset("CTFPlayer", "m_flSpawnTime"), flSpawnTime);
+		}
+	}
+	
+	property Address m_pWaveSpawnPopulator
+	{
+		public set(Address pWaveSpawnPopulator)
+		{
+			SetEntData(this.index, GetOffset("CTFPlayer", "m_pWaveSpawnPopulator"), pWaveSpawnPopulator);
+		}
+	}
+	
 	public bool IsInvader()
 	{
 		if (IsClientSourceTV(this.index))
 			return false;
 		
 		TFTeam team = TF2_GetClientTeam(this.index);
-		return (team == TFTeam_Spectator || team == TFTeam_Invaders) && !this.HasPreference(PREF_DISABLE_SPAWNING);
+		return (team == TFTeam_Spectator || team == TFTeam_Invaders) && !this.HasPreference(PREF_SPECTATOR_MODE);
 	}
 	
 	public float GetSpawnTime()
 	{
-		return GetEntDataFloat(this.index, GetOffset("CTFPlayer", "m_flSpawnTime"));
+		return this.m_flSpawnTime;
 	}
 	
 	public TFTeam GetDisguiseTeam()
@@ -420,6 +563,11 @@ methodmap Player < CBaseCombatCharacter
 		this.m_weaponRestrictionFlags |= restrictionFlags;
 	}
 	
+	public void RemoveWeaponRestriction(WeaponRestrictionType restrictionFlags)
+	{
+		this.m_weaponRestrictionFlags &= ~restrictionFlags;
+	}
+	
 	public bool HasWeaponRestriction(WeaponRestrictionType restrictionFlags)
 	{
 		return this.m_weaponRestrictionFlags & restrictionFlags ? true : false;
@@ -460,33 +608,16 @@ methodmap Player < CBaseCombatCharacter
 	
 	public void RemoveTag(const char[] tag)
 	{
-		for (int i = 0; i < this.m_tags.Length; ++i)
+		int index = this.m_tags.FindString(tag);
+		if (index != -1)
 		{
-			char m_tag[64];
-			this.m_tags.GetString(i, m_tag, sizeof(m_tag));
-			
-			if (StrEqual(tag, m_tag))
-			{
-				this.m_tags.Erase(i);
-				return;
-			}
+			this.m_tags.Erase(index);
 		}
 	}
 	
 	public bool HasTag(const char[] tag)
 	{
-		for (int i = 0; i < this.m_tags.Length; ++i)
-		{
-			char m_tag[64];
-			this.m_tags.GetString(i, m_tag, sizeof(m_tag));
-			
-			if (StrEqual(tag, m_tag))
-			{
-				return true;
-			}
-		}
-		
-		return false;
+		return this.m_tags.FindString(tag) != -1;
 	}
 	
 	public void GetIdleSound(char[] buffer, int maxlen)
@@ -508,7 +639,7 @@ methodmap Player < CBaseCombatCharacter
 	{
 		this.m_fModelScaleOverride = fScale;
 		
-		SetModelScale(this.index, this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : 1.0);
+		this.SetModelScale(this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : 1.0);
 	}
 	
 	public MissionType GetPrevMission()
@@ -563,7 +694,7 @@ methodmap Player < CBaseCombatCharacter
 		for (int i = 0; i < teleportWhereName.Count(); ++i)
 		{
 			char name[64];
-			PtrToString(Deref(teleportWhereName.Get(i)), name, sizeof(name));
+			PtrToString(LoadFromAddress(teleportWhereName.Get(i), NumberType_Int32), name, sizeof(name));
 			
 			this.m_teleportWhereName.PushString(name);
 		}
@@ -643,7 +774,7 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
-	public void SetName(const char[] name, bool bSetName)
+	public void SetInvaderName(const char[] name, bool bSetName)
 	{
 		strcopy(m_szInvaderName[this.index], sizeof(m_szInvaderName[]), name);
 		
@@ -654,12 +785,12 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
-	public int GetName(char[] buffer, int maxlen)
+	public bool GetInvaderName(char[] buffer, int maxlen)
 	{
-		return strcopy(buffer, maxlen, m_szInvaderName[this.index]);
+		return strcopy(buffer, maxlen, m_szInvaderName[this.index]) != 0;
 	}
 	
-	public void ResetName()
+	public void ResetInvaderName()
 	{
 		m_szInvaderName[this.index][0] = EOS;
 		
@@ -670,9 +801,21 @@ methodmap Player < CBaseCombatCharacter
 		}
 	}
 	
+	public DifficultyType GetDifficulty()
+	{
+		return this.m_difficulty;
+	}
+	
 	public void SetDifficulty(DifficultyType difficulty)
 	{
+		this.m_difficulty = difficulty;
+		
 		this.SetProp(Prop_Send, "m_nBotSkill", difficulty);
+	}
+	
+	public bool IsDifficulty(DifficultyType skill)
+	{
+		return skill == this.m_difficulty;
 	}
 	
 	public void ModifyMaxHealth(int nNewMaxHealth, bool bSetCurrentHealth = true, bool bAllowModelScaling = true)
@@ -689,7 +832,7 @@ methodmap Player < CBaseCombatCharacter
 		
 		if (bAllowModelScaling && this.IsMiniBoss())
 		{
-			SetModelScale(this.index, this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : tf_mvm_miniboss_scale.FloatValue);
+			this.SetModelScale(this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : tf_mvm_miniboss_scale.FloatValue);
 		}
 	}
 	
@@ -698,9 +841,9 @@ methodmap Player < CBaseCombatCharacter
 		this.SetProp(Prop_Send, "m_nCurrency", nAmount);
 	}
 	
-	public void SetWaveSpawnPopulator(Address pWave)
+	public void SetWaveSpawnPopulator(CWaveSpawnPopulator pWave)
 	{
-		SetEntData(this.index, GetOffset("CTFPlayer", "m_pWaveSpawnPopulator"), pWave);
+		this.m_pWaveSpawnPopulator = pWave;
 	}
 	
 	public void ClearEventChangeAttributes()
@@ -757,12 +900,12 @@ methodmap Player < CBaseCombatCharacter
 			for (int i = 0; i < pEvent.m_characterAttributes.Count(); i++)
 			{
 				Address characterAttributes = pEvent.m_characterAttributes.Get(i, GetOffset(NULL_STRING, "sizeof(static_attrib_t)"));
-				int defIndex = Deref(characterAttributes + GetOffset("static_attrib_t", "iDefIndex"), NumberType_Int16);
+				int defIndex = LoadFromAddress(characterAttributes + GetOffset("static_attrib_t", "iDefIndex"), NumberType_Int16);
 				
 				Address pDef = TF2Econ_GetAttributeDefinitionAddress(defIndex);
 				if (pDef)
 				{
-					float flValue = Deref(characterAttributes + GetOffset("static_attrib_t", "m_value"));
+					float flValue = LoadFromAddress(characterAttributes + GetOffset("static_attrib_t", "m_value"), NumberType_Int32);
 					TF2Attrib_SetByDefIndex(this.index, defIndex, flValue);
 				}
 			}
@@ -776,7 +919,7 @@ methodmap Player < CBaseCombatCharacter
 			for (int i = 0; i < pEvent.m_items.Count(); i++)
 			{
 				char item[64];
-				PtrToString(Deref(pEvent.m_items.Get(i)), item, sizeof(item));
+				PtrToString(LoadFromAddress(pEvent.m_items.Get(i), NumberType_Int32), item, sizeof(item));
 				
 				this.AddItem(item);
 			}
@@ -786,7 +929,7 @@ methodmap Player < CBaseCombatCharacter
 				Address itemAttributes = pEvent.m_itemsAttributes.Get(i, GetOffset(NULL_STRING, "sizeof(item_attributes_t)"));
 				
 				char itemName[64];
-				PtrToString(Deref(itemAttributes + GetOffset("item_attributes_t", "m_itemName")), itemName, sizeof(itemName));
+				PtrToString(LoadFromAddress(itemAttributes + GetOffset("item_attributes_t", "m_itemName"), NumberType_Int32), itemName, sizeof(itemName));
 				
 				int itemDef = GetItemDefinitionIndexByName(itemName);
 				
@@ -801,8 +944,8 @@ methodmap Player < CBaseCombatCharacter
 						{
 							Address attrib = attributes.Get(iAtt, GetOffset(NULL_STRING, "sizeof(static_attrib_t)"));
 							
-							int defIndex = Deref(attrib + GetOffset("static_attrib_t", "iDefIndex"), NumberType_Int16);
-							float value = Deref(attrib + GetOffset("static_attrib_t", "m_value"));
+							int defIndex = LoadFromAddress(attrib + GetOffset("static_attrib_t", "iDefIndex"), NumberType_Int16);
+							float value = LoadFromAddress(attrib + GetOffset("static_attrib_t", "m_value"), NumberType_Int32);
 							
 							TF2Attrib_SetByDefIndex(entity, defIndex, value);
 						}
@@ -810,7 +953,7 @@ methodmap Player < CBaseCombatCharacter
 						if (entity != -1)
 						{
 							// update model incase we change style
-							SDKCall_UpdateModelToClass(entity);
+							SDKCall_CEconEntity_UpdateModelToClass(entity);
 						}
 						
 						// move on to the next set of attributes
@@ -824,9 +967,15 @@ methodmap Player < CBaseCombatCharacter
 			for (int i = 0; i < pEvent.m_tags.Count(); ++i)
 			{
 				char tag[64];
-				PtrToString(Deref(pEvent.m_tags.Get(i)), tag, sizeof(tag));
+				PtrToString(LoadFromAddress(pEvent.m_tags.Get(i), NumberType_Int32), tag, sizeof(tag));
 				
 				this.AddTag(tag);
+			}
+			
+			// human skill attributes
+			if (!IsFakeClient(this.index))
+			{
+				this.SetSkillAttributes();
 			}
 			
 			// Request to Add in Endless
@@ -840,9 +989,7 @@ methodmap Player < CBaseCombatCharacter
 	public void AddItem(const char[] szItemName)
 	{
 		int itemDefIndex = GetItemDefinitionIndexByName(szItemName);
-		
-		Handle item = GenerateItem(this.index, itemDefIndex);
-		if (item)
+		if (itemDefIndex != TF_ITEMDEF_DEFAULT)
 		{
 			// If we already have an item in that slot, remove it
 			TFClassType class = TF2_GetPlayerClass(this.index);
@@ -879,20 +1026,7 @@ methodmap Player < CBaseCombatCharacter
 				}
 			}
 			
-			int newItem = TF2Items_GiveNamedItem(this.index, item);
-			if (newItem != -1)
-			{
-				if (TF2Util_IsEntityWearable(newItem))
-				{
-					TF2Util_EquipPlayerWearable(this.index, newItem);
-				}
-				else
-				{
-					EquipPlayerWeapon(this.index, newItem);
-				}
-			}
-			
-			SDKCall_PostInventoryApplication(this.index);
+			SDKCall_BotGenerateAndWearItem(this.index, szItemName);
 		}
 		else
 		{
@@ -901,7 +1035,35 @@ methodmap Player < CBaseCombatCharacter
 				LogError("CTFBotSpawner::AddItemToBot: Invalid item %s.", szItemName);
 			}
 		}
-		delete item;
+	}
+	
+	public void SetSkillAttributes()
+	{
+		// average skill of a human player matches HARD bots
+		switch (this.GetDifficulty())
+		{
+			case EASY:
+			{
+				if (TF2_GetPlayerClass(this.index) == TFClass_Pyro)
+				{
+					int weapon = TF2Util_GetPlayerLoadoutEntity(this.index, LOADOUT_POSITION_PRIMARY);
+					if (weapon != -1)
+					{
+						TF2Attrib_SetByName(weapon, "airblast disabled", 1.0);
+					}
+				}
+				
+				MultiplyAttributeValue(this.index, "damage penalty", 0.75);
+			}
+			case NORMAL:
+			{
+				MultiplyAttributeValue(this.index, "damage penalty", 0.9);
+			}
+			case EXPERT:
+			{
+				MultiplyAttributeValue(this.index, "damage bonus", 1.1);
+			}
+		}
 	}
 	
 	public bool IsWeaponRestricted(int weapon)
@@ -919,7 +1081,7 @@ methodmap Player < CBaseCombatCharacter
 		else
 		{
 			int weaponId = TF2Util_GetWeaponID(weapon);
-			if (weaponId == TF_WEAPON_BUFF_ITEM || weaponId == TF_WEAPON_LUNCHBOX || weaponId == TF_WEAPON_PARACHUTE || weaponId == TF_WEAPON_GRAPPLINGHOOK)
+			if (weaponId == TF_WEAPON_BUFF_ITEM || weaponId == TF_WEAPON_LUNCHBOX || weaponId == TF_WEAPON_PARACHUTE || weaponId == TF_WEAPON_GRAPPLINGHOOK || weaponId == TF_WEAPON_ROCKETPACK)
 			{
 				// Always allow specific passive weapons
 				return false;
@@ -955,7 +1117,7 @@ methodmap Player < CBaseCombatCharacter
 	
 	public bool EquipRequiredWeapon()
 	{
-		if (this.HasWeaponRestriction(MELEE_ONLY))
+		if (tf_bot_melee_only.BoolValue || GameRules_GetProp("m_bPlayingMedieval") || this.HasWeaponRestriction(MELEE_ONLY))
 		{
 			// force use of melee weapons
 			TF2Util_SetPlayerActiveWeapon(this.index, GetPlayerWeaponSlot(this.index, TFWeaponSlot_Melee));
@@ -984,7 +1146,7 @@ methodmap Player < CBaseCombatCharacter
 			weapon = this.GetPropEnt(Prop_Send, "m_hActiveWeapon");
 		}
 		
-		if (weapon)
+		if (weapon != -1)
 		{
 			switch (TF2Util_GetWeaponID(weapon))
 			{
@@ -996,6 +1158,21 @@ methodmap Player < CBaseCombatCharacter
 		}
 		
 		return false;
+	}
+	
+	public void SetModelScale(float scale, float change_duration = 0.0)
+	{
+		float vecScale[3];
+		vecScale[0] = scale;
+		vecScale[1] = change_duration;
+		
+		SetVariantVector3D(vecScale);
+		this.AcceptInput("SetModelScale");
+	}
+	
+	public bool HasTheFlag()
+	{
+		return this.GetPropEnt(Prop_Send, "m_hItem") != -1;
 	}
 	
 	public int GetFlagToFetch()
@@ -1031,7 +1208,7 @@ methodmap Player < CBaseCombatCharacter
 				continue;
 			
 			// If I'm carrying a flag, look for mine and early-out
-			if (HasTheFlag(this.index))
+			if (this.HasTheFlag())
 			{
 				if (GetEntPropEnt(flag, Prop_Send, "m_hOwnerEntity") == this.index)
 				{
@@ -1131,10 +1308,12 @@ methodmap Player < CBaseCombatCharacter
 	
 	public float CalculateSpawnTime()
 	{
+		if (sm_mitm_spawn_hurry_time.FloatValue <= 0.0)
+			return -1.0;
+		
 		// factor in squad speed
 		float flSpeed = this.IsInASquad() ? this.GetSquad().GetSlowestMemberSpeed() : this.GetPropFloat(Prop_Send, "m_flMaxspeed");
-		float flTime = mitm_min_spawn_hurry_time.FloatValue * (400.0 / flSpeed);
-		return Clamp(flTime, mitm_min_spawn_hurry_time.FloatValue, mitm_max_spawn_hurry_time.FloatValue);
+		return sm_mitm_spawn_hurry_time.FloatValue + (sm_mitm_spawn_hurry_time.FloatValue * (300.0 / flSpeed));
 	}
 	
 	public bool ShouldAutoJump()
@@ -1198,12 +1377,12 @@ methodmap Player < CBaseCombatCharacter
 		delete enemyList;
 	}
 	
-	public bool HasPreference(PreferenceType preference)
+	public bool HasPreference(MannInTheMachinePreference preference)
 	{
 		return this.m_preferences != -1 && this.m_preferences & view_as<int>(preference) != 0;
 	}
 	
-	public bool SetPreference(PreferenceType preference, bool enable)
+	public bool SetPreference(MannInTheMachinePreference preference, bool enable)
 	{
 		if (this.m_preferences == -1)
 			return false;
@@ -1220,17 +1399,27 @@ methodmap Player < CBaseCombatCharacter
 	
 	public void MarkAsMissionEnemy()
 	{
-		SetEntData(this.index, GetOffset("CTFPlayer", "m_bIsMissionEnemy"), true, 1);
+		this.m_bIsMissionEnemy = true;
 	}
 	
 	public void MarkAsSupportEnemy()
 	{
-		SetEntData(this.index, GetOffset("CTFPlayer", "m_bIsSupportEnemy"), true, 1);
+		this.m_bIsSupportEnemy = true;
 	}
 	
 	public void MarkAsLimitedSupportEnemy()
 	{
-		SetEntData(this.index, GetOffset("CTFPlayer", "m_bIsLimitedSupportEnemy"), true, 1);
+		this.m_bIsLimitedSupportEnemy = true;
+	}
+	
+	public Address GetClassIconName()
+	{
+		return this.m_iszClassIcon;
+	}
+	
+	public void SetClassIconName(Address iszClassIcon)
+	{
+		this.m_iszClassIcon = iszClassIcon;
 	}
 	
 	public CTFBotSquad GetSquad()
@@ -1331,7 +1520,7 @@ methodmap Player < CBaseCombatCharacter
 		this.m_tags = new ArrayList(ByteCountToCells(64));
 	}
 	
-	public void ResetOnTeamChange()
+	public void ResetInvader()
 	{
 		this.SetAutoJump(0.0, 0.0);
 		this.m_autoJumpTimer.Invalidate();
@@ -1342,19 +1531,23 @@ methodmap Player < CBaseCombatCharacter
 		this.ClearWeaponRestrictions();
 		this.ClearAllAttributes();
 		this.ClearIdleSound();
+		
 		this.m_fModelScaleOverride = 0.0;
 		this.m_flSpawnTimeLeft = -1.0;
+		this.m_flSpawnTimeLeftMax = -1.0;
 		this.m_missionTarget = INVALID_ENT_REFERENCE;
 		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
 		this.m_hFollowingFlagTarget = INVALID_ENT_REFERENCE;
+		this.m_isWaitingForFullReload = false;
+		this.m_annotationTimer = null;
+		
+		this.ResetInvaderName();
 	}
 	
 	public void Reset()
 	{
-		this.ResetOnTeamChange();
-		
 		this.m_invaderPriority = 0;
-		this.m_iMiniBossCount = 0;
+		this.m_invaderMiniBossPriority = 0;
 		this.m_defenderQueuePoints = -1;
 		this.m_preferences = -1;
 		this.m_party = NULL_PARTY;
@@ -1366,18 +1559,18 @@ methodmap Player < CBaseCombatCharacter
 	}
 }
 
-methodmap EventChangeAttributes_t
+methodmap EventChangeAttributes_t < Address
 {
-	public EventChangeAttributes_t(Address address)
+	public EventChangeAttributes_t(Address pThis)
 	{
-		return view_as<EventChangeAttributes_t>(address);
+		return view_as<EventChangeAttributes_t>(pThis);
 	}
 	
 	property Address m_eventName
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("EventChangeAttributes_t", "m_eventName"));
+			return LoadFromAddress(this + GetOffset("EventChangeAttributes_t", "m_eventName"), NumberType_Int32);
 		}
 	}
 	
@@ -1385,7 +1578,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("EventChangeAttributes_t", "m_skill"));
+			return LoadFromAddress(this + GetOffset("EventChangeAttributes_t", "m_skill"), NumberType_Int32);
 		}
 	}
 	
@@ -1393,7 +1586,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("EventChangeAttributes_t", "m_weaponRestriction"));
+			return LoadFromAddress(this + GetOffset("EventChangeAttributes_t", "m_weaponRestriction"), NumberType_Int32);
 		}
 	}
 	
@@ -1401,7 +1594,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("EventChangeAttributes_t", "m_mission"));
+			return LoadFromAddress(this + GetOffset("EventChangeAttributes_t", "m_mission"), NumberType_Int32);
 		}
 	}
 	
@@ -1409,7 +1602,7 @@ methodmap EventChangeAttributes_t
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("EventChangeAttributes_t", "m_attributeFlags"));
+			return LoadFromAddress(this + GetOffset("EventChangeAttributes_t", "m_attributeFlags"), NumberType_Int32);
 		}
 	}
 	
@@ -1446,11 +1639,11 @@ methodmap EventChangeAttributes_t
 	}
 };
 
-methodmap CTFBotSpawner
+methodmap CTFBotSpawner < Address
 {
-	public CTFBotSpawner(Address spawner)
+	public CTFBotSpawner(Address pThis)
 	{
-		return view_as<CTFBotSpawner>(spawner);
+		return view_as<CTFBotSpawner>(pThis);
 	}
 	
 	property EventChangeAttributes_t m_defaultAttributes
@@ -1473,7 +1666,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CTFBotSpawner", "m_health"));
+			return LoadFromAddress(this + GetOffset("CTFBotSpawner", "m_health"), NumberType_Int32);
 		}
 	}
 	
@@ -1481,7 +1674,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CTFBotSpawner", "m_class"));
+			return LoadFromAddress(this + GetOffset("CTFBotSpawner", "m_class"), NumberType_Int32);
 		}
 	}
 	
@@ -1489,7 +1682,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CTFBotSpawner", "m_scale"));
+			return LoadFromAddress(this + GetOffset("CTFBotSpawner", "m_scale"), NumberType_Int32);
 		}
 	}
 	
@@ -1497,7 +1690,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CTFBotSpawner", "m_flAutoJumpMin"));
+			return LoadFromAddress(this + GetOffset("CTFBotSpawner", "m_flAutoJumpMin"), NumberType_Int32);
 		}
 	}
 	
@@ -1505,7 +1698,7 @@ methodmap CTFBotSpawner
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CTFBotSpawner", "m_flAutoJumpMax"));
+			return LoadFromAddress(this + GetOffset("CTFBotSpawner", "m_flAutoJumpMax"), NumberType_Int32);
 		}
 	}
 	
@@ -1519,7 +1712,7 @@ methodmap CTFBotSpawner
 	
 	public void GetName(char[] buffer, int maxlen, const char[] defValue = "")
 	{
-		Address m_name = Deref(this + GetOffset("CTFBotSpawner", "m_name"));
+		Address m_name = LoadFromAddress(this + GetOffset("CTFBotSpawner", "m_name"), NumberType_Int32);
 		if (m_name)
 		{
 			PtrToString(m_name, buffer, maxlen);
@@ -1532,22 +1725,22 @@ methodmap CTFBotSpawner
 	
 	public Address GetClassIcon(int nSpawnNum = -1)
 	{
-		return Deref(SDKCall_GetClassIcon(this, nSpawnNum));
+		return LoadFromAddress(SDKCall_GetClassIcon(this, nSpawnNum), NumberType_Int32);
 	}
 };
 
-methodmap CSquadSpawner
+methodmap CSquadSpawner < Address
 {
-	public CSquadSpawner(Address address)
+	public CSquadSpawner(Address pThis)
 	{
-		return view_as<CSquadSpawner>(address);
+		return view_as<CSquadSpawner>(pThis);
 	}
 	
 	property float m_formationSize
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CSquadSpawner", "m_formationSize"));
+			return LoadFromAddress(this + GetOffset("CSquadSpawner", "m_formationSize"), NumberType_Int32);
 		}
 	}
 	
@@ -1555,23 +1748,23 @@ methodmap CSquadSpawner
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CSquadSpawner", "m_bShouldPreserveSquad"));
+			return LoadFromAddress(this + GetOffset("CSquadSpawner", "m_bShouldPreserveSquad"), NumberType_Int32);
 		}
 	}
 }
 
-methodmap CMissionPopulator
+methodmap CMissionPopulator < Address
 {
-	public CMissionPopulator(Address address)
+	public CMissionPopulator(Address pThis)
 	{
-		return view_as<CMissionPopulator>(address);
+		return view_as<CMissionPopulator>(pThis);
 	}
 	
 	property MissionType m_mission
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CMissionPopulator", "m_mission"));
+			return LoadFromAddress(this + GetOffset("CMissionPopulator", "m_mission"), NumberType_Int32);
 		}
 	}
 	
@@ -1579,7 +1772,7 @@ methodmap CMissionPopulator
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CMissionPopulator", "m_cooldownDuration"));
+			return LoadFromAddress(this + GetOffset("CMissionPopulator", "m_cooldownDuration"), NumberType_Int32);
 		}
 	}
 	
@@ -1587,7 +1780,7 @@ methodmap CMissionPopulator
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("IPopulationSpawner", "m_spawner"));
+			return LoadFromAddress(this + GetOffset("IPopulationSpawner", "m_spawner"), NumberType_Int32);
 		}
 	}
 	
@@ -1595,23 +1788,23 @@ methodmap CMissionPopulator
 	{
 		public get()
 		{
-			return view_as<Address>(this) + GetOffset("IPopulationSpawner", "m_where");
+			return this + GetOffset("IPopulationSpawner", "m_where");
 		}
 	}
 }
 
-methodmap CWave
+methodmap CWave < Address
 {
-	public CWave(Address address)
+	public CWave(Address pThis)
 	{
-		return view_as<CWave>(address);
+		return view_as<CWave>(pThis);
 	}
 	
 	property int m_nNumEngineersTeleportSpawned
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CWave", "m_nNumEngineersTeleportSpawned"));
+			return LoadFromAddress(this + GetOffset("CWave", "m_nNumEngineersTeleportSpawned"), NumberType_Int32);
 		}
 		public set(int nNumEngineersTeleportSpawned)
 		{
@@ -1623,7 +1816,7 @@ methodmap CWave
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CWave", "m_nNumSentryBustersKilled"));
+			return LoadFromAddress(this + GetOffset("CWave", "m_nNumSentryBustersKilled"), NumberType_Int32);
 		}
 		public set(int nNumSentryBustersKilled)
 		{
@@ -1635,7 +1828,7 @@ methodmap CWave
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CWave", "m_nSentryBustersSpawned"));
+			return LoadFromAddress(this + GetOffset("CWave", "m_nSentryBustersSpawned"), NumberType_Int32);
 		}
 		public set(int nSentryBustersSpawned)
 		{
@@ -1684,6 +1877,18 @@ methodmap CPopulationManager < CBaseEntity
 	public CPopulationManager(int entity)
 	{
 		return view_as<CPopulationManager>(entity);
+	}
+	
+	property bool m_bIsInitialized
+	{
+		public get()
+		{
+			return GetEntData(this.index, GetOffset("CPopulationManager", "m_bIsInitialized"), 1) != 0;
+		}
+		public set(bool bIsInitialized)
+		{
+			SetEntData(this.index, GetOffset("CPopulationManager", "m_bIsInitialized"), bIsInitialized, 1);
+		}
 	}
 	
 	property bool m_canBotsAttackWhileInSpawnRoom
@@ -1735,27 +1940,27 @@ methodmap CPopulationManager < CBaseEntity
 	
 	public void ResetMap()
 	{
-		SDKCall_ResetMap(this.index);
+		SDKCall_CPopulationManager_ResetMap(this.index);
 	}
 	
 	public CWave GetCurrentWave()
 	{
-		return CWave(SDKCall_GetCurrentWave(this.index));
+		return CWave(SDKCall_CPopulationManager_GetCurrentWave(this.index));
 	}
 	
 	public bool IsInEndlessWaves()
 	{
-		return SDKCall_IsInEndlessWaves(this.index);
+		return SDKCall_CPopulationManager_IsInEndlessWaves(this.index);
 	}
 	
 	public float GetHealthMultiplier(bool bIsTank = false)
 	{
-		return SDKCall_GetHealthMultiplier(this.index, bIsTank);
+		return SDKCall_CPopulationManager_GetHealthMultiplier(this.index, bIsTank);
 	}
 	
 	public void GetSentryBusterDamageAndKillThreshold(int &nDamage, int &nKills)
 	{
-		SDKCall_GetSentryBusterDamageAndKillThreshold(this.index, nDamage, nKills);
+		SDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold(this.index, nDamage, nKills);
 	}
 	
 	public void EndlessSetAttributesForBot(int player)
@@ -1769,11 +1974,11 @@ methodmap CPopulationManager < CBaseEntity
 			
 			if (upgrade.bIsBotAttr == true)
 			{
-				Player(player).SetAttribute(view_as<AttributeType>(RoundFloat(upgrade.flValue)));
+				CTFPlayer(player).SetAttribute(view_as<AttributeType>(RoundFloat(upgrade.flValue)));
 			}
 			else if (upgrade.bIsSkillAttr == true)
 			{
-				Player(player).SetDifficulty(view_as<DifficultyType>(RoundFloat(upgrade.flValue)));
+				CTFPlayer(player).SetDifficulty(view_as<DifficultyType>(RoundFloat(upgrade.flValue)));
 			}
 			else
 			{
@@ -1787,7 +1992,7 @@ methodmap CPopulationManager < CBaseEntity
 					}
 					else
 					{
-						int iFormat = Deref(pDef + GetOffset("CEconItemAttributeDefinition", "m_iDescriptionFormat"));
+						int iFormat = LoadFromAddress(pDef + GetOffset("CEconItemAttributeDefinition", "m_iDescriptionFormat"), NumberType_Int32);
 						float flValue = upgrade.flValue;
 						if (iFormat == ATTDESCFORM_VALUE_IS_PERCENTAGE || iFormat == ATTDESCFORM_VALUE_IS_INVERTED_PERCENTAGE)
 						{
@@ -1804,7 +2009,7 @@ methodmap CPopulationManager < CBaseEntity
 	}
 }
 
-methodmap BombInfo_t
+methodmap BombInfo_t < Address
 {
 	public BombInfo_t(Address pThis)
 	{
@@ -1815,7 +2020,7 @@ methodmap BombInfo_t
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("BombInfo_t", "m_flMaxBattleFront"));
+			return LoadFromAddress(this + GetOffset("BombInfo_t", "m_flMaxBattleFront"), NumberType_Int32);
 		}
 	}
 }
@@ -1871,7 +2076,7 @@ methodmap CBaseTFBotHintEntity < CBaseEntity
 	}
 }
 
-methodmap CWaveSpawnPopulator
+methodmap CWaveSpawnPopulator < Address
 {
 	public CWaveSpawnPopulator(Address pThis)
 	{
@@ -1882,7 +2087,7 @@ methodmap CWaveSpawnPopulator
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CWaveSpawnPopulator", "m_bSupportWave"), NumberType_Int8);
+			return LoadFromAddress(this + GetOffset("CWaveSpawnPopulator", "m_bSupportWave"), NumberType_Int8);
 		}
 	}
 	
@@ -1890,7 +2095,7 @@ methodmap CWaveSpawnPopulator
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CWaveSpawnPopulator", "m_bLimitedSupport"), NumberType_Int8);
+			return LoadFromAddress(this + GetOffset("CWaveSpawnPopulator", "m_bLimitedSupport"), NumberType_Int8);
 		}
 	}
 	
@@ -1905,7 +2110,7 @@ methodmap CWaveSpawnPopulator
 	}
 }
 
-methodmap CMvMBotUpgrade
+methodmap CMvMBotUpgrade < Address
 {
 	public CMvMBotUpgrade(Address pThis)
 	{
@@ -1916,7 +2121,7 @@ methodmap CMvMBotUpgrade
 	{
 		public get()
 		{
-			return view_as<Address>(this + GetOffset("CMvMBotUpgrade", "szAttrib"));
+			return this + GetOffset("CMvMBotUpgrade", "szAttrib");
 		}
 	}
 	
@@ -1924,7 +2129,7 @@ methodmap CMvMBotUpgrade
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CMvMBotUpgrade", "iAttribIndex"), NumberType_Int16);
+			return LoadFromAddress(this + GetOffset("CMvMBotUpgrade", "iAttribIndex"), NumberType_Int16);
 		}
 	}
 	
@@ -1932,7 +2137,7 @@ methodmap CMvMBotUpgrade
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CMvMBotUpgrade", "flValue"));
+			return LoadFromAddress(this + GetOffset("CMvMBotUpgrade", "flValue"), NumberType_Int32);
 		}
 	}
 	
@@ -1940,7 +2145,7 @@ methodmap CMvMBotUpgrade
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CMvMBotUpgrade", "bIsBotAttr"), NumberType_Int8);
+			return LoadFromAddress(this + GetOffset("CMvMBotUpgrade", "bIsBotAttr"), NumberType_Int8);
 		}
 	}
 	
@@ -1948,7 +2153,7 @@ methodmap CMvMBotUpgrade
 	{
 		public get()
 		{
-			return Deref(this + GetOffset("CMvMBotUpgrade", "bIsSkillAttr"), NumberType_Int8);
+			return LoadFromAddress(this + GetOffset("CMvMBotUpgrade", "bIsSkillAttr"), NumberType_Int8);
 		}
 	}
 }
@@ -2034,6 +2239,11 @@ methodmap CTFObjectiveResource < CBaseEntity
 		}
 	}
 	
+	public bool IsPopFileEventType(int fileType)
+	{
+		return this.GetProp(Prop_Send, "m_nMvMEventPopfileType") == fileType;
+	}
+	
 	public TFTeam GetOwningTeam(int index)
 	{
 		if (index >= this.GetProp(Prop_Send, "m_iNumControlPoints"))
@@ -2043,15 +2253,25 @@ methodmap CTFObjectiveResource < CBaseEntity
 	}
 }
 
-methodmap CMannVsMachineStats < CBaseEntity
+methodmap CTFGameRules < CBaseEntity
 {
-	public CMannVsMachineStats(int entity)
+	public CTFGameRules(int entity)
 	{
-		return view_as<CMannVsMachineStats>(entity);
+		return view_as<CTFGameRules>(entity);
 	}
 	
-	public int GetCurrentWave()
+	public void SetCustomUpgradesFile(const char[] path)
 	{
-		return this.GetProp(Prop_Send, "m_iCurrentWaveIdx");
+		if (FileExists(path, true, "GAME"))
+		{
+			AddFileToDownloadsTable(path);
+			
+			SetVariantString(path);
+			this.AcceptInput("SetCustomUpgradesFile");
+		}
+		else if (path[0])
+		{
+			LogError("The custom upgrades file '%s' does not exist", path);
+		}
 	}
 }

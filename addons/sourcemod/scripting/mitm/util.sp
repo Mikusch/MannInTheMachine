@@ -182,11 +182,6 @@ any Max(any a, any b)
 	return (a >= b) ? a : b;
 }
 
-any Clamp(any val, any min, any max)
-{
-	return Min(Max(val, min), max);
-}
-
 bool IsMannVsMachineMode()
 {
 	return view_as<bool>(GameRules_GetProp("m_bPlayingMannVsMachine"));
@@ -202,16 +197,6 @@ void BroadcastSound(int iTeam, const char[] sound, int iAdditionalSoundFlags = 0
 		event.SetInt("additional_flags", iAdditionalSoundFlags);
 		event.Fire();
 	}
-}
-
-void SetModelScale(int entity, float scale, float duration = 0.0)
-{
-	float vecScale[3];
-	vecScale[0] = scale;
-	vecScale[1] = duration;
-	
-	SetVariantVector3D(vecScale);
-	AcceptEntityInput(entity, "SetModelScale");
 }
 
 bool IsMiscSlot(int iSlot)
@@ -240,21 +225,6 @@ bool IsWearableSlot(int iSlot)
 		|| iSlot == LOADOUT_POSITION_ACTION
 		|| IsMiscSlot(iSlot)
 		|| IsTauntSlot(iSlot);
-}
-
-Handle GenerateItem(int player, int itemDefIndex)
-{
-	Handle item = TF2Items_CreateItem(PRESERVE_ATTRIBUTES | FORCE_GENERATION);
-	if (item)
-	{
-		char classname[64];
-		TF2Econ_GetItemClassName(itemDefIndex, classname, sizeof(classname));
-		TF2Econ_TranslateWeaponEntForClass(classname, sizeof(classname), TF2_GetPlayerClass(player));
-		
-		TF2Items_SetClassname(item, classname);
-		TF2Items_SetItemIndex(item, itemDefIndex);
-	}
-	return item;
 }
 
 int GetItemDefinitionIndexByName(const char[] name)
@@ -328,8 +298,6 @@ void SelectNewDefenders()
 	mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
 	mp_tournament_blueteamname.GetString(blueTeamname, sizeof(blueTeamname));
 	
-	g_bAllowTeamChange = true;
-	
 	ArrayList players = new ArrayList();
 	
 	// Collect all valid players
@@ -341,12 +309,14 @@ void SelectNewDefenders()
 		if (IsClientSourceTV(client))
 			continue;
 		
+		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
+			continue;
+		
 		players.Push(client);
 	}
 	
 	ArrayList queue = Queue_GetDefenderQueue();
-	int iDefenderCount = 0;
-	int iReqDefenderCount = Max(mitm_defender_min_count.IntValue, RoundToNearest((float(players.Length) / float(MaxClients)) * mitm_defender_max_count.IntValue));
+	int iDefenderCount = 0, iReqDefenderCount = sm_mitm_defender_count.IntValue;
 	
 	// Select our defenders
 	for (int i = 0; i < queue.Length; i++)
@@ -361,24 +331,23 @@ void SelectNewDefenders()
 			if (iReqDefenderCount - iDefenderCount - party.GetMemberCount(false) < 0)
 				continue;
 			
-			ArrayList members = new ArrayList();
-			party.CollectMembers(members, false);
-			for (int j = 0; j < members.Length; j++)
+			int[] members = new int[MaxClients];
+			int count = party.CollectMembers(members, MaxClients, false);
+			for (int j = 0; j < count; j++)
 			{
-				int member = members.Get(j);
+				int member = members[j];
 				
-				TF2_ChangeClientTeam(member, TFTeam_Defenders);
+				TF2_ForceChangeClientTeam(member, TFTeam_Defenders);
 				Queue_SetPoints(member, 0);
 				CPrintToChat(member, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
 				
 				players.Erase(players.FindValue(member));
 				++iDefenderCount;
 			}
-			delete members;
 		}
 		else
 		{
-			TF2_ChangeClientTeam(client, TFTeam_Defenders);
+			TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
 			Queue_SetPoints(client, 0);
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
 			
@@ -387,7 +356,7 @@ void SelectNewDefenders()
 		}
 		
 		// If we have enough defenders, early out
-		if (iReqDefenderCount == iDefenderCount)
+		if (iReqDefenderCount <= iDefenderCount)
 			break;
 	}
 	
@@ -401,13 +370,13 @@ void SelectNewDefenders()
 		{
 			int client = players.Get(i);
 			
-			if (Player(client).HasPreference(PREF_DISABLE_SPAWNING))
+			if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 				continue;
 			
 			// Keep filling slots until our quota is met
 			if (iDefenderCount++ < iReqDefenderCount)
 			{
-				TF2_ChangeClientTeam(client, TFTeam_Defenders);
+				TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
 				CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender_Forced", redTeamname);
 				
 				players.Erase(i);
@@ -425,25 +394,23 @@ void SelectNewDefenders()
 	{
 		int client = players.Get(i);
 		
-		TF2_ChangeClientTeam(client, TFTeam_Spectator);
+		TF2_ForceChangeClientTeam(client, TFTeam_Spectator);
 		
 		// Do not award queue points if the player can not become a Defender
 		if (!Forwards_OnIsValidDefender(client))
 		{
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader_Forced", blueTeamname);
 		}
-		else if (Player(client).HasPreference(PREF_DISABLE_DEFENDER) && (!Player(client).IsInAParty() || Player(client).GetParty().GetMemberCount() <= 1))
+		else if (CTFPlayer(client).HasPreference(PREF_DEFENDER_DISABLE_QUEUE) && (!CTFPlayer(client).IsInAParty() || CTFPlayer(client).GetParty().GetMemberCount() <= 1))
 		{
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader_DefenderDisabled", blueTeamname);
 		}
-		else if (!Player(client).HasPreference(PREF_DISABLE_SPAWNING))
+		else if (!CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 		{
-			Queue_AddPoints(client, mitm_queue_points.IntValue);
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname, mitm_queue_points.IntValue, Player(client).m_defenderQueuePoints);
+			Queue_AddPoints(client, sm_mitm_queue_points.IntValue);
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname, sm_mitm_queue_points.IntValue, CTFPlayer(client).m_defenderQueuePoints);
 		}
 	}
-	
-	g_bAllowTeamChange = false;
 	
 	for (int client = 1; client <= MaxClients; client++)
 	{
@@ -465,6 +432,42 @@ void SelectNewDefenders()
 	delete queue;
 }
 
+void FindReplacementDefender()
+{
+	ArrayList queue = Queue_GetDefenderQueue();
+	for (int i = 0; i < queue.Length; i++)
+	{
+		int client = queue.Get(i, QueueData::m_client);
+		
+		// Exclude parties in queue
+		if (client == -1 || CTFPlayer(client).IsInAParty())
+			continue;
+		
+		if (TF2_GetClientTeam(client) != TFTeam_Spectator)
+			continue;
+		
+		if (CTFPlayer(client).HasPreference(PREF_DEFENDER_DISABLE_REPLACEMENT))
+			continue;
+		
+		// Don't force switch because we want GetTeamAssignmentOverride to decide
+		TF2_ChangeClientTeam(client, TFTeam_Defenders);
+		
+		// Validate that they were successfully switched
+		if (TF2_GetClientTeam(client) == TFTeam_Defenders)
+		{
+			Queue_SetPoints(client, 0);
+			
+			char redTeamname[MAX_TEAM_NAME_LENGTH];
+			mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
+			
+			break;
+		}
+	}
+	
+	delete queue;
+}
+
 ArrayList GetInvaderQueue(bool bMiniBoss = false)
 {
 	ArrayList queue = new ArrayList();
@@ -481,10 +484,10 @@ ArrayList GetInvaderQueue(bool bMiniBoss = false)
 		if (TF2_GetClientTeam(client) != TFTeam_Spectator)
 			continue;
 		
-		if (Player(client).HasPreference(PREF_DISABLE_SPAWNING))
+		if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 			continue;
 		
-		if (bMiniBoss && Player(client).HasPreference(PREF_DISABLE_GIANT))
+		if (bMiniBoss && CTFPlayer(client).HasPreference(PREF_INVADER_DISABLE_MINIBOSS))
 			continue;
 		
 		if (!Forwards_OnIsValidInvader(client, bMiniBoss))
@@ -493,7 +496,7 @@ ArrayList GetInvaderQueue(bool bMiniBoss = false)
 		queue.Push(client);
 	}
 	
-	queue.SortCustom(bMiniBoss ? SortPlayersByMinibossCount : SortPlayersByPriority);
+	queue.SortCustom(bMiniBoss ? SortPlayersByMinibossPriority : SortPlayersByPriority);
 	
 	return queue;
 }
@@ -509,18 +512,23 @@ int FindNextInvader(bool bMiniBoss)
 		{
 			// Remember the player and reset priority
 			priorityClient = client;
-			Player(client).m_invaderPriority = 0;
+			CTFPlayer(client).m_invaderPriority = 0;
 			
 			// This player is becoming a miniboss
 			if (bMiniBoss)
 			{
-				Player(client).m_iMiniBossCount++;
+				CTFPlayer(client).m_invaderMiniBossPriority = 0;
 			}
 		}
 		else
 		{
 			// Every player who doesn't get spawned gets a priority point
-			Player(client).m_invaderPriority++;
+			CTFPlayer(client).m_invaderPriority++;
+			
+			if (bMiniBoss)
+			{
+				CTFPlayer(client).m_invaderMiniBossPriority++;
+			}
 		}
 	}
 	delete queue;
@@ -591,22 +599,22 @@ int SortPlayersByPriority(int index1, int index2, Handle array, Handle hndl)
 	int client2 = list.Get(index2);
 	
 	// Sort by highest priority
-	return Compare(Player(client2).m_invaderPriority, Player(client1).m_invaderPriority);
+	return Compare(CTFPlayer(client2).m_invaderPriority, CTFPlayer(client1).m_invaderPriority);
 }
 
-int SortPlayersByMinibossCount(int index1, int index2, Handle array, Handle hndl)
+int SortPlayersByMinibossPriority(int index1, int index2, Handle array, Handle hndl)
 {
 	ArrayList list = view_as<ArrayList>(array);
 	int client1 = list.Get(index1);
 	int client2 = list.Get(index2);
 	
-	// Sort by miniboss spawns
-	int c = Compare(Player(client1).m_iMiniBossCount, Player(client2).m_iMiniBossCount);
+	// Sort by highest miniboss priority
+	int c = Compare(CTFPlayer(client2).m_invaderMiniBossPriority, CTFPlayer(client1).m_invaderMiniBossPriority);
 	
 	// Sort by highest priority
 	if (c == 0)
 	{
-		c = Compare(Player(client2).m_invaderPriority, Player(client1).m_invaderPriority);
+		c = Compare(CTFPlayer(client2).m_invaderPriority, CTFPlayer(client1).m_invaderPriority);
 	}
 	
 	return c;
@@ -671,7 +679,7 @@ bool TraceEntityFilter_IgnoreActorsAndFriendlyCombatItems(int entity, int conten
 	if (CBaseEntity(entity).MyCombatCharacterPointer())
 		return false;
 	
-	if (SDKCall_IsCombatItem(entity))
+	if (SDKCall_CBaseEntity_IsCombatItem(entity))
 	{
 		if (GetEntProp(entity, Prop_Data, "m_iTeamNum") == m_iIgnoreTeam)
 			return false;
@@ -934,7 +942,7 @@ int FindTeleporterHintForPlayer(int player)
 		int owner = GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity");
 		if (owner == player)
 		{
-			return SDKCall_GetTeleporterHint(hint);
+			return SDKCall_CTFBotHintEngineerNest_GetTeleporterHint(hint);
 		}
 	}
 	
@@ -949,21 +957,16 @@ int FindSentryHintForPlayer(int player)
 		int owner = GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity");
 		if (owner == player)
 		{
-			return SDKCall_GetSentryHint(hint);
+			return SDKCall_CTFBotHintEngineerNest_GetSentryHint(hint);
 		}
 	}
 	
 	return -1;
 }
 
-bool HasTheFlag(int client)
-{
-	return GetEntPropEnt(client, Prop_Send, "m_hItem") != -1;
-}
-
 void ShowAnnotation(int client, int id, const char[] text, int target = 0, const float worldPos[3] = ZERO_VECTOR, float lifeTime = 10.0, const char[] sound = "ui/hint.wav", bool showDistance = true, bool showEffect = true)
 {
-	if (Player(client).HasPreference(PREF_DISABLE_ANNOTATIONS))
+	if (CTFPlayer(client).HasPreference(PREF_DISABLE_ANNOTATIONS))
 		return;
 	
 	Event event = CreateEvent("show_annotation");
@@ -1005,7 +1008,7 @@ void ShowGateBotAnnotation(int client)
 		if (GetEntProp(trigger, Prop_Data, "m_bDisabled"))
 			continue;
 		
-		if (!SDKCall_PassesTriggerFilters(trigger, client))
+		if (!SDKCall_CBaseTrigger_PassesTriggerFilters(trigger, client))
 			continue;
 		
 		char iszCapPointName[64];
@@ -1017,7 +1020,7 @@ void ShowGateBotAnnotation(int client)
 			int iPointIndex = GetEntProp(point, Prop_Data, "m_iPointIndex");
 			
 			// Locked, requiring preceding points, etc.
-			if (!SDKCall_TeamMayCapturePoint(TF2_GetClientTeam(client), iPointIndex))
+			if (!SDKCall_CTeamplayRules_TeamMayCapturePoint(TF2_GetClientTeam(client), iPointIndex))
 				continue;
 			
 			// Point already owned
@@ -1038,7 +1041,7 @@ void ShowGateBotAnnotation(int client)
 				char text[64];
 				Format(text, sizeof(text), "%T", "Invader_CaptureGate_Annotation", client, iszPrintName);
 				
-				ShowAnnotation(client, MITM_HINT_MASK | client, text, 0, center, mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
+				ShowAnnotation(client, MITM_HINT_MASK | client, text, _, center, sm_mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
 				return;
 			}
 		}
@@ -1056,14 +1059,14 @@ void LockWeapon(int client, int weapon, int &buttons)
 		// auto behavior
 		if (TF2Util_GetWeaponID(weapon) == TF_WEAPON_GRENADELAUNCHER || GetEntProp(client, Prop_Send, "m_bShieldEquipped"))
 		{
-			SDKCall_DoClassSpecialSkill(client);
+			SDKCall_CTFPlayer_DoClassSpecialSkill(client);
 		}
 		// semi-auto behaviour
 		else
 		{
 			if (view_as<bool>(GetEntData(weapon, GetOffset("CTFWeaponBase", "m_bInAttack2"), 1)) == false)
 			{
-				SDKCall_DoClassSpecialSkill(client);
+				SDKCall_CTFPlayer_DoClassSpecialSkill(client);
 				SetEntData(weapon, GetOffset("CTFWeaponBase", "m_bInAttack2"), true, 1);
 			}
 		}
@@ -1129,6 +1132,19 @@ bool StrPtrEquals(Address psz1, Address psz2)
 	return strcmp(sz1, sz2, false) == 0;
 }
 
+void MultiplyAttributeValue(int entity, const char[] szAttrib, float flMult)
+{
+	Address pAttrib = TF2Attrib_GetByName(entity, szAttrib);
+	if (pAttrib)
+	{
+		TF2Attrib_SetValue(pAttrib, TF2Attrib_GetValue(pAttrib) * flMult);
+	}
+	else
+	{
+		TF2Attrib_SetByName(entity, szAttrib, flMult);
+	}
+}
+
 float TranslateAttributeValue(int iFormat, float flValue)
 {
 	switch (iFormat)
@@ -1180,6 +1196,13 @@ int CollectPlayers(ArrayList &playerList, TFTeam team = TFTeam_Any, bool isAlive
 	}
 	
 	return playerList.Length;
+}
+
+void TF2_ForceChangeClientTeam(int client, TFTeam team)
+{
+	g_bAllowTeamChange = true;
+	TF2_ChangeClientTeam(client, team);
+	g_bAllowTeamChange = false;
 }
 
 int GetEffectiveViewModelIndex(int client, int weapon)

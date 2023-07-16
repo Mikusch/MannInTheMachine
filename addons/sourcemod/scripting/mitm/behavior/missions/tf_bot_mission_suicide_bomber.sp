@@ -144,7 +144,7 @@ static int OnStart(CTFBotMissionSuicideBomber action, int actor, NextBotAction p
 	action.m_bWasSuccessful = false;
 	action.m_bWasKilled = false;
 	
-	action.m_victim = Player(actor).GetMissionTarget();
+	action.m_victim = CTFPlayer(actor).GetMissionTarget();
 	
 	if (IsValidEntity(action.m_victim))
 	{
@@ -165,7 +165,7 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 		{
 			char text[64];
 			Format(text, sizeof(text), "%T", "Invader_DestroySentries_DetonateSentry", actor);
-			ShowAnnotation(actor, MITM_HINT_MASK | actor, text, action.m_victim, _, mitm_annotation_lifetime.FloatValue, "coach/coach_attack_here.wav");
+			ShowAnnotation(actor, MITM_HINT_MASK | actor, text, action.m_victim, _, sm_mitm_annotation_lifetime.FloatValue, "coach/coach_attack_here.wav");
 			action.m_annotationTimer.Invalidate();
 		}
 	}
@@ -374,7 +374,7 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 	}
 	
 	// Clear my mission before we have everyone take damage so I will die with the rest
-	Player(actor).SetMission(NO_MISSION);
+	CTFPlayer(actor).SetMission(NO_MISSION);
 	SetEntProp(actor, Prop_Data, "m_takedamage", DAMAGE_YES);
 	
 	// kill victims (including me)
@@ -424,7 +424,7 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 	ForcePlayerSuicide(actor);
 	if (IsPlayerAlive(actor))
 	{
-		TF2_ChangeClientTeam(actor, TFTeam_Spectator);
+		TF2_ForceChangeClientTeam(actor, TFTeam_Spectator);
 	}
 	
 	if (action.m_bWasKilled)

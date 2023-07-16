@@ -23,6 +23,7 @@ static bool g_bHasActiveTeleporterPre;
 void SDKHooks_OnClientPutInServer(int client)
 {
 	SDKHook(client, SDKHook_OnTakeDamageAlive, SDKHookCB_Client_OnTakeDamageAlive);
+	SDKHook(client, SDKHook_WeaponCanSwitchTo, SDKHookCB_Client_WeaponCanSwitchTo);
 	SDKHook(client, SDKHook_WeaponEquipPost, SDKHookCB_Client_WeaponEquipPost);
 	SDKHook(client, SDKHook_WeaponSwitchPost, SDKHookCB_Client_WeaponSwitchPost);
 }
@@ -45,12 +46,13 @@ static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int 
 	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
 	{
 		// Don't let Sentry Busters die until they've done their spin-up
-		if (Player(victim).HasMission(MISSION_DESTROY_SENTRIES))
+		if (CTFPlayer(victim).HasMission(MISSION_DESTROY_SENTRIES))
 		{
 			if ((float(GetEntProp(victim, Prop_Data, "m_iHealth")) - damage) <= 0.0)
 			{
 				SetEntityHealth(victim, 1);
-				return Plugin_Handled;
+				damage = 0.0;
+				return Plugin_Changed;
 			}
 		}
 		
@@ -59,15 +61,26 @@ static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int 
 		if (IsEntityClient(attacker) && TF2_GetClientTeam(attacker) == TFTeam_Invaders)
 		{
 			if ((attacker != victim) &&
-				Player(attacker).GetPrevMission() == MISSION_DESTROY_SENTRIES &&
+				CTFPlayer(attacker).GetPrevMission() == MISSION_DESTROY_SENTRIES &&
 				g_bForceFriendlyFire &&
 				TF2_GetClientTeam(victim) == TF2_GetClientTeam(attacker) &&
-				Player(victim).IsMiniBoss())
+				CTFPlayer(victim).IsMiniBoss())
 			{
 				damage = 600.0;
 				return Plugin_Changed;
 			}
 		}
+	}
+	
+	return Plugin_Continue;
+}
+
+static Action SDKHookCB_Client_WeaponCanSwitchTo(int client, int weapon)
+{
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders && CTFPlayer(client).IsWeaponRestricted(weapon))
+	{
+		EmitGameSoundToClient(client, "Player.DenyWeaponSelection");
+		return Plugin_Handled;
 	}
 	
 	return Plugin_Continue;
@@ -129,11 +142,11 @@ static Action SDKHookCB_ProjectilePipeRemote_SetTransmit(int entity, int client)
 	if (team == TFTeam_Defenders)
 	{
 		// do not show defender stickybombs to the invading team
-		if (Player(client).IsInvader())
+		if (CTFPlayer(client).IsInvader())
 		{
 			// only when fully armed
 			float flCreationTime = GetEntDataFloat(entity, GetOffset("CTFGrenadePipebombProjectile", "m_flCreationTime"));
-			if ((GetGameTime() - flCreationTime) >= SDKCall_GetLiveTime(entity))
+			if ((GetGameTime() - flCreationTime) >= SDKCall_CTFGrenadePipebombProjectile_GetLiveTime(entity))
 			{
 				return Plugin_Handled;
 			}
@@ -154,10 +167,12 @@ static void SDKHookCB_BotHintEngineerNest_ThinkPost(int entity)
 {
 	if (!g_bHasActiveTeleporterPre && GetEntProp(entity, Prop_Send, "m_bHasActiveTeleporter"))
 	{
+		BroadcastSound(255, "Announcer.MVM_Engineer_Teleporter_Activated");
+		
 		CUtlVector m_teleporters = CUtlVector(GetEntityAddress(entity) + GetOffset("CTFBotHintEngineerNest", "m_teleporters"));
 		for (int i = 0; i < m_teleporters.Count(); ++i)
 		{
-			int owner = GetEntPropEnt(GetEntityFromHandle(Deref(m_teleporters.Get(i))), Prop_Send, "m_hOwnerEntity");
+			int owner = GetEntPropEnt(LoadEntityFromHandleAddress(m_teleporters.Get(i)), Prop_Send, "m_hOwnerEntity");
 			if (owner != -1 && IsBaseObject(owner))
 			{
 				EmitSoundToAll(")mvm/mvm_tele_activate.wav", owner, SNDCHAN_STATIC, 155);
@@ -170,7 +185,10 @@ Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)
 {
 	int hEffectEntity = GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity");
 	
-	int hMissionTarget = Player(client).GetMissionTarget();
+	if (!IsValidEntity(hEffectEntity))
+		return Plugin_Handled;
+	
+	int hMissionTarget = CTFPlayer(client).GetMissionTarget();
 	if (IsValidEntity(hMissionTarget) && IsBaseObject(hMissionTarget))
 	{
 		// target sentry - only outline if not carried
@@ -191,9 +209,9 @@ Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)
 		}
 	}
 	
-	if (Player(client).IsInASquad())
+	if (CTFPlayer(client).IsInASquad())
 	{
-		if (hEffectEntity != client && Player(client).GetSquad().IsLeader(hEffectEntity))
+		if (hEffectEntity != client && CTFPlayer(client).GetSquad().IsLeader(hEffectEntity))
 		{
 			// show the glow of our squad leader
 			return Plugin_Continue;

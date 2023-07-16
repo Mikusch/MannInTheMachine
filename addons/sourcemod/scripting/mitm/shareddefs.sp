@@ -22,7 +22,10 @@
 
 #define ZERO_VECTOR	{ 0.0, 0.0, 0.0 }
 
-#define FLT_MAX	340282346600000000000000000000000000000.0
+#define VEC_HULL_MIN	{ -24.0, -24.0, 0.0 }
+#define VEC_HULL_MAX	{ 24.0, 24.0, 82.0 }
+
+#define FLT_MAX	view_as<float>(0x7F7FFFFF)
 
 #define INVALID_ITEM_DEF_INDEX	(0xFFFF)
 
@@ -47,6 +50,8 @@
 #define MVM_CLASS_FLAG_MINIBOSS			(1<<3)
 #define MVM_CLASS_FLAG_ALWAYSCRIT		(1<<4)
 #define MVM_CLASS_FLAG_SUPPORT_LIMITED	(1<<5)
+
+#define TF_BOT_TYPE	1337
 
 // TF FlagInfo State
 #define TF_FLAGINFO_HOME		0
@@ -73,13 +78,15 @@
 // 5 bytes are reserved for other parameters
 #define TEXTMSG_MAX_MESSAGE_LENGTH	(MAX_USER_MSG_DATA - 5)
 
+#define PROGRESS_BAR_NUM_BLOCKS	10
+#define PROGRESS_BAR_CHAR_FILLED	"▰"
+#define PROGRESS_BAR_CHAR_EMPTY	"▱"
+
 #define MITM_HINT_MASK	(0x10200)	// annotations have id ( MITM_HINT_MASK | entindex )
 
 // CollectPlayers
 #define COLLECT_ONLY_LIVING_PLAYERS true
 #define APPEND_PLAYERS true
-
-#define UPGRADE_GAS_EXPLODE_ON_IGNITE	54
 
 const TFTeam TFTeam_Any = view_as<TFTeam>(-2);
 const TFTeam TFTeam_Defenders = TFTeam_Red;
@@ -214,6 +221,34 @@ enum SolidFlags_t
 	FSOLID_MAX_BITS	= 10
 };
 
+enum Collision_Group_t
+{
+	COLLISION_GROUP_NONE  = 0,
+	COLLISION_GROUP_DEBRIS,			// Collides with nothing but world and static stuff
+	COLLISION_GROUP_DEBRIS_TRIGGER, // Same as debris, but hits triggers
+	COLLISION_GROUP_INTERACTIVE_DEBRIS,	// Collides with everything except other interactive debris or debris
+	COLLISION_GROUP_INTERACTIVE,	// Collides with everything except interactive debris or debris
+	COLLISION_GROUP_PLAYER,
+	COLLISION_GROUP_BREAKABLE_GLASS,
+	COLLISION_GROUP_VEHICLE,
+	COLLISION_GROUP_PLAYER_MOVEMENT,  // For HL2, same as Collision_Group_Player, for
+										// TF2, this filters out other players and CBaseObjects
+	COLLISION_GROUP_NPC,			// Generic NPC group
+	COLLISION_GROUP_IN_VEHICLE,		// for any entity inside a vehicle
+	COLLISION_GROUP_WEAPON,			// for any weapons that need collision detection
+	COLLISION_GROUP_VEHICLE_CLIP,	// vehicle clip brush to restrict vehicle movement
+	COLLISION_GROUP_PROJECTILE,		// Projectiles!
+	COLLISION_GROUP_DOOR_BLOCKER,	// Blocks entities not permitted to get near moving doors
+	COLLISION_GROUP_PASSABLE_DOOR,	// Doors that the player shouldn't collide with
+	COLLISION_GROUP_DISSOLVING,		// Things that are dissolving are in this group
+	COLLISION_GROUP_PUSHAWAY,		// Nonsolid on client and server, pushaway in player code
+
+	COLLISION_GROUP_NPC_ACTOR,		// Used so NPCs in scripts ignore the player.
+	COLLISION_GROUP_NPC_SCRIPTED,	// USed for NPCs in scripts that should not collide with each other
+
+	LAST_SHARED_COLLISION_GROUP
+};
+
 enum
 {
 	DONT_BLEED = -1,
@@ -229,6 +264,20 @@ enum SpawnLocationResult
 	SPAWN_LOCATION_NOT_FOUND = 0,
 	SPAWN_LOCATION_NAV,
 	SPAWN_LOCATION_TELEPORTER
+};
+
+//--------------------------------------------------------------------------
+// BUILDING
+//--------------------------------------------------------------------------
+// Build checks will return one of these for a player
+enum
+{
+	CB_CAN_BUILD,			// Player is allowed to build this object
+	CB_CANNOT_BUILD,		// Player is not allowed to build this object
+	CB_LIMIT_REACHED,		// Player has reached the limit of the number of these objects allowed
+	CB_NEED_RESOURCES,		// Player doesn't have enough resources to build this object
+	CB_NEED_ADRENALIN,		// Commando doesn't have enough adrenalin to build a rally flag
+	CB_UNKNOWN_OBJECT,		// Error message, tried to build unknown object
 };
 
 enum taunts_t

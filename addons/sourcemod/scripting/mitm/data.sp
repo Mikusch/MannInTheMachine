@@ -49,6 +49,12 @@ static char m_szPrevName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
 static bool m_isWaitingForFullReload[MAXPLAYERS + 1];
 static Handle m_annotationTimer[MAXPLAYERS + 1];
 
+// PressXButton
+static int m_inputButtons[MAXPLAYERS + 1];
+static CountdownTimer m_fireButtonTimer[MAXPLAYERS + 1];
+static CountdownTimer m_altFireButtonTimer[MAXPLAYERS + 1];
+static CountdownTimer m_specialFireButtonTimer[MAXPLAYERS + 1];
+
 // Non-resetting Properties
 static int m_invaderPriority[MAXPLAYERS + 1];
 static int m_invaderMiniBossPriority[MAXPLAYERS + 1];
@@ -350,6 +356,54 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		public set(Handle annotationTimer)
 		{
 			m_annotationTimer[this.index] = annotationTimer;
+		}
+	}
+	
+	property int m_inputButtons
+	{
+		public get()
+		{
+			return m_inputButtons[this.index];
+		}
+		public set(int inputButtons)
+		{
+			m_inputButtons[this.index] = inputButtons;
+		}
+	}
+	
+	property CountdownTimer m_fireButtonTimer
+	{
+		public get()
+		{
+			return m_fireButtonTimer[this.index];
+		}
+		public set(CountdownTimer fireButtonTimer)
+		{
+			m_fireButtonTimer[this.index] = fireButtonTimer;
+		}
+	}
+	
+	property CountdownTimer m_altFireButtonTimer
+	{
+		public get()
+		{
+			return m_altFireButtonTimer[this.index];
+		}
+		public set(CountdownTimer altFireButtonTimer)
+		{
+			m_altFireButtonTimer[this.index] = altFireButtonTimer;
+		}
+	}
+	
+	property CountdownTimer m_specialFireButtonTimer
+	{
+		public get()
+		{
+			return m_specialFireButtonTimer[this.index];
+		}
+		public set(CountdownTimer specialFireButtonTimer)
+		{
+			m_specialFireButtonTimer[this.index] = specialFireButtonTimer;
 		}
 	}
 	
@@ -1335,6 +1389,24 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		return false;
 	}
 	
+	public void PressFireButton(float duration = -1.0)
+	{
+		this.m_inputButtons |= IN_ATTACK;
+		this.m_fireButtonTimer.Start(duration);
+	}
+	
+	public void PressAltFireButton(float duration = -1.0)
+	{
+		this.m_inputButtons |= IN_ATTACK2;
+		this.m_altFireButtonTimer.Start(duration);
+	}
+	
+	public void PressSpecialFireButton(float duration = -1.0)
+	{
+		this.m_inputButtons |= IN_ATTACK3;
+		this.m_specialFireButtonTimer.Start(duration);
+	}
+	
 	public int GetClosestCaptureZone()
 	{
 		int captureZone = -1;
@@ -1518,6 +1590,9 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		this.m_teleportWhereName = new ArrayList(ByteCountToCells(64));
 		this.m_eventChangeAttributes = new ArrayList();
 		this.m_tags = new ArrayList(ByteCountToCells(64));
+		this.m_fireButtonTimer = new CountdownTimer();
+		this.m_altFireButtonTimer = new CountdownTimer();
+		this.m_specialFireButtonTimer = new CountdownTimer();
 	}
 	
 	public void ResetInvader()
@@ -1540,6 +1615,11 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		this.m_hFollowingFlagTarget = INVALID_ENT_REFERENCE;
 		this.m_isWaitingForFullReload = false;
 		this.m_annotationTimer = null;
+		
+		this.m_inputButtons = 0;
+		this.m_fireButtonTimer.Invalidate();
+		this.m_altFireButtonTimer.Invalidate();
+		this.m_specialFireButtonTimer.Invalidate();
 		
 		this.ResetInvaderName();
 	}

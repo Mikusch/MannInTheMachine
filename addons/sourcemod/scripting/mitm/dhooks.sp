@@ -106,14 +106,16 @@ void DHooks_Init(GameData hGameData)
 	CopyScriptFunctionBinding("CTFBot", "DisbandCurrentSquad", "CTFPlayer", DHookCallback_CTFBot_DisbandAndDeleteSquad);
 	CopyScriptFunctionBinding("CTFBot", "HasBotAttribute", "CTFPlayer", DHookCallback_CTFBot_HasAttribute_Pre);
 	CopyScriptFunctionBinding("CTFBot", "HasBotTag", "CTFPlayer", DHookCallback_CTFBot_HasTag_Pre);
+	CopyScriptFunctionBinding("CTFBot", "HasWeaponRestriction", "CTFPlayer", DHookCallback_CTFBot_HasWeaponRestriction_Pre);
 	CopyScriptFunctionBinding("CTFBot", "IsInASquad", "CTFPlayer", DHookCallback_CTFBot_IsInASquad_Pre);
 	CopyScriptFunctionBinding("CTFBot", "LeaveSquad", "CTFPlayer", DHookCallback_CTFBot_LeaveSquad_Pre);
-	CopyScriptFunctionBinding("CTFBot", "HasWeaponRestriction", "CTFPlayer", DHookCallback_CTFBot_HasWeaponRestriction_Pre);
+	CopyScriptFunctionBinding("CTFBot", "PressAltFireButton", "CTFPlayer", DHookCallback_CTFBot_PressAltFireButton_Pre);
+	CopyScriptFunctionBinding("CTFBot", "PressFireButton", "CTFPlayer", DHookCallback_CTFBot_PressFireButton_Pre);
+	CopyScriptFunctionBinding("CTFBot", "PressSpecialFireButton", "CTFPlayer", DHookCallback_CTFBot_PressSpecialFireButton_Pre);
 	CopyScriptFunctionBinding("CTFBot", "RemoveBotAttribute", "CTFPlayer", DHookCallback_CTFBot_RemoveAttribute_Pre);
 	CopyScriptFunctionBinding("CTFBot", "RemoveBotTag", "CTFPlayer", DHookCallback_CTFBot_RemoveTag_Pre);
 	CopyScriptFunctionBinding("CTFBot", "RemoveWeaponRestriction", "CTFPlayer", DHookCallback_CTFBot_RemoveWeaponRestriction_Pre);
-	CopyScriptFunctionBinding("CTFBot", "GenerateAndWearItem", "CTFPlayer");
-	CopyScriptFunctionBinding("CTFBot", "PressAltFireButton", "CTFPlayer", _, true);
+	CopyScriptFunctionBinding("CTFBot", "GenerateAndWearItem", "CTFPlayer", _, false);
 	
 	VScript_ResetScriptVM();
 	
@@ -238,7 +240,7 @@ static DynamicHook CreateDynamicHook(GameData hGameData, const char[] name)
 	return hook;
 }
 
-static void CopyScriptFunctionBinding(const char[] szSourceClassName, const char[] szFunctionName, const char[] szTargetClassName, DHookCallback fnCallback = INVALID_FUNCTION, bool bEmpty = false)
+static void CopyScriptFunctionBinding(const char[] szSourceClassName, const char[] szFunctionName, const char[] szTargetClassName, DHookCallback fnCallback = INVALID_FUNCTION, bool bEmpty = true)
 {
 	VScriptFunction pTargetFunc = VScript_GetClassFunction(szTargetClassName, szFunctionName);
 	if (!pTargetFunc)
@@ -2013,6 +2015,16 @@ static MRESReturn DHookCallback_CTFBot_HasTag_Pre(int bot, DHookReturn ret, DHoo
 	return MRES_Supercede;
 }
 
+static MRESReturn DHookCallback_CTFBot_HasWeaponRestriction_Pre(int bot, DHookReturn ret, DHookParam params)
+{
+	if (IsFakeClient(bot))
+		return MRES_Ignored;
+	
+	ret.Value = CTFPlayer(bot).HasWeaponRestriction(params.Get(1));
+	
+	return MRES_Supercede;
+}
+
 static MRESReturn DHookCallback_CTFBot_IsInASquad_Pre(int bot, DHookReturn ret)
 {
 	if (IsFakeClient(bot))
@@ -2033,12 +2045,32 @@ static MRESReturn DHookCallback_CTFBot_LeaveSquad_Pre(int bot)
 	return MRES_Supercede;
 }
 
-static MRESReturn DHookCallback_CTFBot_HasWeaponRestriction_Pre(int bot, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CTFBot_PressAltFireButton_Pre(int bot, DHookParam params)
 {
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
 	
-	ret.Value = CTFPlayer(bot).HasWeaponRestriction(params.Get(1));
+	CTFPlayer(bot).PressAltFireButton(params.Get(1));
+	
+	return MRES_Supercede;
+}
+
+static MRESReturn DHookCallback_CTFBot_PressFireButton_Pre(int bot, DHookParam params)
+{
+	if (IsFakeClient(bot))
+		return MRES_Ignored;
+	
+	CTFPlayer(bot).PressFireButton(params.Get(1));
+	
+	return MRES_Supercede;
+}
+
+static MRESReturn DHookCallback_CTFBot_PressSpecialFireButton_Pre(int bot, DHookParam params)
+{
+	if (IsFakeClient(bot))
+		return MRES_Ignored;
+	
+	CTFPlayer(bot).PressSpecialFireButton(params.Get(1));
 	
 	return MRES_Supercede;
 }

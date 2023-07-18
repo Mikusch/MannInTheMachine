@@ -373,24 +373,47 @@ public void OnGameFrame()
 	delete queue;
 }
 
-public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int & subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
+public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
 	if (!IsClientInGame(client))
 		return Plugin_Continue;
 	
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	if (TF2_GetClientTeam(client) != TFTeam_Invaders)
+		return Plugin_Continue;
+	
+	if (CTFPlayer(client).m_inputButtons != 0)
 	{
-		if (CTFPlayer(client).HasAttribute(AUTO_JUMP) && CTFPlayer(client).ShouldAutoJump())
-		{
-			buttons |= IN_JUMP;
-		}
-		
-		FireWeaponAtEnemy(client, buttons);
-		
-		return Plugin_Changed;
+		buttons |= CTFPlayer(client).m_inputButtons;
+		CTFPlayer(client).m_inputButtons = 0;
 	}
 	
-	return Plugin_Continue;
+	if (!CTFPlayer(client).m_fireButtonTimer.IsElapsed())
+		buttons |= IN_ATTACK;
+	
+	if (!CTFPlayer(client).m_altFireButtonTimer.IsElapsed())
+		buttons |= IN_ATTACK2;
+	
+	if (!CTFPlayer(client).m_specialFireButtonTimer.IsElapsed())
+		buttons |= IN_ATTACK3;
+	
+	if (CTFPlayer(client).HasAttribute(AUTO_JUMP))
+	{
+		// AutoJump robots are not allowed to jump manually
+		if (CTFPlayer(client).ShouldAutoJump())
+		{
+			buttons |= IN_JUMP;
+			TF2Attrib_RemoveByName(client, "no_jump");
+		}
+		else
+		{
+			buttons &= ~IN_JUMP;
+			TF2Attrib_SetByName(client, "no_jump", 1.0);
+		}
+	}
+	
+	ApplyRobotWeaponRestrictions(client, buttons);
+	
+	return Plugin_Changed;
 }
 
 public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
@@ -398,20 +421,20 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 	if (!IsClientInGame(client))
 		return;
 	
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	if (TF2_GetClientTeam(client) != TFTeam_Invaders)
+		return;
+	
+	if (CTFPlayer(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
 	{
-		if (CTFPlayer(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
+		TF2_AddCondition(client, TFCond_CritCanteen);
+	}
+	
+	if (CTFPlayer(client).IsInASquad())
+	{
+		if (CTFPlayer(client).GetSquad().GetMemberCount() <= 1 || CTFPlayer(client).GetSquad().GetLeader() == -1)
 		{
-			TF2_AddCondition(client, TFCond_CritCanteen);
-		}
-		
-		if (CTFPlayer(client).IsInASquad())
-		{
-			if (CTFPlayer(client).GetSquad().GetMemberCount() <= 1 || CTFPlayer(client).GetSquad().GetLeader() == -1)
-			{
-				// squad has collapsed - disband it
-				CTFPlayer(client).LeaveSquad();
-			}
+			// squad has collapsed - disband it
+			CTFPlayer(client).LeaveSquad();
 		}
 	}
 }
@@ -470,7 +493,7 @@ static INextBot CreateNextBotPlayer(Address entity)
 	return nextbot;
 }
 
-static void FireWeaponAtEnemy(int client, int &buttons)
+static void ApplyRobotWeaponRestrictions(int client, int &buttons)
 {
 	if (!IsPlayerAlive(client))
 		return;

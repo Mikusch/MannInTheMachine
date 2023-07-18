@@ -1321,14 +1321,14 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		if (!this.HasAttribute(AUTO_JUMP))
 			return false;
 		
-		if (!m_autoJumpTimer[this.index].HasStarted())
+		if (!this.m_autoJumpTimer.HasStarted())
 		{
-			m_autoJumpTimer[this.index].Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
+			this.m_autoJumpTimer.Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
 			return true;
 		}
-		else if (m_autoJumpTimer[this.index].IsElapsed())
+		else if (this.m_autoJumpTimer.IsElapsed())
 		{
-			m_autoJumpTimer[this.index].Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
+			this.m_autoJumpTimer.Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
 			return true;
 		}
 		

@@ -403,7 +403,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	if (CTFPlayer(client).ShouldAutoJump())
 	{
 		buttons |= IN_JUMP;
-		SetEntProp(client, Prop_Data, "m_nOldButtons", GetEntProp(client, Prop_Data, "m_nOldButtons") &~ IN_JUMP);
+		SetEntProp(client, Prop_Data, "m_nOldButtons", GetEntProp(client, Prop_Data, "m_nOldButtons") & ~IN_JUMP);
 	}
 	
 	ApplyRobotWeaponRestrictions(client, buttons);
@@ -573,40 +573,29 @@ static void ApplyRobotWeaponRestrictions(int client, int &buttons)
 		return;
 	}
 	
-	if (g_pPopulationManager.IsValid() && !CTFPlayer(client).HasAttribute(ALWAYS_FIRE_WEAPON))
+	static bool isAttackBlocked[MAXPLAYERS + 1];
+	
+	if (CTFPlayer(client).MyNextBotPointer().GetIntentionInterface().ShouldAttack(INVALID_ENT_REFERENCE) == ANSWER_NO && !CTFPlayer(client).HasAttribute(ALWAYS_FIRE_WEAPON))
 	{
-		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(client).GetLastKnownArea());
-		TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(client) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
+		isAttackBlocked[client] = true;
 		
-		static bool s_isInSpawn[MAXPLAYERS + 1];
-		
-		if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
+		LockWeapon(client, myWeapon, buttons);
+		return;
+	}
+	
+	if (isAttackBlocked[client])
+	{
+		// The active weapon might have switched, remove attributes from all
+		int numWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
+		for (int i = 0; i < numWeapons; i++)
 		{
-			// if I'm in my spawn room, obey the population manager's attack restrictions
-			if (!g_pPopulationManager.CanBotsAttackWhileInSpawnRoom())
-			{
-				s_isInSpawn[client] = true;
-				
-				LockWeapon(client, myWeapon, buttons);
-				return;
-			}
-		}
-		
-		if (s_isInSpawn[client])
-		{
-			// The active weapon might have switched, remove attributes from all
-			int numWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
-			for (int i = 0; i < numWeapons; i++)
-			{
-				int weapon = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i);
-				if (weapon == -1)
-					continue;
-				
-				UnlockWeapon(weapon);
-			}
+			int weapon = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i);
+			if (weapon == -1)
+				continue;
 			
-			// We have left the spawn
-			s_isInSpawn[client] = false;
+			UnlockWeapon(weapon);
 		}
+		
+		isAttackBlocked[client] = false;
 	}
 }

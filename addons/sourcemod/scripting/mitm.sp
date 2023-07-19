@@ -128,7 +128,9 @@ ConVar phys_pushscale;
 #include "mitm/behavior/tf_bot_dead.sp"
 #include "mitm/behavior/tf_bot_mvm_deploy_bomb.sp"
 #include "mitm/behavior/tf_bot_scenario_monitor.sp"
+#include "mitm/behavior/tf_bot_tactical_monitor.sp"
 #include "mitm/behavior/tf_bot_taunt.sp"
+#include "mitm/behavior/tf_bot_use_item.sp"
 
 public Plugin myinfo =
 {
@@ -161,7 +163,9 @@ public void OnPluginStart()
 	CTFBotScenarioMonitor.Init();
 	CTFBotSniperLurk.Init();
 	CTFBotSpyLeaveSpawnRoom.Init();
+	CTFBotTacticalMonitor.Init();
 	CTFBotTaunt.Init();
+	CTFBotUseItem.Init();
 	
 	// Install player action factory
 	CEntityFactory hEntityFactory = new CEntityFactory("player");

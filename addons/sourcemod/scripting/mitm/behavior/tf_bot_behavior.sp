@@ -65,7 +65,7 @@ static NextBotAction InitialContainedAction(CTFBotMainAction action, int actor)
 {
 	if (TF2_GetClientTeam(actor) == TFTeam_Invaders)
 	{
-		return CTFBotScenarioMonitor();
+		return CTFBotTacticalMonitor();
 	}
 	
 	return NULL_ACTION;
@@ -202,6 +202,8 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 			action.m_undergroundTimer.Invalidate();
 		}
 	}
+	
+	CTFPlayer(actor).EquipRequiredWeapon();
 	
 	return action.Continue();
 }

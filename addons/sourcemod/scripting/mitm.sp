@@ -379,10 +379,7 @@ public void OnGameFrame()
 
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
-	if (!IsClientInGame(client))
-		return Plugin_Continue;
-	
-	if (TF2_GetClientTeam(client) != TFTeam_Invaders)
+	if (!IsClientInGame(client) || !IsPlayerAlive(client) || TF2_GetClientTeam(client) != TFTeam_Invaders)
 		return Plugin_Continue;
 	
 	if (CTFPlayer(client).m_inputButtons != 0)
@@ -400,19 +397,13 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	if (!CTFPlayer(client).m_specialFireButtonTimer.IsElapsed())
 		buttons |= IN_ATTACK3;
 	
-	if (CTFPlayer(client).HasAttribute(AUTO_JUMP))
+	if (CTFPlayer(client).HasAttribute(ALWAYS_FIRE_WEAPON))
+		buttons |= IN_ATTACK;
+	
+	if (CTFPlayer(client).ShouldAutoJump())
 	{
-		// AutoJump robots are not allowed to jump manually
-		if (CTFPlayer(client).ShouldAutoJump())
-		{
-			buttons |= IN_JUMP;
-			TF2Attrib_RemoveByName(client, "no_jump");
-		}
-		else
-		{
-			buttons &= ~IN_JUMP;
-			TF2Attrib_SetByName(client, "no_jump", 1.0);
-		}
+		buttons |= IN_JUMP;
+		SetEntProp(client, Prop_Data, "m_nOldButtons", GetEntProp(client, Prop_Data, "m_nOldButtons") &~ IN_JUMP);
 	}
 	
 	ApplyRobotWeaponRestrictions(client, buttons);
@@ -422,10 +413,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 
 public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
 {
-	if (!IsClientInGame(client))
-		return;
-	
-	if (TF2_GetClientTeam(client) != TFTeam_Invaders)
+	if (!IsClientInGame(client) || TF2_GetClientTeam(client) != TFTeam_Invaders)
 		return;
 	
 	if (CTFPlayer(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
@@ -529,12 +517,6 @@ static void ApplyRobotWeaponRestrictions(int client, int &buttons)
 				CTFPlayer(client).m_isWaitingForFullReload = false;
 			}
 		}
-	}
-	
-	if (CTFPlayer(client).HasAttribute(ALWAYS_FIRE_WEAPON))
-	{
-		buttons |= IN_ATTACK;
-		return;
 	}
 	
 	if (CTFPlayer(client).HasMission(MISSION_DESTROY_SENTRIES))

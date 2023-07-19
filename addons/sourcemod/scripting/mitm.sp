@@ -519,16 +519,6 @@ static void ApplyRobotWeaponRestrictions(int client, int &buttons)
 		}
 	}
 	
-	if (CTFPlayer(client).HasMission(MISSION_DESTROY_SENTRIES))
-	{
-		LockWeapon(client, myWeapon, buttons);
-		return;
-	}
-	else if (CTFPlayer(client).GetPrevMission() == MISSION_DESTROY_SENTRIES)
-	{
-		UnlockWeapon(myWeapon);
-	}
-	
 	int weaponID = TF2Util_GetWeaponID(myWeapon);
 	
 	// Vaccinator resistance preference for robot medics

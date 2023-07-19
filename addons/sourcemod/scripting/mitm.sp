@@ -573,7 +573,7 @@ static void ApplyRobotWeaponRestrictions(int client, int &buttons)
 		return;
 	}
 	
-	if (g_pPopulationManager.IsValid())
+	if (g_pPopulationManager.IsValid() && !CTFPlayer(client).HasAttribute(ALWAYS_FIRE_WEAPON))
 	{
 		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(client).GetLastKnownArea());
 		TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(client) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;

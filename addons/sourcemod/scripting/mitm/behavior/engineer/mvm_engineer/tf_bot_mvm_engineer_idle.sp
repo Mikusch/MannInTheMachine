@@ -38,6 +38,8 @@ methodmap CTFBotMvMEngineerIdle < NextBotAction
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldRetreat, ShouldRetreat);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldHurry, ShouldHurry);
 	}
 	
 	public CTFBotMvMEngineerIdle()
@@ -346,4 +348,14 @@ static void TryToDetonateStaleNest(CTFBotMvMEngineerIdle action)
 	action.m_bTriedToDetonateStaleNest = true;
 	
 	delete activeEngineerNest;
+}
+
+static QueryResultType ShouldRetreat(CTFBotMvMEngineerIdle action, INextBot bot)
+{
+	return ANSWER_NO;
+}
+
+static QueryResultType ShouldHurry(CTFBotMvMEngineerIdle action, INextBot bot)
+{
+	return ANSWER_YES;
 }

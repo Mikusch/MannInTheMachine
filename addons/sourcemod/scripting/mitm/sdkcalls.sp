@@ -41,6 +41,7 @@ static Handle g_hSDKCall_CTeamplayRules_TeamMayCapturePoint;
 static Handle g_hSDKCall_CTFBotHintEngineerNest_GetSentryHint;
 static Handle g_hSDKCall_CTFBotHintEngineerNest_GetTeleporterHint;
 static Handle g_hSDKCall_CPopulationManager_GetCurrentWave;
+static Handle g_hSDKCall_CBaseEntity_ShouldCollide;
 static Handle g_hSDKCall_CBaseEntity_IsCombatItem;
 static Handle g_hSDKCall_CBaseObject_GetMaxHealthForCurrentLevel;
 static Handle g_hSDKCall_CBaseCombatWeapon_Clip1;
@@ -53,7 +54,7 @@ static Handle g_hSDKCall_CTFBotHintEngineerNest_IsStaleNest;
 static Handle g_hSDKCall_CTFBotHintEngineerNest_DetonateStaleNest;
 static Handle g_hSDKCall_CTFGrenadePipebombProjectile_GetLiveTime;
 static Handle g_hSDKCall_CBaseTrigger_PassesTriggerFilters;
-static Handle g_hSDKCall_CBaseEntity_ShouldCollide;
+static Handle g_hSDKCall_CBaseCombatWeapon_HasAmmo;
 
 void SDKCalls_Init(GameData hGameData)
 {
@@ -99,6 +100,7 @@ void SDKCalls_Init(GameData hGameData)
 	g_hSDKCall_CTFBotHintEngineerNest_GetSentryHint = PrepSDKCall_CTFBotHintEngineerNest_GetSentryHint(hGameData);
 	g_hSDKCall_CTFBotHintEngineerNest_GetTeleporterHint = PrepSDKCall_CTFBotHintEngineerNest_GetTeleporterHint(hGameData);
 	g_hSDKCall_CPopulationManager_GetCurrentWave = PrepSDKCall_CPopulationManager_GetCurrentWave(hGameData);
+	g_hSDKCall_CBaseEntity_ShouldCollide = PrepSDKCall_CBaseEntity_ShouldCollide(hGameData);
 	g_hSDKCall_CBaseEntity_IsCombatItem = PrepSDKCall_CBaseEntity_IsCombatItem(hGameData);
 	g_hSDKCall_CBaseObject_GetMaxHealthForCurrentLevel = PrepSDKCall_CBaseObject_GetMaxHealthForCurrentLevel(hGameData);
 	g_hSDKCall_CBaseCombatWeapon_Clip1 = PrepSDKCall_CBaseCombatWeapon_Clip1(hGameData);
@@ -111,7 +113,20 @@ void SDKCalls_Init(GameData hGameData)
 	g_hSDKCall_CTFBotHintEngineerNest_DetonateStaleNest = PrepSDKCall_CTFBotHintEngineerNest_DetonateStaleNest(hGameData);
 	g_hSDKCall_CTFGrenadePipebombProjectile_GetLiveTime = PrepSDKCall_CTFGrenadePipebombProjectile_GetLiveTime(hGameData);
 	g_hSDKCall_CBaseTrigger_PassesTriggerFilters = PrepSDKCall_CBaseTrigger_PassesTriggerFilters(hGameData);
-	g_hSDKCall_CBaseEntity_ShouldCollide = PrepSDKCall_CBaseEntity_ShouldCollide(hGameData);
+	
+	g_hSDKCall_CBaseCombatWeapon_HasAmmo = PrepSDKCall_FromScriptFunction("CBaseCombatWeapon", "HasAnyAmmo");
+}
+
+static Handle PrepSDKCall_FromScriptFunction(const char[] className, const char[] functionName)
+{
+	VScriptFunction func = VScript_GetClassFunction(className, functionName);
+	if (!func)
+	{
+		LogError("Failed to find script function: %s::%s", className, functionName);
+		return null;
+	}
+	
+	return func.CreateSDKCall();
 }
 
 static Handle PrepSDKCall_GetClassIcon_Linux(GameData hGameData)
@@ -898,6 +913,14 @@ bool SDKCall_CBaseTrigger_PassesTriggerFilters(int trigger, int other)
 {
 	if (g_hSDKCall_CBaseTrigger_PassesTriggerFilters)
 		return SDKCall(g_hSDKCall_CBaseTrigger_PassesTriggerFilters, trigger, other);
+	
+	return false;
+}
+
+bool SDKCall_CBaseCombatWeapon_HasAmmo(int weapon)
+{
+	if (g_hSDKCall_CBaseCombatWeapon_HasAmmo)
+		return SDKCall(g_hSDKCall_CBaseCombatWeapon_HasAmmo, weapon);
 	
 	return false;
 }

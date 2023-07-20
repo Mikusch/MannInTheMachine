@@ -128,7 +128,9 @@ ConVar phys_pushscale;
 #include "mitm/behavior/tf_bot_dead.sp"
 #include "mitm/behavior/tf_bot_mvm_deploy_bomb.sp"
 #include "mitm/behavior/tf_bot_scenario_monitor.sp"
+#include "mitm/behavior/tf_bot_tactical_monitor.sp"
 #include "mitm/behavior/tf_bot_taunt.sp"
+#include "mitm/behavior/tf_bot_use_item.sp"
 
 public Plugin myinfo =
 {
@@ -161,7 +163,9 @@ public void OnPluginStart()
 	CTFBotScenarioMonitor.Init();
 	CTFBotSniperLurk.Init();
 	CTFBotSpyLeaveSpawnRoom.Init();
+	CTFBotTacticalMonitor.Init();
 	CTFBotTaunt.Init();
+	CTFBotUseItem.Init();
 	
 	// Install player action factory
 	CEntityFactory hEntityFactory = new CEntityFactory("player");
@@ -373,45 +377,56 @@ public void OnGameFrame()
 	delete queue;
 }
 
-public Action OnPlayerRunCmd(int client, int& buttons, int& impulse, float vel[3], float angles[3], int& weapon, int & subtype, int& cmdnum, int& tickcount, int& seed, int mouse[2])
+public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
-	if (!IsClientInGame(client))
+	if (!IsClientInGame(client) || !IsPlayerAlive(client) || TF2_GetClientTeam(client) != TFTeam_Invaders)
 		return Plugin_Continue;
 	
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	if (CTFPlayer(client).m_inputButtons != 0)
 	{
-		if (CTFPlayer(client).HasAttribute(AUTO_JUMP) && CTFPlayer(client).ShouldAutoJump())
-		{
-			buttons |= IN_JUMP;
-		}
-		
-		FireWeaponAtEnemy(client, buttons);
-		
-		return Plugin_Changed;
+		buttons |= CTFPlayer(client).m_inputButtons;
+		CTFPlayer(client).m_inputButtons = 0;
 	}
 	
-	return Plugin_Continue;
+	if (!CTFPlayer(client).m_fireButtonTimer.IsElapsed())
+		buttons |= IN_ATTACK;
+	
+	if (!CTFPlayer(client).m_altFireButtonTimer.IsElapsed())
+		buttons |= IN_ATTACK2;
+	
+	if (!CTFPlayer(client).m_specialFireButtonTimer.IsElapsed())
+		buttons |= IN_ATTACK3;
+	
+	if (CTFPlayer(client).HasAttribute(ALWAYS_FIRE_WEAPON))
+		buttons |= IN_ATTACK;
+	
+	if (CTFPlayer(client).ShouldAutoJump())
+	{
+		buttons |= IN_JUMP;
+		SetEntProp(client, Prop_Data, "m_nOldButtons", GetEntProp(client, Prop_Data, "m_nOldButtons") & ~IN_JUMP);
+	}
+	
+	ApplyRobotWeaponRestrictions(client, buttons);
+	
+	return Plugin_Changed;
 }
 
 public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
 {
-	if (!IsClientInGame(client))
+	if (!IsClientInGame(client) || TF2_GetClientTeam(client) != TFTeam_Invaders)
 		return;
 	
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	if (CTFPlayer(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
 	{
-		if (CTFPlayer(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
+		TF2_AddCondition(client, TFCond_CritCanteen);
+	}
+	
+	if (CTFPlayer(client).IsInASquad())
+	{
+		if (CTFPlayer(client).GetSquad().GetMemberCount() <= 1 || CTFPlayer(client).GetSquad().GetLeader() == -1)
 		{
-			TF2_AddCondition(client, TFCond_CritCanteen);
-		}
-		
-		if (CTFPlayer(client).IsInASquad())
-		{
-			if (CTFPlayer(client).GetSquad().GetMemberCount() <= 1 || CTFPlayer(client).GetSquad().GetLeader() == -1)
-			{
-				// squad has collapsed - disband it
-				CTFPlayer(client).LeaveSquad();
-			}
+			// squad has collapsed - disband it
+			CTFPlayer(client).LeaveSquad();
 		}
 	}
 }
@@ -470,7 +485,7 @@ static INextBot CreateNextBotPlayer(Address entity)
 	return nextbot;
 }
 
-static void FireWeaponAtEnemy(int client, int &buttons)
+static void ApplyRobotWeaponRestrictions(int client, int &buttons)
 {
 	if (!IsPlayerAlive(client))
 		return;
@@ -502,22 +517,6 @@ static void FireWeaponAtEnemy(int client, int &buttons)
 				CTFPlayer(client).m_isWaitingForFullReload = false;
 			}
 		}
-	}
-	
-	if (CTFPlayer(client).HasAttribute(ALWAYS_FIRE_WEAPON))
-	{
-		buttons |= IN_ATTACK;
-		return;
-	}
-	
-	if (CTFPlayer(client).HasMission(MISSION_DESTROY_SENTRIES))
-	{
-		LockWeapon(client, myWeapon, buttons);
-		return;
-	}
-	else if (CTFPlayer(client).GetPrevMission() == MISSION_DESTROY_SENTRIES)
-	{
-		UnlockWeapon(myWeapon);
 	}
 	
 	int weaponID = TF2Util_GetWeaponID(myWeapon);
@@ -564,40 +563,29 @@ static void FireWeaponAtEnemy(int client, int &buttons)
 		return;
 	}
 	
-	if (g_pPopulationManager.IsValid())
+	static bool isAttackBlocked[MAXPLAYERS + 1];
+	
+	if (CTFPlayer(client).MyNextBotPointer().GetIntentionInterface().ShouldAttack(INVALID_ENT_REFERENCE) == ANSWER_NO && !CTFPlayer(client).HasAttribute(ALWAYS_FIRE_WEAPON))
 	{
-		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(client).GetLastKnownArea());
-		TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(client) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
+		isAttackBlocked[client] = true;
 		
-		static bool s_isInSpawn[MAXPLAYERS + 1];
-		
-		if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
+		LockWeapon(client, myWeapon, buttons);
+		return;
+	}
+	
+	if (isAttackBlocked[client])
+	{
+		// The active weapon might have switched, remove attributes from all
+		int numWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
+		for (int i = 0; i < numWeapons; i++)
 		{
-			// if I'm in my spawn room, obey the population manager's attack restrictions
-			if (!g_pPopulationManager.CanBotsAttackWhileInSpawnRoom())
-			{
-				s_isInSpawn[client] = true;
-				
-				LockWeapon(client, myWeapon, buttons);
-				return;
-			}
-		}
-		
-		if (s_isInSpawn[client])
-		{
-			// The active weapon might have switched, remove attributes from all
-			int numWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
-			for (int i = 0; i < numWeapons; i++)
-			{
-				int weapon = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i);
-				if (weapon == -1)
-					continue;
-				
-				UnlockWeapon(weapon);
-			}
+			int weapon = GetEntPropEnt(client, Prop_Send, "m_hMyWeapons", i);
+			if (weapon == -1)
+				continue;
 			
-			// We have left the spawn
-			s_isInSpawn[client] = false;
+			UnlockWeapon(weapon);
 		}
+		
+		isAttackBlocked[client] = false;
 	}
 }

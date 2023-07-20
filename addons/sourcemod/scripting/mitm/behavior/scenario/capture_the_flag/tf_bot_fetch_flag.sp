@@ -29,6 +29,8 @@ methodmap CTFBotFetchFlag < NextBotAction
 			.DefineBoolField("m_isTemporary")
 		.EndDataMapDesc();
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldHurry, ShouldHurry);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldRetreat, ShouldRetreat);
 	}
 	
 	public CTFBotFetchFlag(bool isTemporary = false)
@@ -79,4 +81,14 @@ static int Update(CTFBotFetchFlag action, int actor, float interval)
 	}
 	
 	return action.Continue();
+}
+
+static QueryResultType ShouldHurry(CTFBotFetchFlag action, INextBot bot)
+{
+	return ANSWER_YES;
+}
+
+static QueryResultType ShouldRetreat(CTFBotFetchFlag action, INextBot bot)
+{
+	return ANSWER_NO;
 }

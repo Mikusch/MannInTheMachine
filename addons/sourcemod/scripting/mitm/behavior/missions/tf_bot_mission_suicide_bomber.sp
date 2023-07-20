@@ -40,6 +40,7 @@ methodmap CTFBotMissionSuicideBomber < NextBotAction
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
 		ActionFactory.SetEventCallback(EventResponderType_OnKilled, OnKilled);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldAttack, ShouldAttack);
 	}
 	
 	public CTFBotMissionSuicideBomber()
@@ -295,6 +296,12 @@ static int OnKilled(CTFBotMissionSuicideBomber action, int actor, int attacker, 
 	}
 	
 	return action.TryContinue();
+}
+
+static QueryResultType ShouldAttack(CTFBotMissionSuicideBomber action, INextBot bot, CKnownEntity knownEntity)
+{
+	// buster never "attacks", just approaches and self-detonates
+	return ANSWER_NO;
 }
 
 static void StartDetonate(CTFBotMissionSuicideBomber action, int actor, bool bWasSuccessful = false, bool bWasKilled = false)

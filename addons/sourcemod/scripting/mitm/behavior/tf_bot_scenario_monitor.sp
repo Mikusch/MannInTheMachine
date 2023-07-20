@@ -35,7 +35,7 @@ methodmap CTFBotScenarioMonitor < NextBotAction
 	}
 }
 
-static NextBotAction InitialContainedAction(NextBotAction action, int actor)
+static NextBotAction InitialContainedAction(CTFBotScenarioMonitor action, int actor)
 {
 	if (CTFPlayer(actor).IsInASquad())
 	{
@@ -59,7 +59,7 @@ static NextBotAction InitialContainedAction(NextBotAction action, int actor)
 	return DesiredScenarioAndClassAction(actor);
 }
 
-static int Update(NextBotAction action, int actor, float interval)
+static int Update(CTFBotScenarioMonitor action, int actor, float interval)
 {
 	if (CTFPlayer(actor).HasTheFlag())
 	{

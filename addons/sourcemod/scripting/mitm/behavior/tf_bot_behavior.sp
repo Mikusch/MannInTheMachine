@@ -36,6 +36,8 @@ methodmap CTFBotMainAction < NextBotAction
 		ActionFactory.SetEventCallback(EventResponderType_OnKilled, OnKilled);
 		ActionFactory.SetEventCallback(EventResponderType_OnContact, OnContact);
 		ActionFactory.SetEventCallback(EventResponderType_OnOtherKilled, OnOtherKilled);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldAttack, ShouldAttack);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldHurry, ShouldHurry);
 	}
 	
 	public static NextBotActionFactory GetFactory()
@@ -65,7 +67,7 @@ static NextBotAction InitialContainedAction(CTFBotMainAction action, int actor)
 {
 	if (TF2_GetClientTeam(actor) == TFTeam_Invaders)
 	{
-		return CTFBotScenarioMonitor();
+		return CTFBotTacticalMonitor();
 	}
 	
 	return NULL_ACTION;
@@ -203,6 +205,8 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 		}
 	}
 	
+	CTFPlayer(actor).EquipRequiredWeapon();
+	
 	return action.Continue();
 }
 
@@ -275,4 +279,44 @@ static int OnOtherKilled(CTFBotMainAction action, int actor, int victim, int att
 	}
 	
 	return action.TryContinue();
+}
+
+static QueryResultType ShouldAttack(CTFBotMainAction action, INextBot bot, CKnownEntity knownEntity)
+{
+	if (g_pPopulationManager.IsValid())
+	{
+		// if I'm in my spawn room, obey the population manager's attack restrictions
+		int me = bot.GetEntity();
+		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(me).GetLastKnownArea());
+		TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(me) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
+		
+		if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
+		{
+			return g_pPopulationManager.CanBotsAttackWhileInSpawnRoom() ? ANSWER_YES : ANSWER_NO;
+		}
+	}
+	
+	return ANSWER_YES;
+}
+
+static QueryResultType ShouldHurry(CTFBotMainAction action, INextBot bot)
+{
+	if (g_pPopulationManager.IsValid())
+	{
+		// if I'm in my spawn room, obey the population manager's attack restrictions
+		int me = bot.GetEntity();
+		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(me).GetLastKnownArea());
+		TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(me) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
+		
+		if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
+		{
+			if (g_pPopulationManager.CanBotsAttackWhileInSpawnRoom())
+			{
+				// hurry to leave the spawn
+				return ANSWER_YES;
+			}
+		}
+	}
+	
+	return ANSWER_UNDEFINED;
 }

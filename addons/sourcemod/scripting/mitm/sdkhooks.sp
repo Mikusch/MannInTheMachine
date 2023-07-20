@@ -23,7 +23,6 @@ static bool g_bHasActiveTeleporterPre;
 void SDKHooks_OnClientPutInServer(int client)
 {
 	SDKHook(client, SDKHook_OnTakeDamageAlive, SDKHookCB_Client_OnTakeDamageAlive);
-	SDKHook(client, SDKHook_WeaponCanSwitchTo, SDKHookCB_Client_WeaponCanSwitchTo);
 }
 
 void SDKHooks_OnEntityCreated(int entity, const char[] classname)
@@ -68,17 +67,6 @@ static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int 
 				return Plugin_Changed;
 			}
 		}
-	}
-	
-	return Plugin_Continue;
-}
-
-static Action SDKHookCB_Client_WeaponCanSwitchTo(int client, int weapon)
-{
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders && CTFPlayer(client).IsWeaponRestricted(weapon))
-	{
-		EmitGameSoundToClient(client, "Player.DenyWeaponSelection");
-		return Plugin_Handled;
 	}
 	
 	return Plugin_Continue;

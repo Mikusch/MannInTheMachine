@@ -36,6 +36,9 @@ methodmap CTFBotDeliverFlag < NextBotAction
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
 		ActionFactory.SetEventCallback(EventResponderType_OnContact, OnContact);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldAttack, ShouldAttack);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldHurry, ShouldHurry);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldRetreat, ShouldRetreat);
 	}
 	
 	public CTFBotDeliverFlag()
@@ -284,4 +287,24 @@ static int OnContact(CTFBotDeliverFlag action, int actor, int other, Address res
 	}
 	
 	return action.TryContinue();
+}
+
+static QueryResultType ShouldAttack(CTFBotDeliverFlag action, INextBot bot, CKnownEntity knownEntity)
+{
+	if (tf_mvm_bot_allow_flag_carrier_to_fight.BoolValue)
+	{
+		return ANSWER_UNDEFINED;
+	}
+	
+	return ANSWER_NO;
+}
+
+static QueryResultType ShouldHurry(CTFBotDeliverFlag action, INextBot bot)
+{
+	return ANSWER_YES;
+}
+
+static QueryResultType ShouldRetreat(CTFBotDeliverFlag action, INextBot bot)
+{
+	return ANSWER_NO;
 }

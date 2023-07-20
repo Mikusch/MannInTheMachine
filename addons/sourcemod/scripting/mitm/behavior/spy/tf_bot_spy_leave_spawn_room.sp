@@ -32,6 +32,7 @@ methodmap CTFBotSpyLeaveSpawnRoom < NextBotAction
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldAttack, ShouldAttack);
 	}
 	
 	public CTFBotSpyLeaveSpawnRoom()
@@ -124,6 +125,11 @@ static int Update(CTFBotSpyLeaveSpawnRoom action, int actor, float interval)
 static void OnEnd(CTFBotSpyLeaveSpawnRoom action, int actor, NextBotAction nextAction)
 {
 	delete action.m_waitTimer;
+}
+
+static QueryResultType ShouldAttack(CTFBotSpyLeaveSpawnRoom action, INextBot bot, CKnownEntity knownEntity)
+{
+	return ANSWER_NO;
 }
 
 static bool TeleportNearVictim(int actor, int victim, int attempt)

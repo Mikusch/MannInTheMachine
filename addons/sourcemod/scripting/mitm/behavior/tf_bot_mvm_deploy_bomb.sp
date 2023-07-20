@@ -33,6 +33,7 @@ methodmap CTFBotMvMDeployBomb < NextBotAction
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
 		ActionFactory.SetEventCallback(EventResponderType_OnContact, OnContact);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldAttack, ShouldAttack);
 	}
 	
 	property CountdownTimer m_timer
@@ -191,4 +192,9 @@ static int OnContact(CTFBotMvMDeployBomb action, int actor, int other, Address r
 {
 	// so event doesn't fall thru to buried action which will then redo transition to this state as we stay in contact with the zone
 	return action.TryToSustain(RESULT_CRITICAL);
+}
+
+static QueryResultType ShouldAttack(CTFBotMvMDeployBomb action, INextBot bot, CKnownEntity knownEntity)
+{
+	return ANSWER_NO;
 }

@@ -152,7 +152,7 @@
 			"CTFGameRules::PlayerReadyStatus_UpdatePlayerState"
 			{
 				"linux"		"@_ZN12CTFGameRules35PlayerReadyStatus_UpdatePlayerStateEP9CTFPlayerb"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x10\x53\x8B\xD9\x80\xBB\x86\x09\x00\x00\x00\x75\x2A"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x10\x53\x8B\xD9\x80\xBB\x72\x0C\x00\x00\x00\x75\x2A"
 			}
 			"CTeamplayRoundBasedRules::ResetPlayerAndTeamReadyState"
 			{
@@ -192,7 +192,7 @@
 			"CTFPlayer::RemoveObject"
 			{
 				"linux"		"@_ZN9CTFPlayer12RemoveObjectEP11CBaseObject"
-				"windows"	"\x55\x8B\xEC\x56\x8B\xF1\x57\x8B\xBE\xBC\x22\x00\x00"
+				"windows"	"\x55\x8B\xEC\x56\x8B\xF1\x57\x8B\xBE\x44\x23\x00\x00"
 			}
 			"CTFPlayer::RemoveAllOwnedEntitiesFromWorld"
 			{

@@ -118,6 +118,7 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 			TF2_AddCondition(actor, TFCond_Ubercharged, 0.5);
 			TF2_AddCondition(actor, TFCond_UberchargedHidden, 0.5);
 			TF2_AddCondition(actor, TFCond_UberchargeFading, 0.5);
+			TF2_AddCondition(actor, TFCond_ImmuneToPushback, 1.0);
 			
 			// force bots to walk out of spawn
 			if (!CTFPlayer(actor).HasAttribute(AUTO_JUMP))

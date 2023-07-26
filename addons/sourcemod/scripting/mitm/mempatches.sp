@@ -21,6 +21,8 @@
 void MemPatches_Init(GameData hGameData)
 {
 	CreateMemoryPatch(hGameData, "CTFGameRules::GetTeamAssignmentOverride::kMVM_DefendersTeamSize");
+	CreateMemoryPatch(hGameData, "CMissionPopulator::UpdateMission::MVM_INVADERS_TEAM_SIZE");
+	CreateMemoryPatch(hGameData, "CWaveSpawnPopulator::Update::MVM_INVADERS_TEAM_SIZE");
 }
 
 static void CreateMemoryPatch(GameData hGameData, const char[] name)

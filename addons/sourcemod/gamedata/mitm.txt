@@ -1390,22 +1390,6 @@
 					"patch"		"\x83\xF9\x36"
 				}
 			}
-			"CMissionPopulator::UpdateMission::MVM_INVADERS_TEAM_SIZE"
-			{
-				"signature" "CMissionPopulator::UpdateMission"
-				"linux"
-				{
-					"offset"	"2E5h"
-					"verify"	"\x83\xF8\x16"
-					"patch"		"\x83\xF8\x36"
-				}
-				"windows"
-				{
-					"offset"	"1D2h"
-					"verify"	"\x83\xF9\x16"
-					"patch"		"\x83\xF9\x36"
-				}
-			}
 			"CWaveSpawnPopulator::Update::MVM_INVADERS_TEAM_SIZE"
 			{
 				"signature" "CWaveSpawnPopulator::Update"

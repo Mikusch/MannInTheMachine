@@ -457,24 +457,6 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 				TF2_RemoveCondition(client, condition);
 			}
 		}
-		case TFCond_KnockedIntoAir:
-		{
-			if (TF2_GetClientTeam(client) == TFTeam_Invaders)
-			{
-				CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(client).GetLastKnownArea());
-				TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(client) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
-				
-				if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
-				{
-					// If we are being airblasted in spawn, give more time to leave
-					if (CTFPlayer(client).m_flSpawnTimeLeft != 1.0)
-					{
-						CTFPlayer(client).m_flSpawnTimeLeft += 5.0;
-						CTFPlayer(client).m_flSpawnTimeLeftMax += 5.0;
-					}
-				}
-			}
-		}
 	}
 }
 

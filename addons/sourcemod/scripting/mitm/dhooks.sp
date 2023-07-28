@@ -29,7 +29,6 @@ static DynamicHook g_hDHook_CTFPlayer_IsAllowedToPickUpFlag;
 static DynamicHook g_hDHook_CBasePlayer_EntSelectSpawnPoint;
 static DynamicHook g_hDHook_CBaseFilter_PassesFilterImpl;
 static DynamicHook g_hDHook_CTFItem_PickUp;
-static DynamicHook g_hDHook_CGameRules_ClientConnected;
 static DynamicHook g_hDHook_CGameRules_FPlayerCanTakeDamage;
 
 static ArrayList m_justSpawnedList;
@@ -94,7 +93,6 @@ void DHooks_Init(GameData hGameData)
 	g_hDHook_CBasePlayer_EntSelectSpawnPoint = CreateDynamicHook(hGameData, "CBasePlayer::EntSelectSpawnPoint");
 	g_hDHook_CBaseFilter_PassesFilterImpl = CreateDynamicHook(hGameData, "CBaseFilter::PassesFilterImpl");
 	g_hDHook_CTFItem_PickUp = CreateDynamicHook(hGameData, "CTFItem::PickUp");
-	g_hDHook_CGameRules_ClientConnected = CreateDynamicHook(hGameData, "CGameRules::ClientConnected");
 	g_hDHook_CGameRules_FPlayerCanTakeDamage = CreateDynamicHook(hGameData, "CGameRules::FPlayerCanTakeDamage");
 	
 	CopyScriptFunctionBinding("CTFBot", "AddBotAttribute", "CTFPlayer", DHookCallback_CTFBot_AddAttribute_Pre);
@@ -158,11 +156,6 @@ void DHooks_OnClientPutInServer(int client)
 
 void DHooks_HookGamerules()
 {
-	if (g_hDHook_CGameRules_ClientConnected)
-	{
-		g_hDHook_CGameRules_ClientConnected.HookGamerules(Hook_Pre, DHookCallback_CTFGameRules_ClientConnected_Pre);
-	}
-	
 	if (g_hDHook_CGameRules_FPlayerCanTakeDamage)
 	{
 		g_hDHook_CGameRules_FPlayerCanTakeDamage.HookGamerules(Hook_Pre, DHookCallback_CTFGameRules_FPlayerCanTakeDamage_Pre);
@@ -369,6 +362,8 @@ static void Timer_OnWaitingForPlayersEnd(Handle timer)
 // The meat of the spawning logic. Any error happening in here WILL cause bots to spawn!
 static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, DHookReturn ret, DHookParam params)
 {
+	CTFPlayer newBot = CTFPlayer(-1);
+	
 	float rawHere[3];
 	params.GetVector(1, rawHere);
 	
@@ -435,7 +430,7 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 	}
 	
 	// find dead bot we can re-use
-	CTFPlayer newBot = CTFPlayer(FindNextInvader(spawner.m_defaultAttributes.m_attributeFlags & MINIBOSS));
+	newBot = CTFPlayer(FindNextInvader(spawner.m_defaultAttributes.m_attributeFlags & MINIBOSS));
 	
 	if (newBot.IsValid())
 	{
@@ -1204,7 +1199,7 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 		}
 		
 		// players can join defenders freely if a slot is open
-		if (iDefenderCount >= sm_mitm_defender_count.IntValue || 
+		if (iDefenderCount >= tf_mvm_defenders_team_size.IntValue || 
 			CTFPlayer(player).IsInAParty() || 
 			CTFPlayer(player).HasPreference(PREF_DEFENDER_DISABLE_QUEUE) || 
 			CTFPlayer(player).HasPreference(PREF_SPECTATOR_MODE))
@@ -1895,13 +1890,6 @@ static MRESReturn DHookCallback_CCurrencyPack_ComeToRest_Pre(int item)
 	}
 	
 	return MRES_Ignored;
-}
-
-static MRESReturn DHookCallback_CTFGameRules_ClientConnected_Pre(DHookReturn ret, DHookParam params)
-{
-	// MvM will start rejecting connections if the server has 10 humans
-	ret.Value = true;
-	return MRES_Supercede;
 }
 
 static MRESReturn DHookCallback_CTFGameRules_FPlayerCanTakeDamage_Pre(DHookReturn ret, DHookParam params)

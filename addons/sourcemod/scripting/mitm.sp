@@ -54,7 +54,6 @@ bool g_bInEndlessRollEscalation;
 
 // Plugin ConVars
 ConVar sm_mitm_developer;
-ConVar sm_mitm_defender_count;
 ConVar sm_mitm_custom_upgrades_file;
 ConVar sm_mitm_spawn_hurry_time;
 ConVar sm_mitm_queue_points;
@@ -70,7 +69,8 @@ ConVar sm_mitm_max_spawn_deaths;
 ConVar tf_avoidteammates_pushaway;
 ConVar tf_deploying_bomb_delay_time;
 ConVar tf_deploying_bomb_time;
-ConVar tf_bot_engineer_building_health_multiplier;
+ConVar tf_mvm_defenders_team_size;
+ConVar tf_mvm_max_connected_players;
 ConVar tf_mvm_miniboss_scale;
 ConVar tf_mvm_min_players_to_start;
 ConVar tf_mvm_bot_allow_flag_carrier_to_fight;
@@ -80,6 +80,7 @@ ConVar tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade;
 ConVar tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade;
 ConVar tf_mvm_engineer_teleporter_uber_duration;
 ConVar tf_populator_debug;
+ConVar tf_bot_engineer_building_health_multiplier;
 ConVar tf_bot_suicide_bomb_range;
 ConVar tf_bot_suicide_bomb_friendly_fire;
 ConVar tf_bot_taunt_victim_chance;

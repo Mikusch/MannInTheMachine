@@ -149,7 +149,7 @@ methodmap Party
 	
 	public int GetMaxPlayers()
 	{
-		int iMaxPartySize = sm_mitm_party_max_size.IntValue, iDefenderCount = sm_mitm_defender_count.IntValue;
+		int iMaxPartySize = sm_mitm_party_max_size.IntValue, iDefenderCount = tf_mvm_defenders_team_size.IntValue;
 		return (iMaxPartySize == 0) ? iDefenderCount : Min(iMaxPartySize, iDefenderCount);
 	}
 	

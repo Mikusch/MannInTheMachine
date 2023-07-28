@@ -419,11 +419,6 @@
 				"linux"		"30"
 				"windows"	"29"
 			}
-			"CGameRules::ClientConnected"
-			{
-				"linux"		"60"
-				"windows"	"59"
-			}
 			"CGameRules::FPlayerCanTakeDamage"
 			{
 				"linux"		"64"
@@ -1284,37 +1279,6 @@
 					}
 				}
 			}
-			"CGameRules::ClientConnected"
-			{
-				"offset"	"CGameRules::ClientConnected"
-				"hooktype"	"gamerules"
-				"return"	"bool"
-				"this"		"ignore"
-				"arguments"
-				{
-					"pEntity"
-					{
-						"type"	"edict"
-					}
-					"pszName"
-					{
-						"type"	"charptr"
-					}
-					"pszAddress"
-					{
-						"type"	"charptr"
-					}
-					"reject"
-					{
-						"type"	"charptr"
-					}
-					"maxrejectlen"
-					{
-						"type"	"int"
-					}
-				}
-				
-			}
 			"CGameRules::FPlayerCanTakeDamage"
 			{
 				"offset"	"CGameRules::FPlayerCanTakeDamage"
@@ -1358,22 +1322,6 @@
 		}
 		"MemPatches"
 		{
-			"CTFGameRules::GetTeamAssignmentOverride::kMVM_DefendersTeamSize"
-			{
-				"signature" "CTFGameRules::GetTeamAssignmentOverride"
-				"linux"
-				{
-					"offset"	"1D0h"
-					"verify"	"\xB8\x06"
-					"patch"		"\xB8\x20"
-				}
-				"windows"
-				{
-					"offset"	"14Ch"
-					"verify"	"\xB8\x06"
-					"patch"		"\xB8\x20"
-				}
-			}
 			"CMissionPopulator::UpdateMission::MVM_INVADERS_TEAM_SIZE"
 			{
 				"signature" "CMissionPopulator::UpdateMission"

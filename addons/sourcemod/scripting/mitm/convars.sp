@@ -22,7 +22,6 @@ void ConVars_Init()
 {
 	CreateConVar("sm_mitm_version", PLUGIN_VERSION, "Plugin version.", FCVAR_SPONLY | FCVAR_REPLICATED | FCVAR_NOTIFY | FCVAR_DONTRECORD);
 	sm_mitm_developer = CreateConVar("sm_mitm_developer", "0", "Toggle plugin developer mode.");
-	sm_mitm_defender_count = CreateConVar("sm_mitm_defender_count", "6", "Amount of defenders.", _, true, 1.0, true, 10.0);
 	sm_mitm_custom_upgrades_file = CreateConVar("sm_mitm_custom_upgrades_file", "", "Path to custom upgrades file, set to an empty string to use the default.");
 	sm_mitm_spawn_hurry_time = CreateConVar("sm_mitm_spawn_hurry_time", "10", "The base time invaders have to leave their spawn, in seconds.");
 	sm_mitm_queue_points = CreateConVar("sm_mitm_queue_points", "5", "Amount of queue points awarded to players that did not become defenders.", _, true, 1.0);
@@ -37,7 +36,8 @@ void ConVars_Init()
 	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");
 	tf_deploying_bomb_time = FindConVar("tf_deploying_bomb_time");
-	tf_bot_engineer_building_health_multiplier = FindConVar("tf_bot_engineer_building_health_multiplier");
+	tf_mvm_defenders_team_size = FindConVar("tf_mvm_defenders_team_size");
+	tf_mvm_max_connected_players = FindConVar("tf_mvm_max_connected_players");
 	tf_mvm_miniboss_scale = FindConVar("tf_mvm_miniboss_scale");
 	tf_mvm_min_players_to_start = FindConVar("tf_mvm_min_players_to_start");
 	tf_mvm_bot_allow_flag_carrier_to_fight = FindConVar("tf_mvm_bot_allow_flag_carrier_to_fight");
@@ -47,6 +47,7 @@ void ConVars_Init()
 	tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade = FindConVar("tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade");
 	tf_mvm_engineer_teleporter_uber_duration = FindConVar("tf_mvm_engineer_teleporter_uber_duration");
 	tf_populator_debug = FindConVar("tf_populator_debug");
+	tf_bot_engineer_building_health_multiplier = FindConVar("tf_bot_engineer_building_health_multiplier");
 	tf_bot_suicide_bomb_range = FindConVar("tf_bot_suicide_bomb_range");
 	tf_bot_suicide_bomb_friendly_fire = FindConVar("tf_bot_suicide_bomb_friendly_fire");
 	tf_bot_taunt_victim_chance = FindConVar("tf_bot_taunt_victim_chance");
@@ -58,6 +59,9 @@ void ConVars_Init()
 	mp_waitingforplayers_time = FindConVar("mp_waitingforplayers_time");
 	sv_stepsize = FindConVar("sv_stepsize");
 	phys_pushscale = FindConVar("phys_pushscale");
+	
+	// TODO: Add proper convar system to set convars but reset them once the gamemode unloads.
+	tf_mvm_max_connected_players.IntValue = MaxClients;
 	
 	sm_mitm_custom_upgrades_file.AddChangeHook(ConVarChanged_CustomUpgradesFile);
 	sm_mitm_party_enabled.AddChangeHook(ConVarChanged_PartyEnabled);

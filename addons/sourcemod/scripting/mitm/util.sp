@@ -316,7 +316,7 @@ void SelectNewDefenders()
 	}
 	
 	ArrayList queue = Queue_GetDefenderQueue();
-	int iDefenderCount = 0, iReqDefenderCount = sm_mitm_defender_count.IntValue;
+	int iDefenderCount = 0, iReqDefenderCount = tf_mvm_defenders_team_size.IntValue;
 	
 	// Select our defenders
 	for (int i = 0; i < queue.Length; i++)

@@ -1158,8 +1158,8 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 	
 	if (GameRules_GetRoundState() == RoundState_Pregame || g_bInWaitingForPlayers)
 	{
-		params.Set(2, TFTeam_Defenders);
-		return MRES_ChangedHandled;
+		ret.Value = TFTeam_Defenders;
+		return MRES_Supercede;
 	}
 	else if (g_bAllowTeamChange || (sm_mitm_developer.BoolValue && !IsFakeClient(player)))
 	{

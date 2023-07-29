@@ -292,6 +292,18 @@ TFTeam GetEnemyTeam(TFTeam team)
 
 void SelectNewDefenders()
 {
+	// Move everyone to spectator team
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
+			continue;
+		
+		TF2_ForceChangeClientTeam(client, TFTeam_Spectator);
+	}
+	
 	CPrintToChatAll("%s %t", PLUGIN_TAG, "Queue_NewDefenders");
 	
 	char redTeamname[MAX_TEAM_NAME_LENGTH], blueTeamname[MAX_TEAM_NAME_LENGTH];

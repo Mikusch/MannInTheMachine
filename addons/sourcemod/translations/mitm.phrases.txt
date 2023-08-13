@@ -178,7 +178,11 @@
 	}
 	"Invader_Queue_Header"
 	{
-		"en"		"Next Robot Spawns:"
+		"en"		"NEXT ROBOT SPAWNS"
+	}
+	"Invader_Queue_Header_MiniBoss"
+	{
+		"en"		"NEXT GIANT SPAWNS"
 	}
 	"Invader_Deployed"
 	{
@@ -190,9 +194,9 @@
 		"#format"	"{1:d}"
 		"en"		"...and {1} more"
 	}
-	"MvM_Upgrade_Disabled"
+	"Spectator_Mode"
 	{
-		"en"	"This upgrade is disabled and can not be purchased."
+		"en"		"You are in SPECTATOR MODE"
 	}
 	
 	// Party

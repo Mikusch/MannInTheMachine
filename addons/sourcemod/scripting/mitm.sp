@@ -48,6 +48,8 @@ CTFGameRules g_pGameRules = view_as<CTFGameRules>(INVALID_ENT_REFERENCE);
 // Other globals
 Handle g_hWarningHudSync;
 bool g_bInWaitingForPlayers;
+bool g_bMiniBossQueue;
+float g_flLastQueueSwitchTime;
 bool g_bAllowTeamChange;	// Bypass CTFGameRules::GetTeamAssignmentOverride?
 bool g_bForceFriendlyFire;
 bool g_bInEndlessRollEscalation;
@@ -232,6 +234,8 @@ public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int maxlen)
 public void OnMapStart()
 {
 	g_bInWaitingForPlayers = false;
+	g_bMiniBossQueue = false;
+	g_flLastQueueSwitchTime = GetGameTime();
 	
 	PrecacheSound("ui/system_message_alert.wav");
 	PrecacheSound(")mvm/mvm_tele_activate.wav");
@@ -328,52 +332,63 @@ public void OnEntityDestroyed(int entity)
 
 public void OnGameFrame()
 {
-	static ArrayList s_prevQueue;
+	// alternate between robot and giant queue every 5 seconds
+	if (GetGameTime() - g_flLastQueueSwitchTime > 5.0)
+	{
+		g_bMiniBossQueue = !g_bMiniBossQueue;
+		g_flLastQueueSwitchTime = GetGameTime();
+	}
 	
-	ArrayList queue = GetInvaderQueue();
+	ArrayList queue = GetInvaderQueue(g_bMiniBossQueue);
 	queue.Resize(Min(queue.Length, 8));
 	
 	if (queue.Length > 0)
 	{
-		// Only send the hint if the visible queue has changed or we are between waves
-		if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() || (s_prevQueue && !ArrayListEquals(s_prevQueue, queue)))
+		for (int client = 1; client <= MaxClients; client++)
 		{
-			for (int client = 1; client <= MaxClients; client++)
+			if (!IsClientInGame(client))
+				continue;
+			
+			if (!CTFPlayer(client).IsInvader())
+				continue;
+			
+			if (!IsClientObserver(client))
+				continue;
+			
+			char text[MAX_USER_MSG_DATA];
+			Format(text, sizeof(text), "%T\n", g_bMiniBossQueue ? "Invader_Queue_Header_MiniBoss" : "Invader_Queue_Header", client);
+			
+			for (int i = 0; i < queue.Length; i++)
 			{
-				if (!IsClientInGame(client))
-					continue;
-				
-				if (!CTFPlayer(client).IsInvader())
-					continue;
-				
-				if (IsPlayerAlive(client))
-					continue;
-				
-				char text[MAX_USER_MSG_DATA];
-				Format(text, sizeof(text), "%T\n", "Invader_Queue_Header", client);
-				
-				for (int i = 0; i < queue.Length; i++)
+				int other = queue.Get(i);
+				if (other == client)
 				{
-					int other = queue.Get(i);
-					if (other == client)
-					{
-						Format(text, sizeof(text), "%s\n➤ %N", text, other);
-					}
-					else
-					{
-						Format(text, sizeof(text), "%s\n%N", text, other);
-					}
+					Format(text, sizeof(text), "%s\n➤ %N", text, other);
 				}
-				
-				PrintKeyHintText(client, text);
+				else
+				{
+					Format(text, sizeof(text), "%s\n%N", text, other);
+				}
 			}
+			
+			PrintKeyHintText(client, text);
 		}
 	}
 	
-	// Store old queue list for comparison
-	delete s_prevQueue;
-	s_prevQueue = queue.Clone();
-	delete queue;
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (!IsClientObserver(client))
+			continue;
+		
+		if (!CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
+			continue;
+		
+		SetHudTextParams(-1.0, 0.01, GetGameFrameTime(), 255, 255, 255, 255);
+		ShowSyncHudText(client, g_hWarningHudSync, "%t", "Spectator_Mode");
+	}
 }
 
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])

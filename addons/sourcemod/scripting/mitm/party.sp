@@ -706,7 +706,7 @@ static Action ConCmd_PartyName(int client, int args)
 	// truncate the name if it's too long
 	if (strlen(name) > MAX_PARTY_NAME_LENGTH)
 	{
-		name[MAX_PARTY_NAME_LENGTH - 1] = '\0';
+		name[MAX_PARTY_NAME_LENGTH - 1] = EOS;
 	}
 	
 	party.SetName(name);

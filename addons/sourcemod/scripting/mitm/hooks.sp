@@ -88,7 +88,7 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 		{
 			CMvMBotUpgrade upgrade = g_pPopulationManager.m_EndlessActiveBotUpgrades.Get(i, GetOffset(NULL_STRING, "sizeof(CMvMBotUpgrade)"));
 			
-			if (upgrade.bIsBotAttr == true)
+			if (upgrade.bIsBotAttr)
 			{
 				char szAttrib[MAX_ATTRIBUTE_DESCRIPTION_LENGTH];
 				PtrToString(upgrade.szAttrib, szAttrib, sizeof(szAttrib));
@@ -102,7 +102,7 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 					Format(szMessage, sizeof(szMessage), "%s- %s\n", szMessage, szAttrib);
 				}
 			}
-			else if (upgrade.bIsSkillAttr == true)
+			else if (upgrade.bIsSkillAttr)
 			{
 				char szAttrib[MAX_ATTRIBUTE_DESCRIPTION_LENGTH];
 				PtrToString(upgrade.szAttrib, szAttrib, sizeof(szAttrib));
@@ -192,11 +192,11 @@ static void EntityOutput_OnStateEnterBetweenRounds(const char[] output, int call
 {
 	if (!g_bInWaitingForPlayers && sm_mitm_setup_time.IntValue > 0)
 	{
-		CreateTimer(0.1, Timer_StartReadyTimer);
+		RequestFrame(RequestFrame_StartReadyTimer);
 	}
 }
 
-static void Timer_StartReadyTimer(Handle timer)
+static void RequestFrame_StartReadyTimer()
 {
 	// Automatically start the ready timer
 	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + sm_mitm_setup_time.FloatValue);

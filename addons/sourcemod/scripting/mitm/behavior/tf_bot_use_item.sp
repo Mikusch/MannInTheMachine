@@ -67,23 +67,23 @@ methodmap CTFBotUseItem < NextBotAction
 	}
 }
 
-static int OnStart(CTFBotUseItem action, int actor, NextBotAction priorAction)
+static int OnStart(CTFBotUseItem action, CTFPlayer actor, NextBotAction priorAction)
 {
-	CTFPlayer(actor).PushRequiredWeapon(action.m_item);
+	actor.PushRequiredWeapon(action.m_item);
 	
 	action.m_cooldownTimer.Start(GetEntPropFloat(action.m_item, Prop_Send, "m_flNextPrimaryAttack") - GetGameTime() + 0.25);
 	
 	return action.Continue();
 }
 
-static int Update(CTFBotUseItem action, int actor, float interval)
+static int Update(CTFBotUseItem action, CTFPlayer actor, float interval)
 {
 	if (!IsValidEntity(action.m_item))
 	{
 		return action.Done("NULL item");
 	}
 	
-	int myCurrentWeapon = GetEntPropEnt(actor, Prop_Send, "m_hActiveWeapon");
+	int myCurrentWeapon = actor.GetPropEnt(Prop_Send, "m_hActiveWeapon");
 	
 	if (!IsValidEntity(myCurrentWeapon))
 	{
@@ -95,14 +95,14 @@ static int Update(CTFBotUseItem action, int actor, float interval)
 		if (action.m_cooldownTimer.IsElapsed())
 		{
 			// use it
-			CTFPlayer(actor).PressFireButton();
+			actor.PressFireButton();
 			action.m_cooldownTimer.Invalidate();
 		}
 	}
 	else // used
 	{
 		// some items use the taunt system - wait for the taunt to end
-		if (!TF2_IsPlayerInCondition(actor, TFCond_Taunting))
+		if (!TF2_IsPlayerInCondition(actor.index, TFCond_Taunting))
 		{
 			return action.Done("Item used");
 		}
@@ -111,9 +111,9 @@ static int Update(CTFBotUseItem action, int actor, float interval)
 	return action.Continue();
 }
 
-static void OnEnd(CTFBotUseItem action, int actor, NextBotAction nextAction)
+static void OnEnd(CTFBotUseItem action, CTFPlayer actor, NextBotAction nextAction)
 {
-	CTFPlayer(actor).PopRequiredWeapon();
+	actor.PopRequiredWeapon();
 	
 	delete action.m_cooldownTimer;
 }

@@ -417,7 +417,7 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 	
 	if (IsMannVsMachineMode())
 	{
-		if (spawner.m_class == TFClass_Engineer && spawner.m_defaultAttributes.m_attributeFlags & TELEPORT_TO_HINT && SDKCall_CTFBotMvMEngineerHintFinder_FindHint(true, false) == false)
+		if (spawner.m_class == TFClass_Engineer && spawner.m_defaultAttributes.m_attributeFlags & TELEPORT_TO_HINT && !SDKCall_CTFBotMvMEngineerHintFinder_FindHint(true, false))
 		{
 			if (tf_populator_debug.BoolValue)
 			{

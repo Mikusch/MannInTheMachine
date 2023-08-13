@@ -1411,10 +1411,10 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		
 		this.m_opportunisticTimer.Start(GetRandomFloat(0.1, 0.2));
 		
-		int nNumWeapons = this.GetPropArraySize(Prop_Send, "m_hMyWeapons");
-		for (int w = 0; w < nNumWeapons; w++)
+		int numWeapons = this.GetPropArraySize(Prop_Send, "m_hMyWeapons");
+		for (int i = 0; i < numWeapons; ++i)
 		{
-			int weapon = GetPlayerWeaponSlot(this.index, w);
+			int weapon = GetPlayerWeaponSlot(this.index, i);
 			if (weapon == -1 || !TF2Util_IsEntityWeapon(weapon))
 				continue;
 			
@@ -2091,11 +2091,11 @@ methodmap CPopulationManager < CBaseEntity
 		{
 			CMvMBotUpgrade upgrade = this.m_EndlessActiveBotUpgrades.Get(i, GetOffset(NULL_STRING, "sizeof(CMvMBotUpgrade)"));
 			
-			if (upgrade.bIsBotAttr == true)
+			if (upgrade.bIsBotAttr)
 			{
 				CTFPlayer(player).SetAttribute(view_as<AttributeType>(RoundFloat(upgrade.flValue)));
 			}
-			else if (upgrade.bIsSkillAttr == true)
+			else if (upgrade.bIsSkillAttr)
 			{
 				CTFPlayer(player).SetDifficulty(view_as<DifficultyType>(RoundFloat(upgrade.flValue)));
 			}

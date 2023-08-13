@@ -375,6 +375,8 @@ public void OnGameFrame()
 		}
 	}
 	
+	delete queue;
+	
 	for (int client = 1; client <= MaxClients; client++)
 	{
 		if (!IsClientInGame(client))

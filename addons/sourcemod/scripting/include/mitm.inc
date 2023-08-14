@@ -73,12 +73,19 @@ forward bool MannInTheMachine_OnIsValidDefender(int client);
 forward bool MannInTheMachine_OnIsValidInvader(int client, bool isMiniBoss);
 
 /**
- * Returns whether the game is in "Endless Waves" mode.
+ * Returns whether the game is in Endless Waves mode.
  *
- * @return		True if the game is in "Endless Waves" mode.
+ * @return		True if the game is in Endless Waves mode.
  * @error		Invalid population manager.
  */
 native bool MannInTheMachine_IsInEndlessWaves();
+
+/**
+ * Returns whether the game is Waiting For Players.
+ *
+ * @return		True if the game is in Waiting For Players.
+ */
+native bool MannInTheMachine_IsInWaitingForPlayers();
 
 public SharedPlugin __pl_mitm =
 {

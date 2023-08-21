@@ -1844,7 +1844,7 @@ methodmap CTFBotSpawner < Address
 	
 	public Address GetClassIcon(int nSpawnNum = -1)
 	{
-		return LoadFromAddress(SDKCall_GetClassIcon(this, nSpawnNum), NumberType_Int32);
+		return LoadFromAddress(SDKCall_IPopulationSpawner_GetClassIcon(this, nSpawnNum), NumberType_Int32);
 	}
 };
 

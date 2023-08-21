@@ -95,6 +95,9 @@ static int OnStart(CTFBotDeliverFlag action, int actor, NextBotAction priorActio
 	
 	if (!IsFakeClient(actor))
 	{
+		// Don't push around the flag (bomb) carrier.
+		// We need this for MvM mode so friendly bots don't
+		// move the bomb jumper and cause him to restart.
 		tf_avoidteammates_pushaway.ReplicateToClient(actor, "0");
 	}
 	

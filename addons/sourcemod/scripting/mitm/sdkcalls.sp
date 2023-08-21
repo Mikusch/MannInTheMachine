@@ -18,8 +18,8 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static Handle g_hSDKCallGetClassIconLinux;
-static Handle g_hSDKCallGetClassIconWindows;
+static Handle g_hSDKCall_CTFBotSpawner_GetClassIcon;
+static Handle g_hSDKCall_IPopulationSpawner_GetClassIcon;
 static Handle g_hSDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert;
 static Handle g_hSDKCall_CEconEntity_UpdateModelToClass;
 static Handle g_hSDKCall_CTFItem_PickUp;
@@ -63,11 +63,11 @@ void SDKCalls_Init(GameData hGameData)
 	{
 		if (StrEqual(platform, "linux"))
 		{
-			g_hSDKCallGetClassIconLinux = PrepSDKCall_GetClassIcon_Linux(hGameData);
+			g_hSDKCall_CTFBotSpawner_GetClassIcon = PrepSDKCall_CTFBotSpawner_GetClassIcon(hGameData);
 		}
 		else if (StrEqual(platform, "windows"))
 		{
-			g_hSDKCallGetClassIconWindows = PrepSDKCall_GetClassIcon_Windows(hGameData);
+			g_hSDKCall_IPopulationSpawner_GetClassIcon = PrepSDKCall_IPopulationSpawner_GetClassIcon(hGameData);
 		}
 		else
 		{
@@ -129,7 +129,7 @@ static Handle PrepSDKCall_FromScriptFunction(const char[] className, const char[
 	return func.CreateSDKCall();
 }
 
-static Handle PrepSDKCall_GetClassIcon_Linux(GameData hGameData)
+static Handle PrepSDKCall_CTFBotSpawner_GetClassIcon(GameData hGameData)
 {
 	// linux signature. this uses a hidden pointer passed in before `this` on the stack
 	// so we'll do our best with static since SM doesn't support that calling convention
@@ -148,19 +148,19 @@ static Handle PrepSDKCall_GetClassIcon_Linux(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_GetClassIcon_Windows(GameData hGameData)
+static Handle PrepSDKCall_IPopulationSpawner_GetClassIcon(GameData hGameData)
 {
 	// windows vcall. this one also uses a hidden pointer, but it's passed as the first param
 	// `this` remains unchanged so we can still use a vcall
 	StartPrepSDKCall(SDKCall_Raw);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "CTFBotSpawner::GetClassIcon");
+	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "IPopulationSpawner::GetClassIcon");
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Pointer); // return value
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // int nSpawnNum
 	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain); // return string_t
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogError("Failed to create SDKCall: CTFBotSpawner::GetClassIcon");
+		LogError("Failed to create SDKCall: IPopulationSpawner::GetClassIcon");
 	
 	return call;
 }
@@ -658,19 +658,19 @@ static Handle PrepSDKCall_CBaseTrigger_PassesTriggerFilters(GameData hGameData)
 	return call;
 }
 
-Address SDKCall_GetClassIcon(Address spawner, int nSpawnNum = -1)
+Address SDKCall_IPopulationSpawner_GetClassIcon(Address spawner, int nSpawnNum = -1)
 {
 	Address result;
 	
-	if (g_hSDKCallGetClassIconWindows)
+	if (g_hSDKCall_IPopulationSpawner_GetClassIcon)
 	{
 		// windows version; hidden ptr pushes params, `this` still in correct register
-		return SDKCall(g_hSDKCallGetClassIconWindows, spawner, result, nSpawnNum);
+		return SDKCall(g_hSDKCall_IPopulationSpawner_GetClassIcon, spawner, result, nSpawnNum);
 	}
-	else if (g_hSDKCallGetClassIconLinux)
+	else if (g_hSDKCall_CTFBotSpawner_GetClassIcon)
 	{
 		// linux version; hidden ptr moves the stack and this forward
-		return SDKCall(g_hSDKCallGetClassIconLinux, result, spawner, nSpawnNum);
+		return SDKCall(g_hSDKCall_CTFBotSpawner_GetClassIcon, result, spawner, nSpawnNum);
 	}
 	
 	return Address_Null;
@@ -876,7 +876,7 @@ void SDKCall_CTFPlayer_RemoveObject(int player, int obj)
 void SDKCall_BotGenerateAndWearItem(int player, const char[] itemName)
 {
 	if (g_hSDKCall_BotGenerateAndWearItem)
-		 SDKCall(g_hSDKCall_BotGenerateAndWearItem, player, itemName);
+		SDKCall(g_hSDKCall_BotGenerateAndWearItem, player, itemName);
 }
 
 bool SDKCall_GetBombInfo(BombInfo_t pBombInfo = view_as<BombInfo_t>(Address_Null))

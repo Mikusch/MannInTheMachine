@@ -40,7 +40,7 @@ static float g_flTempRestartRoundTime;
 // CMissionPopulator
 static CountdownTimer m_cooldownTimer;
 static CountdownTimer m_checkForDangerousSentriesTimer;
-static CMissionPopulator s_MissionPopulator;
+static CMissionPopulator s_missionPopulator;
 static int s_activeMissionMembers;
 static int s_nSniperCount;
 
@@ -563,7 +563,7 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 		{
 			// Apply the Rome 2 promo items to each player. They'll be 
 			// filtered out for clients that do not have Romevision.
-			CMissionPopulator pMission = s_MissionPopulator;
+			CMissionPopulator pMission = s_missionPopulator;
 			if (pMission && pMission.m_mission == MISSION_DESTROY_SENTRIES)
 			{
 				newBot.AddItem("tw_sentrybuster");
@@ -886,7 +886,7 @@ static MRESReturn DHookCallback_CMissionPopulator_UpdateMission_Post(Address pTh
 
 static MRESReturn DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_Pre(CMissionPopulator populator, DHookReturn ret)
 {
-	s_MissionPopulator = populator;
+	s_missionPopulator = populator;
 	
 	if (!m_cooldownTimer.IsElapsed())
 	{
@@ -1072,7 +1072,7 @@ static MRESReturn DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_P
 
 static MRESReturn DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_Post(Address pThis, DHookReturn ret)
 {
-	s_MissionPopulator = CMissionPopulator(Address_Null);
+	s_missionPopulator = CMissionPopulator(Address_Null);
 	
 	return MRES_Ignored;
 }
@@ -1689,6 +1689,11 @@ static MRESReturn DHookCallback_CTFPlayer_ShouldGib_Pre(int player, DHookReturn 
 
 static MRESReturn DHookCallback_CTFPlayer_IsAllowedToPickUpFlag_Post(int player, DHookReturn ret)
 {
+	if (!ret.Value)
+	{
+		return MRES_Ignored;
+	}
+	
 	// only the leader of a squad can pick up the flag
 	if (CTFPlayer(player).IsInASquad() && !CTFPlayer(player).GetSquad().IsLeader(player))
 	{
@@ -1697,13 +1702,8 @@ static MRESReturn DHookCallback_CTFPlayer_IsAllowedToPickUpFlag_Post(int player,
 	}
 	
 	// mission bots can't pick up the flag
-	if (CTFPlayer(player).IsOnAnyMission())
-	{
-		ret.Value = false;
-		return MRES_Supercede;
-	}
-	
-	return MRES_Ignored;
+	ret.Value = !CTFPlayer(player).IsOnAnyMission();
+	return MRES_Supercede;
 }
 
 static MRESReturn DHookCallback_CTFPlayer_EntSelectSpawnPoint_Pre(int player, DHookReturn ret)

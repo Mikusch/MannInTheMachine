@@ -1691,7 +1691,8 @@ static MRESReturn DHookCallback_CTFPlayer_IsAllowedToPickUpFlag_Post(int player,
 {
 	if (!ret.Value)
 	{
-		return MRES_Ignored;
+		ret.Value = false;
+		return MRES_Supercede;
 	}
 	
 	// only the leader of a squad can pick up the flag

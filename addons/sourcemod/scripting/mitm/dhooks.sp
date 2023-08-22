@@ -145,7 +145,7 @@ void DHooks_OnClientPutInServer(int client)
 	
 	if (g_hDHook_CTFPlayer_IsAllowedToPickUpFlag)
 	{
-		g_hDHook_CTFPlayer_IsAllowedToPickUpFlag.HookEntity(Hook_Pre, client, DHookCallback_CTFPlayer_IsAllowedToPickUpFlag_Post);
+		g_hDHook_CTFPlayer_IsAllowedToPickUpFlag.HookEntity(Hook_Post, client, DHookCallback_CTFPlayer_IsAllowedToPickUpFlag_Post);
 	}
 	
 	if (g_hDHook_CBasePlayer_EntSelectSpawnPoint)
@@ -1691,8 +1691,7 @@ static MRESReturn DHookCallback_CTFPlayer_IsAllowedToPickUpFlag_Post(int player,
 {
 	if (!ret.Value)
 	{
-		ret.Value = false;
-		return MRES_Supercede;
+		return MRES_Ignored;
 	}
 	
 	// only the leader of a squad can pick up the flag

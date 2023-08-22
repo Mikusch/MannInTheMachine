@@ -288,9 +288,24 @@
 	{
 		"en"		"The party system is currently disabled."
 	}
+	"Party_PlayerInvitePending"
+	{
+		"#format"	"{1:N}"
+		"en"		"{lightgreen}{1} {default}already has a pending invite."
+	}
+	"Party_PlayerIgnoringInvites"
+	{
+		"#format"	"{1:N}"
+		"en"		"{lightgreen}{1} {default}is ignoring party invites."
+	}
+	"Party_PlayerBlocked"
+	{
+		"#format"	"{1:N}"
+		"en"		"{lightgreen}{1} {default}is not allowed to join parties."
+	}
 	"Party_InvitedPlayers"
 	{
-		"#format"	"{1:t},{2:s}"
+		"#format"	"{1:N},{2:s}"
 		"en"		"You have invited {lightgreen}{1} {default}to {cyan}{2}{default}."
 	}
 	"Party_DoesNotExist"

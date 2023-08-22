@@ -399,6 +399,7 @@ static Action ConCmd_PartyCreate(int client, int args)
 		
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
+		
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Created", name);
 		ClientCommand(client, "play %s", SOUND_PARTY_UPDATE);
 	}
@@ -462,6 +463,7 @@ static Action ConCmd_PartyJoin(int client, int args)
 		
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
+		
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Joined", name);
 		ClientCommand(client, "play %s", SOUND_PARTY_UPDATE);
 	}
@@ -547,40 +549,41 @@ static Action ConCmd_PartyInvite(int client, int args)
 	int target_list[MAXPLAYERS], target_count;
 	bool tn_is_ml;
 	
-	if ((target_count = ProcessTargetString(target, 0, target_list, sizeof(target_list), COMMAND_TARGET_NONE, target_name, sizeof(target_name), tn_is_ml)) <= 0)
+	if ((target_count = ProcessTargetString(target, 0, target_list, sizeof(target_list), COMMAND_FILTER_NO_MULTI, target_name, sizeof(target_name), tn_is_ml)) <= 0)
 	{
 		ReplyToTargetError(client, target_count);
 		return Plugin_Handled;
 	}
 	
+	int player = target_list[0];
+	
+	if (party.IsInvited(player))
+	{
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_PlayerInvitePending", player);
+		return Plugin_Handled;
+	}
+	
+	if (CTFPlayer(player).HasPreference(PREF_IGNORE_PARTY_INVITES))
+	{
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_PlayerIgnoringInvites", player);
+		return Plugin_Handled;
+	}
+	
+	if (!Forwards_OnIsValidDefender(player))
+	{
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_PlayerBlocked", player);
+		return Plugin_Handled;
+	}
+	
+	CTFPlayer(player).InviteToParty(party);
+	
 	char name[MAX_NAME_LENGTH];
 	party.GetName(name, sizeof(name));
 	
-	for (int i = 0; i < target_count; ++i)
-	{
-		if (target_list[i] == client)
-			continue;
-		
-		if (party.IsInvited(target_list[i]))
-			continue;
-		
-		if (CTFPlayer(target_list[i]).HasPreference(PREF_IGNORE_PARTY_INVITES))
-			continue;
-		
-		CTFPlayer(target_list[i]).InviteToParty(party);
-		
-		CPrintToChat(target_list[i], "%s %t", PLUGIN_TAG, "Party_IncomingInvite", name, client);
-		ClientCommand(target_list[i], "play %s", SOUND_PARTY_INVITE);
-	}
+	CPrintToChat(player, "%s %t", PLUGIN_TAG, "Party_IncomingInvite", name, client);
+	ClientCommand(player, "play %s", SOUND_PARTY_INVITE);
 	
-	if (tn_is_ml)
-	{
-		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_InvitedPlayers", target_name, name);
-	}
-	else
-	{
-		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_InvitedPlayers", "_s", target_name, name);
-	}
+	CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_InvitedPlayers", player, name);
 	
 	return Plugin_Handled;
 }
@@ -658,6 +661,7 @@ static Action ConCmd_PartyKick(int client, int args)
 		
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
+		
 		CPrintToChat(target_list[i], "%s %t", PLUGIN_TAG, "Party_Kicked", name);
 		ClientCommand(target_list[i], "play %s", SOUND_PARTY_UPDATE);
 		

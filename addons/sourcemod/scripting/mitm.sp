@@ -82,6 +82,7 @@ ConVar tf_mvm_bot_flag_carrier_interval_to_2nd_upgrade;
 ConVar tf_mvm_bot_flag_carrier_interval_to_3rd_upgrade;
 ConVar tf_mvm_engineer_teleporter_uber_duration;
 ConVar tf_populator_debug;
+ConVar tf_bot_difficulty;
 ConVar tf_bot_engineer_building_health_multiplier;
 ConVar tf_bot_suicide_bomb_range;
 ConVar tf_bot_suicide_bomb_friendly_fire;
@@ -273,7 +274,7 @@ public void OnClientPutInServer(int client)
 	DHooks_OnClientPutInServer(client);
 	SDKHooks_OnClientPutInServer(client);
 	
-	CTFPlayer(client).Reset();
+	CTFPlayer(client).OnClientPutInServer();
 	
 	if (AreClientCookiesCached(client))
 	{

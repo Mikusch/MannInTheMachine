@@ -81,6 +81,8 @@ static int OnStart(CTFBotMainAction action, int actor, NextBotAction priorAction
 		return action.Done("I'm not an invader!");
 	}
 	
+	CTFPlayer(actor).m_isWaitingForFullReload = false;
+	
 	// if bot is already dead at this point, make sure it's dead
 	// check for !IsAlive because bot could be DYING
 	if (!IsPlayerAlive(actor))
@@ -146,14 +148,14 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 						int iMaxDeaths = sm_mitm_max_spawn_deaths.IntValue;
 						if (iMaxDeaths && !sm_mitm_developer.BoolValue)
 						{
-							if (iMaxDeaths <= ++CTFPlayer(actor).m_iSpawnDeathCount)
+							if (iMaxDeaths <= ++CTFPlayer(actor).m_spawnDeathCount)
 							{
 								KickClient(actor, "%t", "Invader_SpawnTimer_KickReason");
 								CPrintToChatAll("%s %t", PLUGIN_TAG, "Invader_SpawnTimer_Kicked", actor);
 							}
 							else
 							{
-								CPrintToChat(actor, "%s %t", PLUGIN_TAG, "Invader_SpawnTimer_Warning", iMaxDeaths - CTFPlayer(actor).m_iSpawnDeathCount);
+								CPrintToChat(actor, "%s %t", PLUGIN_TAG, "Invader_SpawnTimer_Warning", iMaxDeaths - CTFPlayer(actor).m_spawnDeathCount);
 							}
 						}
 					}

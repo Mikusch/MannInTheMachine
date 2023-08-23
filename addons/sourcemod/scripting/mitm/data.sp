@@ -36,7 +36,7 @@ static CountdownTimer m_opportunisticTimer[MAXPLAYERS + 1];
 static WeaponRestrictionType m_weaponRestrictionFlags[MAXPLAYERS + 1];
 static AttributeType m_attributeFlags[MAXPLAYERS + 1];
 static DifficultyType m_difficulty[MAXPLAYERS + 1];
-static char m_szIdleSound[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
+static char m_idleSound[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
 static float m_fModelScaleOverride[MAXPLAYERS + 1];
 static MissionType m_mission[MAXPLAYERS + 1];
 static MissionType m_prevMission[MAXPLAYERS + 1];
@@ -46,8 +46,8 @@ static float m_flSpawnTimeLeftMax[MAXPLAYERS + 1];
 static int m_spawnPointEntity[MAXPLAYERS + 1];
 static CTFBotSquad m_squad[MAXPLAYERS + 1];
 static int m_hFollowingFlagTarget[MAXPLAYERS + 1];
-static char m_szInvaderName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
-static char m_szPrevName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
+static char m_invaderName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
+static char m_prevName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
 static bool m_isWaitingForFullReload[MAXPLAYERS + 1];
 static Handle m_annotationTimer[MAXPLAYERS + 1];
 
@@ -63,8 +63,8 @@ static int m_invaderMiniBossPriority[MAXPLAYERS + 1];
 static int m_defenderQueuePoints[MAXPLAYERS + 1];
 static int m_preferences[MAXPLAYERS + 1];
 static Party m_party[MAXPLAYERS + 1];
-static bool m_bIsPartyMenuActive[MAXPLAYERS + 1];
-static int m_iSpawnDeathCount[MAXPLAYERS + 1];
+static bool m_isPartyMenuActive[MAXPLAYERS + 1];
+static int m_spawnDeathCount[MAXPLAYERS + 1];
 
 methodmap CTFPlayer < CBaseCombatCharacter
 {
@@ -445,27 +445,27 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		}
 	}
 	
-	property bool m_bIsPartyMenuActive
+	property bool m_isPartyMenuActive
 	{
 		public get()
 		{
-			return m_bIsPartyMenuActive[this.index];
+			return m_isPartyMenuActive[this.index];
 		}
 		public set(bool bIsPartyMenuActive)
 		{
-			m_bIsPartyMenuActive[this.index] = bIsPartyMenuActive;
+			m_isPartyMenuActive[this.index] = bIsPartyMenuActive;
 		}
 	}
 	
-	property int m_iSpawnDeathCount
+	property int m_spawnDeathCount
 	{
 		public get()
 		{
-			return m_iSpawnDeathCount[this.index];
+			return m_spawnDeathCount[this.index];
 		}
 		public set(int iSpawnDeathCount)
 		{
-			m_iSpawnDeathCount[this.index] = iSpawnDeathCount;
+			m_spawnDeathCount[this.index] = iSpawnDeathCount;
 		}
 	}
 	
@@ -700,21 +700,6 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		return this.m_tags.FindString(tag) != -1;
 	}
 	
-	public void GetIdleSound(char[] buffer, int maxlen)
-	{
-		strcopy(buffer, maxlen, m_szIdleSound[this.index]);
-	}
-	
-	public void SetIdleSound(const char[] soundName)
-	{
-		strcopy(m_szIdleSound[this.index], sizeof(m_szIdleSound[]), soundName);
-	}
-	
-	public void ClearIdleSound()
-	{
-		m_szIdleSound[this.index][0] = EOS;
-	}
-	
 	public void SetScaleOverride(float fScale)
 	{
 		this.m_fModelScaleOverride = fScale;
@@ -799,67 +784,61 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		
 		if (this.IsMiniBoss())
 		{
-			char pszSoundName[PLATFORM_MAX_PATH];
-			
 			TFClassType class = TF2_GetPlayerClass(this.index);
 			switch (class)
 			{
 				case TFClass_Heavy:
 				{
-					strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantHeavyLoop");
+					strcopy(m_idleSound[this.index], sizeof(m_idleSound[]), "MVM.GiantHeavyLoop");
 				}
 				case TFClass_Soldier:
 				{
-					strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantSoldierLoop");
+					strcopy(m_idleSound[this.index], sizeof(m_idleSound[]), "MVM.GiantSoldierLoop");
 				}
 				
 				case TFClass_DemoMan:
 				{
 					if (this.m_mission == MISSION_DESTROY_SENTRIES)
 					{
-						strcopy(pszSoundName, sizeof(pszSoundName), "MVM.SentryBusterLoop");
+						strcopy(m_idleSound[this.index], sizeof(m_idleSound[]), "MVM.SentryBusterLoop");
 					}
 					else
 					{
-						strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantDemomanLoop");
+						strcopy(m_idleSound[this.index], sizeof(m_idleSound[]), "MVM.GiantDemomanLoop");
 					}
 				}
 				case TFClass_Scout:
 				{
-					strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantScoutLoop");
+					strcopy(m_idleSound[this.index], sizeof(m_idleSound[]), "MVM.GiantScoutLoop");
 				}
 				case TFClass_Pyro:
 				{
-					strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantPyroLoop");
+					strcopy(m_idleSound[this.index], sizeof(m_idleSound[]), "MVM.GiantPyroLoop");
 				}
 			}
 			
-			if (pszSoundName[0])
+			if (m_idleSound[this.index][0])
 			{
-				EmitGameSoundToAll(pszSoundName, this.index);
-				this.SetIdleSound(pszSoundName);
+				EmitGameSoundToAll(m_idleSound[this.index], this.index);
 			}
 		}
 	}
 	
 	public void StopIdleSound()
 	{
-		char idleSound[PLATFORM_MAX_PATH];
-		this.GetIdleSound(idleSound, sizeof(idleSound));
-		
-		if (idleSound[0])
+		if (m_idleSound[this.index][0])
 		{
-			StopGameSound(this.index, idleSound);
-			this.ClearIdleSound();
+			StopGameSound(this.index, m_idleSound[this.index]);
+			m_idleSound[this.index][0] = EOS;
 		}
 	}
 	
 	public void SetInvaderName(const char[] name, bool bSetName)
 	{
-		strcopy(m_szInvaderName[this.index], sizeof(m_szInvaderName[]), name);
+		strcopy(m_invaderName[this.index], sizeof(m_invaderName[]), name);
 		
 		// if requested, change client name
-		if (bSetName && GetClientName(this.index, m_szPrevName[this.index], sizeof(m_szPrevName[])))
+		if (bSetName && GetClientName(this.index, m_prevName[this.index], sizeof(m_prevName[])))
 		{
 			SetClientName(this.index, name);
 		}
@@ -867,17 +846,17 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public bool GetInvaderName(char[] buffer, int maxlen)
 	{
-		return strcopy(buffer, maxlen, m_szInvaderName[this.index]) != 0;
+		return strcopy(buffer, maxlen, m_invaderName[this.index]) != 0;
 	}
 	
 	public void ResetInvaderName()
 	{
-		m_szInvaderName[this.index][0] = EOS;
+		m_invaderName[this.index][0] = EOS;
 		
-		if (m_szPrevName[this.index][0])
+		if (m_prevName[this.index][0])
 		{
-			SetClientName(this.index, m_szPrevName[this.index]);
-			m_szPrevName[this.index][0] = EOS;
+			SetClientName(this.index, m_prevName[this.index]);
+			m_prevName[this.index][0] = EOS;
 		}
 	}
 	
@@ -1612,12 +1591,12 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public bool IsPartyMenuActive()
 	{
-		return this.m_bIsPartyMenuActive;
+		return this.m_isPartyMenuActive;
 	}
 	
 	public void SetPartyMenuActive(bool bIsPartyMenuActive)
 	{
-		this.m_bIsPartyMenuActive = bIsPartyMenuActive;
+		this.m_isPartyMenuActive = bIsPartyMenuActive;
 	}
 	
 	public void Init()
@@ -1633,48 +1612,56 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		this.m_specialFireButtonTimer = new CountdownTimer();
 	}
 	
-	public void ResetInvader()
-	{
-		this.SetAutoJump(0.0, 0.0);
-		this.m_autoJumpTimer.Invalidate();
-		
-		this.ClearTeleportWhere();
-		this.ClearEventChangeAttributes();
-		this.ClearTags();
-		this.m_requiredWeaponStack.Clear();
-		this.ClearWeaponRestrictions();
-		this.ClearAllAttributes();
-		this.ClearIdleSound();
-		
-		this.m_fModelScaleOverride = 0.0;
-		this.m_flSpawnTimeLeft = -1.0;
-		this.m_flSpawnTimeLeftMax = -1.0;
-		this.m_missionTarget = INVALID_ENT_REFERENCE;
-		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
-		this.m_hFollowingFlagTarget = INVALID_ENT_REFERENCE;
-		this.m_isWaitingForFullReload = false;
-		this.m_annotationTimer = null;
-		
-		this.m_inputButtons = 0;
-		this.m_fireButtonTimer.Invalidate();
-		this.m_altFireButtonTimer.Invalidate();
-		this.m_specialFireButtonTimer.Invalidate();
-		
-		this.ResetInvaderName();
-	}
-	
-	public void Reset()
+	public void OnClientPutInServer()
 	{
 		this.m_invaderPriority = 0;
 		this.m_invaderMiniBossPriority = 0;
 		this.m_defenderQueuePoints = -1;
 		this.m_preferences = -1;
 		this.m_party = NULL_PARTY;
-		this.m_bIsPartyMenuActive = false;
-		this.m_iSpawnDeathCount = 0;
+		this.m_isPartyMenuActive = false;
+		this.m_spawnDeathCount = 0;
 		
-		m_szInvaderName[this.index][0] = EOS;
-		m_szPrevName[this.index][0] = EOS;
+		m_invaderName[this.index][0] = EOS;
+		m_prevName[this.index][0] = EOS;
+		
+		// NextBotPlayer< PlayerType >::NextBotPlayer
+		this.m_inputButtons = 0;
+		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
+		
+		// CTFBot::CTFBot
+		this.ClearWeaponRestrictions();
+		this.ClearAllAttributes();
+		this.m_squad = NULL_SQUAD;
+		this.m_difficulty = Clamp(tf_bot_difficulty.IntValue, EASY, EXPERT);
+		
+		this.SetMission(NO_MISSION);
+		this.SetMissionTarget(INVALID_ENT_REFERENCE);
+		
+		this.m_fModelScaleOverride = -1.0;
+		
+		this.m_hFollowingFlagTarget = INVALID_ENT_REFERENCE;
+		
+		this.SetAutoJump(0.0, 0.0);
+	}
+	
+	public void Spawn()
+	{
+		this.m_annotationTimer = null;
+		
+		// NextBotPlayer< PlayerType >::Spawn
+		this.m_fireButtonTimer.Invalidate();
+		this.m_altFireButtonTimer.Invalidate();
+		this.m_specialFireButtonTimer.Invalidate();
+		
+		// CTFBot::Spawn
+		this.m_squad = NULL_SQUAD;
+		
+		this.ClearTags();
+		
+		this.m_hFollowingFlagTarget = INVALID_ENT_REFERENCE;
+		
+		this.m_requiredWeaponStack.Clear();
 	}
 }
 

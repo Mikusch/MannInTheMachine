@@ -1703,8 +1703,13 @@ static MRESReturn DHookCallback_CTFPlayer_ChangeTeam_Post(int player, DHookParam
 		// Clear Sound
 		CTFPlayer(player).StopIdleSound();
 		
-		SetVariantString("");
-		AcceptEntityInput(player, "SetCustomModel");
+		if (params.Get(1) != TFTeam_Invaders)
+		{
+			SetVariantString("");
+			AcceptEntityInput(player, "SetCustomModel");
+			
+			CTFPlayer(player).ResetInvaderName();
+		}
 	}
 	
 	return MRES_Ignored;

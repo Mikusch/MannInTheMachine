@@ -182,6 +182,11 @@ any Max(any a, any b)
 	return (a >= b) ? a : b;
 }
 
+any Clamp(any val, any min, any max)
+{
+	return Min(Max(val, min), max);
+}
+
 bool IsMannVsMachineMode()
 {
 	return view_as<bool>(GameRules_GetProp("m_bPlayingMannVsMachine"));

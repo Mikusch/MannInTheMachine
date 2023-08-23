@@ -38,6 +38,8 @@ static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroad
 	if (client == 0)
 		return;
 	
+	CTFPlayer(client).Spawn();
+	
 	CTFPlayer(client).m_annotationTimer = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
 }
 

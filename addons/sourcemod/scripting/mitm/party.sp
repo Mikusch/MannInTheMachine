@@ -392,7 +392,7 @@ static Action ConCmd_PartyCreate(int client, int args)
 	if (!Party_ShouldRunCommand(client))
 		return Plugin_Handled;
 	
-	if (!Forwards_OnIsValidDefender(player))
+	if (!Forwards_OnIsValidDefender(client))
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_CannotCreate");
 		return Plugin_Handled;

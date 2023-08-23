@@ -55,31 +55,11 @@ static void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroad
 
 static Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroadcast)
 {
-	int client = GetClientOfUserId(event.GetInt("userid"));
-	if (client == 0)
-		return Plugin_Continue;
-	
 	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
 	
 	// Only show when a new defender joins
 	bool bSilent = team != TFTeam_Defenders;
 	event.SetInt("silent", bSilent);
-	
-	if (IsMannVsMachineMode())
-	{
-		CTFPlayer(client).SetPrevMission(NO_MISSION);
-		TF2Attrib_RemoveAll(client);
-		// Clear Sound
-		CTFPlayer(client).StopIdleSound();
-	}
-	
-	if (team != TFTeam_Invaders)
-	{
-		CTFPlayer(client).ResetInvader();
-		
-		SetVariantString("");
-		AcceptEntityInput(client, "SetCustomModel");
-	}
 	
 	return Plugin_Changed;
 }

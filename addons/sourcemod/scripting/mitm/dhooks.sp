@@ -25,6 +25,7 @@ static DynamicHook g_hDHook_CItem_ComeToRest;
 static DynamicHook g_hDHook_CBaseEntity_ShouldTransmit;
 static DynamicHook g_hDHook_CBaseEntity_Event_Killed;
 static DynamicHook g_hDHook_CBaseCombatCharacter_ShouldGib;
+static DynamicHook g_hDHook_CTFPlayer_ChangeTeam;
 static DynamicHook g_hDHook_CTFPlayer_IsAllowedToPickUpFlag;
 static DynamicHook g_hDHook_CBasePlayer_EntSelectSpawnPoint;
 static DynamicHook g_hDHook_CBaseFilter_PassesFilterImpl;
@@ -89,6 +90,7 @@ void DHooks_Init(GameData hGameData)
 	g_hDHook_CBaseEntity_ShouldTransmit = CreateDynamicHook(hGameData, "CBaseEntity::ShouldTransmit");
 	g_hDHook_CBaseEntity_Event_Killed = CreateDynamicHook(hGameData, "CBaseEntity::Event_Killed");
 	g_hDHook_CBaseCombatCharacter_ShouldGib = CreateDynamicHook(hGameData, "CBaseCombatCharacter::ShouldGib");
+	g_hDHook_CTFPlayer_ChangeTeam = CreateDynamicHook(hGameData, "CTFPlayer::ChangeTeam");
 	g_hDHook_CTFPlayer_IsAllowedToPickUpFlag = CreateDynamicHook(hGameData, "CTFPlayer::IsAllowedToPickUpFlag");
 	g_hDHook_CBasePlayer_EntSelectSpawnPoint = CreateDynamicHook(hGameData, "CBasePlayer::EntSelectSpawnPoint");
 	g_hDHook_CBaseFilter_PassesFilterImpl = CreateDynamicHook(hGameData, "CBaseFilter::PassesFilterImpl");
@@ -141,6 +143,11 @@ void DHooks_OnClientPutInServer(int client)
 	if (g_hDHook_CBaseCombatCharacter_ShouldGib)
 	{
 		g_hDHook_CBaseCombatCharacter_ShouldGib.HookEntity(Hook_Pre, client, DHookCallback_CTFPlayer_ShouldGib_Pre);
+	}
+	
+	if (g_hDHook_CTFPlayer_ChangeTeam)
+	{
+		g_hDHook_CTFPlayer_ChangeTeam.HookEntity(Hook_Post, client, DHookCallback_CTFPlayer_ChangeTeam_Post);
 	}
 	
 	if (g_hDHook_CTFPlayer_IsAllowedToPickUpFlag)
@@ -1682,6 +1689,22 @@ static MRESReturn DHookCallback_CTFPlayer_ShouldGib_Pre(int player, DHookReturn 
 	{
 		ret.Value = true;
 		return MRES_Supercede;
+	}
+	
+	return MRES_Ignored;
+}
+
+static MRESReturn DHookCallback_CTFPlayer_ChangeTeam_Post(int player, DHookParam params)
+{
+	if (IsMannVsMachineMode())
+	{
+		CTFPlayer(player).SetPrevMission(NO_MISSION);
+		TF2Attrib_RemoveAll(player);
+		// Clear Sound
+		CTFPlayer(player).StopIdleSound();
+		
+		SetVariantString("");
+		AcceptEntityInput(player, "SetCustomModel");
 	}
 	
 	return MRES_Ignored;

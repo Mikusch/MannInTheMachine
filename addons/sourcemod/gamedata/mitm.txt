@@ -394,6 +394,11 @@
 				"linux"		"297"
 				"windows"	"296"
 			}
+			"CTFPlayer::ChangeTeam"
+			{
+				"linux"		"432"
+				"windows"	"431"
+			}
 			"CTFPlayer::IsAllowedToPickUpFlag"
 			{
 				"linux"		"485"
@@ -1244,6 +1249,32 @@
 					"info"
 					{
 						"type"	"objectptr"
+					}
+				}
+			}
+			"CTFPlayer::ChangeTeam"
+			{
+				"offset"	"CTFPlayer::ChangeTeam"
+				"hooktype"	"entity"
+				"return"	"void"
+				"this"		"entity"
+				"arguments"
+				{
+					"iTeamNum"
+					{
+						"type"	"int"
+					}
+					"bAutoTeam"
+					{
+						"type"	"bool"
+					}
+					"bSilent"
+					{
+						"type"	"bool"
+					}
+					"bAutoBalance"
+					{
+						"type"	"bool"
 					}
 				}
 			}

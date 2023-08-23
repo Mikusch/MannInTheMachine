@@ -579,7 +579,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 			return false;
 		
 		TFTeam team = TF2_GetClientTeam(this.index);
-		return (team == TFTeam_Spectator || team == TFTeam_Invaders) && !this.HasPreference(PREF_SPECTATOR_MODE);
+		return team == TFTeam_Invaders || (team == TFTeam_Spectator && !this.HasPreference(PREF_SPECTATOR_MODE));
 	}
 	
 	public float GetSpawnTime()

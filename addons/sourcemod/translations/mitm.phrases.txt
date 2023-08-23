@@ -333,6 +333,10 @@
 		"#format"	"{1:s}"
 		"en"		"You have created and automatically joined {cyan}{1}{default}."
 	}
+	"Party_CannotCreate"
+	{
+		"en"		"You are not allowed to create parties."
+	}
 	"Party_Joined"
 	{
 		"#format"	"{1:s}"

@@ -530,6 +530,9 @@ void Menus_DisplayPartyManageInviteMenu(int client)
 		if (CTFPlayer(other).HasPreference(PREF_IGNORE_PARTY_INVITES))
 			continue;
 		
+		if (!Forwards_OnIsValidDefender(other))
+			continue;
+		
 		Party party = CTFPlayer(client).GetParty();
 		
 		char userid[32];

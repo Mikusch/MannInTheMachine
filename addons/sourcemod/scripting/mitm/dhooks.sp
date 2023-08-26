@@ -1699,7 +1699,7 @@ static MRESReturn DHookCallback_CTFPlayer_ChangeTeam_Post(int player, DHookParam
 	if (IsMannVsMachineMode())
 	{
 		CTFPlayer(player).SetPrevMission(NO_MISSION);
-		TF2Attrib_RemoveAll(player);
+		CTFPlayer(player).ClearAllAttributes();
 		// Clear Sound
 		CTFPlayer(player).StopIdleSound();
 		

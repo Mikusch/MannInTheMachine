@@ -103,5 +103,6 @@ public void __pl_mitm_SetNTVOptional()
 {
 	MarkNativeAsOptional("MannInTheMachinePlayer.HasPreference");
 	MarkNativeAsOptional("MannInTheMachine_IsInEndlessWaves");
+	MarkNativeAsOptional("MannInTheMachine_IsInWaitingForPlayers");
 }
 #endif

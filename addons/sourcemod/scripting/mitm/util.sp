@@ -705,49 +705,82 @@ bool TraceEntityFilter_IgnoreActorsAndFriendlyCombatItems(int entity, int conten
 	return true;
 }
 
-void TE_TFParticleEffect(const char[] name, const float vecOrigin[3] = NULL_VECTOR,
-	const float vecStart[3] = NULL_VECTOR, const float vecAngles[3] = NULL_VECTOR,
-	int entity = -1, ParticleAttachment_t attachType = PATTACH_ABSORIGIN,
-	int attachPoint = -1, bool bResetParticles = false)
+int GetParticleSystemIndex(const char[] szParticleSystemName)
 {
-	int particleTable, particleIndex;
-	
-	if ((particleTable = FindStringTable("ParticleEffectNames")) == INVALID_STRING_TABLE)
+	if (szParticleSystemName[0])
 	{
-		ThrowError("Could not find string table: ParticleEffectNames");
+		int iStringTableParticleEffectNamesIndex = FindStringTable("ParticleEffectNames");
+		if (iStringTableParticleEffectNamesIndex == INVALID_STRING_TABLE)
+		{
+			LogError("Missing string table 'ParticleEffectNames'");
+			return 0;
+		}
+		
+		int nIndex = FindStringIndex(iStringTableParticleEffectNamesIndex, szParticleSystemName);
+		if (nIndex == INVALID_STRING_INDEX)
+		{
+			LogError("Missing precache for particle system '%s'", szParticleSystemName);
+			return 0;
+		}
+		
+		return nIndex;
+		
 	}
 	
-	if ((particleIndex = FindStringIndex(particleTable, name)) == INVALID_STRING_INDEX)
+	return 0;
+}
+
+void TE_TFParticleEffect(const char[] szParticleName, float vecOrigin[3], float vecAngles[3], int entity = -1, ParticleAttachment_t eAttachType = PATTACH_CUSTOMORIGIN, float vecStart[3] = NULL_VECTOR)
+{
+	TE_Start("TFParticleEffect");
+	
+	TE_WriteNum("m_iParticleSystemIndex", GetParticleSystemIndex(szParticleName));
+	
+	TE_WriteVector("m_vecOrigin", vecOrigin);
+	TE_WriteVector("m_vecAngles", vecAngles);
+	TE_WriteVector("m_vecStart", vecStart);
+	
+	if (IsValidEntity(entity))
 	{
-		ThrowError("Could not find particle index: %s", name);
+		TE_WriteNum("m_nEntIndex", entity);
+		TE_WriteNum("m_iAttachType", view_as<int>(eAttachType));
+	}
+	
+	TE_SendToAll();
+}
+
+void TE_TFParticleEffectAttachment(const char[] szParticleName, int entity = -1, ParticleAttachment_t eAttachType = PATTACH_CUSTOMORIGIN, const char[] szAttachmentName, bool bResetAllParticlesOnEntity = false)
+{
+	int iAttachmentPoint = -1;
+	if (IsValidEntity(entity))
+	{
+		iAttachmentPoint = LookupEntityAttachment(entity, szAttachmentName);
+		if (iAttachmentPoint <= 0)
+		{
+			char szModelName[PLATFORM_MAX_PATH];
+			GetEntPropString(entity, Prop_Data, "m_ModelName", szModelName, sizeof(szModelName));
+			
+			LogError("Model '%s' does not have attachment '%s' to attach particle system '%s' to", szModelName, szAttachmentName, szParticleName);
+			return;
+		}
 	}
 	
 	TE_Start("TFParticleEffect");
-	TE_WriteFloat("m_vecOrigin[0]", vecOrigin[0]);
-	TE_WriteFloat("m_vecOrigin[1]", vecOrigin[1]);
-	TE_WriteFloat("m_vecOrigin[2]", vecOrigin[2]);
-	TE_WriteFloat("m_vecStart[0]", vecStart[0]);
-	TE_WriteFloat("m_vecStart[1]", vecStart[1]);
-	TE_WriteFloat("m_vecStart[2]", vecStart[2]);
-	TE_WriteVector("m_vecAngles", vecAngles);
-	TE_WriteNum("m_iParticleSystemIndex", particleIndex);
 	
-	if (entity != -1)
+	TE_WriteNum("m_iParticleSystemIndex", GetParticleSystemIndex(szParticleName));
+	
+	if (IsValidEntity(entity))
 	{
 		TE_WriteNum("entindex", entity);
 	}
 	
-	if (attachType != PATTACH_ABSORIGIN)
-	{
-		TE_WriteNum("m_iAttachType", view_as<int>(attachType));
-	}
+	TE_WriteNum("m_iAttachType", view_as<int>(eAttachType));
+	TE_WriteNum("m_iAttachmentPointIndex", iAttachmentPoint);
 	
-	if (attachPoint != -1)
+	if (bResetAllParticlesOnEntity)
 	{
-		TE_WriteNum("m_iAttachmentPointIndex", attachPoint);
+		TE_WriteNum("m_bResetParticles", true);
 	}
-	
-	TE_WriteNum("m_bResetParticles", bResetParticles ? 1 : 0);
 	
 	TE_SendToAll();
 }

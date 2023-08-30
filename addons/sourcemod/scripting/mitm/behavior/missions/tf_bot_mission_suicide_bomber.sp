@@ -338,8 +338,8 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 	GetClientAbsOrigin(actor, origin);
 	GetClientAbsAngles(actor, angles);
 	
-	TE_TFParticleEffect("explosionTrail_seeds_mvm", .vecOrigin = origin, .vecAngles = angles);
-	TE_TFParticleEffect("fluidSmokeExpl_ring_mvm", .vecOrigin = origin, .vecAngles = angles);
+	TE_TFParticleEffect("explosionTrail_seeds_mvm", origin, angles);
+	TE_TFParticleEffect("fluidSmokeExpl_ring_mvm", origin, angles);
 	
 	EmitGameSoundToAll("MVM.SentryBusterExplode", actor);
 	

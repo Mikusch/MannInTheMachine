@@ -446,6 +446,16 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 			CTFPlayer(client).LeaveSquad();
 		}
 	}
+	
+	if (buttons & IN_JUMP)
+	{
+		if (TF2Attrib_HookValueInt(0, "bot_custom_jump_particle", client))
+		{
+			static char szEffectName[] = "rocketjump_smoke";
+			TE_TFParticleEffectAttachment(szEffectName, client, PATTACH_POINT_FOLLOW, "foot_L");
+			TE_TFParticleEffectAttachment(szEffectName, client, PATTACH_POINT_FOLLOW, "foot_R");
+		}
+	}
 }
 
 public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname, bool &result)

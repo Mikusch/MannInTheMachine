@@ -233,7 +233,7 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 							g_pObjectiveResource.SetBaseMvMBombUpgradeTime(GetGameTime());
 							g_pObjectiveResource.SetNextMvMBombUpgradeTime(GetGameTime() + action.m_upgradeTimer.GetRemainingTime());
 							HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE1", TFTeam_Defenders);
-							TE_TFParticleEffect("mvm_levelup1", .attachType = PATTACH_POINT_FOLLOW, .entity = actor, .attachPoint = LookupEntityAttachment(actor, "head"));
+							TE_TFParticleEffectAttachment("mvm_levelup1", actor, PATTACH_POINT_FOLLOW, "head");
 						}
 						return true;
 					}
@@ -252,7 +252,7 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 							g_pObjectiveResource.SetBaseMvMBombUpgradeTime(GetGameTime());
 							g_pObjectiveResource.SetNextMvMBombUpgradeTime(GetGameTime() + action.m_upgradeTimer.GetRemainingTime());
 							HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE2", TFTeam_Defenders);
-							TE_TFParticleEffect("mvm_levelup2", .attachType = PATTACH_POINT_FOLLOW, .entity = actor, .attachPoint = LookupEntityAttachment(actor, "head"));
+							TE_TFParticleEffectAttachment("mvm_levelup2", actor, PATTACH_POINT_FOLLOW, "head");
 						}
 						return true;
 					}
@@ -270,7 +270,7 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 							g_pObjectiveResource.SetBaseMvMBombUpgradeTime(-1.0);
 							g_pObjectiveResource.SetNextMvMBombUpgradeTime(-1.0);
 							HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE3", TFTeam_Defenders);
-							TE_TFParticleEffect("mvm_levelup3", .attachType = PATTACH_POINT_FOLLOW, .entity = actor, .attachPoint = LookupEntityAttachment(actor, "head"));
+							TE_TFParticleEffectAttachment("mvm_levelup3", actor, PATTACH_POINT_FOLLOW, "head");
 						}
 						return true;
 					}

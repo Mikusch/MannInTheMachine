@@ -736,9 +736,13 @@ void TE_TFParticleEffect(const char[] szParticleName, float vecOrigin[3], float 
 	
 	TE_WriteNum("m_iParticleSystemIndex", GetParticleSystemIndex(szParticleName));
 	
-	TE_WriteVector("m_vecOrigin", vecOrigin);
+	TE_WriteFloat("m_vecOrigin[0]", vecOrigin[0]);
+	TE_WriteFloat("m_vecOrigin[1]", vecOrigin[1]);
+	TE_WriteFloat("m_vecOrigin[2]", vecOrigin[2]);
 	TE_WriteVector("m_vecAngles", vecAngles);
-	TE_WriteVector("m_vecStart", vecStart);
+	TE_WriteFloat("m_vecStart[0]", vecStart[0]);
+	TE_WriteFloat("m_vecStart[1]", vecStart[1]);
+	TE_WriteFloat("m_vecStart[2]", vecStart[2]);
 	
 	if (IsValidEntity(entity))
 	{

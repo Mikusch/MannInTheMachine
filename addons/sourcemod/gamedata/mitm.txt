@@ -414,6 +414,11 @@
 				"linux"		"269"
 				"windows"	"231"
 			}
+			"CBaseCombatCharacter::ClearLastKnownArea"
+			{
+				"linux"		"325"
+				"windows"	"324"
+			}
 			"CBaseFilter::PassesFilterImpl"
 			{
 				"linux"		"199"

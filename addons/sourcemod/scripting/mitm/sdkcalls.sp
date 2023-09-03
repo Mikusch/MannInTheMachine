@@ -23,6 +23,7 @@ static Handle g_hSDKCall_IPopulationSpawner_GetClassIcon;
 static Handle g_hSDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert;
 static Handle g_hSDKCall_CEconEntity_UpdateModelToClass;
 static Handle g_hSDKCall_CTFItem_PickUp;
+static Handle g_hSDKCall_CBaseCombatCharacter_ClearLastKnownArea;
 static Handle g_hSDKCall_CCaptureZone_Capture;
 static Handle g_hSDKCall_CTFPlayer_DoAnimationEvent;
 static Handle g_hSDKCall_CTFPlayer_PlaySpecificSequence;
@@ -82,6 +83,7 @@ void SDKCalls_Init(GameData hGameData)
 	g_hSDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert = PrepSDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert(hGameData);
 	g_hSDKCall_CEconEntity_UpdateModelToClass = PrepSDKCall_CEconEntity_UpdateModelToClass(hGameData);
 	g_hSDKCall_CTFItem_PickUp = PrepSDKCall_CTFItem_PickUp(hGameData);
+	g_hSDKCall_CBaseCombatCharacter_ClearLastKnownArea = PrepSDKCall_CBaseCombatCharacter_ClearLastKnownArea(hGameData);
 	g_hSDKCall_CCaptureZone_Capture = PrepSDKCall_CCaptureZone_Capture(hGameData);
 	g_hSDKCall_CTFPlayer_DoAnimationEvent = PrepSDKCall_CTFPlayer_DoAnimationEvent(hGameData);
 	g_hSDKCall_CTFPlayer_PlaySpecificSequence = PrepSDKCall_CTFPlayer_PlaySpecificSequence(hGameData);
@@ -203,6 +205,18 @@ static Handle PrepSDKCall_CTFItem_PickUp(GameData hGameData)
 	Handle call = EndPrepSDKCall();
 	if (!call)
 		LogError("Failed to create SDKCall: CTFItem::PickUp");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_CBaseCombatCharacter_ClearLastKnownArea(GameData hGameData)
+{
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "CBaseCombatCharacter::ClearLastKnownArea");
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogError("Failed to create SDKCall: CBaseCombatCharacter::ClearLastKnownArea");
 	
 	return call;
 }
@@ -692,7 +706,14 @@ void SDKCall_CEconEntity_UpdateModelToClass(int entity)
 
 void SDKCall_CTFItem_PickUp(int flag, int player, bool invisible)
 {
-	SDKCall(g_hSDKCall_CTFItem_PickUp, flag, player, invisible);
+	if (g_hSDKCall_CTFItem_PickUp)
+		SDKCall(g_hSDKCall_CTFItem_PickUp, flag, player, invisible);
+}
+
+void SDKCall_CBaseCombatCharacter_ClearLastKnownArea(int player)
+{
+	if (g_hSDKCall_CBaseCombatCharacter_ClearLastKnownArea)
+		SDKCall(g_hSDKCall_CBaseCombatCharacter_ClearLastKnownArea, player);
 }
 
 void SDKCall_CCaptureZone_Capture(int zone, int other)

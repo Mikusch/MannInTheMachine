@@ -23,7 +23,8 @@ void Hooks_Init()
 	HookUserMessage(GetUserMessageId("SayText2"), OnSayText2, true);
 	HookUserMessage(GetUserMessageId("TextMsg"), OnTextMsg, true);
 	
-	HookEntityOutput("tf_gamerules", "OnStateEnterBetweenRounds", EntityOutput_OnStateEnterBetweenRounds);
+	HookEntityOutput("tf_gamerules", "OnStateEnterBetweenRounds", EntityOutput_CTFGameRules_OnStateEnterBetweenRounds);
+	HookEntityOutput("trigger_remove_tf_player_condition", "OnStartTouch", EntityOutput_CTriggerRemoveTFPlayerCondition_OnStartTouch);
 }
 
 static Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNum, bool reliable, bool init)
@@ -188,12 +189,18 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 	}
 }
 
-static void EntityOutput_OnStateEnterBetweenRounds(const char[] output, int caller, int activator, float delay)
+static void EntityOutput_CTFGameRules_OnStateEnterBetweenRounds(const char[] output, int caller, int activator, float delay)
 {
 	if (!g_bInWaitingForPlayers && sm_mitm_setup_time.IntValue > 0)
 	{
 		RequestFrame(RequestFrame_StartReadyTimer);
 	}
+}
+
+static void EntityOutput_CTriggerRemoveTFPlayerCondition_OnStartTouch(const char[] output, int caller, int activator, float delay)
+{
+	// Copy behavior of CTriggerRemoveTFPlayerCondition::StartTouch
+	SDKCall_CBaseCombatCharacter_ClearLastKnownArea(activator);
 }
 
 static void RequestFrame_StartReadyTimer()

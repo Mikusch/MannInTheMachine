@@ -746,7 +746,7 @@ void TE_TFParticleEffect(const char[] szParticleName, float vecOrigin[3], float 
 	
 	if (IsValidEntity(entity))
 	{
-		TE_WriteNum("m_nEntIndex", entity);
+		TE_WriteNum("entindex", entity);
 		TE_WriteNum("m_iAttachType", view_as<int>(eAttachType));
 	}
 	

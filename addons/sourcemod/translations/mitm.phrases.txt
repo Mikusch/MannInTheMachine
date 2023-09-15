@@ -333,9 +333,13 @@
 		"#format"	"{1:s}"
 		"en"		"You have created and automatically joined {cyan}{1}{default}."
 	}
-	"Party_CannotCreate"
+	"Party_NotAllowed"
 	{
-		"en"		"You are not allowed to create parties."
+		"en"		"You are not allowed to use the party feature."
+	}
+	"Party_QueuePointsLoading"
+	{
+		"en"		"Your queue points are still loading, please wait a moment."
 	}
 	"Party_Joined"
 	{

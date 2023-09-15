@@ -384,6 +384,18 @@ bool Party_ShouldRunCommand(int client)
 		return false;
 	}
 	
+	if (!Forwards_OnIsValidDefender(client))
+	{
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_NotAllowed");
+		return false;
+	}
+	
+	if (CTFPlayer(client).m_defenderQueuePoints == -1)
+	{
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_QueuePointsLoading");
+		return false;
+	}
+	
 	return true;
 }
 
@@ -391,12 +403,6 @@ static Action ConCmd_PartyCreate(int client, int args)
 {
 	if (!Party_ShouldRunCommand(client))
 		return Plugin_Handled;
-	
-	if (!Forwards_OnIsValidDefender(client))
-	{
-		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_CannotCreate");
-		return Plugin_Handled;
-	}
 	
 	Party party = Party.Create();
 	if (party)

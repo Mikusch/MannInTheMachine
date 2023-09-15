@@ -389,7 +389,7 @@ public void OnGameFrame()
 		if (!CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 			continue;
 		
-		SetHudTextParams(-1.0, 0.01, GetGameFrameTime(), 255, 255, 255, 255);
+		SetHudTextParams(-1.0, 0.95, GetGameFrameTime(), 255, 255, 255, 255);
 		ShowSyncHudText(client, g_hWarningHudSync, "%t", "Spectator_Mode");
 	}
 }

@@ -1736,6 +1736,9 @@ static MRESReturn DHookCallback_CTFPlayer_IsAllowedToPickUpFlag_Post(int player,
 
 static MRESReturn DHookCallback_CTFPlayer_EntSelectSpawnPoint_Pre(int player, DHookReturn ret)
 {
+	if (TF2_GetClientTeam(player) != TFTeam_Invaders)
+		return MRES_Ignored;
+	
 	// override normal spawn behavior to spawn robots at the right place
 	if (IsValidEntity(CTFPlayer(player).m_spawnPointEntity))
 	{

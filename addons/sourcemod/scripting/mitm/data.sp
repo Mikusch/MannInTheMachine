@@ -1129,9 +1129,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	{
 		if (!this.m_requiredWeaponStack.Empty)
 		{
-			// ArrayStack.Top()
-			int weapon = this.m_requiredWeaponStack.Pop();
-			this.m_requiredWeaponStack.Push(weapon);
+			int weapon = this.m_requiredWeaponStack.Top();
 			return TF2Util_SetPlayerActiveWeapon(this.index, weapon);
 		}
 		

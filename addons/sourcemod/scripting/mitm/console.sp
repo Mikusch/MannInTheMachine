@@ -30,6 +30,7 @@ void Console_Init()
 	AddCommandListener(CommandListener_Suicide, "explode");
 	AddCommandListener(CommandListener_Suicide, "kill");
 	AddCommandListener(CommandListener_DropItem, "dropitem");
+	AddCommandListener(CommandListener_AutoTeam, "autoteam");
 	AddCommandListener(CommandListener_JoinTeam, "jointeam");
 	AddCommandListener(CommandListener_JoinClass, "joinclass");
 	AddCommandListener(CommandListener_Buyback, "td_buyback");
@@ -132,6 +133,17 @@ static Action CommandListener_Suicide(int client, const char[] command, int argc
 	return Plugin_Continue;
 }
 
+static Action CommandListener_AutoTeam(int client, const char[] command, int argc)
+{
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
+	{
+		// autoteam does NOT call GetTeamAssignmentOverride! just axe it entirely.
+		return Plugin_Handled;
+	}
+	
+	return Plugin_Continue;
+}
+
 static Action CommandListener_DropItem(int client, const char[] command, int argc)
 {
 	if (CTFPlayer(client).GetDeployingBombState() != TF_BOMB_DEPLOYING_NONE)
@@ -151,9 +163,11 @@ static Action CommandListener_JoinTeam(int client, const char[] command, int arg
 		GetCmdArg(1, arg, sizeof(arg));
 		
 		if (StrEqual(arg, "spectate", false) || StrEqual(arg, "auto", false))
-		{
 			return Plugin_Continue;
-		}
+		
+		// never allow joining invader team directly
+		if (StrEqual(arg, "blue", false))
+			return Plugin_Handled;
 		
 		// allow CTFPlayer::GetAutoTeam to set currency for new defenders
 		FakeClientCommand(client, "%s %s", command, "auto");

@@ -25,7 +25,6 @@ static DynamicHook g_hDHook_CItem_ComeToRest;
 static DynamicHook g_hDHook_CBaseEntity_ShouldTransmit;
 static DynamicHook g_hDHook_CBaseEntity_Event_Killed;
 static DynamicHook g_hDHook_CBaseCombatCharacter_ShouldGib;
-static DynamicHook g_hDHook_CTFPlayer_ChangeTeam;
 static DynamicHook g_hDHook_CTFPlayer_IsAllowedToPickUpFlag;
 static DynamicHook g_hDHook_CBasePlayer_EntSelectSpawnPoint;
 static DynamicHook g_hDHook_CBaseFilter_PassesFilterImpl;
@@ -90,7 +89,6 @@ void DHooks_Init(GameData hGameData)
 	g_hDHook_CBaseEntity_ShouldTransmit = CreateDynamicHook(hGameData, "CBaseEntity::ShouldTransmit");
 	g_hDHook_CBaseEntity_Event_Killed = CreateDynamicHook(hGameData, "CBaseEntity::Event_Killed");
 	g_hDHook_CBaseCombatCharacter_ShouldGib = CreateDynamicHook(hGameData, "CBaseCombatCharacter::ShouldGib");
-	g_hDHook_CTFPlayer_ChangeTeam = CreateDynamicHook(hGameData, "CTFPlayer::ChangeTeam");
 	g_hDHook_CTFPlayer_IsAllowedToPickUpFlag = CreateDynamicHook(hGameData, "CTFPlayer::IsAllowedToPickUpFlag");
 	g_hDHook_CBasePlayer_EntSelectSpawnPoint = CreateDynamicHook(hGameData, "CBasePlayer::EntSelectSpawnPoint");
 	g_hDHook_CBaseFilter_PassesFilterImpl = CreateDynamicHook(hGameData, "CBaseFilter::PassesFilterImpl");
@@ -143,11 +141,6 @@ void DHooks_OnClientPutInServer(int client)
 	if (g_hDHook_CBaseCombatCharacter_ShouldGib)
 	{
 		g_hDHook_CBaseCombatCharacter_ShouldGib.HookEntity(Hook_Pre, client, DHookCallback_CTFPlayer_ShouldGib_Pre);
-	}
-	
-	if (g_hDHook_CTFPlayer_ChangeTeam)
-	{
-		g_hDHook_CTFPlayer_ChangeTeam.HookEntity(Hook_Post, client, DHookCallback_CTFPlayer_ChangeTeam_Post);
 	}
 	
 	if (g_hDHook_CTFPlayer_IsAllowedToPickUpFlag)
@@ -1156,6 +1149,7 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 {
 	int player = params.Get(1);
 	TFTeam nDesiredTeam = params.Get(2);
+	TFTeam nCurrentTeam = TF2_GetClientTeam(player);
 	
 	if (IsClientSourceTV(player))
 		return MRES_Ignored;
@@ -1178,47 +1172,47 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 	}
 	else
 	{
-		// player is trying to switch from invaders to spectate
-		if (nDesiredTeam == TFTeam_Spectator && TF2_GetClientTeam(player) == TFTeam_Invaders && !sm_mitm_invader_allow_suicide.BoolValue)
+		// player is trying to switch from invaders to a different team
+		if (nCurrentTeam == TFTeam_Invaders && nDesiredTeam != nCurrentTeam && !sm_mitm_invader_allow_suicide.BoolValue)
 		{
 			if (IsPlayerAlive(player))
 				PrintCenterText(player, "%t", "Invader_NotAllowedToSuicide");
 			
-			ret.Value = TF2_GetClientTeam(player);
+			ret.Value = nCurrentTeam;
 			return MRES_Supercede;
 		}
 		
-		if (!Forwards_OnIsValidDefender(player))
+		if (nDesiredTeam == TFTeam_Defenders)
 		{
-			params.Set(2, TFTeam_Spectator);
-			return MRES_ChangedHandled;
-		}
-		
-		int iDefenderCount = 0;
-		
-		for (int client = 1; client <= MaxClients; client++)
-		{
-			if (!IsClientInGame(client))
-				continue;
+			if (!Forwards_OnIsValidDefender(player))
+			{
+				ret.Value = TFTeam_Spectator;
+				return MRES_Supercede;
+			}
 			
-			if (TF2_GetClientTeam(client) == TFTeam_Defenders)
-				iDefenderCount++;
+			int iDefenderCount = 0;
+			
+			for (int client = 1; client <= MaxClients; client++)
+			{
+				if (!IsClientInGame(client))
+					continue;
+				
+				if (TF2_GetClientTeam(client) == TFTeam_Defenders)
+					iDefenderCount++;
+			}
+			
+			// players can join defenders freely if a slot is open
+			if (iDefenderCount >= tf_mvm_defenders_team_size.IntValue ||
+				CTFPlayer(player).IsInAParty() ||
+				CTFPlayer(player).HasPreference(PREF_DEFENDER_DISABLE_QUEUE) ||
+				CTFPlayer(player).HasPreference(PREF_SPECTATOR_MODE))
+			{
+				ret.Value = TFTeam_Spectator;
+				return MRES_Supercede;
+			}
 		}
 		
-		// players can join defenders freely if a slot is open
-		if (iDefenderCount >= tf_mvm_defenders_team_size.IntValue || 
-			CTFPlayer(player).IsInAParty() || 
-			CTFPlayer(player).HasPreference(PREF_DEFENDER_DISABLE_QUEUE) || 
-			CTFPlayer(player).HasPreference(PREF_SPECTATOR_MODE))
-		{
-			params.Set(2, TFTeam_Spectator);
-			return MRES_ChangedHandled;
-		}
-		else
-		{
-			params.Set(2, TFTeam_Defenders);
-			return MRES_ChangedHandled;
-		}
+		return MRES_Ignored;
 	}
 }
 
@@ -1689,27 +1683,6 @@ static MRESReturn DHookCallback_CTFPlayer_ShouldGib_Pre(int player, DHookReturn 
 	{
 		ret.Value = true;
 		return MRES_Supercede;
-	}
-	
-	return MRES_Ignored;
-}
-
-static MRESReturn DHookCallback_CTFPlayer_ChangeTeam_Post(int player, DHookParam params)
-{
-	if (IsMannVsMachineMode())
-	{
-		CTFPlayer(player).SetPrevMission(NO_MISSION);
-		CTFPlayer(player).ClearAllAttributes();
-		// Clear Sound
-		CTFPlayer(player).StopIdleSound();
-		
-		if (params.Get(1) != TFTeam_Invaders)
-		{
-			SetVariantString("");
-			AcceptEntityInput(player, "SetCustomModel");
-			
-			CTFPlayer(player).ResetOnTeamChange();
-		}
 	}
 	
 	return MRES_Ignored;

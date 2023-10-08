@@ -1622,14 +1622,14 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		
 		m_invaderName[this.index][0] = EOS;
 		m_prevName[this.index][0] = EOS;
-		
-		// NextBotPlayer< PlayerType >::NextBotPlayer
-		this.m_inputButtons = 0;
-		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
 	}
 	
 	public void ResetOnTeamChange()
 	{
+		// NextBotPlayer< PlayerType >::NextBotPlayer
+		this.m_inputButtons = 0;
+		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
+		
 		// CTFBot::CTFBot
 		this.ClearWeaponRestrictions();
 		this.ClearAllAttributes();
@@ -1645,13 +1645,13 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		
 		this.SetAutoJump(0.0, 0.0);
 		
+		// MannInTheMachinePlayer
+		TF2Attrib_RemoveAll(this.index);
 		this.ResetInvaderName();
 	}
 	
 	public void Spawn()
 	{
-		this.m_annotationTimer = null;
-		
 		// NextBotPlayer< PlayerType >::Spawn
 		this.m_fireButtonTimer.Invalidate();
 		this.m_altFireButtonTimer.Invalidate();
@@ -1665,6 +1665,9 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		this.m_hFollowingFlagTarget = INVALID_ENT_REFERENCE;
 		
 		this.m_requiredWeaponStack.Clear();
+		
+		// MannInTheMachinePlayer
+		this.m_annotationTimer = null;
 	}
 }
 

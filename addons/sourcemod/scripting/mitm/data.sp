@@ -1622,14 +1622,14 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		
 		m_invaderName[this.index][0] = EOS;
 		m_prevName[this.index][0] = EOS;
+		
+		// NextBotPlayer< PlayerType >::NextBotPlayer
+		this.m_inputButtons = 0;
+		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
 	}
 	
 	public void ResetOnTeamChange()
 	{
-		// NextBotPlayer< PlayerType >::NextBotPlayer
-		this.m_inputButtons = 0;
-		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
-		
 		// CTFBot::CTFBot
 		this.ClearWeaponRestrictions();
 		this.ClearAllAttributes();

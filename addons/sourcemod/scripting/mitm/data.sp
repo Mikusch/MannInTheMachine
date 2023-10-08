@@ -1622,7 +1622,10 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		
 		m_invaderName[this.index][0] = EOS;
 		m_prevName[this.index][0] = EOS;
-		
+	}
+	
+	public void ResetOnTeamChange()
+	{
 		// NextBotPlayer< PlayerType >::NextBotPlayer
 		this.m_inputButtons = 0;
 		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
@@ -1641,6 +1644,8 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		this.m_hFollowingFlagTarget = INVALID_ENT_REFERENCE;
 		
 		this.SetAutoJump(0.0, 0.0);
+		
+		this.ResetInvaderName();
 	}
 	
 	public void Spawn()

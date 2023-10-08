@@ -1708,7 +1708,7 @@ static MRESReturn DHookCallback_CTFPlayer_ChangeTeam_Post(int player, DHookParam
 			SetVariantString("");
 			AcceptEntityInput(player, "SetCustomModel");
 			
-			CTFPlayer(player).ResetInvaderName();
+			CTFPlayer(player).ResetOnTeamChange();
 		}
 	}
 	

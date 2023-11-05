@@ -32,6 +32,7 @@ void ConVars_Init()
 	sm_mitm_party_max_size = CreateConVar("sm_mitm_party_max_size", "0", "Maximum size of player parties.", _, true, 0.0, true, 10.0);
 	sm_mitm_setup_time = CreateConVar("sm_mitm_setup_time", "150", "Time for defenders to set up before the round automatically starts.");
 	sm_mitm_max_spawn_deaths = CreateConVar("sm_mitm_max_spawn_deaths", "2", "How many times a player can die to the spawn timer before getting kicked.");
+	sm_mitm_defender_ping_limit = CreateConVar("sm_mitm_defender_ping_limit", "200", "Maximum ping a client can have to play on the defender team.");
 	
 	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");

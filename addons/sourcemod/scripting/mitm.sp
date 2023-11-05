@@ -66,6 +66,7 @@ ConVar sm_mitm_party_enabled;
 ConVar sm_mitm_party_max_size;
 ConVar sm_mitm_setup_time;
 ConVar sm_mitm_max_spawn_deaths;
+ConVar sm_mitm_defender_ping_limit;
 
 // Game ConVars
 ConVar tf_avoidteammates_pushaway;

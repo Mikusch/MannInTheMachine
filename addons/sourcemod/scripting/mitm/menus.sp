@@ -26,7 +26,11 @@ void Menus_DisplayMainMenu(int client)
 	
 	menu.AddItem("queue", "Menu_Main_Queue");
 	menu.AddItem("preferences", "Menu_Main_Preferences");
-	menu.AddItem("party", "Menu_Main_Party", sm_mitm_party_enabled.BoolValue ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	
+	if (sm_mitm_party_enabled.BoolValue)
+	{
+		menu.AddItem("party", "Menu_Main_Party");
+	}
 	
 	menu.Display(client, MENU_TIME_FOREVER);
 }

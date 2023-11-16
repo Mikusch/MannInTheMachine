@@ -36,6 +36,10 @@ void SDKHooks_OnEntityCreated(int entity, const char[] classname)
 		SDKHook(entity, SDKHook_Think, SDKHookCB_BotHintEngineerNest_Think);
 		SDKHook(entity, SDKHook_ThinkPost, SDKHookCB_BotHintEngineerNest_ThinkPost);
 	}
+	else if (StrEqual(classname, "entity_medigun_shield"))
+	{
+		SDKHook(entity, SDKHook_OnTakeDamagePost, SDKHookCB_EntityMedigunShield_OnTakeDamagePost);
+	}
 }
 
 static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
@@ -115,6 +119,15 @@ static void SDKHookCB_BotHintEngineerNest_ThinkPost(int entity)
 			}
 		}
 	}
+}
+
+static void SDKHookCB_EntityMedigunShield_OnTakeDamagePost(int victim, int attacker, int inflictor, float damage, int damagetype)
+{
+	int owner = GetEntPropEnt(victim, Prop_Send, "m_hOwnerEntity");
+	if (!IsValidEntity(owner))
+		return;
+	
+	SetEntPropFloat(owner, Prop_Send, "m_flRageMeter", GetEntPropFloat(owner, Prop_Send, "m_flRageMeter") - (damage * sm_mitm_shield_damage_drain_rate.FloatValue));
 }
 
 Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)

@@ -424,11 +424,6 @@
 				"linux"		"30"
 				"windows"	"29"
 			}
-			"CGameRules::FPlayerCanTakeDamage"
-			{
-				"linux"		"64"
-				"windows"	"63"
-			}
 			"CTeamplayRules::TeamMayCapturePoint"
 			{
 				"linux"		"159"
@@ -1281,28 +1276,6 @@
 					"pEntity"
 					{
 						"type"	"cbaseentity"
-					}
-				}
-			}
-			"CGameRules::FPlayerCanTakeDamage"
-			{
-				"offset"	"CGameRules::FPlayerCanTakeDamage"
-				"hooktype"	"gamerules"
-				"return"	"bool"
-				"this"		"ignore"
-				"arguments"
-				{
-					"pPlayer"
-					{
-						"type"	"cbaseentity"
-					}
-					"pAttacker"
-					{
-						"type"	"cbaseentity"
-					}
-					"info"
-					{
-						"type"	"objectptr"
 					}
 				}
 			}

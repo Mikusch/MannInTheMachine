@@ -246,9 +246,10 @@ static int OnContact(CTFBotMainAction action, int actor, int other, Address resu
 					CBaseEntity(actor).WorldSpaceCenter(actorCenter);
 					SubtractVectors(victimCenter, actorCenter, toVictim);
 					
-					float vecForce[3];
-					CalculateMeleeDamageForce(toVictim, float(4 * damage), 1.0, vecForce);
-					SDKHooks_TakeDamage(other, actor, actor, float(4 * damage), DMG_BLAST, _, vecForce, actorCenter);
+					CTakeDamageInfo info = GetGlobalDamageInfo();
+					info.Init(actor, actor, .damage = float(4 * damage), .bitsDamageType = DMG_BLAST);
+					CalculateMeleeDamageForce(info, toVictim, actorCenter, 1.0);
+					CBaseEntity(other).TakeDamage(info);
 				}
 			}
 		}

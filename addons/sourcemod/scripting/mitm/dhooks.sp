@@ -29,7 +29,6 @@ static DynamicHook g_hDHook_CTFPlayer_IsAllowedToPickUpFlag;
 static DynamicHook g_hDHook_CBasePlayer_EntSelectSpawnPoint;
 static DynamicHook g_hDHook_CBaseFilter_PassesFilterImpl;
 static DynamicHook g_hDHook_CTFItem_PickUp;
-static DynamicHook g_hDHook_CGameRules_FPlayerCanTakeDamage;
 
 static ArrayList m_justSpawnedList;
 
@@ -93,7 +92,6 @@ void DHooks_Init(GameData hGameData)
 	g_hDHook_CBasePlayer_EntSelectSpawnPoint = CreateDynamicHook(hGameData, "CBasePlayer::EntSelectSpawnPoint");
 	g_hDHook_CBaseFilter_PassesFilterImpl = CreateDynamicHook(hGameData, "CBaseFilter::PassesFilterImpl");
 	g_hDHook_CTFItem_PickUp = CreateDynamicHook(hGameData, "CTFItem::PickUp");
-	g_hDHook_CGameRules_FPlayerCanTakeDamage = CreateDynamicHook(hGameData, "CGameRules::FPlayerCanTakeDamage");
 	
 	CopyScriptFunctionBinding("CTFBot", "AddBotAttribute", "CTFPlayer", DHookCallback_CTFBot_AddAttribute_Pre);
 	CopyScriptFunctionBinding("CTFBot", "AddBotTag", "CTFPlayer", DHookCallback_CTFBot_AddTag_Pre);
@@ -151,14 +149,6 @@ void DHooks_OnClientPutInServer(int client)
 	if (g_hDHook_CBasePlayer_EntSelectSpawnPoint)
 	{
 		g_hDHook_CBasePlayer_EntSelectSpawnPoint.HookEntity(Hook_Pre, client, DHookCallback_CTFPlayer_EntSelectSpawnPoint_Pre);
-	}
-}
-
-void DHooks_HookGamerules()
-{
-	if (g_hDHook_CGameRules_FPlayerCanTakeDamage)
-	{
-		g_hDHook_CGameRules_FPlayerCanTakeDamage.HookGamerules(Hook_Pre, DHookCallback_CTFGameRules_FPlayerCanTakeDamage_Pre);
 	}
 }
 
@@ -1891,17 +1881,6 @@ static MRESReturn DHookCallback_CCurrencyPack_ComeToRest_Pre(int item)
 		RemoveEntity(item);
 		
 		return MRES_Supercede;
-	}
-	
-	return MRES_Ignored;
-}
-
-static MRESReturn DHookCallback_CTFGameRules_FPlayerCanTakeDamage_Pre(DHookReturn ret, DHookParam params)
-{
-	if (g_bForceFriendlyFire)
-	{
-		params.SetObjectVar(3, GetOffset("CTakeDamageInfo", "m_bForceFriendlyFire"), ObjectValueType_Bool, true);
-		return MRES_ChangedHandled;
 	}
 	
 	return MRES_Ignored;

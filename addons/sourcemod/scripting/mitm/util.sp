@@ -855,14 +855,26 @@ Address GetPlayerShared(int client)
 	return GetEntityAddress(client) + offset;
 }
 
-void CalculateMeleeDamageForce(const float vecMeleeDir[3], float flDamage, float flScale, float vecForce[3])
+void CopyVector(const float source[3], float target[3])
 {
+	target[0] = source[0];
+	target[1] = source[1];
+	target[2] = source[2];
+}
+
+void CalculateMeleeDamageForce(CTakeDamageInfo info, const float vecMeleeDir[3], const float vecForceOrigin[3], float flScale)
+{
+	info.SetDamagePosition(vecForceOrigin);
+	
 	// Calculate an impulse large enough to push a 75kg man 4 in/sec per point of damage
-	float flForceScale = flDamage * (75 * 4);
-	NormalizeVector(vecMeleeDir, vecForce);
+	float flForceScale = info.GetBaseDamage() * (75 * 4);
+	float vecForce[3];
+	CopyVector(vecMeleeDir, vecForce);
+	NormalizeVector(vecForce, vecForce);
 	ScaleVector(vecForce, flForceScale);
 	ScaleVector(vecForce, phys_pushscale.FloatValue);
 	ScaleVector(vecForce, flScale);
+	info.SetDamageForce(vecForce);
 }
 
 int FixedUnsigned16(float value, int scale)

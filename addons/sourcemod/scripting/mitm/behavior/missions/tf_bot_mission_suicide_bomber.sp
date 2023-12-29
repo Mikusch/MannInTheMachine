@@ -409,19 +409,17 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 		{
 			NormalizeVector(toVictim, toVictim);
 			
-			int nDamage = Max(TF2Util_GetEntityMaxHealth(victim), GetEntProp(victim, Prop_Data, "m_iHealth"));
+			int damage = Max(TF2Util_GetEntityMaxHealth(victim), GetEntProp(victim, Prop_Data, "m_iHealth"));
 			
-			float flDamage = float(4 * nDamage);
+			CTakeDamageInfo info = GetGlobalDamageInfo();
+			info.Init(actor, actor, .damage = float(4 * damage), .bitsDamageType = DMG_BLAST);
 			if (tf_bot_suicide_bomb_friendly_fire.BoolValue)
 			{
-				g_bForceFriendlyFire = true;
+				info.SetForceFriendlyFire(true);
 			}
 			
-			float vecForce[3];
-			CalculateMeleeDamageForce(toVictim, flDamage, 1.0, vecForce);
-			SDKHooks_TakeDamage(victim, actor, actor, flDamage, DMG_BLAST, .damageForce = vecForce, .damagePosition = actorCenter, .bypassHooks = false);
-			
-			g_bForceFriendlyFire = false;
+			CalculateMeleeDamageForce(info, toVictim, actorCenter, 1.0);
+			CBaseEntity(victim).TakeDamage(info);
 		}
 	}
 	

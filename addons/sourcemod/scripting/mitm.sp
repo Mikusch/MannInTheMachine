@@ -51,7 +51,6 @@ bool g_bInWaitingForPlayers;
 bool g_bMiniBossQueue;
 float g_flLastQueueSwitchTime;
 bool g_bAllowTeamChange;	// Bypass CTFGameRules::GetTeamAssignmentOverride?
-bool g_bForceFriendlyFire;
 bool g_bInEndlessRollEscalation;
 
 // Plugin ConVars
@@ -242,8 +241,6 @@ public void OnMapStart()
 	
 	PrecacheSound("ui/system_message_alert.wav");
 	PrecacheSound(")mvm/mvm_tele_activate.wav");
-	
-	DHooks_HookGamerules();
 	
 	// Add bot icons to the downloads table
 	DirectoryListing directory = OpenDirectory("materials/hud");

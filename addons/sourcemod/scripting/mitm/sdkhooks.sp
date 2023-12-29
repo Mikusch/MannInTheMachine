@@ -44,6 +44,8 @@ void SDKHooks_OnEntityCreated(int entity, const char[] classname)
 
 static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
+	CTakeDamageInfo info = GetGlobalDamageInfo();
+	
 	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
 	{
 		// Don't let Sentry Busters die until they've done their spin-up
@@ -63,7 +65,7 @@ static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int 
 		{
 			if ((attacker != victim) &&
 				CTFPlayer(attacker).GetPrevMission() == MISSION_DESTROY_SENTRIES &&
-				g_bForceFriendlyFire &&
+				info.IsForceFriendlyFire() &&
 				TF2_GetClientTeam(victim) == TF2_GetClientTeam(attacker) &&
 				CTFPlayer(victim).IsMiniBoss())
 			{

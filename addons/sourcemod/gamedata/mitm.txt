@@ -701,11 +701,6 @@
 				"linux"		"16"
 				"windows"	"16"
 			}
-			"CTakeDamageInfo::m_bForceFriendlyFire"
-			{
-				"linux"		"92"
-				"windows"	"92"
-			}
 			"CTFNavArea::m_distanceToBombTarget"
 			{
 				"linux"		"552"

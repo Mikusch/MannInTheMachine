@@ -355,6 +355,10 @@ public void OnGameFrame()
 			if (!IsClientObserver(client))
 				continue;
 			
+			int iObserverMode = GetEntProp(client, Prop_Send, "m_iObserverMode");
+			if (iObserverMode == OBS_MODE_DEATHCAM || iObserverMode == OBS_MODE_FREEZECAM)
+				continue;
+			
 			char text[MAX_USER_MSG_DATA];
 			Format(text, sizeof(text), "%T\n", g_bMiniBossQueue ? "Invader_Queue_Header_MiniBoss" : "Invader_Queue_Header", client);
 			

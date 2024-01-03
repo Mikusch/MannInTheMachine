@@ -272,6 +272,7 @@ public void OnClientPutInServer(int client)
 {
 	DHooks_OnClientPutInServer(client);
 	SDKHooks_OnClientPutInServer(client);
+	CBaseNPC_HookEventKilled(client);
 	
 	CTFPlayer(client).OnClientPutInServer();
 	
@@ -488,6 +489,114 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 			}
 		}
 	}
+}
+
+public Action CBaseCombatCharacter_EventKilled(int entity, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+{
+	// Replicate behavior of CTFBot::Event_Killed
+	if (!IsEntityClient(entity) || TF2_GetClientTeam(entity) != TFTeam_Invaders)
+		return Plugin_Continue;
+	
+	// announce Spies
+	if (IsMannVsMachineMode())
+	{
+		if (TF2_GetPlayerClass(entity) == TFClass_Spy)
+		{
+			ArrayList playerList = new ArrayList();
+			CollectPlayers(playerList, TFTeam_Invaders, COLLECT_ONLY_LIVING_PLAYERS);
+			
+			int spyCount = 0;
+			for (int i = 0; i < playerList.Length; ++i)
+			{
+				if (TF2_GetPlayerClass(playerList.Get(i)) == TFClass_Spy)
+				{
+					++spyCount;
+				}
+			}
+			
+			delete playerList;
+			
+			Event event = CreateEvent("mvm_mission_update");
+			if (event)
+			{
+				event.SetInt("class", view_as<int>(TFClass_Spy));
+				event.SetInt("count", spyCount);
+				event.Fire();
+			}
+		}
+		else if (TF2_GetPlayerClass(entity) == TFClass_Engineer)
+		{
+			// in MVM, when an engineer dies, we need to decouple his objects so they stay alive when his bot slot gets recycled
+			while (TF2Util_GetPlayerObjectCount(entity) > 0)
+			{
+				// set to not have owner
+				int obj = TF2Util_GetPlayerObject(entity, 0);
+				if (obj != -1)
+				{
+					SetEntityOwner(obj, -1);
+					SetEntPropEnt(obj, Prop_Send, "m_hBuilder", -1);
+				}
+				SDKCall_CTFPlayer_RemoveObject(entity, obj);
+			}
+			
+			// unown engineer nest if owned any
+			int hint = -1;
+			while ((hint = FindEntityByClassname(hint, "bot_hint_*")) != -1)
+			{
+				if (GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity") == entity)
+				{
+					SetEntityOwner(hint, -1);
+				}
+			}
+			
+			ArrayList playerList = new ArrayList();
+			CollectPlayers(playerList, TFTeam_Invaders, COLLECT_ONLY_LIVING_PLAYERS);
+			bool bShouldAnnounceLastEngineerBotDeath = CTFPlayer(entity).HasAttribute(TELEPORT_TO_HINT);
+			if (bShouldAnnounceLastEngineerBotDeath)
+			{
+				for (int i = 0; i < playerList.Length; ++i)
+				{
+					if (playerList.Get(i) != entity && TF2_GetPlayerClass(playerList.Get(i)) == TFClass_Engineer)
+					{
+						bShouldAnnounceLastEngineerBotDeath = false;
+						break;
+					}
+				}
+			}
+			delete playerList;
+			
+			if (bShouldAnnounceLastEngineerBotDeath)
+			{
+				bool bEngineerTeleporterInTheWorld = false;
+				int obj = -1;
+				while ((obj = FindEntityByClassname(obj, "obj_teleporter")) != -1)
+				{
+					if (TF2_GetObjectType(obj) == TFObject_Teleporter && view_as<TFTeam>(GetEntProp(obj, Prop_Data, "m_iTeamNum")) == TFTeam_Invaders)
+					{
+						bEngineerTeleporterInTheWorld = true;
+					}
+				}
+				
+				if (bEngineerTeleporterInTheWorld)
+				{
+					BroadcastSound(255, "Announcer.MVM_An_Engineer_Bot_Is_Dead_But_Not_Teleporter");
+				}
+				else
+				{
+					BroadcastSound(255, "Announcer.MVM_An_Engineer_Bot_Is_Dead");
+				}
+			}
+		}
+		
+		if (CTFPlayer(entity).IsInASquad())
+		{
+			CTFPlayer(entity).LeaveSquad();
+		}
+		
+		CTFPlayer(entity).StopIdleSound();
+	}
+	
+	return Plugin_Continue;
 }
 
 static INextBot CreateNextBotPlayer(Address entity)

@@ -23,7 +23,6 @@ static DynamicHook g_hDHook_CBaseObject_IsPlacementPosValid;
 static DynamicHook g_hDHook_CBaseObject_CanBeUpgraded;
 static DynamicHook g_hDHook_CItem_ComeToRest;
 static DynamicHook g_hDHook_CBaseEntity_ShouldTransmit;
-static DynamicHook g_hDHook_CBaseEntity_Event_Killed;
 static DynamicHook g_hDHook_CBaseCombatCharacter_ShouldGib;
 static DynamicHook g_hDHook_CTFPlayer_IsAllowedToPickUpFlag;
 static DynamicHook g_hDHook_CBasePlayer_EntSelectSpawnPoint;
@@ -86,7 +85,6 @@ void DHooks_Init(GameData hGameData)
 	g_hDHook_CBaseObject_CanBeUpgraded = CreateDynamicHook(hGameData, "CBaseObject::CanBeUpgraded");
 	g_hDHook_CItem_ComeToRest = CreateDynamicHook(hGameData, "CItem::ComeToRest");
 	g_hDHook_CBaseEntity_ShouldTransmit = CreateDynamicHook(hGameData, "CBaseEntity::ShouldTransmit");
-	g_hDHook_CBaseEntity_Event_Killed = CreateDynamicHook(hGameData, "CBaseEntity::Event_Killed");
 	g_hDHook_CBaseCombatCharacter_ShouldGib = CreateDynamicHook(hGameData, "CBaseCombatCharacter::ShouldGib");
 	g_hDHook_CTFPlayer_IsAllowedToPickUpFlag = CreateDynamicHook(hGameData, "CTFPlayer::IsAllowedToPickUpFlag");
 	g_hDHook_CBasePlayer_EntSelectSpawnPoint = CreateDynamicHook(hGameData, "CBasePlayer::EntSelectSpawnPoint");
@@ -129,11 +127,6 @@ void DHooks_OnClientPutInServer(int client)
 	if (g_hDHook_CBaseEntity_ShouldTransmit)
 	{
 		g_hDHook_CBaseEntity_ShouldTransmit.HookEntity(Hook_Pre, client, DHookCallback_CTFPlayer_ShouldTransmit_Pre);
-	}
-	
-	if (g_hDHook_CBaseEntity_Event_Killed)
-	{
-		g_hDHook_CBaseEntity_Event_Killed.HookEntity(Hook_Pre, client, DHookCallback_CTFPlayer_EventKilled_Pre);
 	}
 	
 	if (g_hDHook_CBaseCombatCharacter_ShouldGib)
@@ -1556,111 +1549,6 @@ static MRESReturn DHookCallback_CTFPlayer_ShouldTransmit_Pre(int player, DHookRe
 	{
 		ret.Value = FL_EDICT_ALWAYS;
 		return MRES_Supercede;
-	}
-	
-	return MRES_Ignored;
-}
-
-static MRESReturn DHookCallback_CTFPlayer_EventKilled_Pre(int player, DHookParam params)
-{
-	// Replicate behavior of CTFBot::Event_Killed
-	if (TF2_GetClientTeam(player) == TFTeam_Invaders)
-	{
-		// announce Spies
-		if (TF2_GetPlayerClass(player) == TFClass_Spy)
-		{
-			ArrayList playerList = new ArrayList();
-			CollectPlayers(playerList, TFTeam_Invaders, COLLECT_ONLY_LIVING_PLAYERS);
-			
-			int spyCount = 0;
-			for (int i = 0; i < playerList.Length; ++i)
-			{
-				if (TF2_GetPlayerClass(playerList.Get(i)) == TFClass_Spy)
-				{
-					++spyCount;
-				}
-			}
-			
-			delete playerList;
-			
-			Event event = CreateEvent("mvm_mission_update");
-			if (event)
-			{
-				event.SetInt("class", view_as<int>(TFClass_Spy));
-				event.SetInt("count", spyCount);
-				event.Fire();
-			}
-		}
-		else if (TF2_GetPlayerClass(player) == TFClass_Engineer)
-		{
-			// in MVM, when an engineer dies, we need to decouple his objects so they stay alive when his bot slot gets recycled
-			while (TF2Util_GetPlayerObjectCount(player) > 0)
-			{
-				// set to not have owner
-				int obj = TF2Util_GetPlayerObject(player, 0);
-				if (obj != -1)
-				{
-					SetEntityOwner(obj, -1);
-					SetEntPropEnt(obj, Prop_Send, "m_hBuilder", -1);
-				}
-				SDKCall_CTFPlayer_RemoveObject(player, obj);
-			}
-			
-			// unown engineer nest if owned any
-			int hint = -1;
-			while ((hint = FindEntityByClassname(hint, "bot_hint_*")) != -1)
-			{
-				if (GetEntPropEnt(hint, Prop_Send, "m_hOwnerEntity") == player)
-				{
-					SetEntityOwner(hint, -1);
-				}
-			}
-			
-			ArrayList playerList = new ArrayList();
-			CollectPlayers(playerList, TFTeam_Invaders, COLLECT_ONLY_LIVING_PLAYERS);
-			bool bShouldAnnounceLastEngineerBotDeath = CTFPlayer(player).HasAttribute(TELEPORT_TO_HINT);
-			if (bShouldAnnounceLastEngineerBotDeath)
-			{
-				for (int i = 0; i < playerList.Length; ++i)
-				{
-					if (playerList.Get(i) != player && TF2_GetPlayerClass(playerList.Get(i)) == TFClass_Engineer)
-					{
-						bShouldAnnounceLastEngineerBotDeath = false;
-						break;
-					}
-				}
-			}
-			delete playerList;
-			
-			if (bShouldAnnounceLastEngineerBotDeath)
-			{
-				bool bEngineerTeleporterInTheWorld = false;
-				int obj = -1;
-				while ((obj = FindEntityByClassname(obj, "obj_teleporter")) != -1)
-				{
-					if (TF2_GetObjectType(obj) == TFObject_Teleporter && view_as<TFTeam>(GetEntProp(obj, Prop_Data, "m_iTeamNum")) == TFTeam_Invaders)
-					{
-						bEngineerTeleporterInTheWorld = true;
-					}
-				}
-				
-				if (bEngineerTeleporterInTheWorld)
-				{
-					BroadcastSound(255, "Announcer.MVM_An_Engineer_Bot_Is_Dead_But_Not_Teleporter");
-				}
-				else
-				{
-					BroadcastSound(255, "Announcer.MVM_An_Engineer_Bot_Is_Dead");
-				}
-			}
-		}
-		
-		if (CTFPlayer(player).IsInASquad())
-		{
-			CTFPlayer(player).LeaveSquad();
-		}
-		
-		CTFPlayer(player).StopIdleSound();
 	}
 	
 	return MRES_Ignored;

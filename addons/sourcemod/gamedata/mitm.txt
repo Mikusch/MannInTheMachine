@@ -384,11 +384,6 @@
 				"linux"		"21"
 				"windows"	"20"
 			}
-			"CBaseEntity::Event_Killed"
-			{
-				"linux"		"69"
-				"windows"	"68"
-			}
 			"CBaseCombatCharacter::ShouldGib"
 			{
 				"linux"		"297"
@@ -1209,20 +1204,6 @@
 				"arguments"
 				{
 					"pInfo"
-					{
-						"type"	"objectptr"
-					}
-				}
-			}
-			"CBaseEntity::Event_Killed"
-			{
-				"offset"	"CBaseEntity::Event_Killed"
-				"hooktype"	"entity"
-				"return"	"void"
-				"this"		"entity"
-				"arguments"
-				{
-					"info"
 					{
 						"type"	"objectptr"
 					}

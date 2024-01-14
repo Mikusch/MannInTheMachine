@@ -18,8 +18,21 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+#define COMMAND_MAX_LENGTH	512
+
+enum struct ConVarData
+{
+	char szName[COMMAND_MAX_LENGTH];
+	char szValue[COMMAND_MAX_LENGTH];
+	char szInitialValue[COMMAND_MAX_LENGTH];
+}
+
+static StringMap g_hConVars;
+
 void ConVars_Init()
 {
+	g_hConVars = new StringMap();
+	
 	CreateConVar("sm_mitm_version", PLUGIN_VERSION, "Plugin version.", FCVAR_SPONLY | FCVAR_REPLICATED | FCVAR_NOTIFY | FCVAR_DONTRECORD);
 	sm_mitm_enabled = CreateConVar("sm_mitm_enabled", "1", "Whether the plugin is enabled.");
 	sm_mitm_enabled.AddChangeHook(ConVarChanged_PluginEnabled);
@@ -41,7 +54,6 @@ void ConVars_Init()
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");
 	tf_deploying_bomb_time = FindConVar("tf_deploying_bomb_time");
 	tf_mvm_defenders_team_size = FindConVar("tf_mvm_defenders_team_size");
-	tf_mvm_max_connected_players = FindConVar("tf_mvm_max_connected_players");
 	tf_mvm_miniboss_scale = FindConVar("tf_mvm_miniboss_scale");
 	tf_mvm_min_players_to_start = FindConVar("tf_mvm_min_players_to_start");
 	tf_mvm_bot_allow_flag_carrier_to_fight = FindConVar("tf_mvm_bot_allow_flag_carrier_to_fight");
@@ -65,12 +77,123 @@ void ConVars_Init()
 	sv_stepsize = FindConVar("sv_stepsize");
 	phys_pushscale = FindConVar("phys_pushscale");
 	
-	// TODO: Add proper convar system to set convars but reset them once the gamemode unloads.
-	tf_mvm_max_connected_players.IntValue = MaxClients;
+	char szValue[12];
+	IntToString(MaxClients, szValue, sizeof(szValue));
+	ConVars_AddConVar("tf_mvm_max_connected_players", szValue);
+}
+
+void ConVars_Toggle(bool bEnable)
+{
+	if (bEnable)
+	{
+		sm_mitm_custom_upgrades_file.AddChangeHook(ConVarChanged_CustomUpgradesFile);
+		sm_mitm_party_enabled.AddChangeHook(ConVarChanged_PartyEnabled);
+		tf_mvm_min_players_to_start.AddChangeHook(ConVarChanged_MinPlayersToStart);
+	}
+	else
+	{
+		sm_mitm_custom_upgrades_file.RemoveChangeHook(ConVarChanged_CustomUpgradesFile);
+		sm_mitm_party_enabled.RemoveChangeHook(ConVarChanged_PartyEnabled);
+		tf_mvm_min_players_to_start.RemoveChangeHook(ConVarChanged_MinPlayersToStart);
+	}
 	
-	sm_mitm_custom_upgrades_file.AddChangeHook(ConVarChanged_CustomUpgradesFile);
-	sm_mitm_party_enabled.AddChangeHook(ConVarChanged_PartyEnabled);
-	tf_mvm_min_players_to_start.AddChangeHook(ConVarChanged_MinPlayersToStart);
+	StringMapSnapshot hSnapshot = g_hConVars.Snapshot();
+	for (int i = 0; i < hSnapshot.Length; i++)
+	{
+		int nSize = hSnapshot.KeyBufferSize(i);
+		char[] szKey = new char[nSize];
+		hSnapshot.GetKey(i, szKey, nSize);
+		
+		if (bEnable)
+		{
+			ConVars_Enable(szKey);
+		}
+		else
+		{
+			ConVars_Disable(szKey);
+		}
+	}
+	delete hSnapshot;
+}
+
+static void ConVars_AddConVar(const char[] szName, const char[] szValue)
+{
+	ConVar hConVar = FindConVar(szName);
+	if (hConVar)
+	{
+		ConVarData data;
+		strcopy(data.szName, sizeof(data.szName), szName);
+		strcopy(data.szValue, sizeof(data.szValue), szValue);
+		g_hConVars.SetArray(szName, data, sizeof(data));
+		
+		if (g_bEnabled)
+		{
+			ConVars_Enable(szName);
+		}
+	}
+	else
+	{
+		LogError("Failed to find convar with name %s", szName);
+	}
+}
+
+static void ConVars_Enable(const char[] szName)
+{
+	ConVarData data;
+	if (g_hConVars.GetArray(szName, data, sizeof(data)))
+	{
+		ConVar hConVar = FindConVar(data.szName);
+		
+		// Store the current value so we can later reset the convar to it
+		hConVar.GetString(data.szInitialValue, sizeof(data.szInitialValue));
+		g_hConVars.SetArray(szName, data, sizeof(data));
+		
+		// Update the current value
+		hConVar.SetString(data.szValue);
+		hConVar.AddChangeHook(ConVarChanged_OnTrackedConVarChanged);
+	}
+	else
+	{
+		LogError("Failed to enable convar with name %s", szName);
+	}
+}
+
+static void ConVars_Disable(const char[] szName)
+{
+	ConVarData data;
+	if (g_hConVars.GetArray(szName, data, sizeof(data)))
+	{
+		ConVar hConVar = FindConVar(data.szName);
+		
+		g_hConVars.SetArray(szName, data, sizeof(data));
+		
+		// Restore the convar value
+		hConVar.RemoveChangeHook(ConVarChanged_OnTrackedConVarChanged);
+		hConVar.SetString(data.szInitialValue);
+	}
+	else
+	{
+		LogError("Failed to disable convar with name %s", szName);
+	}
+}
+
+static void ConVarChanged_OnTrackedConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	char[] szName = new char[sizeof(ConVarData::szName)];
+	convar.GetName(szName, sizeof(ConVarData::szName));
+	
+	ConVarData data;
+	if (g_hConVars.GetArray(szName, data, sizeof(data)))
+	{
+		if (!StrEqual(newValue, data.szValue))
+		{
+			strcopy(data.szInitialValue, sizeof(data.szInitialValue), newValue);
+			g_hConVars.SetArray(szName, data, sizeof(data));
+			
+			// Restore our wanted value
+			convar.SetString(data.szValue);
+		}
+	}
 }
 
 static void ConVarChanged_PluginEnabled(ConVar convar, const char[] oldValue, const char[] newValue)

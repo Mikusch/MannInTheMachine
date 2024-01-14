@@ -36,7 +36,7 @@
 #include <mitm>
 
 // Uncomment this for diagnostic messages in server console (very verbose)
-#define DEBUG
+//#define DEBUG
 
 #define PLUGIN_VERSION	"1.0.0"
 
@@ -75,7 +75,6 @@ ConVar tf_avoidteammates_pushaway;
 ConVar tf_deploying_bomb_delay_time;
 ConVar tf_deploying_bomb_time;
 ConVar tf_mvm_defenders_team_size;
-ConVar tf_mvm_max_connected_players;
 ConVar tf_mvm_miniboss_scale;
 ConVar tf_mvm_min_players_to_start;
 ConVar tf_mvm_bot_allow_flag_carrier_to_fight;
@@ -205,6 +204,14 @@ public void OnPluginStart()
 	{
 		CTFPlayer(client).Init();
 	}
+}
+
+public void OnPluginEnd()
+{
+	if (!g_bEnabled)
+		return;
+	
+	TogglePlugin(false);
 }
 
 public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int maxlen)
@@ -591,6 +598,7 @@ void TogglePlugin(bool bEnable)
 {
 	g_bEnabled = bEnable;
 	
+	ConVars_Toggle(bEnable);
 	DHooks_Toggle(bEnable);
 	SDKHooks_Toggle(bEnable);
 	

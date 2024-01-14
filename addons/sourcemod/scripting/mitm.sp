@@ -36,7 +36,7 @@
 #include <mitm>
 
 // Uncomment this for diagnostic messages in server console (very verbose)
-// #define DEBUG
+#define DEBUG
 
 #define PLUGIN_VERSION	"1.0.0"
 
@@ -46,6 +46,7 @@ CTFObjectiveResource g_pObjectiveResource = view_as<CTFObjectiveResource>(INVALI
 CTFGameRules g_pGameRules = view_as<CTFGameRules>(INVALID_ENT_REFERENCE);
 
 // Other globals
+bool g_bEnabled;
 Handle g_hWarningHudSync;
 bool g_bInWaitingForPlayers;
 bool g_bMiniBossQueue;
@@ -54,6 +55,7 @@ bool g_bAllowTeamChange;	// Bypass CTFGameRules::GetTeamAssignmentOverride?
 bool g_bInEndlessRollEscalation;
 
 // Plugin ConVars
+ConVar sm_mitm_enabled;
 ConVar sm_mitm_developer;
 ConVar sm_mitm_custom_upgrades_file;
 ConVar sm_mitm_spawn_hurry_time;
@@ -152,7 +154,6 @@ public void OnPluginStart()
 	LoadTranslations("common.phrases");
 	LoadTranslations("mitm.phrases");
 	
-	// Init bot actions
 	CTFBotMainAction.Init();
 	CTFBotDead.Init();
 	CTFBotDeliverFlag.Init();
@@ -171,14 +172,12 @@ public void OnPluginStart()
 	CTFBotTaunt.Init();
 	CTFBotUseItem.Init();
 	
-	// Install player action factory
 	CEntityFactory hEntityFactory = new CEntityFactory("player");
 	hEntityFactory.DeriveFromClass("player");
 	hEntityFactory.AttachNextBot(CreateNextBotPlayer);
 	hEntityFactory.SetInitialActionFactory(CTFBotMainAction.GetFactory());
 	hEntityFactory.Install();
 	
-	// Init plugin functions
 	Console_Init();
 	ConVars_Init();
 	Events_Init();
@@ -186,16 +185,16 @@ public void OnPluginStart()
 	Hooks_Init();
 	ClientPrefs_Init();
 	Party_Init();
+	SDKHooks_Init();
 	
-	GameData hGameData = new GameData("mitm");
-	if (hGameData)
+	GameData hGameConf = new GameData("mitm");
+	if (hGameConf)
 	{
-		// Init plugin functions requiring gamedata
-		DHooks_Init(hGameData);
-		Offsets_Init(hGameData);
-		SDKCalls_Init(hGameData);
+		DHooks_Init(hGameConf);
+		Offsets_Init(hGameConf);
+		SDKCalls_Init(hGameConf);
 		
-		delete hGameData;
+		delete hGameConf;
 	}
 	else
 	{
@@ -204,23 +203,7 @@ public void OnPluginStart()
 	
 	for (int client = 1; client <= MaxClients; client++)
 	{
-		// Init player properties
 		CTFPlayer(client).Init();
-		
-		if (IsClientInGame(client))
-		{
-			OnClientPutInServer(client);
-		}
-	}
-	
-	int entity = -1;
-	while ((entity = FindEntityByClassname(entity, "*")) != -1)
-	{
-		char classname[64];
-		if (GetEntityClassname(entity, classname, sizeof(classname)))
-		{
-			OnEntityCreated(entity, classname);
-		}
 	}
 }
 
@@ -259,19 +242,18 @@ public void OnMapStart()
 
 public void OnConfigsExecuted()
 {
-	char path[PLATFORM_MAX_PATH];
-	sm_mitm_custom_upgrades_file.GetString(path, sizeof(path));
-	
-	if (path[0] && g_pGameRules.IsValid())
+	if (g_bEnabled != sm_mitm_enabled.BoolValue)
 	{
-		g_pGameRules.SetCustomUpgradesFile(path);
+		TogglePlugin(sm_mitm_enabled.BoolValue);
 	}
 }
 
 public void OnClientPutInServer(int client)
 {
+	if (!g_bEnabled)
+		return;
+	
 	DHooks_OnClientPutInServer(client);
-	SDKHooks_OnClientPutInServer(client);
 	CBaseNPC_HookEventKilled(client);
 	
 	CTFPlayer(client).OnClientPutInServer();
@@ -302,14 +284,20 @@ public void OnClientDisconnect(int client)
 
 public void OnClientCookiesCached(int client)
 {
+	if (!g_bEnabled)
+		return;
+	
 	ClientPrefs_RefreshQueue(client);
 	ClientPrefs_RefreshPreferences(client);
 }
 
 public void OnEntityCreated(int entity, const char[] classname)
 {
+	if (!g_bEnabled)
+		return;
+	
 	DHooks_OnEntityCreated(entity, classname);
-	SDKHooks_OnEntityCreated(entity, classname);
+	SDKHooks_HookEntity(entity, classname, true);
 	
 	// Store the references of entities that should only exist once
 	if (StrEqual(classname, "info_populator"))
@@ -597,6 +585,50 @@ public Action CBaseCombatCharacter_EventKilled(int entity, int &attacker, int &i
 	}
 	
 	return Plugin_Continue;
+}
+
+void TogglePlugin(bool bEnable)
+{
+	g_bEnabled = bEnable;
+	
+	DHooks_Toggle(bEnable);
+	SDKHooks_Toggle(bEnable);
+	
+	if (bEnable)
+	{
+		for (int client = 1; client <= MaxClients; client++)
+		{
+			if (!IsClientInGame(client))
+				continue;
+			
+			OnClientPutInServer(client);
+		}
+		
+		int entity = -1;
+		while ((entity = FindEntityByClassname(entity, "*")) != -1)
+		{
+			char szClassName[64];
+			if (GetEntityClassname(entity, szClassName, sizeof(szClassName)))
+			{
+				OnEntityCreated(entity, szClassName);
+			}
+		}
+		
+		char szFilePath[PLATFORM_MAX_PATH];
+		sm_mitm_custom_upgrades_file.GetString(szFilePath, sizeof(szFilePath));
+		
+		if (szFilePath[0] && g_pGameRules.IsValid())
+		{
+			g_pGameRules.SetCustomUpgradesFile(szFilePath);
+		}
+	}
+	else
+	{
+		if (g_pGameRules.IsValid())
+		{
+			g_pGameRules.SetCustomUpgradesFile(DEFAULT_UPGRADES_FILE);
+		}
+	}
 }
 
 static INextBot CreateNextBotPlayer(Address entity)

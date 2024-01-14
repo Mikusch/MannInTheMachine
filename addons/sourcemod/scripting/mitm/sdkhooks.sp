@@ -18,28 +18,88 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static bool g_bHasActiveTeleporterPre;
-
-void SDKHooks_OnClientPutInServer(int client)
+enum struct SDKHookData
 {
-	SDKHook(client, SDKHook_OnTakeDamageAlive, SDKHookCB_Client_OnTakeDamageAlive);
+	char classname[64];
+	SDKHookType type;
+	SDKHookCB callback;
 }
 
-void SDKHooks_OnEntityCreated(int entity, const char[] classname)
+static bool g_bHasActiveTeleporterPre;
+static ArrayList g_sdkHookData;
+
+void SDKHooks_Init()
 {
-	if (StrEqual(classname, "tf_projectile_pipe_remote"))
+	g_sdkHookData = new ArrayList(sizeof(SDKHookData));
+	
+	SDKHooks_AddHook("player", SDKHook_OnTakeDamageAlive, SDKHookCB_Client_OnTakeDamageAlive);
+	SDKHooks_AddHook("tf_projectile_pipe_remote", SDKHook_SetTransmit, SDKHookCB_ProjectilePipeRemote_SetTransmit);
+	SDKHooks_AddHook("bot_hint_engineer_nest", SDKHook_Think, SDKHookCB_BotHintEngineerNest_Think);
+	SDKHooks_AddHook("bot_hint_engineer_nest", SDKHook_ThinkPost, SDKHookCB_BotHintEngineerNest_ThinkPost);
+	SDKHooks_AddHook("entity_medigun_shield", SDKHook_OnTakeDamagePost, SDKHookCB_EntityMedigunShield_OnTakeDamagePost);
+}
+
+void SDKHooks_Toggle(bool bEnable)
+{
+	for (int entity = 0; entity < GetMaxEntities(); entity++)
 	{
-		SDKHook(entity, SDKHook_SetTransmit, SDKHookCB_ProjectilePipeRemote_SetTransmit);
+		if (!IsValidEntity(entity))
+			continue;
+		
+		char classname[64];
+		if (!GetEntityClassname(entity, classname, sizeof(classname)))
+			continue;
+		
+		if (bEnable)
+		{
+			SDKHooks_HookEntity(entity, classname, true);
+		}
+		else
+		{
+			SDKHooks_HookEntity(entity, classname, false);
+		}
 	}
-	else if (StrEqual(classname, "bot_hint_engineer_nest"))
+}
+
+void SDKHooks_HookEntity(int entity, const char[] classname, bool bHook)
+{
+	int index = g_sdkHookData.FindString(classname, SDKHookData::classname);
+	if (index == -1)
+		return;
+	
+	for (int i = index; i < g_sdkHookData.Length; i++)
 	{
-		SDKHook(entity, SDKHook_Think, SDKHookCB_BotHintEngineerNest_Think);
-		SDKHook(entity, SDKHook_ThinkPost, SDKHookCB_BotHintEngineerNest_ThinkPost);
+		SDKHookData data;
+		if (g_sdkHookData.GetArray(i, data) && StrEqual(data.classname, classname))
+		{
+			if (bHook)
+			{
+				SDKHook(entity, data.type, data.callback);
+				
+#if defined DEBUG
+				LogMessage("[SDKHooks] Hooking %s", data.classname);
+#endif
+			}
+			else
+			{
+				SDKUnhook(entity, data.type, data.callback);
+				
+#if defined DEBUG
+				LogMessage("[SDKHooks] Unhooking %s", data.classname);
+#endif
+			}
+		}
 	}
-	else if (StrEqual(classname, "entity_medigun_shield"))
-	{
-		SDKHook(entity, SDKHook_OnTakeDamagePost, SDKHookCB_EntityMedigunShield_OnTakeDamagePost);
-	}
+}
+
+static void SDKHooks_AddHook(const char[] classname, SDKHookType type, SDKHookCB callback)
+{
+	SDKHookData data;
+	strcopy(data.classname, sizeof(data.classname), classname);
+	data.type = type;
+	data.callback = callback;
+	
+	g_sdkHookData.PushArray(data);
 }
 
 static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)

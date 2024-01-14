@@ -21,6 +21,8 @@
 void ConVars_Init()
 {
 	CreateConVar("sm_mitm_version", PLUGIN_VERSION, "Plugin version.", FCVAR_SPONLY | FCVAR_REPLICATED | FCVAR_NOTIFY | FCVAR_DONTRECORD);
+	sm_mitm_enabled = CreateConVar("sm_mitm_enabled", "1", "Whether the plugin is enabled.");
+	sm_mitm_enabled.AddChangeHook(ConVarChanged_PluginEnabled);
 	sm_mitm_developer = CreateConVar("sm_mitm_developer", "0", "Toggle plugin developer mode.");
 	sm_mitm_custom_upgrades_file = CreateConVar("sm_mitm_custom_upgrades_file", "", "Path to custom upgrades file, set to an empty string to use the default.");
 	sm_mitm_spawn_hurry_time = CreateConVar("sm_mitm_spawn_hurry_time", "10", "The base time invaders have to leave their spawn, in seconds.");
@@ -69,6 +71,14 @@ void ConVars_Init()
 	sm_mitm_custom_upgrades_file.AddChangeHook(ConVarChanged_CustomUpgradesFile);
 	sm_mitm_party_enabled.AddChangeHook(ConVarChanged_PartyEnabled);
 	tf_mvm_min_players_to_start.AddChangeHook(ConVarChanged_MinPlayersToStart);
+}
+
+static void ConVarChanged_PluginEnabled(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	if (g_bEnabled != convar.BoolValue)
+	{
+		TogglePlugin(convar.BoolValue);
+	}
 }
 
 static void ConVarChanged_CustomUpgradesFile(ConVar convar, const char[] oldValue, const char[] newValue)

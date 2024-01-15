@@ -407,25 +407,27 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	if (!IsClientInGame(client) || !IsPlayerAlive(client) || TF2_GetClientTeam(client) != TFTeam_Invaders)
 		return Plugin_Continue;
 	
-	if (CTFPlayer(client).m_inputButtons != 0)
+	CTFPlayer player = CTFPlayer(client);
+	
+	if (player.m_inputButtons != 0)
 	{
-		buttons |= CTFPlayer(client).m_inputButtons;
-		CTFPlayer(client).m_inputButtons = 0;
+		buttons |= player.m_inputButtons;
+		player.m_inputButtons = 0;
 	}
 	
-	if (!CTFPlayer(client).m_fireButtonTimer.IsElapsed())
+	if (!player.m_fireButtonTimer.IsElapsed())
 		buttons |= IN_ATTACK;
 	
-	if (!CTFPlayer(client).m_altFireButtonTimer.IsElapsed())
+	if (!player.m_altFireButtonTimer.IsElapsed())
 		buttons |= IN_ATTACK2;
 	
-	if (!CTFPlayer(client).m_specialFireButtonTimer.IsElapsed())
+	if (!player.m_specialFireButtonTimer.IsElapsed())
 		buttons |= IN_ATTACK3;
 	
-	if (CTFPlayer(client).HasAttribute(ALWAYS_FIRE_WEAPON))
+	if (player.HasAttribute(ALWAYS_FIRE_WEAPON))
 		buttons |= IN_ATTACK;
 	
-	if (CTFPlayer(client).ShouldAutoJump())
+	if (player.ShouldAutoJump())
 	{
 		buttons |= IN_JUMP;
 		SetEntProp(client, Prop_Data, "m_nOldButtons", GetEntProp(client, Prop_Data, "m_nOldButtons") & ~IN_JUMP);
@@ -444,17 +446,19 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 	if (!IsClientInGame(client) || TF2_GetClientTeam(client) != TFTeam_Invaders)
 		return;
 	
-	if (CTFPlayer(client).HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
+	CTFPlayer player = CTFPlayer(client);
+	
+	if (player.HasAttribute(ALWAYS_CRIT) && !TF2_IsPlayerInCondition(client, TFCond_CritCanteen))
 	{
 		TF2_AddCondition(client, TFCond_CritCanteen);
 	}
 	
-	if (CTFPlayer(client).IsInASquad())
+	if (player.IsInASquad())
 	{
-		if (CTFPlayer(client).GetSquad().GetMemberCount() <= 1 || CTFPlayer(client).GetSquad().GetLeader() == -1)
+		if (player.GetSquad().GetMemberCount() <= 1 || player.GetSquad().GetLeader() == -1)
 		{
 			// squad has collapsed - disband it
-			CTFPlayer(client).LeaveSquad();
+			player.LeaveSquad();
 		}
 	}
 	
@@ -686,16 +690,18 @@ static void ApplyRobotWeaponRestrictions(int client, int &buttons)
 	if (myWeapon == -1)
 		return;
 	
-	if (CTFPlayer(client).IsBarrageAndReloadWeapon(myWeapon))
+	CTFPlayer player = CTFPlayer(client);
+	
+	if (player.IsBarrageAndReloadWeapon(myWeapon))
 	{
-		if (CTFPlayer(client).HasAttribute(HOLD_FIRE_UNTIL_FULL_RELOAD) || tf_bot_always_full_reload.BoolValue)
+		if (player.HasAttribute(HOLD_FIRE_UNTIL_FULL_RELOAD) || tf_bot_always_full_reload.BoolValue)
 		{
 			if (SDKCall_CBaseCombatWeapon_Clip1(myWeapon) <= 0)
 			{
-				CTFPlayer(client).m_isWaitingForFullReload = true;
+				player.m_isWaitingForFullReload = true;
 			}
 			
-			if (CTFPlayer(client).m_isWaitingForFullReload)
+			if (player.m_isWaitingForFullReload)
 			{
 				if (SDKCall_CBaseCombatWeapon_Clip1(myWeapon) < TF2Util_GetWeaponMaxClip(myWeapon))
 				{
@@ -706,7 +712,7 @@ static void ApplyRobotWeaponRestrictions(int client, int &buttons)
 				UnlockWeapon(myWeapon);
 				
 				// we are fully reloaded
-				CTFPlayer(client).m_isWaitingForFullReload = false;
+				player.m_isWaitingForFullReload = false;
 			}
 		}
 	}
@@ -720,24 +726,24 @@ static void ApplyRobotWeaponRestrictions(int client, int &buttons)
 		int index = attributes.FindValue(144); // set_weapon_mode
 		if (index != -1 && attributes.Get(index, 1) == float(MEDIGUN_RESIST))
 		{
-			bool preferBullets = CTFPlayer(client).HasAttribute(PREFER_VACCINATOR_BULLETS);
-			bool preferBlast = CTFPlayer(client).HasAttribute(PREFER_VACCINATOR_BLAST);
-			bool preferFire = CTFPlayer(client).HasAttribute(PREFER_VACCINATOR_FIRE);
+			bool bPreferBullets = player.HasAttribute(PREFER_VACCINATOR_BULLETS);
+			bool bPreferBlast = player.HasAttribute(PREFER_VACCINATOR_BLAST);
+			bool bPreferFire = player.HasAttribute(PREFER_VACCINATOR_FIRE);
 			
-			if (preferBullets)
+			if (bPreferBullets)
 			{
 				SetEntProp(myWeapon, Prop_Send, "m_nChargeResistType", MEDIGUN_CHARGE_BULLET_RESIST + MEDIGUN_CHARGE_BULLET_RESIST);
 			}
-			else if (preferBlast)
+			else if (bPreferBlast)
 			{
 				SetEntProp(myWeapon, Prop_Send, "m_nChargeResistType", MEDIGUN_CHARGE_BLAST_RESIST + MEDIGUN_CHARGE_BULLET_RESIST);
 			}
-			else if (preferFire)
+			else if (bPreferFire)
 			{
 				SetEntProp(myWeapon, Prop_Send, "m_nChargeResistType", MEDIGUN_CHARGE_FIRE_RESIST + MEDIGUN_CHARGE_BULLET_RESIST);
 			}
 			
-			if (preferBullets || preferBlast || preferFire)
+			if (bPreferBullets || bPreferBlast || bPreferFire)
 			{
 				delete attributes;
 				
@@ -755,17 +761,17 @@ static void ApplyRobotWeaponRestrictions(int client, int &buttons)
 		return;
 	}
 	
-	static bool isAttackBlocked[MAXPLAYERS + 1];
+	static bool s_bIsAttackBlocked[MAXPLAYERS + 1];
 	
-	if (CTFPlayer(client).MyNextBotPointer().GetIntentionInterface().ShouldAttack(INVALID_ENT_REFERENCE) == ANSWER_NO && !CTFPlayer(client).HasAttribute(ALWAYS_FIRE_WEAPON))
+	if (player.MyNextBotPointer().GetIntentionInterface().ShouldAttack(INVALID_ENT_REFERENCE) == ANSWER_NO && !player.HasAttribute(ALWAYS_FIRE_WEAPON))
 	{
-		isAttackBlocked[client] = true;
+		s_bIsAttackBlocked[client] = true;
 		
 		LockWeapon(client, myWeapon, buttons);
 		return;
 	}
 	
-	if (isAttackBlocked[client])
+	if (s_bIsAttackBlocked[client])
 	{
 		// The active weapon might have switched, remove attributes from all
 		int numWeapons = GetEntPropArraySize(client, Prop_Send, "m_hMyWeapons");
@@ -778,6 +784,6 @@ static void ApplyRobotWeaponRestrictions(int client, int &buttons)
 			UnlockWeapon(weapon);
 		}
 		
-		isAttackBlocked[client] = false;
+		s_bIsAttackBlocked[client] = false;
 	}
 }

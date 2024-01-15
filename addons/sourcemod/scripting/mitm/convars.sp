@@ -18,13 +18,11 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define COMMAND_MAX_LENGTH	512
-
 enum struct ConVarData
 {
-	char szName[COMMAND_MAX_LENGTH];
-	char szValue[COMMAND_MAX_LENGTH];
-	char szInitialValue[COMMAND_MAX_LENGTH];
+	char name[COMMAND_MAX_LENGTH];
+	char value[COMMAND_MAX_LENGTH];
+	char prev_value[COMMAND_MAX_LENGTH];
 }
 
 static StringMap g_hConVars;
@@ -77,9 +75,9 @@ void ConVars_Init()
 	sv_stepsize = FindConVar("sv_stepsize");
 	phys_pushscale = FindConVar("phys_pushscale");
 	
-	char szValue[12];
-	IntToString(MaxClients, szValue, sizeof(szValue));
-	ConVars_AddConVar("tf_mvm_max_connected_players", szValue);
+	char value[12];
+	IntToString(MaxClients, value, sizeof(value));
+	ConVars_AddConVar("tf_mvm_max_connected_players", value);
 }
 
 void ConVars_Toggle(bool bEnable)
@@ -97,101 +95,100 @@ void ConVars_Toggle(bool bEnable)
 		tf_mvm_min_players_to_start.RemoveChangeHook(ConVarChanged_MinPlayersToStart);
 	}
 	
-	StringMapSnapshot hSnapshot = g_hConVars.Snapshot();
-	for (int i = 0; i < hSnapshot.Length; i++)
+	StringMapSnapshot snapshot = g_hConVars.Snapshot();
+	for (int i = 0; i < snapshot.Length; i++)
 	{
-		int nSize = hSnapshot.KeyBufferSize(i);
-		char[] szKey = new char[nSize];
-		hSnapshot.GetKey(i, szKey, nSize);
+		int size = snapshot.KeyBufferSize(i);
+		char[] key = new char[size];
+		snapshot.GetKey(i, key, size);
 		
 		if (bEnable)
 		{
-			ConVars_Enable(szKey);
+			ConVars_Enable(key);
 		}
 		else
 		{
-			ConVars_Disable(szKey);
+			ConVars_Disable(key);
 		}
 	}
-	delete hSnapshot;
+	delete snapshot;
 }
 
-static void ConVars_AddConVar(const char[] szName, const char[] szValue)
+static void ConVars_AddConVar(const char[] name, const char[] value)
 {
-	ConVar hConVar = FindConVar(szName);
-	if (hConVar)
+	ConVar convar = FindConVar(name);
+	if (convar)
 	{
 		ConVarData data;
-		strcopy(data.szName, sizeof(data.szName), szName);
-		strcopy(data.szValue, sizeof(data.szValue), szValue);
-		g_hConVars.SetArray(szName, data, sizeof(data));
+		strcopy(data.name, sizeof(data.name), name);
+		strcopy(data.value, sizeof(data.value), value);
+		g_hConVars.SetArray(name, data, sizeof(data));
 		
 		if (g_bEnabled)
 		{
-			ConVars_Enable(szName);
+			ConVars_Enable(name);
 		}
 	}
 	else
 	{
-		LogError("Failed to find convar with name %s", szName);
+		LogError("Failed to find convar: %s", name);
 	}
 }
 
-static void ConVars_Enable(const char[] szName)
+static void ConVars_Enable(const char[] name)
 {
 	ConVarData data;
-	if (g_hConVars.GetArray(szName, data, sizeof(data)))
+	if (g_hConVars.GetArray(name, data, sizeof(data)))
 	{
-		ConVar hConVar = FindConVar(data.szName);
+		ConVar convar = FindConVar(data.name);
 		
 		// Store the current value so we can later reset the convar to it
-		hConVar.GetString(data.szInitialValue, sizeof(data.szInitialValue));
-		g_hConVars.SetArray(szName, data, sizeof(data));
+		convar.GetString(data.prev_value, sizeof(data.prev_value));
+		g_hConVars.SetArray(name, data, sizeof(data));
 		
 		// Update the current value
-		hConVar.SetString(data.szValue);
-		hConVar.AddChangeHook(ConVarChanged_OnTrackedConVarChanged);
+		convar.SetString(data.value);
+		convar.AddChangeHook(ConVarChanged_OnTrackedConVarChanged);
 	}
 	else
 	{
-		LogError("Failed to enable convar with name %s", szName);
+		LogError("Failed to enable convar: %s", name);
 	}
 }
 
-static void ConVars_Disable(const char[] szName)
+static void ConVars_Disable(const char[] name)
 {
 	ConVarData data;
-	if (g_hConVars.GetArray(szName, data, sizeof(data)))
+	if (g_hConVars.GetArray(name, data, sizeof(data)))
 	{
-		ConVar hConVar = FindConVar(data.szName);
-		
-		g_hConVars.SetArray(szName, data, sizeof(data));
+		g_hConVars.SetArray(name, data, sizeof(data));
 		
 		// Restore the convar value
-		hConVar.RemoveChangeHook(ConVarChanged_OnTrackedConVarChanged);
-		hConVar.SetString(data.szInitialValue);
+		ConVar convar = FindConVar(data.name);
+		convar.RemoveChangeHook(ConVarChanged_OnTrackedConVarChanged);
+		convar.SetString(data.prev_value);
 	}
 	else
 	{
-		LogError("Failed to disable convar with name %s", szName);
+		LogError("Failed to disable convar: %s", name);
 	}
 }
 
 static void ConVarChanged_OnTrackedConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
 {
-	char[] szName = new char[sizeof(ConVarData::szName)];
-	convar.GetName(szName, sizeof(ConVarData::szName));
+	char[] name = new char[sizeof(ConVarData::name)];
+	convar.GetName(name, sizeof(ConVarData::name));
 	
 	ConVarData data;
-	if (g_hConVars.GetArray(szName, data, sizeof(data)))
+	if (g_hConVars.GetArray(name, data, sizeof(data)))
 	{
-		if (!StrEqual(newValue, data.szValue))
+		if (!StrEqual(newValue, data.value))
 		{
-			strcopy(data.szInitialValue, sizeof(data.szInitialValue), newValue);
-			g_hConVars.SetArray(szName, data, sizeof(data));
+			strcopy(data.prev_value, sizeof(data.prev_value), newValue);
+			g_hConVars.SetArray(name, data, sizeof(data));
 			
 			// Restore our wanted value
-			convar.SetString(data.szValue);
+			convar.SetString(data.value);
 		}
 	}
 }
@@ -209,7 +206,7 @@ static void ConVarChanged_CustomUpgradesFile(ConVar convar, const char[] oldValu
 	if (!g_pGameRules.IsValid())
 		return;
 	
-	g_pGameRules.SetCustomUpgradesFile(newValue[0] ? newValue : "scripts/items/mvm_upgrades.txt");
+	g_pGameRules.SetCustomUpgradesFile(newValue[0] ? newValue : DEFAULT_UPGRADES_FILE);
 }
 
 static void ConVarChanged_PartyEnabled(ConVar convar, const char[] oldValue, const char[] newValue)

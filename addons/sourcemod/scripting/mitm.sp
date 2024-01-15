@@ -36,7 +36,7 @@
 #include <mitm>
 
 // Uncomment this for diagnostic messages in server console (very verbose)
-//#define DEBUG
+// #define DEBUG
 
 #define PLUGIN_VERSION	"1.0.0"
 
@@ -47,6 +47,7 @@ CTFGameRules g_pGameRules = view_as<CTFGameRules>(INVALID_ENT_REFERENCE);
 
 // Other globals
 bool g_bEnabled;
+CEntityFactory g_hEntityFactory;
 Handle g_hWarningHudSync;
 bool g_bInWaitingForPlayers;
 bool g_bMiniBossQueue;
@@ -153,11 +154,11 @@ public void OnPluginStart()
 	LoadTranslations("common.phrases");
 	LoadTranslations("mitm.phrases");
 	
-	CTFBotMainAction.Init();
 	CTFBotDead.Init();
 	CTFBotDeliverFlag.Init();
 	CTFBotEscortSquadLeader.Init();
 	CTFBotFetchFlag.Init();
+	CTFBotMainAction.Init();
 	CTFBotMedicHeal.Init();
 	CTFBotMissionSuicideBomber.Init();
 	CTFBotMvMDeployBomb.Init();
@@ -171,18 +172,17 @@ public void OnPluginStart()
 	CTFBotTaunt.Init();
 	CTFBotUseItem.Init();
 	
-	CEntityFactory hEntityFactory = new CEntityFactory("player");
-	hEntityFactory.DeriveFromClass("player");
-	hEntityFactory.AttachNextBot(CreateNextBotPlayer);
-	hEntityFactory.SetInitialActionFactory(CTFBotMainAction.GetFactory());
-	hEntityFactory.Install();
+	g_hEntityFactory = new CEntityFactory("player");
+	g_hEntityFactory.DeriveFromClass("player");
+	g_hEntityFactory.AttachNextBot(CreateNextBotPlayer);
+	g_hEntityFactory.SetInitialActionFactory(CTFBotMainAction.GetFactory());
 	
+	ClientPrefs_Init();
 	Console_Init();
 	ConVars_Init();
 	Events_Init();
 	Forwards_Init();
 	Hooks_Init();
-	ClientPrefs_Init();
 	Party_Init();
 	SDKHooks_Init();
 	
@@ -273,6 +273,9 @@ public void OnClientPutInServer(int client)
 
 public void OnClientDisconnect(int client)
 {
+	if (!g_bEnabled)
+		return;
+	
 	if (!IsClientInGame(client))
 		return;
 	
@@ -328,6 +331,9 @@ public void OnEntityDestroyed(int entity)
 
 public void OnGameFrame()
 {
+	if (!g_bEnabled)
+		return;
+	
 	// alternate between robot and giant queue every 5 seconds
 	if (GetGameTime() - g_flLastQueueSwitchTime > 5.0)
 	{
@@ -395,6 +401,9 @@ public void OnGameFrame()
 
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
+	if (!g_bEnabled)
+		return Plugin_Continue;
+	
 	if (!IsClientInGame(client) || !IsPlayerAlive(client) || TF2_GetClientTeam(client) != TFTeam_Invaders)
 		return Plugin_Continue;
 	
@@ -429,6 +438,9 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 
 public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
 {
+	if (!g_bEnabled)
+		return;
+	
 	if (!IsClientInGame(client) || TF2_GetClientTeam(client) != TFTeam_Invaders)
 		return;
 	
@@ -459,6 +471,9 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 
 public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname, bool &result)
 {
+	if (!g_bEnabled)
+		return Plugin_Continue;
+	
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
 		if (CTFPlayer(client).HasAttribute(ALWAYS_CRIT))
@@ -473,6 +488,9 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 
 public void TF2_OnConditionAdded(int client, TFCond condition)
 {
+	if (!g_bEnabled)
+		return;
+	
 	switch (condition)
 	{
 		case TFCond_SpawnOutline:
@@ -488,6 +506,9 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 
 public Action CBaseCombatCharacter_EventKilled(int entity, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
+	if (!g_bEnabled)
+		return Plugin_Continue;
+	
 	// Replicate behavior of CTFBot::Event_Killed
 	if (!IsEntityClient(entity) || TF2_GetClientTeam(entity) != TFTeam_Invaders)
 		return Plugin_Continue;
@@ -598,12 +619,16 @@ void TogglePlugin(bool bEnable)
 {
 	g_bEnabled = bEnable;
 	
+	Console_Toggle(bEnable);
 	ConVars_Toggle(bEnable);
 	DHooks_Toggle(bEnable);
+	Events_Toggle(bEnable);
 	SDKHooks_Toggle(bEnable);
 	
 	if (bEnable)
 	{
+		g_hEntityFactory.Install();
+		
 		for (int client = 1; client <= MaxClients; client++)
 		{
 			if (!IsClientInGame(client))
@@ -615,23 +640,28 @@ void TogglePlugin(bool bEnable)
 		int entity = -1;
 		while ((entity = FindEntityByClassname(entity, "*")) != -1)
 		{
-			char szClassName[64];
-			if (GetEntityClassname(entity, szClassName, sizeof(szClassName)))
+			char classname[64];
+			if (GetEntityClassname(entity, classname, sizeof(classname)))
 			{
-				OnEntityCreated(entity, szClassName);
+				OnEntityCreated(entity, classname);
 			}
 		}
 		
-		char szFilePath[PLATFORM_MAX_PATH];
-		sm_mitm_custom_upgrades_file.GetString(szFilePath, sizeof(szFilePath));
-		
-		if (szFilePath[0] && g_pGameRules.IsValid())
+		if (g_pGameRules.IsValid())
 		{
-			g_pGameRules.SetCustomUpgradesFile(szFilePath);
+			char path[PLATFORM_MAX_PATH];
+			sm_mitm_custom_upgrades_file.GetString(path, sizeof(path));
+			
+			if (path[0])
+			{
+				g_pGameRules.SetCustomUpgradesFile(path);
+			}
 		}
 	}
 	else
 	{
+		g_hEntityFactory.Uninstall();
+		
 		if (g_pGameRules.IsValid())
 		{
 			g_pGameRules.SetCustomUpgradesFile(DEFAULT_UPGRADES_FILE);

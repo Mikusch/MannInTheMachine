@@ -26,11 +26,11 @@ enum struct SDKHookData
 }
 
 static bool g_bHasActiveTeleporterPre;
-static ArrayList g_sdkHookData;
+static ArrayList g_hSDKHooks;
 
 void SDKHooks_Init()
 {
-	g_sdkHookData = new ArrayList(sizeof(SDKHookData));
+	g_hSDKHooks = new ArrayList(sizeof(SDKHookData));
 	
 	SDKHooks_AddHook("player", SDKHook_OnTakeDamageAlive, SDKHookCB_Client_OnTakeDamageAlive);
 	SDKHooks_AddHook("tf_projectile_pipe_remote", SDKHook_SetTransmit, SDKHookCB_ProjectilePipeRemote_SetTransmit);
@@ -63,30 +63,22 @@ void SDKHooks_Toggle(bool bEnable)
 
 void SDKHooks_HookEntity(int entity, const char[] classname, bool bHook)
 {
-	int index = g_sdkHookData.FindString(classname, SDKHookData::classname);
+	int index = g_hSDKHooks.FindString(classname, SDKHookData::classname);
 	if (index == -1)
 		return;
 	
-	for (int i = index; i < g_sdkHookData.Length; i++)
+	for (int i = index; i < g_hSDKHooks.Length; i++)
 	{
 		SDKHookData data;
-		if (g_sdkHookData.GetArray(i, data) && StrEqual(data.classname, classname))
+		if (g_hSDKHooks.GetArray(i, data) && StrEqual(data.classname, classname))
 		{
 			if (bHook)
 			{
 				SDKHook(entity, data.type, data.callback);
-				
-#if defined DEBUG
-				LogMessage("[SDKHooks] Hooking %s", data.classname);
-#endif
 			}
 			else
 			{
 				SDKUnhook(entity, data.type, data.callback);
-				
-#if defined DEBUG
-				LogMessage("[SDKHooks] Unhooking %s", data.classname);
-#endif
 			}
 		}
 	}
@@ -99,7 +91,7 @@ static void SDKHooks_AddHook(const char[] classname, SDKHookType type, SDKHookCB
 	data.type = type;
 	data.callback = callback;
 	
-	g_sdkHookData.PushArray(data);
+	g_hSDKHooks.PushArray(data);
 }
 
 static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)

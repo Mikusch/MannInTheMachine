@@ -20,13 +20,13 @@
 
 enum struct DetourData
 {
-	DynamicDetour hDetour;
-	DHookCallback fnCallbackPre;
-	DHookCallback fnCallbackPost;
+	DynamicDetour detour;
+	DHookCallback callback_pre;
+	DHookCallback callback_post;
 }
 
-static ArrayList g_DynamicDetours;
-static ArrayList g_DynamicHookIds;
+static ArrayList g_hDetours;
+static ArrayList g_hHookIds;
 
 static DynamicHook g_hDHook_CBaseEntity_SetModel;
 static DynamicHook g_hDHook_CBaseObject_IsPlacementPosValid;
@@ -58,8 +58,8 @@ static float s_flLastTeleportTime;
 
 void DHooks_Init(GameData hGameConf)
 {
-	g_DynamicDetours = new ArrayList(sizeof(DetourData));
-	g_DynamicHookIds = new ArrayList();
+	g_hDetours = new ArrayList(sizeof(DetourData));
+	g_hHookIds = new ArrayList();
 	
 	m_justSpawnedList = new ArrayList();
 	m_cooldownTimer = new CountdownTimer();
@@ -132,35 +132,35 @@ void DHooks_Init(GameData hGameConf)
 
 void DHooks_Toggle(bool bEnable)
 {
-	for (int i = 0; i < g_DynamicDetours.Length; i++)
+	for (int i = 0; i < g_hDetours.Length; i++)
 	{
 		DetourData data;
-		if (g_DynamicDetours.GetArray(i, data) > 0)
+		if (g_hDetours.GetArray(i, data))
 		{
-			if (data.fnCallbackPre != INVALID_FUNCTION)
+			if (data.callback_pre != INVALID_FUNCTION)
 			{
 				if (bEnable)
-					data.hDetour.Enable(Hook_Pre, data.fnCallbackPre);
+					data.detour.Enable(Hook_Pre, data.callback_pre);
 				else
-					data.hDetour.Disable(Hook_Pre, data.fnCallbackPre);
+					data.detour.Disable(Hook_Pre, data.callback_pre);
 			}
 			
-			if (data.fnCallbackPost != INVALID_FUNCTION)
+			if (data.callback_post != INVALID_FUNCTION)
 			{
 				if (bEnable)
-					data.hDetour.Enable(Hook_Post, data.fnCallbackPost);
+					data.detour.Enable(Hook_Post, data.callback_post);
 				else
-					data.hDetour.Disable(Hook_Post, data.fnCallbackPost);
+					data.detour.Disable(Hook_Post, data.callback_post);
 			}
 		}
 	}
 	
 	if (!bEnable)
 	{
-		for (int i = g_DynamicHookIds.Length - 1; i >= 0; i--)
+		for (int i = g_hHookIds.Length - 1; i >= 0; i--)
 		{
-			int hookid = g_DynamicHookIds.Get(i);
-			DynamicHook.RemoveHook(hookid);
+			int iHookId = g_hHookIds.Get(i);
+			DynamicHook.RemoveHook(iHookId);
 		}
 	}
 }
@@ -238,69 +238,57 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 	}
 }
 
-static void DHooks_AddDynamicDetour(GameData hGameConf, const char[] szName, DHookCallback fnCallbackPre = INVALID_FUNCTION, DHookCallback fnCallbackPost = INVALID_FUNCTION)
+static void DHooks_AddDynamicDetour(GameData hGameConf, const char[] name, DHookCallback callbackPre = INVALID_FUNCTION, DHookCallback callbackPost = INVALID_FUNCTION)
 {
-	DynamicDetour hDetour = DynamicDetour.FromConf(hGameConf, szName);
+	DynamicDetour hDetour = DynamicDetour.FromConf(hGameConf, name);
 	if (hDetour)
 	{
 		DetourData data;
-		data.hDetour = hDetour;
-		data.fnCallbackPre = fnCallbackPre;
-		data.fnCallbackPost = fnCallbackPost;
+		data.detour = hDetour;
+		data.callback_pre = callbackPre;
+		data.callback_post = callbackPost;
 		
-		g_DynamicDetours.PushArray(data);
-		
-#if defined DEBUG
-		LogMessage("[DHooks] Added dynamic detour: %s", szName);
-#endif
+		g_hDetours.PushArray(data);
 	}
 	else
 	{
-		LogError("Failed to create detour setup handle for %s", szName);
+		LogError("Failed to create detour setup handle: %s", name);
 	}
 }
 
-static DynamicHook DHooks_AddDynamicHook(GameData hGameConf, const char[] szName)
+static DynamicHook DHooks_AddDynamicHook(GameData hGameConf, const char[] name)
 {
-	DynamicHook hHook = DynamicHook.FromConf(hGameConf, szName);
-	if (!hHook)
-	{
-		LogError("Failed to create hook setup handle for %s", szName);
-	}
-	else
-	{
-#if defined DEBUG
-		LogMessage("[DHooks] Added dynamic hook: %s", szName);
-#endif
-	}
+	DynamicHook hook = DynamicHook.FromConf(hGameConf, name);
+	if (!hook)
+		LogError("Failed to create hook setup handle: %s", name);
 	
-	return hHook;
+	return hook;
 }
 
-static void DHooks_HookEntity(DynamicHook hHook, HookMode mode, int entity, DHookCallback fnCallback)
+static void DHooks_HookEntity(DynamicHook hook, HookMode mode, int entity, DHookCallback callback)
 {
-	if (!hHook)
+	if (!hook)
 		return;
 	
-	int iHookId = hHook.HookEntity(mode, entity, fnCallback, DHookRemovalCB_OnHookRemoved);
+	int iHookId = hook.HookEntity(mode, entity, callback, DHookRemovalCB_OnHookRemoved);
 	if (iHookId != INVALID_HOOK_ID)
-		g_DynamicHookIds.Push(iHookId);
+		g_hHookIds.Push(iHookId);
 }
 
 static void DHookRemovalCB_OnHookRemoved(int iHookId)
 {
-	int index = g_DynamicHookIds.FindValue(iHookId);
+	int index = g_hHookIds.FindValue(iHookId);
 	if (index != -1)
-		g_DynamicHookIds.Erase(index);
+		g_hHookIds.Erase(index);
 }
 
-static void DHooks_CopyScriptFunctionBinding(const char[] szSourceClassName, const char[] szFunctionName, const char[] szTargetClassName, DHookCallback fnCallbackPre = INVALID_FUNCTION, DHookCallback fnCallbackPost = INVALID_FUNCTION, bool bEmpty = true)
+static void DHooks_CopyScriptFunctionBinding(const char[] sourceClassName, const char[] functionName, const char[] targetClassName, DHookCallback callbackPre = INVALID_FUNCTION, DHookCallback callbackPost = INVALID_FUNCTION, bool bEmpty = true)
 {
-	VScriptFunction pTargetFunc = VScript_GetClassFunction(szTargetClassName, szFunctionName);
+	VScriptFunction pTargetFunc = VScript_GetClassFunction(targetClassName, functionName);
 	if (!pTargetFunc)
 	{
-		VScriptFunction pSourceFunc = VScript_GetClassFunction(szSourceClassName, szFunctionName);
-		VScriptClass pTargetClass = VScript_GetClass(szTargetClassName);
+		VScriptFunction pSourceFunc = VScript_GetClassFunction(sourceClassName, functionName);
+		VScriptClass pTargetClass = VScript_GetClass(targetClassName);
 		
 		pTargetFunc = pTargetClass.CreateFunction();
 		pTargetFunc.CopyFrom(pSourceFunc);
@@ -310,60 +298,52 @@ static void DHooks_CopyScriptFunctionBinding(const char[] szSourceClassName, con
 	}
 	
 #if defined DEBUG
-		LogMessage("[DHooks] Copied script function binding: %s::%s -> %s", szTargetClassName, szFunctionName, szTargetClassName);
+		LogMessage("Copied script function binding: %s::%s -> %s", targetClassName, functionName, targetClassName);
 #endif
 	
 	// not setup for detour
-	if (fnCallbackPre == INVALID_FUNCTION && fnCallbackPost == INVALID_FUNCTION)
+	if (callbackPre == INVALID_FUNCTION && callbackPost == INVALID_FUNCTION)
 		return;
 	
 	DetourData data;
-	data.hDetour = pTargetFunc.CreateDetour();
+	data.detour = pTargetFunc.CreateDetour();
 	
-	if (data.hDetour)
+	if (data.detour)
 	{
-		data.fnCallbackPre = fnCallbackPre;
-		data.fnCallbackPost = fnCallbackPost;
+		data.callback_pre = callbackPre;
+		data.callback_post = callbackPost;
 		
-		g_DynamicDetours.PushArray(data);
-		
-#if defined DEBUG
-		LogMessage("[DHooks] Added script detour: %s::%s", szTargetClassName, szFunctionName);
-#endif
+		g_hDetours.PushArray(data);
 	}
 	else
 	{
-		LogError("Failed to create script detour: %s::%s", szTargetClassName, szFunctionName);
+		LogError("Failed to create script detour: %s::%s", targetClassName, functionName);
 	}
 }
 
-static void DHooks_CreateScriptDetour(const char[] szClassName, const char[] szFunctionName, DHookCallback fnCallbackPre = INVALID_FUNCTION, DHookCallback fnCallbackPost = INVALID_FUNCTION)
+static void DHooks_CreateScriptDetour(const char[] szClassName, const char[] functionName, DHookCallback callbackPre = INVALID_FUNCTION, DHookCallback callbackPost = INVALID_FUNCTION)
 {
 	DetourData data;
 	
 	if (szClassName[0])
 	{
-		data.hDetour = VScript_GetClassFunction(szClassName, szFunctionName).CreateDetour();
+		data.detour = VScript_GetClassFunction(szClassName, functionName).CreateDetour();
 	}
 	else
 	{
-		data.hDetour = VScript_GetGlobalFunction(szFunctionName).CreateDetour();
+		data.detour = VScript_GetGlobalFunction(functionName).CreateDetour();
 	}
 	
-	if (data.hDetour)
+	if (data.detour)
 	{
-		data.fnCallbackPre = fnCallbackPre;
-		data.fnCallbackPost = fnCallbackPost;
+		data.callback_pre = callbackPre;
+		data.callback_post = callbackPost;
 		
-		g_DynamicDetours.PushArray(data);
-		
-#if defined DEBUG
-		LogMessage("[DHooks] Added script detour: %s::%s", szClassName, szFunctionName);
-#endif
+		g_hDetours.PushArray(data);
 	}
 	else
 	{
-		LogError("Failed to create script detour: %s::%s", szClassName, szFunctionName);
+		LogError("Failed to create script detour: %s::%s", szClassName, functionName);
 	}
 }
 

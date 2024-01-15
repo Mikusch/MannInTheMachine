@@ -31,8 +31,8 @@
 
 #define INVALID_ITEM_DEF_INDEX	(0xFFFF)
 
-#define MAX_USER_MSG_DATA	255
-
+#define COMMAND_MAX_LENGTH		512
+#define MAX_USER_MSG_DATA		255
 #define MAX_TEAM_NAME_LENGTH	32	// Max length of a team's name
 
 #define NULL_SQUAD	CTFBotSquad(0)

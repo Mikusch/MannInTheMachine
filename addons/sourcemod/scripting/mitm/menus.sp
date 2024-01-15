@@ -248,7 +248,7 @@ void Menus_DisplayPreferencesMenu(int client)
 		for (int i = 0; i < sizeof(g_PreferenceNames); i++)
 		{
 			char info[32];
-			if (IntToString(i, info, sizeof(info)) > 0)
+			if (IntToString(i, info, sizeof(info)))
 				menu.AddItem(info, g_PreferenceNames[i]);
 		}
 		

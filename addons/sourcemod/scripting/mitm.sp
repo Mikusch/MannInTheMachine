@@ -623,6 +623,7 @@ void TogglePlugin(bool bEnable)
 	ConVars_Toggle(bEnable);
 	DHooks_Toggle(bEnable);
 	Events_Toggle(bEnable);
+	Hooks_Toggle(bEnable);
 	SDKHooks_Toggle(bEnable);
 	
 	if (bEnable)

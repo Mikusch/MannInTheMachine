@@ -2374,7 +2374,7 @@ methodmap CTFGameRules < CBaseEntity
 	
 	public void SetCustomUpgradesFile(const char[] path)
 	{
-		if (FileExists(path, true, "GAME"))
+		if (FileExists(path, true))
 		{
 			AddFileToDownloadsTable(path);
 			

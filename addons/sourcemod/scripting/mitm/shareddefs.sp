@@ -20,6 +20,8 @@
 
 #define PLUGIN_TAG	"[{orange}MitM{default}]"
 
+#define DEFAULT_UPGRADES_FILE	"scripts/items/mvm_upgrades.txt"
+
 #define ZERO_VECTOR	{ 0.0, 0.0, 0.0 }
 
 #define VEC_HULL_MIN	{ -24.0, -24.0, 0.0 }
@@ -29,8 +31,8 @@
 
 #define INVALID_ITEM_DEF_INDEX	(0xFFFF)
 
-#define MAX_USER_MSG_DATA	255
-
+#define COMMAND_MAX_LENGTH		512
+#define MAX_USER_MSG_DATA		255
 #define MAX_TEAM_NAME_LENGTH	32	// Max length of a team's name
 
 #define NULL_SQUAD	CTFBotSquad(0)

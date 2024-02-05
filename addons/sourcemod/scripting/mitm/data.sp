@@ -1477,7 +1477,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		else
 			this.m_preferences &= ~view_as<int>(preference);
 		
-		ClientPrefs_SavePreferences(this.index, this.m_preferences);
+		g_hCookiePreferences.SetInt(this.index, this.m_preferences);
 		
 		return true;
 	}

@@ -245,11 +245,11 @@ void Menus_DisplayPreferencesMenu(int client)
 		menu.SetTitle("%T", "Menu_Preferences_Title", client);
 		menu.ExitBackButton = true;
 		
-		for (int i = 0; i < sizeof(g_PreferenceNames); i++)
+		for (int i = 0; i < sizeof(g_aPreferenceNames); i++)
 		{
 			char info[32];
 			if (IntToString(i, info, sizeof(info)))
-				menu.AddItem(info, g_PreferenceNames[i]);
+				menu.AddItem(info, g_aPreferenceNames[i]);
 		}
 		
 		menu.Display(client, MENU_TIME_FOREVER);
@@ -276,7 +276,7 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 			CTFPlayer(param1).SetPreference(preference, !CTFPlayer(param1).HasPreference(preference));
 			
 			char name[64];
-			Format(name, sizeof(name), "%T", g_PreferenceNames[i], param1);
+			Format(name, sizeof(name), "%T", g_aPreferenceNames[i], param1);
 			
 			if (CTFPlayer(param1).HasPreference(preference))
 				CPrintToChat(param1, "%s %t", PLUGIN_TAG, "Preferences_Enabled", name);
@@ -305,9 +305,9 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 			MannInTheMachinePreference preference = view_as<MannInTheMachinePreference>(1 << i);
 			
 			if (CTFPlayer(param1).HasPreference(preference))
-				Format(display, sizeof(display), "☑ %T", g_PreferenceNames[i], param1);
+				Format(display, sizeof(display), "☑ %T", g_aPreferenceNames[i], param1);
 			else
-				Format(display, sizeof(display), "☐ %T", g_PreferenceNames[i], param1);
+				Format(display, sizeof(display), "☐ %T", g_aPreferenceNames[i], param1);
 			
 			return RedrawMenuItem(display);
 		}

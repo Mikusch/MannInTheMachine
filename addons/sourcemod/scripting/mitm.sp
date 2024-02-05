@@ -45,6 +45,10 @@ CPopulationManager g_pPopulationManager = view_as<CPopulationManager>(INVALID_EN
 CTFObjectiveResource g_pObjectiveResource = view_as<CTFObjectiveResource>(INVALID_ENT_REFERENCE);
 CTFGameRules g_pGameRules = view_as<CTFGameRules>(INVALID_ENT_REFERENCE);
 
+// Cookies
+Cookie g_hCookieQueue;
+Cookie g_hCookiePreferences;
+
 // Other globals
 bool g_bEnabled;
 CEntityFactory g_hEntityFactory;
@@ -101,7 +105,6 @@ ConVar phys_pushscale;
 
 #include "mitm/shareddefs.sp"
 
-#include "mitm/clientprefs.sp"
 #include "mitm/console.sp"
 #include "mitm/convars.sp"
 #include "mitm/data.sp"
@@ -177,7 +180,9 @@ public void OnPluginStart()
 	g_hEntityFactory.AttachNextBot(CreateNextBotPlayer);
 	g_hEntityFactory.SetInitialActionFactory(CTFBotMainAction.GetFactory());
 	
-	ClientPrefs_Init();
+	g_hCookieQueue = new Cookie("mitm_queue", "Mann in the Machine: Queue Points", CookieAccess_Protected);
+	g_hCookiePreferences = new Cookie("mitm_preferences", "Mann in the Machine: Preferences", CookieAccess_Protected);
+	
 	Console_Init();
 	ConVars_Init();
 	Events_Init();
@@ -285,9 +290,11 @@ public void OnClientDisconnect(int client)
 		ForcePlayerSuicide(client);
 	}
 	
-	if (CTFPlayer(client).IsInAParty())
+	CTFPlayer player = CTFPlayer(client);
+	
+	if (player.IsInAParty())
 	{
-		Party party = CTFPlayer(client).GetParty();
+		Party party = player.GetParty();
 		party.OnPartyMemberLeave(client);
 	}
 }
@@ -297,8 +304,9 @@ public void OnClientCookiesCached(int client)
 	if (!g_bEnabled)
 		return;
 	
-	ClientPrefs_RefreshQueue(client);
-	ClientPrefs_RefreshPreferences(client);
+	CTFPlayer player = CTFPlayer(client);
+	player.m_defenderQueuePoints = g_hCookieQueue.GetInt(client, -1);
+	player.m_preferences = g_hCookiePreferences.GetInt(client, 0);
 }
 
 public void OnEntityCreated(int entity, const char[] classname)

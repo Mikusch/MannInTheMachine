@@ -94,12 +94,14 @@ ArrayList Queue_GetDefenderQueue()
 
 void Queue_AddPoints(int client, int points)
 {
-	CTFPlayer(client).m_defenderQueuePoints += points;
-	ClientPrefs_SaveQueue(client, CTFPlayer(client).m_defenderQueuePoints);
+	CTFPlayer player = CTFPlayer(client);
+	player.m_defenderQueuePoints += points;
+	g_hCookieQueue.SetInt(client, player.m_defenderQueuePoints);
 }
 
 void Queue_SetPoints(int client, int points)
 {
-	CTFPlayer(client).m_defenderQueuePoints = points;
-	ClientPrefs_SaveQueue(client, CTFPlayer(client).m_defenderQueuePoints);
+	CTFPlayer player = CTFPlayer(client);
+	player.m_defenderQueuePoints = points;
+	g_hCookiePreferences.SetInt(client, player.m_defenderQueuePoints);
 }

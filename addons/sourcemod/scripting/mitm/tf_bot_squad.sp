@@ -193,7 +193,7 @@ methodmap CTFBotSquad
 			if (this.m_bShouldPreserveSquad)
 			{
 				int[] members = new int[MaxClients];
-				if (this.CollectMembers(members, MaxClients))
+				if (this.CollectMembers(members))
 				{
 					this.m_leader = members[0];
 				}
@@ -214,7 +214,7 @@ methodmap CTFBotSquad
 		}
 	}
 	
-	public int CollectMembers(int[] clients, int size)
+	public int CollectMembers(int[] clients)
 	{
 		int count = 0;
 		

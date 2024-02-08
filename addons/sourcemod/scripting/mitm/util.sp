@@ -349,7 +349,7 @@ void SelectNewDefenders()
 				continue;
 			
 			int[] members = new int[MaxClients];
-			int count = party.CollectMembers(members, MaxClients, false);
+			int count = party.CollectMembers(members, false);
 			for (int j = 0; j < count; j++)
 			{
 				int member = members[j];

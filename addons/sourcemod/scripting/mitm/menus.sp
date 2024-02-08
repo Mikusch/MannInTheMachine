@@ -195,7 +195,7 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 					party.GetName(name, sizeof(name));
 					
 					int[] members = new int[MaxClients];
-					int count = party.CollectMembers(members, MaxClients);
+					int count = party.CollectMembers(members);
 					
 					for (int i = 0; i < count; i++)
 					{
@@ -354,7 +354,7 @@ void Menus_DisplayPartyMenu(int client)
 		
 		// show party members
 		int[] members = new int[MaxClients];
-		int count = party.CollectMembers(members, MaxClients);
+		int count = party.CollectMembers(members);
 		for (int i = 0; i < count; i++)
 		{
 			int member = members[i];
@@ -640,7 +640,7 @@ void Menus_DisplayPartyManageKickMenu(int client)
 	menu.ExitBackButton = true;
 	
 	int[] members = new int[MaxClients];
-	int count = party.CollectMembers(members, MaxClients);
+	int count = party.CollectMembers(members);
 	
 	for (int i = 0; i < count; i++)
 	{

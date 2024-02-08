@@ -49,7 +49,7 @@ static int Update(CTFBotMedicHeal action, int actor, float interval)
 		if (!squad.ShouldPreserveSquad())
 		{
 			int[] members = new int[MaxClients];
-			int count = squad.CollectMembers(members, MaxClients);
+			int count = squad.CollectMembers(members);
 			
 			int i;
 			for (i = 0; i < count; i++)

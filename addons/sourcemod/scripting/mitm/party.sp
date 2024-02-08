@@ -200,7 +200,7 @@ methodmap Party
 			
 			// pick the next leader that's left in the party
 			int[] members = new int[MaxClients];
-			if (this.CollectMembers(members, MaxClients))
+			if (this.CollectMembers(members))
 			{
 				this.m_leader = members[0];
 			}
@@ -212,7 +212,7 @@ methodmap Party
 		}
 	}
 	
-	public int CollectMembers(int[] clients, int size, bool bIncludeSpectators = true)
+	public int CollectMembers(int[] clients, bool bIncludeSpectators = true)
 	{
 		int count = 0;
 		
@@ -235,7 +235,7 @@ methodmap Party
 	public int GetMemberCount(bool bIncludeSpectators = true)
 	{
 		int[] members = new int[MaxClients];
-		return this.CollectMembers(members, MaxClients, bIncludeSpectators);
+		return this.CollectMembers(members, bIncludeSpectators);
 	}
 	
 	public int CalculateQueuePoints()
@@ -243,7 +243,7 @@ methodmap Party
 		int points = 0;
 		
 		int[] members = new int[MaxClients];
-		int count = this.CollectMembers(members, MaxClients, false);
+		int count = this.CollectMembers(members, false);
 		for (int i = 0; i < count; ++i)
 		{
 			points += CTFPlayer(members[i]).m_defenderQueuePoints;
@@ -278,7 +278,7 @@ methodmap Party
 		{
 			// notify all members
 			int[] members = new int[MaxClients];
-			int count = this.CollectMembers(members, MaxClients);
+			int count = this.CollectMembers(members);
 			for (int i = 0; i < count; ++i)
 			{
 				int member = members[i];
@@ -485,7 +485,7 @@ static Action ConCmd_PartyJoin(int client, int args)
 	
 	// notify all other members
 	int[] members = new int[MaxClients];
-	int count = party.CollectMembers(members, MaxClients);
+	int count = party.CollectMembers(members);
 	for (int i = 0; i < count; ++i)
 	{
 		int member = members[i];
@@ -679,7 +679,7 @@ static Action ConCmd_PartyKick(int client, int args)
 		
 		// notify all other members
 		int[] members = new int[MaxClients];
-		int count = party.CollectMembers(members, MaxClients);
+		int count = party.CollectMembers(members);
 		for (int j = 0; j < count; j++)
 		{
 			int member = members[j];

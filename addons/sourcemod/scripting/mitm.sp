@@ -236,20 +236,6 @@ public void OnMapStart()
 	
 	PrecacheSound("ui/system_message_alert.wav");
 	PrecacheSound(")mvm/mvm_tele_activate.wav");
-	
-	// Add bot icons to the downloads table
-	DirectoryListing directory = OpenDirectory("materials/hud");
-	if (directory)
-	{
-		char file[PLATFORM_MAX_PATH];
-		FileType type;
-		while (directory.GetNext(file, sizeof(file), type))
-		{
-			Format(file, sizeof(file), "materials/hud/%s", file);
-			AddFileToDownloadsTable(file);
-		}
-	}
-	delete directory;
 }
 
 public void OnConfigsExecuted()

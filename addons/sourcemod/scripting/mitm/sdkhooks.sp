@@ -48,14 +48,7 @@ void SDKHooks_Toggle(bool bEnable)
 		if (!GetEntityClassname(entity, classname, sizeof(classname)))
 			continue;
 		
-		if (bEnable)
-		{
-			SDKHooks_HookEntity(entity, classname, true);
-		}
-		else
-		{
-			SDKHooks_HookEntity(entity, classname, false);
-		}
+		SDKHooks_HookEntity(entity, classname, bEnable);
 	}
 }
 

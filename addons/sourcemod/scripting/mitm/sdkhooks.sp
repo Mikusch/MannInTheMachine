@@ -41,11 +41,9 @@ void SDKHooks_Init()
 
 void SDKHooks_Toggle(bool bEnable)
 {
-	for (int entity = 0; entity < GetMaxEntities(); entity++)
+	int entity = -1;
+	while ((entity = FindEntityByClassname(entity, "*")) != -1)
 	{
-		if (!IsValidEntity(entity))
-			continue;
-		
 		char classname[64];
 		if (!GetEntityClassname(entity, classname, sizeof(classname)))
 			continue;

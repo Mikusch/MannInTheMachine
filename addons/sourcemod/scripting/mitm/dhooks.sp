@@ -25,8 +25,8 @@ enum struct DetourData
 	DHookCallback callback_post;
 }
 
-static ArrayList g_hDetours;
-static ArrayList g_hHookIds;
+static ArrayList g_hDynamicDetours;
+static ArrayList g_hDynamicHookIds;
 
 static DynamicHook g_hDHook_CBaseEntity_SetModel;
 static DynamicHook g_hDHook_CBaseObject_IsPlacementPosValid;
@@ -58,8 +58,8 @@ static float s_flLastTeleportTime;
 
 void DHooks_Init(GameData hGameConf)
 {
-	g_hDetours = new ArrayList(sizeof(DetourData));
-	g_hHookIds = new ArrayList();
+	g_hDynamicDetours = new ArrayList(sizeof(DetourData));
+	g_hDynamicHookIds = new ArrayList();
 	
 	m_justSpawnedList = new ArrayList();
 	m_cooldownTimer = new CountdownTimer();
@@ -134,75 +134,47 @@ void DHooks_Init(GameData hGameConf)
 
 void DHooks_Toggle(bool bEnable)
 {
-	for (int i = 0; i < g_hDetours.Length; i++)
+	for (int i = 0; i < g_hDynamicDetours.Length; i++)
 	{
 		DetourData data;
-		if (g_hDetours.GetArray(i, data))
-		{
-			if (data.callback_pre != INVALID_FUNCTION)
-			{
-				if (bEnable)
-					data.detour.Enable(Hook_Pre, data.callback_pre);
-				else
-					data.detour.Disable(Hook_Pre, data.callback_pre);
-			}
-			
-			if (data.callback_post != INVALID_FUNCTION)
-			{
-				if (bEnable)
-					data.detour.Enable(Hook_Post, data.callback_post);
-				else
-					data.detour.Disable(Hook_Post, data.callback_post);
-			}
-		}
+		if (g_hDynamicDetours.GetArray(i, data))
+			DHooks_ToggleDetour(data, bEnable);
 	}
 	
 	if (!bEnable)
 	{
-		for (int i = g_hHookIds.Length - 1; i >= 0; i--)
+		for (int i = g_hDynamicHookIds.Length - 1; i >= 0; i--)
 		{
-			int iHookId = g_hHookIds.Get(i);
-			DynamicHook.RemoveHook(iHookId);
+			int hookid = g_hDynamicHookIds.Get(i);
+			if (!DynamicHook.RemoveHook(hookid))
+				LogError("Failed to remove dynamic hook (ID %d)", hookid);
 		}
-	}
-}
-
-void DHooks_OnClientPutInServer(int client)
-{
-	if (g_hDHook_CBaseEntity_SetModel)
-	{
-		DHooks_HookEntity(g_hDHook_CBaseEntity_SetModel, Hook_Post, client, DHookCallback_CBaseEntity_SetModel_Post);
-	}
-	
-	if (g_hDHook_CBaseEntity_ShouldTransmit)
-	{
-		DHooks_HookEntity(g_hDHook_CBaseEntity_ShouldTransmit, Hook_Pre, client, DHookCallback_CTFPlayer_ShouldTransmit_Pre);
-	}
-	
-	if (g_hDHook_CBaseCombatCharacter_ShouldGib)
-	{
-		DHooks_HookEntity(g_hDHook_CBaseCombatCharacter_ShouldGib, Hook_Pre, client, DHookCallback_CTFPlayer_ShouldGib_Pre);
-	}
-	
-	if (g_hDHook_CTFPlayer_IsAllowedToPickUpFlag)
-	{
-		DHooks_HookEntity(g_hDHook_CTFPlayer_IsAllowedToPickUpFlag, Hook_Post, client, DHookCallback_CTFPlayer_IsAllowedToPickUpFlag_Post);
-	}
-	
-	if (g_hDHook_CBasePlayer_EntSelectSpawnPoint)
-	{
-		DHooks_HookEntity(g_hDHook_CBasePlayer_EntSelectSpawnPoint, Hook_Pre, client, DHookCallback_CTFPlayer_EntSelectSpawnPoint_Pre);
 	}
 }
 
 void DHooks_OnEntityCreated(int entity, const char[] classname)
 {
-	if (StrEqual(classname, "filter_tf_bot_has_tag"))
+	if (IsEntityClient(entity))
+	{
+		if (g_hDHook_CBaseEntity_SetModel)
+			DHooks_HookEntity(g_hDHook_CBaseEntity_SetModel, Hook_Post, entity, DHookCallback_CBaseEntity_SetModel_Post);
+		
+		if (g_hDHook_CBaseEntity_ShouldTransmit)
+			DHooks_HookEntity(g_hDHook_CBaseEntity_ShouldTransmit, Hook_Pre, entity, DHookCallback_CTFPlayer_ShouldTransmit_Pre);
+		
+		if (g_hDHook_CBaseCombatCharacter_ShouldGib)
+			DHooks_HookEntity(g_hDHook_CBaseCombatCharacter_ShouldGib, Hook_Pre, entity, DHookCallback_CTFPlayer_ShouldGib_Pre);
+		
+		if (g_hDHook_CTFPlayer_IsAllowedToPickUpFlag)
+			DHooks_HookEntity(g_hDHook_CTFPlayer_IsAllowedToPickUpFlag, Hook_Post, entity, DHookCallback_CTFPlayer_IsAllowedToPickUpFlag_Post);
+		
+		if (g_hDHook_CBasePlayer_EntSelectSpawnPoint)
+			DHooks_HookEntity(g_hDHook_CBasePlayer_EntSelectSpawnPoint, Hook_Pre, entity, DHookCallback_CTFPlayer_EntSelectSpawnPoint_Pre);
+	}
+	else if (StrEqual(classname, "filter_tf_bot_has_tag"))
 	{
 		if (g_hDHook_CBaseFilter_PassesFilterImpl)
-		{
 			DHooks_HookEntity(g_hDHook_CBaseFilter_PassesFilterImpl, Hook_Pre, entity, DHookCallback_CFilterTFBotHasTag_PassesFilterImpl_Pre);
-		}
 	}
 	else if (StrEqual(classname, "item_teamflag"))
 	{
@@ -215,28 +187,20 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 	else if (StrEqual(classname, "obj_teleporter"))
 	{
 		if (g_hDHook_CBaseObject_CanBeUpgraded)
-		{
 			DHooks_HookEntity(g_hDHook_CBaseObject_CanBeUpgraded, Hook_Pre, entity, DHookCallback_CObjectTeleporter_CanBeUpgraded_Pre);
-		}
 		
 		if (g_hDHook_CBaseObject_IsPlacementPosValid)
-		{
 			DHooks_HookEntity(g_hDHook_CBaseObject_IsPlacementPosValid, Hook_Post, entity, DHookCallback_CObjectTeleporter_IsPlacementPosValid_Post);
-		}
 	}
 	else if (strncmp(classname, "item_currencypack_", 18) == 0)
 	{
 		if (g_hDHook_CItem_ComeToRest)
-		{
 			DHooks_HookEntity(g_hDHook_CItem_ComeToRest, Hook_Pre, entity, DHookCallback_CCurrencyPack_ComeToRest_Pre);
-		}
 	}
 	else if (StrEqual(classname, "obj_sentrygun"))
 	{
 		if (g_hDHook_CBaseEntity_SetModel)
-		{
 			DHooks_HookEntity(g_hDHook_CBaseEntity_SetModel, Hook_Post, entity, DHookCallback_CBaseEntity_SetModel_Post);
-		}
 	}
 }
 
@@ -250,7 +214,7 @@ static void DHooks_AddDynamicDetour(GameData hGameConf, const char[] name, DHook
 		data.callback_pre = callbackPre;
 		data.callback_post = callbackPost;
 		
-		g_hDetours.PushArray(data);
+		g_hDynamicDetours.PushArray(data);
 	}
 	else
 	{
@@ -272,16 +236,35 @@ static void DHooks_HookEntity(DynamicHook hook, HookMode mode, int entity, DHook
 	if (!hook)
 		return;
 	
-	int iHookId = hook.HookEntity(mode, entity, callback, DHookRemovalCB_OnHookRemoved);
-	if (iHookId != INVALID_HOOK_ID)
-		g_hHookIds.Push(iHookId);
+	int hookid = hook.HookEntity(mode, entity, callback, DHookRemovalCB_OnHookRemoved);
+	if (hookid != INVALID_HOOK_ID)
+		g_hDynamicHookIds.Push(hookid);
 }
 
-static void DHookRemovalCB_OnHookRemoved(int iHookId)
+static void DHooks_ToggleDetour(DetourData data, bool bEnable)
 {
-	int index = g_hHookIds.FindValue(iHookId);
+	if (data.callback_pre != INVALID_FUNCTION)
+	{
+		if (bEnable)
+			data.detour.Enable(Hook_Pre, data.callback_pre);
+		else
+			data.detour.Disable(Hook_Pre, data.callback_pre);
+	}
+	
+	if (data.callback_post != INVALID_FUNCTION)
+	{
+		if (bEnable)
+			data.detour.Enable(Hook_Post, data.callback_post);
+		else
+			data.detour.Disable(Hook_Post, data.callback_post);
+	}
+}
+
+static void DHookRemovalCB_OnHookRemoved(int hookid)
+{
+	int index = g_hDynamicHookIds.FindValue(hookid);
 	if (index != -1)
-		g_hHookIds.Erase(index);
+		g_hDynamicHookIds.Erase(index);
 }
 
 static void DHooks_CopyScriptFunctionBinding(const char[] sourceClassName, const char[] functionName, const char[] targetClassName, DHookCallback callbackPre = INVALID_FUNCTION, DHookCallback callbackPost = INVALID_FUNCTION, bool bEmpty = true)
@@ -315,7 +298,7 @@ static void DHooks_CopyScriptFunctionBinding(const char[] sourceClassName, const
 		data.callback_pre = callbackPre;
 		data.callback_post = callbackPost;
 		
-		g_hDetours.PushArray(data);
+		g_hDynamicDetours.PushArray(data);
 	}
 	else
 	{
@@ -341,7 +324,7 @@ static void DHooks_CreateScriptDetour(const char[] szClassName, const char[] fun
 		data.callback_pre = callbackPre;
 		data.callback_post = callbackPost;
 		
-		g_hDetours.PushArray(data);
+		g_hDynamicDetours.PushArray(data);
 	}
 	else
 	{

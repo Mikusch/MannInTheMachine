@@ -183,6 +183,8 @@ public void OnPluginStart()
 	g_hCookieQueue = new Cookie("mitm_queue", "Mann in the Machine: Queue Points", CookieAccess_Protected);
 	g_hCookiePreferences = new Cookie("mitm_preferences", "Mann in the Machine: Preferences", CookieAccess_Protected);
 	
+	Entity.Init();
+	
 	Console_Init();
 	ConVars_Init();
 	Events_Init();
@@ -251,7 +253,6 @@ public void OnClientPutInServer(int client)
 	if (!g_bEnabled)
 		return;
 	
-	DHooks_OnClientPutInServer(client);
 	CBaseNPC_HookEventKilled(client);
 	
 	CTFPlayer(client).OnClientPutInServer();
@@ -301,7 +302,7 @@ public void OnEntityCreated(int entity, const char[] classname)
 		return;
 	
 	DHooks_OnEntityCreated(entity, classname);
-	SDKHooks_HookEntity(entity, classname, true);
+	SDKHooks_HookEntity(entity, classname);
 	
 	// Store the references of entities that should only exist once
 	if (StrEqual(classname, "info_populator"))
@@ -320,7 +321,13 @@ public void OnEntityCreated(int entity, const char[] classname)
 
 public void OnEntityDestroyed(int entity)
 {
-	Entity(entity).Destroy();
+	if (!g_bEnabled)
+		return;
+	
+	SDKHooks_UnhookEntity(entity);
+	
+	if (Entity.IsEntityTracked(entity))
+		Entity(entity).Destroy();
 }
 
 public void OnGameFrame()
@@ -622,29 +629,30 @@ void TogglePlugin(bool bEnable)
 	DHooks_Toggle(bEnable);
 	Events_Toggle(bEnable);
 	Hooks_Toggle(bEnable);
-	SDKHooks_Toggle(bEnable);
+	
+	int entity = -1;
+	while ((entity = FindEntityByClassname(entity, "*")) != -1)
+	{
+		if (bEnable)
+		{
+			char classname[64];
+			if (!GetEntityClassname(entity, classname, sizeof(classname)))
+				continue;
+			
+			OnEntityCreated(entity, classname);
+		}
+		else
+		{
+			SDKHooks_UnhookEntity(entity);
+			
+			if (Entity.IsEntityTracked(entity))
+				Entity(entity).Destroy();
+		}
+	}
 	
 	if (bEnable)
 	{
 		g_hEntityFactory.Install();
-		
-		for (int client = 1; client <= MaxClients; client++)
-		{
-			if (!IsClientInGame(client))
-				continue;
-			
-			OnClientPutInServer(client);
-		}
-		
-		int entity = -1;
-		while ((entity = FindEntityByClassname(entity, "*")) != -1)
-		{
-			char classname[64];
-			if (GetEntityClassname(entity, classname, sizeof(classname)))
-			{
-				OnEntityCreated(entity, classname);
-			}
-		}
 		
 		if (g_pGameRules.IsValid())
 		{
@@ -655,6 +663,14 @@ void TogglePlugin(bool bEnable)
 			{
 				g_pGameRules.SetCustomUpgradesFile(path);
 			}
+		}
+		
+		for (int client = 1; client <= MaxClients; client++)
+		{
+			if (!IsClientInGame(client))
+				continue;
+			
+			OnClientPutInServer(client);
 		}
 	}
 	else

@@ -20,69 +20,65 @@
 
 enum struct SDKHookData
 {
-	char classname[64];
+	int ref;
 	SDKHookType type;
 	SDKHookCB callback;
 }
 
 static bool g_bHasActiveTeleporterPre;
-static ArrayList g_hSDKHooks;
+static ArrayList g_hActiveHooks;
 
 void SDKHooks_Init()
 {
-	g_hSDKHooks = new ArrayList(sizeof(SDKHookData));
-	
-	SDKHooks_AddHook("player", SDKHook_OnTakeDamageAlive, SDKHookCB_Client_OnTakeDamageAlive);
-	SDKHooks_AddHook("tf_projectile_pipe_remote", SDKHook_SetTransmit, SDKHookCB_ProjectilePipeRemote_SetTransmit);
-	SDKHooks_AddHook("bot_hint_engineer_nest", SDKHook_Think, SDKHookCB_BotHintEngineerNest_Think);
-	SDKHooks_AddHook("bot_hint_engineer_nest", SDKHook_ThinkPost, SDKHookCB_BotHintEngineerNest_ThinkPost);
-	SDKHooks_AddHook("entity_medigun_shield", SDKHook_OnTakeDamagePost, SDKHookCB_EntityMedigunShield_OnTakeDamagePost);
+	g_hActiveHooks = new ArrayList(sizeof(SDKHookData));
 }
 
-void SDKHooks_Toggle(bool bEnable)
+void SDKHooks_HookEntity(int entity, const char[] classname)
 {
-	int entity = -1;
-	while ((entity = FindEntityByClassname(entity, "*")) != -1)
+	if (IsEntityClient(entity))
 	{
-		char classname[64];
-		if (!GetEntityClassname(entity, classname, sizeof(classname)))
-			continue;
-		
-		SDKHooks_HookEntity(entity, classname, bEnable);
+		SDKHooks_HookEntityInternal(entity, SDKHook_OnTakeDamageAlive, SDKHookCB_Client_OnTakeDamageAlive);
+	}
+	else if (StrEqual(classname, "tf_projectile_pipe_remote"))
+	{
+		SDKHooks_HookEntityInternal(entity, SDKHook_SetTransmit, SDKHookCB_ProjectilePipeRemote_SetTransmit);
+	}
+	else if (StrEqual(classname, "bot_hint_engineer_nest"))
+	{
+		SDKHooks_HookEntityInternal(entity, SDKHook_Think, SDKHookCB_BotHintEngineerNest_Think);
+		SDKHooks_HookEntityInternal(entity, SDKHook_ThinkPost, SDKHookCB_BotHintEngineerNest_ThinkPost);
+	}
+	else if (StrEqual(classname, "entity_medigun_shield"))
+	{
+		SDKHooks_HookEntityInternal(entity, SDKHook_OnTakeDamagePost, SDKHookCB_EntityMedigunShield_OnTakeDamagePost);
 	}
 }
 
-void SDKHooks_HookEntity(int entity, const char[] classname, bool bHook)
+void SDKHooks_UnhookEntity(int entity)
 {
-	int index = g_hSDKHooks.FindString(classname, SDKHookData::classname);
-	if (index == -1)
-		return;
+	int ref = IsValidEdict(entity) ? EntIndexToEntRef(entity) : entity;
 	
-	for (int i = index; i < g_hSDKHooks.Length; i++)
+	for (int i = g_hActiveHooks.Length - 1; i >= 0; i--)
 	{
 		SDKHookData data;
-		if (g_hSDKHooks.GetArray(i, data) && StrEqual(data.classname, classname))
+		if (g_hActiveHooks.GetArray(i, data) && ref == data.ref)
 		{
-			if (bHook)
-			{
-				SDKHook(entity, data.type, data.callback);
-			}
-			else
-			{
-				SDKUnhook(entity, data.type, data.callback);
-			}
+			SDKUnhook(data.ref, data.type, data.callback);
+			g_hActiveHooks.Erase(i);
 		}
 	}
 }
 
-static void SDKHooks_AddHook(const char[] classname, SDKHookType type, SDKHookCB callback)
+static void SDKHooks_HookEntityInternal(int entity, SDKHookType type, SDKHookCB callback)
 {
 	SDKHookData data;
-	strcopy(data.classname, sizeof(data.classname), classname);
+	data.ref = IsValidEdict(entity) ? EntIndexToEntRef(entity) : entity;
 	data.type = type;
 	data.callback = callback;
 	
-	g_hSDKHooks.PushArray(data);
+	g_hActiveHooks.PushArray(data);
+	
+	SDKHook(entity, type, callback);
 }
 
 static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)

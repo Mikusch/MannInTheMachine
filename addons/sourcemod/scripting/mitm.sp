@@ -292,7 +292,7 @@ public void OnClientCookiesCached(int client)
 		return;
 	
 	CTFPlayer player = CTFPlayer(client);
-	player.m_defenderQueuePoints = g_hCookieQueue.GetInt(client, -1);
+	player.m_defenderQueuePoints = g_hCookieQueue.GetInt(client, 0);
 	player.m_preferences = g_hCookiePreferences.GetInt(client, 0);
 }
 

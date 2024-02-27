@@ -183,10 +183,9 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 			menu.GetItem(param2, info, sizeof(info));
 			
 			// display party members
-			if (strncmp(info, "party_", 6) == 0)
+			if (!strncmp(info, "party_", 6))
 			{
-				ReplaceStringEx(info, sizeof(info), "party_", "");
-				int id = StringToInt(info);
+				int id = StringToInt(info[6]);
 				
 				Party party = Party(id);
 				if (party.IsValid())
@@ -204,9 +203,7 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 						Format(strMember, sizeof(strMember), "%N (%d)", members[i], CTFPlayer(members[i]).m_defenderQueuePoints);
 						
 						if (i < count - 1)
-						{
 							StrCat(strMember, sizeof(strMember), ", ");
-						}
 						
 						StrCat(strMembers, sizeof(strMembers), strMember);
 					}
@@ -278,10 +275,7 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 			char name[64];
 			Format(name, sizeof(name), "%T", g_aPreferenceNames[i], param1);
 			
-			if (CTFPlayer(param1).HasPreference(preference))
-				CPrintToChat(param1, "%s %t", PLUGIN_TAG, "Preferences_Enabled", name);
-			else
-				CPrintToChat(param1, "%s %t", PLUGIN_TAG, "Preferences_Disabled", name);
+			CPrintToChat(param1, "%s %t", PLUGIN_TAG, CTFPlayer(param1).HasPreference(preference) ? "Preferences_Enabled" : "Preferences_Disabled", name);
 			
 			Menus_DisplayPreferencesMenu(param1);
 		}
@@ -304,10 +298,7 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 			int i = StringToInt(info);
 			MannInTheMachinePreference preference = view_as<MannInTheMachinePreference>(1 << i);
 			
-			if (CTFPlayer(param1).HasPreference(preference))
-				Format(display, sizeof(display), "☑ %T", g_aPreferenceNames[i], param1);
-			else
-				Format(display, sizeof(display), "☐ %T", g_aPreferenceNames[i], param1);
+			Format(display, sizeof(display), "%s %T", CTFPlayer(param1).HasPreference(preference) ? "☑" : "☐", g_aPreferenceNames[i], param1);
 			
 			return RedrawMenuItem(display);
 		}

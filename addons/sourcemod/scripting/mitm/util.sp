@@ -1180,7 +1180,7 @@ bool StrPtrEquals(Address psz1, Address psz2)
 	PtrToString(psz1, sz1, sizeof(sz1));
 	PtrToString(psz2, sz2, sizeof(sz2));
 	
-	return strcmp(sz1, sz2, false) == 0;
+	return !strcmp(sz1, sz2, false);
 }
 
 void MultiplyAttributeValue(int entity, const char[] szAttrib, float flMult)

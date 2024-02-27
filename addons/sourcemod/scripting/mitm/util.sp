@@ -485,7 +485,7 @@ void FindReplacementDefender()
 	delete queue;
 }
 
-ArrayList GetInvaderQueue(bool bMiniBoss = false)
+ArrayList GetInvaderQueue(bool bIsMiniBoss = false)
 {
 	ArrayList queue = new ArrayList();
 	
@@ -504,16 +504,16 @@ ArrayList GetInvaderQueue(bool bMiniBoss = false)
 		if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 			continue;
 		
-		if (bMiniBoss && CTFPlayer(client).HasPreference(PREF_INVADER_DISABLE_MINIBOSS))
+		if (bIsMiniBoss && CTFPlayer(client).HasPreference(PREF_INVADER_DISABLE_MINIBOSS))
 			continue;
 		
-		if (!Forwards_OnIsValidInvader(client, bMiniBoss))
+		if (!Forwards_OnIsValidInvader(client, bIsMiniBoss))
 			continue;
 		
 		queue.Push(client);
 	}
 	
-	queue.SortCustom(bMiniBoss ? SortPlayersByMinibossPriority : SortPlayersByPriority);
+	queue.SortCustom(bIsMiniBoss ? SortPlayersByMinibossPriority : SortPlayersByPriority);
 	
 	return queue;
 }
@@ -709,14 +709,17 @@ int GetParticleSystemIndex(const char[] szParticleSystemName)
 {
 	if (szParticleSystemName[0])
 	{
-		int iStringTableParticleEffectNamesIndex = FindStringTable("ParticleEffectNames");
-		if (iStringTableParticleEffectNamesIndex == INVALID_STRING_TABLE)
+		static int s_iStringTableParticleEffectNames = INVALID_STRING_TABLE;
+		if (s_iStringTableParticleEffectNames == INVALID_STRING_TABLE)
 		{
-			LogError("Missing string table 'ParticleEffectNames'");
-			return 0;
+			if ((s_iStringTableParticleEffectNames = FindStringTable("ParticleEffectNames")) == INVALID_STRING_TABLE)
+			{
+				LogError("Missing string table 'ParticleEffectNames'");
+				return INVALID_STRING_INDEX;
+			}
 		}
 		
-		int nIndex = FindStringIndex(iStringTableParticleEffectNamesIndex, szParticleSystemName);
+		int nIndex = FindStringIndex(s_iStringTableParticleEffectNames, szParticleSystemName);
 		if (nIndex == INVALID_STRING_INDEX)
 		{
 			LogError("Missing precache for particle system '%s'", szParticleSystemName);
@@ -724,7 +727,6 @@ int GetParticleSystemIndex(const char[] szParticleSystemName)
 		}
 		
 		return nIndex;
-		
 	}
 	
 	return 0;

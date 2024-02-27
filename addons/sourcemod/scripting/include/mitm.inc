@@ -67,10 +67,10 @@ forward bool MannInTheMachine_OnIsValidDefender(int client);
  * Called when the plugin determines whether a player is allowed to become an invader.
  *
  * @param client		Client index.
- * @param isMiniBoss	True if the next invader is a miniboss.
+ * @param bIsMiniBoss	True if the next invader is a miniboss.
  * @return				True if the player is allowed to become an invader, false otherwise.
  */
-forward bool MannInTheMachine_OnIsValidInvader(int client, bool isMiniBoss);
+forward bool MannInTheMachine_OnIsValidInvader(int client, bool bIsMiniBoss);
 
 /**
  * Returns whether the game is in Endless Waves mode.

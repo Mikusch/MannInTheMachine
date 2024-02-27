@@ -310,7 +310,7 @@
 	}
 	"Party_DoesNotExist"
 	{
-		"en"		"The party does not exist. It may have been deleted."
+		"en"		"The party does not exist. It may have been disbanded already."
 	}
 	"Party_AlreadyMember"
 	{

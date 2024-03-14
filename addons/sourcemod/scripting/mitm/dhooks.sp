@@ -440,9 +440,9 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 	
 	// the ground may be variable here, try a few heights
 	float z;
-	for (z = 0.0; z < sv_stepsize.FloatValue; z += 4.0)
+	for (z = 0.0; z < StepHeight; z += 4.0)
 	{
-		here[2] = rawHere[2] + sv_stepsize.FloatValue;
+		here[2] = rawHere[2] + StepHeight;
 		
 		if (SDKCall_IsSpaceToSpawnHere(here))
 		{
@@ -450,7 +450,7 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 		}
 	}
 	
-	if (z >= sv_stepsize.FloatValue)
+	if (z >= StepHeight)
 	{
 		if (tf_populator_debug.BoolValue)
 		{

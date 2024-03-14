@@ -80,15 +80,17 @@
 // 5 bytes are reserved for other parameters
 #define TEXTMSG_MAX_MESSAGE_LENGTH	(MAX_USER_MSG_DATA - 5)
 
-#define PROGRESS_BAR_NUM_BLOCKS	10
+#define PROGRESS_BAR_NUM_BLOCKS		10
 #define PROGRESS_BAR_CHAR_FILLED	"▰"
-#define PROGRESS_BAR_CHAR_EMPTY	"▱"
+#define PROGRESS_BAR_CHAR_EMPTY		"▱"
 
 #define MITM_HINT_MASK	(0x10200)	// annotations have id ( MITM_HINT_MASK | entindex )
 
 // CollectPlayers
 #define COLLECT_ONLY_LIVING_PLAYERS true
 #define APPEND_PLAYERS true
+
+const float StepHeight = 18.0;
 
 const TFTeam TFTeam_Any = view_as<TFTeam>(-2);
 const TFTeam TFTeam_Defenders = TFTeam_Red;

@@ -72,7 +72,6 @@ void ConVars_Init()
 	mp_tournament_redteamname = FindConVar("mp_tournament_redteamname");
 	mp_tournament_blueteamname = FindConVar("mp_tournament_blueteamname");
 	mp_waitingforplayers_time = FindConVar("mp_waitingforplayers_time");
-	sv_stepsize = FindConVar("sv_stepsize");
 	phys_pushscale = FindConVar("phys_pushscale");
 	
 	char value[12];

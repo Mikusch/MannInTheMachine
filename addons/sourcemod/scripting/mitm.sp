@@ -100,7 +100,6 @@ ConVar tf_bot_melee_only;
 ConVar mp_tournament_redteamname;
 ConVar mp_tournament_blueteamname;
 ConVar mp_waitingforplayers_time;
-ConVar sv_stepsize;
 ConVar phys_pushscale;
 
 #include "mitm/shareddefs.sp"

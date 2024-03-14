@@ -281,7 +281,7 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 	if (IsDistanceBetweenLessThan(actor, lastKnownVictimPosition, detonateRange))
 	{
 		float where[3];
-		AddVectors(lastKnownVictimPosition, Vector(0.0, 0.0, sv_stepsize.FloatValue), where);
+		AddVectors(lastKnownVictimPosition, Vector(0.0, 0.0, StepHeight), where);
 		if (IsLineOfFireClearGivenPlayerAndPoint(actor, where))
 		{
 			StartDetonate(action, actor, true);

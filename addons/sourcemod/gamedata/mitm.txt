@@ -321,108 +321,108 @@
 			// Virtual Function Offsets
 			"IPopulationSpawner::Spawn"
 			{
-				"linux"		"3"
-				"windows"	"2"
+				"linux64"		"3"
+				"windows64"		"2"
 			}
 			"CBaseEntity::ShouldCollide"
 			{
-				"linux"		"18"
-				"windows"	"17"
+				"linux64"		"18"
+				"windows64"		"17"
 			}
 			"CBaseEntity::SetModel"
 			{
-				"linux"		"27"
-				"windows"	"26"
+				"linux64"		"27"
+				"windows64"		"26"
 			}
 			"CBaseEntity::IsCombatItem"
 			{
-				"linux"		"88"
-				"windows"	"87"
+				"linux64"		"88"
+				"windows64"		"87"
 			}
 			"CBaseObject::IsPlacementPosValid"
 			{
-				"linux"		"341"
-				"windows"	"340"
+				"linux64"		"341"
+				"windows64"		"340"
 			}
 			"CBaseObject::CanBeUpgraded"
 			{
-				"linux"		"383"
-				"windows"	"382"
+				"linux64"		"383"
+				"windows64"		"382"
 			}
 			"CBaseObject::GetMaxHealthForCurrentLevel"
 			{
-				"linux"		"392"
-				"windows"	"390"
+				"linux64"		"392"
+				"windows64"		"390"
 			}
 			"CBaseCombatWeapon::Clip1"
 			{
-				"linux"		"350"
-				"windows"	"344"
+				"linux64"		"350"
+				"windows64"		"344"
 			}
 			"CTFGrenadePipebombProjectile::GetLiveTime"
 			{
-				"linux"		"257"
-				"windows"	"256"
+				"linux64"		"257"
+				"windows64"		"256"
 			}
 			"CBaseTrigger::PassesTriggerFilters"
 			{
-				"linux"		"208"
-				"windows"	"207"
+				"linux64"		"208"
+				"windows64"		"207"
 			}
 			"CItem::ComeToRest"
 			{
-				"linux"		"233"
-				"windows"	"230"
+				"linux64"		"233"
+				"windows64"		"230"
 			}
 			"IPopulationSpawner::GetClassIcon"
 			{
 				// Linux uses signature call CTFBotSpawner::GetClassIcon
-				"windows"	"6"
+				"windows64"		"6"
 			}
 			"CBaseEntity::ShouldTransmit"
 			{
-				"linux"		"21"
-				"windows"	"20"
+				"linux64"		"21"
+				"windows64"		"20"
 			}
 			"CBaseCombatCharacter::ShouldGib"
 			{
-				"linux"		"297"
-				"windows"	"296"
+				"linux64"		"297"
+				"windows64"		"296"
 			}
 			"CTFPlayer::IsAllowedToPickUpFlag"
 			{
-				"linux"		"485"
-				"windows"	"484"
+				"linux64"		"485"
+				"windows64"		"484"
 			}
 			"CBasePlayer::EntSelectSpawnPoint"
 			{
-				"linux"		"404"
-				"windows"	"403"
+				"linux64"		"404"
+				"windows64"		"403"
 			}
 			"CTFItem::PickUp"
 			{
-				"linux"		"269"
-				"windows"	"231"
+				"linux64"		"269"
+				"windows64"		"231"
 			}
 			"CBaseCombatCharacter::ClearLastKnownArea"
 			{
-				"linux"		"325"
-				"windows"	"324"
+				"linux64"		"325"
+				"windows64"		"324"
 			}
 			"CBaseFilter::PassesFilterImpl"
 			{
-				"linux"		"199"
-				"windows"	"198"
+				"linux64"		"199"
+				"windows64"		"198"
 			}
 			"CGameRules::ShouldCollide"
 			{
-				"linux"		"30"
-				"windows"	"29"
+				"linux64"		"30"
+				"windows64"		"29"
 			}
 			"CTeamplayRules::TeamMayCapturePoint"
 			{
-				"linux"		"159"
-				"windows"	"158"
+				"linux64"		"159"
+				"windows64"		"158"
 			}
 			
 			// Data Offsets

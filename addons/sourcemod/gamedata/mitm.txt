@@ -67,253 +67,255 @@
 			"CTFBotSpawner::GetClassIcon"
 			{
 				// Windows uses virtual IPopulationSpawner::GetClassIcon
-				"linux"		"@_ZN13CTFBotSpawner12GetClassIconEi"
+				"linux64"		"@_ZN13CTFBotSpawner12GetClassIconEi"
 			}
 			"CTFGCServerSystem::PreClientUpdate"
 			{
-				"linux"		"@_ZN17CTFGCServerSystem15PreClientUpdateEv"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x20\x53\x56\x8B\xD9\x57\x89\x5D\xF4\xE8\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A"
+				"linux64"		"@_ZN17CTFGCServerSystem15PreClientUpdateEv"
+				"windows64"		"\x40\x53\x55\x56\x41\x56\x41\x57\x48\x83\xEC\x30"
 			}
 			"CPopulationManager::AllocateBots"
 			{
-				"linux"		"@_ZN18CPopulationManager12AllocateBotsEv"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x14\x53\x8B\xD9\x80\xBB\xAD\x05\x00\x00\x00"
+				"linux64"		"@_ZN18CPopulationManager12AllocateBotsEv"
+				"windows64"		"\x4C\x8B\xDC\x49\x89\x4B\x08\x41\x54\x48\x83\xEC\x50"
 			}
 			"CPopulationManager::EndlessRollEscalation"
 			{
-				"linux"		"@_ZN18CPopulationManager21EndlessRollEscalationEv"
-				"windows"	"\x55\x8B\xEC\x81\xEC\xCC\x02\x00\x00"
+				"linux64"		"@_ZN18CPopulationManager21EndlessRollEscalationEv"
+				"windows64"		"\x48\x8B\xC4\x48\x89\x48\x08\x53\x48\x81\xEC\x30\x04\x00\x00"
 			}
 			"CPopulationManager::IsInEndlessWaves"
 			{
-				"linux"		"@_ZN18CPopulationManager16IsInEndlessWavesEv"
-				"windows"	"\x80\xB9\x0E\x06\x00\x00\x00\x75\x2A\xA1\x2A\x2A\x2A\x2A\x83\x78\x30\x00\x74\x2A\x83\xB9\xE0\x05\x00\x00\x00\x7E\x2A\xB0\x01"
+				"linux64"		"@_ZN18CPopulationManager16IsInEndlessWavesEv"
+				"windows64"		"\x80\xB9\x5A\x07\x00\x00\x00\x75\x2A\x48\x8B\x05\x28\x65\x88\x00"
 			}
 			"CPopulationManager::GetHealthMultiplier"
 			{
-				"linux"		"@_ZN18CPopulationManager19GetHealthMultiplierEb"
-				"windows"	"\x55\x8B\xEC\x80\xB9\x0E\x06\x00\x00\x00"
+				"linux64"		"@_ZN18CPopulationManager19GetHealthMultiplierEb"
+				"windows64"		"\x80\xB9\x5A\x07\x00\x00\x00\x75\x2A\x48\x8B\x05\x38\x6E\x88\x00"
 			}
 			"CPopulationManager::RestoreCheckpoint"
 			{
-				"linux"		"@_ZN18CPopulationManager17RestoreCheckpointEv"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x2C\x53\x56\x8B\xF1\x57\x89\x75\xFC"
+				"linux64"		"@_ZN18CPopulationManager17RestoreCheckpointEv"
+				"windows64"		"\x40\x56\x48\x83\xEC\x50\x80\xB9\x5A\x07\x00\x00\x00"
 			}
 			"CPopulationManager::GetCurrentWave"
 			{
-				"linux"		"@_ZN18CPopulationManager14GetCurrentWaveEv"
-				"windows"	"\x80\xB9\xAC\x05\x00\x00\x00"
+				"linux64"		"@_ZN18CPopulationManager14GetCurrentWaveEv"
+				"windows64"		"\x80\xB9\xD0\x06\x00\x00\x00"
 			}
 			"CTFBotSpawner::Spawn"
 			{
-				"linux"		"@_ZN13CTFBotSpawner5SpawnERK6VectorP10CUtlVectorI7CHandleI11CBaseEntityE10CUtlMemoryIS6_iEE"
-				"windows"	"\x55\x8B\xEC\x81\xEC\x70\x01\x00\x00"
+				"linux64"		"@_ZN13CTFBotSpawner5SpawnERK6VectorP10CUtlVectorI7CHandleI11CBaseEntityE10CUtlMemoryIS6_iEE"
+				"windows64"		"\x4C\x89\x44\x24\x18\x48\x89\x4C\x24\x08\x55\x53\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8D\xAC\x24\xE8\xFE\xFF\xFF"
 			}
 			"CSquadSpawner::Spawn"
 			{
-				"linux"		"@_ZN13CSquadSpawner5SpawnERK6VectorP10CUtlVectorI7CHandleI11CBaseEntityE10CUtlMemoryIS6_iEE"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x2C\x53\x57\x33\xDB"
+				"linux64"		"@_ZN13CSquadSpawner5SpawnERK6VectorP10CUtlVectorI7CHandleI11CBaseEntityE10CUtlMemoryIS6_iEE"
+				"windows64"		"\x48\x89\x5C\x24\x10\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8B\xEC"
 			}
 			"CPopulationManager::Update"
 			{
-				"linux"		"@_ZN18CPopulationManager6UpdateEv"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x18\x53\x56\x57\x8B\xF9\x33\xF6"
+				"linux64"		"@_ZN18CPopulationManager6UpdateEv"
+				"windows64"		"\x4C\x8B\xDC\x49\x89\x5B\x10\x49\x89\x6B\x18\x49\x89\x73\x20\x57\x41\x56\x41\x57\x48\x83\xEC\x60\x48\x8B\x05\xF1\x55\x19\x00"
 			}
 			"CPeriodicSpawnPopulator::Update"
 			{
-				"linux"		"@_ZN23CPeriodicSpawnPopulator6UpdateEv"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x24\x53\x8B\xD9\x56\x8B\x43\x38"
+				"linux64"		"@_ZN23CPeriodicSpawnPopulator6UpdateEv"
+				"windows64"		"\x48\x89\x5C\x24\x18\x48\x89\x7C\x24\x20\x55\x48\x8B\xEC\x48\x83\xEC\x60"
 			}
 			"CWaveSpawnPopulator::Update"
 			{
-				"linux"		"@_ZN19CWaveSpawnPopulator6UpdateEv"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x40\x53\x56\x57\x33\xDB"
+				"linux64"		"@_ZN19CWaveSpawnPopulator6UpdateEv"
+				"windows64"		"\x48\x8B\xC4\x55\x41\x55\x41\x56\x48\x8D\x68\xA1"
 			}
 			"CMissionPopulator::UpdateMission"
 			{
-				"linux"		"@_ZN17CMissionPopulator13UpdateMissionEN6CTFBot11MissionTypeE"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x5C\x8B\x15\x2A\x2A\x2A\x2A"
+				"linux64"		"@_ZN17CMissionPopulator13UpdateMissionEN6CTFBot11MissionTypeE"
+				"windows64"		"\x89\x54\x24\x10\x4C\x8B\xDC\x49\x89\x4B\x08\x53"
 			}
 			"CMissionPopulator::UpdateMissionDestroySentries"
 			{
-				"linux"		"@_ZN17CMissionPopulator28UpdateMissionDestroySentriesEv"
-				"windows"	"\x55\x8B\xEC\x81\xEC\x88\x00\x00\x00\x8B\x15\x2A\x2A\x2A\x2A"
+				"linux"			"@_ZN17CMissionPopulator28UpdateMissionDestroySentriesEv"
+				"windows64"		"\x48\x8B\xC4\x48\x89\x48\x08\x55\x56\x57"
 			}
 			"CPointPopulatorInterface::InputChangeBotAttributes"
 			{
-				"linux"		"@_ZN24CPointPopulatorInterface24InputChangeBotAttributesER11inputdata_t"
-				"windows"	"\x55\x8B\xEC\x8B\x4D\x08\x83\xEC\x14\x83\xC1\x08"
+				"linux64"		"@_ZN24CPointPopulatorInterface24InputChangeBotAttributesER11inputdata_t"
+				"windows64"		"\x41\x54\x48\x83\xEC\x40\x83\x7A\x24\x02"
 			}
 			"CTFGameRules::GetTeamAssignmentOverride"
 			{
-				"linux"		"@_ZN12CTFGameRules25GetTeamAssignmentOverrideEP9CTFPlayerib"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x10\x81\x65\xF4\xFF\xFF\x0F\xFF\x8D\x45\xF0\x53"
+				"linux64"		"@_ZN12CTFGameRules25GetTeamAssignmentOverrideEP9CTFPlayerib"
+				"windows64"		"\x48\x89\x5C\x24\x10\x48\x89\x74\x24\x18\x48\x89\x7C\x24\x20\x55\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8B\xEC\x48\x83\xEC\x30"
 			}
 			"CTFGameRules::PlayerReadyStatus_UpdatePlayerState"
 			{
-				"linux"		"@_ZN12CTFGameRules35PlayerReadyStatus_UpdatePlayerStateEP9CTFPlayerb"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x10\x53\x8B\xD9\x80\xBB\x72\x0C\x00\x00\x00\x75\x2A"
+				"linux64"		"@_ZN12CTFGameRules35PlayerReadyStatus_UpdatePlayerStateEP9CTFPlayerb"
+				"windows64"		"\x48\x83\xEC\x28\x80\xB9\x26\x0D\x00\x00\x00"
 			}
 			"CTeamplayRoundBasedRules::ResetPlayerAndTeamReadyState"
 			{
-				"linux"		"@_ZN24CTeamplayRoundBasedRules28ResetPlayerAndTeamReadyStateEv"
-				"windows"	"\x55\x8B\xEC\x51\x56\x57\x8B\xF9\xC6\x45\xFF\x00\x33\xF6"
+				"linux64"		"@_ZN24CTeamplayRoundBasedRules28ResetPlayerAndTeamReadyStateEv"
+				"windows64"		"\x48\x89\x5C\x24\x08\x48\x89\x6C\x24\x10\x48\x89\x74\x24\x18\x48\x89\x7C\x24\x20\x41\x56\x48\x83\xEC\x20\x33\xFF\x48\x8B\xD9"
 			}
 			"CTeamplayRoundBasedRules::PlayThrottledAlert"
 			{
-				"linux"		"@_ZN24CTeamplayRoundBasedRules18PlayThrottledAlertEiPKcf"
-				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x56\x8B\xF1\xF3\x0F\x10\x40\x0C"
+				"linux64"		"@_ZN24CTeamplayRoundBasedRules18PlayThrottledAlertEiPKcf"
+				"windows64"		"\x40\x53\x48\x83\xEC\x40\x48\x8B\x05\xE3\xB4\x9D\x00"
 			}
 			"CTFPlayer::GetLoadoutItem"
 			{
-				"linux"		"@_ZN9CTFPlayer14GetLoadoutItemEiib"
-				"windows"	"\x55\x8B\xEC\x51\x53\x56\x8B\xF1\x8B\x0D\x2A\x2A\x2A\x2A\x57\x89\x75\xFC"
+				"linux64"		"@_ZN9CTFPlayer14GetLoadoutItemEiib"
+				"windows64"		"\x48\x89\x5C\x24\x08\x48\x89\x6C\x24\x10\x48\x89\x74\x24\x18\x44\x88\x4C\x24\x20\x57\x41\x54"
 			}
 			"CTFPlayer::CheckInstantLoadoutRespawn"
 			{
-				"linux"		"@_ZN9CTFPlayer26CheckInstantLoadoutRespawnEv"
-				"windows"	"\x57\x8B\xF9\x8B\x07\x8B\x80\x0C\x01\x00\x00\xFF\xD0\x84\xC0\x0F\x84\x2A\x2A\x2A\x2A\x8B\x07"
+				"linux64"		"@_ZN9CTFPlayer26CheckInstantLoadoutRespawnEv"
+				"windows64"		""
 			}
 			"CTFPlayer::DoClassSpecialSkill"
 			{
-				"linux"		"@_ZN9CTFPlayer19DoClassSpecialSkillEv"
-				"windows"	"\x56\x8B\xF1\x8B\x06\x8B\x80\x0C\x01\x00\x00\xFF\xD0\x84\xC0\x75\x2A\x32\xC0\x5E\xC3\xF7\x86\xB4\x1B\x00\x00\x00\x00\x04\x00"
+				"linux64"		"@_ZN9CTFPlayer19DoClassSpecialSkillEv"
+				"windows64"		"\x40\x53\x48\x83\xEC\x20\x48\x8B\x01\x48\x8B\xD9\xFF\x90\x18\x02\x00\x00\x84\xC0\x0F\x84\x2A\x2A\x2A\x2A"
 			}
 			"CTFPlayer::DoAnimationEvent"
 			{
-				"linux"		"@_ZN9CTFPlayer16DoAnimationEventE17PlayerAnimEvent_ti"
-				"windows"	"\x55\x8B\xEC\x51\x53\x56\x8B\x35\x2A\x2A\x2A\x2A\x8B\xD9\x8B\xCE"
+				"linux64"		"@_ZN9CTFPlayer16DoAnimationEventE17PlayerAnimEvent_ti"
+				"windows64"		"\x48\x89\x5C\x24\x08\x48\x89\x6C\x24\x10\x48\x89\x74\x24\x18\x48\x89\x7C\x24\x20\x41\x56\x48\x83\xEC\x70\x48\x8B\x1D\x9F\x2E\x9E\x00"
 			}
 			"CTFPlayer::PlaySpecificSequence"
 			{
-				"linux"		"@_ZN9CTFPlayer20PlaySpecificSequenceEPKc"
-				"windows"	"\x55\x8B\xEC\x53\x56\x8B\x75\x08\x57\x56\x8B\xF9\xE8\x2A\x2A\x2A\x2A\x8B\xD8"
+				"linux64"		"@_ZN9CTFPlayer20PlaySpecificSequenceEPKc"
+				"windows64"		"\x48\x89\x5C\x24\x08\x57\x48\x83\xEC\x20\x48\x8B\xFA\x48\x8B\xD9\xE8\x2A\x2A\x2A\x2A\x48\x8B\xCB\x83\xF8\xFF\x74\x2A"
 			}
 			"CTFPlayer::RemoveObject"
 			{
-				"linux"		"@_ZN9CTFPlayer12RemoveObjectEP11CBaseObject"
-				"windows"	"\x55\x8B\xEC\x56\x8B\xF1\x57\x8B\xBE\x44\x23\x00\x00"
+				"linux64"		"@_ZN9CTFPlayer12RemoveObjectEP11CBaseObject"
+				"windows64"		"\x40\x57\x44\x8B\x99\xB8\x27\x00\x00"
 			}
 			"CTFPlayer::RemoveAllOwnedEntitiesFromWorld"
 			{
-				"linux"		"@_ZN9CTFPlayer31RemoveAllOwnedEntitiesFromWorldEb"
-				"windows"	"\x55\x8B\xEC\x56\x8B\xF1\xE8\x2A\x2A\x2A\x2A\xA1\x2A\x2A\x2A\x2A"
+				"linux64"		"@_ZN9CTFPlayer31RemoveAllOwnedEntitiesFromWorldEb"
+				"windows64"		"\x48\x89\x5C\x24\x10\x56\x48\x83\xEC\x20\x0F\xB6\xF2"
 			}
+			// TODO: THIS IS INLINED ON WINDOWS NOW!
+			// CTFBotDeliverFlag::OnContact -> Go to VTable -> CTFBotDeliverFlag::OnEnd
 			"CTFPlayerShared::ResetRageBuffs"
 			{
-				"linux"		"@_ZN15CTFPlayerShared14ResetRageBuffsEv"
-				"windows"	"\xC7\x81\x94\x02\x00\x00\x00\x00\x00\x00\xC7\x81\x98\x02\x00\x00\x00\x00\x00\x00"
+				"linux64"		"@_ZN15CTFPlayerShared14ResetRageBuffsEv"
+				"windows64"		""
 			}
 			"CTFPlayer::CanBuild"
 			{
-				"linux"		"@_ZN9CTFPlayer8CanBuildEii"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x0C\x53\x8B\x5D\x08\x57\x8B\xF9\x83\xFB\x03"
+				"linux64"		"@_ZN9CTFPlayer8CanBuildEii"
+				"windows64"		""
 			}
 			"CEconEntity::UpdateModelToClass"
 			{
-				"linux"		"@_ZN11CEconEntity18UpdateModelToClassEv"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x0C\x53\x56\x8B\x35\x2A\x2A\x2A\x2A\x8B\xD9"
+				"linux64"		"@_ZN11CEconEntity18UpdateModelToClassEv"
+				"windows64"		""
 			}
 			"CCaptureZone::Capture"
 			{
-				"linux"		"@_ZN12CCaptureZone7CaptureEP11CBaseEntity"
-				"windows"	"\x55\x8B\xEC\x51\x53\x57\x8B\x7D\x08\x8B\xD9\x85\xFF\x0F\x84\x2A\x2A\x2A\x2A\x8B\x07\x8B\xCF\x8B\x80\x48\x01\x00\x00\xFF\xD0\x84\xC0\x0F\x84\x2A\x2A\x2A\x2A\x8B\xCF"
+				"linux64"		"@_ZN12CCaptureZone7CaptureEP11CBaseEntity"
+				"windows64"		""
 			}
 			"CWeaponMedigun::AllowedToHealTarget"
 			{
-				"linux"		"@_ZN14CWeaponMedigun19AllowedToHealTargetEP11CBaseEntity"
-				"windows"	"\x55\x8B\xEC\x53\x8B\xD9\x57\x8B\x93\x10\x02\x00\x00\x85\xD2\x0F\x84\x2A\x2A\x2A\x2A\xB9\xFF\x1F\x00\x00\x83\xFA\xFF\x74\x2A\x0F\xB7\xCA\xA1\x2A\x2A\x2A\x2A\xC1\xE1\x04\x8D\x78\x04\x03\xF9\x0F\x84\x2A\x2A\x2A\x2A\xC1\xEA\x10\x39\x57\x04\x0F\x85\x2A\x2A\x2A\x2A\x8B\x3F\x85\xFF\x0F\x84\x2A\x2A\x2A\x2A\x8B\x07\x8B\xCF\x8B\x80\x48\x01\x00\x00\xFF\xD0\x84\xC0\x0F\x84\x2A\x2A\x2A\x2A\x56\x8B\x75\x08\x85\xF6\x0F\x84\x2A\x2A\x2A\x2A\x8B\x06"
+				"linux64"		"@_ZN14CWeaponMedigun19AllowedToHealTargetEP11CBaseEntity"
+				"windows64"		""
 			}
 			"CPopulationManager::ResetMap"
 			{
-				"linux"		"@_ZN18CPopulationManager8ResetMapEv"
-				"windows"	"\x55\x8B\xEC\x51\xA1\x2A\x2A\x2A\x2A\x53\x56\x57\xBF\x01\x00\x00\x00"
+				"linux64"		"@_ZN18CPopulationManager8ResetMapEv"
+				"windows64"		""
 			}
 			"CSpawnLocation::FindSpawnLocation"
 			{
-				"linux"		"@_ZN14CSpawnLocation17FindSpawnLocationER6Vector"
-				"windows"	"\x55\x8B\xEC\x81\xEC\xB4\x00\x00\x00\x53\x8B\xC1"
+				"linux64"		"@_ZN14CSpawnLocation17FindSpawnLocationER6Vector"
+				"windows64"		""
 			}
 			"CPopulationManager::GetSentryBusterDamageAndKillThreshold"
 			{
-				"linux"		"@_ZNK18CPopulationManager37GetSentryBusterDamageAndKillThresholdERiS0_"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x08\x56\x33\xD2"
+				"linux64"		"@_ZNK18CPopulationManager37GetSentryBusterDamageAndKillThresholdERiS0_"
+				"windows64"		""
 			}
 			"IsSpaceToSpawnHere"
 			{
-				"linux"		"@_Z18IsSpaceToSpawnHereRK6Vector"
-				"windows"	"\x53\x8B\xDC\x83\xEC\x08\x83\xE4\xF0\x83\xC4\x04\x55\x8B\x6B\x04\x89\x6C\x24\x04\x8B\xEC\x81\xEC\xDC\x00\x00\x00\x8B\x0D\x2A\x2A\x2A\x2A"
+				"linux64"		"@_Z18IsSpaceToSpawnHereRK6Vector"
+				"windows64"		""
 			}
 			"CTFBotMvMEngineerHintFinder::FindHint"
 			{
-				"linux"		"@_ZN27CTFBotMvMEngineerHintFinder8FindHintEbbP7CHandleI22CTFBotHintEngineerNestE"
-				"windows"	"\x55\x8B\xEC\x81\xEC\xCC\x04\x00\x00"
+				"linux64"		"@_ZN27CTFBotMvMEngineerHintFinder8FindHintEbbP7CHandleI22CTFBotHintEngineerNestE"
+				"windows64"		""
 			}
 			"CTFGameRules::PushAllPlayersAway"
 			{
-				"linux"		"@_ZN12CTFGameRules18PushAllPlayersAwayERK6VectorffiP10CUtlVectorIP9CTFPlayer10CUtlMemoryIS5_iEE"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x2C\x6A\x00"
+				"linux64"		"@_ZN12CTFGameRules18PushAllPlayersAwayERK6VectorffiP10CUtlVectorIP9CTFPlayer10CUtlMemoryIS5_iEE"
+				"windows64"		""
 			}
 			"CTFGameRules::DistributeCurrencyAmount"
 			{
-				"linux"		"@_ZN12CTFGameRules24DistributeCurrencyAmountEiP9CTFPlayerbbb"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x18\x80\x7D\x10\x00"
+				"linux64"		"@_ZN12CTFGameRules24DistributeCurrencyAmountEiP9CTFPlayerbbb"
+				"windows64"		""
 			}
 			"CTFBotHintEngineerNest::GetSentryHint"
 			{
-				"linux"		"@_ZNK22CTFBotHintEngineerNest13GetSentryHintEv"
-				"windows"	"\x8D\x81\x90\x03\x00\x00"
+				"linux64"		"@_ZNK22CTFBotHintEngineerNest13GetSentryHintEv"
+				"windows64"		""
 			}
 			"CTFBotHintEngineerNest::GetTeleporterHint"
 			{
-				"linux"		"@_ZNK22CTFBotHintEngineerNest17GetTeleporterHintEv"
-				"windows"	"\x8D\x81\xA4\x03\x00\x00"
+				"linux64"		"@_ZNK22CTFBotHintEngineerNest17GetTeleporterHintEv"
+				"windows64"		""
 			}
 			"CTraceFilterObject::ShouldHitEntity"
 			{
-				"linux"		"@_ZN18CTraceFilterObject15ShouldHitEntityEP13IHandleEntityi"
-				"windows"	"\x55\x8B\xEC\x51\x8B\xC1\x8B\x0D\x2A\x2A\x2A\x2A"
+				"linux64"		"@_ZN18CTraceFilterObject15ShouldHitEntityEP13IHandleEntityi"
+				"windows64"		""
 			}
 			"CLagCompensationManager::StartLagCompensation"
 			{
-				"linux"		"@_ZN23CLagCompensationManager20StartLagCompensationEP11CBasePlayerP8CUserCmd"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x24\x57\x8B\xF9\x89\x7D\xE8"
+				"linux64"		"@_ZN23CLagCompensationManager20StartLagCompensationEP11CBasePlayerP8CUserCmd"
+				"windows64"		""
 			}
 			"CUniformRandomStream::SetSeed"
 			{
-				"library"	"vstdlib"
-				"linux"		"@_ZN20CUniformRandomStream7SetSeedEi"
-				"windows"	"@?SetSeed@CUniformRandomStream@@UAEXH@Z"
+				"library"		"vstdlib"
+				"linux64"		"@_ZN20CUniformRandomStream7SetSeedEi"
+				"windows64"		"@?SetSeed@CUniformRandomStream@@UAEXH@Z"
 			}
 			"CTFBotHintEngineerNest::IsStaleNest"
 			{
-				"linux"		"@_ZNK22CTFBotHintEngineerNest11IsStaleNestEv"
-				"windows"	"\x56\x57\x8B\xF9\x33\xF6\x39\xB7\x9C\x03\x00\x00"
+				"linux64"		"@_ZNK22CTFBotHintEngineerNest11IsStaleNestEv"
+				"windows64"		""
 			}
 			"CTFBotHintEngineerNest::DetonateStaleNest"
 			{
-				"linux"		"@_ZN22CTFBotHintEngineerNest17DetonateStaleNestEv"
-				"windows"	"\x56\x8B\xF1\x8D\x86\x90\x03\x00\x00"
+				"linux64"		"@_ZN22CTFBotHintEngineerNest17DetonateStaleNestEv"
+				"windows64"		""
 			}
 			"DoTeleporterOverride"
 			{
-				"linux"		"@_Z20DoTeleporterOverrideP11CBaseEntityR6Vectorb"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x1C\x53\x56\x33\xC9"
+				"linux64"		"@_Z20DoTeleporterOverrideP11CBaseEntityR6Vectorb"
+				"windows64"		""
 			}
 			"OnBotTeleported"
 			{
-				"linux"		"@_Z15OnBotTeleportedP6CTFBot"
-				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x83\xEC\x40\x56\x85\xC0"
+				"linux64"		"@_Z15OnBotTeleportedP6CTFBot"
+				"windows64"		""
 			}
 			"BotGenerateAndWearItem"
 			{
-				"linux"		"@_Z22BotGenerateAndWearItemP9CTFPlayerPKc"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x58\x53\x8B\x5D\x08\x85\xDB"
+				"linux64"		"@_Z22BotGenerateAndWearItemP9CTFPlayerPKc"
+				"windows64	"	""
 			}
 			"GetBombInfo"
 			{
-				"linux"		"@_Z11GetBombInfoP10BombInfo_t"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x20\x8B\x15\x2A\x2A\x2A\x2A\x0F\x57\xD2"
+				"linux64"		"@_Z11GetBombInfoP10BombInfo_t"
+				"windows64"		""
 			}
 		}
 		"Offsets"

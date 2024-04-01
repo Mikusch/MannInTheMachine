@@ -19,7 +19,7 @@
 {
 	"Menu_Main_Title"
 	{
-		"en"		"Welcome to Mann in the Machine by Mikusch!"
+		"en"		"Welcome to Mann in the Machine!"
 	}
 	"Menu_Main_Queue"
 	{
@@ -32,6 +32,10 @@
 	"Menu_Main_Party"
 	{
 		"en"		"Open party menu"
+	}
+	"Menu_Main_Credits"
+	{
+		"en"		"View gamemode credits"
 	}
 	"Menu_Queue_Title"
 	{
@@ -62,6 +66,22 @@
 	"Menu_Preferences_NotLoaded"
 	{
 		"en"		"Your preferences are still loading, please wait a moment."
+	}
+	"Menu_Credits_Title"
+	{
+		"en"	"Gamemode Credits"
+	}
+	"Menu_Credits_Mikusch"
+	{
+		"en"	"Code and gameplay"
+	}
+	"Menu_Credits_Kenzzer"
+	{
+		"en"	"Early coding help"
+	}
+	"Menu_Credits_trigger_hurt"
+	{
+		"en"	"Custom robot viewmodels"
 	}
 	"Preference_DisableDefender"
 	{

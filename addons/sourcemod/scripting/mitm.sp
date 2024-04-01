@@ -236,8 +236,6 @@ public void OnMapStart()
 	g_bMiniBossQueue = false;
 	g_flLastQueueSwitchTime = GetGameTime();
 	
-	DHooks_HookGamerules();
-	
 	// Add bot icons to the downloads table
 	DirectoryListing directory = OpenDirectory("materials/hud");
 	if (directory)

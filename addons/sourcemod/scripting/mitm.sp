@@ -236,23 +236,6 @@ public void OnMapStart()
 	g_bMiniBossQueue = false;
 	g_flLastQueueSwitchTime = GetGameTime();
 	
-	// Add bot icons to the downloads table
-	DirectoryListing directory = OpenDirectory("materials/hud");
-	if (directory)
-	{
-		char file[PLATFORM_MAX_PATH];
-		FileType type;
-		while (directory.GetNext(file, sizeof(file), type))
-		{
-			Format(file, sizeof(file), "materials/hud/%s", file);
-			AddFileToDownloadsTable(file);
-		}
-	}
-	delete directory;
-	
-	PrecacheSound("ui/system_message_alert.wav");
-	PrecacheSound(")mvm/mvm_tele_activate.wav");
-	
 	Precache();
 }
 
@@ -702,6 +685,9 @@ void TogglePlugin(bool bEnable)
 
 static void Precache()
 {
+	PrecacheSound("ui/system_message_alert.wav");
+	PrecacheSound(")mvm/mvm_tele_activate.wav");
+	
 	SuperPrecacheModel("models/weapons/c_models/c_scout_bot_arms.mdl");
 	SuperPrecacheModel("models/weapons/c_models/c_scout_bot_animations.mdl");
 	SuperPrecacheModel("models/weapons/c_models/c_sniper_bot_arms.mdl");

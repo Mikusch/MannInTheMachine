@@ -26,7 +26,11 @@ void Menus_DisplayMainMenu(int client)
 	
 	menu.AddItem("queue", "Menu_Main_Queue");
 	menu.AddItem("preferences", "Menu_Main_Preferences");
-	menu.AddItem("party", "Menu_Main_Party", sm_mitm_party_enabled.BoolValue ? ITEMDRAW_DEFAULT : ITEMDRAW_DISABLED);
+	
+	if (sm_mitm_party_enabled.BoolValue)
+	{
+		menu.AddItem("party", "Menu_Main_Party");
+	}
 	
 	menu.Display(client, MENU_TIME_FOREVER);
 }
@@ -179,10 +183,9 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 			menu.GetItem(param2, info, sizeof(info));
 			
 			// display party members
-			if (strncmp(info, "party_", 6) == 0)
+			if (!strncmp(info, "party_", 6))
 			{
-				ReplaceStringEx(info, sizeof(info), "party_", "");
-				int id = StringToInt(info);
+				int id = StringToInt(info[6]);
 				
 				Party party = Party(id);
 				if (party.IsValid())
@@ -191,7 +194,7 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 					party.GetName(name, sizeof(name));
 					
 					int[] members = new int[MaxClients];
-					int count = party.CollectMembers(members, MaxClients);
+					int count = party.CollectMembers(members);
 					
 					for (int i = 0; i < count; i++)
 					{
@@ -200,9 +203,7 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 						Format(strMember, sizeof(strMember), "%N (%d)", members[i], CTFPlayer(members[i]).m_defenderQueuePoints);
 						
 						if (i < count - 1)
-						{
 							StrCat(strMember, sizeof(strMember), ", ");
-						}
 						
 						StrCat(strMembers, sizeof(strMembers), strMember);
 					}
@@ -241,11 +242,11 @@ void Menus_DisplayPreferencesMenu(int client)
 		menu.SetTitle("%T", "Menu_Preferences_Title", client);
 		menu.ExitBackButton = true;
 		
-		for (int i = 0; i < sizeof(g_PreferenceNames); i++)
+		for (int i = 0; i < sizeof(g_aPreferenceNames); i++)
 		{
 			char info[32];
-			if (IntToString(i, info, sizeof(info)) > 0)
-				menu.AddItem(info, g_PreferenceNames[i]);
+			if (IntToString(i, info, sizeof(info)))
+				menu.AddItem(info, g_aPreferenceNames[i]);
 		}
 		
 		menu.Display(client, MENU_TIME_FOREVER);
@@ -272,12 +273,9 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 			CTFPlayer(param1).SetPreference(preference, !CTFPlayer(param1).HasPreference(preference));
 			
 			char name[64];
-			Format(name, sizeof(name), "%T", g_PreferenceNames[i], param1);
+			Format(name, sizeof(name), "%T", g_aPreferenceNames[i], param1);
 			
-			if (CTFPlayer(param1).HasPreference(preference))
-				CPrintToChat(param1, "%s %t", PLUGIN_TAG, "Preferences_Enabled", name);
-			else
-				CPrintToChat(param1, "%s %t", PLUGIN_TAG, "Preferences_Disabled", name);
+			CPrintToChat(param1, "%s %t", PLUGIN_TAG, CTFPlayer(param1).HasPreference(preference) ? "Preferences_Enabled" : "Preferences_Disabled", name);
 			
 			Menus_DisplayPreferencesMenu(param1);
 		}
@@ -300,10 +298,7 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 			int i = StringToInt(info);
 			MannInTheMachinePreference preference = view_as<MannInTheMachinePreference>(1 << i);
 			
-			if (CTFPlayer(param1).HasPreference(preference))
-				Format(display, sizeof(display), "☑ %T", g_PreferenceNames[i], param1);
-			else
-				Format(display, sizeof(display), "☐ %T", g_PreferenceNames[i], param1);
+			Format(display, sizeof(display), "%s %T", CTFPlayer(param1).HasPreference(preference) ? "☑" : "☐", g_aPreferenceNames[i], param1);
 			
 			return RedrawMenuItem(display);
 		}
@@ -350,7 +345,7 @@ void Menus_DisplayPartyMenu(int client)
 		
 		// show party members
 		int[] members = new int[MaxClients];
-		int count = party.CollectMembers(members, MaxClients);
+		int count = party.CollectMembers(members);
 		for (int i = 0; i < count; i++)
 		{
 			int member = members[i];
@@ -530,6 +525,9 @@ void Menus_DisplayPartyManageInviteMenu(int client)
 		if (CTFPlayer(other).HasPreference(PREF_IGNORE_PARTY_INVITES))
 			continue;
 		
+		if (!Forwards_OnIsValidDefender(other))
+			continue;
+		
 		Party party = CTFPlayer(client).GetParty();
 		
 		char userid[32];
@@ -633,7 +631,7 @@ void Menus_DisplayPartyManageKickMenu(int client)
 	menu.ExitBackButton = true;
 	
 	int[] members = new int[MaxClients];
-	int count = party.CollectMembers(members, MaxClients);
+	int count = party.CollectMembers(members);
 	
 	for (int i = 0; i < count; i++)
 	{

@@ -36,6 +36,8 @@ methodmap CTFBotMainAction < NextBotAction
 		ActionFactory.SetEventCallback(EventResponderType_OnKilled, OnKilled);
 		ActionFactory.SetEventCallback(EventResponderType_OnContact, OnContact);
 		ActionFactory.SetEventCallback(EventResponderType_OnOtherKilled, OnOtherKilled);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldAttack, ShouldAttack);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldHurry, ShouldHurry);
 	}
 	
 	public static NextBotActionFactory GetFactory()
@@ -65,7 +67,7 @@ static NextBotAction InitialContainedAction(CTFBotMainAction action, int actor)
 {
 	if (TF2_GetClientTeam(actor) == TFTeam_Invaders)
 	{
-		return CTFBotScenarioMonitor();
+		return CTFBotTacticalMonitor();
 	}
 	
 	return NULL_ACTION;
@@ -78,6 +80,8 @@ static int OnStart(CTFBotMainAction action, int actor, NextBotAction priorAction
 		// not an invader - do nothing
 		return action.Done("I'm not an invader!");
 	}
+	
+	CTFPlayer(actor).m_isWaitingForFullReload = false;
 	
 	// if bot is already dead at this point, make sure it's dead
 	// check for !IsAlive because bot could be DYING
@@ -116,6 +120,7 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 			TF2_AddCondition(actor, TFCond_Ubercharged, 0.5);
 			TF2_AddCondition(actor, TFCond_UberchargedHidden, 0.5);
 			TF2_AddCondition(actor, TFCond_UberchargeFading, 0.5);
+			TF2_AddCondition(actor, TFCond_ImmuneToPushback, 1.0);
 			
 			// force bots to walk out of spawn
 			if (!CTFPlayer(actor).HasAttribute(AUTO_JUMP))
@@ -143,14 +148,14 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 						int iMaxDeaths = sm_mitm_max_spawn_deaths.IntValue;
 						if (iMaxDeaths && !sm_mitm_developer.BoolValue)
 						{
-							if (iMaxDeaths <= ++CTFPlayer(actor).m_iSpawnDeathCount)
+							if (iMaxDeaths <= ++CTFPlayer(actor).m_spawnDeathCount)
 							{
 								KickClient(actor, "%t", "Invader_SpawnTimer_KickReason");
 								CPrintToChatAll("%s %t", PLUGIN_TAG, "Invader_SpawnTimer_Kicked", actor);
 							}
 							else
 							{
-								CPrintToChat(actor, "%s %t", PLUGIN_TAG, "Invader_SpawnTimer_Warning", iMaxDeaths - CTFPlayer(actor).m_iSpawnDeathCount);
+								CPrintToChat(actor, "%s %t", PLUGIN_TAG, "Invader_SpawnTimer_Warning", iMaxDeaths - CTFPlayer(actor).m_spawnDeathCount);
 							}
 						}
 					}
@@ -203,6 +208,8 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 		}
 	}
 	
+	CTFPlayer(actor).EquipRequiredWeapon();
+	
 	return action.Continue();
 }
 
@@ -239,9 +246,10 @@ static int OnContact(CTFBotMainAction action, int actor, int other, Address resu
 					CBaseEntity(actor).WorldSpaceCenter(actorCenter);
 					SubtractVectors(victimCenter, actorCenter, toVictim);
 					
-					float vecForce[3];
-					CalculateMeleeDamageForce(toVictim, float(4 * damage), 1.0, vecForce);
-					SDKHooks_TakeDamage(other, actor, actor, float(4 * damage), DMG_BLAST, _, vecForce, actorCenter);
+					CTakeDamageInfo info = GetGlobalDamageInfo();
+					info.Init(actor, actor, .damage = float(4 * damage), .bitsDamageType = DMG_BLAST);
+					CalculateMeleeDamageForce(info, toVictim, actorCenter, 1.0);
+					CBaseEntity(other).TakeDamage(info);
 				}
 			}
 		}
@@ -275,4 +283,44 @@ static int OnOtherKilled(CTFBotMainAction action, int actor, int victim, int att
 	}
 	
 	return action.TryContinue();
+}
+
+static QueryResultType ShouldAttack(CTFBotMainAction action, INextBot bot, CKnownEntity knownEntity)
+{
+	if (g_pPopulationManager.IsValid())
+	{
+		// if I'm in my spawn room, obey the population manager's attack restrictions
+		int me = bot.GetEntity();
+		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(me).GetLastKnownArea());
+		TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(me) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
+		
+		if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
+		{
+			return g_pPopulationManager.CanBotsAttackWhileInSpawnRoom() ? ANSWER_YES : ANSWER_NO;
+		}
+	}
+	
+	return ANSWER_YES;
+}
+
+static QueryResultType ShouldHurry(CTFBotMainAction action, INextBot bot)
+{
+	if (g_pPopulationManager.IsValid())
+	{
+		// if I'm in my spawn room, obey the population manager's attack restrictions
+		int me = bot.GetEntity();
+		CTFNavArea myArea = view_as<CTFNavArea>(CBaseCombatCharacter(me).GetLastKnownArea());
+		TFNavAttributeType spawnRoomFlag = TF2_GetClientTeam(me) == TFTeam_Red ? RED_SPAWN_ROOM : BLUE_SPAWN_ROOM;
+		
+		if (myArea && myArea.HasAttributeTF(spawnRoomFlag))
+		{
+			if (g_pPopulationManager.CanBotsAttackWhileInSpawnRoom())
+			{
+				// hurry to leave the spawn
+				return ANSWER_YES;
+			}
+		}
+	}
+	
+	return ANSWER_UNDEFINED;
 }

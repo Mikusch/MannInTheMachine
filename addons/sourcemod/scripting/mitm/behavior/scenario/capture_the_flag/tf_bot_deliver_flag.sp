@@ -36,6 +36,9 @@ methodmap CTFBotDeliverFlag < NextBotAction
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
 		ActionFactory.SetEventCallback(EventResponderType_OnContact, OnContact);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldAttack, ShouldAttack);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldHurry, ShouldHurry);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldRetreat, ShouldRetreat);
 	}
 	
 	public CTFBotDeliverFlag()
@@ -92,6 +95,9 @@ static int OnStart(CTFBotDeliverFlag action, int actor, NextBotAction priorActio
 	
 	if (!IsFakeClient(actor))
 	{
+		// Don't push around the flag (bomb) carrier.
+		// We need this for MvM mode so friendly bots don't
+		// move the bomb jumper and cause him to restart.
 		tf_avoidteammates_pushaway.ReplicateToClient(actor, "0");
 	}
 	
@@ -116,6 +122,11 @@ static int OnStart(CTFBotDeliverFlag action, int actor, NextBotAction priorActio
 			g_pObjectiveResource.SetBaseMvMBombUpgradeTime(GetGameTime());
 			g_pObjectiveResource.SetNextMvMBombUpgradeTime(GetGameTime() + action.m_upgradeTimer.GetRemainingTime());
 		}
+	}
+	
+	if (IsMannVsMachineMode())
+	{
+		TF2Attrib_SetByName(actor, "self dmg push force decreased", 0.0);
 	}
 	
 	return action.Continue();
@@ -158,6 +169,7 @@ static void OnEnd(CTFBotDeliverFlag action, int actor, NextBotAction nextAction)
 		SDKCall_CTFPlayerShared_ResetRageBuffs(GetPlayerShared(actor));
 		TF2Attrib_RemoveByName(actor, "health regen");
 		TF2_RemoveCondition(actor, TFCond_CritCanteen);
+		TF2Attrib_RemoveByName(actor, "self dmg push force decreased");
 	}
 	
 	delete action.m_upgradeTimer;
@@ -227,7 +239,7 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 							g_pObjectiveResource.SetBaseMvMBombUpgradeTime(GetGameTime());
 							g_pObjectiveResource.SetNextMvMBombUpgradeTime(GetGameTime() + action.m_upgradeTimer.GetRemainingTime());
 							HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE1", TFTeam_Defenders);
-							TE_TFParticleEffect("mvm_levelup1", .attachType = PATTACH_POINT_FOLLOW, .entity = actor, .attachPoint = LookupEntityAttachment(actor, "head"));
+							TE_TFParticleEffectAttachment("mvm_levelup1", actor, PATTACH_POINT_FOLLOW, "head");
 						}
 						return true;
 					}
@@ -246,7 +258,7 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 							g_pObjectiveResource.SetBaseMvMBombUpgradeTime(GetGameTime());
 							g_pObjectiveResource.SetNextMvMBombUpgradeTime(GetGameTime() + action.m_upgradeTimer.GetRemainingTime());
 							HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE2", TFTeam_Defenders);
-							TE_TFParticleEffect("mvm_levelup2", .attachType = PATTACH_POINT_FOLLOW, .entity = actor, .attachPoint = LookupEntityAttachment(actor, "head"));
+							TE_TFParticleEffectAttachment("mvm_levelup2", actor, PATTACH_POINT_FOLLOW, "head");
 						}
 						return true;
 					}
@@ -264,7 +276,7 @@ static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)
 							g_pObjectiveResource.SetBaseMvMBombUpgradeTime(-1.0);
 							g_pObjectiveResource.SetNextMvMBombUpgradeTime(-1.0);
 							HaveAllPlayersSpeakConceptIfAllowed("TLK_MVM_BOMB_CARRIER_UPGRADE3", TFTeam_Defenders);
-							TE_TFParticleEffect("mvm_levelup3", .attachType = PATTACH_POINT_FOLLOW, .entity = actor, .attachPoint = LookupEntityAttachment(actor, "head"));
+							TE_TFParticleEffectAttachment("mvm_levelup3", actor, PATTACH_POINT_FOLLOW, "head");
 						}
 						return true;
 					}
@@ -284,4 +296,24 @@ static int OnContact(CTFBotDeliverFlag action, int actor, int other, Address res
 	}
 	
 	return action.TryContinue();
+}
+
+static QueryResultType ShouldAttack(CTFBotDeliverFlag action, INextBot bot, CKnownEntity knownEntity)
+{
+	if (tf_mvm_bot_allow_flag_carrier_to_fight.BoolValue)
+	{
+		return ANSWER_UNDEFINED;
+	}
+	
+	return ANSWER_NO;
+}
+
+static QueryResultType ShouldHurry(CTFBotDeliverFlag action, INextBot bot)
+{
+	return ANSWER_YES;
+}
+
+static QueryResultType ShouldRetreat(CTFBotDeliverFlag action, INextBot bot)
+{
+	return ANSWER_NO;
 }

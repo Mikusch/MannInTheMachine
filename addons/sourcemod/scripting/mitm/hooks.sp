@@ -18,12 +18,53 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+enum struct EntityOutputData
+{
+	char classname[64];
+	char output[64];
+	EntityOutput callback;
+}
+
+static ArrayList g_hEntityOutputs;
+
 void Hooks_Init()
 {
+	g_hEntityOutputs = new ArrayList(sizeof(EntityOutputData));
+	
 	HookUserMessage(GetUserMessageId("SayText2"), OnSayText2, true);
 	HookUserMessage(GetUserMessageId("TextMsg"), OnTextMsg, true);
 	
-	HookEntityOutput("tf_gamerules", "OnStateEnterBetweenRounds", EntityOutput_OnStateEnterBetweenRounds);
+	Hooks_AddEntityOutput("tf_gamerules", "OnStateEnterBetweenRounds", EntityOutput_CTFGameRules_OnStateEnterBetweenRounds);
+	Hooks_AddEntityOutput("trigger_remove_tf_player_condition", "OnStartTouch", EntityOutput_CTriggerRemoveTFPlayerCondition_OnStartTouch);
+}
+
+void Hooks_Toggle(bool bEnable)
+{
+	for (int i = 0; i < g_hEntityOutputs.Length; i++)
+	{
+		EntityOutputData data;
+		if (g_hEntityOutputs.GetArray(i, data))
+		{
+			if (bEnable)
+			{
+				HookEntityOutput(data.classname, data.output, data.callback);
+			}
+			else
+			{
+				UnhookEntityOutput(data.classname, data.output, data.callback);
+			}
+		}
+	}
+}
+
+static void Hooks_AddEntityOutput(const char[] classname, const char[] output, EntityOutput callback)
+{
+	EntityOutputData data;
+	strcopy(data.classname, sizeof(data.classname), classname);
+	strcopy(data.output, sizeof(data.output), output);
+	data.callback = callback;
+	
+	g_hEntityOutputs.PushArray(data);
 }
 
 static Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNum, bool reliable, bool init)
@@ -88,7 +129,7 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 		{
 			CMvMBotUpgrade upgrade = g_pPopulationManager.m_EndlessActiveBotUpgrades.Get(i, GetOffset(NULL_STRING, "sizeof(CMvMBotUpgrade)"));
 			
-			if (upgrade.bIsBotAttr == true)
+			if (upgrade.bIsBotAttr)
 			{
 				char szAttrib[MAX_ATTRIBUTE_DESCRIPTION_LENGTH];
 				PtrToString(upgrade.szAttrib, szAttrib, sizeof(szAttrib));
@@ -102,7 +143,7 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 					Format(szMessage, sizeof(szMessage), "%s- %s\n", szMessage, szAttrib);
 				}
 			}
-			else if (upgrade.bIsSkillAttr == true)
+			else if (upgrade.bIsSkillAttr)
 			{
 				char szAttrib[MAX_ATTRIBUTE_DESCRIPTION_LENGTH];
 				PtrToString(upgrade.szAttrib, szAttrib, sizeof(szAttrib));
@@ -188,15 +229,21 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 	}
 }
 
-static void EntityOutput_OnStateEnterBetweenRounds(const char[] output, int caller, int activator, float delay)
+static void EntityOutput_CTFGameRules_OnStateEnterBetweenRounds(const char[] output, int caller, int activator, float delay)
 {
 	if (!g_bInWaitingForPlayers && sm_mitm_setup_time.IntValue > 0)
 	{
-		CreateTimer(0.1, Timer_StartReadyTimer);
+		RequestFrame(RequestFrame_StartReadyTimer);
 	}
 }
 
-static void Timer_StartReadyTimer(Handle timer)
+static void EntityOutput_CTriggerRemoveTFPlayerCondition_OnStartTouch(const char[] output, int caller, int activator, float delay)
+{
+	// Copy behavior of CTriggerRemoveTFPlayerCondition::StartTouch
+	SDKCall_CBaseCombatCharacter_ClearLastKnownArea(activator);
+}
+
+static void RequestFrame_StartReadyTimer()
 {
 	// Automatically start the ready timer
 	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + sm_mitm_setup_time.FloatValue);

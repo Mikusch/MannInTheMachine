@@ -18,31 +18,76 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static bool g_bHasActiveTeleporterPre;
-
-void SDKHooks_OnClientPutInServer(int client)
+enum struct SDKHookData
 {
-	SDKHook(client, SDKHook_OnTakeDamageAlive, SDKHookCB_Client_OnTakeDamageAlive);
-	SDKHook(client, SDKHook_WeaponCanSwitchTo, SDKHookCB_Client_WeaponCanSwitchTo);
-	SDKHook(client, SDKHook_WeaponEquipPost, SDKHookCB_Client_WeaponEquipPost);
-	SDKHook(client, SDKHook_WeaponSwitchPost, SDKHookCB_Client_WeaponSwitchPost);
+	int ref;
+	SDKHookType type;
+	SDKHookCB callback;
 }
 
-void SDKHooks_OnEntityCreated(int entity, const char[] classname)
+static bool g_bHasActiveTeleporterPre;
+static ArrayList g_hActiveHooks;
+
+void SDKHooks_Init()
 {
-	if (StrEqual(classname, "tf_projectile_pipe_remote"))
+	g_hActiveHooks = new ArrayList(sizeof(SDKHookData));
+}
+
+void SDKHooks_HookEntity(int entity, const char[] classname)
+{
+	if (IsEntityClient(entity))
 	{
-		SDKHook(entity, SDKHook_SetTransmit, SDKHookCB_ProjectilePipeRemote_SetTransmit);
+		SDKHooks_HookEntityInternal(entity, SDKHook_OnTakeDamageAlive, SDKHookCB_Client_OnTakeDamageAlive);
+		SDKHooks_HookEntityInternal(entity, SDKHook_WeaponCanSwitchTo, SDKHookCB_Client_WeaponCanSwitchTo);
+		SDKHooks_HookEntityInternal(entity, SDKHook_WeaponEquipPost, SDKHookCB_Client_WeaponEquipPost);
+		SDKHooks_HookEntityInternal(entity, SDKHook_WeaponSwitchPost, SDKHookCB_Client_WeaponSwitchPost);
+	}
+	else if (StrEqual(classname, "tf_projectile_pipe_remote"))
+	{
+		SDKHooks_HookEntityInternal(entity, SDKHook_SetTransmit, SDKHookCB_ProjectilePipeRemote_SetTransmit);
 	}
 	else if (StrEqual(classname, "bot_hint_engineer_nest"))
 	{
-		SDKHook(entity, SDKHook_Think, SDKHookCB_BotHintEngineerNest_Think);
-		SDKHook(entity, SDKHook_ThinkPost, SDKHookCB_BotHintEngineerNest_ThinkPost);
+		SDKHooks_HookEntityInternal(entity, SDKHook_Think, SDKHookCB_BotHintEngineerNest_Think);
+		SDKHooks_HookEntityInternal(entity, SDKHook_ThinkPost, SDKHookCB_BotHintEngineerNest_ThinkPost);
 	}
+	else if (StrEqual(classname, "entity_medigun_shield"))
+	{
+		SDKHooks_HookEntityInternal(entity, SDKHook_OnTakeDamagePost, SDKHookCB_EntityMedigunShield_OnTakeDamagePost);
+	}
+}
+
+void SDKHooks_UnhookEntity(int entity)
+{
+	int ref = IsValidEdict(entity) ? EntIndexToEntRef(entity) : entity;
+	
+	for (int i = g_hActiveHooks.Length - 1; i >= 0; i--)
+	{
+		SDKHookData data;
+		if (g_hActiveHooks.GetArray(i, data) && ref == data.ref)
+		{
+			SDKUnhook(data.ref, data.type, data.callback);
+			g_hActiveHooks.Erase(i);
+		}
+	}
+}
+
+static void SDKHooks_HookEntityInternal(int entity, SDKHookType type, SDKHookCB callback)
+{
+	SDKHookData data;
+	data.ref = IsValidEdict(entity) ? EntIndexToEntRef(entity) : entity;
+	data.type = type;
+	data.callback = callback;
+	
+	g_hActiveHooks.PushArray(data);
+	
+	SDKHook(entity, type, callback);
 }
 
 static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
+	CTakeDamageInfo info = GetGlobalDamageInfo();
+	
 	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
 	{
 		// Don't let Sentry Busters die until they've done their spin-up
@@ -62,7 +107,7 @@ static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int 
 		{
 			if ((attacker != victim) &&
 				CTFPlayer(attacker).GetPrevMission() == MISSION_DESTROY_SENTRIES &&
-				g_bForceFriendlyFire &&
+				info.IsForceFriendlyFire() &&
 				TF2_GetClientTeam(victim) == TF2_GetClientTeam(attacker) &&
 				CTFPlayer(victim).IsMiniBoss())
 			{
@@ -88,7 +133,7 @@ static Action SDKHookCB_Client_WeaponCanSwitchTo(int client, int weapon)
 
 static void SDKHookCB_Client_WeaponEquipPost(int client, int weapon)
 {
-	if (mitm_use_bot_viewmodels.BoolValue && TF2_GetClientTeam(client) == TFTeam_Invaders)
+	if (sm_mitm_use_bot_viewmodels.BoolValue && TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
 		if (TF2Util_GetWeaponID(weapon) == TF_WEAPON_INVIS)
 		{
@@ -125,7 +170,7 @@ static void SDKHookCB_Client_WeaponEquipPost(int client, int weapon)
 
 static void SDKHookCB_Client_WeaponSwitchPost(int client, int weapon)
 {
-	if (mitm_use_bot_viewmodels.BoolValue && TF2_GetClientTeam(client) == TFTeam_Invaders)
+	if (sm_mitm_use_bot_viewmodels.BoolValue && TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
 		int iModelIndex = GetEffectiveViewModelIndex(client, weapon);
 		if (iModelIndex == 0)
@@ -179,6 +224,15 @@ static void SDKHookCB_BotHintEngineerNest_ThinkPost(int entity)
 			}
 		}
 	}
+}
+
+static void SDKHookCB_EntityMedigunShield_OnTakeDamagePost(int victim, int attacker, int inflictor, float damage, int damagetype)
+{
+	int owner = GetEntPropEnt(victim, Prop_Send, "m_hOwnerEntity");
+	if (!IsValidEntity(owner))
+		return;
+	
+	SetEntPropFloat(owner, Prop_Send, "m_flRageMeter", GetEntPropFloat(owner, Prop_Send, "m_flRageMeter") - (damage * sm_mitm_shield_damage_drain_rate.FloatValue));
 }
 
 Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)

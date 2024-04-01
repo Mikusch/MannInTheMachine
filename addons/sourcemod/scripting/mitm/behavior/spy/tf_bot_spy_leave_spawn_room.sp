@@ -32,6 +32,7 @@ methodmap CTFBotSpyLeaveSpawnRoom < NextBotAction
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldAttack, ShouldAttack);
 	}
 	
 	public CTFBotSpyLeaveSpawnRoom()
@@ -126,6 +127,11 @@ static void OnEnd(CTFBotSpyLeaveSpawnRoom action, int actor, NextBotAction nextA
 	delete action.m_waitTimer;
 }
 
+static QueryResultType ShouldAttack(CTFBotSpyLeaveSpawnRoom action, INextBot bot, CKnownEntity knownEntity)
+{
+	return ANSWER_NO;
+}
+
 static bool TeleportNearVictim(int actor, int victim, int attempt)
 {
 	if (victim == -1)
@@ -150,7 +156,7 @@ static bool TeleportNearVictim(int actor, int victim, int attempt)
 	
 	// collect walkable areas surrounding this victim
 	SurroundingAreasCollector areas;
-	areas = TheNavMesh.CollectSurroundingAreas(CBaseCombatCharacter(victim).GetLastKnownArea(), surroundTravelRange, sv_stepsize.FloatValue, sv_stepsize.FloatValue);
+	areas = TheNavMesh.CollectSurroundingAreas(CBaseCombatCharacter(victim).GetLastKnownArea(), surroundTravelRange, StepHeight, StepHeight);
 	
 	// keep subset that isn't visible to the victim's team
 	for (int i = 0; i < areas.Count(); i++)
@@ -186,7 +192,7 @@ static bool TeleportNearVictim(int actor, int victim, int attempt)
 		CNavArea area = ambushList.Get(which);
 		float where[3];
 		area.GetCenter(where);
-		AddVectors(where, Vector(0.0, 0.0, sv_stepsize.FloatValue), where);
+		AddVectors(where, Vector(0.0, 0.0, StepHeight), where);
 		
 		if (SDKCall_IsSpaceToSpawnHere(where))
 		{

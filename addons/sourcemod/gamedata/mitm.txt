@@ -66,7 +66,7 @@
 		{
 			"CTFBotSpawner::GetClassIcon"
 			{
-				// Windows uses virtual CTFBotSpawner::GetClassIcon
+				// Windows uses virtual IPopulationSpawner::GetClassIcon
 				"linux"		"@_ZN13CTFBotSpawner12GetClassIconEi"
 			}
 			"CTFGCServerSystem::PreClientUpdate"
@@ -152,7 +152,7 @@
 			"CTFGameRules::PlayerReadyStatus_UpdatePlayerState"
 			{
 				"linux"		"@_ZN12CTFGameRules35PlayerReadyStatus_UpdatePlayerStateEP9CTFPlayerb"
-				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x83\xEC\x10\x83\x78\x30\x00\x53\x8B\xD9"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x10\x53\x8B\xD9\x80\xBB\x72\x0C\x00\x00\x00\x75\x2A"
 			}
 			"CTeamplayRoundBasedRules::ResetPlayerAndTeamReadyState"
 			{
@@ -192,7 +192,7 @@
 			"CTFPlayer::RemoveObject"
 			{
 				"linux"		"@_ZN9CTFPlayer12RemoveObjectEP11CBaseObject"
-				"windows"	"\x55\x8B\xEC\x56\x8B\xF1\x57\x8B\xBE\xBC\x22\x00\x00"
+				"windows"	"\x55\x8B\xEC\x56\x8B\xF1\x57\x8B\xBE\x44\x23\x00\x00"
 			}
 			"CTFPlayer::RemoveAllOwnedEntitiesFromWorld"
 			{
@@ -374,7 +374,7 @@
 				"linux"		"233"
 				"windows"	"230"
 			}
-			"CTFBotSpawner::GetClassIcon"
+			"IPopulationSpawner::GetClassIcon"
 			{
 				// Linux uses signature call CTFBotSpawner::GetClassIcon
 				"windows"	"6"
@@ -383,11 +383,6 @@
 			{
 				"linux"		"21"
 				"windows"	"20"
-			}
-			"CBaseEntity::Event_Killed"
-			{
-				"linux"		"69"
-				"windows"	"68"
 			}
 			"CBaseCombatCharacter::ShouldGib"
 			{
@@ -409,6 +404,11 @@
 				"linux"		"269"
 				"windows"	"231"
 			}
+			"CBaseCombatCharacter::ClearLastKnownArea"
+			{
+				"linux"		"325"
+				"windows"	"324"
+			}
 			"CBaseFilter::PassesFilterImpl"
 			{
 				"linux"		"199"
@@ -418,16 +418,6 @@
 			{
 				"linux"		"30"
 				"windows"	"29"
-			}
-			"CGameRules::ClientConnected"
-			{
-				"linux"		"60"
-				"windows"	"59"
-			}
-			"CGameRules::FPlayerCanTakeDamage"
-			{
-				"linux"		"64"
-				"windows"	"63"
 			}
 			"CTeamplayRules::TeamMayCapturePoint"
 			{
@@ -705,11 +695,6 @@
 			{
 				"linux"		"16"
 				"windows"	"16"
-			}
-			"CTakeDamageInfo::m_bForceFriendlyFire"
-			{
-				"linux"		"92"
-				"windows"	"92"
 			}
 			"CTFNavArea::m_distanceToBombTarget"
 			{
@@ -1224,20 +1209,6 @@
 					}
 				}
 			}
-			"CBaseEntity::Event_Killed"
-			{
-				"offset"	"CBaseEntity::Event_Killed"
-				"hooktype"	"entity"
-				"return"	"void"
-				"this"		"entity"
-				"arguments"
-				{
-					"info"
-					{
-						"type"	"objectptr"
-					}
-				}
-			}
 			"CBaseCombatCharacter::ShouldGib"
 			{
 				"offset"	"CBaseCombatCharacter::ShouldGib"
@@ -1284,59 +1255,6 @@
 					}
 				}
 			}
-			"CGameRules::ClientConnected"
-			{
-				"offset"	"CGameRules::ClientConnected"
-				"hooktype"	"gamerules"
-				"return"	"bool"
-				"this"		"ignore"
-				"arguments"
-				{
-					"pEntity"
-					{
-						"type"	"edict"
-					}
-					"pszName"
-					{
-						"type"	"charptr"
-					}
-					"pszAddress"
-					{
-						"type"	"charptr"
-					}
-					"reject"
-					{
-						"type"	"charptr"
-					}
-					"maxrejectlen"
-					{
-						"type"	"int"
-					}
-				}
-				
-			}
-			"CGameRules::FPlayerCanTakeDamage"
-			{
-				"offset"	"CGameRules::FPlayerCanTakeDamage"
-				"hooktype"	"gamerules"
-				"return"	"bool"
-				"this"		"ignore"
-				"arguments"
-				{
-					"pPlayer"
-					{
-						"type"	"cbaseentity"
-					}
-					"pAttacker"
-					{
-						"type"	"cbaseentity"
-					}
-					"info"
-					{
-						"type"	"objectptr"
-					}
-				}
-			}
 			"CTFItem::PickUp"
 			{
 				"offset"	"CTFItem::PickUp"
@@ -1353,25 +1271,6 @@
 					{
 						"type"	"bool"
 					}
-				}
-			}
-		}
-		"MemPatches"
-		{
-			"CTFGameRules::GetTeamAssignmentOverride::kMVM_DefendersTeamSize"
-			{
-				"signature" "CTFGameRules::GetTeamAssignmentOverride"
-				"linux"
-				{
-					"offset"	"1D0h"
-					"verify"	"\xB8\x06"
-					"patch"		"\xB8\x20"
-				}
-				"windows"
-				{
-					"offset"	"14Ch"
-					"verify"	"\xB8\x06"
-					"patch"		"\xB8\x20"
 				}
 			}
 		}

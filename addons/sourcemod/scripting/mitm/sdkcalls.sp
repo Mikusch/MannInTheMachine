@@ -18,11 +18,12 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static Handle g_hSDKCallGetClassIconLinux;
-static Handle g_hSDKCallGetClassIconWindows;
+static Handle g_hSDKCall_CTFBotSpawner_GetClassIcon;
+static Handle g_hSDKCall_IPopulationSpawner_GetClassIcon;
 static Handle g_hSDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert;
 static Handle g_hSDKCall_CEconEntity_UpdateModelToClass;
 static Handle g_hSDKCall_CTFItem_PickUp;
+static Handle g_hSDKCall_CBaseCombatCharacter_ClearLastKnownArea;
 static Handle g_hSDKCall_CCaptureZone_Capture;
 static Handle g_hSDKCall_CTFPlayer_DoAnimationEvent;
 static Handle g_hSDKCall_CTFPlayer_PlaySpecificSequence;
@@ -41,6 +42,7 @@ static Handle g_hSDKCall_CTeamplayRules_TeamMayCapturePoint;
 static Handle g_hSDKCall_CTFBotHintEngineerNest_GetSentryHint;
 static Handle g_hSDKCall_CTFBotHintEngineerNest_GetTeleporterHint;
 static Handle g_hSDKCall_CPopulationManager_GetCurrentWave;
+static Handle g_hSDKCall_CBaseEntity_ShouldCollide;
 static Handle g_hSDKCall_CBaseEntity_IsCombatItem;
 static Handle g_hSDKCall_CBaseObject_GetMaxHealthForCurrentLevel;
 static Handle g_hSDKCall_CBaseCombatWeapon_Clip1;
@@ -53,20 +55,20 @@ static Handle g_hSDKCall_CTFBotHintEngineerNest_IsStaleNest;
 static Handle g_hSDKCall_CTFBotHintEngineerNest_DetonateStaleNest;
 static Handle g_hSDKCall_CTFGrenadePipebombProjectile_GetLiveTime;
 static Handle g_hSDKCall_CBaseTrigger_PassesTriggerFilters;
-static Handle g_hSDKCall_CBaseEntity_ShouldCollide;
+static Handle g_hSDKCall_CBaseCombatWeapon_HasAmmo;
 
-void SDKCalls_Init(GameData hGameData)
+void SDKCalls_Init(GameData hGameConf)
 {
 	char platform[64];
-	if (hGameData.GetKeyValue("Platform", platform, sizeof(platform)))
+	if (hGameConf.GetKeyValue("Platform", platform, sizeof(platform)))
 	{
 		if (StrEqual(platform, "linux"))
 		{
-			g_hSDKCallGetClassIconLinux = PrepSDKCall_GetClassIcon_Linux(hGameData);
+			g_hSDKCall_CTFBotSpawner_GetClassIcon = PrepSDKCall_CTFBotSpawner_GetClassIcon(hGameConf);
 		}
 		else if (StrEqual(platform, "windows"))
 		{
-			g_hSDKCallGetClassIconWindows = PrepSDKCall_GetClassIcon_Windows(hGameData);
+			g_hSDKCall_IPopulationSpawner_GetClassIcon = PrepSDKCall_IPopulationSpawner_GetClassIcon(hGameConf);
 		}
 		else
 		{
@@ -78,49 +80,64 @@ void SDKCalls_Init(GameData hGameData)
 		ThrowError("Could not find 'Platform' key in gamedata");
 	}
 	
-	g_hSDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert = PrepSDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert(hGameData);
-	g_hSDKCall_CEconEntity_UpdateModelToClass = PrepSDKCall_CEconEntity_UpdateModelToClass(hGameData);
-	g_hSDKCall_CTFItem_PickUp = PrepSDKCall_CTFItem_PickUp(hGameData);
-	g_hSDKCall_CCaptureZone_Capture = PrepSDKCall_CCaptureZone_Capture(hGameData);
-	g_hSDKCall_CTFPlayer_DoAnimationEvent = PrepSDKCall_CTFPlayer_DoAnimationEvent(hGameData);
-	g_hSDKCall_CTFPlayer_PlaySpecificSequence = PrepSDKCall_CTFPlayer_PlaySpecificSequence(hGameData);
-	g_hSDKCall_CTFPlayer_DoClassSpecialSkill = PrepSDKCall_CTFPlayer_DoClassSpecialSkill(hGameData);
-	g_hSDKCall_CTFPlayerShared_ResetRageBuffs = PrepSDKCall_CTFPlayerShared_ResetRageBuffs(hGameData);
-	g_hSDKCall_CPopulationManager_IsInEndlessWaves = PrepSDKCall_CPopulationManager_IsInEndlessWaves(hGameData);
-	g_hSDKCall_CPopulationManager_GetHealthMultiplier = PrepSDKCall_CPopulationManager_GetHealthMultiplier(hGameData);
-	g_hSDKCall_CPopulationManager_ResetMap = PrepSDKCall_CPopulationManager_ResetMap(hGameData);
-	g_hSDKCall_IsSpaceToSpawnHere = PrepSDKCall_IsSpaceToSpawnHere(hGameData);
-	g_hSDKCall_CTFPlayer_RemoveObject = PrepSDKCall_CTFPlayer_RemoveObject(hGameData);
-	g_hSDKCall_CTFBotMvMEngineerHintFinder_FindHint = PrepSDKCall_CTFBotMvMEngineerHintFinder_FindHint(hGameData);
-	g_hSDKCall_CTFGameRules_PushAllPlayersAway = PrepSDKCall_CTFGameRules_PushAllPlayersAway(hGameData);
-	g_hSDKCall_CGameRules_ShouldCollide = PrepSDKCall_CGameRules_ShouldCollide(hGameData);
-	g_hSDKCall_CTFGameRules_DistributeCurrencyAmount = PrepSDKCall_CTFGameRules_DistributeCurrencyAmount(hGameData);
-	g_hSDKCall_CTeamplayRules_TeamMayCapturePoint = PrepSDKCall_CTeamplayRules_TeamMayCapturePoint(hGameData);
-	g_hSDKCall_CTFBotHintEngineerNest_GetSentryHint = PrepSDKCall_CTFBotHintEngineerNest_GetSentryHint(hGameData);
-	g_hSDKCall_CTFBotHintEngineerNest_GetTeleporterHint = PrepSDKCall_CTFBotHintEngineerNest_GetTeleporterHint(hGameData);
-	g_hSDKCall_CPopulationManager_GetCurrentWave = PrepSDKCall_CPopulationManager_GetCurrentWave(hGameData);
-	g_hSDKCall_CBaseEntity_IsCombatItem = PrepSDKCall_CBaseEntity_IsCombatItem(hGameData);
-	g_hSDKCall_CBaseObject_GetMaxHealthForCurrentLevel = PrepSDKCall_CBaseObject_GetMaxHealthForCurrentLevel(hGameData);
-	g_hSDKCall_CBaseCombatWeapon_Clip1 = PrepSDKCall_CBaseCombatWeapon_Clip1(hGameData);
-	g_hSDKCall_CSpawnLocation_FindSpawnLocation = PrepSDKCall_CSpawnLocation_FindSpawnLocation(hGameData);
-	g_hSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold = PrepSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold(hGameData);
-	g_hSDKCall_IPopulationSpawner_Spawn = PrepSDKCall_IPopulationSpawner_Spawn(hGameData);
-	g_hSDKCall_BotGenerateAndWearItem = PrepSDKCall_BotGenerateAndWearItem(hGameData);
-	g_hSDKCall_GetBombInfo = PrepSDKCall_GetBombInfo(hGameData);
-	g_hSDKCall_CTFBotHintEngineerNest_IsStaleNest = PrepSDKCall_CTFBotHintEngineerNest_IsStaleNest(hGameData);
-	g_hSDKCall_CTFBotHintEngineerNest_DetonateStaleNest = PrepSDKCall_CTFBotHintEngineerNest_DetonateStaleNest(hGameData);
-	g_hSDKCall_CTFGrenadePipebombProjectile_GetLiveTime = PrepSDKCall_CTFGrenadePipebombProjectile_GetLiveTime(hGameData);
-	g_hSDKCall_CBaseTrigger_PassesTriggerFilters = PrepSDKCall_CBaseTrigger_PassesTriggerFilters(hGameData);
-	g_hSDKCall_CBaseEntity_ShouldCollide = PrepSDKCall_CBaseEntity_ShouldCollide(hGameData);
+	g_hSDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert = PrepSDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert(hGameConf);
+	g_hSDKCall_CEconEntity_UpdateModelToClass = PrepSDKCall_CEconEntity_UpdateModelToClass(hGameConf);
+	g_hSDKCall_CTFItem_PickUp = PrepSDKCall_CTFItem_PickUp(hGameConf);
+	g_hSDKCall_CBaseCombatCharacter_ClearLastKnownArea = PrepSDKCall_CBaseCombatCharacter_ClearLastKnownArea(hGameConf);
+	g_hSDKCall_CCaptureZone_Capture = PrepSDKCall_CCaptureZone_Capture(hGameConf);
+	g_hSDKCall_CTFPlayer_DoAnimationEvent = PrepSDKCall_CTFPlayer_DoAnimationEvent(hGameConf);
+	g_hSDKCall_CTFPlayer_PlaySpecificSequence = PrepSDKCall_CTFPlayer_PlaySpecificSequence(hGameConf);
+	g_hSDKCall_CTFPlayer_DoClassSpecialSkill = PrepSDKCall_CTFPlayer_DoClassSpecialSkill(hGameConf);
+	g_hSDKCall_CTFPlayerShared_ResetRageBuffs = PrepSDKCall_CTFPlayerShared_ResetRageBuffs(hGameConf);
+	g_hSDKCall_CPopulationManager_IsInEndlessWaves = PrepSDKCall_CPopulationManager_IsInEndlessWaves(hGameConf);
+	g_hSDKCall_CPopulationManager_GetHealthMultiplier = PrepSDKCall_CPopulationManager_GetHealthMultiplier(hGameConf);
+	g_hSDKCall_CPopulationManager_ResetMap = PrepSDKCall_CPopulationManager_ResetMap(hGameConf);
+	g_hSDKCall_IsSpaceToSpawnHere = PrepSDKCall_IsSpaceToSpawnHere(hGameConf);
+	g_hSDKCall_CTFPlayer_RemoveObject = PrepSDKCall_CTFPlayer_RemoveObject(hGameConf);
+	g_hSDKCall_CTFBotMvMEngineerHintFinder_FindHint = PrepSDKCall_CTFBotMvMEngineerHintFinder_FindHint(hGameConf);
+	g_hSDKCall_CTFGameRules_PushAllPlayersAway = PrepSDKCall_CTFGameRules_PushAllPlayersAway(hGameConf);
+	g_hSDKCall_CGameRules_ShouldCollide = PrepSDKCall_CGameRules_ShouldCollide(hGameConf);
+	g_hSDKCall_CTFGameRules_DistributeCurrencyAmount = PrepSDKCall_CTFGameRules_DistributeCurrencyAmount(hGameConf);
+	g_hSDKCall_CTeamplayRules_TeamMayCapturePoint = PrepSDKCall_CTeamplayRules_TeamMayCapturePoint(hGameConf);
+	g_hSDKCall_CTFBotHintEngineerNest_GetSentryHint = PrepSDKCall_CTFBotHintEngineerNest_GetSentryHint(hGameConf);
+	g_hSDKCall_CTFBotHintEngineerNest_GetTeleporterHint = PrepSDKCall_CTFBotHintEngineerNest_GetTeleporterHint(hGameConf);
+	g_hSDKCall_CPopulationManager_GetCurrentWave = PrepSDKCall_CPopulationManager_GetCurrentWave(hGameConf);
+	g_hSDKCall_CBaseEntity_ShouldCollide = PrepSDKCall_CBaseEntity_ShouldCollide(hGameConf);
+	g_hSDKCall_CBaseEntity_IsCombatItem = PrepSDKCall_CBaseEntity_IsCombatItem(hGameConf);
+	g_hSDKCall_CBaseObject_GetMaxHealthForCurrentLevel = PrepSDKCall_CBaseObject_GetMaxHealthForCurrentLevel(hGameConf);
+	g_hSDKCall_CBaseCombatWeapon_Clip1 = PrepSDKCall_CBaseCombatWeapon_Clip1(hGameConf);
+	g_hSDKCall_CSpawnLocation_FindSpawnLocation = PrepSDKCall_CSpawnLocation_FindSpawnLocation(hGameConf);
+	g_hSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold = PrepSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold(hGameConf);
+	g_hSDKCall_IPopulationSpawner_Spawn = PrepSDKCall_IPopulationSpawner_Spawn(hGameConf);
+	g_hSDKCall_BotGenerateAndWearItem = PrepSDKCall_BotGenerateAndWearItem(hGameConf);
+	g_hSDKCall_GetBombInfo = PrepSDKCall_GetBombInfo(hGameConf);
+	g_hSDKCall_CTFBotHintEngineerNest_IsStaleNest = PrepSDKCall_CTFBotHintEngineerNest_IsStaleNest(hGameConf);
+	g_hSDKCall_CTFBotHintEngineerNest_DetonateStaleNest = PrepSDKCall_CTFBotHintEngineerNest_DetonateStaleNest(hGameConf);
+	g_hSDKCall_CTFGrenadePipebombProjectile_GetLiveTime = PrepSDKCall_CTFGrenadePipebombProjectile_GetLiveTime(hGameConf);
+	g_hSDKCall_CBaseTrigger_PassesTriggerFilters = PrepSDKCall_CBaseTrigger_PassesTriggerFilters(hGameConf);
+	
+	g_hSDKCall_CBaseCombatWeapon_HasAmmo = PrepSDKCall_FromScriptFunction("CBaseCombatWeapon", "HasAnyAmmo");
 }
 
-static Handle PrepSDKCall_GetClassIcon_Linux(GameData hGameData)
+static Handle PrepSDKCall_FromScriptFunction(const char[] className, const char[] functionName)
+{
+	VScriptFunction func = VScript_GetClassFunction(className, functionName);
+	if (!func)
+	{
+		LogError("Failed to find script function: %s::%s", className, functionName);
+		return null;
+	}
+	
+	return func.CreateSDKCall();
+}
+
+static Handle PrepSDKCall_CTFBotSpawner_GetClassIcon(GameData hGameConf)
 {
 	// linux signature. this uses a hidden pointer passed in before `this` on the stack
 	// so we'll do our best with static since SM doesn't support that calling convention
 	// no subclasses override this virtual function so we'll just call it directly
 	StartPrepSDKCall(SDKCall_Static);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTFBotSpawner::GetClassIcon");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CTFBotSpawner::GetClassIcon");
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Pointer); // return value
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // thisptr
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // int nSpawnNum
@@ -133,27 +150,27 @@ static Handle PrepSDKCall_GetClassIcon_Linux(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_GetClassIcon_Windows(GameData hGameData)
+static Handle PrepSDKCall_IPopulationSpawner_GetClassIcon(GameData hGameConf)
 {
 	// windows vcall. this one also uses a hidden pointer, but it's passed as the first param
 	// `this` remains unchanged so we can still use a vcall
 	StartPrepSDKCall(SDKCall_Raw);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "CTFBotSpawner::GetClassIcon");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Virtual, "IPopulationSpawner::GetClassIcon");
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Pointer); // return value
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // int nSpawnNum
 	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain); // return string_t
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
-		LogError("Failed to create SDKCall: CTFBotSpawner::GetClassIcon");
+		LogError("Failed to create SDKCall: IPopulationSpawner::GetClassIcon");
 	
 	return call;
 }
 
-static Handle PrepSDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert(GameData hGameData)
+static Handle PrepSDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_GameRules);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTeamplayRoundBasedRules::PlayThrottledAlert");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CTeamplayRoundBasedRules::PlayThrottledAlert");
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
 	PrepSDKCall_AddParameter(SDKType_Float, SDKPass_ByValue);
@@ -166,10 +183,10 @@ static Handle PrepSDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert(GameData h
 	return call;
 }
 
-static Handle PrepSDKCall_CEconEntity_UpdateModelToClass(GameData hGameData)
+static Handle PrepSDKCall_CEconEntity_UpdateModelToClass(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CEconEntity::UpdateModelToClass");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CEconEntity::UpdateModelToClass");
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
@@ -178,10 +195,10 @@ static Handle PrepSDKCall_CEconEntity_UpdateModelToClass(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_CTFItem_PickUp(GameData hGameData)
+static Handle PrepSDKCall_CTFItem_PickUp(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "CTFItem::PickUp");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Virtual, "CTFItem::PickUp");
 	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
 	PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_ByValue);
 	
@@ -192,10 +209,22 @@ static Handle PrepSDKCall_CTFItem_PickUp(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_CCaptureZone_Capture(GameData hGameData)
+static Handle PrepSDKCall_CBaseCombatCharacter_ClearLastKnownArea(GameData hGameConf)
+{
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Virtual, "CBaseCombatCharacter::ClearLastKnownArea");
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogError("Failed to create SDKCall: CBaseCombatCharacter::ClearLastKnownArea");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_CCaptureZone_Capture(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CCaptureZone::Capture");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CCaptureZone::Capture");
 	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
 	
 	Handle call = EndPrepSDKCall();
@@ -205,10 +234,10 @@ static Handle PrepSDKCall_CCaptureZone_Capture(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_CTFPlayer_DoAnimationEvent(GameData hGameData)
+static Handle PrepSDKCall_CTFPlayer_DoAnimationEvent(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Player);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTFPlayer::DoAnimationEvent");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CTFPlayer::DoAnimationEvent");
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	
@@ -219,10 +248,10 @@ static Handle PrepSDKCall_CTFPlayer_DoAnimationEvent(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_CTFPlayer_PlaySpecificSequence(GameData hGameData)
+static Handle PrepSDKCall_CTFPlayer_PlaySpecificSequence(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Player);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTFPlayer::PlaySpecificSequence");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CTFPlayer::PlaySpecificSequence");
 	PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
 	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
 	
@@ -233,10 +262,10 @@ static Handle PrepSDKCall_CTFPlayer_PlaySpecificSequence(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_CTFPlayer_DoClassSpecialSkill(GameData hGameData)
+static Handle PrepSDKCall_CTFPlayer_DoClassSpecialSkill(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Player);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTFPlayer::DoClassSpecialSkill");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CTFPlayer::DoClassSpecialSkill");
 	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
 	
 	Handle call = EndPrepSDKCall();
@@ -246,10 +275,10 @@ static Handle PrepSDKCall_CTFPlayer_DoClassSpecialSkill(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_CTFPlayerShared_ResetRageBuffs(GameData hGameData)
+static Handle PrepSDKCall_CTFPlayerShared_ResetRageBuffs(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Raw);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTFPlayerShared::ResetRageBuffs");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CTFPlayerShared::ResetRageBuffs");
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
@@ -258,10 +287,10 @@ static Handle PrepSDKCall_CTFPlayerShared_ResetRageBuffs(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_CPopulationManager_IsInEndlessWaves(GameData hGameData)
+static Handle PrepSDKCall_CPopulationManager_IsInEndlessWaves(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CPopulationManager::IsInEndlessWaves");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CPopulationManager::IsInEndlessWaves");
 	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
 	
 	Handle call = EndPrepSDKCall();
@@ -271,10 +300,10 @@ static Handle PrepSDKCall_CPopulationManager_IsInEndlessWaves(GameData hGameData
 	return call;
 }
 
-static Handle PrepSDKCall_CPopulationManager_GetHealthMultiplier(GameData hGameData)
+static Handle PrepSDKCall_CPopulationManager_GetHealthMultiplier(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CPopulationManager::GetHealthMultiplier");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CPopulationManager::GetHealthMultiplier");
 	PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_ByValue);
 	PrepSDKCall_SetReturnInfo(SDKType_Float, SDKPass_ByValue);
 	
@@ -285,10 +314,10 @@ static Handle PrepSDKCall_CPopulationManager_GetHealthMultiplier(GameData hGameD
 	return call;
 }
 
-static Handle PrepSDKCall_CPopulationManager_ResetMap(GameData hGameData)
+static Handle PrepSDKCall_CPopulationManager_ResetMap(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CPopulationManager::ResetMap");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CPopulationManager::ResetMap");
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
@@ -297,10 +326,10 @@ static Handle PrepSDKCall_CPopulationManager_ResetMap(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_IsSpaceToSpawnHere(GameData hGameData)
+static Handle PrepSDKCall_IsSpaceToSpawnHere(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Static);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "IsSpaceToSpawnHere");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "IsSpaceToSpawnHere");
 	PrepSDKCall_AddParameter(SDKType_Vector, SDKPass_ByRef);
 	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
 	
@@ -311,10 +340,10 @@ static Handle PrepSDKCall_IsSpaceToSpawnHere(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_CTFBotMvMEngineerHintFinder_FindHint(GameData hGameData)
+static Handle PrepSDKCall_CTFBotMvMEngineerHintFinder_FindHint(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Static);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTFBotMvMEngineerHintFinder::FindHint");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CTFBotMvMEngineerHintFinder::FindHint");
 	PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_ByValue);
 	PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_ByValue);
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_ByRef, _, VENCODE_FLAG_COPYBACK);
@@ -327,10 +356,10 @@ static Handle PrepSDKCall_CTFBotMvMEngineerHintFinder_FindHint(GameData hGameDat
 	return call;
 }
 
-static Handle PrepSDKCall_CTFGameRules_PushAllPlayersAway(GameData hGameData)
+static Handle PrepSDKCall_CTFGameRules_PushAllPlayersAway(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_GameRules);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTFGameRules::PushAllPlayersAway");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CTFGameRules::PushAllPlayersAway");
 	PrepSDKCall_AddParameter(SDKType_Vector, SDKPass_ByRef);
 	PrepSDKCall_AddParameter(SDKType_Float, SDKPass_ByValue);
 	PrepSDKCall_AddParameter(SDKType_Float, SDKPass_ByValue);
@@ -344,10 +373,10 @@ static Handle PrepSDKCall_CTFGameRules_PushAllPlayersAway(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_CTFGameRules_DistributeCurrencyAmount(GameData hGameData)
+static Handle PrepSDKCall_CTFGameRules_DistributeCurrencyAmount(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_GameRules);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTFGameRules::DistributeCurrencyAmount");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CTFGameRules::DistributeCurrencyAmount");
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	PrepSDKCall_AddParameter(SDKType_CBasePlayer, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL);
 	PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_ByValue);
@@ -364,10 +393,10 @@ static Handle PrepSDKCall_CTFGameRules_DistributeCurrencyAmount(GameData hGameDa
 	return call;
 }
 
-static Handle PrepSDKCall_CGameRules_ShouldCollide(GameData hGameData)
+static Handle PrepSDKCall_CGameRules_ShouldCollide(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_GameRules);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "CGameRules::ShouldCollide");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Virtual, "CGameRules::ShouldCollide");
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
@@ -381,10 +410,10 @@ static Handle PrepSDKCall_CGameRules_ShouldCollide(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_CTeamplayRules_TeamMayCapturePoint(GameData hGameData)
+static Handle PrepSDKCall_CTeamplayRules_TeamMayCapturePoint(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_GameRules);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "CTeamplayRules::TeamMayCapturePoint");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Virtual, "CTeamplayRules::TeamMayCapturePoint");
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
@@ -398,10 +427,10 @@ static Handle PrepSDKCall_CTeamplayRules_TeamMayCapturePoint(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_CTFBotHintEngineerNest_GetSentryHint(GameData hGameData)
+static Handle PrepSDKCall_CTFBotHintEngineerNest_GetSentryHint(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTFBotHintEngineerNest::GetSentryHint");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CTFBotHintEngineerNest::GetSentryHint");
 	PrepSDKCall_SetReturnInfo(SDKType_CBaseEntity, SDKPass_Pointer);
 	
 	Handle call = EndPrepSDKCall();
@@ -411,10 +440,10 @@ static Handle PrepSDKCall_CTFBotHintEngineerNest_GetSentryHint(GameData hGameDat
 	return call;
 }
 
-static Handle PrepSDKCall_CTFBotHintEngineerNest_GetTeleporterHint(GameData hGameData)
+static Handle PrepSDKCall_CTFBotHintEngineerNest_GetTeleporterHint(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTFBotHintEngineerNest::GetTeleporterHint");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CTFBotHintEngineerNest::GetTeleporterHint");
 	PrepSDKCall_SetReturnInfo(SDKType_CBaseEntity, SDKPass_Pointer);
 	
 	Handle call = EndPrepSDKCall();
@@ -440,10 +469,10 @@ int SDKCall_CTFBotHintEngineerNest_GetTeleporterHint(int hint)
 	return -1;
 }
 
-static Handle PrepSDKCall_CPopulationManager_GetCurrentWave(GameData hGameData)
+static Handle PrepSDKCall_CPopulationManager_GetCurrentWave(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CPopulationManager::GetCurrentWave");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CPopulationManager::GetCurrentWave");
 	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
 	
 	Handle call = EndPrepSDKCall();
@@ -453,10 +482,10 @@ static Handle PrepSDKCall_CPopulationManager_GetCurrentWave(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_CBaseEntity_ShouldCollide(GameData hGameData)
+static Handle PrepSDKCall_CBaseEntity_ShouldCollide(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "CBaseEntity::ShouldCollide");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Virtual, "CBaseEntity::ShouldCollide");
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
@@ -468,10 +497,10 @@ static Handle PrepSDKCall_CBaseEntity_ShouldCollide(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_CBaseEntity_IsCombatItem(GameData hGameData)
+static Handle PrepSDKCall_CBaseEntity_IsCombatItem(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "CBaseEntity::IsCombatItem");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Virtual, "CBaseEntity::IsCombatItem");
 	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
 	
 	Handle call = EndPrepSDKCall();
@@ -481,10 +510,10 @@ static Handle PrepSDKCall_CBaseEntity_IsCombatItem(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_CBaseObject_GetMaxHealthForCurrentLevel(GameData hGameData)
+static Handle PrepSDKCall_CBaseObject_GetMaxHealthForCurrentLevel(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "CBaseObject::GetMaxHealthForCurrentLevel");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Virtual, "CBaseObject::GetMaxHealthForCurrentLevel");
 	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
 	
 	Handle call = EndPrepSDKCall();
@@ -494,10 +523,10 @@ static Handle PrepSDKCall_CBaseObject_GetMaxHealthForCurrentLevel(GameData hGame
 	return call;
 }
 
-static Handle PrepSDKCall_CBaseCombatWeapon_Clip1(GameData hGameData)
+static Handle PrepSDKCall_CBaseCombatWeapon_Clip1(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "CBaseCombatWeapon::Clip1");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Virtual, "CBaseCombatWeapon::Clip1");
 	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
 	
 	Handle call = EndPrepSDKCall();
@@ -507,10 +536,10 @@ static Handle PrepSDKCall_CBaseCombatWeapon_Clip1(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_CSpawnLocation_FindSpawnLocation(GameData hGameData)
+static Handle PrepSDKCall_CSpawnLocation_FindSpawnLocation(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Raw);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CSpawnLocation::FindSpawnLocation");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CSpawnLocation::FindSpawnLocation");
 	PrepSDKCall_AddParameter(SDKType_Vector, SDKPass_ByRef, _, VENCODE_FLAG_COPYBACK);
 	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
 	
@@ -521,10 +550,10 @@ static Handle PrepSDKCall_CSpawnLocation_FindSpawnLocation(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold(GameData hGameData)
+static Handle PrepSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CPopulationManager::GetSentryBusterDamageAndKillThreshold");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CPopulationManager::GetSentryBusterDamageAndKillThreshold");
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_ByRef, VDECODE_FLAG_BYREF, VENCODE_FLAG_COPYBACK);
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_ByRef, VDECODE_FLAG_BYREF, VENCODE_FLAG_COPYBACK);
 	
@@ -535,10 +564,10 @@ static Handle PrepSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThresho
 	return call;
 }
 
-static Handle PrepSDKCall_IPopulationSpawner_Spawn(GameData hGameData)
+static Handle PrepSDKCall_IPopulationSpawner_Spawn(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Raw);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "IPopulationSpawner::Spawn");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Virtual, "IPopulationSpawner::Spawn");
 	PrepSDKCall_AddParameter(SDKType_Vector, SDKPass_ByRef);
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
@@ -550,10 +579,10 @@ static Handle PrepSDKCall_IPopulationSpawner_Spawn(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_CTFPlayer_RemoveObject(GameData hGameData)
+static Handle PrepSDKCall_CTFPlayer_RemoveObject(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Player);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTFPlayer::RemoveObject");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CTFPlayer::RemoveObject");
 	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
 	
 	Handle call = EndPrepSDKCall();
@@ -563,10 +592,10 @@ static Handle PrepSDKCall_CTFPlayer_RemoveObject(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_BotGenerateAndWearItem(GameData hGameData)
+static Handle PrepSDKCall_BotGenerateAndWearItem(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Static);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "BotGenerateAndWearItem");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "BotGenerateAndWearItem");
 	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
 	PrepSDKCall_AddParameter(SDKType_String, SDKPass_Pointer);
 	
@@ -577,10 +606,10 @@ static Handle PrepSDKCall_BotGenerateAndWearItem(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_GetBombInfo(GameData hGameData)
+static Handle PrepSDKCall_GetBombInfo(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Static);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "GetBombInfo");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "GetBombInfo");
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
 	
@@ -591,10 +620,10 @@ static Handle PrepSDKCall_GetBombInfo(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_CTFBotHintEngineerNest_IsStaleNest(GameData hGameData)
+static Handle PrepSDKCall_CTFBotHintEngineerNest_IsStaleNest(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTFBotHintEngineerNest::IsStaleNest");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CTFBotHintEngineerNest::IsStaleNest");
 	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
 	
 	Handle call = EndPrepSDKCall();
@@ -604,10 +633,10 @@ static Handle PrepSDKCall_CTFBotHintEngineerNest_IsStaleNest(GameData hGameData)
 	return call;
 }
 
-static Handle PrepSDKCall_CTFBotHintEngineerNest_DetonateStaleNest(GameData hGameData)
+static Handle PrepSDKCall_CTFBotHintEngineerNest_DetonateStaleNest(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Signature, "CTFBotHintEngineerNest::DetonateStaleNest");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CTFBotHintEngineerNest::DetonateStaleNest");
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
@@ -616,10 +645,10 @@ static Handle PrepSDKCall_CTFBotHintEngineerNest_DetonateStaleNest(GameData hGam
 	return call;
 }
 
-static Handle PrepSDKCall_CTFGrenadePipebombProjectile_GetLiveTime(GameData hGameData)
+static Handle PrepSDKCall_CTFGrenadePipebombProjectile_GetLiveTime(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "CTFGrenadePipebombProjectile::GetLiveTime");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Virtual, "CTFGrenadePipebombProjectile::GetLiveTime");
 	PrepSDKCall_SetReturnInfo(SDKType_Float, SDKPass_ByValue);
 	
 	Handle call = EndPrepSDKCall();
@@ -629,10 +658,10 @@ static Handle PrepSDKCall_CTFGrenadePipebombProjectile_GetLiveTime(GameData hGam
 	return call;
 }
 
-static Handle PrepSDKCall_CBaseTrigger_PassesTriggerFilters(GameData hGameData)
+static Handle PrepSDKCall_CBaseTrigger_PassesTriggerFilters(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameData, SDKConf_Virtual, "CBaseTrigger::PassesTriggerFilters");
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Virtual, "CBaseTrigger::PassesTriggerFilters");
 	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer);
 	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
 	
@@ -643,19 +672,19 @@ static Handle PrepSDKCall_CBaseTrigger_PassesTriggerFilters(GameData hGameData)
 	return call;
 }
 
-Address SDKCall_GetClassIcon(Address spawner, int nSpawnNum = -1)
+Address SDKCall_IPopulationSpawner_GetClassIcon(Address spawner, int nSpawnNum = -1)
 {
 	Address result;
 	
-	if (g_hSDKCallGetClassIconWindows)
+	if (g_hSDKCall_IPopulationSpawner_GetClassIcon)
 	{
 		// windows version; hidden ptr pushes params, `this` still in correct register
-		return SDKCall(g_hSDKCallGetClassIconWindows, spawner, result, nSpawnNum);
+		return SDKCall(g_hSDKCall_IPopulationSpawner_GetClassIcon, spawner, result, nSpawnNum);
 	}
-	else if (g_hSDKCallGetClassIconLinux)
+	else if (g_hSDKCall_CTFBotSpawner_GetClassIcon)
 	{
 		// linux version; hidden ptr moves the stack and this forward
-		return SDKCall(g_hSDKCallGetClassIconLinux, result, spawner, nSpawnNum);
+		return SDKCall(g_hSDKCall_CTFBotSpawner_GetClassIcon, result, spawner, nSpawnNum);
 	}
 	
 	return Address_Null;
@@ -677,7 +706,14 @@ void SDKCall_CEconEntity_UpdateModelToClass(int entity)
 
 void SDKCall_CTFItem_PickUp(int flag, int player, bool invisible)
 {
-	SDKCall(g_hSDKCall_CTFItem_PickUp, flag, player, invisible);
+	if (g_hSDKCall_CTFItem_PickUp)
+		SDKCall(g_hSDKCall_CTFItem_PickUp, flag, player, invisible);
+}
+
+void SDKCall_CBaseCombatCharacter_ClearLastKnownArea(int player)
+{
+	if (g_hSDKCall_CBaseCombatCharacter_ClearLastKnownArea)
+		SDKCall(g_hSDKCall_CBaseCombatCharacter_ClearLastKnownArea, player);
 }
 
 void SDKCall_CCaptureZone_Capture(int zone, int other)
@@ -861,7 +897,7 @@ void SDKCall_CTFPlayer_RemoveObject(int player, int obj)
 void SDKCall_BotGenerateAndWearItem(int player, const char[] itemName)
 {
 	if (g_hSDKCall_BotGenerateAndWearItem)
-		 SDKCall(g_hSDKCall_BotGenerateAndWearItem, player, itemName);
+		SDKCall(g_hSDKCall_BotGenerateAndWearItem, player, itemName);
 }
 
 bool SDKCall_GetBombInfo(BombInfo_t pBombInfo = view_as<BombInfo_t>(Address_Null))
@@ -898,6 +934,14 @@ bool SDKCall_CBaseTrigger_PassesTriggerFilters(int trigger, int other)
 {
 	if (g_hSDKCall_CBaseTrigger_PassesTriggerFilters)
 		return SDKCall(g_hSDKCall_CBaseTrigger_PassesTriggerFilters, trigger, other);
+	
+	return false;
+}
+
+bool SDKCall_CBaseCombatWeapon_HasAmmo(int weapon)
+{
+	if (g_hSDKCall_CBaseCombatWeapon_HasAmmo)
+		return SDKCall(g_hSDKCall_CBaseCombatWeapon_HasAmmo, weapon);
 	
 	return false;
 }

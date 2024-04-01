@@ -20,6 +20,8 @@
 
 #define PLUGIN_TAG	"[{orange}MitM{default}]"
 
+#define DEFAULT_UPGRADES_FILE	"scripts/items/mvm_upgrades.txt"
+
 #define ZERO_VECTOR	{ 0.0, 0.0, 0.0 }
 
 #define VEC_HULL_MIN	{ -24.0, -24.0, 0.0 }
@@ -29,8 +31,8 @@
 
 #define INVALID_ITEM_DEF_INDEX	(0xFFFF)
 
-#define MAX_USER_MSG_DATA	255
-
+#define COMMAND_MAX_LENGTH		512
+#define MAX_USER_MSG_DATA		255
 #define MAX_TEAM_NAME_LENGTH	32	// Max length of a team's name
 
 #define NULL_SQUAD	CTFBotSquad(0)
@@ -78,9 +80,9 @@
 // 5 bytes are reserved for other parameters
 #define TEXTMSG_MAX_MESSAGE_LENGTH	(MAX_USER_MSG_DATA - 5)
 
-#define PROGRESS_BAR_NUM_BLOCKS	10
+#define PROGRESS_BAR_NUM_BLOCKS		10
 #define PROGRESS_BAR_CHAR_FILLED	"▰"
-#define PROGRESS_BAR_CHAR_EMPTY	"▱"
+#define PROGRESS_BAR_CHAR_EMPTY		"▱"
 
 #define MITM_HINT_MASK	(0x10200)	// annotations have id ( MITM_HINT_MASK | entindex )
 
@@ -88,9 +90,21 @@
 #define COLLECT_ONLY_LIVING_PLAYERS true
 #define APPEND_PLAYERS true
 
+const float StepHeight = 18.0;
+
 const TFTeam TFTeam_Any = view_as<TFTeam>(-2);
 const TFTeam TFTeam_Defenders = TFTeam_Red;
 const TFTeam TFTeam_Invaders = TFTeam_Blue;
+
+char g_aPreferenceNames[][] =
+{
+	"Preference_DisableDefender",
+	"Preference_SpectatorMode",
+	"Preference_DisableMiniBoss",
+	"Preference_DisableAnnotations",
+	"Preference_IgnorePartyInvites",
+	"Preference_DisableDefenderReplacement",
+};
 
 char g_aRawPlayerClassNames[][] =
 {
@@ -538,4 +552,19 @@ enum
 	ATTDESCFORM_VALUE_IS_KILLSTREAK_IDLEEFFECT_INDEX,  // Printed as idle effect description
 	ATTDESCFORM_VALUE_IS_ITEM_DEF,				// Printed as item name
 	ATTDESCFORM_VALUE_IS_FROM_LOOKUP_TABLE,		// Printed as a string from a lookup table, specified by the attribute definition name
+};
+
+// Spectator Movement modes
+enum
+{
+	OBS_MODE_NONE = 0,	// not in spectator mode
+	OBS_MODE_DEATHCAM,	// special mode for death cam animation
+	OBS_MODE_FREEZECAM,	// zooms to a target, and freeze-frames on them
+	OBS_MODE_FIXED,		// view from a fixed camera position
+	OBS_MODE_IN_EYE,	// follow a player in first person view
+	OBS_MODE_CHASE,		// follow a player in third person view
+	OBS_MODE_POI,		// PASSTIME point of interest - game objective, big fight, anything interesting; added in the middle of the enum due to tons of hard-coded "<ROAMING" enum compares
+	OBS_MODE_ROAMING,	// free roaming
+
+	NUM_OBSERVER_MODES,
 };

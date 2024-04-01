@@ -50,6 +50,9 @@ ArrayList Queue_GetDefenderQueue()
 		if (CTFPlayer(client).m_defenderQueuePoints == -1)
 			continue;
 		
+		if (!IsFakeClient(client) && (GetClientAvgLatency(client, NetFlow_Outgoing) * 1000.0) >= sm_mitm_defender_ping_limit.FloatValue)
+			continue;
+		
 		if (!Forwards_OnIsValidDefender(client))
 			continue;
 		
@@ -91,12 +94,14 @@ ArrayList Queue_GetDefenderQueue()
 
 void Queue_AddPoints(int client, int points)
 {
-	CTFPlayer(client).m_defenderQueuePoints += points;
-	ClientPrefs_SaveQueue(client, CTFPlayer(client).m_defenderQueuePoints);
+	CTFPlayer player = CTFPlayer(client);
+	player.m_defenderQueuePoints += points;
+	g_hCookieQueue.SetInt(client, player.m_defenderQueuePoints);
 }
 
 void Queue_SetPoints(int client, int points)
 {
-	CTFPlayer(client).m_defenderQueuePoints = points;
-	ClientPrefs_SaveQueue(client, CTFPlayer(client).m_defenderQueuePoints);
+	CTFPlayer player = CTFPlayer(client);
+	player.m_defenderQueuePoints = points;
+	g_hCookiePreferences.SetInt(client, player.m_defenderQueuePoints);
 }

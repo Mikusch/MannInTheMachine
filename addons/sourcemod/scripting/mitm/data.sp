@@ -31,10 +31,12 @@ static ArrayList m_teleportWhereName[MAXPLAYERS + 1];
 // Bot Spawner
 static ArrayList m_eventChangeAttributes[MAXPLAYERS + 1];
 static ArrayList m_tags[MAXPLAYERS + 1];
+static ArrayStack m_requiredWeaponStack[MAXPLAYERS + 1];
+static CountdownTimer m_opportunisticTimer[MAXPLAYERS + 1];
 static WeaponRestrictionType m_weaponRestrictionFlags[MAXPLAYERS + 1];
 static AttributeType m_attributeFlags[MAXPLAYERS + 1];
 static DifficultyType m_difficulty[MAXPLAYERS + 1];
-static char m_szIdleSound[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
+static char m_idleSound[MAXPLAYERS + 1][PLATFORM_MAX_PATH];
 static float m_fModelScaleOverride[MAXPLAYERS + 1];
 static MissionType m_mission[MAXPLAYERS + 1];
 static MissionType m_prevMission[MAXPLAYERS + 1];
@@ -44,10 +46,16 @@ static float m_flSpawnTimeLeftMax[MAXPLAYERS + 1];
 static int m_spawnPointEntity[MAXPLAYERS + 1];
 static CTFBotSquad m_squad[MAXPLAYERS + 1];
 static int m_hFollowingFlagTarget[MAXPLAYERS + 1];
-static char m_szInvaderName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
-static char m_szPrevName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
+static char m_invaderName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
+static char m_prevName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
 static bool m_isWaitingForFullReload[MAXPLAYERS + 1];
 static Handle m_annotationTimer[MAXPLAYERS + 1];
+
+// PressXButton
+static int m_inputButtons[MAXPLAYERS + 1];
+static CountdownTimer m_fireButtonTimer[MAXPLAYERS + 1];
+static CountdownTimer m_altFireButtonTimer[MAXPLAYERS + 1];
+static CountdownTimer m_specialFireButtonTimer[MAXPLAYERS + 1];
 
 // Non-resetting Properties
 static int m_invaderPriority[MAXPLAYERS + 1];
@@ -55,8 +63,8 @@ static int m_invaderMiniBossPriority[MAXPLAYERS + 1];
 static int m_defenderQueuePoints[MAXPLAYERS + 1];
 static int m_preferences[MAXPLAYERS + 1];
 static Party m_party[MAXPLAYERS + 1];
-static bool m_bIsPartyMenuActive[MAXPLAYERS + 1];
-static int m_iSpawnDeathCount[MAXPLAYERS + 1];
+static bool m_isPartyMenuActive[MAXPLAYERS + 1];
+static int m_spawnDeathCount[MAXPLAYERS + 1];
 
 methodmap CTFPlayer < CBaseCombatCharacter
 {
@@ -122,6 +130,30 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		public set(ArrayList tags)
 		{
 			m_tags[this.index] = tags;
+		}
+	}
+	
+	property ArrayStack m_requiredWeaponStack
+	{
+		public get()
+		{
+			return m_requiredWeaponStack[this.index];
+		}
+		public set(ArrayStack requiredWeaponStack)
+		{
+			m_requiredWeaponStack[this.index] = requiredWeaponStack;
+		}
+	}
+	
+	property CountdownTimer m_opportunisticTimer
+	{
+		public get()
+		{
+			return m_opportunisticTimer[this.index];
+		}
+		public set(CountdownTimer opportunisticTimer)
+		{
+			m_opportunisticTimer[this.index] = opportunisticTimer;
 		}
 	}
 	
@@ -353,6 +385,54 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		}
 	}
 	
+	property int m_inputButtons
+	{
+		public get()
+		{
+			return m_inputButtons[this.index];
+		}
+		public set(int inputButtons)
+		{
+			m_inputButtons[this.index] = inputButtons;
+		}
+	}
+	
+	property CountdownTimer m_fireButtonTimer
+	{
+		public get()
+		{
+			return m_fireButtonTimer[this.index];
+		}
+		public set(CountdownTimer fireButtonTimer)
+		{
+			m_fireButtonTimer[this.index] = fireButtonTimer;
+		}
+	}
+	
+	property CountdownTimer m_altFireButtonTimer
+	{
+		public get()
+		{
+			return m_altFireButtonTimer[this.index];
+		}
+		public set(CountdownTimer altFireButtonTimer)
+		{
+			m_altFireButtonTimer[this.index] = altFireButtonTimer;
+		}
+	}
+	
+	property CountdownTimer m_specialFireButtonTimer
+	{
+		public get()
+		{
+			return m_specialFireButtonTimer[this.index];
+		}
+		public set(CountdownTimer specialFireButtonTimer)
+		{
+			m_specialFireButtonTimer[this.index] = specialFireButtonTimer;
+		}
+	}
+	
 	property Party m_party
 	{
 		public get()
@@ -365,27 +445,27 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		}
 	}
 	
-	property bool m_bIsPartyMenuActive
+	property bool m_isPartyMenuActive
 	{
 		public get()
 		{
-			return m_bIsPartyMenuActive[this.index];
+			return m_isPartyMenuActive[this.index];
 		}
 		public set(bool bIsPartyMenuActive)
 		{
-			m_bIsPartyMenuActive[this.index] = bIsPartyMenuActive;
+			m_isPartyMenuActive[this.index] = bIsPartyMenuActive;
 		}
 	}
 	
-	property int m_iSpawnDeathCount
+	property int m_spawnDeathCount
 	{
 		public get()
 		{
-			return m_iSpawnDeathCount[this.index];
+			return m_spawnDeathCount[this.index];
 		}
 		public set(int iSpawnDeathCount)
 		{
-			m_iSpawnDeathCount[this.index] = iSpawnDeathCount;
+			m_spawnDeathCount[this.index] = iSpawnDeathCount;
 		}
 	}
 	
@@ -499,7 +579,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 			return false;
 		
 		TFTeam team = TF2_GetClientTeam(this.index);
-		return (team == TFTeam_Spectator || team == TFTeam_Invaders) && !this.HasPreference(PREF_SPECTATOR_MODE);
+		return team == TFTeam_Invaders || (team == TFTeam_Spectator && !this.HasPreference(PREF_SPECTATOR_MODE));
 	}
 	
 	public float GetSpawnTime()
@@ -620,21 +700,6 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		return this.m_tags.FindString(tag) != -1;
 	}
 	
-	public void GetIdleSound(char[] buffer, int maxlen)
-	{
-		strcopy(buffer, maxlen, m_szIdleSound[this.index]);
-	}
-	
-	public void SetIdleSound(const char[] soundName)
-	{
-		strcopy(m_szIdleSound[this.index], sizeof(m_szIdleSound[]), soundName);
-	}
-	
-	public void ClearIdleSound()
-	{
-		m_szIdleSound[this.index][0] = EOS;
-	}
-	
 	public void SetScaleOverride(float fScale)
 	{
 		this.m_fModelScaleOverride = fScale;
@@ -719,67 +784,61 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		
 		if (this.IsMiniBoss())
 		{
-			char pszSoundName[PLATFORM_MAX_PATH];
-			
 			TFClassType class = TF2_GetPlayerClass(this.index);
 			switch (class)
 			{
 				case TFClass_Heavy:
 				{
-					strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantHeavyLoop");
+					strcopy(m_idleSound[this.index], sizeof(m_idleSound[]), "MVM.GiantHeavyLoop");
 				}
 				case TFClass_Soldier:
 				{
-					strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantSoldierLoop");
+					strcopy(m_idleSound[this.index], sizeof(m_idleSound[]), "MVM.GiantSoldierLoop");
 				}
 				
 				case TFClass_DemoMan:
 				{
 					if (this.m_mission == MISSION_DESTROY_SENTRIES)
 					{
-						strcopy(pszSoundName, sizeof(pszSoundName), "MVM.SentryBusterLoop");
+						strcopy(m_idleSound[this.index], sizeof(m_idleSound[]), "MVM.SentryBusterLoop");
 					}
 					else
 					{
-						strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantDemomanLoop");
+						strcopy(m_idleSound[this.index], sizeof(m_idleSound[]), "MVM.GiantDemomanLoop");
 					}
 				}
 				case TFClass_Scout:
 				{
-					strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantScoutLoop");
+					strcopy(m_idleSound[this.index], sizeof(m_idleSound[]), "MVM.GiantScoutLoop");
 				}
 				case TFClass_Pyro:
 				{
-					strcopy(pszSoundName, sizeof(pszSoundName), "MVM.GiantPyroLoop");
+					strcopy(m_idleSound[this.index], sizeof(m_idleSound[]), "MVM.GiantPyroLoop");
 				}
 			}
 			
-			if (pszSoundName[0])
+			if (m_idleSound[this.index][0])
 			{
-				EmitGameSoundToAll(pszSoundName, this.index);
-				this.SetIdleSound(pszSoundName);
+				EmitGameSoundToAll(m_idleSound[this.index], this.index);
 			}
 		}
 	}
 	
 	public void StopIdleSound()
 	{
-		char idleSound[PLATFORM_MAX_PATH];
-		this.GetIdleSound(idleSound, sizeof(idleSound));
-		
-		if (idleSound[0])
+		if (m_idleSound[this.index][0])
 		{
-			StopGameSound(this.index, idleSound);
-			this.ClearIdleSound();
+			StopGameSound(this.index, m_idleSound[this.index]);
+			m_idleSound[this.index][0] = EOS;
 		}
 	}
 	
 	public void SetInvaderName(const char[] name, bool bSetName)
 	{
-		strcopy(m_szInvaderName[this.index], sizeof(m_szInvaderName[]), name);
+		strcopy(m_invaderName[this.index], sizeof(m_invaderName[]), name);
 		
 		// if requested, change client name
-		if (bSetName && GetClientName(this.index, m_szPrevName[this.index], sizeof(m_szPrevName[])))
+		if (bSetName && GetClientName(this.index, m_prevName[this.index], sizeof(m_prevName[])))
 		{
 			SetClientName(this.index, name);
 		}
@@ -787,17 +846,17 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public bool GetInvaderName(char[] buffer, int maxlen)
 	{
-		return strcopy(buffer, maxlen, m_szInvaderName[this.index]) != 0;
+		return strcopy(buffer, maxlen, m_invaderName[this.index]) != 0;
 	}
 	
 	public void ResetInvaderName()
 	{
-		m_szInvaderName[this.index][0] = EOS;
+		m_invaderName[this.index][0] = EOS;
 		
-		if (m_szPrevName[this.index][0])
+		if (m_prevName[this.index][0])
 		{
-			SetClientName(this.index, m_szPrevName[this.index]);
-			m_szPrevName[this.index][0] = EOS;
+			SetClientName(this.index, m_prevName[this.index]);
+			m_prevName[this.index][0] = EOS;
 		}
 	}
 	
@@ -1066,57 +1125,14 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		}
 	}
 	
-	public bool IsWeaponRestricted(int weapon)
-	{
-		if (weapon == -1)
-		{
-			return false;
-		}
-		
-		if (TF2Util_IsEntityWearable(weapon))
-		{
-			// Always allow wearable weapons
-			return false;
-		}
-		else
-		{
-			int weaponId = TF2Util_GetWeaponID(weapon);
-			if (weaponId == TF_WEAPON_BUFF_ITEM || weaponId == TF_WEAPON_LUNCHBOX || weaponId == TF_WEAPON_PARACHUTE || weaponId == TF_WEAPON_GRAPPLINGHOOK || weaponId == TF_WEAPON_ROCKETPACK)
-			{
-				// Always allow specific passive weapons
-				return false;
-			}
-			else if (TF2Attrib_HookValueInt(0, "is_passive_weapon", weapon))
-			{
-				// Always allow weapons with is_passive_weapon attribute
-				return false;
-			}
-		}
-		
-		// Get the weapon's loadout slot
-		int itemdef = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
-		int iLoadoutSlot = TF2Econ_GetItemLoadoutSlot(itemdef, TF2_GetPlayerClass(this.index));
-		
-		if (this.HasWeaponRestriction(MELEE_ONLY))
-		{
-			return (iLoadoutSlot != LOADOUT_POSITION_MELEE);
-		}
-		
-		if (this.HasWeaponRestriction(PRIMARY_ONLY))
-		{
-			return (iLoadoutSlot != LOADOUT_POSITION_PRIMARY);
-		}
-		
-		if (this.HasWeaponRestriction(SECONDARY_ONLY))
-		{
-			return (iLoadoutSlot != LOADOUT_POSITION_SECONDARY);
-		}
-		
-		return false;
-	}
-	
 	public bool EquipRequiredWeapon()
 	{
+		if (!this.m_requiredWeaponStack.Empty)
+		{
+			int weapon = this.m_requiredWeaponStack.Top();
+			return TF2Util_SetPlayerActiveWeapon(this.index, weapon);
+		}
+		
 		if (tf_bot_melee_only.BoolValue || GameRules_GetProp("m_bPlayingMedieval") || this.HasWeaponRestriction(MELEE_ONLY))
 		{
 			// force use of melee weapons
@@ -1306,6 +1322,16 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		return -1;
 	}
 	
+	public void PushRequiredWeapon(int weapon)
+	{
+		this.m_requiredWeaponStack.Push(weapon);
+	}
+	
+	public void PopRequiredWeapon()
+	{
+		this.m_requiredWeaponStack.Pop();
+	}
+	
 	public float CalculateSpawnTime()
 	{
 		if (sm_mitm_spawn_hurry_time.FloatValue <= 0.0)
@@ -1321,18 +1347,77 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		if (!this.HasAttribute(AUTO_JUMP))
 			return false;
 		
-		if (!m_autoJumpTimer[this.index].HasStarted())
+		if (!this.m_autoJumpTimer.HasStarted())
 		{
-			m_autoJumpTimer[this.index].Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
+			this.m_autoJumpTimer.Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
 			return true;
 		}
-		else if (m_autoJumpTimer[this.index].IsElapsed())
+		else if (this.m_autoJumpTimer.IsElapsed())
 		{
-			m_autoJumpTimer[this.index].Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
+			this.m_autoJumpTimer.Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
 			return true;
 		}
 		
 		return false;
+	}
+	
+	public void PressFireButton(float duration = -1.0)
+	{
+		this.m_inputButtons |= IN_ATTACK;
+		this.m_fireButtonTimer.Start(duration);
+	}
+	
+	public void PressAltFireButton(float duration = -1.0)
+	{
+		this.m_inputButtons |= IN_ATTACK2;
+		this.m_altFireButtonTimer.Start(duration);
+	}
+	
+	public void PressSpecialFireButton(float duration = -1.0)
+	{
+		this.m_inputButtons |= IN_ATTACK3;
+		this.m_specialFireButtonTimer.Start(duration);
+	}
+	
+	public NextBotAction OpportunisticallyUseWeaponAbilities()
+	{
+		if (!this.m_opportunisticTimer.IsElapsed())
+		{
+			return NULL_ACTION;
+		}
+		
+		this.m_opportunisticTimer.Start(GetRandomFloat(0.1, 0.2));
+		
+		int numWeapons = this.GetPropArraySize(Prop_Send, "m_hMyWeapons");
+		for (int i = 0; i < numWeapons; ++i)
+		{
+			int weapon = GetPlayerWeaponSlot(this.index, i);
+			if (weapon == -1 || !TF2Util_IsEntityWeapon(weapon))
+				continue;
+			
+			// if I have some kind of buff banner - use it!
+			if (TF2Util_GetWeaponID(weapon) == TF_WEAPON_BUFF_ITEM)
+			{
+				if (this.GetPropFloat(Prop_Send, "m_flRageMeter") >= 100.0)
+				{
+					return CTFBotUseItem(weapon);
+				}
+			}
+			else if (TF2Util_GetWeaponID(weapon) == TF_WEAPON_LUNCHBOX)
+			{
+				// if we have an eatable (drink, sandvich, etc) - eat it!
+				if (SDKCall_CBaseCombatWeapon_HasAmmo(weapon))
+				{
+					// scout lunchboxes are also gated by their energy drink meter
+					if (TF2_GetPlayerClass(this.index) != TFClass_Scout || this.GetPropFloat(Prop_Send, "m_flEnergyDrinkMeter") >= 100)
+					{
+						return CTFBotUseItem(weapon);
+					}
+				}
+			}
+		}
+		
+		return NULL_ACTION;
 	}
 	
 	public int GetClosestCaptureZone()
@@ -1392,7 +1477,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		else
 			this.m_preferences &= ~view_as<int>(preference);
 		
-		ClientPrefs_SavePreferences(this.index, this.m_preferences);
+		g_hCookiePreferences.SetInt(this.index, this.m_preferences);
 		
 		return true;
 	}
@@ -1504,12 +1589,12 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public bool IsPartyMenuActive()
 	{
-		return this.m_bIsPartyMenuActive;
+		return this.m_isPartyMenuActive;
 	}
 	
 	public void SetPartyMenuActive(bool bIsPartyMenuActive)
 	{
-		this.m_bIsPartyMenuActive = bIsPartyMenuActive;
+		this.m_isPartyMenuActive = bIsPartyMenuActive;
 	}
 	
 	public void Init()
@@ -1518,44 +1603,71 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		this.m_teleportWhereName = new ArrayList(ByteCountToCells(64));
 		this.m_eventChangeAttributes = new ArrayList();
 		this.m_tags = new ArrayList(ByteCountToCells(64));
+		this.m_requiredWeaponStack = new ArrayStack();
+		this.m_opportunisticTimer = new CountdownTimer();
+		this.m_fireButtonTimer = new CountdownTimer();
+		this.m_altFireButtonTimer = new CountdownTimer();
+		this.m_specialFireButtonTimer = new CountdownTimer();
 	}
 	
-	public void ResetInvader()
-	{
-		this.SetAutoJump(0.0, 0.0);
-		this.m_autoJumpTimer.Invalidate();
-		
-		this.ClearTeleportWhere();
-		this.ClearEventChangeAttributes();
-		this.ClearTags();
-		this.ClearWeaponRestrictions();
-		this.ClearAllAttributes();
-		this.ClearIdleSound();
-		
-		this.m_fModelScaleOverride = 0.0;
-		this.m_flSpawnTimeLeft = -1.0;
-		this.m_flSpawnTimeLeftMax = -1.0;
-		this.m_missionTarget = INVALID_ENT_REFERENCE;
-		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
-		this.m_hFollowingFlagTarget = INVALID_ENT_REFERENCE;
-		this.m_isWaitingForFullReload = false;
-		this.m_annotationTimer = null;
-		
-		this.ResetInvaderName();
-	}
-	
-	public void Reset()
+	public void OnClientPutInServer()
 	{
 		this.m_invaderPriority = 0;
 		this.m_invaderMiniBossPriority = 0;
 		this.m_defenderQueuePoints = -1;
 		this.m_preferences = -1;
 		this.m_party = NULL_PARTY;
-		this.m_bIsPartyMenuActive = false;
-		this.m_iSpawnDeathCount = 0;
+		this.m_isPartyMenuActive = false;
+		this.m_spawnDeathCount = 0;
 		
-		m_szInvaderName[this.index][0] = EOS;
-		m_szPrevName[this.index][0] = EOS;
+		m_invaderName[this.index][0] = EOS;
+		m_prevName[this.index][0] = EOS;
+	}
+	
+	public void ResetOnTeamChange()
+	{
+		// NextBotPlayer< PlayerType >::NextBotPlayer
+		this.m_inputButtons = 0;
+		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
+		
+		// CTFBot::CTFBot
+		this.ClearWeaponRestrictions();
+		this.ClearAllAttributes();
+		this.m_squad = NULL_SQUAD;
+		this.m_difficulty = Clamp(tf_bot_difficulty.IntValue, EASY, EXPERT);
+		
+		this.SetMission(NO_MISSION);
+		this.SetMissionTarget(INVALID_ENT_REFERENCE);
+		
+		this.m_fModelScaleOverride = -1.0;
+		
+		this.m_hFollowingFlagTarget = INVALID_ENT_REFERENCE;
+		
+		this.SetAutoJump(0.0, 0.0);
+		
+		// MannInTheMachinePlayer
+		TF2Attrib_RemoveAll(this.index);
+		this.ResetInvaderName();
+	}
+	
+	public void Spawn()
+	{
+		// NextBotPlayer< PlayerType >::Spawn
+		this.m_fireButtonTimer.Invalidate();
+		this.m_altFireButtonTimer.Invalidate();
+		this.m_specialFireButtonTimer.Invalidate();
+		
+		// CTFBot::Spawn
+		this.m_squad = NULL_SQUAD;
+		
+		this.ClearTags();
+		
+		this.m_hFollowingFlagTarget = INVALID_ENT_REFERENCE;
+		
+		this.m_requiredWeaponStack.Clear();
+		
+		// MannInTheMachinePlayer
+		this.m_annotationTimer = null;
 	}
 }
 
@@ -1725,7 +1837,7 @@ methodmap CTFBotSpawner < Address
 	
 	public Address GetClassIcon(int nSpawnNum = -1)
 	{
-		return LoadFromAddress(SDKCall_GetClassIcon(this, nSpawnNum), NumberType_Int32);
+		return LoadFromAddress(SDKCall_IPopulationSpawner_GetClassIcon(this, nSpawnNum), NumberType_Int32);
 	}
 };
 
@@ -1972,11 +2084,11 @@ methodmap CPopulationManager < CBaseEntity
 		{
 			CMvMBotUpgrade upgrade = this.m_EndlessActiveBotUpgrades.Get(i, GetOffset(NULL_STRING, "sizeof(CMvMBotUpgrade)"));
 			
-			if (upgrade.bIsBotAttr == true)
+			if (upgrade.bIsBotAttr)
 			{
 				CTFPlayer(player).SetAttribute(view_as<AttributeType>(RoundFloat(upgrade.flValue)));
 			}
-			else if (upgrade.bIsSkillAttr == true)
+			else if (upgrade.bIsSkillAttr)
 			{
 				CTFPlayer(player).SetDifficulty(view_as<DifficultyType>(RoundFloat(upgrade.flValue)));
 			}
@@ -2262,7 +2374,7 @@ methodmap CTFGameRules < CBaseEntity
 	
 	public void SetCustomUpgradesFile(const char[] path)
 	{
-		if (FileExists(path, true, "GAME"))
+		if (FileExists(path, true))
 		{
 			AddFileToDownloadsTable(path);
 			

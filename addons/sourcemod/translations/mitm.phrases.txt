@@ -178,7 +178,11 @@
 	}
 	"Invader_Queue_Header"
 	{
-		"en"		"Next Robot Spawns:"
+		"en"		"NEXT ROBOT SPAWNS"
+	}
+	"Invader_Queue_Header_MiniBoss"
+	{
+		"en"		"NEXT GIANT SPAWNS"
 	}
 	"Invader_Deployed"
 	{
@@ -190,9 +194,9 @@
 		"#format"	"{1:d}"
 		"en"		"...and {1} more"
 	}
-	"MvM_Upgrade_Disabled"
+	"Spectator_Mode"
 	{
-		"en"	"This upgrade is disabled and can not be purchased."
+		"en"		"You are in SPECTATOR MODE"
 	}
 	
 	// Party
@@ -284,14 +288,29 @@
 	{
 		"en"		"The party system is currently disabled."
 	}
+	"Party_PlayerInvitePending"
+	{
+		"#format"	"{1:N}"
+		"en"		"{lightgreen}{1} {default}already has a pending invite."
+	}
+	"Party_PlayerIgnoringInvites"
+	{
+		"#format"	"{1:N}"
+		"en"		"{lightgreen}{1} {default}is ignoring party invites."
+	}
+	"Party_PlayerBlocked"
+	{
+		"#format"	"{1:N}"
+		"en"		"{lightgreen}{1} {default}is not allowed to join parties."
+	}
 	"Party_InvitedPlayers"
 	{
-		"#format"	"{1:t},{2:s}"
+		"#format"	"{1:N},{2:s}"
 		"en"		"You have invited {lightgreen}{1} {default}to {cyan}{2}{default}."
 	}
 	"Party_DoesNotExist"
 	{
-		"en"		"The party does not exist. It may have been deleted."
+		"en"		"The party does not exist. It may have been disbanded already."
 	}
 	"Party_AlreadyMember"
 	{
@@ -313,6 +332,14 @@
 	{
 		"#format"	"{1:s}"
 		"en"		"You have created and automatically joined {cyan}{1}{default}."
+	}
+	"Party_NotAllowed"
+	{
+		"en"		"You are not allowed to use the party feature."
+	}
+	"Party_QueuePointsLoading"
+	{
+		"en"		"Your queue points are still loading, please wait a moment."
 	}
 	"Party_Joined"
 	{

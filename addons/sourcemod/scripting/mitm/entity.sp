@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-static ArrayList g_EntityProperties;
+static ArrayList g_hEntityProperties;
 
 enum struct EntityProperties
 {
@@ -52,21 +52,19 @@ methodmap Entity
 			return view_as<Entity>(INVALID_ENT_REFERENCE);
 		}
 		
-		if (!g_EntityProperties)
+		if (!g_hEntityProperties)
 		{
-			g_EntityProperties = new ArrayList(sizeof(EntityProperties));
+			g_hEntityProperties = new ArrayList(sizeof(EntityProperties));
 		}
 		
-		// doubly convert it to ensure we store it as an entity reference
-		int ref = EntIndexToEntRef(EntRefToEntIndex(entity));
+		int ref = IsValidEdict(entity) ? EntIndexToEntRef(entity) : entity;
 		
-		if (g_EntityProperties.FindValue(ref, EntityProperties::m_ref) == -1)
+		if (!Entity.IsReferenceTracked(ref))
 		{
-			// fill basic properties
 			EntityProperties properties;
 			properties.Init(ref);
 			
-			g_EntityProperties.PushArray(properties);
+			g_hEntityProperties.PushArray(properties);
 		}
 		
 		return view_as<Entity>(ref);
@@ -76,7 +74,7 @@ methodmap Entity
 	{
 		public get()
 		{
-			return g_EntityProperties.FindValue(view_as<int>(this), EntityProperties::m_ref);
+			return g_hEntityProperties.FindValue(view_as<int>(this), EntityProperties::m_ref);
 		}
 	}
 	
@@ -84,11 +82,11 @@ methodmap Entity
 	{
 		public get()
 		{
-			return g_EntityProperties.Get(this.m_listIndex, EntityProperties::m_teleportWhereName);
+			return g_hEntityProperties.Get(this.m_listIndex, EntityProperties::m_teleportWhereName);
 		}
 		public set(ArrayList teleportWhereName)
 		{
-			g_EntityProperties.Set(this.m_listIndex, teleportWhereName, EntityProperties::m_teleportWhereName);
+			g_hEntityProperties.Set(this.m_listIndex, teleportWhereName, EntityProperties::m_teleportWhereName);
 		}
 	}
 	
@@ -96,11 +94,11 @@ methodmap Entity
 	{
 		public get()
 		{
-			return g_EntityProperties.Get(this.m_listIndex, EntityProperties::m_hGlowEntity);
+			return g_hEntityProperties.Get(this.m_listIndex, EntityProperties::m_hGlowEntity);
 		}
 		public set(int glowEntity)
 		{
-			g_EntityProperties.Set(this.m_listIndex, glowEntity, EntityProperties::m_hGlowEntity);
+			g_hEntityProperties.Set(this.m_listIndex, glowEntity, EntityProperties::m_hGlowEntity);
 		}
 	}
 	
@@ -134,17 +132,30 @@ methodmap Entity
 	
 	public void Destroy()
 	{
-		if (this.m_listIndex == -1)
+		int index = this.m_listIndex;
+		if (index == -1)
 			return;
 		
 		EntityProperties properties;
-		if (g_EntityProperties.GetArray(this.m_listIndex, properties))
-		{
-			// properly dispose of contained handles
+		if (g_hEntityProperties.GetArray(index, properties))
 			properties.Destroy();
-		}
 		
-		// finally, remove the entry from local storage
-		g_EntityProperties.Erase(this.m_listIndex);
+		g_hEntityProperties.Erase(index);
+	}
+	
+	public static bool IsEntityTracked(int entity)
+	{
+		int ref = IsValidEdict(entity) ? EntIndexToEntRef(entity) : entity;
+		return Entity.IsReferenceTracked(ref);
+	}
+	
+	public static bool IsReferenceTracked(int ref)
+	{
+		return g_hEntityProperties.FindValue(ref, EntityProperties::m_ref) != -1;
+	}
+	
+	public static void Init()
+	{
+		g_hEntityProperties = new ArrayList(sizeof(EntityProperties));
 	}
 }

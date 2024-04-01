@@ -115,13 +115,13 @@ static int Update(CTFBotMvMEngineerTeleportSpawn action, int actor, float interv
 		
 		TeleportEntity(actor, origin, angles);
 		
-		TE_TFParticleEffect("teleported_blue", origin);
-		TE_TFParticleEffect("player_sparkles_blue", origin);
+		TE_TFParticleEffect("teleported_blue", origin, NULL_VECTOR);
+		TE_TFParticleEffect("player_sparkles_blue", origin, NULL_VECTOR);
 		
 		if (action.m_bFirstTeleportSpawn)
 		{
 			// notify players that engineer's teleported into the map
-			TE_TFParticleEffect("teleported_mvm_bot", origin);
+			TE_TFParticleEffect("teleported_mvm_bot", origin, NULL_VECTOR);
 			EmitGameSoundToAll("Engineer.MVM_BattleCry07", actor);
 			EmitGameSoundToAll("MVM.Robot_Engineer_Spawn", action.m_hintEntity);
 			

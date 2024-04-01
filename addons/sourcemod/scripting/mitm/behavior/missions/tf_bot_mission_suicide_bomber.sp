@@ -27,6 +27,7 @@ methodmap CTFBotMissionSuicideBomber < NextBotAction
 		ActionFactory = new NextBotActionFactory("MissionSuicideBomber");
 		ActionFactory.BeginDataMapDesc()
 			.DefineIntField("m_detonateTimer")
+			.DefineIntField("m_startDetonateTimer")
 			.DefineIntField("m_talkTimer")
 			.DefineIntField("m_annotationTimer")
 			.DefineEntityField("m_victim")
@@ -40,12 +41,14 @@ methodmap CTFBotMissionSuicideBomber < NextBotAction
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
 		ActionFactory.SetEventCallback(EventResponderType_OnKilled, OnKilled);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldAttack, ShouldAttack);
 	}
 	
 	public CTFBotMissionSuicideBomber()
 	{
 		CTFBotMissionSuicideBomber action = view_as<CTFBotMissionSuicideBomber>(ActionFactory.Create());
 		action.m_detonateTimer = new CountdownTimer();
+		action.m_startDetonateTimer = new CountdownTimer();
 		action.m_talkTimer = new CountdownTimer();
 		action.m_annotationTimer = new CountdownTimer();
 		return action;
@@ -60,6 +63,18 @@ methodmap CTFBotMissionSuicideBomber < NextBotAction
 		public set(CountdownTimer detonateTimer)
 		{
 			this.SetData("m_detonateTimer", detonateTimer);
+		}
+	}
+	
+	property CountdownTimer m_startDetonateTimer
+	{
+		public get()
+		{
+			return this.GetData("m_startDetonateTimer");
+		}
+		public set(CountdownTimer startDetonateTimer)
+		{
+			this.SetData("m_startDetonateTimer", startDetonateTimer);
 		}
 	}
 	
@@ -139,6 +154,7 @@ methodmap CTFBotMissionSuicideBomber < NextBotAction
 static int OnStart(CTFBotMissionSuicideBomber action, int actor, NextBotAction priorAction)
 {
 	action.m_detonateTimer.Invalidate();
+	action.m_startDetonateTimer.Invalidate();
 	action.m_annotationTimer.Invalidate();
 	action.m_bHasDetonated = false;
 	action.m_bWasSuccessful = false;
@@ -238,6 +254,25 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 			}
 		}
 	}
+	else
+	{
+		// target is dead or invalid - detonate after a while
+		if (!action.m_startDetonateTimer.HasStarted())
+		{
+			action.m_startDetonateTimer.Start(20.0);
+			
+			float lastKnownVictimPosition[3];
+			action.GetDataVector("m_lastKnownVictimPosition", lastKnownVictimPosition);
+			
+			char text[64];
+			Format(text, sizeof(text), "%T", "Invader_DestroySentries_DetonateHere", actor);
+			ShowAnnotation(actor, MITM_HINT_MASK | actor, text, _, lastKnownVictimPosition, sm_mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
+		}
+		else if (action.m_startDetonateTimer.IsElapsed())
+		{
+			StartDetonate(action, actor, false);
+		}
+	}
 	
 	// Get to a third of the damage range before detonating
 	float lastKnownVictimPosition[3];
@@ -246,11 +281,16 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 	if (IsDistanceBetweenLessThan(actor, lastKnownVictimPosition, detonateRange))
 	{
 		float where[3];
-		AddVectors(lastKnownVictimPosition, Vector(0.0, 0.0, sv_stepsize.FloatValue), where);
+		AddVectors(lastKnownVictimPosition, Vector(0.0, 0.0, StepHeight), where);
 		if (IsLineOfFireClearGivenPlayerAndPoint(actor, where))
 		{
 			StartDetonate(action, actor, true);
 		}
+	}
+	
+	if (TF2_IsPlayerInCondition(actor, TFCond_Taunting))
+	{
+		StartDetonate(action, actor, true);
 	}
 	
 	if (action.m_talkTimer.IsElapsed())
@@ -267,6 +307,7 @@ static void OnEnd(CTFBotMissionSuicideBomber action, int actor, NextBotAction ne
 	HideAnnotation(actor, MITM_HINT_MASK | actor);
 	
 	delete action.m_detonateTimer;
+	delete action.m_startDetonateTimer;
 	delete action.m_talkTimer;
 	delete action.m_annotationTimer;
 }
@@ -295,6 +336,12 @@ static int OnKilled(CTFBotMissionSuicideBomber action, int actor, int attacker, 
 	}
 	
 	return action.TryContinue();
+}
+
+static QueryResultType ShouldAttack(CTFBotMissionSuicideBomber action, INextBot bot, CKnownEntity knownEntity)
+{
+	// buster never "attacks", just approaches and self-detonates
+	return ANSWER_NO;
 }
 
 static void StartDetonate(CTFBotMissionSuicideBomber action, int actor, bool bWasSuccessful = false, bool bWasKilled = false)
@@ -331,8 +378,8 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 	GetClientAbsOrigin(actor, origin);
 	GetClientAbsAngles(actor, angles);
 	
-	TE_TFParticleEffect("explosionTrail_seeds_mvm", .vecOrigin = origin, .vecAngles = angles);
-	TE_TFParticleEffect("fluidSmokeExpl_ring_mvm", .vecOrigin = origin, .vecAngles = angles);
+	TE_TFParticleEffect("explosionTrail_seeds_mvm", origin, angles);
+	TE_TFParticleEffect("fluidSmokeExpl_ring_mvm", origin, angles);
 	
 	EmitGameSoundToAll("MVM.SentryBusterExplode", actor);
 	
@@ -402,19 +449,17 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 		{
 			NormalizeVector(toVictim, toVictim);
 			
-			int nDamage = Max(TF2Util_GetEntityMaxHealth(victim), GetEntProp(victim, Prop_Data, "m_iHealth"));
+			int damage = Max(TF2Util_GetEntityMaxHealth(victim), GetEntProp(victim, Prop_Data, "m_iHealth"));
 			
-			float flDamage = float(4 * nDamage);
+			CTakeDamageInfo info = GetGlobalDamageInfo();
+			info.Init(actor, actor, .damage = float(4 * damage), .bitsDamageType = DMG_BLAST);
 			if (tf_bot_suicide_bomb_friendly_fire.BoolValue)
 			{
-				g_bForceFriendlyFire = true;
+				info.SetForceFriendlyFire(true);
 			}
 			
-			float vecForce[3];
-			CalculateMeleeDamageForce(toVictim, flDamage, 1.0, vecForce);
-			SDKHooks_TakeDamage(victim, actor, actor, flDamage, DMG_BLAST, .damageForce = vecForce, .damagePosition = actorCenter, .bypassHooks = false);
-			
-			g_bForceFriendlyFire = false;
+			CalculateMeleeDamageForce(info, toVictim, actorCenter, 1.0);
+			CBaseEntity(victim).TakeDamage(info);
 		}
 	}
 	

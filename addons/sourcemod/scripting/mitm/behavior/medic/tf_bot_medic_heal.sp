@@ -26,6 +26,7 @@ methodmap CTFBotMedicHeal < NextBotAction
 	{
 		ActionFactory = new NextBotActionFactory("MedicHeal");
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
+		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldHurry, ShouldHurry);
 	}
 	
 	public CTFBotMedicHeal()
@@ -48,7 +49,7 @@ static int Update(CTFBotMedicHeal action, int actor, float interval)
 		if (!squad.ShouldPreserveSquad())
 		{
 			int[] members = new int[MaxClients];
-			int count = squad.CollectMembers(members, MaxClients);
+			int count = squad.CollectMembers(members);
 			
 			int i;
 			for (i = 0; i < count; i++)
@@ -87,6 +88,12 @@ static int Update(CTFBotMedicHeal action, int actor, float interval)
 	}
 	
 	return action.Continue();
+}
+
+static QueryResultType ShouldHurry(CTFBotMedicHeal action, INextBot bot)
+{
+	// never abandon our patient
+	return ANSWER_YES;
 }
 
 static int SelectPatient(int actor)

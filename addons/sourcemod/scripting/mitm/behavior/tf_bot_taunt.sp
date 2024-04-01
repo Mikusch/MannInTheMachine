@@ -100,7 +100,7 @@ static int Update(CTFBotTaunt action, int actor, float interval)
 				FakeClientCommand(actor, "stop_taunt");
 			}
 			
-			if (TF2_IsPlayerInCondition(actor, TFCond_Taunting) == false)
+			if (!TF2_IsPlayerInCondition(actor, TFCond_Taunting))
 			{
 				return action.Done("Taunt finished");
 			}

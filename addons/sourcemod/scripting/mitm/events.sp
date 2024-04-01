@@ -18,18 +18,68 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+#define MAX_EVENT_NAME_LENGTH	32
+
+enum struct EventData
+{
+	char name[MAX_EVENT_NAME_LENGTH];
+	EventHook callback;
+	EventHookMode mode;
+}
+
+static ArrayList g_hEvents;
+
 void Events_Init()
 {
-	HookEvent("player_spawn", EventHook_PlayerSpawn);
-	HookEvent("player_death", EventHook_PlayerDeath);
-	HookEvent("player_team", EventHook_PlayerTeam, EventHookMode_Pre);
-	HookEvent("post_inventory_application", EventHook_PostInventoryApplication);
-	HookEvent("player_builtobject", EventHook_PlayerBuiltObject);
-	HookEvent("object_destroyed", EventHook_ObjectDestroyed);
-	HookEvent("object_detonated", EventHook_ObjectDestroyed);
-	HookEvent("teamplay_point_captured", EventHook_TeamplayPointCaptured);
-	HookEvent("teamplay_flag_event", EventHook_TeamplayFlagEvent);
-	HookEvent("teams_changed", EventHook_TeamsChanged);
+	g_hEvents = new ArrayList(sizeof(EventData));
+	
+	Events_AddEvent("player_spawn", EventHook_PlayerSpawn);
+	Events_AddEvent("player_death", EventHook_PlayerDeath);
+	Events_AddEvent("player_team", EventHook_PlayerTeam, EventHookMode_Pre);
+	Events_AddEvent("post_inventory_application", EventHook_PostInventoryApplication);
+	Events_AddEvent("player_builtobject", EventHook_PlayerBuiltObject);
+	Events_AddEvent("teamplay_point_captured", EventHook_TeamplayPointCaptured);
+	Events_AddEvent("teamplay_flag_event", EventHook_TeamplayFlagEvent);
+	Events_AddEvent("teams_changed", EventHook_TeamsChanged);
+}
+
+void Events_Toggle(bool bEnable)
+{
+	for (int i = 0; i < g_hEvents.Length; i++)
+	{
+		EventData data;
+		if (g_hEvents.GetArray(i, data))
+		{
+			if (bEnable)
+			{
+				HookEvent(data.name, data.callback, data.mode);
+			}
+			else
+			{
+				UnhookEvent(data.name, data.callback, data.mode);
+			}
+		}
+	}
+}
+
+static void Events_AddEvent(const char[] name, EventHook callback, EventHookMode mode = EventHookMode_Post)
+{
+	Event event = CreateEvent(name, true);
+	if (event)
+	{
+		event.Cancel();
+		
+		EventData data;
+		strcopy(data.name, sizeof(data.name), name);
+		data.callback = callback;
+		data.mode = mode;
+		
+		g_hEvents.PushArray(data);
+	}
+	else
+	{
+		LogError("Failed to create event: %s", name);
+	}
 }
 
 static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
@@ -37,6 +87,8 @@ static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroad
 	int client = GetClientOfUserId(event.GetInt("userid"));
 	if (client == 0)
 		return;
+	
+	CTFPlayer(client).Spawn();
 	
 	CTFPlayer(client).m_annotationTimer = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
 }
@@ -68,17 +120,17 @@ static Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroa
 	if (IsMannVsMachineMode())
 	{
 		CTFPlayer(client).SetPrevMission(NO_MISSION);
-		TF2Attrib_RemoveAll(client);
+		CTFPlayer(client).ClearAllAttributes();
 		// Clear Sound
 		CTFPlayer(client).StopIdleSound();
-	}
-	
-	if (team != TFTeam_Invaders)
-	{
-		CTFPlayer(client).ResetInvader();
 		
-		SetVariantString("");
-		AcceptEntityInput(client, "SetCustomModel");
+		if (team != TFTeam_Invaders)
+		{
+			SetVariantString("");
+			AcceptEntityInput(client, "SetCustomModel");
+			
+			CTFPlayer(client).ResetOnTeamChange();
+		}
 	}
 	
 	return Plugin_Changed;
@@ -176,31 +228,6 @@ static void EventHook_PlayerBuiltObject(Event event, const char[] name, bool don
 	}
 }
 
-static void EventHook_ObjectDestroyed(Event event, const char[] name, bool dontBroadcast)
-{
-	int index = event.GetInt("index");
-	
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		if (!IsPlayerAlive(client))
-			continue;
-		
-		if (CTFPlayer(client).HasMission(MISSION_DESTROY_SENTRIES) && index == CTFPlayer(client).GetMissionTarget())
-		{
-			char text[64];
-			Format(text, sizeof(text), "%T", "Invader_DestroySentries_DetonateHere", client);
-			
-			float worldPos[3];
-			GetEntPropVector(index, Prop_Data, "m_vecAbsOrigin", worldPos);
-			
-			ShowAnnotation(client, MITM_HINT_MASK | client, text, _, worldPos, sm_mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
-		}
-	}
-}
-
 static void EventHook_TeamplayPointCaptured(Event event, const char[] name, bool dontBroadcast)
 {
 	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
@@ -239,7 +266,7 @@ void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool dontBroadc
 
 static void EventHook_TeamsChanged(Event event, const char[] name, bool dontBroadcast)
 {
-	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && !sm_mitm_developer.BoolValue)
+	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && GameRules_GetRoundState() != RoundState_GameOver && !sm_mitm_developer.BoolValue)
 	{
 		RequestFrame(RequestFrameCallback_FindReplacementDefender);
 	}

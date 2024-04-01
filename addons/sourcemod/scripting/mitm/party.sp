@@ -149,7 +149,7 @@ methodmap Party
 	
 	public int GetMaxPlayers()
 	{
-		int iMaxPartySize = sm_mitm_party_max_size.IntValue, iDefenderCount = sm_mitm_defender_count.IntValue;
+		int iMaxPartySize = sm_mitm_party_max_size.IntValue, iDefenderCount = tf_mvm_defenders_team_size.IntValue;
 		return (iMaxPartySize == 0) ? iDefenderCount : Min(iMaxPartySize, iDefenderCount);
 	}
 	
@@ -200,7 +200,7 @@ methodmap Party
 			
 			// pick the next leader that's left in the party
 			int[] members = new int[MaxClients];
-			if (this.CollectMembers(members, MaxClients))
+			if (this.CollectMembers(members))
 			{
 				this.m_leader = members[0];
 			}
@@ -212,7 +212,7 @@ methodmap Party
 		}
 	}
 	
-	public int CollectMembers(int[] clients, int size, bool bIncludeSpectators = true)
+	public int CollectMembers(int[] clients, bool bIncludeSpectators = true)
 	{
 		int count = 0;
 		
@@ -235,7 +235,7 @@ methodmap Party
 	public int GetMemberCount(bool bIncludeSpectators = true)
 	{
 		int[] members = new int[MaxClients];
-		return this.CollectMembers(members, MaxClients, bIncludeSpectators);
+		return this.CollectMembers(members, bIncludeSpectators);
 	}
 	
 	public int CalculateQueuePoints()
@@ -243,7 +243,7 @@ methodmap Party
 		int points = 0;
 		
 		int[] members = new int[MaxClients];
-		int count = this.CollectMembers(members, MaxClients, false);
+		int count = this.CollectMembers(members, false);
 		for (int i = 0; i < count; ++i)
 		{
 			points += CTFPlayer(members[i]).m_defenderQueuePoints;
@@ -278,7 +278,7 @@ methodmap Party
 		{
 			// notify all members
 			int[] members = new int[MaxClients];
-			int count = this.CollectMembers(members, MaxClients);
+			int count = this.CollectMembers(members);
 			for (int i = 0; i < count; ++i)
 			{
 				int member = members[i];
@@ -384,6 +384,18 @@ bool Party_ShouldRunCommand(int client)
 		return false;
 	}
 	
+	if (!Forwards_OnIsValidDefender(client))
+	{
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_NotAllowed");
+		return false;
+	}
+	
+	if (CTFPlayer(client).m_defenderQueuePoints == -1)
+	{
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_QueuePointsLoading");
+		return false;
+	}
+	
 	return true;
 }
 
@@ -399,6 +411,7 @@ static Action ConCmd_PartyCreate(int client, int args)
 		
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
+		
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Created", name);
 		ClientCommand(client, "play %s", SOUND_PARTY_UPDATE);
 	}
@@ -462,6 +475,7 @@ static Action ConCmd_PartyJoin(int client, int args)
 		
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
+		
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_Joined", name);
 		ClientCommand(client, "play %s", SOUND_PARTY_UPDATE);
 	}
@@ -471,7 +485,7 @@ static Action ConCmd_PartyJoin(int client, int args)
 	
 	// notify all other members
 	int[] members = new int[MaxClients];
-	int count = party.CollectMembers(members, MaxClients);
+	int count = party.CollectMembers(members);
 	for (int i = 0; i < count; ++i)
 	{
 		int member = members[i];
@@ -547,40 +561,41 @@ static Action ConCmd_PartyInvite(int client, int args)
 	int target_list[MAXPLAYERS], target_count;
 	bool tn_is_ml;
 	
-	if ((target_count = ProcessTargetString(target, 0, target_list, sizeof(target_list), COMMAND_TARGET_NONE, target_name, sizeof(target_name), tn_is_ml)) <= 0)
+	if ((target_count = ProcessTargetString(target, 0, target_list, sizeof(target_list), COMMAND_FILTER_NO_MULTI, target_name, sizeof(target_name), tn_is_ml)) <= 0)
 	{
 		ReplyToTargetError(client, target_count);
 		return Plugin_Handled;
 	}
 	
+	int player = target_list[0];
+	
+	if (party.IsInvited(player))
+	{
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_PlayerInvitePending", player);
+		return Plugin_Handled;
+	}
+	
+	if (CTFPlayer(player).HasPreference(PREF_IGNORE_PARTY_INVITES))
+	{
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_PlayerIgnoringInvites", player);
+		return Plugin_Handled;
+	}
+	
+	if (!Forwards_OnIsValidDefender(player))
+	{
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_PlayerBlocked", player);
+		return Plugin_Handled;
+	}
+	
+	CTFPlayer(player).InviteToParty(party);
+	
 	char name[MAX_NAME_LENGTH];
 	party.GetName(name, sizeof(name));
 	
-	for (int i = 0; i < target_count; ++i)
-	{
-		if (target_list[i] == client)
-			continue;
-		
-		if (party.IsInvited(target_list[i]))
-			continue;
-		
-		if (CTFPlayer(target_list[i]).HasPreference(PREF_IGNORE_PARTY_INVITES))
-			continue;
-		
-		CTFPlayer(target_list[i]).InviteToParty(party);
-		
-		CPrintToChat(target_list[i], "%s %t", PLUGIN_TAG, "Party_IncomingInvite", name, client);
-		ClientCommand(target_list[i], "play %s", SOUND_PARTY_INVITE);
-	}
+	CPrintToChat(player, "%s %t", PLUGIN_TAG, "Party_IncomingInvite", name, client);
+	ClientCommand(player, "play %s", SOUND_PARTY_INVITE);
 	
-	if (tn_is_ml)
-	{
-		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_InvitedPlayers", target_name, name);
-	}
-	else
-	{
-		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_InvitedPlayers", "_s", target_name, name);
-	}
+	CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_InvitedPlayers", player, name);
 	
 	return Plugin_Handled;
 }
@@ -658,12 +673,13 @@ static Action ConCmd_PartyKick(int client, int args)
 		
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
+		
 		CPrintToChat(target_list[i], "%s %t", PLUGIN_TAG, "Party_Kicked", name);
 		ClientCommand(target_list[i], "play %s", SOUND_PARTY_UPDATE);
 		
 		// notify all other members
 		int[] members = new int[MaxClients];
-		int count = party.CollectMembers(members, MaxClients);
+		int count = party.CollectMembers(members);
 		for (int j = 0; j < count; j++)
 		{
 			int member = members[j];
@@ -706,7 +722,7 @@ static Action ConCmd_PartyName(int client, int args)
 	// truncate the name if it's too long
 	if (strlen(name) > MAX_PARTY_NAME_LENGTH)
 	{
-		name[MAX_PARTY_NAME_LENGTH - 1] = '\0';
+		name[MAX_PARTY_NAME_LENGTH - 1] = EOS;
 	}
 	
 	party.SetName(name);

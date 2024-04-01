@@ -23,6 +23,7 @@ void Natives_Init()
 	CreateNative("MannInTheMachinePlayer.HasPreference", Native_HasPreference);
 	
 	CreateNative("MannInTheMachine_IsInEndlessWaves", Native_IsInEndlessWaves);
+	CreateNative("MannInTheMachine_IsInWaitingForPlayers", Native_IsInWaitingForPlayers);
 }
 
 static int Native_HasPreference(Handle plugin, int numParams)
@@ -41,6 +42,11 @@ static int Native_IsInEndlessWaves(Handle plugin, int numParams)
 	}
 	
 	return g_pPopulationManager.IsInEndlessWaves();
+}
+
+static int Native_IsInWaitingForPlayers(Handle plugin, int numParams)
+{
+	return g_bInWaitingForPlayers;
 }
 
 static int GetNativeInGameClient(int param)

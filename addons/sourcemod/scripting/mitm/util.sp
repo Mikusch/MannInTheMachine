@@ -182,6 +182,11 @@ any Max(any a, any b)
 	return (a >= b) ? a : b;
 }
 
+any Clamp(any val, any min, any max)
+{
+	return Min(Max(val, min), max);
+}
+
 bool IsMannVsMachineMode()
 {
 	return view_as<bool>(GameRules_GetProp("m_bPlayingMannVsMachine"));
@@ -292,6 +297,18 @@ TFTeam GetEnemyTeam(TFTeam team)
 
 void SelectNewDefenders()
 {
+	// Move everyone to spectator team
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
+			continue;
+		
+		TF2_ForceChangeClientTeam(client, TFTeam_Spectator);
+	}
+	
 	CPrintToChatAll("%s %t", PLUGIN_TAG, "Queue_NewDefenders");
 	
 	char redTeamname[MAX_TEAM_NAME_LENGTH], blueTeamname[MAX_TEAM_NAME_LENGTH];
@@ -316,7 +333,7 @@ void SelectNewDefenders()
 	}
 	
 	ArrayList queue = Queue_GetDefenderQueue();
-	int iDefenderCount = 0, iReqDefenderCount = sm_mitm_defender_count.IntValue;
+	int iDefenderCount = 0, iReqDefenderCount = tf_mvm_defenders_team_size.IntValue;
 	
 	// Select our defenders
 	for (int i = 0; i < queue.Length; i++)
@@ -332,7 +349,7 @@ void SelectNewDefenders()
 				continue;
 			
 			int[] members = new int[MaxClients];
-			int count = party.CollectMembers(members, MaxClients, false);
+			int count = party.CollectMembers(members, false);
 			for (int j = 0; j < count; j++)
 			{
 				int member = members[j];
@@ -468,7 +485,7 @@ void FindReplacementDefender()
 	delete queue;
 }
 
-ArrayList GetInvaderQueue(bool bMiniBoss = false)
+ArrayList GetInvaderQueue(bool bIsMiniBoss = false)
 {
 	ArrayList queue = new ArrayList();
 	
@@ -487,16 +504,16 @@ ArrayList GetInvaderQueue(bool bMiniBoss = false)
 		if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 			continue;
 		
-		if (bMiniBoss && CTFPlayer(client).HasPreference(PREF_INVADER_DISABLE_MINIBOSS))
+		if (bIsMiniBoss && CTFPlayer(client).HasPreference(PREF_INVADER_DISABLE_MINIBOSS))
 			continue;
 		
-		if (!Forwards_OnIsValidInvader(client, bMiniBoss))
+		if (!Forwards_OnIsValidInvader(client, bIsMiniBoss))
 			continue;
 		
 		queue.Push(client);
 	}
 	
-	queue.SortCustom(bMiniBoss ? SortPlayersByMinibossPriority : SortPlayersByPriority);
+	queue.SortCustom(bIsMiniBoss ? SortPlayersByMinibossPriority : SortPlayersByPriority);
 	
 	return queue;
 }
@@ -688,49 +705,88 @@ bool TraceEntityFilter_IgnoreActorsAndFriendlyCombatItems(int entity, int conten
 	return true;
 }
 
-void TE_TFParticleEffect(const char[] name, const float vecOrigin[3] = NULL_VECTOR,
-	const float vecStart[3] = NULL_VECTOR, const float vecAngles[3] = NULL_VECTOR,
-	int entity = -1, ParticleAttachment_t attachType = PATTACH_ABSORIGIN,
-	int attachPoint = -1, bool bResetParticles = false)
+int GetParticleSystemIndex(const char[] szParticleSystemName)
 {
-	int particleTable, particleIndex;
-	
-	if ((particleTable = FindStringTable("ParticleEffectNames")) == INVALID_STRING_TABLE)
+	if (szParticleSystemName[0])
 	{
-		ThrowError("Could not find string table: ParticleEffectNames");
+		static int s_iStringTableParticleEffectNames = INVALID_STRING_TABLE;
+		if (s_iStringTableParticleEffectNames == INVALID_STRING_TABLE)
+		{
+			if ((s_iStringTableParticleEffectNames = FindStringTable("ParticleEffectNames")) == INVALID_STRING_TABLE)
+			{
+				LogError("Missing string table 'ParticleEffectNames'");
+				return INVALID_STRING_INDEX;
+			}
+		}
+		
+		int nIndex = FindStringIndex(s_iStringTableParticleEffectNames, szParticleSystemName);
+		if (nIndex == INVALID_STRING_INDEX)
+		{
+			LogError("Missing precache for particle system '%s'", szParticleSystemName);
+			return 0;
+		}
+		
+		return nIndex;
 	}
 	
-	if ((particleIndex = FindStringIndex(particleTable, name)) == INVALID_STRING_INDEX)
-	{
-		ThrowError("Could not find particle index: %s", name);
-	}
-	
+	return 0;
+}
+
+void TE_TFParticleEffect(const char[] szParticleName, float vecOrigin[3], float vecAngles[3], int entity = -1, ParticleAttachment_t eAttachType = PATTACH_CUSTOMORIGIN, float vecStart[3] = NULL_VECTOR)
+{
 	TE_Start("TFParticleEffect");
+	
+	TE_WriteNum("m_iParticleSystemIndex", GetParticleSystemIndex(szParticleName));
+	
 	TE_WriteFloat("m_vecOrigin[0]", vecOrigin[0]);
 	TE_WriteFloat("m_vecOrigin[1]", vecOrigin[1]);
 	TE_WriteFloat("m_vecOrigin[2]", vecOrigin[2]);
+	TE_WriteVector("m_vecAngles", vecAngles);
 	TE_WriteFloat("m_vecStart[0]", vecStart[0]);
 	TE_WriteFloat("m_vecStart[1]", vecStart[1]);
 	TE_WriteFloat("m_vecStart[2]", vecStart[2]);
-	TE_WriteVector("m_vecAngles", vecAngles);
-	TE_WriteNum("m_iParticleSystemIndex", particleIndex);
 	
-	if (entity != -1)
+	if (IsValidEntity(entity))
+	{
+		TE_WriteNum("entindex", entity);
+		TE_WriteNum("m_iAttachType", view_as<int>(eAttachType));
+	}
+	
+	TE_SendToAll();
+}
+
+void TE_TFParticleEffectAttachment(const char[] szParticleName, int entity = -1, ParticleAttachment_t eAttachType = PATTACH_CUSTOMORIGIN, const char[] szAttachmentName, bool bResetAllParticlesOnEntity = false)
+{
+	int iAttachmentPoint = -1;
+	if (IsValidEntity(entity))
+	{
+		iAttachmentPoint = LookupEntityAttachment(entity, szAttachmentName);
+		if (iAttachmentPoint <= 0)
+		{
+			char szModelName[PLATFORM_MAX_PATH];
+			GetEntPropString(entity, Prop_Data, "m_ModelName", szModelName, sizeof(szModelName));
+			
+			LogError("Model '%s' does not have attachment '%s' to attach particle system '%s' to", szModelName, szAttachmentName, szParticleName);
+			return;
+		}
+	}
+	
+	TE_Start("TFParticleEffect");
+	
+	TE_WriteNum("m_iParticleSystemIndex", GetParticleSystemIndex(szParticleName));
+	
+	if (IsValidEntity(entity))
 	{
 		TE_WriteNum("entindex", entity);
 	}
 	
-	if (attachType != PATTACH_ABSORIGIN)
-	{
-		TE_WriteNum("m_iAttachType", view_as<int>(attachType));
-	}
+	TE_WriteNum("m_iAttachType", view_as<int>(eAttachType));
+	TE_WriteNum("m_iAttachmentPointIndex", iAttachmentPoint);
 	
-	if (attachPoint != -1)
+	if (bResetAllParticlesOnEntity)
 	{
-		TE_WriteNum("m_iAttachmentPointIndex", attachPoint);
+		TE_WriteNum("m_bResetParticles", true);
 	}
-	
-	TE_WriteNum("m_bResetParticles", bResetParticles ? 1 : 0);
 	
 	TE_SendToAll();
 }
@@ -801,14 +857,26 @@ Address GetPlayerShared(int client)
 	return GetEntityAddress(client) + offset;
 }
 
-void CalculateMeleeDamageForce(const float vecMeleeDir[3], float flDamage, float flScale, float vecForce[3])
+void CopyVector(const float source[3], float target[3])
 {
+	target[0] = source[0];
+	target[1] = source[1];
+	target[2] = source[2];
+}
+
+void CalculateMeleeDamageForce(CTakeDamageInfo info, const float vecMeleeDir[3], const float vecForceOrigin[3], float flScale)
+{
+	info.SetDamagePosition(vecForceOrigin);
+	
 	// Calculate an impulse large enough to push a 75kg man 4 in/sec per point of damage
-	float flForceScale = flDamage * (75 * 4);
-	NormalizeVector(vecMeleeDir, vecForce);
+	float flForceScale = info.GetBaseDamage() * (75 * 4);
+	float vecForce[3];
+	CopyVector(vecMeleeDir, vecForce);
+	NormalizeVector(vecForce, vecForce);
 	ScaleVector(vecForce, flForceScale);
 	ScaleVector(vecForce, phys_pushscale.FloatValue);
 	ScaleVector(vecForce, flScale);
+	info.SetDamageForce(vecForce);
 }
 
 int FixedUnsigned16(float value, int scale)
@@ -1064,7 +1132,7 @@ void LockWeapon(int client, int weapon, int &buttons)
 		// semi-auto behaviour
 		else
 		{
-			if (view_as<bool>(GetEntData(weapon, GetOffset("CTFWeaponBase", "m_bInAttack2"), 1)) == false)
+			if (!GetEntData(weapon, GetOffset("CTFWeaponBase", "m_bInAttack2"), 1))
 			{
 				SDKCall_CTFPlayer_DoClassSpecialSkill(client);
 				SetEntData(weapon, GetOffset("CTFWeaponBase", "m_bInAttack2"), true, 1);
@@ -1099,23 +1167,6 @@ void PrintKeyHintText(int client, const char[] format, any...)
 	EndMessage();
 }
 
-bool ArrayListEquals(ArrayList list1, ArrayList list2)
-{
-	if (list1.Length != list2.Length)
-		return false;
-	
-	for (int i = 0; i < list1.Length; i++)
-	{
-		for (int j = 0; j < list1.BlockSize; j++)
-		{
-			if (list1.Get(i, j) != list2.Get(i, j))
-				return false;
-		}
-	}
-	
-	return true;
-}
-
 bool StrPtrEquals(Address psz1, Address psz2)
 {
 	if (psz1 == psz2)
@@ -1129,7 +1180,7 @@ bool StrPtrEquals(Address psz1, Address psz2)
 	PtrToString(psz1, sz1, sizeof(sz1));
 	PtrToString(psz2, sz2, sizeof(sz2));
 	
-	return strcmp(sz1, sz2, false) == 0;
+	return !strcmp(sz1, sz2, false);
 }
 
 void MultiplyAttributeValue(int entity, const char[] szAttrib, float flMult)

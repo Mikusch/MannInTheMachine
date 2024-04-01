@@ -53,12 +53,12 @@ Cookie g_hCookiePreferences;
 bool g_bEnabled;
 CEntityFactory g_hEntityFactory;
 Handle g_hWarningHudSync;
+StringMap g_hSpyWatchModelReplacements;
 bool g_bInWaitingForPlayers;
 bool g_bMiniBossQueue;
 float g_flLastQueueSwitchTime;
 bool g_bAllowTeamChange;	// Bypass CTFGameRules::GetTeamAssignmentOverride?
 bool g_bInEndlessRollEscalation;
-StringMap g_hBotViewModelIndexes;
 
 // Plugin ConVars
 ConVar sm_mitm_enabled;
@@ -154,7 +154,7 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	g_hWarningHudSync = CreateHudSynchronizer();
-	g_hBotViewModelIndexes = new StringMap();
+	g_hSpyWatchModelReplacements = new StringMap();
 	
 	LoadTranslations("common.phrases");
 	LoadTranslations("mitm.phrases");
@@ -184,6 +184,12 @@ public void OnPluginStart()
 	
 	g_hCookieQueue = new Cookie("mitm_queue", "Mann in the Machine: Queue Points", CookieAccess_Protected);
 	g_hCookiePreferences = new Cookie("mitm_preferences", "Mann in the Machine: Preferences", CookieAccess_Protected);
+	
+	g_hSpyWatchModelReplacements.SetString("models/weapons/v_models/v_watch_spy.mdl", "models/weapons/v_models/v_watch_spy_bot.mdl");
+	g_hSpyWatchModelReplacements.SetString("models/weapons/v_models/v_watch_pocket_spy.mdl", "models/weapons/v_models/v_watch_pocket_spy_bot.mdl");
+	g_hSpyWatchModelReplacements.SetString("models/weapons/v_models/v_watch_leather_spy.mdl", "models/weapons/v_models/v_watch_leather_spy_bot.mdl");
+	g_hSpyWatchModelReplacements.SetString("models/weapons/v_models/v_ttg_watch_spy.mdl", "models/weapons/v_models/v_ttg_watch_spy_bot.mdl");
+	g_hSpyWatchModelReplacements.SetString("models/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch.mdl", "models/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch_bot.mdl");
 	
 	Entity.Init();
 	
@@ -712,10 +718,15 @@ static void Precache()
 	SuperPrecacheModel("models/weapons/v_models/v_pda_spy_animations.mdl");
 	SuperPrecacheModel("models/weapons/v_models/v_pda_spy_bot.mdl");
 	SuperPrecacheModel("models/weapons/v_models/v_pda_spy_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_ttg_watch_spy_bot.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_watch_leather_spy_bot.mdl");
 	SuperPrecacheModel("models/weapons/v_models/v_watch_pocket_spy_animations.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_watch_pocket_spy_bot.mdl");
 	SuperPrecacheModel("models/weapons/v_models/v_watch_pocket_spy_bot_animations.mdl");
 	SuperPrecacheModel("models/weapons/v_models/v_watch_spy_animations.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_watch_spy_bot.mdl");
 	SuperPrecacheModel("models/weapons/v_models/v_watch_spy_bot_animations.mdl");
+	SuperPrecacheModel("models/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch_bot.mdl");
 	
 	AddFileToDownloadsTable("materials/models/bots/pyro/pyro_bot_righthand_blue.vmt");
 	AddFileToDownloadsTable("materials/models/bots/pyro/pyro_bot_righthand_red.vmt");
@@ -723,13 +734,6 @@ static void Precache()
 	AddFileToDownloadsTable("materials/models/bots/spy/spy_bot_arms_red.vmt");
 	AddFileToDownloadsTable("materials/models/bots/spy/spy_bot_body_blue_unfinished.vtf");
 	AddFileToDownloadsTable("materials/models/bots/spy/spy_bot_body_red_unfinished.vtf");
-	
-	g_hBotViewModelIndexes.Clear();
-	g_hBotViewModelIndexes.SetValue("models/weapons/v_models/v_watch_spy.mdl", PrecacheModel("models/weapons/v_models/v_watch_spy_bot.mdl"));
-	g_hBotViewModelIndexes.SetValue("models/weapons/v_models/v_watch_pocket_spy.mdl", PrecacheModel("models/weapons/v_models/v_watch_pocket_spy_bot.mdl"));
-	g_hBotViewModelIndexes.SetValue("models/weapons/v_models/v_watch_leather_spy.mdl", PrecacheModel("models/weapons/v_models/v_watch_leather_spy_bot.mdl"));
-	g_hBotViewModelIndexes.SetValue("models/weapons/v_models/v_ttg_watch_spy.mdl", PrecacheModel("models/weapons/v_models/v_ttg_watch_spy_bot.mdl"));
-	g_hBotViewModelIndexes.SetValue("models/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch.mdl", PrecacheModel("models/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch_bot.mdl"));
 }
 
 static INextBot CreateNextBotPlayer(Address entity)

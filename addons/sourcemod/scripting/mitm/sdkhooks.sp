@@ -129,12 +129,12 @@ static void SDKHookCB_Client_WeaponEquipPost(int client, int weapon)
 	{
 		case TF_WEAPON_INVIS:
 		{
-			char szModel[PLATFORM_MAX_PATH];
+			char szModel[PLATFORM_MAX_PATH], szBotModel[PLATFORM_MAX_PATH];
 			GetEntPropString(weapon, Prop_Data, "m_ModelName", szModel, sizeof(szModel));
 			
-			int nModelIndex;
-			if (g_hBotViewModelIndexes.GetValue(szModel, nModelIndex))
+			if (g_hSpyWatchModelReplacements.GetString(szModel, szBotModel, sizeof(szBotModel)))
 			{
+				int nModelIndex = PrecacheModel(szBotModel);
 				SetEntProp(weapon, Prop_Send, "m_nModelIndex", nModelIndex);
 				SetEntProp(weapon, Prop_Send, "m_nCustomViewmodelModelIndex", nModelIndex);
 			}
@@ -155,7 +155,7 @@ static void SDKHookCB_Client_WeaponSwitchPost(int client, int weapon)
 	if (nModelIndex == 0)
 		return;
 	
-	SetEntProp(GetEntPropEnt(client, Prop_Send, "m_hViewModel"), Prop_Data, "m_nModelIndex", nModelIndex);
+	SetEntProp(GetEntPropEnt(client, Prop_Send, "m_hViewModel"), Prop_Send, "m_nModelIndex", nModelIndex);
 	SetEntProp(weapon, Prop_Send, "m_nCustomViewmodelModelIndex", nModelIndex);
 }
 

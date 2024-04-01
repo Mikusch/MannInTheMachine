@@ -121,35 +121,25 @@ static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int 
 
 static void SDKHookCB_Client_WeaponEquipPost(int client, int weapon)
 {
-	if (sm_mitm_use_bot_viewmodels.BoolValue && TF2_GetClientTeam(client) == TFTeam_Invaders)
+	if (!sm_mitm_use_bot_viewmodels.BoolValue || TF2_GetClientTeam(client) != TFTeam_Invaders)
+		return;
+	
+	int iWeaponID = TF2Util_GetWeaponID(weapon);
+	switch (iWeaponID)
 	{
-		if (TF2Util_GetWeaponID(weapon) == TF_WEAPON_INVIS)
+		case TF_WEAPON_INVIS:
 		{
-			char szModel[PLATFORM_MAX_PATH], szBotModel[PLATFORM_MAX_PATH];
+			char szModel[PLATFORM_MAX_PATH];
 			GetEntPropString(weapon, Prop_Data, "m_ModelName", szModel, sizeof(szModel));
 			
-			if (StrContains(szModel, "pocket") != -1)
+			int nModelIndex;
+			if (g_hBotViewModelIndexes.GetValue(szModel, nModelIndex))
 			{
-				strcopy(szBotModel, sizeof(szBotModel), "models/weapons/v_models/v_watch_pocket_spy_bot.mdl");
+				SetEntProp(weapon, Prop_Send, "m_nModelIndex", nModelIndex);
+				SetEntProp(weapon, Prop_Send, "m_nCustomViewmodelModelIndex", nModelIndex);
 			}
-			else if (StrContains(szModel, "leather") != -1)
-			{
-				strcopy(szBotModel, sizeof(szBotModel), "models/weapons/v_models/v_watch_leather_spy_bot.mdl");
-			}
-			else if (StrContains(szModel, "ttg_watch_spy") != -1)
-			{
-				strcopy(szBotModel, sizeof(szBotModel), "models/weapons/v_models/v_ttg_watch_spy_bot.mdl");
-			}
-			else
-			{
-				strcopy(szBotModel, sizeof(szBotModel), "models/weapons/v_models/v_watch_spy_bot.mdl");
-			}
-			
-			SetEntityModel(weapon, szBotModel);
-			SetEntProp(weapon, Prop_Send, "m_nCustomViewmodelModelIndex", PrecacheModel(szBotModel));
 		}
-		
-		if (TF2Util_GetWeaponID(weapon) == TF_WEAPON_PDA_SPY)
+		case TF_WEAPON_PDA_SPY:
 		{
 			SetEntProp(weapon, Prop_Data, "m_nModelIndex", PrecacheModel("models/weapons/v_models/v_pda_spy_bot.mdl"));
 		}
@@ -158,15 +148,15 @@ static void SDKHookCB_Client_WeaponEquipPost(int client, int weapon)
 
 static void SDKHookCB_Client_WeaponSwitchPost(int client, int weapon)
 {
-	if (sm_mitm_use_bot_viewmodels.BoolValue && TF2_GetClientTeam(client) == TFTeam_Invaders)
-	{
-		int iModelIndex = GetEffectiveViewModelIndex(client, weapon);
-		if (iModelIndex == 0)
-			return;
-		
-		SetEntProp(GetEntPropEnt(client, Prop_Send, "m_hViewModel"), Prop_Data, "m_nModelIndex", iModelIndex);
-		SetEntProp(weapon, Prop_Send, "m_nCustomViewmodelModelIndex", iModelIndex);
-	}
+	if (!sm_mitm_use_bot_viewmodels.BoolValue || TF2_GetClientTeam(client) != TFTeam_Invaders)
+		return;
+	
+	int nModelIndex = GetEffectiveViewModelIndex(client, weapon);
+	if (nModelIndex == 0)
+		return;
+	
+	SetEntProp(GetEntPropEnt(client, Prop_Send, "m_hViewModel"), Prop_Data, "m_nModelIndex", nModelIndex);
+	SetEntProp(weapon, Prop_Send, "m_nCustomViewmodelModelIndex", nModelIndex);
 }
 
 static Action SDKHookCB_ProjectilePipeRemote_SetTransmit(int entity, int client)

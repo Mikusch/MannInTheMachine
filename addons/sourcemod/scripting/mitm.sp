@@ -58,6 +58,7 @@ bool g_bMiniBossQueue;
 float g_flLastQueueSwitchTime;
 bool g_bAllowTeamChange;	// Bypass CTFGameRules::GetTeamAssignmentOverride?
 bool g_bInEndlessRollEscalation;
+StringMap g_hBotViewModelIndexes;
 
 // Plugin ConVars
 ConVar sm_mitm_enabled;
@@ -153,6 +154,7 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	g_hWarningHudSync = CreateHudSynchronizer();
+	g_hBotViewModelIndexes = new StringMap();
 	
 	LoadTranslations("common.phrases");
 	LoadTranslations("mitm.phrases");
@@ -688,45 +690,46 @@ static void Precache()
 	PrecacheSound("ui/system_message_alert.wav");
 	PrecacheSound(")mvm/mvm_tele_activate.wav");
 	
-	SuperPrecacheModel("models/weapons/c_models/c_scout_bot_arms.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_scout_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_sniper_bot_arms.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_sniper_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_soldier_bot_arms.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_soldier_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_demo_bot_arms.mdl");
 	SuperPrecacheModel("models/weapons/c_models/c_demo_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_medic_bot_arms.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_medic_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_heavy_bot_arms.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_heavy_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_pyro_bot_arms.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_pyro_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_spy_bot_arms.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_spy_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_engineer_bot_arms.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_demo_bot_arms.mdl");
 	SuperPrecacheModel("models/weapons/c_models/c_engineer_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_engineer_bot_arms.mdl");
 	SuperPrecacheModel("models/weapons/c_models/c_engineer_bot_gunslinger.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_engineer_bot_gunslinger_animations.mdl");
-	
+	SuperPrecacheModel("models/weapons/c_models/c_heavy_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_heavy_bot_arms.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_medic_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_medic_bot_arms.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_pyro_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_pyro_bot_arms.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_scout_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_scout_bot_arms.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_sniper_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_sniper_bot_arms.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_soldier_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_soldier_bot_arms.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_spy_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_spy_bot_arms.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_pda_spy_animations.mdl");
 	SuperPrecacheModel("models/weapons/v_models/v_pda_spy_bot.mdl");
 	SuperPrecacheModel("models/weapons/v_models/v_pda_spy_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/v_models/v_ttg_watch_spy_bot.mdl");
-	SuperPrecacheModel("models/weapons/v_models/v_ttg_watch_spy_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/v_models/v_watch_leather_spy_bot.mdl");
-	SuperPrecacheModel("models/weapons/v_models/v_watch_leather_spy_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/v_models/v_watch_pocket_spy_bot.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_watch_pocket_spy_animations.mdl");
 	SuperPrecacheModel("models/weapons/v_models/v_watch_pocket_spy_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/v_models/v_watch_spy_bot.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_watch_spy_animations.mdl");
 	SuperPrecacheModel("models/weapons/v_models/v_watch_spy_bot_animations.mdl");
 	
+	AddFileToDownloadsTable("materials/models/bots/pyro/pyro_bot_righthand_blue.vmt");
+	AddFileToDownloadsTable("materials/models/bots/pyro/pyro_bot_righthand_red.vmt");
 	AddFileToDownloadsTable("materials/models/bots/spy/spy_bot_arms_blue.vmt");
 	AddFileToDownloadsTable("materials/models/bots/spy/spy_bot_arms_red.vmt");
 	AddFileToDownloadsTable("materials/models/bots/spy/spy_bot_body_blue_unfinished.vtf");
 	AddFileToDownloadsTable("materials/models/bots/spy/spy_bot_body_red_unfinished.vtf");
 	
-	PrecacheSound("ui/system_message_alert.wav");
-	PrecacheSound(")mvm/mvm_tele_activate.wav");
+	g_hBotViewModelIndexes.Clear();
+	g_hBotViewModelIndexes.SetValue("models/weapons/v_models/v_watch_spy.mdl", PrecacheModel("models/weapons/v_models/v_watch_spy_bot.mdl"));
+	g_hBotViewModelIndexes.SetValue("models/weapons/v_models/v_watch_pocket_spy.mdl", PrecacheModel("models/weapons/v_models/v_watch_pocket_spy_bot.mdl"));
+	g_hBotViewModelIndexes.SetValue("models/weapons/v_models/v_watch_leather_spy.mdl", PrecacheModel("models/weapons/v_models/v_watch_leather_spy_bot.mdl"));
+	g_hBotViewModelIndexes.SetValue("models/weapons/v_models/v_ttg_watch_spy.mdl", PrecacheModel("models/weapons/v_models/v_ttg_watch_spy_bot.mdl"));
+	g_hBotViewModelIndexes.SetValue("models/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch.mdl", PrecacheModel("models/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch_bot.mdl"));
 }
 
 static INextBot CreateNextBotPlayer(Address entity)

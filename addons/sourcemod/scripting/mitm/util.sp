@@ -1258,23 +1258,23 @@ void TF2_ForceChangeClientTeam(int client, TFTeam team)
 
 int GetEffectiveViewModelIndex(int client, int weapon)
 {
-	int iModelIndex = 0;
+	int nModelIndex = 0;
 	
 	if (TF2Util_GetWeaponID(weapon) == TF_WEAPON_PDA_SPY)
 	{
-		iModelIndex = PrecacheModel("models/weapons/v_models/v_pda_spy_bot.mdl");
+		nModelIndex = PrecacheModel("models/weapons/v_models/v_pda_spy_bot.mdl");
 	}
 	else
 	{
-		iModelIndex = PrecacheModel(g_aBotArmModels[TF2_GetPlayerClass(client)]);
+		nModelIndex = PrecacheModel(g_aBotArmModels[TF2_GetPlayerClass(client)]);
 	}
 	
 	if (TF2Attrib_HookValueInt(0, "wrench_builds_minisentry", client))
 	{
-		iModelIndex = PrecacheModel("models/weapons/c_models/c_engineer_bot_gunslinger.mdl");
+		nModelIndex = PrecacheModel("models/weapons/c_models/c_engineer_bot_gunslinger.mdl");
 	}
 	
-	return iModelIndex;
+	return nModelIndex;
 }
 
 void SuperPrecacheModel(const char[] szModel)

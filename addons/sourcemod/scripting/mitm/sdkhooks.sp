@@ -141,7 +141,11 @@ static void SDKHookCB_Client_WeaponEquipPost(int client, int weapon)
 		}
 		case TF_WEAPON_PDA_SPY:
 		{
-			SetEntProp(weapon, Prop_Data, "m_nModelIndex", PrecacheModel("models/weapons/v_models/v_pda_spy_bot.mdl"));
+			SetEntProp(weapon, Prop_Send, "m_nModelIndex", PrecacheModel("models/weapons/v_models/v_pda_spy_bot.mdl"));
+		}
+		case TF_WEAPON_COMPOUND_BOW:
+		{
+			SetEntProp(weapon, Prop_Send, "m_bFlipViewModel", false);
 		}
 	}
 }

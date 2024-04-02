@@ -75,7 +75,6 @@ ConVar sm_mitm_setup_time;
 ConVar sm_mitm_max_spawn_deaths;
 ConVar sm_mitm_defender_ping_limit;
 ConVar sm_mitm_shield_damage_drain_rate;
-ConVar sm_mitm_use_custom_bot_viewmodels;
 
 // Game ConVars
 ConVar tf_avoidteammates_pushaway;
@@ -154,7 +153,13 @@ public Plugin myinfo =
 public void OnPluginStart()
 {
 	g_hWarningHudSync = CreateHudSynchronizer();
+	
 	g_hSpyWatchModelReplacements = new StringMap();
+	g_hSpyWatchModelReplacements.SetString("models/weapons/v_models/v_watch_spy.mdl", "models/weapons/v_models/v_watch_spy_bot.mdl");
+	g_hSpyWatchModelReplacements.SetString("models/weapons/v_models/v_watch_pocket_spy.mdl", "models/weapons/v_models/v_watch_pocket_spy_bot.mdl");
+	g_hSpyWatchModelReplacements.SetString("models/weapons/v_models/v_watch_leather_spy.mdl", "models/weapons/v_models/v_watch_leather_spy_bot.mdl");
+	g_hSpyWatchModelReplacements.SetString("models/weapons/v_models/v_ttg_watch_spy.mdl", "models/weapons/v_models/v_ttg_watch_spy_bot.mdl");
+	g_hSpyWatchModelReplacements.SetString("models/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch.mdl", "models/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch_bot.mdl");
 	
 	LoadTranslations("common.phrases");
 	LoadTranslations("mitm.phrases");
@@ -184,12 +189,6 @@ public void OnPluginStart()
 	
 	g_hCookieQueue = new Cookie("mitm_queue", "Mann in the Machine: Queue Points", CookieAccess_Protected);
 	g_hCookiePreferences = new Cookie("mitm_preferences", "Mann in the Machine: Preferences", CookieAccess_Protected);
-	
-	g_hSpyWatchModelReplacements.SetString("models/weapons/v_models/v_watch_spy.mdl", "models/weapons/v_models/v_watch_spy_bot.mdl");
-	g_hSpyWatchModelReplacements.SetString("models/weapons/v_models/v_watch_pocket_spy.mdl", "models/weapons/v_models/v_watch_pocket_spy_bot.mdl");
-	g_hSpyWatchModelReplacements.SetString("models/weapons/v_models/v_watch_leather_spy.mdl", "models/weapons/v_models/v_watch_leather_spy_bot.mdl");
-	g_hSpyWatchModelReplacements.SetString("models/weapons/v_models/v_ttg_watch_spy.mdl", "models/weapons/v_models/v_ttg_watch_spy_bot.mdl");
-	g_hSpyWatchModelReplacements.SetString("models/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch.mdl", "models/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch_bot.mdl");
 	
 	Entity.Init();
 	

@@ -47,7 +47,6 @@ void ConVars_Init()
 	sm_mitm_max_spawn_deaths = CreateConVar("sm_mitm_max_spawn_deaths", "2", "How many times a player can die to the spawn timer before getting kicked.");
 	sm_mitm_defender_ping_limit = CreateConVar("sm_mitm_defender_ping_limit", "200", "Maximum ping a client can have to play on the defender team.");
 	sm_mitm_shield_damage_drain_rate = CreateConVar("sm_mitm_shield_damage_drain_rate", "0.03", "How much energy to drain for each point of damage to the shield.");
-	sm_mitm_use_custom_bot_viewmodels = CreateConVar("sm_mitm_use_custom_bot_viewmodels", "1", "Whether to use custom bot viewmodels.");
 	
 	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");

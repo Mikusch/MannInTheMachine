@@ -31,12 +31,13 @@
  */
 enum MannInTheMachinePreference
 {
-	PREF_DEFENDER_DISABLE_QUEUE =		(1 << 0),	/**< Can not be chosen as defender from queue */
-	PREF_SPECTATOR_MODE =				(1 << 1),	/**< Spectator mode, no spawning */
-	PREF_INVADER_DISABLE_MINIBOSS =		(1 << 2),	/**< Can not become a giant robot */
-	PREF_DISABLE_ANNOTATIONS =			(1 << 3),	/**< Disables clientside world annotations e.g. gate bot and sentry buster hints */
-	PREF_IGNORE_PARTY_INVITES =			(1 << 4),	/**< Can not be invited to any parties */
-	PREF_DEFENDER_DISABLE_REPLACEMENT =	(1 << 5),	/**< Can not be chosen as a replacement defender */
+	PREF_DEFENDER_DISABLE_QUEUE =				(1 << 0),	/**< Can not be chosen as defender from queue */
+	PREF_SPECTATOR_MODE =						(1 << 1),	/**< Spectator mode, no spawning */
+	PREF_INVADER_DISABLE_MINIBOSS =				(1 << 2),	/**< Can not become a giant robot */
+	PREF_DISABLE_ANNOTATIONS =					(1 << 3),	/**< Disables clientside world annotations e.g. gate bot and sentry buster hints */
+	PREF_IGNORE_PARTY_INVITES =					(1 << 4),	/**< Can not be invited to any parties */
+	PREF_DEFENDER_DISABLE_REPLACEMENT =			(1 << 5),	/**< Can not be chosen as a replacement defender */
+	PREF_INVADER_DISABLE_CUSTOM_VIEWMODELS =	(1 << 6),	/**< Disables custom robot viewmodels */
 }
 
 methodmap MannInTheMachinePlayer < CBaseCombatCharacter

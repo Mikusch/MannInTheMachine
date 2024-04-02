@@ -77,7 +77,7 @@
 	}
 	"Menu_Credits_Kenzzer"
 	{
-		"en"	"Early coding help"
+		"en"	"Early coding assistance"
 	}
 	"Menu_Credits_trigger_hurt"
 	{
@@ -85,15 +85,15 @@
 	}
 	"Preference_DisableDefender"
 	{
-		"en"		"Don't select me as defender"
+		"en"		"Disable playing as defender"
 	}
 	"Preference_SpectatorMode"
 	{
-		"en"		"Spectator mode (no spawning)"
+		"en"		"Enable spectator mode (no spawning)"
 	}
 	"Preference_DisableMiniBoss"
 	{
-		"en"		"Don't select me as a giant robot"
+		"en"		"Disable spawning as giant robot"
 	}
 	"Preference_DisableAnnotations"
 	{
@@ -101,11 +101,15 @@
 	}
 	"Preference_IgnorePartyInvites"
 	{
-		"en"		"Ignore party invites"
+		"en"		"Block party invites"
 	}
 	"Preference_DisableDefenderReplacement"
 	{
-		"en"		"Don't select me as replacement defender"
+		"en"		"Disable being selected as substitute defender"
+	}
+	"Preference_DisableCustomViewModels"
+	{
+		"en"		"Use human viewmodels as robot"
 	}
 	"Preferences_Enabled"
 	{
@@ -316,7 +320,7 @@
 	"Party_PlayerIgnoringInvites"
 	{
 		"#format"	"{1:N}"
-		"en"		"{lightgreen}{1} {default}is ignoring party invites."
+		"en"		"{lightgreen}{1} {default}is blocking party invites and can not be invited."
 	}
 	"Party_PlayerBlocked"
 	{

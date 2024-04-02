@@ -1482,6 +1482,11 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		return true;
 	}
 	
+	public bool ShouldUseCustomViewModel()
+	{
+		return TF2_GetClientTeam(this.index) == TFTeam_Invaders && !this.HasPreference(PREF_INVADER_DISABLE_CUSTOM_VIEWMODELS);
+	}
+	
 	public void MarkAsMissionEnemy()
 	{
 		this.m_bIsMissionEnemy = true;

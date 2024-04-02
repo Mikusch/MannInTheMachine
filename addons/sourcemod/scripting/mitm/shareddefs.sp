@@ -104,6 +104,7 @@ char g_aPreferenceNames[][] =
 	"Preference_DisableAnnotations",
 	"Preference_IgnorePartyInvites",
 	"Preference_DisableDefenderReplacement",
+	"Preference_DisableCustomViewModels"
 };
 
 char g_aRawPlayerClassNames[][] =

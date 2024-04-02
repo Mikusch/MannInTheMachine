@@ -38,6 +38,8 @@ void SDKHooks_HookEntity(int entity, const char[] classname)
 	if (IsEntityClient(entity))
 	{
 		SDKHooks_HookEntityInternal(entity, SDKHook_OnTakeDamageAlive, SDKHookCB_Client_OnTakeDamageAlive);
+		SDKHooks_HookEntityInternal(entity, SDKHook_WeaponEquipPost, SDKHookCB_Client_WeaponEquipPost);
+		SDKHooks_HookEntityInternal(entity, SDKHook_WeaponSwitchPost, SDKHookCB_Client_WeaponSwitchPost);
 	}
 	else if (StrEqual(classname, "tf_projectile_pipe_remote"))
 	{
@@ -115,6 +117,50 @@ static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int 
 	}
 	
 	return Plugin_Continue;
+}
+
+static void SDKHookCB_Client_WeaponEquipPost(int client, int weapon)
+{
+	if (!CTFPlayer(client).ShouldUseCustomViewModel())
+		return;
+	
+	int iWeaponID = TF2Util_GetWeaponID(weapon);
+	switch (iWeaponID)
+	{
+		case TF_WEAPON_INVIS:
+		{
+			char szModel[PLATFORM_MAX_PATH], szBotModel[PLATFORM_MAX_PATH];
+			GetEntPropString(weapon, Prop_Data, "m_ModelName", szModel, sizeof(szModel));
+			
+			if (g_hSpyWatchOverrides.GetString(szModel, szBotModel, sizeof(szBotModel)))
+			{
+				int nModelIndex = PrecacheModel(szBotModel);
+				SetEntProp(weapon, Prop_Send, "m_nModelIndex", nModelIndex);
+				SetEntProp(weapon, Prop_Send, "m_nCustomViewmodelModelIndex", nModelIndex);
+			}
+		}
+		case TF_WEAPON_PDA_SPY:
+		{
+			SetEntProp(weapon, Prop_Send, "m_nModelIndex", PrecacheModel(PDA_SPY_ARMS_OVERRIDE));
+		}
+		case TF_WEAPON_COMPOUND_BOW:
+		{
+			SetEntProp(weapon, Prop_Send, "m_bFlipViewModel", false);
+		}
+	}
+}
+
+static void SDKHookCB_Client_WeaponSwitchPost(int client, int weapon)
+{
+	if (!CTFPlayer(client).ShouldUseCustomViewModel())
+		return;
+	
+	int nModelIndex = GetEffectiveViewModelIndex(client, weapon);
+	if (nModelIndex == 0)
+		return;
+	
+	SetEntProp(GetEntPropEnt(client, Prop_Send, "m_hViewModel"), Prop_Send, "m_nModelIndex", nModelIndex);
+	SetEntProp(weapon, Prop_Send, "m_nCustomViewmodelModelIndex", nModelIndex);
 }
 
 static Action SDKHookCB_ProjectilePipeRemote_SetTransmit(int entity, int client)

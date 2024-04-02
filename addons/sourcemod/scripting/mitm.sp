@@ -53,6 +53,7 @@ Cookie g_hCookiePreferences;
 bool g_bEnabled;
 CEntityFactory g_hEntityFactory;
 Handle g_hWarningHudSync;
+StringMap g_hSpyWatchOverrides;
 bool g_bInWaitingForPlayers;
 bool g_bMiniBossQueue;
 float g_flLastQueueSwitchTime;
@@ -153,6 +154,13 @@ public void OnPluginStart()
 {
 	g_hWarningHudSync = CreateHudSynchronizer();
 	
+	g_hSpyWatchOverrides = new StringMap();
+	g_hSpyWatchOverrides.SetString("models/weapons/v_models/v_watch_spy.mdl", "models/weapons/v_models/v_watch_spy_bot.mdl");
+	g_hSpyWatchOverrides.SetString("models/weapons/v_models/v_watch_pocket_spy.mdl", "models/weapons/v_models/v_watch_pocket_spy_bot.mdl");
+	g_hSpyWatchOverrides.SetString("models/weapons/v_models/v_watch_leather_spy.mdl", "models/weapons/v_models/v_watch_leather_spy_bot.mdl");
+	g_hSpyWatchOverrides.SetString("models/weapons/v_models/v_ttg_watch_spy.mdl", "models/weapons/v_models/v_ttg_watch_spy_bot.mdl");
+	g_hSpyWatchOverrides.SetString("models/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch.mdl", "models/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch_bot.mdl");
+	
 	LoadTranslations("common.phrases");
 	LoadTranslations("mitm.phrases");
 	
@@ -235,8 +243,7 @@ public void OnMapStart()
 	g_bMiniBossQueue = false;
 	g_flLastQueueSwitchTime = GetGameTime();
 	
-	PrecacheSound("ui/system_message_alert.wav");
-	PrecacheSound(")mvm/mvm_tele_activate.wav");
+	Precache();
 }
 
 public void OnConfigsExecuted()
@@ -681,6 +688,50 @@ void TogglePlugin(bool bEnable)
 			g_pGameRules.SetCustomUpgradesFile(DEFAULT_UPGRADES_FILE);
 		}
 	}
+}
+
+static void Precache()
+{
+	PrecacheSound("ui/system_message_alert.wav");
+	PrecacheSound(")mvm/mvm_tele_activate.wav");
+	
+	for (int i = 0; i < sizeof(g_aBotArmModels); i++)
+	{
+		if (g_aBotArmModels[i][0])
+			SuperPrecacheModel(g_aBotArmModels[i]);
+	}
+	
+	SuperPrecacheModel(GUNSLINGER_ENGINEER_ARMS_OVERRIDE);
+	SuperPrecacheModel(PDA_SPY_ARMS_OVERRIDE);
+	
+	SuperPrecacheModel("models/weapons/c_models/c_demo_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_engineer_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_engineer_bot_gunslinger_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_heavy_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_medic_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_pyro_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_scout_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_sniper_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_soldier_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/c_models/c_spy_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_pda_spy_animations.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_pda_spy_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_ttg_watch_spy_bot.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_watch_leather_spy_bot.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_watch_pocket_spy_animations.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_watch_pocket_spy_bot.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_watch_pocket_spy_bot_animations.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_watch_spy_animations.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_watch_spy_bot.mdl");
+	SuperPrecacheModel("models/weapons/v_models/v_watch_spy_bot_animations.mdl");
+	SuperPrecacheModel("models/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch_bot.mdl");
+	
+	AddFileToDownloadsTable("materials/models/bots/pyro/pyro_bot_righthand_blue.vmt");
+	AddFileToDownloadsTable("materials/models/bots/pyro/pyro_bot_righthand_red.vmt");
+	AddFileToDownloadsTable("materials/models/bots/spy/spy_bot_arms_blue.vmt");
+	AddFileToDownloadsTable("materials/models/bots/spy/spy_bot_arms_red.vmt");
+	AddFileToDownloadsTable("materials/models/bots/spy/spy_bot_body_blue_unfinished.vtf");
+	AddFileToDownloadsTable("materials/models/bots/spy/spy_bot_body_red_unfinished.vtf");
 }
 
 static INextBot CreateNextBotPlayer(Address entity)

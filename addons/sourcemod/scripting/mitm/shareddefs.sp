@@ -90,6 +90,9 @@
 #define COLLECT_ONLY_LIVING_PLAYERS true
 #define APPEND_PLAYERS true
 
+#define GUNSLINGER_ENGINEER_ARMS_OVERRIDE	"models/weapons/c_models/c_engineer_bot_gunslinger.mdl"
+#define PDA_SPY_ARMS_OVERRIDE				"models/weapons/v_models/v_pda_spy_bot.mdl"
+
 const float StepHeight = 18.0;
 
 const TFTeam TFTeam_Any = view_as<TFTeam>(-2);
@@ -104,6 +107,7 @@ char g_aPreferenceNames[][] =
 	"Preference_DisableAnnotations",
 	"Preference_IgnorePartyInvites",
 	"Preference_DisableDefenderReplacement",
+	"Preference_DisableCustomViewModels"
 };
 
 char g_aRawPlayerClassNames[][] =
@@ -121,6 +125,21 @@ char g_aRawPlayerClassNames[][] =
 	"civilian",
 	"",
 	"random"
+};
+
+char g_aBotArmModels[][] =
+{
+	"", //TF_CLASS_UNDEFINED
+	
+	"models/weapons/c_models/c_scout_bot_arms.mdl",
+	"models/weapons/c_models/c_sniper_bot_arms.mdl",
+	"models/weapons/c_models/c_soldier_bot_arms.mdl",
+	"models/weapons/c_models/c_demo_bot_arms.mdl",
+	"models/weapons/c_models/c_medic_bot_arms.mdl",
+	"models/weapons/c_models/c_heavy_bot_arms.mdl",
+	"models/weapons/c_models/c_pyro_bot_arms.mdl",
+	"models/weapons/c_models/c_spy_bot_arms.mdl",
+	"models/weapons/c_models/c_engineer_bot_arms.mdl",
 };
 
 char g_aRawPlayerClassNamesShort[][] =

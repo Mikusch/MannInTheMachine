@@ -1255,3 +1255,64 @@ void TF2_ForceChangeClientTeam(int client, TFTeam team)
 	TF2_ChangeClientTeam(client, team);
 	g_bAllowTeamChange = false;
 }
+
+int GetEffectiveViewModelIndex(int client, int weapon)
+{
+	int nModelIndex = 0;
+	
+	if (TF2Util_GetWeaponID(weapon) == TF_WEAPON_PDA_SPY)
+	{
+		nModelIndex = PrecacheModel(PDA_SPY_ARMS_OVERRIDE);
+	}
+	else
+	{
+		nModelIndex = PrecacheModel(g_aBotArmModels[TF2_GetPlayerClass(client)]);
+	}
+	
+	if (TF2Attrib_HookValueInt(0, "wrench_builds_minisentry", client))
+	{
+		nModelIndex = PrecacheModel(GUNSLINGER_ENGINEER_ARMS_OVERRIDE);
+	}
+	
+	return nModelIndex;
+}
+
+void SuperPrecacheModel(const char[] szModel)
+{
+	char szBase[PLATFORM_MAX_PATH], szPath[PLATFORM_MAX_PATH];
+	strcopy(szBase, sizeof(szBase), szModel);
+	SplitString(szBase, ".mdl", szBase, sizeof(szBase));
+	
+	AddFileToDownloadsTable(szModel);
+	PrecacheModel(szModel);
+	
+	Format(szPath, sizeof(szPath), "%s.phy", szBase);
+	if (FileExists(szPath))
+	{
+		AddFileToDownloadsTable(szPath);
+	}
+	
+	Format(szPath, sizeof(szPath), "%s.vvd", szBase);
+	if (FileExists(szPath))
+	{
+		AddFileToDownloadsTable(szPath);
+	}
+	
+	Format(szPath, sizeof(szPath), "%s.dx80.vtx", szBase);
+	if (FileExists(szPath))
+	{
+		AddFileToDownloadsTable(szPath);
+	}
+	
+	Format(szPath, sizeof(szPath), "%s.dx90.vtx", szBase);
+	if (FileExists(szPath))
+	{
+		AddFileToDownloadsTable(szPath);
+	}
+	
+	Format(szPath, sizeof(szPath), "%s.sw.vtx", szBase);
+	if (FileExists(szPath))
+	{
+		AddFileToDownloadsTable(szPath);
+	}
+}

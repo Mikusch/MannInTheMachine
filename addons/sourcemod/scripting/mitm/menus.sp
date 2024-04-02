@@ -18,6 +18,13 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+static char g_aCreditInfos[][] =
+{
+	"Mikusch",
+	"Kenzzer",
+	"trigger_hurt"
+};
+
 void Menus_DisplayMainMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_MainMenu, MenuAction_Select | MenuAction_End | MenuAction_DisplayItem);
@@ -31,6 +38,8 @@ void Menus_DisplayMainMenu(int client)
 	{
 		menu.AddItem("party", "Menu_Main_Party");
 	}
+	
+	menu.AddItem("credits", "Menu_Main_Credits");
 	
 	menu.Display(client, MENU_TIME_FOREVER);
 }
@@ -56,6 +65,10 @@ static int MenuHandler_MainMenu(Menu menu, MenuAction action, int param1, int pa
 			{
 				Menus_DisplayPartyMenu(param1);
 			}
+			else if (StrEqual(info, "credits"))
+			{
+				Menus_DisplayCreditsMenu(param1);
+			}
 		}
 		case MenuAction_End:
 		{
@@ -63,14 +76,7 @@ static int MenuHandler_MainMenu(Menu menu, MenuAction action, int param1, int pa
 		}
 		case MenuAction_DisplayItem:
 		{
-			char info[32], display[64];
-			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
-			
-			if (!TranslationPhraseExists(display))
-				return 0;
-			
-			Format(display, sizeof(display), "%T", display, param1);
-			return RedrawMenuItem(display);
+			return Menus_OnItemDisplayed(menu, param1, param2);
 		}
 	}
 	
@@ -437,14 +443,7 @@ static int MenuHandler_PartyMenu(Menu menu, MenuAction action, int param1, int p
 		}
 		case MenuAction_DisplayItem:
 		{
-			char info[32], display[64];
-			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
-			
-			if (!TranslationPhraseExists(display))
-				return 0;
-			
-			Format(display, sizeof(display), "%T", display, param1);
-			return RedrawMenuItem(display);
+			return Menus_OnItemDisplayed(menu, param1, param2);
 		}
 	}
 	
@@ -494,14 +493,7 @@ static int MenuHandler_PartyManageMenu(Menu menu, MenuAction action, int param1,
 		}
 		case MenuAction_DisplayItem:
 		{
-			char info[32], display[64];
-			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
-			
-			if (!TranslationPhraseExists(display))
-				return 0;
-			
-			Format(display, sizeof(display), "%T", display, param1);
-			return RedrawMenuItem(display);
+			return Menus_OnItemDisplayed(menu, param1, param2);
 		}
 	}
 	
@@ -608,14 +600,7 @@ static int MenuHandler_PartyManageInviteMenu(Menu menu, MenuAction action, int p
 		}
 		case MenuAction_DisplayItem:
 		{
-			char info[32], display[64];
-			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
-			
-			if (!TranslationPhraseExists(display))
-				return 0;
-			
-			Format(display, sizeof(display), "%T", display, param1);
-			return RedrawMenuItem(display);
+			return Menus_OnItemDisplayed(menu, param1, param2);
 		}
 	}
 	
@@ -693,14 +678,7 @@ static int MenuHandler_PartyKickMenu(Menu menu, MenuAction action, int param1, i
 		}
 		case MenuAction_DisplayItem:
 		{
-			char info[32], display[64];
-			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
-			
-			if (!TranslationPhraseExists(display))
-				return 0;
-			
-			Format(display, sizeof(display), "%T", display, param1);
-			return RedrawMenuItem(display);
+			return Menus_OnItemDisplayed(menu, param1, param2);
 		}
 	}
 	
@@ -768,16 +746,63 @@ static int MenuHandler_PartyInviteMenu(Menu menu, MenuAction action, int param1,
 		}
 		case MenuAction_DisplayItem:
 		{
-			char info[32], display[64];
-			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
-			
-			if (!TranslationPhraseExists(display))
-				return 0;
-			
-			Format(display, sizeof(display), "%T", display, param1);
-			return RedrawMenuItem(display);
+			return Menus_OnItemDisplayed(menu, param1, param2);
 		}
 	}
 	
 	return 0;
+}
+
+void Menus_DisplayCreditsMenu(int client)
+{
+	Menu menu = new Menu(MenuHandler_CreditsMenu, MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
+	menu.SetTitle("%T", "Menu_Credits_Title", client);
+	menu.ExitBackButton = true;
+	
+	for (int i = 0; i < sizeof(g_aCreditInfos); i++)
+	{
+		char display[64], phrase[64];
+		Format(phrase, sizeof(phrase), "Menu_Credits_%s", g_aCreditInfos[i]);
+		Format(display, sizeof(display), "%s - %T", g_aCreditInfos[i], phrase, client);
+		
+		menu.AddItem(g_aCreditInfos[i], display, ITEMDRAW_DISABLED);
+	}
+	
+	menu.Display(client, MENU_TIME_FOREVER);
+}
+
+static int MenuHandler_CreditsMenu(Menu menu, MenuAction action, int param1, int param2)
+{
+	switch (action)
+	{
+		case MenuAction_Cancel:
+		{
+			if (param2 == MenuCancel_ExitBack)
+			{
+				Menus_DisplayMainMenu(param1);
+			}
+		}
+		case MenuAction_End:
+		{
+			delete menu;
+		}
+		case MenuAction_DisplayItem:
+		{
+			return Menus_OnItemDisplayed(menu, param1, param2);
+		}
+	}
+	
+	return 0;
+}
+
+static int Menus_OnItemDisplayed(Menu menu, int param1, int param2)
+{
+	char info[32], display[64];
+	menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
+	
+	if (!TranslationPhraseExists(display))
+		return 0;
+	
+	Format(display, sizeof(display), "%T", display, param1);
+	return RedrawMenuItem(display);
 }

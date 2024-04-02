@@ -132,7 +132,7 @@ static void SDKHookCB_Client_WeaponEquipPost(int client, int weapon)
 			char szModel[PLATFORM_MAX_PATH], szBotModel[PLATFORM_MAX_PATH];
 			GetEntPropString(weapon, Prop_Data, "m_ModelName", szModel, sizeof(szModel));
 			
-			if (g_hSpyWatchModelReplacements.GetString(szModel, szBotModel, sizeof(szBotModel)))
+			if (g_hSpyWatchOverrides.GetString(szModel, szBotModel, sizeof(szBotModel)))
 			{
 				int nModelIndex = PrecacheModel(szBotModel);
 				SetEntProp(weapon, Prop_Send, "m_nModelIndex", nModelIndex);
@@ -141,7 +141,7 @@ static void SDKHookCB_Client_WeaponEquipPost(int client, int weapon)
 		}
 		case TF_WEAPON_PDA_SPY:
 		{
-			SetEntProp(weapon, Prop_Send, "m_nModelIndex", PrecacheModel("models/weapons/v_models/v_pda_spy_bot.mdl"));
+			SetEntProp(weapon, Prop_Send, "m_nModelIndex", PrecacheModel(PDA_SPY_ARMS_OVERRIDE));
 		}
 		case TF_WEAPON_COMPOUND_BOW:
 		{

@@ -1262,7 +1262,7 @@ int GetEffectiveViewModelIndex(int client, int weapon)
 	
 	if (TF2Util_GetWeaponID(weapon) == TF_WEAPON_PDA_SPY)
 	{
-		nModelIndex = PrecacheModel("models/weapons/v_models/v_pda_spy_bot.mdl");
+		nModelIndex = PrecacheModel(PDA_SPY_ARMS_OVERRIDE);
 	}
 	else
 	{
@@ -1271,7 +1271,7 @@ int GetEffectiveViewModelIndex(int client, int weapon)
 	
 	if (TF2Attrib_HookValueInt(0, "wrench_builds_minisentry", client))
 	{
-		nModelIndex = PrecacheModel("models/weapons/c_models/c_engineer_bot_gunslinger.mdl");
+		nModelIndex = PrecacheModel(GUNSLINGER_ENGINEER_ARMS_OVERRIDE);
 	}
 	
 	return nModelIndex;

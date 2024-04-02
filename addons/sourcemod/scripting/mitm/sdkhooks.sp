@@ -121,7 +121,7 @@ static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int 
 
 static void SDKHookCB_Client_WeaponEquipPost(int client, int weapon)
 {
-	if (!sm_mitm_use_bot_viewmodels.BoolValue || TF2_GetClientTeam(client) != TFTeam_Invaders)
+	if (!sm_mitm_use_custom_bot_viewmodels.BoolValue || TF2_GetClientTeam(client) != TFTeam_Invaders)
 		return;
 	
 	int iWeaponID = TF2Util_GetWeaponID(weapon);
@@ -152,7 +152,7 @@ static void SDKHookCB_Client_WeaponEquipPost(int client, int weapon)
 
 static void SDKHookCB_Client_WeaponSwitchPost(int client, int weapon)
 {
-	if (!sm_mitm_use_bot_viewmodels.BoolValue || TF2_GetClientTeam(client) != TFTeam_Invaders)
+	if (!sm_mitm_use_custom_bot_viewmodels.BoolValue || TF2_GetClientTeam(client) != TFTeam_Invaders)
 		return;
 	
 	int nModelIndex = GetEffectiveViewModelIndex(client, weapon);

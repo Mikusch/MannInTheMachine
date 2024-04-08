@@ -148,7 +148,7 @@ static void SDKHookCB_Client_WeaponEquipPost(int client, int weapon)
 
 static void SDKHookCB_Client_WeaponSwitchPost(int client, int weapon)
 {
-	if (!CTFPlayer(client).ShouldUseCustomViewModel())
+	if (!CTFPlayer(client).ShouldUseCustomViewModel() || !IsValidEntity(weapon))
 		return;
 	
 	int nModelIndex = GetEffectiveViewModelIndex(client, weapon);

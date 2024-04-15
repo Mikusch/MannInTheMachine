@@ -69,131 +69,157 @@
 				// Windows uses virtual IPopulationSpawner::GetClassIcon
 				"linux64"		"@_ZN13CTFBotSpawner12GetClassIconEi"
 			}
+			// Search string "Lobby in invalid state %d\n"
 			"CTFGCServerSystem::PreClientUpdate"
 			{
 				"linux64"		"@_ZN17CTFGCServerSystem15PreClientUpdateEv"
 				"windows64"		"\x40\x53\x55\x56\x41\x56\x41\x57\x48\x83\xEC\x30"
 			}
+			// Search string "%d bots were already allocated some how before CPopulationManager"
 			"CPopulationManager::AllocateBots"
 			{
 				"linux64"		"@_ZN18CPopulationManager12AllocateBotsEv"
 				"windows64"		"\x4C\x8B\xDC\x49\x89\x4B\x08\x41\x54\x48\x83\xEC\x50"
 			}
+			// Search string "***  Bot Upgrades\n"
 			"CPopulationManager::EndlessRollEscalation"
 			{
 				"linux64"		"@_ZN18CPopulationManager21EndlessRollEscalationEv"
 				"windows64"		"\x48\x8B\xC4\x48\x89\x48\x08\x53\x48\x81\xEC\x30\x04\x00\x00"
 			}
+			// Search string "mvm_adv_wave_complete_no_gates" -> the next subroutine
 			"CPopulationManager::IsInEndlessWaves"
 			{
 				"linux64"		"@_ZN18CPopulationManager16IsInEndlessWavesEv"
 				"windows64"		"\x80\xB9\x5A\x07\x00\x00\x00\x75\x2A\x48\x8B\x05\x28\x65\x88\x00"
 			}
+			// Search string "tw_sentrybuster" -> a bit further up in the function
 			"CPopulationManager::GetHealthMultiplier"
 			{
 				"linux64"		"@_ZN18CPopulationManager19GetHealthMultiplierEb"
 				"windows64"		"\x80\xB9\x5A\x07\x00\x00\x00\x75\x2A\x48\x8B\x05\x38\x6E\x88\x00"
 			}
+			// Search string "Announcer.MVM_Get_To_Upgrade"
 			"CPopulationManager::RestoreCheckpoint"
 			{
 				"linux64"		"@_ZN18CPopulationManager17RestoreCheckpointEv"
 				"windows64"		"\x40\x56\x48\x83\xEC\x50\x80\xB9\x5A\x07\x00\x00\x00"
 			}
+			// Search string "MVM.Robot_Engineer_Spawn" -> second subroutine after
 			"CPopulationManager::GetCurrentWave"
 			{
 				"linux64"		"@_ZN18CPopulationManager14GetCurrentWaveEv"
 				"windows64"		"\x80\xB9\xD0\x06\x00\x00\x00"
 			}
+			// Search string "CTFBotSpawner: %3.2f: *** No teleporter hint for engineer"
 			"CTFBotSpawner::Spawn"
 			{
 				"linux64"		"@_ZN13CTFBotSpawner5SpawnERK6VectorP10CUtlVectorI7CHandleI11CBaseEntityE10CUtlMemoryIS6_iEE"
 				"windows64"		"\x4C\x89\x44\x24\x18\x48\x89\x4C\x24\x08\x55\x53\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8D\xAC\x24\xE8\xFE\xFF\xFF"
 			}
+			// Search string "CSquadSpawner: %3.2f: <<<< Spawning Squad >>>>"
 			"CSquadSpawner::Spawn"
 			{
 				"linux64"		"@_ZN13CSquadSpawner5SpawnERK6VectorP10CUtlVectorI7CHandleI11CBaseEntityE10CUtlMemoryIS6_iEE"
 				"windows64"		"\x48\x89\x5C\x24\x10\x55\x56\x57\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8B\xEC"
 			}
+			// Search string "kickall #TF_PVE_Disconnect\n"
 			"CPopulationManager::Update"
 			{
 				"linux64"		"@_ZN18CPopulationManager6UpdateEv"
 				"windows64"		"\x4C\x8B\xDC\x49\x89\x5B\x10\x49\x89\x6B\x18\x49\x89\x73\x20\x57\x41\x56\x41\x57\x48\x83\xEC\x60\x48\x8B\x05\xF1\x55\x19\x00"
 			}
+			// Search string "MVM.Robot_Teleporter_Deliver" -> the function with no strings
 			"CPeriodicSpawnPopulator::Update"
 			{
 				"linux64"		"@_ZN23CPeriodicSpawnPopulator6UpdateEv"
 				"windows64"		"\x48\x89\x5C\x24\x18\x48\x89\x7C\x24\x20\x55\x48\x8B\xEC\x48\x83\xEC\x60"
 			}
+			// Search string "%3.2f: WaveSpawn(%s) started SPAWNING\n"
 			"CWaveSpawnPopulator::Update"
 			{
 				"linux64"		"@_ZN19CWaveSpawnPopulator6UpdateEv"
 				"windows64"		"\x48\x8B\xC4\x55\x41\x55\x41\x56\x48\x8D\x68\xA1"
 			}
+			// Search string "MissionPopulator: %3.2f: Skipped a member - can't find a place to spawn\n"
 			"CMissionPopulator::UpdateMission"
 			{
 				"linux64"		"@_ZN17CMissionPopulator13UpdateMissionEN6CTFBot11MissionTypeE"
 				"windows64"		"\x89\x54\x24\x10\x4C\x8B\xDC\x49\x89\x4B\x08\x53"
 			}
+			// Search string "MANN VS MACHINE: %3.2f: <<<< Spawning Sentry Busting Mission >>>>"
 			"CMissionPopulator::UpdateMissionDestroySentries"
 			{
-				"linux"			"@_ZN17CMissionPopulator28UpdateMissionDestroySentriesEv"
+				"linux64"			"@_ZN17CMissionPopulator28UpdateMissionDestroySentriesEv"
 				"windows64"		"\x48\x8B\xC4\x48\x89\x48\x08\x55\x56\x57"
 			}
+			// Search string "ChangeBotAttributes: Failed to find event [%s] in the pop file"
 			"CPointPopulatorInterface::InputChangeBotAttributes"
 			{
 				"linux64"		"@_ZN24CPointPopulatorInterface24InputChangeBotAttributesER11inputdata_t"
 				"windows64"		"\x41\x54\x48\x83\xEC\x40\x83\x7A\x24\x02"
 			}
+			// Search string "MVM assigned %s to defending team"
 			"CTFGameRules::GetTeamAssignmentOverride"
 			{
 				"linux64"		"@_ZN12CTFGameRules25GetTeamAssignmentOverrideEP9CTFPlayerib"
 				"windows64"		"\x48\x89\x5C\x24\x10\x48\x89\x74\x24\x18\x48\x89\x7C\x24\x20\x55\x41\x54\x41\x55\x41\x56\x41\x57\x48\x8B\xEC\x48\x83\xEC\x30"
 			}
+			// Search string "teamplay_round_restart_seconds" -> the function without any other strings
 			"CTFGameRules::PlayerReadyStatus_UpdatePlayerState"
 			{
 				"linux64"		"@_ZN12CTFGameRules35PlayerReadyStatus_UpdatePlayerStateEP9CTFPlayerb"
 				"windows64"		"\x48\x83\xEC\x28\x80\xB9\x26\x0D\x00\x00\x00"
 			}
+			// Search string "Invalid wave number\n" -> enter CTFGameRules::PlayerReadyStatus_ResetState subroutine (fourth one in a block of them) -> enter to first subroutine
 			"CTeamplayRoundBasedRules::ResetPlayerAndTeamReadyState"
 			{
 				"linux64"		"@_ZN24CTeamplayRoundBasedRules28ResetPlayerAndTeamReadyStateEv"
 				"windows64"		"\x48\x89\x5C\x24\x08\x48\x89\x6C\x24\x10\x48\x89\x74\x24\x18\x48\x89\x7C\x24\x20\x41\x56\x48\x83\xEC\x20\x33\xFF\x48\x8B\xD9"
 			}
+			// Search string "Announcer.MVM_Bomb_Alert_Deploying" -> enter first subroutine
 			"CTeamplayRoundBasedRules::PlayThrottledAlert"
 			{
 				"linux64"		"@_ZN24CTeamplayRoundBasedRules18PlayThrottledAlertEiPKcf"
 				"windows64"		"\x40\x53\x48\x83\xEC\x40\x48\x8B\x05\xE3\xB4\x9D\x00"
 			}
+			// Search string "#Item_BlacklistedInMatch"
 			"CTFPlayer::GetLoadoutItem"
 			{
 				"linux64"		"@_ZN9CTFPlayer14GetLoadoutItemEiib"
 				"windows64"		"\x48\x89\x5C\x24\x08\x48\x89\x6C\x24\x10\x48\x89\x74\x24\x18\x44\x88\x4C\x24\x20\x57\x41\x54"
 			}
+			// Search string "ForceRegenerateAndRespawn" -> enter second subroutine -> xref to the other function
 			"CTFPlayer::CheckInstantLoadoutRespawn"
 			{
 				"linux64"		"@_ZN9CTFPlayer26CheckInstantLoadoutRespawnEv"
-				"windows64"		""
+				"windows64"		"\x40\x56\x48\x83\xEC\x30\x48\x8B\x01\x48\x8B\xF1\xFF\x90\x18\x02\x00\x00"
 			}
+			// vtable lookup to CTFGrenadeLauncher::SecondaryAttack -> last function call
 			"CTFPlayer::DoClassSpecialSkill"
 			{
 				"linux64"		"@_ZN9CTFPlayer19DoClassSpecialSkillEv"
 				"windows64"		"\x40\x53\x48\x83\xEC\x20\x48\x8B\x01\x48\x8B\xD9\xFF\x90\x18\x02\x00\x00\x84\xC0\x0F\x84\x2A\x2A\x2A\x2A"
 			}
+			// Search string "pda_click" -> use decompiled view -> last subroutine in the if after an InCond check
 			"CTFPlayer::DoAnimationEvent"
 			{
 				"linux64"		"@_ZN9CTFPlayer16DoAnimationEventE17PlayerAnimEvent_ti"
 				"windows64"		"\x48\x89\x5C\x24\x08\x48\x89\x6C\x24\x10\x48\x89\x74\x24\x18\x48\x89\x7C\x24\x20\x41\x56\x48\x83\xEC\x70\x48\x8B\x1D\x9F\x2E\x9E\x00"
 			}
+			// Search string "primary_deploybomb" -> first function right after
 			"CTFPlayer::PlaySpecificSequence"
 			{
 				"linux64"		"@_ZN9CTFPlayer20PlaySpecificSequenceEPKc"
 				"windows64"		"\x48\x89\x5C\x24\x08\x57\x48\x83\xEC\x20\x48\x8B\xFA\x48\x8B\xD9\xE8\x2A\x2A\x2A\x2A\x48\x8B\xCB\x83\xF8\xFF\x74\x2A"
 			}
+			// Search string "Announcer.MVM_An_Engineer_Bot_Is_Dead_But_Not_Teleporter" -> look for while-loop in decompiled loop, should be in else branch after "mvm_mission_update" -> follow last function call in loop
 			"CTFPlayer::RemoveObject"
 			{
 				"linux64"		"@_ZN9CTFPlayer12RemoveObjectEP11CBaseObject"
 				"windows64"		"\x40\x57\x44\x8B\x99\xB8\x27\x00\x00"
 			}
+			// Search string "CTFPlayer::ForceChangeTeam( %d )" -> function above a function call with 5 parameters
 			"CTFPlayer::RemoveAllOwnedEntitiesFromWorld"
 			{
 				"linux64"		"@_ZN9CTFPlayer31RemoveAllOwnedEntitiesFromWorldEb"
@@ -206,80 +232,96 @@
 				"linux64"		"@_ZN15CTFPlayerShared14ResetRageBuffsEv"
 				"windows64"		""
 			}
+			// Search string "engy_disposable_sentries"
 			"CTFPlayer::CanBuild"
 			{
 				"linux64"		"@_ZN9CTFPlayer8CanBuildEii"
-				"windows64"		""
+				"windows64"		"\x40\x56\x57\x41\x54\x48\x83\xEC\x40\x45\x8B\xE0"
 			}
+			// Search string "models\\weapons\\c_models\\c_engineer_gunslinger.mdl" -> follow xref to function with two branching paths -> follow xref to function that does NOT contain the string "wrench_builds_minisentry"
+			// Alternatively: Enter virtual CTFWearable::ReapplyProvision -> enter only function call
 			"CEconEntity::UpdateModelToClass"
 			{
 				"linux64"		"@_ZN11CEconEntity18UpdateModelToClassEv"
-				"windows64"		""
+				"windows64"		"\x48\x89\x5C\x24\x18\x55\x56\x57\x48\x83\xEC\x30\x48\x8B\x1D\xAD\xA7\xB6\x00"
 			}
+			// Search string "#TF_CTF_Cannot_Capture"
 			"CCaptureZone::Capture"
 			{
 				"linux64"		"@_ZN12CCaptureZone7CaptureEP11CBaseEntity"
-				"windows64"		""
+				"windows64"		"\x48\x85\xD2\x0F\x84\x2A\x2A\x2A\x2A\x55\x56\x48\x83\xEC\x48"
 			}
+			// Search string "weapon_blocks_healing" -> look for function with no other strings and CTFReviveMarker RTTI Type Descriptor
 			"CWeaponMedigun::AllowedToHealTarget"
 			{
 				"linux64"		"@_ZN14CWeaponMedigun19AllowedToHealTargetEP11CBaseEntity"
-				"windows64"		""
+				"windows64"		"\x48\x89\x5C\x24\x10\x48\x89\x6C\x24\x18\x48\x89\x74\x24\x20\x57\x48\x83\xEC\x30\x48\x8B\xDA"
 			}
+			// Search string "mp_restartgame 1;" -> follow jmp to function in the other branch
 			"CPopulationManager::ResetMap"
 			{
 				"linux64"		"@_ZN18CPopulationManager8ResetMapEv"
-				"windows64"		""
+				"windows64"		"\x48\x89\x5C\x24\x08\x48\x89\x6C\x24\x10\x48\x89\x74\x24\x18\x57\x48\x83\xEC\x20\x48\x8B\x05\x45\xAE\x6B\x00"
 			}
+			// Search string "MANN VS MACHINE: %3.2f: <<<< Spawning Sentry Busting Mission >>>>" -> first call to a subroutine above
 			"CSpawnLocation::FindSpawnLocation"
 			{
 				"linux64"		"@_ZN14CSpawnLocation17FindSpawnLocationER6Vector"
-				"windows64"		""
+				"windows64"		"\x48\x8B\xC4\x48\x89\x50\x10\x53\x57"
 			}
+			// Search string "MANN VS MACHINE: %3.2f: <<<< Spawning Sentry Busting Mission >>>>" -> first subroutine call after RandomFloat
 			"CPopulationManager::GetSentryBusterDamageAndKillThreshold"
 			{
 				"linux64"		"@_ZNK18CPopulationManager37GetSentryBusterDamageAndKillThresholdERiS0_"
-				"windows64"		""
+				"windows64"		"\x40\x55\x41\x56\x41\x57\x48\x83\xEC\x40\x48\x89\x74\x24\x30"
 			}
+			// Search string "CTFBotSpyLeaveSpawnRoom::TeleportNearVictim" -> first subroutine call after RandomInt
 			"IsSpaceToSpawnHere"
 			{
 				"linux64"		"@_Z18IsSpaceToSpawnHereRK6Vector"
-				"windows64"		""
+				"windows64"		"\x48\x8B\xC4\x53\x48\x81\xEC\x80\x01\x00\x00"
 			}
+			// Search string "Sentry hint has NULL nav area!\n"
 			"CTFBotMvMEngineerHintFinder::FindHint"
 			{
 				"linux64"		"@_ZN27CTFBotMvMEngineerHintFinder8FindHintEbbP7CHandleI22CTFBotHintEngineerNestE"
-				"windows64"		""
+				"windows64"		"\x48\x8B\xC4\x4C\x89\x40\x18\x88\x50\x10"
 			}
+			// Search string "player_rocketpack_pushed" -> first subroutine call above
 			"CTFGameRules::PushAllPlayersAway"
 			{
 				"linux64"		"@_ZN12CTFGameRules18PushAllPlayersAwayERK6VectorffiP10CUtlVectorIP9CTFPlayer10CUtlMemoryIS5_iEE"
-				"windows64"		""
+				"windows64"		"\x48\x8B\xC4\x48\x89\x50\x10\x41\x56\x48\x81\xEC\xC0\x00\x00\x00"
 			}
+			// Search string "Announcer.MVM_Bonus" -> first subroutine call above
 			"CTFGameRules::DistributeCurrencyAmount"
 			{
 				"linux64"		"@_ZN12CTFGameRules24DistributeCurrencyAmountEiP9CTFPlayerbbb"
-				"windows64"		""
+				"windows64"		"\x4C\x8B\xDC\x49\x89\x4B\x08\x41\x54\x48\x83\xEC\x40"
 			}
+			// TODO this one is hard to find
 			"CTFBotHintEngineerNest::GetSentryHint"
 			{
 				"linux64"		"@_ZNK22CTFBotHintEngineerNest13GetSentryHintEv"
 				"windows64"		""
 			}
+			// TODO this one is hard to find
 			"CTFBotHintEngineerNest::GetTeleporterHint"
 			{
 				"linux64"		"@_ZNK22CTFBotHintEngineerNest17GetTeleporterHintEv"
 				"windows64"		""
 			}
+			// TODO this one is hard to find
 			"CTraceFilterObject::ShouldHitEntity"
 			{
 				"linux64"		"@_ZN18CTraceFilterObject15ShouldHitEntityEP13IHandleEntityi"
 				"windows64"		""
 			}
+			// Search string "Trying to start a new lag compensation session while one is already active!"
 			"CLagCompensationManager::StartLagCompensation"
 			{
 				"linux64"		"@_ZN23CLagCompensationManager20StartLagCompensationEP11CBasePlayerP8CUserCmd"
-				"windows64"		""
+				"windows64"		"\x40\x55\x57\x41\x55\x48\x81\xEC\xA0\x00\x00\x00"
 			}
 			"CUniformRandomStream::SetSeed"
 			{
@@ -287,31 +329,37 @@
 				"linux64"		"@_ZN20CUniformRandomStream7SetSeedEi"
 				"windows64"		"@?SetSeed@CUniformRandomStream@@UAEXH@Z"
 			}
+			// TODO this one is hard to find
 			"CTFBotHintEngineerNest::IsStaleNest"
 			{
 				"linux64"		"@_ZNK22CTFBotHintEngineerNest11IsStaleNestEv"
 				"windows64"		""
 			}
+			// TODO this one is hard to find
 			"CTFBotHintEngineerNest::DetonateStaleNest"
 			{
 				"linux64"		"@_ZN22CTFBotHintEngineerNest17DetonateStaleNestEv"
 				"windows64"		""
 			}
+			// Start from CSpawnLocation::FindSpawnLocation -> find function call which only has a single x-ref back to FindSpawnLocation
 			"DoTeleporterOverride"
 			{
 				"linux64"		"@_Z20DoTeleporterOverrideP11CBaseEntityR6Vectorb"
-				"windows64"		""
+				"windows64"		"\x48\x8B\xC4\x48\x89\x58\x20\x44\x88\x40\x18"
 			}
+			// Search string "MVM.Robot_Teleporter_Deliver"
 			"OnBotTeleported"
 			{
 				"linux64"		"@_Z15OnBotTeleportedP6CTFBot"
-				"windows64"		""
+				"windows64"		"\x48\x8B\xC4\x48\x89\x58\x08\x48\x89\x68\x10\x48\x89\x70\x18\x57\x48\x81\xEC\xB0\x00\x00\x00\x0F\x29\x70\xE8"
 			}
+			// Search string "Failed to create an item named %s\n"
 			"BotGenerateAndWearItem"
 			{
 				"linux64"		"@_Z22BotGenerateAndWearItemP9CTFPlayerPKc"
-				"windows64	"	""
+				"windows64	"	"\x48\x85\xC9\x0F\x84\x2A\x2A\x2A\x2A\x48\x8B\xC4\x48\x89\x68\x20"
 			}
+			// TODO: This one is a problem regardless
 			"GetBombInfo"
 			{
 				"linux64"		"@_Z11GetBombInfoP10BombInfo_t"

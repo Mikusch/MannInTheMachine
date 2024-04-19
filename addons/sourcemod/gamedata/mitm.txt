@@ -72,17 +72,17 @@
 			"CTFGCServerSystem::PreClientUpdate"
 			{
 				"linux"		"@_ZN17CTFGCServerSystem15PreClientUpdateEv"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x20\x53\x56\x8B\xD9\x57\x89\x5D\xF4\xE8\x2A\x2A\x2A\x2A\xE8\x2A\x2A\x2A\x2A"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x28\x53\x56\x8B\xD9"
 			}
 			"CPopulationManager::AllocateBots"
 			{
 				"linux"		"@_ZN18CPopulationManager12AllocateBotsEv"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x14\x53\x8B\xD9\x80\xBB\xAD\x05\x00\x00\x00"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x1C\x8B\xC1\x89\x45\xF8"
 			}
 			"CPopulationManager::EndlessRollEscalation"
 			{
 				"linux"		"@_ZN18CPopulationManager21EndlessRollEscalationEv"
-				"windows"	"\x55\x8B\xEC\x81\xEC\xCC\x02\x00\x00"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x50\x03\x00\x00"
 			}
 			"CPopulationManager::IsInEndlessWaves"
 			{
@@ -97,7 +97,7 @@
 			"CPopulationManager::RestoreCheckpoint"
 			{
 				"linux"		"@_ZN18CPopulationManager17RestoreCheckpointEv"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x2C\x53\x56\x8B\xF1\x57\x89\x75\xFC"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x30\x53\x8B\xD9\x56\x57"
 			}
 			"CPopulationManager::GetCurrentWave"
 			{
@@ -107,37 +107,37 @@
 			"CTFBotSpawner::Spawn"
 			{
 				"linux"		"@_ZN13CTFBotSpawner5SpawnERK6VectorP10CUtlVectorI7CHandleI11CBaseEntityE10CUtlMemoryIS6_iEE"
-				"windows"	"\x55\x8B\xEC\x81\xEC\x70\x01\x00\x00"
+				"windows"	"\x53\x8B\xDC\x83\xEC\x08\x83\xE4\xF0\x83\xC4\x04\x55\x8B\x6B\x04\x89\x6C\x24\x04\x8B\xEC\x81\xEC\x58\x02\x00\x00"
 			}
 			"CSquadSpawner::Spawn"
 			{
 				"linux"		"@_ZN13CSquadSpawner5SpawnERK6VectorP10CUtlVectorI7CHandleI11CBaseEntityE10CUtlMemoryIS6_iEE"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x2C\x53\x57\x33\xDB"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x2C\x53\x56\x57\x33\xD2"
 			}
 			"CPopulationManager::Update"
 			{
 				"linux"		"@_ZN18CPopulationManager6UpdateEv"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x18\x53\x56\x57\x8B\xF9\x33\xF6"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x14\x53\x56\x33\xD2"
 			}
 			"CPeriodicSpawnPopulator::Update"
 			{
 				"linux"		"@_ZN23CPeriodicSpawnPopulator6UpdateEv"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x24\x53\x8B\xD9\x56\x8B\x43\x38"
+				"windows"	"\x55\x8B\xEC\xA1\x2A\x2A\x2A\x2A\x83\xEC\x40\x56"
 			}
 			"CWaveSpawnPopulator::Update"
 			{
 				"linux"		"@_ZN19CWaveSpawnPopulator6UpdateEv"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x40\x53\x56\x57\x33\xDB"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x48\x53\x8B\xD9\x33\xD2\x8B\x0D\x2A\x2A\x2A\x2A\x89\x55\xD8"
 			}
 			"CMissionPopulator::UpdateMission"
 			{
 				"linux"		"@_ZN17CMissionPopulator13UpdateMissionEN6CTFBot11MissionTypeE"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x5C\x8B\x15\x2A\x2A\x2A\x2A"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x58\x8B\x15\x2A\x2A\x2A\x2A\x53\x33\xDB\x89\x4D\xFC"
 			}
 			"CMissionPopulator::UpdateMissionDestroySentries"
 			{
 				"linux"		"@_ZN17CMissionPopulator28UpdateMissionDestroySentriesEv"
-				"windows"	"\x55\x8B\xEC\x81\xEC\x88\x00\x00\x00\x8B\x15\x2A\x2A\x2A\x2A"
+				"windows"	"\x55\x8B\xEC\x81\xEC\x8C\x00\x00\x00\x8B\x15\x2A\x2A\x2A\x2A\x53\x56\x33\xF6"
 			}
 			"CPointPopulatorInterface::InputChangeBotAttributes"
 			{
@@ -147,12 +147,12 @@
 			"CTFGameRules::GetTeamAssignmentOverride"
 			{
 				"linux"		"@_ZN12CTFGameRules25GetTeamAssignmentOverrideEP9CTFPlayerib"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x10\x81\x65\xF4\xFF\xFF\x0F\xFF\x8D\x45\xF0\x53"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x18\x81\x65\xEC\xFF\xFF\x0F\xFF\x8D\x45\xE8\x53\x56"
 			}
 			"CTFGameRules::PlayerReadyStatus_UpdatePlayerState"
 			{
 				"linux"		"@_ZN12CTFGameRules35PlayerReadyStatus_UpdatePlayerStateEP9CTFPlayerb"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x10\x53\x8B\xD9\x80\xBB\x72\x0C\x00\x00\x00\x75\x2A"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x24\x53\x8B\xD9\xE8\x2A\x2A\x2A\x2A"
 			}
 			"CTeamplayRoundBasedRules::ResetPlayerAndTeamReadyState"
 			{
@@ -167,12 +167,12 @@
 			"CTFPlayer::GetLoadoutItem"
 			{
 				"linux"		"@_ZN9CTFPlayer14GetLoadoutItemEiib"
-				"windows"	"\x55\x8B\xEC\x51\x53\x56\x8B\xF1\x8B\x0D\x2A\x2A\x2A\x2A\x57\x89\x75\xFC"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x10\x53\x56\x8B\xF1\x8B\x0D\x2A\x2A\x2A\x2A"
 			}
 			"CTFPlayer::CheckInstantLoadoutRespawn"
 			{
 				"linux"		"@_ZN9CTFPlayer26CheckInstantLoadoutRespawnEv"
-				"windows"	"\x57\x8B\xF9\x8B\x07\x8B\x80\x0C\x01\x00\x00\xFF\xD0\x84\xC0\x0F\x84\x2A\x2A\x2A\x2A\x8B\x07"
+				"windows"	"\x57\x8B\xF9\x8B\x07\x8B\x80\x0C\x01\x00\x00\xFF\xD0\x84\xC0\x0F\x84\x2A\x2A\x2A\x2A"
 			}
 			"CTFPlayer::DoClassSpecialSkill"
 			{

@@ -24,7 +24,9 @@
 			"Platform"
 			{
 				"linux"		"linux"
+				"linux64"	"linux"
 				"windows"	"windows"
+				"windows64"	"windows"
 			}
 			"CTFPlayer_BaseOffset"
 			{

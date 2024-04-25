@@ -147,7 +147,7 @@ static int Update(CTFBotDeliverFlag action, int actor, float interval)
 		return action.Done("I'm no longer carrying the flag");
 	}
 	
-	if (UpgradeOverTime(action, actor))
+	if (UpgradeOverTime(action, actor) && sm_mitm_bot_taunt_on_upgrade.BoolValue)
 	{
 		return action.SuspendFor(CTFBotTaunt(), "Taunting for our new upgrade");
 	}

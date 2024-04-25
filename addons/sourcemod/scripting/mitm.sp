@@ -75,6 +75,7 @@ ConVar sm_mitm_setup_time;
 ConVar sm_mitm_max_spawn_deaths;
 ConVar sm_mitm_defender_ping_limit;
 ConVar sm_mitm_shield_damage_drain_rate;
+ConVar sm_mitm_bot_taunt_on_upgrade;
 
 // Game ConVars
 ConVar tf_avoidteammates_pushaway;

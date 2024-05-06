@@ -136,6 +136,11 @@ methodmap CTFBotSquad
 		return this.m_leader == bot;
 	}
 	
+	public bool IsMember(int bot)
+	{
+		return this.m_roster.FindValue(bot) != -1;
+	}
+	
 	public float GetFormationSize()
 	{
 		return this.m_formationSize;

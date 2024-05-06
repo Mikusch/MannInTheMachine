@@ -243,9 +243,10 @@ Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)
 	
 	if (CTFPlayer(client).IsInASquad())
 	{
-		if (hEffectEntity != client && CTFPlayer(client).GetSquad().IsLeader(hEffectEntity))
+		CTFBotSquad squad = CTFPlayer(client).GetSquad();
+		if (hEffectEntity != client && (squad.IsLeader(hEffectEntity) || squad.IsLeader(client) && squad.IsMember(hEffectEntity)))
 		{
-			// show the glow of our squad leader
+			// show the glow of our squad leader or our squad members
 			return Plugin_Continue;
 		}
 	}

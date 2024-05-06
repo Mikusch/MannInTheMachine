@@ -1127,6 +1127,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public bool EquipRequiredWeapon()
 	{
+		// if we have a required weapon on our stack, it takes precedence (items, etc)
 		if (!this.m_requiredWeaponStack.Empty)
 		{
 			int weapon = this.m_requiredWeaponStack.Top();

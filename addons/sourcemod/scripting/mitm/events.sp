@@ -158,25 +158,9 @@ static void RequestFrameCallback_ApplyWeaponRestrictions(int userid)
 		return;
 	
 	// equip our required weapon
-	CTFPlayer(client).EquipRequiredWeapon();
-	
-	// switch to special secondary weapon if we have one
-	int weapon = GetPlayerWeaponSlot(client, TFWeaponSlot_Secondary);
-	if (weapon != -1)
+	if (!CTFPlayer(client).EquipRequiredWeapon())
 	{
-		int weaponID = TF2Util_GetWeaponID(weapon);
-		if (weaponID == TF_WEAPON_MEDIGUN ||
-			weaponID == TF_WEAPON_BUFF_ITEM ||
-			weaponID == TF_WEAPON_LUNCHBOX ||
-			weaponID == TF_WEAPON_JAR ||
-			weaponID == TF_WEAPON_JAR_MILK ||
-			weaponID == TF_WEAPON_JAR_GAS ||
-			weaponID == TF_WEAPON_ROCKETPACK ||
-			weaponID == TF_WEAPON_MECHANICAL_ARM ||
-			weaponID == TF_WEAPON_LASER_POINTER)
-		{
-			TF2Util_SetPlayerActiveWeapon(client, weapon);
-		}
+		SDKCall_CBaseCombatCharacter_SwitchToNextBestWeapon(client, -1);
 	}
 }
 

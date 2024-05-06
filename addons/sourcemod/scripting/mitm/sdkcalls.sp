@@ -24,6 +24,7 @@ static Handle g_hSDKCall_CTeamplayRoundBasedRules_PlayThrottledAlert;
 static Handle g_hSDKCall_CEconEntity_UpdateModelToClass;
 static Handle g_hSDKCall_CTFItem_PickUp;
 static Handle g_hSDKCall_CBaseCombatCharacter_ClearLastKnownArea;
+static Handle g_hSDKCall_CBaseCombatCharacter_SwitchToNextBestWeapon;
 static Handle g_hSDKCall_CCaptureZone_Capture;
 static Handle g_hSDKCall_CTFPlayer_DoAnimationEvent;
 static Handle g_hSDKCall_CTFPlayer_PlaySpecificSequence;
@@ -84,6 +85,7 @@ void SDKCalls_Init(GameData hGameConf)
 	g_hSDKCall_CEconEntity_UpdateModelToClass = PrepSDKCall_CEconEntity_UpdateModelToClass(hGameConf);
 	g_hSDKCall_CTFItem_PickUp = PrepSDKCall_CTFItem_PickUp(hGameConf);
 	g_hSDKCall_CBaseCombatCharacter_ClearLastKnownArea = PrepSDKCall_CBaseCombatCharacter_ClearLastKnownArea(hGameConf);
+	g_hSDKCall_CBaseCombatCharacter_SwitchToNextBestWeapon = PrepSDKCall_CBaseCombatCharacter_SwitchToNextBestWeapon(hGameConf);
 	g_hSDKCall_CCaptureZone_Capture = PrepSDKCall_CCaptureZone_Capture(hGameConf);
 	g_hSDKCall_CTFPlayer_DoAnimationEvent = PrepSDKCall_CTFPlayer_DoAnimationEvent(hGameConf);
 	g_hSDKCall_CTFPlayer_PlaySpecificSequence = PrepSDKCall_CTFPlayer_PlaySpecificSequence(hGameConf);
@@ -217,6 +219,19 @@ static Handle PrepSDKCall_CBaseCombatCharacter_ClearLastKnownArea(GameData hGame
 	Handle call = EndPrepSDKCall();
 	if (!call)
 		LogError("Failed to create SDKCall: CBaseCombatCharacter::ClearLastKnownArea");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_CBaseCombatCharacter_SwitchToNextBestWeapon(GameData hGameConf)
+{
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CBaseCombatCharacter::SwitchToNextBestWeapon");
+	PrepSDKCall_AddParameter(SDKType_CBaseEntity, SDKPass_Pointer, VDECODE_FLAG_ALLOWNULL);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogError("Failed to create SDKCall: CBaseCombatCharacter::SwitchToNextBestWeapon");
 	
 	return call;
 }
@@ -714,6 +729,12 @@ void SDKCall_CBaseCombatCharacter_ClearLastKnownArea(int player)
 {
 	if (g_hSDKCall_CBaseCombatCharacter_ClearLastKnownArea)
 		SDKCall(g_hSDKCall_CBaseCombatCharacter_ClearLastKnownArea, player);
+}
+
+void SDKCall_CBaseCombatCharacter_SwitchToNextBestWeapon(int player, int currentWeapon)
+{
+	if (g_hSDKCall_CBaseCombatCharacter_SwitchToNextBestWeapon)
+		SDKCall(g_hSDKCall_CBaseCombatCharacter_SwitchToNextBestWeapon, player, currentWeapon);
 }
 
 void SDKCall_CCaptureZone_Capture(int zone, int other)

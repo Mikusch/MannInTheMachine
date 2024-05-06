@@ -216,6 +216,11 @@
 				"linux"		"@_ZN11CEconEntity18UpdateModelToClassEv"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x0C\x53\x56\x8B\x35\x2A\x2A\x2A\x2A\x8B\xD9"
 			}
+			"CBaseCombatCharacter::SwitchToNextBestWeapon"
+			{
+				"linux"		"@_ZN20CBaseCombatCharacter22SwitchToNextBestWeaponEP17CBaseCombatWeapon"
+				"windows"	"\x55\x8B\xEC\x56\xFF\x75\x08\x8B\xF1\x8B\x0D\x2A\x2A\x2A\x2A\x56"
+			}
 			"CCaptureZone::Capture"
 			{
 				"linux"		"@_ZN12CCaptureZone7CaptureEP11CBaseEntity"

@@ -194,15 +194,16 @@
 	}
 	"Invader_CaptureGate_Annotation"
 	{
-		"en"		"Capture %s!"
+		"#format"	"{1:s}"
+		"en"		"Capture {1}"
 	}
 	"Invader_DestroySentries_DetonateSentry"
 	{
-		"en"		"Detonate!"
+		"en"		"Detonate"
 	}
 	"Invader_DestroySentries_DetonateHere"
 	{
-		"en"		"Detonate here to complete your mission!"
+		"en"		"Detonate here to complete your mission"
 	}
 	"Invader_Queue_Header"
 	{

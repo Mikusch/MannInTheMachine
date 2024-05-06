@@ -1397,7 +1397,7 @@ static MRESReturn DHookCallback_CWeaponMedigun_AllowedToHealTarget_Pre(int medig
 				return MRES_Ignored;
 			}
 			
-			PrintCenterText(owner, "%t", "Medic_Squad_NotAllowedToHeal", squad.GetLeader());
+			PrintCenterText(owner, "%t", "Squad_NotAllowedToHeal", squad.GetLeader());
 			
 			// disallow healing everyone else
 			ret.Value = false;
@@ -1639,6 +1639,8 @@ static MRESReturn DHookCallback_CTFPlayer_IsAllowedToPickUpFlag_Post(int player,
 	// only the leader of a squad can pick up the flag
 	if (CTFPlayer(player).IsInASquad() && !CTFPlayer(player).GetSquad().IsLeader(player))
 	{
+		PrintCenterText(player, "%t", "Squad_NotAllowedToPickUpFlag");
+		
 		ret.Value = false;
 		return MRES_Supercede;
 	}

@@ -131,7 +131,7 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 			if (GameRules_GetRoundState() == RoundState_RoundRunning && CTFPlayer(actor).m_flSpawnTimeLeft != -1.0)
 			{
 				// pause spawn timer while stunned
-				if (!TF2_IsPlayerInCondition(actor, TFCond_Dazed))
+				if (!CTFPlayer(actor).IsControlStunned())
 				{
 					float velocity[3];
 					CTFPlayer(actor).GetAbsVelocity(velocity);

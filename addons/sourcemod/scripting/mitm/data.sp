@@ -592,6 +592,11 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		return view_as<TFTeam>(this.GetProp(Prop_Send, "m_nDisguiseTeam"));
 	}
 	
+	public bool IsControlStunned()
+	{
+		return TF2_IsPlayerInCondition(this.index, TFCond_Dazed) && this.GetProp(Prop_Send, "m_iStunFlags") & TF_STUNFLAG_BONKSTUCK;
+	}
+	
 	public bool IsMiniBoss()
 	{
 		return this.GetProp(Prop_Send, "m_bIsMiniBoss") != 0;

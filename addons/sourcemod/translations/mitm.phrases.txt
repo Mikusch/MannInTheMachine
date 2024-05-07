@@ -158,15 +158,16 @@
 	"Squad_NotAllowedToHeal"
 	{
 		"#format"	"{1:N}"
-		"en"		"You are only allowed to heal your squad leader {1}."
+		"en"		"You are only allowed to heal your squad leader {1}"
 	}
 	"Squad_NotAllowedToPickUpFlag"
 	{
-		"en"		"You are not allowed to pick up the bomb as a squad member."
+		"en"		"You are not allowed to pick up the bomb as a squad member"
 	}
 	"Invader_NotAllowedToSuicide"
 	{
-		"en"		"You are not allowed to suicide as a robot."
+		"en"		"You are not allowed to suicide as a robot"
+	}
 	}
 	"Invader_Spawned"
 	{

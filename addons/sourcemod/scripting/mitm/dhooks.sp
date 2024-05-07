@@ -1266,7 +1266,8 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Post(DHoo
 {
 	if (ret.Value == TFTeam_Invaders)
 	{
-		// mark all invaders as bots
+		// Mark all invaders as bots.
+		// This will allow IsBot() to return true, but IsFakeClient() will still be false!
 		int player = params.Get(1);
 		CBaseEntity(player).AddFlag(FL_FAKECLIENT);
 	}
@@ -1577,7 +1578,7 @@ static MRESReturn DHookCallback_OnBotTeleported_Pre(DHookParam params)
 	return MRES_Supercede;
 }
 
-void OnBotTeleported(int bot)
+static void OnBotTeleported(int bot)
 {
 	float origin[3], angles[3];
 	s_lastTeleporter.GetAbsOrigin(origin);

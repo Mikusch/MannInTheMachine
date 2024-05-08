@@ -602,6 +602,7 @@ public Action CBaseCombatCharacter_EventKilled(int entity, int &attacker, int &i
 					if (TF2_GetObjectType(obj) == TFObject_Teleporter && view_as<TFTeam>(GetEntProp(obj, Prop_Data, "m_iTeamNum")) == TFTeam_Invaders)
 					{
 						bEngineerTeleporterInTheWorld = true;
+						break;
 					}
 				}
 				

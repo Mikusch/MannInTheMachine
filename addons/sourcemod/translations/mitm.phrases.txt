@@ -168,7 +168,6 @@
 	{
 		"en"		"You are not allowed to suicide as a robot"
 	}
-	}
 	"Invader_Spawned"
 	{
 		"#format"	"{1:s}"

@@ -18,69 +18,29 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-enum struct SDKHookData
-{
-	int ref;
-	SDKHookType type;
-	SDKHookCB callback;
-}
-
 static bool g_bHasActiveTeleporterPre;
-static ArrayList g_hActiveHooks;
 
-void SDKHooks_Init()
-{
-	g_hActiveHooks = new ArrayList(sizeof(SDKHookData));
-}
-
-void SDKHooks_HookEntity(int entity, const char[] classname)
+void SDKHooks_OnEntityCreated(int entity, const char[] classname)
 {
 	if (IsEntityClient(entity))
 	{
-		SDKHooks_HookEntityInternal(entity, SDKHook_OnTakeDamageAlive, SDKHookCB_Client_OnTakeDamageAlive);
-		SDKHooks_HookEntityInternal(entity, SDKHook_WeaponEquipPost, SDKHookCB_Client_WeaponEquipPost);
-		SDKHooks_HookEntityInternal(entity, SDKHook_WeaponSwitchPost, SDKHookCB_Client_WeaponSwitchPost);
+		PM_SDKHook(entity, SDKHook_OnTakeDamageAlive, SDKHookCB_Client_OnTakeDamageAlive);
+		PM_SDKHook(entity, SDKHook_WeaponEquipPost, SDKHookCB_Client_WeaponEquipPost);
+		PM_SDKHook(entity, SDKHook_WeaponSwitchPost, SDKHookCB_Client_WeaponSwitchPost);
 	}
 	else if (StrEqual(classname, "tf_projectile_pipe_remote"))
 	{
-		SDKHooks_HookEntityInternal(entity, SDKHook_SetTransmit, SDKHookCB_ProjectilePipeRemote_SetTransmit);
+		PM_SDKHook(entity, SDKHook_SetTransmit, SDKHookCB_ProjectilePipeRemote_SetTransmit);
 	}
 	else if (StrEqual(classname, "bot_hint_engineer_nest"))
 	{
-		SDKHooks_HookEntityInternal(entity, SDKHook_Think, SDKHookCB_BotHintEngineerNest_Think);
-		SDKHooks_HookEntityInternal(entity, SDKHook_ThinkPost, SDKHookCB_BotHintEngineerNest_ThinkPost);
+		PM_SDKHook(entity, SDKHook_Think, SDKHookCB_BotHintEngineerNest_Think);
+		PM_SDKHook(entity, SDKHook_ThinkPost, SDKHookCB_BotHintEngineerNest_ThinkPost);
 	}
 	else if (StrEqual(classname, "entity_medigun_shield"))
 	{
-		SDKHooks_HookEntityInternal(entity, SDKHook_OnTakeDamagePost, SDKHookCB_EntityMedigunShield_OnTakeDamagePost);
+		PM_SDKHook(entity, SDKHook_OnTakeDamagePost, SDKHookCB_EntityMedigunShield_OnTakeDamagePost);
 	}
-}
-
-void SDKHooks_UnhookEntity(int entity)
-{
-	int ref = IsValidEdict(entity) ? EntIndexToEntRef(entity) : entity;
-	
-	for (int i = g_hActiveHooks.Length - 1; i >= 0; i--)
-	{
-		SDKHookData data;
-		if (g_hActiveHooks.GetArray(i, data) && ref == data.ref)
-		{
-			SDKUnhook(data.ref, data.type, data.callback);
-			g_hActiveHooks.Erase(i);
-		}
-	}
-}
-
-static void SDKHooks_HookEntityInternal(int entity, SDKHookType type, SDKHookCB callback)
-{
-	SDKHookData data;
-	data.ref = IsValidEdict(entity) ? EntIndexToEntRef(entity) : entity;
-	data.type = type;
-	data.callback = callback;
-	
-	g_hActiveHooks.PushArray(data);
-	
-	SDKHook(entity, type, callback);
 }
 
 static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)

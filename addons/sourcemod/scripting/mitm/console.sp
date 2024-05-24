@@ -18,18 +18,8 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-enum struct CommandListenerData
-{
-	CommandListener callback;
-	char command[COMMAND_MAX_LENGTH];
-}
-
-static ArrayList g_hCommandListeners;
-
 void Console_Init()
 {
-	g_hCommandListeners = new ArrayList(sizeof(CommandListenerData));
-	
 	RegConsoleCmd("sm_mitm", ConCmd_MannInTheMachine, "Opens the main menu.");
 	RegConsoleCmd("sm_queue", ConCmd_Queue, "Opens the queue menu.");
 	RegConsoleCmd("sm_preferences", ConCmd_Settings, "Opens the preferences menu.");
@@ -37,46 +27,18 @@ void Console_Init()
 	
 	RegAdminCmd("sm_addqueue", ConCmd_AddQueuePoints, ADMFLAG_CHEATS, "Adds defender queue points to a player.");
 	
-	Console_AddCommandListener(CommandListener_Suicide, "explode");
-	Console_AddCommandListener(CommandListener_Suicide, "kill");
-	Console_AddCommandListener(CommandListener_DropItem, "dropitem");
-	Console_AddCommandListener(CommandListener_AutoTeam, "autoteam");
-	Console_AddCommandListener(CommandListener_JoinTeam, "jointeam");
-	Console_AddCommandListener(CommandListener_JoinClass, "joinclass");
-	Console_AddCommandListener(CommandListener_Buyback, "td_buyback");
-}
-
-void Console_Toggle(bool bEnable)
-{
-	for (int i = 0; i < g_hCommandListeners.Length; i++)
-	{
-		CommandListenerData data;
-		if (g_hCommandListeners.GetArray(i, data))
-		{
-			if (bEnable)
-			{
-				AddCommandListener(data.callback, data.command);
-			}
-			else
-			{
-				RemoveCommandListener(data.callback, data.command);
-			}
-		}
-	}
-}
-
-static void Console_AddCommandListener(CommandListener callback, const char[] command)
-{
-	CommandListenerData data;
-	strcopy(data.command, sizeof(data.command), command);
-	data.callback = callback;
-	
-	g_hCommandListeners.PushArray(data);
+	PM_AddCommandListener(CommandListener_Suicide, "explode");
+	PM_AddCommandListener(CommandListener_Suicide, "kill");
+	PM_AddCommandListener(CommandListener_DropItem, "dropitem");
+	PM_AddCommandListener(CommandListener_AutoTeam, "autoteam");
+	PM_AddCommandListener(CommandListener_JoinTeam, "jointeam");
+	PM_AddCommandListener(CommandListener_JoinClass, "joinclass");
+	PM_AddCommandListener(CommandListener_Buyback, "td_buyback");
 }
 
 static Action ConCmd_MannInTheMachine(int client, int args)
 {
-	if (!g_bEnabled)
+	if (!PM_IsEnabled())
 		return Plugin_Continue;
 	
 	if (client == 0)
@@ -91,7 +53,7 @@ static Action ConCmd_MannInTheMachine(int client, int args)
 
 static Action ConCmd_Queue(int client, int args)
 {
-	if (!g_bEnabled)
+	if (!PM_IsEnabled())
 		return Plugin_Continue;
 	
 	if (client == 0)
@@ -106,7 +68,7 @@ static Action ConCmd_Queue(int client, int args)
 
 static Action ConCmd_Settings(int client, int args)
 {
-	if (!g_bEnabled)
+	if (!PM_IsEnabled())
 		return Plugin_Continue;
 	
 	if (client == 0)
@@ -121,7 +83,7 @@ static Action ConCmd_Settings(int client, int args)
 
 static Action ConCmd_Party(int client, int args)
 {
-	if (!g_bEnabled)
+	if (!PM_IsEnabled())
 		return Plugin_Continue;
 	
 	if (!Party_ShouldRunCommand(client))
@@ -133,7 +95,7 @@ static Action ConCmd_Party(int client, int args)
 
 static Action ConCmd_AddQueuePoints(int client, int args)
 {
-	if (!g_bEnabled)
+	if (!PM_IsEnabled())
 		return Plugin_Continue;
 	
 	if (args < 2)

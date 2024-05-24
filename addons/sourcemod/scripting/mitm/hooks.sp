@@ -18,53 +18,13 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-enum struct EntityOutputData
-{
-	char classname[64];
-	char output[64];
-	EntityOutput callback;
-}
-
-static ArrayList g_hEntityOutputs;
-
 void Hooks_Init()
 {
-	g_hEntityOutputs = new ArrayList(sizeof(EntityOutputData));
-	
 	HookUserMessage(GetUserMessageId("SayText2"), OnSayText2, true);
 	HookUserMessage(GetUserMessageId("TextMsg"), OnTextMsg, true);
 	
-	Hooks_AddEntityOutput("tf_gamerules", "OnStateEnterBetweenRounds", EntityOutput_CTFGameRules_OnStateEnterBetweenRounds);
-	Hooks_AddEntityOutput("trigger_remove_tf_player_condition", "OnStartTouch", EntityOutput_CTriggerRemoveTFPlayerCondition_OnStartTouch);
-}
-
-void Hooks_Toggle(bool bEnable)
-{
-	for (int i = 0; i < g_hEntityOutputs.Length; i++)
-	{
-		EntityOutputData data;
-		if (g_hEntityOutputs.GetArray(i, data))
-		{
-			if (bEnable)
-			{
-				HookEntityOutput(data.classname, data.output, data.callback);
-			}
-			else
-			{
-				UnhookEntityOutput(data.classname, data.output, data.callback);
-			}
-		}
-	}
-}
-
-static void Hooks_AddEntityOutput(const char[] classname, const char[] output, EntityOutput callback)
-{
-	EntityOutputData data;
-	strcopy(data.classname, sizeof(data.classname), classname);
-	strcopy(data.output, sizeof(data.output), output);
-	data.callback = callback;
-	
-	g_hEntityOutputs.PushArray(data);
+	PM_AddEntityOutputHook("tf_gamerules", "OnStateEnterBetweenRounds", EntityOutput_CTFGameRules_OnStateEnterBetweenRounds);
+	PM_AddEntityOutputHook("trigger_remove_tf_player_condition", "OnStartTouch", EntityOutput_CTriggerRemoveTFPlayerCondition_OnStartTouch);
 }
 
 static Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNum, bool reliable, bool init)

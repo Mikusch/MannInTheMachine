@@ -67,10 +67,10 @@ void ConVars_Init()
 	IntToString(MaxClients, value, sizeof(value));
 	PSM_AddEnforcedConVar("tf_mvm_max_connected_players", value);
 	
-	PSM_AddPluginStateChangedHook(ConVars_Toggle);
+	PSM_AddPluginStateChangedHook(ConVars_OnPluginStateChanged);
 }
 
-static void ConVars_Toggle(bool bEnable)
+static void ConVars_OnPluginStateChanged(bool bEnable)
 {
 	if (bEnable)
 	{

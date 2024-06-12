@@ -21,7 +21,7 @@
 void ConVars_Init()
 {
 	CreateConVar("sm_mitm_version", PLUGIN_VERSION, "Plugin version.", FCVAR_SPONLY | FCVAR_REPLICATED | FCVAR_NOTIFY | FCVAR_DONTRECORD);
-	sm_mitm_enabled = CreateConVar("sm_mitm_enabled", "1", "Whether the plugin is enabled.");
+	CreateConVar("sm_mitm_enabled", "1", "Whether the plugin is enabled.");
 	sm_mitm_developer = CreateConVar("sm_mitm_developer", "0", "Toggle plugin developer mode.");
 	sm_mitm_custom_upgrades_file = CreateConVar("sm_mitm_custom_upgrades_file", "", "Path to custom upgrades file, set to an empty string to use the default.");
 	sm_mitm_spawn_hurry_time = CreateConVar("sm_mitm_spawn_hurry_time", "10", "The base time invaders have to leave their spawn, in seconds.");
@@ -65,12 +65,12 @@ void ConVars_Init()
 	
 	char value[12];
 	IntToString(MaxClients, value, sizeof(value));
-	PM_AddEnforcedConVar("tf_mvm_max_connected_players", value);
+	PSM_AddEnforcedConVar("tf_mvm_max_connected_players", value);
 	
-	PM_AddPluginStateChangedHook(ConVars_Toggle);
+	PSM_AddPluginStateChangedHook(ConVars_Toggle);
 }
 
-void ConVars_Toggle(bool bEnable)
+static void ConVars_Toggle(bool bEnable)
 {
 	if (bEnable)
 	{

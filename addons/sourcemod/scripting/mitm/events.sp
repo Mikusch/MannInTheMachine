@@ -20,14 +20,14 @@
 
 void Events_Init()
 {
-	PM_AddEventHook("player_spawn", EventHook_PlayerSpawn);
-	PM_AddEventHook("player_death", EventHook_PlayerDeath);
-	PM_AddEventHook("player_team", EventHook_PlayerTeam, EventHookMode_Pre);
-	PM_AddEventHook("post_inventory_application", EventHook_PostInventoryApplication);
-	PM_AddEventHook("player_builtobject", EventHook_PlayerBuiltObject);
-	PM_AddEventHook("teamplay_point_captured", EventHook_TeamplayPointCaptured);
-	PM_AddEventHook("teamplay_flag_event", EventHook_TeamplayFlagEvent);
-	PM_AddEventHook("teams_changed", EventHook_TeamsChanged);
+	PSM_AddEventHook("player_spawn", EventHook_PlayerSpawn);
+	PSM_AddEventHook("player_death", EventHook_PlayerDeath);
+	PSM_AddEventHook("player_team", EventHook_PlayerTeam, EventHookMode_Pre);
+	PSM_AddEventHook("post_inventory_application", EventHook_PostInventoryApplication);
+	PSM_AddEventHook("player_builtobject", EventHook_PlayerBuiltObject);
+	PSM_AddEventHook("teamplay_point_captured", EventHook_TeamplayPointCaptured);
+	PSM_AddEventHook("teamplay_flag_event", EventHook_TeamplayFlagEvent);
+	PSM_AddEventHook("teams_changed", EventHook_TeamsChanged);
 }
 
 static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)

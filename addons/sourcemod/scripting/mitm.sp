@@ -30,7 +30,7 @@
 #include <cbasenpc>
 #include <cbasenpc/tf/nav>
 #include <morecolors>
-#include <pluginmanager>
+#include <pluginstatemanager>
 #include <smmem>
 #include <sourcescramble>
 #include <vscript>
@@ -61,7 +61,6 @@ bool g_bAllowTeamChange;	// Bypass CTFGameRules::GetTeamAssignmentOverride?
 bool g_bInEndlessRollEscalation;
 
 // Plugin ConVars
-ConVar sm_mitm_enabled;
 ConVar sm_mitm_developer;
 ConVar sm_mitm_custom_upgrades_file;
 ConVar sm_mitm_spawn_hurry_time;
@@ -195,9 +194,8 @@ public void OnPluginStart()
 	if (!hGameConf)
 		SetFailState("Could not find mitm gamedata");
 	
-	// TODO
-	PM_Init(CreateConVar("sm_mitm_enabled", "1"), hGameConf);
-	PM_AddPluginStateChangedHook(OnPluginStateChanged);
+	PSM_Init("sm_mitm_enabled", hGameConf);
+	PSM_AddPluginStateChangedHook(OnPluginStateChanged);
 	
 	Entity.Init();
 	
@@ -222,7 +220,7 @@ public void OnPluginStart()
 
 public void OnPluginEnd()
 {
-	PM_Cleanup();
+	PSM_Disable();
 }
 
 public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int maxlen)
@@ -245,12 +243,12 @@ public void OnMapStart()
 
 public void OnConfigsExecuted()
 {
-	PM_TogglePluginStateIfNeeded();
+	PSM_TogglePluginState();
 }
 
 public void OnClientPutInServer(int client)
 {
-	if (!PM_IsEnabled())
+	if (!PSM_IsEnabled())
 		return;
 	
 	CBaseNPC_HookEventKilled(client);
@@ -265,7 +263,7 @@ public void OnClientPutInServer(int client)
 
 public void OnClientDisconnect(int client)
 {
-	if (!PM_IsEnabled())
+	if (!PSM_IsEnabled())
 		return;
 	
 	if (!IsClientInGame(client))
@@ -288,7 +286,7 @@ public void OnClientDisconnect(int client)
 
 public void OnClientCookiesCached(int client)
 {
-	if (!PM_IsEnabled())
+	if (!PSM_IsEnabled())
 		return;
 	
 	CTFPlayer player = CTFPlayer(client);
@@ -298,7 +296,7 @@ public void OnClientCookiesCached(int client)
 
 public void OnEntityCreated(int entity, const char[] classname)
 {
-	if (!PM_IsEnabled())
+	if (!PSM_IsEnabled())
 		return;
 	
 	DHooks_OnEntityCreated(entity, classname);
@@ -321,7 +319,7 @@ public void OnEntityCreated(int entity, const char[] classname)
 
 public void OnEntityDestroyed(int entity)
 {
-	if (!PM_IsEnabled())
+	if (!PSM_IsEnabled())
 		return;
 	
 	if (Entity.IsEntityTracked(entity))
@@ -330,7 +328,7 @@ public void OnEntityDestroyed(int entity)
 
 public void OnGameFrame()
 {
-	if (!PM_IsEnabled())
+	if (!PSM_IsEnabled())
 		return;
 	
 	// alternate between robot and giant queue every 5 seconds
@@ -400,7 +398,7 @@ public void OnGameFrame()
 
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
-	if (!PM_IsEnabled())
+	if (!PSM_IsEnabled())
 		return Plugin_Continue;
 	
 	if (!IsClientInGame(client) || !IsPlayerAlive(client) || TF2_GetClientTeam(client) != TFTeam_Invaders)
@@ -439,7 +437,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 
 public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
 {
-	if (!PM_IsEnabled())
+	if (!PSM_IsEnabled())
 		return;
 	
 	if (!IsClientInGame(client) || TF2_GetClientTeam(client) != TFTeam_Invaders)
@@ -474,7 +472,7 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 
 public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname, bool &result)
 {
-	if (!PM_IsEnabled())
+	if (!PSM_IsEnabled())
 		return Plugin_Continue;
 	
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
@@ -491,7 +489,7 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 
 public void TF2_OnConditionAdded(int client, TFCond condition)
 {
-	if (!PM_IsEnabled())
+	if (!PSM_IsEnabled())
 		return;
 	
 	switch (condition)
@@ -509,7 +507,7 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 
 public Action CBaseCombatCharacter_EventKilled(int entity, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	if (!PM_IsEnabled())
+	if (!PSM_IsEnabled())
 		return Plugin_Continue;
 	
 	// Replicate behavior of CTFBot::Event_Killed
@@ -624,7 +622,15 @@ static void OnPluginStateChanged(bool bEnabled)
 	int entity = -1;
 	while ((entity = FindEntityByClassname(entity, "*")) != -1)
 	{
-		if (!bEnabled)
+		if (bEnabled)
+		{
+			char classname[64];
+			if (!GetEntityClassname(entity, classname, sizeof(classname)))
+				continue;
+			
+			OnEntityCreated(entity, classname);
+		}
+		else
 		{
 			if (Entity.IsEntityTracked(entity))
 				Entity(entity).Destroy();

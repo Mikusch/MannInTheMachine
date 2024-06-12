@@ -23,8 +23,8 @@ void Hooks_Init()
 	HookUserMessage(GetUserMessageId("SayText2"), OnSayText2, true);
 	HookUserMessage(GetUserMessageId("TextMsg"), OnTextMsg, true);
 	
-	PM_AddEntityOutputHook("tf_gamerules", "OnStateEnterBetweenRounds", EntityOutput_CTFGameRules_OnStateEnterBetweenRounds);
-	PM_AddEntityOutputHook("trigger_remove_tf_player_condition", "OnStartTouch", EntityOutput_CTriggerRemoveTFPlayerCondition_OnStartTouch);
+	PSM_AddEntityOutputHook("tf_gamerules", "OnStateEnterBetweenRounds", EntityOutput_CTFGameRules_OnStateEnterBetweenRounds);
+	PSM_AddEntityOutputHook("trigger_remove_tf_player_condition", "OnStartTouch", EntityOutput_CTriggerRemoveTFPlayerCondition_OnStartTouch);
 }
 
 static Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNum, bool reliable, bool init)

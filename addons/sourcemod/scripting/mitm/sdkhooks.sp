@@ -24,22 +24,22 @@ void SDKHooks_OnEntityCreated(int entity, const char[] classname)
 {
 	if (IsEntityClient(entity))
 	{
-		PM_SDKHook(entity, SDKHook_OnTakeDamageAlive, SDKHookCB_Client_OnTakeDamageAlive);
-		PM_SDKHook(entity, SDKHook_WeaponEquipPost, SDKHookCB_Client_WeaponEquipPost);
-		PM_SDKHook(entity, SDKHook_WeaponSwitchPost, SDKHookCB_Client_WeaponSwitchPost);
+		PSM_SDKHook(entity, SDKHook_OnTakeDamageAlive, SDKHookCB_Client_OnTakeDamageAlive);
+		PSM_SDKHook(entity, SDKHook_WeaponEquipPost, SDKHookCB_Client_WeaponEquipPost);
+		PSM_SDKHook(entity, SDKHook_WeaponSwitchPost, SDKHookCB_Client_WeaponSwitchPost);
 	}
 	else if (StrEqual(classname, "tf_projectile_pipe_remote"))
 	{
-		PM_SDKHook(entity, SDKHook_SetTransmit, SDKHookCB_ProjectilePipeRemote_SetTransmit);
+		PSM_SDKHook(entity, SDKHook_SetTransmit, SDKHookCB_ProjectilePipeRemote_SetTransmit);
 	}
 	else if (StrEqual(classname, "bot_hint_engineer_nest"))
 	{
-		PM_SDKHook(entity, SDKHook_Think, SDKHookCB_BotHintEngineerNest_Think);
-		PM_SDKHook(entity, SDKHook_ThinkPost, SDKHookCB_BotHintEngineerNest_ThinkPost);
+		PSM_SDKHook(entity, SDKHook_Think, SDKHookCB_BotHintEngineerNest_Think);
+		PSM_SDKHook(entity, SDKHook_ThinkPost, SDKHookCB_BotHintEngineerNest_ThinkPost);
 	}
 	else if (StrEqual(classname, "entity_medigun_shield"))
 	{
-		PM_SDKHook(entity, SDKHook_OnTakeDamagePost, SDKHookCB_EntityMedigunShield_OnTakeDamagePost);
+		PSM_SDKHook(entity, SDKHook_OnTakeDamagePost, SDKHookCB_EntityMedigunShield_OnTakeDamagePost);
 	}
 }
 

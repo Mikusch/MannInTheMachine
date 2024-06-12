@@ -27,18 +27,18 @@ void Console_Init()
 	
 	RegAdminCmd("sm_addqueue", ConCmd_AddQueuePoints, ADMFLAG_CHEATS, "Adds defender queue points to a player.");
 	
-	PM_AddCommandListener(CommandListener_Suicide, "explode");
-	PM_AddCommandListener(CommandListener_Suicide, "kill");
-	PM_AddCommandListener(CommandListener_DropItem, "dropitem");
-	PM_AddCommandListener(CommandListener_AutoTeam, "autoteam");
-	PM_AddCommandListener(CommandListener_JoinTeam, "jointeam");
-	PM_AddCommandListener(CommandListener_JoinClass, "joinclass");
-	PM_AddCommandListener(CommandListener_Buyback, "td_buyback");
+	PSM_AddCommandListener(CommandListener_Suicide, "explode");
+	PSM_AddCommandListener(CommandListener_Suicide, "kill");
+	PSM_AddCommandListener(CommandListener_DropItem, "dropitem");
+	PSM_AddCommandListener(CommandListener_AutoTeam, "autoteam");
+	PSM_AddCommandListener(CommandListener_JoinTeam, "jointeam");
+	PSM_AddCommandListener(CommandListener_JoinClass, "joinclass");
+	PSM_AddCommandListener(CommandListener_Buyback, "td_buyback");
 }
 
 static Action ConCmd_MannInTheMachine(int client, int args)
 {
-	if (!PM_IsEnabled())
+	if (!PSM_IsEnabled())
 		return Plugin_Continue;
 	
 	if (client == 0)
@@ -53,7 +53,7 @@ static Action ConCmd_MannInTheMachine(int client, int args)
 
 static Action ConCmd_Queue(int client, int args)
 {
-	if (!PM_IsEnabled())
+	if (!PSM_IsEnabled())
 		return Plugin_Continue;
 	
 	if (client == 0)
@@ -68,7 +68,7 @@ static Action ConCmd_Queue(int client, int args)
 
 static Action ConCmd_Settings(int client, int args)
 {
-	if (!PM_IsEnabled())
+	if (!PSM_IsEnabled())
 		return Plugin_Continue;
 	
 	if (client == 0)
@@ -83,7 +83,7 @@ static Action ConCmd_Settings(int client, int args)
 
 static Action ConCmd_Party(int client, int args)
 {
-	if (!PM_IsEnabled())
+	if (!PSM_IsEnabled())
 		return Plugin_Continue;
 	
 	if (!Party_ShouldRunCommand(client))
@@ -95,7 +95,7 @@ static Action ConCmd_Party(int client, int args)
 
 static Action ConCmd_AddQueuePoints(int client, int args)
 {
-	if (!PM_IsEnabled())
+	if (!PSM_IsEnabled())
 		return Plugin_Continue;
 	
 	if (args < 2)

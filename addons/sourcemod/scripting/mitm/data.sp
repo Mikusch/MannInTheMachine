@@ -565,9 +565,9 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		}
 	}
 	
-	property Address m_pWaveSpawnPopulator
+	property CWaveSpawnPopulator m_pWaveSpawnPopulator
 	{
-		public set(Address pWaveSpawnPopulator)
+		public set(CWaveSpawnPopulator pWaveSpawnPopulator)
 		{
 			SetEntData(this.index, GetOffset("CTFPlayer", "m_pWaveSpawnPopulator"), pWaveSpawnPopulator);
 		}

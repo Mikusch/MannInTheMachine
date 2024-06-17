@@ -55,8 +55,6 @@ CEntityFactory g_hEntityFactory;
 Handle g_hWarningHudSync;
 StringMap g_hSpyWatchOverrides;
 bool g_bInWaitingForPlayers;
-bool g_bMiniBossQueue;
-float g_flLastQueueSwitchTime;
 bool g_bAllowTeamChange;	// Bypass CTFGameRules::GetTeamAssignmentOverride?
 bool g_bInEndlessRollEscalation;
 
@@ -241,8 +239,6 @@ public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int maxlen)
 public void OnMapStart()
 {
 	g_bInWaitingForPlayers = false;
-	g_bMiniBossQueue = false;
-	g_flLastQueueSwitchTime = GetGameTime();
 	
 	Precache();
 }
@@ -342,14 +338,7 @@ public void OnGameFrame()
 	if (!g_bEnabled)
 		return;
 	
-	// alternate between robot and giant queue every 5 seconds
-	if (GetGameTime() - g_flLastQueueSwitchTime > 5.0)
-	{
-		g_bMiniBossQueue = !g_bMiniBossQueue;
-		g_flLastQueueSwitchTime = GetGameTime();
-	}
-	
-	ArrayList queue = GetInvaderQueue(g_bMiniBossQueue);
+	ArrayList queue = GetInvaderQueue();
 	queue.Resize(Min(queue.Length, 8));
 	
 	if (queue.Length > 0)
@@ -370,7 +359,7 @@ public void OnGameFrame()
 				continue;
 			
 			char text[MAX_USER_MSG_DATA];
-			Format(text, sizeof(text), "%T\n", g_bMiniBossQueue ? "Invader_Queue_Header_MiniBoss" : "Invader_Queue_Header", client);
+			Format(text, sizeof(text), "%T\n", "Invader_Queue_Header", client);
 			
 			for (int i = 0; i < queue.Length; i++)
 			{

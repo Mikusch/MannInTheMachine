@@ -209,10 +209,6 @@
 	{
 		"en"		"NEXT ROBOT SPAWNS"
 	}
-	"Invader_Queue_Header_MiniBoss"
-	{
-		"en"		"NEXT GIANT SPAWNS"
-	}
 	"Invader_Deployed"
 	{
 		"#format"	"{1:N},{2:d},{3:d}"

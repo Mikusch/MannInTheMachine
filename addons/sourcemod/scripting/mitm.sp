@@ -220,7 +220,7 @@ public void OnPluginStart()
 
 public void OnPluginEnd()
 {
-	PSM_Disable();
+	PSM_SetPluginState(false);
 }
 
 public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int maxlen)
@@ -321,6 +321,8 @@ public void OnEntityDestroyed(int entity)
 {
 	if (!PSM_IsEnabled())
 		return;
+	
+	PSM_SDKUnhook(entity);
 	
 	if (Entity.IsEntityTracked(entity))
 		Entity(entity).Destroy();

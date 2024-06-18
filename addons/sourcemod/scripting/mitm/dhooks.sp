@@ -124,50 +124,50 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 	if (IsEntityClient(entity))
 	{
 		if (g_hDHook_CBaseEntity_SetModel)
-			PSM_DynamicHookEntity(g_hDHook_CBaseEntity_SetModel, Hook_Post, entity, DHookCallback_CBaseEntity_SetModel_Post);
+			PSM_DHookEntity(g_hDHook_CBaseEntity_SetModel, Hook_Post, entity, DHookCallback_CBaseEntity_SetModel_Post);
 		
 		if (g_hDHook_CBaseEntity_ShouldTransmit)
-			PSM_DynamicHookEntity(g_hDHook_CBaseEntity_ShouldTransmit, Hook_Pre, entity, DHookCallback_CTFPlayer_ShouldTransmit_Pre);
+			PSM_DHookEntity(g_hDHook_CBaseEntity_ShouldTransmit, Hook_Pre, entity, DHookCallback_CTFPlayer_ShouldTransmit_Pre);
 		
 		if (g_hDHook_CBaseCombatCharacter_ShouldGib)
-			PSM_DynamicHookEntity(g_hDHook_CBaseCombatCharacter_ShouldGib, Hook_Pre, entity, DHookCallback_CTFPlayer_ShouldGib_Pre);
+			PSM_DHookEntity(g_hDHook_CBaseCombatCharacter_ShouldGib, Hook_Pre, entity, DHookCallback_CTFPlayer_ShouldGib_Pre);
 		
 		if (g_hDHook_CTFPlayer_IsAllowedToPickUpFlag)
-			PSM_DynamicHookEntity(g_hDHook_CTFPlayer_IsAllowedToPickUpFlag, Hook_Post, entity, DHookCallback_CTFPlayer_IsAllowedToPickUpFlag_Post);
+			PSM_DHookEntity(g_hDHook_CTFPlayer_IsAllowedToPickUpFlag, Hook_Post, entity, DHookCallback_CTFPlayer_IsAllowedToPickUpFlag_Post);
 		
 		if (g_hDHook_CBasePlayer_EntSelectSpawnPoint)
-			PSM_DynamicHookEntity(g_hDHook_CBasePlayer_EntSelectSpawnPoint, Hook_Pre, entity, DHookCallback_CTFPlayer_EntSelectSpawnPoint_Pre);
+			PSM_DHookEntity(g_hDHook_CBasePlayer_EntSelectSpawnPoint, Hook_Pre, entity, DHookCallback_CTFPlayer_EntSelectSpawnPoint_Pre);
 	}
 	else if (StrEqual(classname, "filter_tf_bot_has_tag"))
 	{
 		if (g_hDHook_CBaseFilter_PassesFilterImpl)
-			PSM_DynamicHookEntity(g_hDHook_CBaseFilter_PassesFilterImpl, Hook_Pre, entity, DHookCallback_CFilterTFBotHasTag_PassesFilterImpl_Pre);
+			PSM_DHookEntity(g_hDHook_CBaseFilter_PassesFilterImpl, Hook_Pre, entity, DHookCallback_CFilterTFBotHasTag_PassesFilterImpl_Pre);
 	}
 	else if (StrEqual(classname, "item_teamflag"))
 	{
 		if (g_hDHook_CTFItem_PickUp)
 		{
-			PSM_DynamicHookEntity(g_hDHook_CTFItem_PickUp, Hook_Pre, entity, DHookCallback_CCaptureFlag_PickUp_Pre);
-			PSM_DynamicHookEntity(g_hDHook_CTFItem_PickUp, Hook_Post, entity, DHookCallback_CCaptureFlag_PickUp_Post);
+			PSM_DHookEntity(g_hDHook_CTFItem_PickUp, Hook_Pre, entity, DHookCallback_CCaptureFlag_PickUp_Pre);
+			PSM_DHookEntity(g_hDHook_CTFItem_PickUp, Hook_Post, entity, DHookCallback_CCaptureFlag_PickUp_Post);
 		}
 	}
 	else if (StrEqual(classname, "obj_teleporter"))
 	{
 		if (g_hDHook_CBaseObject_CanBeUpgraded)
-			PSM_DynamicHookEntity(g_hDHook_CBaseObject_CanBeUpgraded, Hook_Pre, entity, DHookCallback_CObjectTeleporter_CanBeUpgraded_Pre);
+			PSM_DHookEntity(g_hDHook_CBaseObject_CanBeUpgraded, Hook_Pre, entity, DHookCallback_CObjectTeleporter_CanBeUpgraded_Pre);
 		
 		if (g_hDHook_CBaseObject_IsPlacementPosValid)
-			PSM_DynamicHookEntity(g_hDHook_CBaseObject_IsPlacementPosValid, Hook_Post, entity, DHookCallback_CObjectTeleporter_IsPlacementPosValid_Post);
+			PSM_DHookEntity(g_hDHook_CBaseObject_IsPlacementPosValid, Hook_Post, entity, DHookCallback_CObjectTeleporter_IsPlacementPosValid_Post);
 	}
 	else if (strncmp(classname, "item_currencypack_", 18) == 0)
 	{
 		if (g_hDHook_CItem_ComeToRest)
-			PSM_DynamicHookEntity(g_hDHook_CItem_ComeToRest, Hook_Pre, entity, DHookCallback_CCurrencyPack_ComeToRest_Pre);
+			PSM_DHookEntity(g_hDHook_CItem_ComeToRest, Hook_Pre, entity, DHookCallback_CCurrencyPack_ComeToRest_Pre);
 	}
 	else if (StrEqual(classname, "obj_sentrygun"))
 	{
 		if (g_hDHook_CBaseEntity_SetModel)
-			PSM_DynamicHookEntity(g_hDHook_CBaseEntity_SetModel, Hook_Post, entity, DHookCallback_CBaseEntity_SetModel_Post);
+			PSM_DHookEntity(g_hDHook_CBaseEntity_SetModel, Hook_Post, entity, DHookCallback_CBaseEntity_SetModel_Post);
 	}
 }
 

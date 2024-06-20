@@ -18,16 +18,6 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-enum struct DetourData
-{
-	DynamicDetour detour;
-	DHookCallback callback_pre;
-	DHookCallback callback_post;
-}
-
-static ArrayList g_hDynamicDetours;
-static ArrayList g_hDynamicHookIds;
-
 static DynamicHook g_hDHook_CBaseEntity_SetModel;
 static DynamicHook g_hDHook_CBaseObject_IsPlacementPosValid;
 static DynamicHook g_hDHook_CBaseObject_CanBeUpgraded;
@@ -56,53 +46,50 @@ static int s_nSniperCount;
 static CBaseEntity s_lastTeleporter;
 static float s_flLastTeleportTime;
 
-void DHooks_Init(GameData hGameConf)
+void DHooks_Init()
 {
-	g_hDynamicDetours = new ArrayList(sizeof(DetourData));
-	g_hDynamicHookIds = new ArrayList();
-	
 	m_justSpawnedList = new ArrayList();
 	m_cooldownTimer = new CountdownTimer();
 	m_checkForDangerousSentriesTimer = new CountdownTimer();
 	
-	DHooks_AddDynamicDetour(hGameConf, "CTFGCServerSystem::PreClientUpdate", DHookCallback_CTFGCServerSystem_PreClientUpdate_Pre, DHookCallback_CTFGCServerSystem_PreClientUpdate_Post);
-	DHooks_AddDynamicDetour(hGameConf, "CPopulationManager::AllocateBots", DHookCallback_CPopulationManager_AllocateBots_Pre);
-	DHooks_AddDynamicDetour(hGameConf, "CPopulationManager::EndlessRollEscalation", DHookCallback_CPopulationManager_EndlessRollEscalation_Pre, DHookCallback_CPopulationManager_EndlessRollEscalation_Post);
-	DHooks_AddDynamicDetour(hGameConf, "CPopulationManager::RestoreCheckpoint", DHookCallback_CPopulationManager_RestoreCheckpoint_Pre);
-	DHooks_AddDynamicDetour(hGameConf, "CTFBotSpawner::Spawn", DHookCallback_CTFBotSpawner_Spawn_Pre);
-	DHooks_AddDynamicDetour(hGameConf, "CSquadSpawner::Spawn", _, DHookCallback_CSquadSpawner_Spawn_Post);
-	DHooks_AddDynamicDetour(hGameConf, "CPopulationManager::Update", DHookCallback_CPopulationManager_Update_Pre, DHookCallback_CPopulationManager_Update_Post);
-	DHooks_AddDynamicDetour(hGameConf, "CPeriodicSpawnPopulator::Update", _, DHookCallback_CPeriodicSpawnPopulator_Update_Post);
-	DHooks_AddDynamicDetour(hGameConf, "CWaveSpawnPopulator::Update", _, DHookCallback_CWaveSpawnPopulator_Update_Post);
-	DHooks_AddDynamicDetour(hGameConf, "CMissionPopulator::UpdateMission", DHookCallback_CMissionPopulator_UpdateMission_Pre, DHookCallback_CMissionPopulator_UpdateMission_Post);
-	DHooks_AddDynamicDetour(hGameConf, "CMissionPopulator::UpdateMissionDestroySentries", DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_Pre, DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_Post);
-	DHooks_AddDynamicDetour(hGameConf, "CPointPopulatorInterface::InputChangeBotAttributes", DHookCallback_CPointPopulatorInterface_InputChangeBotAttributes_Pre);
-	DHooks_AddDynamicDetour(hGameConf, "CTFGameRules::GetTeamAssignmentOverride", DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre, DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Post);
-	DHooks_AddDynamicDetour(hGameConf, "CTFGameRules::PlayerReadyStatus_UpdatePlayerState", DHookCallback_CTFGameRules_PlayerReadyStatus_UpdatePlayerState_Pre, DHookCallback_CTFGameRules_PlayerReadyStatus_UpdatePlayerState_Post);
-	DHooks_AddDynamicDetour(hGameConf, "CTeamplayRoundBasedRules::ResetPlayerAndTeamReadyState", DHookCallback_CTeamplayRoundBasedRules_ResetPlayerAndTeamReadyState_Pre);
-	DHooks_AddDynamicDetour(hGameConf, "CTFPlayer::GetLoadoutItem", DHookCallback_CTFPlayer_GetLoadoutItem_Pre, DHookCallback_CTFPlayer_GetLoadoutItem_Post);
-	DHooks_AddDynamicDetour(hGameConf, "CTFPlayer::CheckInstantLoadoutRespawn", DHookCallback_CTFPlayer_CheckInstantLoadoutRespawn_Pre);
-	DHooks_AddDynamicDetour(hGameConf, "CTFPlayer::DoClassSpecialSkill", DHookCallback_CTFPlayer_DoClassSpecialSkill_Pre);
-	DHooks_AddDynamicDetour(hGameConf, "CTFPlayer::RemoveAllOwnedEntitiesFromWorld", DHookCallback_CTFPlayer_RemoveAllOwnedEntitiesFromWorld_Pre);
-	DHooks_AddDynamicDetour(hGameConf, "CTFPlayer::CanBuild", DHookCallback_CTFPlayer_CanBuild_Pre, DHookCallback_CTFPlayer_CanBuild_Post);
-	DHooks_AddDynamicDetour(hGameConf, "CWeaponMedigun::AllowedToHealTarget", DHookCallback_CWeaponMedigun_AllowedToHealTarget_Pre);
-	DHooks_AddDynamicDetour(hGameConf, "CSpawnLocation::FindSpawnLocation", _, DHookCallback_CSpawnLocation_FindSpawnLocation_Post);
-	DHooks_AddDynamicDetour(hGameConf, "CTraceFilterObject::ShouldHitEntity", _, DHookCallback_CTraceFilterObject_ShouldHitEntity_Post);
-	DHooks_AddDynamicDetour(hGameConf, "CLagCompensationManager::StartLagCompensation", DHookCallback_CLagCompensationManager_StartLagCompensation_Pre, DHookCallback_CLagCompensationManager_StartLagCompensation_Post);
-	DHooks_AddDynamicDetour(hGameConf, "CUniformRandomStream::SetSeed", DHookCallback_CUniformRandomStream_SetSeed_Pre);
-	DHooks_AddDynamicDetour(hGameConf, "DoTeleporterOverride", _, DHookCallback_DoTeleporterOverride_Post);
-	DHooks_AddDynamicDetour(hGameConf, "OnBotTeleported", DHookCallback_OnBotTeleported_Pre);
+	PSM_AddDynamicDetourFromConf("CTFGCServerSystem::PreClientUpdate", DHookCallback_CTFGCServerSystem_PreClientUpdate_Pre, DHookCallback_CTFGCServerSystem_PreClientUpdate_Post);
+	PSM_AddDynamicDetourFromConf("CPopulationManager::AllocateBots", DHookCallback_CPopulationManager_AllocateBots_Pre);
+	PSM_AddDynamicDetourFromConf("CPopulationManager::EndlessRollEscalation", DHookCallback_CPopulationManager_EndlessRollEscalation_Pre, DHookCallback_CPopulationManager_EndlessRollEscalation_Post);
+	PSM_AddDynamicDetourFromConf("CPopulationManager::RestoreCheckpoint", DHookCallback_CPopulationManager_RestoreCheckpoint_Pre);
+	PSM_AddDynamicDetourFromConf("CTFBotSpawner::Spawn", DHookCallback_CTFBotSpawner_Spawn_Pre);
+	PSM_AddDynamicDetourFromConf("CSquadSpawner::Spawn", _, DHookCallback_CSquadSpawner_Spawn_Post);
+	PSM_AddDynamicDetourFromConf("CPopulationManager::Update", DHookCallback_CPopulationManager_Update_Pre, DHookCallback_CPopulationManager_Update_Post);
+	PSM_AddDynamicDetourFromConf("CPeriodicSpawnPopulator::Update", _, DHookCallback_CPeriodicSpawnPopulator_Update_Post);
+	PSM_AddDynamicDetourFromConf("CWaveSpawnPopulator::Update", _, DHookCallback_CWaveSpawnPopulator_Update_Post);
+	PSM_AddDynamicDetourFromConf("CMissionPopulator::UpdateMission", DHookCallback_CMissionPopulator_UpdateMission_Pre, DHookCallback_CMissionPopulator_UpdateMission_Post);
+	PSM_AddDynamicDetourFromConf("CMissionPopulator::UpdateMissionDestroySentries", DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_Pre, DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_Post);
+	PSM_AddDynamicDetourFromConf("CPointPopulatorInterface::InputChangeBotAttributes", DHookCallback_CPointPopulatorInterface_InputChangeBotAttributes_Pre);
+	PSM_AddDynamicDetourFromConf("CTFGameRules::GetTeamAssignmentOverride", DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre, DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Post);
+	PSM_AddDynamicDetourFromConf("CTFGameRules::PlayerReadyStatus_UpdatePlayerState", DHookCallback_CTFGameRules_PlayerReadyStatus_UpdatePlayerState_Pre, DHookCallback_CTFGameRules_PlayerReadyStatus_UpdatePlayerState_Post);
+	PSM_AddDynamicDetourFromConf("CTeamplayRoundBasedRules::ResetPlayerAndTeamReadyState", DHookCallback_CTeamplayRoundBasedRules_ResetPlayerAndTeamReadyState_Pre);
+	PSM_AddDynamicDetourFromConf("CTFPlayer::GetLoadoutItem", DHookCallback_CTFPlayer_GetLoadoutItem_Pre, DHookCallback_CTFPlayer_GetLoadoutItem_Post);
+	PSM_AddDynamicDetourFromConf("CTFPlayer::CheckInstantLoadoutRespawn", DHookCallback_CTFPlayer_CheckInstantLoadoutRespawn_Pre);
+	PSM_AddDynamicDetourFromConf("CTFPlayer::DoClassSpecialSkill", DHookCallback_CTFPlayer_DoClassSpecialSkill_Pre);
+	PSM_AddDynamicDetourFromConf("CTFPlayer::RemoveAllOwnedEntitiesFromWorld", DHookCallback_CTFPlayer_RemoveAllOwnedEntitiesFromWorld_Pre);
+	PSM_AddDynamicDetourFromConf("CTFPlayer::CanBuild", DHookCallback_CTFPlayer_CanBuild_Pre, DHookCallback_CTFPlayer_CanBuild_Post);
+	PSM_AddDynamicDetourFromConf("CWeaponMedigun::AllowedToHealTarget", DHookCallback_CWeaponMedigun_AllowedToHealTarget_Pre);
+	PSM_AddDynamicDetourFromConf("CSpawnLocation::FindSpawnLocation", _, DHookCallback_CSpawnLocation_FindSpawnLocation_Post);
+	PSM_AddDynamicDetourFromConf("CTraceFilterObject::ShouldHitEntity", _, DHookCallback_CTraceFilterObject_ShouldHitEntity_Post);
+	PSM_AddDynamicDetourFromConf("CLagCompensationManager::StartLagCompensation", DHookCallback_CLagCompensationManager_StartLagCompensation_Pre, DHookCallback_CLagCompensationManager_StartLagCompensation_Post);
+	PSM_AddDynamicDetourFromConf("CUniformRandomStream::SetSeed", DHookCallback_CUniformRandomStream_SetSeed_Pre);
+	PSM_AddDynamicDetourFromConf("DoTeleporterOverride", _, DHookCallback_DoTeleporterOverride_Post);
+	PSM_AddDynamicDetourFromConf("OnBotTeleported", DHookCallback_OnBotTeleported_Pre);
 	
-	g_hDHook_CBaseEntity_SetModel = DHooks_AddDynamicHook(hGameConf, "CBaseEntity::SetModel");
-	g_hDHook_CBaseObject_IsPlacementPosValid = DHooks_AddDynamicHook(hGameConf, "CBaseObject::IsPlacementPosValid");
-	g_hDHook_CBaseObject_CanBeUpgraded = DHooks_AddDynamicHook(hGameConf, "CBaseObject::CanBeUpgraded");
-	g_hDHook_CItem_ComeToRest = DHooks_AddDynamicHook(hGameConf, "CItem::ComeToRest");
-	g_hDHook_CBaseEntity_ShouldTransmit = DHooks_AddDynamicHook(hGameConf, "CBaseEntity::ShouldTransmit");
-	g_hDHook_CBaseCombatCharacter_ShouldGib = DHooks_AddDynamicHook(hGameConf, "CBaseCombatCharacter::ShouldGib");
-	g_hDHook_CTFPlayer_IsAllowedToPickUpFlag = DHooks_AddDynamicHook(hGameConf, "CTFPlayer::IsAllowedToPickUpFlag");
-	g_hDHook_CBasePlayer_EntSelectSpawnPoint = DHooks_AddDynamicHook(hGameConf, "CBasePlayer::EntSelectSpawnPoint");
-	g_hDHook_CBaseFilter_PassesFilterImpl = DHooks_AddDynamicHook(hGameConf, "CBaseFilter::PassesFilterImpl");
-	g_hDHook_CTFItem_PickUp = DHooks_AddDynamicHook(hGameConf, "CTFItem::PickUp");
+	g_hDHook_CBaseEntity_SetModel = PSM_AddDynamicHookFromConf("CBaseEntity::SetModel");
+	g_hDHook_CBaseObject_IsPlacementPosValid = PSM_AddDynamicHookFromConf("CBaseObject::IsPlacementPosValid");
+	g_hDHook_CBaseObject_CanBeUpgraded = PSM_AddDynamicHookFromConf("CBaseObject::CanBeUpgraded");
+	g_hDHook_CItem_ComeToRest = PSM_AddDynamicHookFromConf("CItem::ComeToRest");
+	g_hDHook_CBaseEntity_ShouldTransmit = PSM_AddDynamicHookFromConf("CBaseEntity::ShouldTransmit");
+	g_hDHook_CBaseCombatCharacter_ShouldGib = PSM_AddDynamicHookFromConf("CBaseCombatCharacter::ShouldGib");
+	g_hDHook_CTFPlayer_IsAllowedToPickUpFlag = PSM_AddDynamicHookFromConf("CTFPlayer::IsAllowedToPickUpFlag");
+	g_hDHook_CBasePlayer_EntSelectSpawnPoint = PSM_AddDynamicHookFromConf("CBasePlayer::EntSelectSpawnPoint");
+	g_hDHook_CBaseFilter_PassesFilterImpl = PSM_AddDynamicHookFromConf("CBaseFilter::PassesFilterImpl");
+	g_hDHook_CTFItem_PickUp = PSM_AddDynamicHookFromConf("CTFItem::PickUp");
 	
 	DHooks_CopyScriptFunctionBinding("CTFBot", "AddBotAttribute", "CTFPlayer", DHookCallback_CTFBot_AddAttribute_Pre);
 	DHooks_CopyScriptFunctionBinding("CTFBot", "AddBotTag", "CTFPlayer", DHookCallback_CTFBot_AddTag_Pre);
@@ -132,138 +119,56 @@ void DHooks_Init(GameData hGameConf)
 	DHooks_CreateScriptDetour(NULL_STRING, "IsPlayerABot", DHookCallback_IsPlayerABot_Pre);
 }
 
-void DHooks_Toggle(bool bEnable)
-{
-	for (int i = 0; i < g_hDynamicDetours.Length; i++)
-	{
-		DetourData data;
-		if (g_hDynamicDetours.GetArray(i, data))
-			DHooks_ToggleDetour(data, bEnable);
-	}
-	
-	if (!bEnable)
-	{
-		for (int i = g_hDynamicHookIds.Length - 1; i >= 0; i--)
-		{
-			int hookid = g_hDynamicHookIds.Get(i);
-			DynamicHook.RemoveHook(hookid);
-		}
-	}
-}
-
 void DHooks_OnEntityCreated(int entity, const char[] classname)
 {
 	if (IsEntityClient(entity))
 	{
 		if (g_hDHook_CBaseEntity_SetModel)
-			DHooks_HookEntity(g_hDHook_CBaseEntity_SetModel, Hook_Post, entity, DHookCallback_CBaseEntity_SetModel_Post);
+			PSM_DHookEntity(g_hDHook_CBaseEntity_SetModel, Hook_Post, entity, DHookCallback_CBaseEntity_SetModel_Post);
 		
 		if (g_hDHook_CBaseEntity_ShouldTransmit)
-			DHooks_HookEntity(g_hDHook_CBaseEntity_ShouldTransmit, Hook_Pre, entity, DHookCallback_CTFPlayer_ShouldTransmit_Pre);
+			PSM_DHookEntity(g_hDHook_CBaseEntity_ShouldTransmit, Hook_Pre, entity, DHookCallback_CTFPlayer_ShouldTransmit_Pre);
 		
 		if (g_hDHook_CBaseCombatCharacter_ShouldGib)
-			DHooks_HookEntity(g_hDHook_CBaseCombatCharacter_ShouldGib, Hook_Pre, entity, DHookCallback_CTFPlayer_ShouldGib_Pre);
+			PSM_DHookEntity(g_hDHook_CBaseCombatCharacter_ShouldGib, Hook_Pre, entity, DHookCallback_CTFPlayer_ShouldGib_Pre);
 		
 		if (g_hDHook_CTFPlayer_IsAllowedToPickUpFlag)
-			DHooks_HookEntity(g_hDHook_CTFPlayer_IsAllowedToPickUpFlag, Hook_Post, entity, DHookCallback_CTFPlayer_IsAllowedToPickUpFlag_Post);
+			PSM_DHookEntity(g_hDHook_CTFPlayer_IsAllowedToPickUpFlag, Hook_Post, entity, DHookCallback_CTFPlayer_IsAllowedToPickUpFlag_Post);
 		
 		if (g_hDHook_CBasePlayer_EntSelectSpawnPoint)
-			DHooks_HookEntity(g_hDHook_CBasePlayer_EntSelectSpawnPoint, Hook_Pre, entity, DHookCallback_CTFPlayer_EntSelectSpawnPoint_Pre);
+			PSM_DHookEntity(g_hDHook_CBasePlayer_EntSelectSpawnPoint, Hook_Pre, entity, DHookCallback_CTFPlayer_EntSelectSpawnPoint_Pre);
 	}
 	else if (StrEqual(classname, "filter_tf_bot_has_tag"))
 	{
 		if (g_hDHook_CBaseFilter_PassesFilterImpl)
-			DHooks_HookEntity(g_hDHook_CBaseFilter_PassesFilterImpl, Hook_Pre, entity, DHookCallback_CFilterTFBotHasTag_PassesFilterImpl_Pre);
+			PSM_DHookEntity(g_hDHook_CBaseFilter_PassesFilterImpl, Hook_Pre, entity, DHookCallback_CFilterTFBotHasTag_PassesFilterImpl_Pre);
 	}
 	else if (StrEqual(classname, "item_teamflag"))
 	{
 		if (g_hDHook_CTFItem_PickUp)
 		{
-			DHooks_HookEntity(g_hDHook_CTFItem_PickUp, Hook_Pre, entity, DHookCallback_CCaptureFlag_PickUp_Pre);
-			DHooks_HookEntity(g_hDHook_CTFItem_PickUp, Hook_Post, entity, DHookCallback_CCaptureFlag_PickUp_Post);
+			PSM_DHookEntity(g_hDHook_CTFItem_PickUp, Hook_Pre, entity, DHookCallback_CCaptureFlag_PickUp_Pre);
+			PSM_DHookEntity(g_hDHook_CTFItem_PickUp, Hook_Post, entity, DHookCallback_CCaptureFlag_PickUp_Post);
 		}
 	}
 	else if (StrEqual(classname, "obj_teleporter"))
 	{
 		if (g_hDHook_CBaseObject_CanBeUpgraded)
-			DHooks_HookEntity(g_hDHook_CBaseObject_CanBeUpgraded, Hook_Pre, entity, DHookCallback_CObjectTeleporter_CanBeUpgraded_Pre);
+			PSM_DHookEntity(g_hDHook_CBaseObject_CanBeUpgraded, Hook_Pre, entity, DHookCallback_CObjectTeleporter_CanBeUpgraded_Pre);
 		
 		if (g_hDHook_CBaseObject_IsPlacementPosValid)
-			DHooks_HookEntity(g_hDHook_CBaseObject_IsPlacementPosValid, Hook_Post, entity, DHookCallback_CObjectTeleporter_IsPlacementPosValid_Post);
+			PSM_DHookEntity(g_hDHook_CBaseObject_IsPlacementPosValid, Hook_Post, entity, DHookCallback_CObjectTeleporter_IsPlacementPosValid_Post);
 	}
 	else if (strncmp(classname, "item_currencypack_", 18) == 0)
 	{
 		if (g_hDHook_CItem_ComeToRest)
-			DHooks_HookEntity(g_hDHook_CItem_ComeToRest, Hook_Pre, entity, DHookCallback_CCurrencyPack_ComeToRest_Pre);
+			PSM_DHookEntity(g_hDHook_CItem_ComeToRest, Hook_Pre, entity, DHookCallback_CCurrencyPack_ComeToRest_Pre);
 	}
 	else if (StrEqual(classname, "obj_sentrygun"))
 	{
 		if (g_hDHook_CBaseEntity_SetModel)
-			DHooks_HookEntity(g_hDHook_CBaseEntity_SetModel, Hook_Post, entity, DHookCallback_CBaseEntity_SetModel_Post);
+			PSM_DHookEntity(g_hDHook_CBaseEntity_SetModel, Hook_Post, entity, DHookCallback_CBaseEntity_SetModel_Post);
 	}
-}
-
-static void DHooks_AddDynamicDetour(GameData hGameConf, const char[] name, DHookCallback callbackPre = INVALID_FUNCTION, DHookCallback callbackPost = INVALID_FUNCTION)
-{
-	DynamicDetour hDetour = DynamicDetour.FromConf(hGameConf, name);
-	if (hDetour)
-	{
-		DetourData data;
-		data.detour = hDetour;
-		data.callback_pre = callbackPre;
-		data.callback_post = callbackPost;
-		
-		g_hDynamicDetours.PushArray(data);
-	}
-	else
-	{
-		LogError("Failed to create detour setup handle: %s", name);
-	}
-}
-
-static DynamicHook DHooks_AddDynamicHook(GameData hGameConf, const char[] name)
-{
-	DynamicHook hook = DynamicHook.FromConf(hGameConf, name);
-	if (!hook)
-		LogError("Failed to create hook setup handle: %s", name);
-	
-	return hook;
-}
-
-static void DHooks_HookEntity(DynamicHook hook, HookMode mode, int entity, DHookCallback callback)
-{
-	if (!hook)
-		return;
-	
-	int hookid = hook.HookEntity(mode, entity, callback, DHookRemovalCB_OnHookRemoved);
-	if (hookid != INVALID_HOOK_ID)
-		g_hDynamicHookIds.Push(hookid);
-}
-
-static void DHooks_ToggleDetour(DetourData data, bool bEnable)
-{
-	if (data.callback_pre != INVALID_FUNCTION)
-	{
-		if (bEnable)
-			data.detour.Enable(Hook_Pre, data.callback_pre);
-		else
-			data.detour.Disable(Hook_Pre, data.callback_pre);
-	}
-	
-	if (data.callback_post != INVALID_FUNCTION)
-	{
-		if (bEnable)
-			data.detour.Enable(Hook_Post, data.callback_post);
-		else
-			data.detour.Disable(Hook_Post, data.callback_post);
-	}
-}
-
-static void DHookRemovalCB_OnHookRemoved(int hookid)
-{
-	int index = g_hDynamicHookIds.FindValue(hookid);
-	if (index != -1)
-		g_hDynamicHookIds.Erase(index);
 }
 
 static void DHooks_CopyScriptFunctionBinding(const char[] sourceClassName, const char[] functionName, const char[] targetClassName, DHookCallback callbackPre = INVALID_FUNCTION, DHookCallback callbackPost = INVALID_FUNCTION, bool bEmpty = true)
@@ -281,53 +186,52 @@ static void DHooks_CopyScriptFunctionBinding(const char[] sourceClassName, const
 			pTargetFunc.SetFunctionEmpty();
 	}
 	
+	char targetName[64];
+	Format(targetName, sizeof(targetName), "%s::%s", targetClassName, functionName);
+	
 #if defined DEBUG
-		LogMessage("Copied script function binding: %s::%s -> %s", targetClassName, functionName, targetClassName);
+		LogMessage("Copied script function binding: %s::%s -> %s", sourceClassName, functionName, targetName);
 #endif
 	
 	// not setup for detour
 	if (callbackPre == INVALID_FUNCTION && callbackPost == INVALID_FUNCTION)
 		return;
 	
-	DetourData data;
-	data.detour = pTargetFunc.CreateDetour();
+	DynamicDetour detour = pTargetFunc.CreateDetour();
 	
-	if (data.detour)
+	if (detour)
 	{
-		data.callback_pre = callbackPre;
-		data.callback_post = callbackPost;
-		
-		g_hDynamicDetours.PushArray(data);
+		PSM_AddDynamicDetour(targetName, detour, callbackPre, callbackPost);
 	}
 	else
 	{
-		LogError("Failed to create script detour: %s::%s", targetClassName, functionName);
+		LogError("Failed to create script detour: %s", targetName);
 	}
 }
 
 static void DHooks_CreateScriptDetour(const char[] szClassName, const char[] functionName, DHookCallback callbackPre = INVALID_FUNCTION, DHookCallback callbackPost = INVALID_FUNCTION)
 {
-	DetourData data;
+	DynamicDetour detour;
 	
 	if (szClassName[0])
 	{
-		data.detour = VScript_GetClassFunction(szClassName, functionName).CreateDetour();
+		detour = VScript_GetClassFunction(szClassName, functionName).CreateDetour();
 	}
 	else
 	{
-		data.detour = VScript_GetGlobalFunction(functionName).CreateDetour();
+		detour = VScript_GetGlobalFunction(functionName).CreateDetour();
 	}
 	
-	if (data.detour)
+	char name[64];
+	Format(name, sizeof(name), "%s::%s", szClassName, functionName);
+	
+	if (detour)
 	{
-		data.callback_pre = callbackPre;
-		data.callback_post = callbackPost;
-		
-		g_hDynamicDetours.PushArray(data);
+		PSM_AddDynamicDetour(name, detour, callbackPre, callbackPost);
 	}
 	else
 	{
-		LogError("Failed to create script detour: %s::%s", szClassName, functionName);
+		LogError("Failed to create script detour: %s", name);
 	}
 }
 

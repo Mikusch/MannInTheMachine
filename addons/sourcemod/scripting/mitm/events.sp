@@ -18,68 +18,16 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-#define MAX_EVENT_NAME_LENGTH	32
-
-enum struct EventData
-{
-	char name[MAX_EVENT_NAME_LENGTH];
-	EventHook callback;
-	EventHookMode mode;
-}
-
-static ArrayList g_hEvents;
-
 void Events_Init()
 {
-	g_hEvents = new ArrayList(sizeof(EventData));
-	
-	Events_AddEvent("player_spawn", EventHook_PlayerSpawn);
-	Events_AddEvent("player_death", EventHook_PlayerDeath);
-	Events_AddEvent("player_team", EventHook_PlayerTeam, EventHookMode_Pre);
-	Events_AddEvent("post_inventory_application", EventHook_PostInventoryApplication);
-	Events_AddEvent("player_builtobject", EventHook_PlayerBuiltObject);
-	Events_AddEvent("teamplay_point_captured", EventHook_TeamplayPointCaptured);
-	Events_AddEvent("teamplay_flag_event", EventHook_TeamplayFlagEvent);
-	Events_AddEvent("teams_changed", EventHook_TeamsChanged);
-}
-
-void Events_Toggle(bool bEnable)
-{
-	for (int i = 0; i < g_hEvents.Length; i++)
-	{
-		EventData data;
-		if (g_hEvents.GetArray(i, data))
-		{
-			if (bEnable)
-			{
-				HookEvent(data.name, data.callback, data.mode);
-			}
-			else
-			{
-				UnhookEvent(data.name, data.callback, data.mode);
-			}
-		}
-	}
-}
-
-static void Events_AddEvent(const char[] name, EventHook callback, EventHookMode mode = EventHookMode_Post)
-{
-	Event event = CreateEvent(name, true);
-	if (event)
-	{
-		event.Cancel();
-		
-		EventData data;
-		strcopy(data.name, sizeof(data.name), name);
-		data.callback = callback;
-		data.mode = mode;
-		
-		g_hEvents.PushArray(data);
-	}
-	else
-	{
-		LogError("Failed to create event: %s", name);
-	}
+	PSM_AddEventHook("player_spawn", EventHook_PlayerSpawn);
+	PSM_AddEventHook("player_death", EventHook_PlayerDeath);
+	PSM_AddEventHook("player_team", EventHook_PlayerTeam, EventHookMode_Pre);
+	PSM_AddEventHook("post_inventory_application", EventHook_PostInventoryApplication);
+	PSM_AddEventHook("player_builtobject", EventHook_PlayerBuiltObject);
+	PSM_AddEventHook("teamplay_point_captured", EventHook_TeamplayPointCaptured);
+	PSM_AddEventHook("teamplay_flag_event", EventHook_TeamplayFlagEvent);
+	PSM_AddEventHook("teams_changed", EventHook_TeamsChanged);
 }
 
 static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)

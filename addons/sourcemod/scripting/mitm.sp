@@ -30,6 +30,7 @@
 #include <cbasenpc>
 #include <cbasenpc/tf/nav>
 #include <morecolors>
+#include <pluginstatemanager>
 #include <smmem>
 #include <sourcescramble>
 #include <vscript>
@@ -50,7 +51,6 @@ Cookie g_hCookieQueue;
 Cookie g_hCookiePreferences;
 
 // Other globals
-bool g_bEnabled;
 CEntityFactory g_hEntityFactory;
 Handle g_hWarningHudSync;
 StringMap g_hSpyWatchOverrides;
@@ -59,7 +59,6 @@ bool g_bAllowTeamChange;	// Bypass CTFGameRules::GetTeamAssignmentOverride?
 bool g_bInEndlessRollEscalation;
 
 // Plugin ConVars
-ConVar sm_mitm_enabled;
 ConVar sm_mitm_developer;
 ConVar sm_mitm_custom_upgrades_file;
 ConVar sm_mitm_spawn_hurry_time;
@@ -189,29 +188,27 @@ public void OnPluginStart()
 	g_hCookieQueue = new Cookie("mitm_queue", "Mann in the Machine: Queue Points", CookieAccess_Protected);
 	g_hCookiePreferences = new Cookie("mitm_preferences", "Mann in the Machine: Preferences", CookieAccess_Protected);
 	
+	GameData hGameConf = new GameData("mitm");
+	if (!hGameConf)
+		SetFailState("Could not find mitm gamedata");
+	
+	PSM_Init("sm_mitm_enabled", hGameConf);
+	PSM_AddPluginStateChangedHook(OnPluginStateChanged);
+	
 	Entity.Init();
 	
 	Console_Init();
 	ConVars_Init();
+	DHooks_Init();
 	Events_Init();
 	Forwards_Init();
 	Hooks_Init();
 	Party_Init();
-	SDKHooks_Init();
 	
-	GameData hGameConf = new GameData("mitm");
-	if (hGameConf)
-	{
-		DHooks_Init(hGameConf);
-		Offsets_Init(hGameConf);
-		SDKCalls_Init(hGameConf);
-		
-		delete hGameConf;
-	}
-	else
-	{
-		SetFailState("Could not find mitm gamedata");
-	}
+	Offsets_Init(hGameConf);
+	SDKCalls_Init(hGameConf);
+	
+	delete hGameConf;
 	
 	for (int client = 1; client <= MaxClients; client++)
 	{
@@ -221,10 +218,7 @@ public void OnPluginStart()
 
 public void OnPluginEnd()
 {
-	if (!g_bEnabled)
-		return;
-	
-	TogglePlugin(false);
+	PSM_SetPluginState(false);
 }
 
 public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int maxlen)
@@ -245,15 +239,12 @@ public void OnMapStart()
 
 public void OnConfigsExecuted()
 {
-	if (g_bEnabled != sm_mitm_enabled.BoolValue)
-	{
-		TogglePlugin(sm_mitm_enabled.BoolValue);
-	}
+	PSM_TogglePluginState();
 }
 
 public void OnClientPutInServer(int client)
 {
-	if (!g_bEnabled)
+	if (!PSM_IsEnabled())
 		return;
 	
 	CBaseNPC_HookEventKilled(client);
@@ -268,7 +259,7 @@ public void OnClientPutInServer(int client)
 
 public void OnClientDisconnect(int client)
 {
-	if (!g_bEnabled)
+	if (!PSM_IsEnabled())
 		return;
 	
 	if (!IsClientInGame(client))
@@ -291,7 +282,7 @@ public void OnClientDisconnect(int client)
 
 public void OnClientCookiesCached(int client)
 {
-	if (!g_bEnabled)
+	if (!PSM_IsEnabled())
 		return;
 	
 	CTFPlayer player = CTFPlayer(client);
@@ -301,11 +292,11 @@ public void OnClientCookiesCached(int client)
 
 public void OnEntityCreated(int entity, const char[] classname)
 {
-	if (!g_bEnabled)
+	if (!PSM_IsEnabled())
 		return;
 	
 	DHooks_OnEntityCreated(entity, classname);
-	SDKHooks_HookEntity(entity, classname);
+	SDKHooks_OnEntityCreated(entity, classname);
 	
 	// Store the references of entities that should only exist once
 	if (StrEqual(classname, "info_populator"))
@@ -324,10 +315,10 @@ public void OnEntityCreated(int entity, const char[] classname)
 
 public void OnEntityDestroyed(int entity)
 {
-	if (!g_bEnabled)
+	if (!PSM_IsEnabled())
 		return;
 	
-	SDKHooks_UnhookEntity(entity);
+	PSM_SDKUnhook(entity);
 	
 	if (Entity.IsEntityTracked(entity))
 		Entity(entity).Destroy();
@@ -335,7 +326,7 @@ public void OnEntityDestroyed(int entity)
 
 public void OnGameFrame()
 {
-	if (!g_bEnabled)
+	if (!PSM_IsEnabled())
 		return;
 	
 	ArrayList queue = GetInvaderQueue();
@@ -398,7 +389,7 @@ public void OnGameFrame()
 
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
-	if (!g_bEnabled)
+	if (!PSM_IsEnabled())
 		return Plugin_Continue;
 	
 	if (!IsClientInGame(client) || !IsPlayerAlive(client) || TF2_GetClientTeam(client) != TFTeam_Invaders)
@@ -437,7 +428,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 
 public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float vel[3], const float angles[3], int weapon, int subtype, int cmdnum, int tickcount, int seed, const int mouse[2])
 {
-	if (!g_bEnabled)
+	if (!PSM_IsEnabled())
 		return;
 	
 	if (!IsClientInGame(client) || TF2_GetClientTeam(client) != TFTeam_Invaders)
@@ -472,7 +463,7 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 
 public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname, bool &result)
 {
-	if (!g_bEnabled)
+	if (!PSM_IsEnabled())
 		return Plugin_Continue;
 	
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
@@ -489,7 +480,7 @@ public Action TF2_CalcIsAttackCritical(int client, int weapon, char[] weaponname
 
 public void TF2_OnConditionAdded(int client, TFCond condition)
 {
-	if (!g_bEnabled)
+	if (!PSM_IsEnabled())
 		return;
 	
 	switch (condition)
@@ -507,7 +498,7 @@ public void TF2_OnConditionAdded(int client, TFCond condition)
 
 public Action CBaseCombatCharacter_EventKilled(int entity, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
-	if (!g_bEnabled)
+	if (!PSM_IsEnabled())
 		return Plugin_Continue;
 	
 	// Replicate behavior of CTFBot::Event_Killed
@@ -617,20 +608,12 @@ public Action CBaseCombatCharacter_EventKilled(int entity, int &attacker, int &i
 	return Plugin_Continue;
 }
 
-void TogglePlugin(bool bEnable)
+static void OnPluginStateChanged(bool bEnabled)
 {
-	g_bEnabled = bEnable;
-	
-	Console_Toggle(bEnable);
-	ConVars_Toggle(bEnable);
-	DHooks_Toggle(bEnable);
-	Events_Toggle(bEnable);
-	Hooks_Toggle(bEnable);
-	
 	int entity = -1;
 	while ((entity = FindEntityByClassname(entity, "*")) != -1)
 	{
-		if (bEnable)
+		if (bEnabled)
 		{
 			char classname[64];
 			if (!GetEntityClassname(entity, classname, sizeof(classname)))
@@ -640,14 +623,12 @@ void TogglePlugin(bool bEnable)
 		}
 		else
 		{
-			SDKHooks_UnhookEntity(entity);
-			
 			if (Entity.IsEntityTracked(entity))
 				Entity(entity).Destroy();
 		}
 	}
 	
-	if (bEnable)
+	if (bEnabled)
 	{
 		g_hEntityFactory.Install();
 		

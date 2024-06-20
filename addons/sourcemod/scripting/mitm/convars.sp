@@ -18,22 +18,10 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-enum struct ConVarData
-{
-	char name[COMMAND_MAX_LENGTH];
-	char value[COMMAND_MAX_LENGTH];
-	char prev_value[COMMAND_MAX_LENGTH];
-}
-
-static StringMap g_hConVars;
-
 void ConVars_Init()
 {
-	g_hConVars = new StringMap();
-	
 	CreateConVar("sm_mitm_version", PLUGIN_VERSION, "Plugin version.", FCVAR_SPONLY | FCVAR_REPLICATED | FCVAR_NOTIFY | FCVAR_DONTRECORD);
-	sm_mitm_enabled = CreateConVar("sm_mitm_enabled", "1", "Whether the plugin is enabled.");
-	sm_mitm_enabled.AddChangeHook(ConVarChanged_PluginEnabled);
+	CreateConVar("sm_mitm_enabled", "1", "Whether the plugin is enabled.");
 	sm_mitm_developer = CreateConVar("sm_mitm_developer", "0", "Toggle plugin developer mode.");
 	sm_mitm_custom_upgrades_file = CreateConVar("sm_mitm_custom_upgrades_file", "", "Path to custom upgrades file, set to an empty string to use the default.");
 	sm_mitm_spawn_hurry_time = CreateConVar("sm_mitm_spawn_hurry_time", "10", "The base time invaders have to leave their spawn, in seconds.");
@@ -77,10 +65,12 @@ void ConVars_Init()
 	
 	char value[12];
 	IntToString(MaxClients, value, sizeof(value));
-	ConVars_AddConVar("tf_mvm_max_connected_players", value);
+	PSM_AddEnforcedConVar("tf_mvm_max_connected_players", value);
+	
+	PSM_AddPluginStateChangedHook(ConVars_OnPluginStateChanged);
 }
 
-void ConVars_Toggle(bool bEnable)
+static void ConVars_OnPluginStateChanged(bool bEnable)
 {
 	if (bEnable)
 	{
@@ -93,111 +83,6 @@ void ConVars_Toggle(bool bEnable)
 		sm_mitm_custom_upgrades_file.RemoveChangeHook(ConVarChanged_CustomUpgradesFile);
 		sm_mitm_party_enabled.RemoveChangeHook(ConVarChanged_PartyEnabled);
 		tf_mvm_min_players_to_start.RemoveChangeHook(ConVarChanged_MinPlayersToStart);
-	}
-	
-	StringMapSnapshot snapshot = g_hConVars.Snapshot();
-	for (int i = 0; i < snapshot.Length; i++)
-	{
-		int size = snapshot.KeyBufferSize(i);
-		char[] key = new char[size];
-		snapshot.GetKey(i, key, size);
-		
-		if (bEnable)
-		{
-			ConVars_Enable(key);
-		}
-		else
-		{
-			ConVars_Disable(key);
-		}
-	}
-	delete snapshot;
-}
-
-static void ConVars_AddConVar(const char[] name, const char[] value)
-{
-	ConVar convar = FindConVar(name);
-	if (convar)
-	{
-		ConVarData data;
-		strcopy(data.name, sizeof(data.name), name);
-		strcopy(data.value, sizeof(data.value), value);
-		g_hConVars.SetArray(name, data, sizeof(data));
-		
-		if (g_bEnabled)
-		{
-			ConVars_Enable(name);
-		}
-	}
-	else
-	{
-		LogError("Failed to find convar: %s", name);
-	}
-}
-
-static void ConVars_Enable(const char[] name)
-{
-	ConVarData data;
-	if (g_hConVars.GetArray(name, data, sizeof(data)))
-	{
-		ConVar convar = FindConVar(data.name);
-		
-		// Store the current value so we can later reset the convar to it
-		convar.GetString(data.prev_value, sizeof(data.prev_value));
-		g_hConVars.SetArray(name, data, sizeof(data));
-		
-		// Update the current value
-		convar.SetString(data.value);
-		convar.AddChangeHook(ConVarChanged_OnTrackedConVarChanged);
-	}
-	else
-	{
-		LogError("Failed to enable convar: %s", name);
-	}
-}
-
-static void ConVars_Disable(const char[] name)
-{
-	ConVarData data;
-	if (g_hConVars.GetArray(name, data, sizeof(data)))
-	{
-		g_hConVars.SetArray(name, data, sizeof(data));
-		
-		// Restore the convar value
-		ConVar convar = FindConVar(data.name);
-		convar.RemoveChangeHook(ConVarChanged_OnTrackedConVarChanged);
-		convar.SetString(data.prev_value);
-	}
-	else
-	{
-		LogError("Failed to disable convar: %s", name);
-	}
-}
-
-static void ConVarChanged_OnTrackedConVarChanged(ConVar convar, const char[] oldValue, const char[] newValue)
-{
-	char[] name = new char[sizeof(ConVarData::name)];
-	convar.GetName(name, sizeof(ConVarData::name));
-	
-	ConVarData data;
-	if (g_hConVars.GetArray(name, data, sizeof(data)))
-	{
-		if (!StrEqual(newValue, data.value))
-		{
-			strcopy(data.prev_value, sizeof(data.prev_value), newValue);
-			g_hConVars.SetArray(name, data, sizeof(data));
-			
-			// Restore our wanted value
-			convar.SetString(data.value);
-		}
-	}
-}
-
-static void ConVarChanged_PluginEnabled(ConVar convar, const char[] oldValue, const char[] newValue)
-{
-	if (g_bEnabled != convar.BoolValue)
-	{
-		TogglePlugin(convar.BoolValue);
 	}
 }
 

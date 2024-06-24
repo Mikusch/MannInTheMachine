@@ -808,7 +808,7 @@ bool SDKCall_CTFBotMvMEngineerHintFinder_FindHint(bool bShouldCheckForBlockingOb
 		
 		if (pFoundNest)
 		{
-			foundNest = GetEntityFromHandle(pFoundNest);
+			foundNest = LoadEntityFromHandleAddress(pFoundNest);
 		}
 		
 		return result;

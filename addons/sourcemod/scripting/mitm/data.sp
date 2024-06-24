@@ -1931,7 +1931,7 @@ methodmap CWave < Address
 		}
 		public set(int nNumEngineersTeleportSpawned)
 		{
-			WriteVal(this + GetOffset("CWave", "m_nNumEngineersTeleportSpawned"), nNumEngineersTeleportSpawned);
+			StoreToAddress(this + GetOffset("CWave", "m_nNumEngineersTeleportSpawned"), nNumEngineersTeleportSpawned, NumberType_Int32);
 		}
 	}
 	
@@ -1943,7 +1943,7 @@ methodmap CWave < Address
 		}
 		public set(int nNumSentryBustersKilled)
 		{
-			WriteVal(this + GetOffset("CWave", "m_nNumSentryBustersKilled"), nNumSentryBustersKilled);
+			StoreToAddress(this + GetOffset("CWave", "m_nNumSentryBustersKilled"), nNumSentryBustersKilled, NumberType_Int32);
 		}
 	}
 	
@@ -1955,7 +1955,7 @@ methodmap CWave < Address
 		}
 		public set(int nSentryBustersSpawned)
 		{
-			WriteVal(this + GetOffset("CWave", "m_nSentryBustersSpawned"), nSentryBustersSpawned);
+			StoreToAddress(this + GetOffset("CWave", "m_nSentryBustersSpawned"), nSentryBustersSpawned, NumberType_Int32);
 		}
 	}
 	

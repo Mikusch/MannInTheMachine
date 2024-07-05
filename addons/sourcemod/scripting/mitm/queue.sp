@@ -103,5 +103,5 @@ void Queue_SetPoints(int client, int points)
 {
 	CTFPlayer player = CTFPlayer(client);
 	player.m_defenderQueuePoints = points;
-	g_hCookiePreferences.SetInt(client, player.m_defenderQueuePoints);
+	g_hCookieQueue.SetInt(client, player.m_defenderQueuePoints);
 }

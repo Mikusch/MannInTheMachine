@@ -181,7 +181,7 @@ static int Update(CTFBotMvMEngineerIdle action, int actor, float interval)
 		bool bShouldTeleportToHint = CTFPlayer(actor).HasAttribute(TELEPORT_TO_HINT);
 		bool bShouldCheckForBlockingObject = !action.m_bTeleportedToHint && bShouldTeleportToHint;
 		
-		MemoryBlock block = new MemoryBlock(GetOffset(NULL_STRING, "sizeof(CHandle)"));
+		MemoryBlock block = new MemoryBlock(GetTypeSize("CHandle"));
 		Address pFoundNest = block.Address;
 		if (!SDKCall_CTFBotMvMEngineerHintFinder_FindHint(bShouldCheckForBlockingObject, !bShouldTeleportToHint, pFoundNest))
 		{
@@ -293,7 +293,7 @@ static bool ShouldAdvanceNestSpot(CTFBotMvMEngineerIdle action, int actor)
 		action.m_reevaluateNestTimer.Invalidate();
 	}
 	
-	MemoryBlock block = new MemoryBlock(GetOffset(NULL_STRING, "sizeof(BombInfo_t)"));
+	MemoryBlock block = new MemoryBlock(GetTypeSize("BombInfo_t"));
 	BombInfo_t bombInfo = view_as<BombInfo_t>(block.Address);
 	if (SDKCall_GetBombInfo(bombInfo))
 	{

@@ -87,7 +87,7 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 		
 		for (int i = 0; i < g_pPopulationManager.m_EndlessActiveBotUpgrades.Count(); ++i)
 		{
-			CMvMBotUpgrade upgrade = g_pPopulationManager.m_EndlessActiveBotUpgrades.Get(i, GetOffset(NULL_STRING, "sizeof(CMvMBotUpgrade)"));
+			CMvMBotUpgrade upgrade = g_pPopulationManager.m_EndlessActiveBotUpgrades.Get(i, GetTypeSize("CMvMBotUpgrade"));
 			
 			if (upgrade.bIsBotAttr)
 			{

@@ -426,7 +426,7 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 		newBot.ClearEventChangeAttributes();
 		for (int i = 0; i < spawner.m_eventChangeAttributes.Count(); ++i)
 		{
-			newBot.AddEventChangeAttributes(spawner.m_eventChangeAttributes.Get(i, GetOffset(NULL_STRING, "sizeof(EventChangeAttributes_t)")));
+			newBot.AddEventChangeAttributes(spawner.m_eventChangeAttributes.Get(i, GetTypeSize("EventChangeAttributes_t")));
 		}
 		
 		newBot.SetTeleportWhere(spawner.m_teleportWhereName);

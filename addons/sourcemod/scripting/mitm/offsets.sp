@@ -19,10 +19,12 @@
 #pragma newdecls required
 
 static StringMap g_offsets;
+static StringMap g_typeSizes;
 
 void Offsets_Init(GameData hGameConf)
 {
 	g_offsets = new StringMap();
+	g_typeSizes = new StringMap();
 	
 	SetOffset(hGameConf, "CTFBotSpawner", "m_class");
 	SetOffset(hGameConf, "CTFBotSpawner", "m_health");
@@ -56,14 +58,12 @@ void Offsets_Init(GameData hGameConf)
 	SetOffset(hGameConf, "IPopulationSpawner", "m_spawner");
 	SetOffset(hGameConf, "IPopulationSpawner", "m_where");
 	
-	SetOffset(hGameConf, NULL_STRING, "sizeof(CMvMBotUpgrade)");
 	SetOffset(hGameConf, "CMvMBotUpgrade", "szAttrib");
 	SetOffset(hGameConf, "CMvMBotUpgrade", "iAttribIndex");
 	SetOffset(hGameConf, "CMvMBotUpgrade", "flValue");
 	SetOffset(hGameConf, "CMvMBotUpgrade", "bIsBotAttr");
 	SetOffset(hGameConf, "CMvMBotUpgrade", "bIsSkillAttr");
 	
-	SetOffset(hGameConf, NULL_STRING, "sizeof(EventChangeAttributes_t)");
 	SetOffset(hGameConf, "EventChangeAttributes_t", "m_eventName");
 	SetOffset(hGameConf, "EventChangeAttributes_t", "m_skill");
 	SetOffset(hGameConf, "EventChangeAttributes_t", "m_weaponRestriction");
@@ -74,15 +74,12 @@ void Offsets_Init(GameData hGameConf)
 	SetOffset(hGameConf, "EventChangeAttributes_t", "m_characterAttributes");
 	SetOffset(hGameConf, "EventChangeAttributes_t", "m_tags");
 	
-	SetOffset(hGameConf, NULL_STRING, "sizeof(item_attributes_t)");
 	SetOffset(hGameConf, "item_attributes_t", "m_itemName");
 	SetOffset(hGameConf, "item_attributes_t", "m_attributes");
 	
-	SetOffset(hGameConf, NULL_STRING, "sizeof(static_attrib_t)");
 	SetOffset(hGameConf, "static_attrib_t", "iDefIndex");
 	SetOffset(hGameConf, "static_attrib_t", "m_value");
 	
-	SetOffset(hGameConf, NULL_STRING, "sizeof(BombInfo_t)");
 	SetOffset(hGameConf, "BombInfo_t", "m_flMaxBattleFront");
 	
 	SetOffset(hGameConf, "CTFPlayer", "m_flSpawnTime");
@@ -109,29 +106,24 @@ void Offsets_Init(GameData hGameConf)
 	SetOffset(hGameConf, "inputdata_t", "value");
 	SetOffset(hGameConf, "CTraceFilterSimple", "m_pPassEnt");
 	SetOffset(hGameConf, "CTFBotHintEngineerNest", "m_teleporters");
-	SetOffset(hGameConf, NULL_STRING, "sizeof(CHandle)");
+	
+	SetTypeSize(hGameConf, "CMvMBotUpgrade");
+	SetTypeSize(hGameConf, "EventChangeAttributes_t");
+	SetTypeSize(hGameConf, "item_attributes_t");
+	SetTypeSize(hGameConf, "static_attrib_t");
+	SetTypeSize(hGameConf, "BombInfo_t");
+	SetTypeSize(hGameConf, "CHandle");
 }
 
 any GetOffset(const char[] cls, const char[] prop)
 {
-	int offset;
+	char key[64];
+	Format(key, sizeof(key), "%s::%s", cls, prop);
 	
-	if (IsNullString(cls))
+	int offset;
+	if (!g_offsets.GetValue(key, offset))
 	{
-		if (!g_offsets.GetValue(prop, offset))
-		{
-			ThrowError("Offset '%s' not present in map", prop);
-		}
-	}
-	else
-	{
-		char key[64];
-		Format(key, sizeof(key), "%s::%s", cls, prop);
-		
-		if (!g_offsets.GetValue(key, offset))
-		{
-			ThrowError("Offset '%s' not present in map", key);
-		}
+		ThrowError("Offset '%s' not present in map", key);
 	}
 	
 	return offset;
@@ -139,61 +131,64 @@ any GetOffset(const char[] cls, const char[] prop)
 
 static void SetOffset(GameData hGameConf, const char[] cls, const char[] prop)
 {
-	if (IsNullString(cls))
+	char key[64], base_key[64], base_prop[64];
+	Format(key, sizeof(key), "%s::%s", cls, prop);
+	Format(base_key, sizeof(base_key), "%s_BaseOffset", cls);
+	
+	// Get the actual offset, calculated using a base offset if present
+	if (hGameConf.GetKeyValue(base_key, base_prop, sizeof(base_prop)))
 	{
-		// Simple gamedata key lookup
-		int offset = hGameConf.GetOffset(prop);
-		if (offset == -1)
+		int base_offset = FindSendPropInfo(cls, base_prop);
+		if (base_offset == -1)
 		{
-			ThrowError("Offset '%s' could not be found", prop);
+			// If we found nothing, search on CBaseEntity instead
+			base_offset = FindSendPropInfo("CBaseEntity", base_prop);
+			if (base_offset == -1)
+			{
+				ThrowError("Base offset '%s::%s' could not be found", cls, base_prop);
+			}
 		}
 		
-		g_offsets.SetValue(prop, offset);
+		int offset = base_offset + hGameConf.GetOffset(key);
+		g_offsets.SetValue(key, offset);
 		
 #if defined DEBUG
-		LogMessage("Found gamedata offset: %s (offset %d)", prop, offset);
+		LogMessage("Found gamedata offset: %s (offset %d) (base %d)", key, offset, base_offset);
 #endif
 	}
 	else
 	{
-		char key[64], base_key[64], base_prop[64];
-		Format(key, sizeof(key), "%s::%s", cls, prop);
-		Format(base_key, sizeof(base_key), "%s_BaseOffset", cls);
+		int offset = hGameConf.GetOffset(key);
+		if (offset == -1)
+		{
+			ThrowError("Offset '%s' could not be found", key);
+		}
 		
-		// Get the actual offset, calculated using a base offset if present
-		if (hGameConf.GetKeyValue(base_key, base_prop, sizeof(base_prop)))
-		{
-			int base_offset = FindSendPropInfo(cls, base_prop);
-			if (base_offset == -1)
-			{
-				// If we found nothing, search on CBaseEntity instead
-				base_offset = FindSendPropInfo("CBaseEntity", base_prop);
-				if (base_offset == -1)
-				{
-					ThrowError("Base offset '%s::%s' could not be found", cls, base_prop);
-				}
-			}
-			
-			int offset = base_offset + hGameConf.GetOffset(key);
-			g_offsets.SetValue(key, offset);
-			
+		g_offsets.SetValue(key, offset);
+		
 #if defined DEBUG
-			LogMessage("Found gamedata offset: %s (offset %d) (base %d)", key, offset, base_offset);
+		LogMessage("Found gamedata offset: %s (offset %d)", key, offset);
 #endif
-		}
-		else
-		{
-			int offset = hGameConf.GetOffset(key);
-			if (offset == -1)
-			{
-				ThrowError("Offset '%s' could not be found", key);
-			}
-			
-			g_offsets.SetValue(key, offset);
-			
-#if defined DEBUG
-			LogMessage("Found gamedata offset: %s (offset %d)", key, offset);
-#endif
-		}
 	}
+}
+
+static void SetTypeSize(GameData hGameConf, const char[] name)
+{
+	char key[64];
+	Format(key, sizeof(key), "sizeof(%s)", name);
+	
+	int size = hGameConf.GetOffset(key);
+	if (size == -1)
+		ThrowError("Failed to find size for type '%s", name);
+	
+	g_typeSizes.SetValue(name, size);
+}
+
+int GetTypeSize(const char[] name)
+{
+	int size;
+	if (!g_typeSizes.GetValue(name, size))
+		ThrowError("Failed to find size for type '%s'", name);
+	
+	return size;
 }

@@ -963,7 +963,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 			// and add ones that we want specifically
 			for (int i = 0; i < pEvent.m_characterAttributes.Count(); i++)
 			{
-				Address characterAttributes = pEvent.m_characterAttributes.Get(i, GetOffset(NULL_STRING, "sizeof(static_attrib_t)"));
+				Address characterAttributes = pEvent.m_characterAttributes.Get(i, GetTypeSize("static_attrib_t"));
 				int defIndex = LoadFromAddress(characterAttributes + GetOffset("static_attrib_t", "iDefIndex"), NumberType_Int16);
 				
 				Address pDef = TF2Econ_GetAttributeDefinitionAddress(defIndex);
@@ -990,7 +990,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 			
 			for (int i = 0; i < pEvent.m_itemsAttributes.Count(); i++)
 			{
-				Address itemAttributes = pEvent.m_itemsAttributes.Get(i, GetOffset(NULL_STRING, "sizeof(item_attributes_t)"));
+				Address itemAttributes = pEvent.m_itemsAttributes.Get(i, GetTypeSize("item_attributes_t"));
 				
 				char itemName[64];
 				PtrToString(LoadFromAddress(itemAttributes + GetOffset("item_attributes_t", "m_itemName"), NumberType_Int32), itemName, sizeof(itemName));
@@ -1006,7 +1006,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 						CUtlVector attributes = CUtlVector(itemAttributes + GetOffset("item_attributes_t", "m_attributes"));
 						for (int iAtt = 0; iAtt < attributes.Count(); ++iAtt)
 						{
-							Address attrib = attributes.Get(iAtt, GetOffset(NULL_STRING, "sizeof(static_attrib_t)"));
+							Address attrib = attributes.Get(iAtt, GetTypeSize("static_attrib_t"));
 							
 							int defIndex = LoadFromAddress(attrib + GetOffset("static_attrib_t", "iDefIndex"), NumberType_Int16);
 							float value = LoadFromAddress(attrib + GetOffset("static_attrib_t", "m_value"), NumberType_Int32);
@@ -2093,7 +2093,7 @@ methodmap CPopulationManager < CBaseEntity
 		
 		for (int i = 0; i < this.m_EndlessActiveBotUpgrades.Count(); ++i)
 		{
-			CMvMBotUpgrade upgrade = this.m_EndlessActiveBotUpgrades.Get(i, GetOffset(NULL_STRING, "sizeof(CMvMBotUpgrade)"));
+			CMvMBotUpgrade upgrade = this.m_EndlessActiveBotUpgrades.Get(i, GetTypeSize("CMvMBotUpgrade"));
 			
 			if (upgrade.bIsBotAttr)
 			{

@@ -168,6 +168,11 @@
 	{
 		"en"		"You are not allowed to suicide as a robot"
 	}
+	"Invader_WaitingToSpawn"
+	{
+		"#format"	"{1:0.f}"
+		"en"		"You are a ROBOT\nThe game will begin in {1} seconds"
+	}
 	"Invader_Spawned"
 	{
 		"#format"	"{1:s}"

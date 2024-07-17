@@ -180,12 +180,17 @@ static int Update(CTFBotMvMEngineerIdle action, int actor, float interval)
 		// figure out where to teleport into the map
 		bool bShouldTeleportToHint = CTFPlayer(actor).HasAttribute(TELEPORT_TO_HINT);
 		bool bShouldCheckForBlockingObject = !action.m_bTeleportedToHint && bShouldTeleportToHint;
-		int newNest = -1;
-		if (!SDKCall_CTFBotMvMEngineerHintFinder_FindHint(bShouldCheckForBlockingObject, !bShouldTeleportToHint, newNest))
+		
+		MemoryBlock block = new MemoryBlock(GetOffset(NULL_STRING, "sizeof(CHandle)"));
+		Address pFoundNest = block.Address;
+		if (!SDKCall_CTFBotMvMEngineerHintFinder_FindHint(bShouldCheckForBlockingObject, !bShouldTeleportToHint, pFoundNest))
 		{
 			// try again next time
 			return action.Continue();
 		}
+		
+		int newNest = LoadEntityFromHandleAddress(pFoundNest);
+		delete block;
 		
 		// unown the old nest
 		if (IsValidEntity(action.m_nestHint))

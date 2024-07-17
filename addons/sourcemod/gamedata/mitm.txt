@@ -778,6 +778,11 @@
 				"linux"		"40"
 				"windows"	"40"
 			}
+			"sizeof(CHandle)"
+			{
+				"linux"		"4"
+				"windows"	"4"
+			}
 		}
 		"Functions"
 		{

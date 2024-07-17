@@ -109,6 +109,7 @@ void Offsets_Init(GameData hGameConf)
 	SetOffset(hGameConf, "inputdata_t", "value");
 	SetOffset(hGameConf, "CTraceFilterSimple", "m_pPassEnt");
 	SetOffset(hGameConf, "CTFBotHintEngineerNest", "m_teleporters");
+	SetOffset(hGameConf, NULL_STRING, "sizeof(CHandle)");
 }
 
 any GetOffset(const char[] cls, const char[] prop)

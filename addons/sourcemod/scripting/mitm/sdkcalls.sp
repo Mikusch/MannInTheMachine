@@ -361,7 +361,7 @@ static Handle PrepSDKCall_CTFBotMvMEngineerHintFinder_FindHint(GameData hGameCon
 	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CTFBotMvMEngineerHintFinder::FindHint");
 	PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_ByValue);
 	PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_ByValue);
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_ByRef, _, VENCODE_FLAG_COPYBACK);
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
 	PrepSDKCall_SetReturnInfo(SDKType_Bool, SDKPass_ByValue);
 	
 	Handle call = EndPrepSDKCall();
@@ -799,20 +799,10 @@ bool SDKCall_IsSpaceToSpawnHere(const float where[3])
 	return false;
 }
 
-bool SDKCall_CTFBotMvMEngineerHintFinder_FindHint(bool bShouldCheckForBlockingObjects, bool bAllowOutOfRangeNest, int &foundNest = -1)
+bool SDKCall_CTFBotMvMEngineerHintFinder_FindHint(bool bShouldCheckForBlockingObjects, bool bAllowOutOfRangeNest, Address pFoundNest = Address_Null)
 {
 	if (g_hSDKCall_CTFBotMvMEngineerHintFinder_FindHint)
-	{
-		Address pFoundNest;
-		bool result = SDKCall(g_hSDKCall_CTFBotMvMEngineerHintFinder_FindHint, bShouldCheckForBlockingObjects, bAllowOutOfRangeNest, pFoundNest);
-		
-		if (pFoundNest)
-		{
-			foundNest = LoadEntityFromHandleAddress(pFoundNest);
-		}
-		
-		return result;
-	}
+		return SDKCall(g_hSDKCall_CTFBotMvMEngineerHintFinder_FindHint, bShouldCheckForBlockingObjects, bAllowOutOfRangeNest, pFoundNest);
 	
 	return false;
 }

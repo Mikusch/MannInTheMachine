@@ -468,22 +468,6 @@ static Handle PrepSDKCall_CTFBotHintEngineerNest_GetTeleporterHint(GameData hGam
 	return call;
 }
 
-int SDKCall_CTFBotHintEngineerNest_GetSentryHint(int hint)
-{
-	if (g_hSDKCall_CTFBotHintEngineerNest_GetSentryHint)
-		return SDKCall(g_hSDKCall_CTFBotHintEngineerNest_GetSentryHint, hint);
-	
-	return -1;
-}
-
-int SDKCall_CTFBotHintEngineerNest_GetTeleporterHint(int hint)
-{
-	if (g_hSDKCall_CTFBotHintEngineerNest_GetTeleporterHint)
-		return SDKCall(g_hSDKCall_CTFBotHintEngineerNest_GetTeleporterHint, hint);
-	
-	return -1;
-}
-
 static Handle PrepSDKCall_CPopulationManager_GetCurrentWave(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
@@ -835,6 +819,22 @@ bool SDKCall_CTeamplayRules_TeamMayCapturePoint(TFTeam team, int pointIndex)
 		return SDKCall(g_hSDKCall_CTeamplayRules_TeamMayCapturePoint, team, pointIndex);
 	
 	return false;
+}
+
+int SDKCall_CTFBotHintEngineerNest_GetSentryHint(int hint)
+{
+	if (g_hSDKCall_CTFBotHintEngineerNest_GetSentryHint)
+		return SDKCall(g_hSDKCall_CTFBotHintEngineerNest_GetSentryHint, hint);
+	
+	return -1;
+}
+
+int SDKCall_CTFBotHintEngineerNest_GetTeleporterHint(int hint)
+{
+	if (g_hSDKCall_CTFBotHintEngineerNest_GetTeleporterHint)
+		return SDKCall(g_hSDKCall_CTFBotHintEngineerNest_GetTeleporterHint, hint);
+	
+	return -1;
 }
 
 Address SDKCall_CPopulationManager_GetCurrentWave(int populator)

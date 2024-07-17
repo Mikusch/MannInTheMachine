@@ -1316,3 +1316,16 @@ void SuperPrecacheModel(const char[] szModel)
 		AddFileToDownloadsTable(szPath);
 	}
 }
+
+void ShowProgressBar(int client, const char[] szTitle, float flProgress, float interval)
+{
+	char szProgressBar[64];
+	for (int i = 0; i < PROGRESS_BAR_NUM_BLOCKS; ++i)
+	{
+		bool bFilled = float(i) / PROGRESS_BAR_NUM_BLOCKS < flProgress;
+		StrCat(szProgressBar, sizeof(szProgressBar), bFilled ? PROGRESS_BAR_CHAR_FILLED : PROGRESS_BAR_CHAR_EMPTY);
+	}
+	
+	SetHudTextParams(-1.0, CTFPlayer(client).HasTheFlag() ? 0.65 : 0.75, interval, 255, 255, 255, 255);
+	ShowSyncHudText(client, g_hWarningHudSync, "%t\n%s", szTitle, szProgressBar);
+}

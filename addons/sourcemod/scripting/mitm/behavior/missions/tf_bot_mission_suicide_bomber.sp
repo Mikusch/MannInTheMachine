@@ -259,7 +259,7 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 		// target is dead or invalid - detonate after a while
 		if (!action.m_startDetonateTimer.HasStarted())
 		{
-			action.m_startDetonateTimer.Start(20.0);
+			action.m_startDetonateTimer.Start(10.0);
 			
 			float lastKnownVictimPosition[3];
 			action.GetDataVector("m_lastKnownVictimPosition", lastKnownVictimPosition);
@@ -271,6 +271,11 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 		else if (action.m_startDetonateTimer.IsElapsed())
 		{
 			StartDetonate(action, actor, false);
+		}
+		else
+		{
+			float flProgress = 1.0 - (action.m_startDetonateTimer.GetElapsedTime() / action.m_startDetonateTimer.GetCountdownDuration());
+			ShowProgressBar(actor, "Invader_DestroySentries_DetonateTimer", flProgress, interval);
 		}
 	}
 	

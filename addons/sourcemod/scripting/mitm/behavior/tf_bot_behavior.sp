@@ -164,16 +164,7 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 				if (CTFPlayer(actor).m_flSpawnTimeLeft > 0.0)
 				{
 					float flProgress = CTFPlayer(actor).m_flSpawnTimeLeft / CTFPlayer(actor).m_flSpawnTimeLeftMax;
-					
-					char szProgressBar[64];
-					for (int i = 0; i < PROGRESS_BAR_NUM_BLOCKS; ++i)
-					{
-						bool bFilled = float(i) / PROGRESS_BAR_NUM_BLOCKS < flProgress;
-						StrCat(szProgressBar, sizeof(szProgressBar), bFilled ? PROGRESS_BAR_CHAR_FILLED : PROGRESS_BAR_CHAR_EMPTY);
-					}
-					
-					SetHudTextParams(-1.0, 0.65, interval, 255, 255, 255, 255);
-					ShowSyncHudText(actor, g_hWarningHudSync, "%t", "Invader_SpawnTimer_Countdown", szProgressBar);
+					ShowProgressBar(actor, "Invader_SpawnTimer_Countdown", flProgress, interval);
 				}
 			}
 		}

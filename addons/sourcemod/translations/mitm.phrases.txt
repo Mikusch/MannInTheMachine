@@ -180,8 +180,7 @@
 	}
 	"Invader_SpawnTimer_Countdown"
 	{
-		"#format"	"{1:s}"
-		"en"		"Leave the spawn area!\n{1}"
+		"en"		"LEAVE SPAWN AREA"
 	}
 	"Invader_SpawnTimer_Warning"
 	{
@@ -209,6 +208,10 @@
 	"Invader_DestroySentries_DetonateHere"
 	{
 		"en"		"Detonate here to complete your mission"
+	}
+	"Invader_DestroySentries_DetonateTimer"
+	{
+		"en"		"AUTO-DETONATION"
 	}
 	"Invader_Queue_Header"
 	{

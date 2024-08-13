@@ -374,6 +374,8 @@ public void OnGameFrame()
 	float flTime = GameRules_GetPropFloat("m_flRestartRoundTime") - GetGameTime();
 	int nTime = RoundToCeil(flTime);
 	
+	SetHudTextParams(-1.0, 0.9, GetGameFrameTime(), 255, 255, 255, 255);
+	
 	for (int client = 1; client <= MaxClients; client++)
 	{
 		if (!IsClientInGame(client))
@@ -381,8 +383,6 @@ public void OnGameFrame()
 		
 		if (!IsClientObserver(client))
 			continue;
-		
-		SetHudTextParams(-1.0, 0.9, GetGameFrameTime(), 255, 255, 255, 255);
 		
 		if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 		{

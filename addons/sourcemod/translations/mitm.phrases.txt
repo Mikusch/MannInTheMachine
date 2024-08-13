@@ -170,7 +170,7 @@
 	}
 	"Invader_WaitingToSpawn"
 	{
-		"#format"	"{1:0.f}"
+		"#format"	"{1:d}"
 		"en"		"You are a ROBOT\nThe game will begin in {1} seconds"
 	}
 	"Invader_Spawned"

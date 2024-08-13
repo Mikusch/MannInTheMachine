@@ -371,7 +371,8 @@ public void OnGameFrame()
 	
 	delete queue;
 	
-	float flRestartRoundSeconds = GameRules_GetPropFloat("m_flRestartRoundTime") - GetGameTime();
+	float flTime = GameRules_GetPropFloat("m_flRestartRoundTime") - GetGameTime();
+	int nTime = RoundToCeil(flTime);
 	
 	for (int client = 1; client <= MaxClients; client++)
 	{
@@ -389,7 +390,7 @@ public void OnGameFrame()
 		}
 		else if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && CTFPlayer(client).IsInvader())
 		{
-			ShowSyncHudText(client, g_hWarningHudSync, "%t", "Invader_WaitingToSpawn", flRestartRoundSeconds);
+			ShowSyncHudText(client, g_hWarningHudSync, "%t", "Invader_WaitingToSpawn", nTime);
 		}
 	}
 }

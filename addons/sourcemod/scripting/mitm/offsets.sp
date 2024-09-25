@@ -101,11 +101,12 @@ void Offsets_Init(GameData hGameConf)
 	
 	SetOffset(hGameConf, "CTFNavArea", "m_distanceToBombTarget");
 	SetOffset(hGameConf, "CBaseTFBotHintEntity", "m_isDisabled");
-	SetOffset(hGameConf, "CTFGrenadePipebombProjectile", "m_flCreationTime");
 	SetOffset(hGameConf, "CBaseObject", "m_vecBuildOrigin");
 	SetOffset(hGameConf, "inputdata_t", "value");
 	SetOffset(hGameConf, "CTraceFilterSimple", "m_pPassEnt");
 	SetOffset(hGameConf, "CTFBotHintEngineerNest", "m_teleporters");
+	SetOffset(hGameConf, "CTFGrenadePipebombProjectile", "m_flCreationTime");
+	SetOffset(hGameConf, "CTFTankBoss", "m_isDroppingBomb");
 	
 	SetTypeSize(hGameConf, "CMvMBotUpgrade");
 	SetTypeSize(hGameConf, "EventChangeAttributes_t");

@@ -41,6 +41,10 @@ void SDKHooks_OnEntityCreated(int entity, const char[] classname)
 	{
 		PSM_SDKHook(entity, SDKHook_OnTakeDamagePost, SDKHookCB_EntityMedigunShield_OnTakeDamagePost);
 	}
+	else if (StrEqual(classname, "tank_boss"))
+	{
+		PSM_SDKHook(entity, SDKHook_Think, SDKHookCB_CTFTankBoss_Think);
+	}
 }
 
 static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
@@ -171,6 +175,16 @@ static void SDKHookCB_EntityMedigunShield_OnTakeDamagePost(int victim, int attac
 		return;
 	
 	SetEntPropFloat(owner, Prop_Send, "m_flRageMeter", GetEntPropFloat(owner, Prop_Send, "m_flRageMeter") - (damage * sm_mitm_shield_damage_drain_rate.FloatValue));
+}
+
+static Action SDKHookCB_CTFTankBoss_Think(int entity)
+{
+	if (CTFTankBoss(entity).m_isDroppingBomb && GetEntProp(entity, Prop_Data, "m_bSequenceFinished"))
+	{
+		CPrintToChatAll("%s %t", PLUGIN_TAG, "Tank_Deployed", GetEntProp(entity, Prop_Data, "m_iHealth"), TF2Util_GetEntityMaxHealth(entity));
+	}
+	
+	return Plugin_Continue;
 }
 
 Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)

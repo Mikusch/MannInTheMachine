@@ -63,6 +63,11 @@
 				"linux"		"m_iType"
 				"windows"	"m_iType"
 			}
+			"CTFTankBoss_BaseOffset"
+			{
+				"linux"		"m_lastHealthPercentage"
+				"windows"	"m_lastHealthPercentage"
+			}
 		}
 		"Signatures"
 		{
@@ -717,6 +722,11 @@
 			{
 				"linux"		"4"
 				"windows"	"4"
+			}
+			"CTFTankBoss::m_isDroppingBomb"
+			{
+				"linux"		"84"
+				"windows"	"84"
 			}
 			"CBaseObject::m_vecBuildOrigin"
 			{

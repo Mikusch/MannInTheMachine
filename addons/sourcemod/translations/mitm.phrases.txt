@@ -217,6 +217,11 @@
 		"#format"	"{1:N},{2:d},{3:d}"
 		"en"		"{blue}{1} {default}deployed the bomb with {lightgreen}{2}{default}/{lightgreen}{3} {default}HP left."
 	}
+	"Tank_Deployed"
+	{
+		"#format"	"{1:d},{2:d}"
+		"en"		"{blue}The Tank {default}deployed the bomb with {lightgreen}{1}{default}/{lightgreen}{2} {default}HP left."
+	}
 	"Endless_MoreAttributes"
 	{
 		"#format"	"{1:d}"

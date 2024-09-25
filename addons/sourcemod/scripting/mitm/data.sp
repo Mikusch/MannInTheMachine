@@ -2144,6 +2144,26 @@ methodmap CPopulationManager < CBaseEntity
 	}
 }
 
+methodmap CTFTankBoss < CBaseEntity
+{
+	public CTFTankBoss(int entity)
+	{
+		return view_as<CTFTankBoss>(entity);
+	}
+	
+	property bool m_isDroppingBomb
+	{
+		public get()
+		{
+			return GetEntData(this.index, GetOffset("CTFTankBoss", "m_isDroppingBomb"), 1) != 0;
+		}
+		public set(bool isDroppingBomb)
+		{
+			SetEntData(this.index, GetOffset("CTFTankBoss", "m_isDroppingBomb"), isDroppingBomb, 1);
+		}
+	}
+}
+
 methodmap BombInfo_t < Address
 {
 	public BombInfo_t(Address pThis)

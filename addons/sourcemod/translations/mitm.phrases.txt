@@ -128,27 +128,22 @@
 	"Queue_SelectedAsDefender"
 	{
 		"#format"	"{1:s}"
-		"en"		"You have been automatically assigned to {red}{1}{default}. Your queue points have been reset."
+		"en"		"You have been assigned to team {red}{1}{default}. Your queue points have been reset."
 	}
 	"Queue_SelectedAsDefender_Forced"
 	{
 		"#format"	"{1:s}"
-		"en"		"You have been forcibly assigned to {red}{1}{default}. Your queue points have not been consumed."
+		"en"		"You have been assigned to team {red}{1}{default} to fill a vacant slot. Your queue points have not been reset."
+	}
+	"Queue_AwardedQueuePoints"
+	{
+		"#format"	"{1:d},{2:d}"
+		"en"		"You have been awarded {green}{1} {default}queue points (Total: {green}{2}{default})."
 	}
 	"Queue_SelectedAsInvader"
 	{
-		"#format"	"{1:s},{2:d},{3:d}"
-		"en"		"You have been automatically assigned to {blue}{1}{default}. You have been awarded {green}{2} {default}queue points (Total: {green}{3}{default})."
-	}
-	"Queue_SelectedAsInvader_Forced"
-	{
 		"#format"	"{1:s}"
-		"en"		"You have been forcibly assigned to {blue}{1}{default}. You have not been awarded any queue points."
-	}
-	"Queue_SelectedAsInvader_DefenderDisabled"
-	{
-		"#format"	"{1:s}"
-		"en"		"You have been assigned to {blue}{1}{default}. You have not been awarded any queue points."
+		"en"		"You have been assigned to team {blue}{1}{default}."
 	}
 	"Queue_AddedPoints"
 	{

@@ -28,6 +28,7 @@ void Events_Init()
 	PSM_AddEventHook("teamplay_point_captured", EventHook_TeamplayPointCaptured);
 	PSM_AddEventHook("teamplay_flag_event", EventHook_TeamplayFlagEvent);
 	PSM_AddEventHook("teams_changed", EventHook_TeamsChanged);
+	PSM_AddEventHook("pve_win_panel", EventHook_WinPanel);
 }
 
 static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
@@ -201,6 +202,28 @@ static void EventHook_TeamsChanged(Event event, const char[] name, bool dontBroa
 	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && GameRules_GetRoundState() != RoundState_GameOver && !sm_mitm_developer.BoolValue)
 	{
 		RequestFrame(RequestFrameCallback_FindReplacementDefender);
+	}
+}
+
+static void EventHook_WinPanel(Event event, const char[] name, bool dontBroadcast)
+{
+	int points = sm_mitm_queue_points.IntValue;
+	
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		CTFPlayer player = CTFPlayer(client);
+		
+		if (!player.IsInvader())
+			continue;
+		
+		if (!Forwards_OnIsValidDefender(client))
+			continue;
+		
+		player.AddQueuePoints(points);
+		CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_AwardedQueuePoints", points, player.m_defenderQueuePoints);
 	}
 }
 

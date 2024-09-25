@@ -582,6 +582,18 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		return team == TFTeam_Invaders || (team == TFTeam_Spectator && !this.HasPreference(PREF_SPECTATOR_MODE));
 	}
 	
+	public void AddQueuePoints(int points)
+	{
+		this.m_defenderQueuePoints += points;
+		g_hCookieQueue.SetInt(this.index, this.m_defenderQueuePoints);
+	}
+	
+	public void SetQueuePoints(int points)
+	{
+		this.m_defenderQueuePoints = points;
+		g_hCookieQueue.SetInt(this.index, this.m_defenderQueuePoints);
+	}
+	
 	public float GetSpawnTime()
 	{
 		return this.m_flSpawnTime;

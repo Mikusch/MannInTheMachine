@@ -355,7 +355,7 @@ void SelectNewDefenders()
 				int member = members[j];
 				
 				TF2_ForceChangeClientTeam(member, TFTeam_Defenders);
-				Queue_SetPoints(member, 0);
+				CTFPlayer(member).SetQueuePoints(0);
 				CPrintToChat(member, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
 				
 				players.Erase(players.FindValue(member));
@@ -365,7 +365,7 @@ void SelectNewDefenders()
 		else
 		{
 			TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
-			Queue_SetPoints(client, 0);
+			CTFPlayer(client).SetQueuePoints(0);
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
 			
 			players.Erase(players.FindValue(client));
@@ -413,19 +413,9 @@ void SelectNewDefenders()
 		
 		TF2_ForceChangeClientTeam(client, TFTeam_Spectator);
 		
-		// Do not award queue points if the player can not become a Defender
-		if (!Forwards_OnIsValidDefender(client))
+		if (!CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 		{
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader_Forced", blueTeamname);
-		}
-		else if (CTFPlayer(client).HasPreference(PREF_DEFENDER_DISABLE_QUEUE) && (!CTFPlayer(client).IsInAParty() || CTFPlayer(client).GetParty().GetMemberCount() <= 1))
-		{
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader_DefenderDisabled", blueTeamname);
-		}
-		else if (!CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
-		{
-			Queue_AddPoints(client, sm_mitm_queue_points.IntValue);
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname, sm_mitm_queue_points.IntValue, CTFPlayer(client).m_defenderQueuePoints);
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname);
 		}
 	}
 	
@@ -472,7 +462,7 @@ void FindReplacementDefender()
 		// Validate that they were successfully switched
 		if (TF2_GetClientTeam(client) == TFTeam_Defenders)
 		{
-			Queue_SetPoints(client, 0);
+			CTFPlayer(client).SetQueuePoints(0);
 			
 			char redTeamname[MAX_TEAM_NAME_LENGTH];
 			mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));

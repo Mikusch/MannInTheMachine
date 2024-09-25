@@ -121,7 +121,7 @@ static Action ConCmd_AddQueuePoints(int client, int args)
 	
 	for (int i = 0; i < target_count; i++)
 	{
-		Queue_AddPoints(target_list[i], amount);
+		CTFPlayer(target_list[i]).AddQueuePoints(amount);
 	}
 	
 	if (tn_is_ml)

@@ -77,7 +77,7 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 		{
 			if (msg_dest == HUD_PRINTCONSOLE)
 			{
-				UTIL_ClientPrintAll(msg_dest, "*** Bot Upgrades");
+				UTIL_ClientPrintAll(HUD_PRINTTALK, "*** Bot Upgrades");
 			}
 			else if (msg_dest == HUD_PRINTCENTER)
 			{
@@ -96,7 +96,7 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 				
 				if (msg_dest == HUD_PRINTCONSOLE)
 				{
-					UTIL_ClientPrintAll(msg_dest, szAttrib);
+					UTIL_ClientPrintAll(HUD_PRINTTALK, szAttrib);
 				}
 				else if (msg_dest == HUD_PRINTCENTER)
 				{
@@ -110,7 +110,7 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 				
 				if (msg_dest == HUD_PRINTCONSOLE)
 				{
-					UTIL_ClientPrintAll(msg_dest, szAttrib);
+					UTIL_ClientPrintAll(HUD_PRINTTALK, szAttrib);
 				}
 				else if (msg_dest == HUD_PRINTCENTER)
 				{
@@ -134,7 +134,7 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 						char szValue[16];
 						IntToString(RoundToFloor(flValue), szValue, sizeof(szValue));
 						
-						UTIL_ClientPrintAll(msg_dest, szDescription, szValue);
+						UTIL_ClientPrintAll(HUD_PRINTTALK, szDescription, szValue);
 					}
 					else if (TF2Econ_GetAttributeName(upgrade.iAttribIndex, szDescription, sizeof(szDescription)))
 					{
@@ -142,7 +142,7 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 						
 						if (msg_dest == HUD_PRINTCONSOLE)
 						{
-							UTIL_ClientPrintAll(msg_dest, szDescription);
+							UTIL_ClientPrintAll(HUD_PRINTTALK, szDescription);
 						}
 						else if (msg_dest == HUD_PRINTCENTER)
 						{

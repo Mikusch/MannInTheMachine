@@ -74,6 +74,14 @@ forward bool MannInTheMachine_OnIsValidDefender(int client);
 forward bool MannInTheMachine_OnIsValidInvader(int client, bool bIsMiniBoss);
 
 /**
+ * Called when a Sentry Buster has successfully detonated their target.
+ *
+ * @param client		Client index.
+ * @param victim		Entity index of the target.
+ */
+forward void MannInTheMachine_OnSentryBusterDetonate(int client, int victim);
+
+/**
  * Returns whether the game is in Endless Waves mode.
  *
  * @return		True if the game is in Endless Waves mode.

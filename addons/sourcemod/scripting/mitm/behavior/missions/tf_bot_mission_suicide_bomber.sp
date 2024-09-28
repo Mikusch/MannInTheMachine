@@ -48,7 +48,6 @@ methodmap CTFBotMissionSuicideBomber < NextBotAction
 	{
 		CTFBotMissionSuicideBomber action = view_as<CTFBotMissionSuicideBomber>(ActionFactory.Create());
 		action.m_detonateTimer = new CountdownTimer();
-		action.m_startDetonateTimer = new CountdownTimer();
 		action.m_talkTimer = new CountdownTimer();
 		action.m_annotationTimer = new CountdownTimer();
 		return action;
@@ -63,18 +62,6 @@ methodmap CTFBotMissionSuicideBomber < NextBotAction
 		public set(CountdownTimer detonateTimer)
 		{
 			this.SetData("m_detonateTimer", detonateTimer);
-		}
-	}
-	
-	property CountdownTimer m_startDetonateTimer
-	{
-		public get()
-		{
-			return this.GetData("m_startDetonateTimer");
-		}
-		public set(CountdownTimer startDetonateTimer)
-		{
-			this.SetData("m_startDetonateTimer", startDetonateTimer);
 		}
 	}
 	
@@ -154,7 +141,6 @@ methodmap CTFBotMissionSuicideBomber < NextBotAction
 static int OnStart(CTFBotMissionSuicideBomber action, int actor, NextBotAction priorAction)
 {
 	action.m_detonateTimer.Invalidate();
-	action.m_startDetonateTimer.Invalidate();
 	action.m_annotationTimer.Invalidate();
 	action.m_bHasDetonated = false;
 	action.m_bWasSuccessful = false;
@@ -215,6 +201,8 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 						FireEvent(event);
 					}
 				}
+				
+				Forwards_OnSentryBusterDetonate(actor, action.m_victim);
 			}
 			
 			// KABOOM!
@@ -256,27 +244,7 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 	}
 	else
 	{
-		// target is dead or invalid - detonate after a while
-		if (!action.m_startDetonateTimer.HasStarted())
-		{
-			action.m_startDetonateTimer.Start(10.0);
-			
-			float lastKnownVictimPosition[3];
-			action.GetDataVector("m_lastKnownVictimPosition", lastKnownVictimPosition);
-			
-			char text[64];
-			Format(text, sizeof(text), "%T", "Invader_DestroySentries_DetonateHere", actor);
-			ShowAnnotation(actor, MITM_HINT_MASK | actor, text, _, lastKnownVictimPosition, sm_mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
-		}
-		else if (action.m_startDetonateTimer.IsElapsed())
-		{
-			StartDetonate(action, actor, false);
-		}
-		else
-		{
-			float flProgress = 1.0 - (action.m_startDetonateTimer.GetElapsedTime() / action.m_startDetonateTimer.GetCountdownDuration());
-			ShowProgressBar(actor, "Invader_DestroySentries_DetonateTimer", flProgress, interval);
-		}
+		StartDetonate(action, actor, false);
 	}
 	
 	// Get to a third of the damage range before detonating
@@ -295,7 +263,7 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 	
 	if (TF2_IsPlayerInCondition(actor, TFCond_Taunting))
 	{
-		StartDetonate(action, actor, true);
+		StartDetonate(action, actor);
 	}
 	
 	if (action.m_talkTimer.IsElapsed())
@@ -312,7 +280,6 @@ static void OnEnd(CTFBotMissionSuicideBomber action, int actor, NextBotAction ne
 	HideAnnotation(actor, MITM_HINT_MASK | actor);
 	
 	delete action.m_detonateTimer;
-	delete action.m_startDetonateTimer;
 	delete action.m_talkTimer;
 	delete action.m_annotationTimer;
 }

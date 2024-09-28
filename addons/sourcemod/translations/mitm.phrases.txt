@@ -204,10 +204,6 @@
 	{
 		"en"		"Detonate here to complete your mission"
 	}
-	"Invader_DestroySentries_DetonateTimer"
-	{
-		"en"		"AUTO-DETONATION"
-	}
 	"Invader_Queue_Header"
 	{
 		"en"		"NEXT ROBOT SPAWNS"

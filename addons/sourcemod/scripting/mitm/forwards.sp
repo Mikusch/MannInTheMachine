@@ -21,12 +21,14 @@
 static GlobalForward g_hForwardOnIsValidDefender;
 static GlobalForward g_hForwardOnIsValidInvader;
 static GlobalForward g_hForwardOnSentryBusterDetonate;
+static GlobalForward g_hForwardOnTankDeployed;
 
 void Forwards_Init()
 {
 	g_hForwardOnIsValidDefender = new GlobalForward("MannInTheMachine_OnIsValidDefender", ET_Single, Param_Cell);
 	g_hForwardOnIsValidInvader = new GlobalForward("MannInTheMachine_OnIsValidInvader", ET_Single, Param_Cell, Param_Cell);
 	g_hForwardOnSentryBusterDetonate = new GlobalForward("MannInTheMachine_OnSentryBusterDetonate", ET_Single, Param_Cell, Param_Cell);
+	g_hForwardOnTankDeployed = new GlobalForward("MannInTheMachine_OnTankDeployed", ET_Single, Param_Cell);
 }
 
 bool Forwards_OnIsValidDefender(int client)
@@ -57,5 +59,12 @@ void Forwards_OnSentryBusterDetonate(int client, int victim)
 	Call_StartForward(g_hForwardOnSentryBusterDetonate);
 	Call_PushCell(client);
 	Call_PushCell(victim);
+	Call_Finish();
+}
+
+void Forwards_OnTankDeployed(int tank)
+{
+	Call_StartForward(g_hForwardOnTankDeployed);
+	Call_PushCell(tank);
 	Call_Finish();
 }

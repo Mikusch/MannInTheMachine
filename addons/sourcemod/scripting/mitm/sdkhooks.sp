@@ -181,6 +181,8 @@ static Action SDKHookCB_CTFTankBoss_Think(int entity)
 {
 	if (CTFTankBoss(entity).m_isDroppingBomb && GetEntProp(entity, Prop_Data, "m_bSequenceFinished"))
 	{
+		Forwards_OnTankDeployed(entity);
+		
 		CPrintToChatAll("%s %t", PLUGIN_TAG, "Tank_Deployed", GetEntProp(entity, Prop_Data, "m_iHealth"), TF2Util_GetEntityMaxHealth(entity));
 	}
 	

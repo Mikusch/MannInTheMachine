@@ -219,6 +219,9 @@ static void EventHook_WinPanel(Event event, const char[] name, bool dontBroadcas
 		if (!player.IsInvader())
 			continue;
 		
+		if (player.HasPreference(PREF_DEFENDER_DISABLE_QUEUE))
+			continue;
+		
 		if (!Forwards_OnIsValidDefender(client))
 			continue;
 		

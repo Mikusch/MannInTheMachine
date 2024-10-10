@@ -55,10 +55,6 @@
 	{
 		"en"		"You are not currently in the queue."
 	}
-	"Menu_Queue_NotLoaded"
-	{
-		"en"		"Your queue points are still loading, please wait a moment."
-	}
 	"Menu_Preferences_Title"
 	{
 		"en"		"User Preferences"
@@ -166,7 +162,7 @@
 	"Invader_WaitingToSpawn"
 	{
 		"#format"	"{1:d}"
-		"en"		"You are a ROBOT\nThe game will begin in {1} seconds"
+		"en"		"You are a ROBOT\nThe wave will start in {1} seconds"
 	}
 	"Invader_Spawned"
 	{
@@ -365,10 +361,6 @@
 	"Party_NotAllowed"
 	{
 		"en"		"You are not allowed to use the party feature."
-	}
-	"Party_QueuePointsLoading"
-	{
-		"en"		"Your queue points are still loading, please wait a moment."
 	}
 	"Party_Joined"
 	{

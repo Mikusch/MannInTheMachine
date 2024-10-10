@@ -1482,14 +1482,11 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public bool HasPreference(MannInTheMachinePreference preference)
 	{
-		return this.m_preferences != -1 && this.m_preferences & view_as<int>(preference) != 0;
+		return this.m_preferences & view_as<int>(preference) != 0;
 	}
 	
 	public bool SetPreference(MannInTheMachinePreference preference, bool enable)
 	{
-		if (this.m_preferences == -1)
-			return false;
-		
 		if (enable)
 			this.m_preferences |= view_as<int>(preference);
 		else
@@ -1637,8 +1634,8 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	{
 		this.m_invaderPriority = 0;
 		this.m_invaderMiniBossPriority = 0;
-		this.m_defenderQueuePoints = -1;
-		this.m_preferences = -1;
+		this.m_defenderQueuePoints = 0;
+		this.m_preferences = 0;
 		this.m_party = NULL_PARTY;
 		this.m_isPartyMenuActive = false;
 		this.m_spawnDeathCount = 0;

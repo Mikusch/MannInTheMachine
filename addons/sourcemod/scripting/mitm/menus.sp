@@ -94,41 +94,33 @@ void Menus_DisplayQueueMenu(int client)
 		char title[64];
 		Format(title, sizeof(title), "%T", "Menu_Queue_Title", client);
 		
-		if (CTFPlayer(client).m_defenderQueuePoints != -1)
+		int index = queue.FindValue(client, QueueData::m_client);
+		if (index != -1)
 		{
-			int index = queue.FindValue(client, QueueData::m_client);
-			if (index != -1)
-			{
-				// player is in queue
-				Format(title, sizeof(title), "%s\n%T", title, "Menu_Queue_Title_QueuePoints", client, queue.Get(index, QueueData::m_points), index + 1);
-			}
-			else
-			{
-				if (CTFPlayer(client).IsInAParty())
-				{
-					index = queue.FindValue(CTFPlayer(client).GetParty(), QueueData::m_party);
-					if (index != -1)
-					{
-						// player is in a party and queuing with others
-						Format(title, sizeof(title), "%s\n%T", title, "Menu_Queue_Title_PartyQueuePoints", client, queue.Get(index, QueueData::m_points), index + 1);
-					}
-					else
-					{
-						// player is in a party but members aren't eligible to queue
-						Format(title, sizeof(title), "%s\n%T", title, "Menu_Queue_Title_NotInQueue", client);
-					}
-				}
-				else
-				{
-					// player is not in queue and not in a party
-					Format(title, sizeof(title), "%s\n%T", title, "Menu_Queue_Title_NotInQueue", client);
-				}
-			}
+			// player is in queue
+			Format(title, sizeof(title), "%s\n%T", title, "Menu_Queue_Title_QueuePoints", client, queue.Get(index, QueueData::m_points), index + 1);
 		}
 		else
 		{
-			// player has invalid queue points
-			Format(title, sizeof(title), "%s\n%T", title, "Menu_Queue_NotLoaded", client);
+			if (CTFPlayer(client).IsInAParty())
+			{
+				index = queue.FindValue(CTFPlayer(client).GetParty(), QueueData::m_party);
+				if (index != -1)
+				{
+					// player is in a party and queuing with others
+					Format(title, sizeof(title), "%s\n%T", title, "Menu_Queue_Title_PartyQueuePoints", client, queue.Get(index, QueueData::m_points), index + 1);
+				}
+				else
+				{
+					// player is in a party but members aren't eligible to queue
+					Format(title, sizeof(title), "%s\n%T", title, "Menu_Queue_Title_NotInQueue", client);
+				}
+			}
+			else
+			{
+				// player is not in queue and not in a party
+				Format(title, sizeof(title), "%s\n%T", title, "Menu_Queue_Title_NotInQueue", client);
+			}
 		}
 		
 		menu.SetTitle(title);

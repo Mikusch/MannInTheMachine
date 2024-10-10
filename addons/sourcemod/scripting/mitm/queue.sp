@@ -47,9 +47,6 @@ ArrayList Queue_GetDefenderQueue()
 		if (CTFPlayer(client).HasPreference(PREF_DEFENDER_DISABLE_QUEUE) || CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 			continue;
 		
-		if (CTFPlayer(client).m_defenderQueuePoints == -1)
-			continue;
-		
 		if (!IsFakeClient(client) && (GetClientAvgLatency(client, NetFlow_Outgoing) * 1000.0) >= sm_mitm_defender_ping_limit.FloatValue)
 			continue;
 		

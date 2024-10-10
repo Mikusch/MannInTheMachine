@@ -390,12 +390,6 @@ bool Party_ShouldRunCommand(int client)
 		return false;
 	}
 	
-	if (CTFPlayer(client).m_defenderQueuePoints == -1)
-	{
-		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_QueuePointsLoading");
-		return false;
-	}
-	
 	return true;
 }
 

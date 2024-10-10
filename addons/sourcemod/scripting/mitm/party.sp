@@ -246,7 +246,7 @@ methodmap Party
 		int count = this.CollectMembers(members, false);
 		for (int i = 0; i < count; ++i)
 		{
-			points += CTFPlayer(members[i]).m_defenderQueuePoints;
+			points += CTFPlayer(members[i]).GetQueuePoints();
 		}
 		
 		if (count)

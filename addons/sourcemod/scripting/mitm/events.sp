@@ -226,7 +226,7 @@ static void EventHook_WinPanel(Event event, const char[] name, bool dontBroadcas
 			continue;
 		
 		player.AddQueuePoints(points);
-		CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_AwardedQueuePoints", points, player.m_defenderQueuePoints);
+		CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_AwardedQueuePoints", points, player.GetQueuePoints());
 	}
 }
 

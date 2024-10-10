@@ -54,7 +54,7 @@ ArrayList Queue_GetDefenderQueue()
 			continue;
 		
 		QueueData data;
-		data.m_points = CTFPlayer(client).m_defenderQueuePoints;
+		data.m_points = CTFPlayer(client).GetQueuePoints();
 		data.m_client = client;
 		data.m_party = NULL_PARTY;
 		

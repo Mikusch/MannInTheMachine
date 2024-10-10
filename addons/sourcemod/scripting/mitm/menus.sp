@@ -198,7 +198,7 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 					{
 						char strMember[MAX_MESSAGE_LENGTH];
 						
-						Format(strMember, sizeof(strMember), "%N (%d)", members[i], CTFPlayer(members[i]).m_defenderQueuePoints);
+						Format(strMember, sizeof(strMember), "%N (%d)", members[i], CTFPlayer(members[i]).GetQueuePoints());
 						
 						if (i < count - 1)
 							StrCat(strMember, sizeof(strMember), ", ");
@@ -234,26 +234,18 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 
 void Menus_DisplayPreferencesMenu(int client)
 {
-	if (CTFPlayer(client).m_preferences != -1)
+	Menu menu = new Menu(MenuHandler_PreferencesMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
+	menu.SetTitle("%T", "Menu_Preferences_Title", client);
+	menu.ExitBackButton = true;
+	
+	for (int i = 0; i < sizeof(g_aPreferenceNames); i++)
 	{
-		Menu menu = new Menu(MenuHandler_PreferencesMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
-		menu.SetTitle("%T", "Menu_Preferences_Title", client);
-		menu.ExitBackButton = true;
-		
-		for (int i = 0; i < sizeof(g_aPreferenceNames); i++)
-		{
-			char info[32];
-			if (IntToString(i, info, sizeof(info)))
-				menu.AddItem(info, g_aPreferenceNames[i]);
-		}
-		
-		menu.Display(client, MENU_TIME_FOREVER);
+		char info[32];
+		if (IntToString(i, info, sizeof(info)))
+			menu.AddItem(info, g_aPreferenceNames[i]);
 	}
-	else
-	{
-		PrintHintText(client, "%t", "Menu_Preferences_NotLoaded");
-		Menus_DisplayMainMenu(client);
-	}
+	
+	menu.Display(client, MENU_TIME_FOREVER);
 }
 
 static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1, int param2)
@@ -348,7 +340,7 @@ void Menus_DisplayPartyMenu(int client)
 		{
 			int member = members[i];
 			Format(title, sizeof(title), "%s%s %N", title, party.IsLeader(member) ? SYMBOL_PARTY_LEADER : SYMBOL_PARTY_MEMBER, member);
-			Format(title, sizeof(title), "%s (%d)\n", title, CTFPlayer(member).m_defenderQueuePoints);
+			Format(title, sizeof(title), "%s (%d)\n", title, CTFPlayer(member).GetQueuePoints());
 		}
 	}
 	else

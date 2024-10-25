@@ -242,7 +242,7 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 			}
 		}
 	}
-	else
+	else if (GetGameTime() - CTFPlayer(actor).GetSpawnTime() > 30.0)
 	{
 		StartDetonate(action, actor, false);
 	}

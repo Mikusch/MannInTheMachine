@@ -107,16 +107,6 @@
 	{
 		"en"		"Use human viewmodels as robot"
 	}
-	"Preferences_Enabled"
-	{
-		"#format"	"{1:s}"
-		"en"		"You have enabled the preference {cyan}{1}{default}."
-	}
-	"Preferences_Disabled"
-	{
-		"#format"	"{1:s}"
-		"en"		"You have disabled the preference {cyan}{1}{default}."
-	}
 	"Queue_NewDefenders"
 	{
 		"en"		"Selecting a new set of defenders..."

@@ -99,17 +99,6 @@ const TFTeam TFTeam_Any = view_as<TFTeam>(-2);
 const TFTeam TFTeam_Defenders = TFTeam_Red;
 const TFTeam TFTeam_Invaders = TFTeam_Blue;
 
-char g_aPreferenceNames[][] =
-{
-	"Preference_DisableDefender",
-	"Preference_SpectatorMode",
-	"Preference_DisableMiniBoss",
-	"Preference_DisableAnnotations",
-	"Preference_IgnorePartyInvites",
-	"Preference_DisableDefenderReplacement",
-	"Preference_DisableCustomViewModels"
-};
-
 char g_aRawPlayerClassNames[][] =
 {
 	"undefined",

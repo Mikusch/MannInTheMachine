@@ -238,14 +238,22 @@ void Menus_DisplayPreferencesMenu(int client)
 	menu.SetTitle("%T", "Menu_Preferences_Title", client);
 	menu.ExitBackButton = true;
 	
-	for (int i = 0; i < sizeof(g_aPreferenceNames); i++)
-	{
-		char info[32];
-		if (IntToString(i, info, sizeof(info)))
-			menu.AddItem(info, g_aPreferenceNames[i]);
-	}
+	AddPreferenceToMenu(menu, PREF_DEFENDER_DISABLE_QUEUE, "Preference_DisableDefender");
+	AddPreferenceToMenu(menu, PREF_SPECTATOR_MODE, "Preference_SpectatorMode");
+	AddPreferenceToMenu(menu, PREF_INVADER_DISABLE_MINIBOSS, "Preference_DisableMiniBoss");
+	AddPreferenceToMenu(menu, PREF_DISABLE_ANNOTATIONS, "Preference_DisableAnnotations");
+	AddPreferenceToMenu(menu, PREF_IGNORE_PARTY_INVITES, "Preference_IgnorePartyInvites");
+	AddPreferenceToMenu(menu, PREF_DEFENDER_DISABLE_REPLACEMENT, "Preference_DisableDefenderReplacement");
+	AddPreferenceToMenu(menu, PREF_INVADER_DISABLE_CUSTOM_VIEWMODELS, "Preference_DisableCustomViewModels");
 	
 	menu.Display(client, MENU_TIME_FOREVER);
+}
+
+static void AddPreferenceToMenu(Menu menu, MannInTheMachinePreference preference, const char[] display)
+{
+	char info[32];
+	if (IntToString(view_as<int>(preference), info, sizeof(info)))
+		menu.AddItem(info, display);
 }
 
 static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1, int param2)
@@ -257,15 +265,9 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 			char info[32];
 			menu.GetItem(param2, info, sizeof(info));
 			
-			int i = StringToInt(info);
-			MannInTheMachinePreference preference = view_as<MannInTheMachinePreference>(1 << i);
+			MannInTheMachinePreference preference = view_as<MannInTheMachinePreference>(StringToInt(info));
 			
 			CTFPlayer(param1).SetPreference(preference, !CTFPlayer(param1).HasPreference(preference));
-			
-			char name[64];
-			Format(name, sizeof(name), "%T", g_aPreferenceNames[i], param1);
-			
-			CPrintToChat(param1, "%s %t", PLUGIN_TAG, CTFPlayer(param1).HasPreference(preference) ? "Preferences_Enabled" : "Preferences_Disabled", name);
 			
 			Menus_DisplayPreferencesMenu(param1);
 		}
@@ -285,10 +287,9 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 			char info[32], display[64];
 			menu.GetItem(param2, info, sizeof(info), _, display, sizeof(display));
 			
-			int i = StringToInt(info);
-			MannInTheMachinePreference preference = view_as<MannInTheMachinePreference>(1 << i);
+			MannInTheMachinePreference preference = view_as<MannInTheMachinePreference>(StringToInt(info));
 			
-			Format(display, sizeof(display), "%s %T", CTFPlayer(param1).HasPreference(preference) ? "☑" : "☐", g_aPreferenceNames[i], param1);
+			Format(display, sizeof(display), "%s %T", CTFPlayer(param1).HasPreference(preference) ? "☑" : "☐", display, param1);
 			
 			return RedrawMenuItem(display);
 		}

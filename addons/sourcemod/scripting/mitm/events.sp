@@ -216,6 +216,12 @@ static void EventHook_WinPanel(Event event, const char[] name, bool dontBroadcas
 		
 		CTFPlayer player = CTFPlayer(client);
 		
+		if (player.m_hasDisabledDefenderThisRound)
+		{
+			player.m_hasDisabledDefenderThisRound = false;
+			continue;
+		}
+		
 		if (!player.IsInvader())
 			continue;
 		

@@ -65,6 +65,7 @@ static int m_preferences[MAXPLAYERS + 1];
 static Party m_party[MAXPLAYERS + 1];
 static bool m_isPartyMenuActive[MAXPLAYERS + 1];
 static int m_spawnDeathCount[MAXPLAYERS + 1];
+static bool m_hasDisabledDefenderThisRound[MAXPLAYERS + 1];
 
 methodmap CTFPlayer < CBaseCombatCharacter
 {
@@ -466,6 +467,18 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		public set(int iSpawnDeathCount)
 		{
 			m_spawnDeathCount[this.index] = iSpawnDeathCount;
+		}
+	}
+	
+	property bool m_hasDisabledDefenderThisRound
+	{
+		public get()
+		{
+			return m_hasDisabledDefenderThisRound[this.index];
+		}
+		public set(bool hasDisabledDefenderThisRound)
+		{
+			m_hasDisabledDefenderThisRound[this.index] = hasDisabledDefenderThisRound;
 		}
 	}
 	
@@ -1493,9 +1506,17 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	public bool SetPreference(MannInTheMachinePreference preference, bool enable)
 	{
 		if (enable)
+		{
 			this.m_preferences |= view_as<int>(preference);
+			
+			// Don't allow queue point buffering
+			if (preference == PREF_DEFENDER_DISABLE_QUEUE || preference == PREF_SPECTATOR_MODE)
+				this.m_hasDisabledDefenderThisRound = true;
+		}
 		else
+		{
 			this.m_preferences &= ~view_as<int>(preference);
+		}
 		
 		g_hCookiePreferences.SetInt(this.index, this.m_preferences);
 		
@@ -1644,6 +1665,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		this.m_party = NULL_PARTY;
 		this.m_isPartyMenuActive = false;
 		this.m_spawnDeathCount = 0;
+		this.m_hasDisabledDefenderThisRound = false;
 		
 		m_invaderName[this.index][0] = EOS;
 		m_prevName[this.index][0] = EOS;

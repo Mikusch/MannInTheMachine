@@ -1509,8 +1509,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		{
 			this.m_preferences |= view_as<int>(preference);
 			
-			// Don't allow queue point buffering if we disabled parties - we want defenders to be random
-			if ((preference == PREF_DEFENDER_DISABLE_QUEUE || preference == PREF_SPECTATOR_MODE) && !sm_mitm_party_enabled.BoolValue)
+			if (preference == PREF_DEFENDER_DISABLE_QUEUE || preference == PREF_SPECTATOR_MODE)
 				this.m_hasDisabledDefenderThisRound = true;
 		}
 		else

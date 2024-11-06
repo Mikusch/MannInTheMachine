@@ -219,7 +219,11 @@ static void EventHook_WinPanel(Event event, const char[] name, bool dontBroadcas
 		if (player.m_hasDisabledDefenderThisRound)
 		{
 			player.m_hasDisabledDefenderThisRound = false;
-			continue;
+			
+			// Don't let players earn queue points if they disabled the queue this round.
+			// Some cheeky bastards buffer up queue points to play together anyway.
+			if (!sm_mitm_party_enabled.BoolValue)
+				continue;
 		}
 		
 		if (!player.IsInvader())

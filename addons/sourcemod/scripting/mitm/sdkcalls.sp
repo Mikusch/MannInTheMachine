@@ -49,6 +49,7 @@ static Handle g_hSDKCall_CBaseObject_GetMaxHealthForCurrentLevel;
 static Handle g_hSDKCall_CBaseCombatWeapon_Clip1;
 static Handle g_hSDKCall_CSpawnLocation_FindSpawnLocation;
 static Handle g_hSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold;
+static Handle g_hSDKCall_CPopulationManager_SetCheckpoint;
 static Handle g_hSDKCall_IPopulationSpawner_Spawn;
 static Handle g_hSDKCall_BotGenerateAndWearItem;
 static Handle g_hSDKCall_GetBombInfo;
@@ -110,6 +111,7 @@ void SDKCalls_Init(GameData hGameConf)
 	g_hSDKCall_CBaseCombatWeapon_Clip1 = PrepSDKCall_CBaseCombatWeapon_Clip1(hGameConf);
 	g_hSDKCall_CSpawnLocation_FindSpawnLocation = PrepSDKCall_CSpawnLocation_FindSpawnLocation(hGameConf);
 	g_hSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold = PrepSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold(hGameConf);
+	g_hSDKCall_CPopulationManager_SetCheckpoint = PrepSDKCall_CPopulationManager_SetCheckpoint(hGameConf);
 	g_hSDKCall_IPopulationSpawner_Spawn = PrepSDKCall_IPopulationSpawner_Spawn(hGameConf);
 	g_hSDKCall_BotGenerateAndWearItem = PrepSDKCall_BotGenerateAndWearItem(hGameConf);
 	g_hSDKCall_GetBombInfo = PrepSDKCall_GetBombInfo(hGameConf);
@@ -563,6 +565,19 @@ static Handle PrepSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThresho
 	return call;
 }
 
+static Handle PrepSDKCall_CPopulationManager_SetCheckpoint(GameData hGameConf)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CPopulationManager::SetCheckpoint");
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogError("Failed to create SDKCall: CPopulationManager::SetCheckpoint");
+	
+	return call;
+}
+
 static Handle PrepSDKCall_IPopulationSpawner_Spawn(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Raw);
@@ -889,6 +904,12 @@ void SDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold(int popula
 {
 	if (g_hSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold)
 		SDKCall(g_hSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold, populator, nDamage, nKills);
+}
+
+void SDKCall_CPopulationManager_SetCheckpoint(int populator, int waveNumber)
+{
+	if (g_hSDKCall_CPopulationManager_SetCheckpoint)
+		SDKCall(g_hSDKCall_CPopulationManager_SetCheckpoint, populator, waveNumber);
 }
 
 bool SDKCall_IPopulationSpawner_Spawn(Address pSpawner, const float vSpawnPosition[3], CUtlVector &spawnVector = view_as<CUtlVector>(0))

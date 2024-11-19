@@ -36,6 +36,8 @@ void ConVars_Init()
 	sm_mitm_defender_ping_limit = CreateConVar("sm_mitm_defender_ping_limit", "200", "Maximum ping a client can have to play on the defender team.");
 	sm_mitm_shield_damage_drain_rate = CreateConVar("sm_mitm_shield_damage_drain_rate", "0.03", "How much energy to drain for each point of damage to the shield.");
 	sm_mitm_bot_taunt_on_upgrade = CreateConVar("sm_mitm_bot_taunt_on_upgrade", "1", "Whether bots should automatically taunt when the bomb levels up.");
+	sm_mitm_autoincrement_max_wipes = CreateConVar("sm_mitm_autoincrement_max_wipes", "2", "After how many losses the game will proceed to the next wave.");
+	sm_mitm_autoincrement_currency_percentage = CreateConVar("sm_mitm_autoincrement_currency_percentage", "0.90", "Percentage of currency gained when the game skips to the next wave.", _, true, 0.0, true, 1.0);
 	
 	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");

@@ -28,7 +28,8 @@ void Events_Init()
 	PSM_AddEventHook("teamplay_point_captured", EventHook_TeamplayPointCaptured);
 	PSM_AddEventHook("teamplay_flag_event", EventHook_TeamplayFlagEvent);
 	PSM_AddEventHook("teams_changed", EventHook_TeamsChanged);
-	PSM_AddEventHook("pve_win_panel", EventHook_WinPanel);
+	PSM_AddEventHook("pve_win_panel", EventHook_PVEWinPanel);
+	PSM_AddEventHook("mvm_wave_complete", EventHook_MvMWaveComplete);
 }
 
 static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
@@ -205,8 +206,12 @@ static void EventHook_TeamsChanged(Event event, const char[] name, bool dontBroa
 	}
 }
 
-static void EventHook_WinPanel(Event event, const char[] name, bool dontBroadcast)
+static void EventHook_PVEWinPanel(Event event, const char[] name, bool dontBroadcast)
 {
+	TFTeam iWinningTeam = view_as<TFTeam>(event.GetInt("winning_team"));
+	if (iWinningTeam == TFTeam_Invaders)
+		g_nNumConsecutiveWipes++;
+	
 	int points = sm_mitm_queue_points.IntValue;
 	
 	for (int client = 1; client <= MaxClients; client++)
@@ -238,6 +243,11 @@ static void EventHook_WinPanel(Event event, const char[] name, bool dontBroadcas
 		player.AddQueuePoints(points);
 		CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_AwardedQueuePoints", points, player.GetQueuePoints());
 	}
+}
+
+static void EventHook_MvMWaveComplete(Event event, const char[] name, bool dontBroadcast)
+{
+	g_nNumConsecutiveWipes = 0;
 }
 
 static void RequestFrameCallback_FindReplacementDefender()

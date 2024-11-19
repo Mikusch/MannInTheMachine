@@ -209,6 +209,11 @@
 		"#format"	"{1:d}"
 		"en"		"...and {1} more"
 	}
+	"Wave_AutoIncremented"
+	{
+		"#format"	"{1:d},{2:d}"
+		"en"		"The game has skipped to {cyan}Wave {1} {default}due to the defenders losing {red}{2} times{default} in a row."
+	}
 	"Spectator_Mode"
 	{
 		"en"		"You are in SPECTATOR MODE"

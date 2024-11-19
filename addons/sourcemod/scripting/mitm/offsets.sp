@@ -47,6 +47,7 @@ void Offsets_Init(GameData hGameConf)
 	
 	SetOffset(hGameConf, "CPopulationManager", "m_bIsInitialized");
 	SetOffset(hGameConf, "CPopulationManager", "m_canBotsAttackWhileInSpawnRoom");
+	SetOffset(hGameConf, "CPopulationManager", "m_iCurrentWaveIndex");
 	SetOffset(hGameConf, "CPopulationManager", "m_bSpawningPaused");
 	SetOffset(hGameConf, "CPopulationManager", "m_EndlessActiveBotUpgrades");
 	SetOffset(hGameConf, "CPopulationManager", "m_defaultEventChangeAttributesName");
@@ -54,6 +55,7 @@ void Offsets_Init(GameData hGameConf)
 	SetOffset(hGameConf, "CWave", "m_nSentryBustersSpawned");
 	SetOffset(hGameConf, "CWave", "m_nNumEngineersTeleportSpawned");
 	SetOffset(hGameConf, "CWave", "m_nNumSentryBustersKilled");
+	SetOffset(hGameConf, "CWave", "m_totalCurrency");
 	
 	SetOffset(hGameConf, "IPopulationSpawner", "m_spawner");
 	SetOffset(hGameConf, "IPopulationSpawner", "m_where");

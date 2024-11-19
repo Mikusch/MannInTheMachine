@@ -189,9 +189,9 @@ static void DHooks_CopyScriptFunctionBinding(const char[] sourceClassName, const
 	char targetName[64];
 	Format(targetName, sizeof(targetName), "%s::%s", targetClassName, functionName);
 	
-#if defined DEBUG
-		LogMessage("Copied script function binding: %s::%s -> %s", sourceClassName, functionName, targetName);
-#endif
+	#if defined DEBUG
+	LogMessage("Copied script function binding: %s::%s -> %s", sourceClassName, functionName, targetName);
+	#endif
 	
 	// not setup for detour
 	if (callbackPre == INVALID_FUNCTION && callbackPost == INVALID_FUNCTION)
@@ -282,6 +282,29 @@ static MRESReturn DHookCallback_CPopulationManager_RestoreCheckpoint_Pre(int pop
 		{
 			g_bInWaitingForPlayers = false;
 			tf_mvm_min_players_to_start.IntValue = 0;
+		}
+		
+		int nMaxConsecutiveWipes = sm_mitm_autoincrement_max_wipes.IntValue;
+		float fCleanMoneyPercent = sm_mitm_autoincrement_currency_percentage.FloatValue;
+		
+		if (nMaxConsecutiveWipes > 0 && g_nNumConsecutiveWipes >= nMaxConsecutiveWipes)
+		{
+			int iNextWaveIndex = g_pPopulationManager.m_iCurrentWaveIndex + 1;
+			if (iNextWaveIndex < g_pObjectiveResource.GetMannVsMachineMaxWaveCount())
+			{
+				g_nNumConsecutiveWipes = 0;
+				
+				g_pPopulationManager.SetCheckpoint(iNextWaveIndex);
+				
+				CWave pWave = g_pPopulationManager.GetWave(iNextWaveIndex);
+				
+				int nCurrency = pWave.GetTotalCurrency();
+				g_pMVMStats.ClearStats(g_pPopulationManager.m_iCurrentWaveIndex);
+				g_pMVMStats.RoundEvent_CreditsDropped(g_pPopulationManager.m_iCurrentWaveIndex, nCurrency);
+				g_pMVMStats.RoundEvent_AcquiredCredits(g_pPopulationManager.m_iCurrentWaveIndex, RoundToFloor(nCurrency * fCleanMoneyPercent), false);
+				
+				CPrintToChatAll("%s %t", PLUGIN_TAG, "Wave_AutoIncremented", iNextWaveIndex + 1, nMaxConsecutiveWipes);
+			}
 		}
 		
 		SelectNewDefenders();
@@ -1152,9 +1175,9 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 			}
 			
 			// players can join defenders freely if a slot is open
-			if (iDefenderCount >= tf_mvm_defenders_team_size.IntValue ||
-				CTFPlayer(player).IsInAParty() ||
-				CTFPlayer(player).HasPreference(PREF_DEFENDER_DISABLE_QUEUE) ||
+			if (iDefenderCount >= tf_mvm_defenders_team_size.IntValue || 
+				CTFPlayer(player).IsInAParty() || 
+				CTFPlayer(player).HasPreference(PREF_DEFENDER_DISABLE_QUEUE) || 
 				CTFPlayer(player).HasPreference(PREF_SPECTATOR_MODE))
 			{
 				ret.Value = TFTeam_Spectator;

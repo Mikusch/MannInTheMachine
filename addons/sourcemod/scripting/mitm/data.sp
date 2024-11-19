@@ -1994,6 +1994,14 @@ methodmap CWave < Address
 		}
 	}
 	
+	property int m_totalCurrency
+	{
+		public get()
+		{
+			return LoadFromAddress(this + GetOffset("CWave", "m_totalCurrency"), NumberType_Int32);
+		}
+	}
+	
 	public int NumSentryBustersSpawned()
 	{
 		return this.m_nSentryBustersSpawned;
@@ -2028,6 +2036,103 @@ methodmap CWave < Address
 	{
 		this.m_nNumEngineersTeleportSpawned++;
 	}
+	
+	public int GetTotalCurrency()
+	{
+		return this.m_totalCurrency;
+	}
+}
+
+methodmap CMannVsMachineStats < CBaseEntity
+{
+	public CMannVsMachineStats(int entity)
+	{
+		return view_as<CMannVsMachineStats>(entity);
+	}
+	
+	property int m_previousWaveStats
+	{
+		public get()
+		{
+			return FindSendPropInfo("CMannVsMachineStats", "m_previousWaveStats");
+		}
+	}
+	
+	property int m_currentWaveStats
+	{
+		public get()
+		{
+			return FindSendPropInfo("CMannVsMachineStats", "m_currentWaveStats");
+		}
+	}
+	
+	property int m_iCurrentWaveIdx
+	{
+		public get()
+		{
+			return this.GetProp(Prop_Send, "m_iCurrentWaveIdx");
+		}
+		public set(int iCurrentWaveIdx)
+		{
+			this.SetProp(Prop_Send, "m_iCurrentWaveIdx", iCurrentWaveIdx);
+		}
+	}
+	
+	public void ClearStats(int idxWave)
+	{
+		if (idxWave == this.m_iCurrentWaveIdx)
+		{
+			for (int i = 1; i < this.GetPropArraySize(Prop_Send, "m_currentWaveStats"); ++i)
+			{
+				SetEntData(this.index, this.m_currentWaveStats + (i * 4), 0, true);
+			}
+		}
+		else if (idxWave == this.m_iCurrentWaveIdx - 1)
+		{
+			for (int i = 1; i < this.GetPropArraySize(Prop_Send, "m_previousWaveStats"); ++i)
+			{
+				SetEntData(this.index, this.m_previousWaveStats + (i * 4), 0, true);
+			}
+		}
+	}
+	
+	public void RoundEvent_AcquiredCredits(int idxWave, int nAmount, bool bIsBonus)
+	{
+		if (idxWave == this.m_iCurrentWaveIdx)
+		{
+			if (bIsBonus)
+			{
+				SetEntData(this.index, this.m_currentWaveStats + 12, GetEntData(this.index, this.m_currentWaveStats + 12) + nAmount, _, true);
+			}
+			else
+			{
+				SetEntData(this.index, this.m_currentWaveStats + 8, GetEntData(this.index, this.m_currentWaveStats + 8) + nAmount, _, true);
+			}
+		}
+		else if (idxWave == this.m_iCurrentWaveIdx - 1)
+		{
+			if (bIsBonus)
+			{
+				SetEntData(this.index, this.m_previousWaveStats + 12, GetEntData(this.index, this.m_previousWaveStats + 12) + nAmount, _, true);
+			}
+			else
+			{
+				SetEntData(this.index, this.m_previousWaveStats + 8, GetEntData(this.index, this.m_previousWaveStats + 8) + nAmount, _, true);
+			}
+		}
+	}
+	
+	public void RoundEvent_CreditsDropped(int idxWave, int nAmount)
+	{
+		if (idxWave == this.m_iCurrentWaveIdx)
+		{
+			SetEntData(this.index, this.m_currentWaveStats + 4, GetEntData(this.index, this.m_currentWaveStats + 4) + nAmount, _, true);
+		}
+		else if (idxWave == this.m_iCurrentWaveIdx - 1)
+		{
+			SetEntData(this.index, this.m_previousWaveStats + 4, GetEntData(this.index, this.m_previousWaveStats + 4) + nAmount, _, true);
+		}
+	}
 }
 
 methodmap CPopulationManager < CBaseEntity
@@ -2054,6 +2159,18 @@ methodmap CPopulationManager < CBaseEntity
 		public get()
 		{
 			return GetEntData(this.index, GetOffset("CPopulationManager", "m_canBotsAttackWhileInSpawnRoom"), 1) != 0;
+		}
+	}
+	
+	property int m_iCurrentWaveIndex
+	{
+		public get()
+		{
+			return GetEntData(this.index, GetOffset("CPopulationManager", "m_iCurrentWaveIndex"));
+		}
+		public set(int iCurrentWaveIndex)
+		{
+			SetEntData(this.index, GetOffset("CPopulationManager", "m_iCurrentWaveIndex"), iCurrentWaveIndex);
 		}
 	}
 	
@@ -2106,9 +2223,23 @@ methodmap CPopulationManager < CBaseEntity
 		return CWave(SDKCall_CPopulationManager_GetCurrentWave(this.index));
 	}
 	
+	public CWave GetWave(int iWaveIndex)
+	{
+		int iOldWaveIndex = this.m_iCurrentWaveIndex;
+		this.m_iCurrentWaveIndex = iWaveIndex;
+		CWave wave = this.GetCurrentWave();
+		this.m_iCurrentWaveIndex = iOldWaveIndex;
+		return wave;
+	}
+	
 	public bool IsInEndlessWaves()
 	{
 		return SDKCall_CPopulationManager_IsInEndlessWaves(this.index);
+	}
+	
+	public void SetCheckpoint(int waveNumber)
+	{
+		SDKCall_CPopulationManager_SetCheckpoint(this.index, waveNumber);
 	}
 	
 	public float GetHealthMultiplier(bool bIsTank = false)
@@ -2343,6 +2474,22 @@ methodmap CTFObjectiveResource < CBaseEntity
 		return view_as<CTFObjectiveResource>(entity);
 	}
 	
+	property int m_iszMannVsMachineWaveClassNames
+	{
+		public get()
+		{
+			return FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames");
+		}
+	}
+	
+	property int m_iszMannVsMachineWaveClassNames2
+	{
+		public get()
+		{
+			return FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames2");
+		}
+	}
+	
 	public void SetFlagCarrierUpgradeLevel(int nLevel)
 	{
 		this.SetProp(Prop_Send, "m_nFlagCarrierUpgradeLevel", nLevel);
@@ -2358,6 +2505,11 @@ methodmap CTFObjectiveResource < CBaseEntity
 		this.SetPropFloat(Prop_Send, "m_flMvMNextBombUpgradeTime", nTime);
 	}
 	
+	public int GetMannVsMachineMaxWaveCount()
+	{
+		return this.GetProp(Prop_Send, "m_nMannVsMachineMaxWaveCount");
+	}
+	
 	public bool GetMannVsMachineIsBetweenWaves()
 	{
 		return this.GetProp(Prop_Send, "m_bMannVsMachineBetweenWaves") != 0;
@@ -2367,7 +2519,7 @@ methodmap CTFObjectiveResource < CBaseEntity
 	{
 		for (int i = 0; i < this.GetPropArraySize(Prop_Send, "m_iszMannVsMachineWaveClassNames"); ++i)
 		{
-			if (GetEntData(this.index, FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames") + (i * 4)) == iszClassIconName && (this.GetProp(Prop_Send, "m_nMannVsMachineWaveClassFlags", _, i) & iFlags))
+			if (GetEntData(this.index, this.m_iszMannVsMachineWaveClassNames + (i * 4)) == iszClassIconName && (this.GetProp(Prop_Send, "m_nMannVsMachineWaveClassFlags", _, i) & iFlags))
 			{
 				this.SetProp(Prop_Send, "m_nMannVsMachineWaveClassCounts", this.GetProp(Prop_Send, "m_nMannVsMachineWaveClassCounts", _, i) + 1, _, i);
 				
@@ -2382,7 +2534,7 @@ methodmap CTFObjectiveResource < CBaseEntity
 		
 		for (int i = 0; i < this.GetPropArraySize(Prop_Send, "m_iszMannVsMachineWaveClassNames2"); ++i)
 		{
-			if (GetEntData(this.index, FindSendPropInfo("CTFObjectiveResource", "m_iszMannVsMachineWaveClassNames2") + (i * 4)) == iszClassIconName && (this.GetProp(Prop_Send, "m_nMannVsMachineWaveClassFlags2", _, i) & iFlags))
+			if (GetEntData(this.index, this.m_iszMannVsMachineWaveClassNames2 + (i * 4)) == iszClassIconName && (this.GetProp(Prop_Send, "m_nMannVsMachineWaveClassFlags2", _, i) & iFlags))
 			{
 				this.SetProp(Prop_Send, "m_nMannVsMachineWaveClassCounts2", this.GetProp(Prop_Send, "m_nMannVsMachineWaveClassCounts2", _, i) + 1, _, i);
 				

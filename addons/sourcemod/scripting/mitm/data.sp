@@ -586,12 +586,17 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		}
 	}
 	
+	public TFTeam GetTFTeam()
+	{
+		return TF2_GetClientTeam(this.index);
+	}
+	
 	public bool IsInvader()
 	{
 		if (IsClientSourceTV(this.index))
 			return false;
 		
-		TFTeam team = TF2_GetClientTeam(this.index);
+		TFTeam team = this.GetTFTeam();
 		return team == TFTeam_Invaders || (team == TFTeam_Spectator && !this.HasPreference(PREF_SPECTATOR_MODE));
 	}
 	
@@ -1234,7 +1239,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		// MvM Engineer bot never pick up a flag
 		if (IsMannVsMachineMode())
 		{
-			if (TF2_GetClientTeam(this.index) == TFTeam_Invaders && TF2_GetPlayerClass(this.index) == TFClass_Engineer)
+			if (this.GetTFTeam() == TFTeam_Invaders && TF2_GetPlayerClass(this.index) == TFClass_Engineer)
 			{
 				return INVALID_ENT_REFERENCE;
 			}
@@ -1273,7 +1278,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 			{
 				case TF_FLAGTYPE_CTF:
 				{
-					if (view_as<TFTeam>(GetEntProp(flag, Prop_Send, "m_iTeamNum")) == GetEnemyTeam(TF2_GetClientTeam(this.index)))
+					if (view_as<TFTeam>(GetEntProp(flag, Prop_Send, "m_iTeamNum")) == GetEnemyTeam(this.GetTFTeam()))
 					{
 						// we want to steal the other team's flag
 						flagsList.Push(flag);
@@ -1282,7 +1287,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 				
 				case TF_FLAGTYPE_ATTACK_DEFEND, TF_FLAGTYPE_TERRITORY_CONTROL, TF_FLAGTYPE_INVADE:
 				{
-					if (view_as<TFTeam>(GetEntProp(flag, Prop_Send, "m_iTeamNum")) != GetEnemyTeam(TF2_GetClientTeam(this.index)))
+					if (view_as<TFTeam>(GetEntProp(flag, Prop_Send, "m_iTeamNum")) != GetEnemyTeam(this.GetTFTeam()))
 					{
 						// we want to move our team's flag or a neutral flag
 						flagsList.Push(flag);
@@ -1356,6 +1361,38 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		}
 		
 		return -1;
+	}
+	
+	public void ShowAnnotation(int id, const char[] text, int target = 0, const float worldPos[3] = ZERO_VECTOR, float lifeTime = 10.0, const char[] sound = "ui/hint.wav", bool showDistance = true, bool showEffect = true)
+	{
+		if (this.HasPreference(PREF_DISABLE_ANNOTATIONS))
+			return;
+		
+		Event event = CreateEvent("show_annotation");
+		if (event)
+		{
+			event.SetString("text", text);
+			event.SetInt("id", id);
+			event.SetFloat("worldPosX", worldPos[0]);
+			event.SetFloat("worldPosY", worldPos[1]);
+			event.SetFloat("worldPosZ", worldPos[2]);
+			event.SetInt("follow_entindex", target);
+			event.SetFloat("lifetime", lifeTime);
+			event.SetString("play_sound", sound);
+			event.SetBool("show_distance", showDistance);
+			event.SetBool("show_effect", showEffect);
+			event.FireToClient(this.index);
+		}
+	}
+	
+	public void HideAnnotation(int id)
+	{
+		Event event = CreateEvent("hide_annotation");
+		if (event)
+		{
+			event.SetInt("id", id);
+			event.FireToClient(this.index);
+		}
 	}
 	
 	public void PushRequiredWeapon(int weapon)
@@ -1485,7 +1522,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	public void DisguiseAsMemberOfEnemyTeam()
 	{
 		ArrayList enemyList = new ArrayList();
-		CollectPlayers(enemyList, GetEnemyTeam(TF2_GetClientTeam(this.index)));
+		CollectPlayers(enemyList, GetEnemyTeam(this.GetTFTeam()));
 		
 		TFClassType disguise = view_as<TFClassType>(GetRandomInt(view_as<int>(TFClass_Scout), view_as<int>(TFClass_Engineer)));
 		
@@ -1494,7 +1531,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 			disguise = TF2_GetPlayerClass(enemyList.Get(GetRandomInt(0, enemyList.Length - 1)));
 		}
 		
-		TF2_DisguisePlayer(this.index, GetEnemyTeam(TF2_GetClientTeam(this.index)), disguise);
+		TF2_DisguisePlayer(this.index, GetEnemyTeam(this.GetTFTeam()), disguise);
 		delete enemyList;
 	}
 	
@@ -1524,7 +1561,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public bool ShouldUseCustomViewModel()
 	{
-		return TF2_GetClientTeam(this.index) == TFTeam_Invaders && !this.HasPreference(PREF_INVADER_DISABLE_CUSTOM_VIEWMODELS);
+		return this.GetTFTeam() == TFTeam_Invaders && !this.HasPreference(PREF_INVADER_DISABLE_CUSTOM_VIEWMODELS);
 	}
 	
 	public void MarkAsMissionEnemy()

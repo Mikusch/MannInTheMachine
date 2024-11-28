@@ -182,6 +182,10 @@
 		"#format"	"{1:s}"
 		"en"		"Capture {1}"
 	}
+	"Invader_DeliverFlag_Annotation"
+	{
+		"en"		"Deliver The Bomb To The Hatch"
+	}
 	"Invader_DestroySentries_DetonateSentry"
 	{
 		"en"		"Detonate"

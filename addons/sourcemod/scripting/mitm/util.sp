@@ -462,11 +462,11 @@ void FindReplacementDefender()
 		// Validate that they were successfully switched
 		if (TF2_GetClientTeam(client) == TFTeam_Defenders)
 		{
-			CTFPlayer(client).SetQueuePoints(0);
+			CTFPlayer(client).SetQueuePoints(CTFPlayer(client).GetQueuePoints() / 2);
 			
 			char redTeamname[MAX_TEAM_NAME_LENGTH];
 			mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender_Replacement", redTeamname);
 			
 			break;
 		}

@@ -116,10 +116,15 @@
 		"#format"	"{1:s}"
 		"en"		"You have been assigned to team {red}{1}{default}. Your queue points have been reset."
 	}
+	"Queue_SelectedAsDefender_Replacement"
+	{
+		"#format"	"{1:s}"
+		"en"		"You have been assigned to team {red}{1}{default} to fill a vacant slot. Your queue points have been halved."
+	}
 	"Queue_SelectedAsDefender_Forced"
 	{
 		"#format"	"{1:s}"
-		"en"		"You have been assigned to team {red}{1}{default} to fill a vacant slot. Your queue points have not been reset."
+		"en"		"You have been forcibly assigned to team {red}{1}{default} because not enough players were eligible to play. Your queue points have not been reset."
 	}
 	"Queue_AwardedQueuePoints"
 	{

@@ -167,7 +167,7 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 		{
 			char text[64];
 			Format(text, sizeof(text), "%T", "Invader_DestroySentries_DetonateSentry", actor);
-			CTFPlayer(actor).ShowAnnotation(MITM_HINT_MASK | actor, text, action.m_victim, _, sm_mitm_annotation_lifetime.FloatValue, "coach/coach_attack_here.wav");
+			CTFPlayer(actor).ShowAnnotation(MITM_HINT_MASK | actor, text, action.m_victim, _, -1.0, "coach/coach_attack_here.wav");
 			action.m_annotationTimer.Invalidate();
 		}
 	}

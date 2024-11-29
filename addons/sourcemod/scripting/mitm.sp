@@ -66,7 +66,6 @@ ConVar sm_mitm_custom_upgrades_file;
 ConVar sm_mitm_spawn_hurry_time;
 ConVar sm_mitm_queue_points;
 ConVar sm_mitm_rename_robots;
-ConVar sm_mitm_annotation_lifetime;
 ConVar sm_mitm_invader_allow_suicide;
 ConVar sm_mitm_party_enabled;
 ConVar sm_mitm_party_max_size;

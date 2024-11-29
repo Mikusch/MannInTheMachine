@@ -1022,38 +1022,6 @@ int FindSentryHintForPlayer(int player)
 	return -1;
 }
 
-void ShowAnnotation(int client, int id, const char[] text, int target = 0, const float worldPos[3] = ZERO_VECTOR, float lifeTime = 10.0, const char[] sound = "ui/hint.wav", bool showDistance = true, bool showEffect = true)
-{
-	if (CTFPlayer(client).HasPreference(PREF_DISABLE_ANNOTATIONS))
-		return;
-	
-	Event event = CreateEvent("show_annotation");
-	if (event)
-	{
-		event.SetString("text", text);
-		event.SetInt("id", id);
-		event.SetFloat("worldPosX", worldPos[0]);
-		event.SetFloat("worldPosY", worldPos[1]);
-		event.SetFloat("worldPosZ", worldPos[2]);
-		event.SetInt("follow_entindex", target);
-		event.SetFloat("lifetime", lifeTime);
-		event.SetString("play_sound", sound);
-		event.SetBool("show_distance", showDistance);
-		event.SetBool("show_effect", showEffect);
-		event.FireToClient(client);
-	}
-}
-
-void HideAnnotation(int client, int id)
-{
-	Event event = CreateEvent("hide_annotation");
-	if (event)
-	{
-		event.SetInt("id", id);
-		event.FireToClient(client);
-	}
-}
-
 void ShowGateBotAnnotation(int client)
 {
 	int trigger = -1;
@@ -1098,8 +1066,7 @@ void ShowGateBotAnnotation(int client)
 				
 				char text[64];
 				Format(text, sizeof(text), "%T", "Invader_CaptureGate_Annotation", client, iszPrintName);
-				
-				ShowAnnotation(client, MITM_HINT_MASK | client, text, _, center, sm_mitm_annotation_lifetime.FloatValue, "coach/coach_go_here.wav");
+				CTFPlayer(client).ShowAnnotation(MITM_HINT_MASK | client, text, _, center, -1.0, "coach/coach_go_here.wav");
 				return;
 			}
 		}

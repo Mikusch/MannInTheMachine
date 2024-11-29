@@ -532,7 +532,7 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 		newBot.StartIdleSound();
 		
 		// Add our items first, they'll get replaced below by the normal MvM items if any are needed
-		if (IsMannVsMachineMode() && (TF2_GetClientTeam(newBot.index) == TFTeam_Invaders))
+		if (IsMannVsMachineMode() && (newBot.GetTFTeam() == TFTeam_Invaders))
 		{
 			// Apply the Rome 2 promo items to each player. They'll be 
 			// filtered out for clients that do not have Romevision.
@@ -1567,7 +1567,7 @@ static MRESReturn DHookCallback_CTFPlayer_IsAllowedToPickUpFlag_Post(int player,
 	// only the leader of a squad can pick up the flag
 	if (CTFPlayer(player).IsInASquad() && !CTFPlayer(player).GetSquad().IsLeader(player))
 	{
-		PrintCenterText(player, "%t", "Squad_NotAllowedToPickUpFlag");
+		PrintCenterText(player, "%t", "Squad_NotAllowedToPickUpFlag", CTFPlayer(player).GetSquad().GetLeader());
 		
 		ret.Value = false;
 		return MRES_Supercede;
@@ -1638,17 +1638,17 @@ static MRESReturn DHookCallback_CFilterTFBotHasTag_PassesFilterImpl_Pre(int filt
 
 static MRESReturn DHookCallback_CCaptureFlag_PickUp_Pre(int item, DHookParam params)
 {
-	int player = params.Get(1);
+	CTFPlayer player = CTFPlayer(params.Get(1));
 	
-	if (IsMannVsMachineMode() && TF2_GetClientTeam(player) == TFTeam_Invaders)
+	if (IsMannVsMachineMode() && player.GetTFTeam() == TFTeam_Invaders)
 	{
 		// do not trip up the assert_cast< CTFBot* >
-		CBaseEntity(player).RemoveFlag(FL_FAKECLIENT);
+		player.RemoveFlag(FL_FAKECLIENT);
 		
-		if (CTFPlayer(player).HasAttribute(IGNORE_FLAG))
+		if (player.HasAttribute(IGNORE_FLAG))
 			return MRES_Supercede;
 		
-		CTFPlayer(player).SetFlagTarget(EntIndexToEntRef(item));
+		player.SetFlagTarget(EntIndexToEntRef(item));
 	}
 	
 	return MRES_Ignored;
@@ -1656,11 +1656,11 @@ static MRESReturn DHookCallback_CCaptureFlag_PickUp_Pre(int item, DHookParam par
 
 static MRESReturn DHookCallback_CCaptureFlag_PickUp_Post(int item, DHookParam params)
 {
-	int player = params.Get(1);
+	CTFPlayer player = CTFPlayer(params.Get(1));
 	
-	if (IsMannVsMachineMode() && TF2_GetClientTeam(player) == TFTeam_Invaders)
+	if (IsMannVsMachineMode() && player.GetTFTeam() == TFTeam_Invaders)
 	{
-		CBaseEntity(player).AddFlag(FL_FAKECLIENT);
+		player.AddFlag(FL_FAKECLIENT);
 	}
 	
 	return MRES_Ignored;

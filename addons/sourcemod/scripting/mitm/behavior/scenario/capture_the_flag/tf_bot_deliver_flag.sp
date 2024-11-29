@@ -30,6 +30,7 @@ methodmap CTFBotDeliverFlag < NextBotAction
 		ActionFactory.BeginDataMapDesc()
 			.DefineIntField("m_upgradeTimer")
 			.DefineIntField("m_buffPulseTimer")
+			.DefineIntField("m_annotationTimer")
 			.DefineIntField("m_upgradeLevel")
 		.EndDataMapDesc();
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
@@ -46,6 +47,7 @@ methodmap CTFBotDeliverFlag < NextBotAction
 		CTFBotDeliverFlag action = view_as<CTFBotDeliverFlag>(ActionFactory.Create());
 		action.m_upgradeTimer = new CountdownTimer();
 		action.m_buffPulseTimer = new CountdownTimer();
+		action.m_annotationTimer = new CountdownTimer();
 		return action;
 	}
 	
@@ -73,6 +75,18 @@ methodmap CTFBotDeliverFlag < NextBotAction
 		}
 	}
 	
+	property CountdownTimer m_annotationTimer
+	{
+		public get()
+		{
+			return this.GetData("m_annotationTimer");
+		}
+		public set(CountdownTimer annotationTimer)
+		{
+			this.SetData("m_annotationTimer", annotationTimer);
+		}
+	}
+	
 	property int m_upgradeLevel
 	{
 		public get()
@@ -88,6 +102,8 @@ methodmap CTFBotDeliverFlag < NextBotAction
 
 static int OnStart(CTFBotDeliverFlag action, int actor, NextBotAction priorAction)
 {
+	action.m_annotationTimer.Start(1.0);
+	
 	if (!tf_mvm_bot_allow_flag_carrier_to_fight.BoolValue)
 	{
 		CTFPlayer(actor).SetAttribute(SUPPRESS_FIRE);
@@ -152,12 +168,30 @@ static int Update(CTFBotDeliverFlag action, int actor, float interval)
 		return action.SuspendFor(CTFBotTaunt(), "Taunting for our new upgrade");
 	}
 	
+	if (action.m_annotationTimer.HasStarted() && action.m_annotationTimer.IsElapsed())
+	{
+		int captureZone = CTFPlayer(actor).GetClosestCaptureZone();
+		if (IsValidEntity(captureZone))
+		{
+			float center[3];
+			CBaseEntity(captureZone).WorldSpaceCenter(center);
+			
+			char text[64];
+			Format(text, sizeof(text), "%T", "Invader_DeliverFlag_Annotation", actor);
+			CTFPlayer(actor).ShowAnnotation(MITM_HINT_MASK | actor, text, _, center, 10.0, "coach/coach_go_here.wav");
+			
+			action.m_annotationTimer.Invalidate();
+		}
+	}
+	
 	return action.Continue();
 }
 
 static void OnEnd(CTFBotDeliverFlag action, int actor, NextBotAction nextAction)
 {
 	CTFPlayer(actor).ClearAttribute(SUPPRESS_FIRE);
+	
+	CTFPlayer(actor).HideAnnotation(MITM_HINT_MASK | actor);
 	
 	if (!IsFakeClient(actor))
 	{
@@ -174,6 +208,7 @@ static void OnEnd(CTFBotDeliverFlag action, int actor, NextBotAction nextAction)
 	
 	delete action.m_upgradeTimer;
 	delete action.m_buffPulseTimer;
+	delete action.m_annotationTimer;
 }
 
 static bool UpgradeOverTime(CTFBotDeliverFlag action, int actor)

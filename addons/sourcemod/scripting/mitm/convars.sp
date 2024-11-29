@@ -27,7 +27,6 @@ void ConVars_Init()
 	sm_mitm_spawn_hurry_time = CreateConVar("sm_mitm_spawn_hurry_time", "10", "The base time invaders have to leave their spawn, in seconds.");
 	sm_mitm_queue_points = CreateConVar("sm_mitm_queue_points", "5", "Amount of queue points awarded to players that did not become defenders.", _, true, 1.0);
 	sm_mitm_rename_robots = CreateConVar("sm_mitm_rename_robots", "0", "Whether to rename robots as they spawn.");
-	sm_mitm_annotation_lifetime = CreateConVar("sm_mitm_annotation_lifetime", "60", "The lifetime of annotations shown to clients, in seconds.", _, true, 1.0);
 	sm_mitm_invader_allow_suicide = CreateConVar("sm_mitm_invader_allow_suicide", "0", "Whether to allow invaders to suicide.");
 	sm_mitm_party_enabled = CreateConVar("sm_mitm_party_enabled", "1", "Whether to allow players to create and join parties.");
 	sm_mitm_party_max_size = CreateConVar("sm_mitm_party_max_size", "0", "Maximum size of player parties.", _, true, 0.0, true, 10.0);

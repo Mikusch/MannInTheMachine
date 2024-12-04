@@ -1274,6 +1274,35 @@ void SuperPrecacheModel(const char[] szModel)
 	}
 }
 
+void PrecacheViewModelMaterialsForClass(const char[] szClass)
+{
+	char szPath[PLATFORM_MAX_PATH];
+	
+	Format(szPath, sizeof(szPath), "materials/models/mvm/bots/%s/%s_bot_arms_blue.vmt", szClass, szClass);
+	if (FileExists(szPath))
+		AddFileToDownloadsTable(szPath);
+	
+	Format(szPath, sizeof(szPath), "materials/models/mvm/bots/%s/%s_bot_arms_blue.vtf", szClass, szClass);
+	if (FileExists(szPath))
+		AddFileToDownloadsTable(szPath);
+	
+	Format(szPath, sizeof(szPath), "materials/models/mvm/bots/%s/%s_bot_arms_exp.vtf", szClass, szClass);
+	if (FileExists(szPath))
+		AddFileToDownloadsTable(szPath);
+	
+	Format(szPath, sizeof(szPath), "materials/models/mvm/bots/%s/%s_bot_arms_normal.vtf", szClass, szClass);
+	if (FileExists(szPath))
+		AddFileToDownloadsTable(szPath);
+	
+	Format(szPath, sizeof(szPath), "materials/models/mvm/bots/%s/%s_bot_arms_red.vmt", szClass, szClass);
+	if (FileExists(szPath))
+		AddFileToDownloadsTable(szPath);
+	
+	Format(szPath, sizeof(szPath), "materials/models/mvm/bots/%s/%s_bot_arms_red.vtf", szClass, szClass);
+	if (FileExists(szPath))
+		AddFileToDownloadsTable(szPath);
+}
+
 void ShowProgressBar(int client, const char[] szTitle, float flProgress, float interval)
 {
 	char szProgressBar[64];

@@ -682,10 +682,8 @@ static void Precache()
 	
 	SuperPrecacheModel("models/mvm/weapons/v_models/v_ttg_watch_spy_bot.mdl");
 	SuperPrecacheModel("models/mvm/weapons/v_models/v_watch_leather_spy_bot.mdl");
-	SuperPrecacheModel("models/mvm/weapons/v_models/v_watch_pocket_spy_animations.mdl");
 	SuperPrecacheModel("models/mvm/weapons/v_models/v_watch_pocket_spy_bot.mdl");
 	SuperPrecacheModel("models/mvm/weapons/v_models/v_watch_pocket_spy_bot_animations.mdl");
-	SuperPrecacheModel("models/mvm/weapons/v_models/v_watch_spy_animations.mdl");
 	SuperPrecacheModel("models/mvm/weapons/v_models/v_watch_spy_bot.mdl");
 	SuperPrecacheModel("models/mvm/weapons/v_models/v_watch_spy_bot_animations.mdl");
 	SuperPrecacheModel("models/mvm/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch_bot.mdl");

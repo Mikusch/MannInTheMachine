@@ -91,7 +91,7 @@ void Menus_DisplayQueueMenu(int client)
 		Menu menu = new Menu(MenuHandler_QueueMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End);
 		menu.ExitBackButton = true;
 		
-		char title[64];
+		char title[128];
 		Format(title, sizeof(title), "%T", "Menu_Queue_Title", client);
 		
 		int index = queue.FindValue(client, QueueData::m_client);

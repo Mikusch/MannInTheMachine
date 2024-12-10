@@ -19,7 +19,7 @@
 {
 	"Menu_Main_Title"
 	{
-		"en"		"Welcome to Mann in the Machine!"
+		"en"		"MANN IN THE MACHINE\n— Main Menu —"
 	}
 	"Menu_Main_Queue"
 	{
@@ -39,7 +39,7 @@
 	}
 	"Menu_Queue_Title"
 	{
-		"en"		"Defender Queue"
+		"en"		"MANN IN THE MACHINE\n— Defender Queue —"
 	}
 	"Menu_Queue_Title_QueuePoints"
 	{
@@ -57,7 +57,7 @@
 	}
 	"Menu_Preferences_Title"
 	{
-		"en"		"User Preferences"
+		"en"		"MANN IN THE MACHINE\n— User Preferences —"
 	}
 	"Menu_Preferences_NotLoaded"
 	{
@@ -65,7 +65,7 @@
 	}
 	"Menu_Credits_Title"
 	{
-		"en"	"Gamemode Credits"
+		"en"	"MANN IN THE MACHINE\n— Gamemode Credits —"
 	}
 	"Menu_Credits_Mikusch"
 	{
@@ -228,23 +228,23 @@
 	
 	"Party_Menu_Title"
 	{
-		"en"		"Party Menu"
+		"en"		"MANN IN THE MACHINE\n— Party Menu —"
 	}
 	"Party_InviteMenu_Title"
 	{
-		"en"		"Pending Party Invites"
+		"en"		"MANN IN THE MACHINE\n— Pending Party Invites —"
 	}
 	"Party_ManageInviteMenu_Title"
 	{
-		"en"		"Invite Players"
+		"en"		"MANN IN THE MACHINE\n— Invite Players —"
 	}
 	"Party_ManageMenu_Title"
 	{
-		"en"		"Manage Party"
+		"en"		"MANN IN THE MACHINE\n— Manage Party —"
 	}
 	"Party_KickMenu_Title"
 	{
-		"en"		"Kick Members"
+		"en"		"MANN IN THE MACHINE — Kick Party Members —"
 	}
 	"Party_KickMenu_NoMembers"
 	{

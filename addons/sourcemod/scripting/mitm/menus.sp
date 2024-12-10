@@ -34,7 +34,7 @@ void Menus_DisplayMainMenu(int client)
 	menu.AddItem("queue", "Menu_Main_Queue");
 	menu.AddItem("preferences", "Menu_Main_Preferences");
 	
-	if (sm_mitm_party_enabled.BoolValue)
+	if (mitm_party_enabled.BoolValue)
 	{
 		menu.AddItem("party", "Menu_Main_Party");
 	}

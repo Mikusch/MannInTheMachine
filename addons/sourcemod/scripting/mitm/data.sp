@@ -1394,12 +1394,12 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public float CalculateSpawnTime()
 	{
-		if (sm_mitm_spawn_hurry_time.FloatValue <= 0.0)
+		if (mitm_spawn_hurry_time.FloatValue <= 0.0)
 			return -1.0;
 		
 		// factor in squad speed
 		float flSpeed = this.IsInASquad() ? this.GetSquad().GetSlowestMemberSpeed() : this.GetPropFloat(Prop_Send, "m_flMaxspeed");
-		return sm_mitm_spawn_hurry_time.FloatValue + (sm_mitm_spawn_hurry_time.FloatValue * (300.0 / flSpeed));
+		return mitm_spawn_hurry_time.FloatValue + (mitm_spawn_hurry_time.FloatValue * (300.0 / flSpeed));
 	}
 	
 	public bool ShouldAutoJump()

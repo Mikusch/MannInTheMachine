@@ -201,7 +201,7 @@ void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool dontBroadc
 
 static void EventHook_TeamsChanged(Event event, const char[] name, bool dontBroadcast)
 {
-	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && GameRules_GetRoundState() != RoundState_GameOver && !sm_mitm_developer.BoolValue)
+	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && GameRules_GetRoundState() != RoundState_GameOver && !mitm_developer.BoolValue)
 	{
 		RequestFrame(RequestFrameCallback_FindReplacementDefender);
 	}
@@ -209,7 +209,7 @@ static void EventHook_TeamsChanged(Event event, const char[] name, bool dontBroa
 
 static void EventHook_WinPanel(Event event, const char[] name, bool dontBroadcast)
 {
-	int points = sm_mitm_queue_points.IntValue;
+	int points = mitm_queue_points.IntValue;
 	
 	for (int client = 1; client <= MaxClients; client++)
 	{

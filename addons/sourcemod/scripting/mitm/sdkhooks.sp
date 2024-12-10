@@ -174,7 +174,7 @@ static void SDKHookCB_EntityMedigunShield_OnTakeDamagePost(int victim, int attac
 	if (!IsValidEntity(owner))
 		return;
 	
-	SetEntPropFloat(owner, Prop_Send, "m_flRageMeter", GetEntPropFloat(owner, Prop_Send, "m_flRageMeter") - (damage * sm_mitm_shield_damage_drain_rate.FloatValue));
+	SetEntPropFloat(owner, Prop_Send, "m_flRageMeter", GetEntPropFloat(owner, Prop_Send, "m_flRageMeter") - (damage * mitm_shield_damage_drain_rate.FloatValue));
 }
 
 static Action SDKHookCB_CTFTankBoss_Think(int entity)

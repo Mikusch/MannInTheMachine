@@ -401,7 +401,7 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 		// set name
 		char name[MAX_NAME_LENGTH];
 		spawner.GetName(name, sizeof(name), "TFBot");
-		newBot.SetInvaderName(name, sm_mitm_rename_robots.BoolValue);
+		newBot.SetInvaderName(name, mitm_rename_robots.BoolValue);
 		
 		CBaseEntity(g_internalSpawnPoint).SetAbsOrigin(here);
 		CBaseEntity(g_internalSpawnPoint).SetLocalAngles(ZERO_VECTOR);
@@ -1053,7 +1053,7 @@ static MRESReturn DHookCallback_CPointPopulatorInterface_InputChangeBotAttribute
 
 static MRESReturn DHookCallback_CTFGameRules_PlayerReadyStatus_UpdatePlayerState_Pre(DHookParam params)
 {
-	if (sm_mitm_setup_time.IntValue <= 0)
+	if (mitm_setup_time.IntValue <= 0)
 		return MRES_Ignored;
 	
 	// Save off the old timer value
@@ -1064,7 +1064,7 @@ static MRESReturn DHookCallback_CTFGameRules_PlayerReadyStatus_UpdatePlayerState
 
 static MRESReturn DHookCallback_CTFGameRules_PlayerReadyStatus_UpdatePlayerState_Post(DHookParam params)
 {
-	if (sm_mitm_setup_time.IntValue <= 0)
+	if (mitm_setup_time.IntValue <= 0)
 		return MRES_Ignored;
 	
 	// If m_flRestartRoundTime is -1.0 at this point, all players have toggled off ready
@@ -1112,7 +1112,7 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 		ret.Value = TFTeam_Defenders;
 		return MRES_Supercede;
 	}
-	else if (g_bAllowTeamChange || (sm_mitm_developer.BoolValue && !IsFakeClient(player)))
+	else if (g_bAllowTeamChange || (mitm_developer.BoolValue && !IsFakeClient(player)))
 	{
 		if (nDesiredTeam == TFTeam_Spectator || nDesiredTeam == TFTeam_Defenders)
 			return MRES_Ignored;
@@ -1123,7 +1123,7 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 	else
 	{
 		// player is trying to switch from invaders to a different team
-		if (nCurrentTeam == TFTeam_Invaders && nDesiredTeam != nCurrentTeam && !sm_mitm_invader_allow_suicide.BoolValue)
+		if (nCurrentTeam == TFTeam_Invaders && nDesiredTeam != nCurrentTeam && !mitm_invader_allow_suicide.BoolValue)
 		{
 			if (IsPlayerAlive(player))
 				PrintCenterText(player, "%t", "Invader_NotAllowedToSuicide");

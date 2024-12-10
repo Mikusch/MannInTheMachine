@@ -59,19 +59,19 @@ bool g_bAllowTeamChange;	// Bypass CTFGameRules::GetTeamAssignmentOverride?
 bool g_bInEndlessRollEscalation;
 
 // Plugin ConVars
-ConVar sm_mitm_developer;
-ConVar sm_mitm_custom_upgrades_file;
-ConVar sm_mitm_spawn_hurry_time;
-ConVar sm_mitm_queue_points;
-ConVar sm_mitm_rename_robots;
-ConVar sm_mitm_invader_allow_suicide;
-ConVar sm_mitm_party_enabled;
-ConVar sm_mitm_party_max_size;
-ConVar sm_mitm_setup_time;
-ConVar sm_mitm_max_spawn_deaths;
-ConVar sm_mitm_defender_ping_limit;
-ConVar sm_mitm_shield_damage_drain_rate;
-ConVar sm_mitm_bot_taunt_on_upgrade;
+ConVar mitm_developer;
+ConVar mitm_custom_upgrades_file;
+ConVar mitm_spawn_hurry_time;
+ConVar mitm_queue_points;
+ConVar mitm_rename_robots;
+ConVar mitm_invader_allow_suicide;
+ConVar mitm_party_enabled;
+ConVar mitm_party_max_size;
+ConVar mitm_setup_time;
+ConVar mitm_max_spawn_deaths;
+ConVar mitm_defender_ping_limit;
+ConVar mitm_shield_damage_drain_rate;
+ConVar mitm_bot_taunt_on_upgrade;
 
 // Game ConVars
 ConVar tf_avoidteammates_pushaway;
@@ -191,7 +191,7 @@ public void OnPluginStart()
 	if (!hGameConf)
 		SetFailState("Could not find mitm gamedata");
 	
-	PSM_Init("sm_mitm_enabled", hGameConf);
+	PSM_Init("mitm_enabled", hGameConf);
 	PSM_AddPluginStateChangedHook(OnPluginStateChanged);
 	
 	Entity.Init();
@@ -642,7 +642,7 @@ static void OnPluginStateChanged(bool bEnabled)
 		if (g_pGameRules.IsValid())
 		{
 			char path[PLATFORM_MAX_PATH];
-			sm_mitm_custom_upgrades_file.GetString(path, sizeof(path));
+			mitm_custom_upgrades_file.GetString(path, sizeof(path));
 			
 			if (path[0])
 			{

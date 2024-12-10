@@ -149,7 +149,7 @@ methodmap Party
 	
 	public int GetMaxPlayers()
 	{
-		int iMaxPartySize = sm_mitm_party_max_size.IntValue, iDefenderCount = tf_mvm_defenders_team_size.IntValue;
+		int iMaxPartySize = mitm_party_max_size.IntValue, iDefenderCount = tf_mvm_defenders_team_size.IntValue;
 		return (iMaxPartySize == 0) ? iDefenderCount : Min(iMaxPartySize, iDefenderCount);
 	}
 	
@@ -378,7 +378,7 @@ bool Party_ShouldRunCommand(int client)
 		return false;
 	}
 	
-	if (!sm_mitm_party_enabled.BoolValue)
+	if (!mitm_party_enabled.BoolValue)
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_FeatureDisabled");
 		return false;

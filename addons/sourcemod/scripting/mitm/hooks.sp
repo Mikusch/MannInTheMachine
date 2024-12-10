@@ -29,7 +29,7 @@ void Hooks_Init()
 
 static Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNum, bool reliable, bool init)
 {
-	if (!sm_mitm_rename_robots.BoolValue)
+	if (!mitm_rename_robots.BoolValue)
 		return Plugin_Continue;
 	
 	int client = msg.ReadByte();
@@ -191,7 +191,7 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 
 static void EntityOutput_CTFGameRules_OnStateEnterBetweenRounds(const char[] output, int caller, int activator, float delay)
 {
-	if (!g_bInWaitingForPlayers && sm_mitm_setup_time.IntValue > 0)
+	if (!g_bInWaitingForPlayers && mitm_setup_time.IntValue > 0)
 	{
 		RequestFrame(RequestFrame_StartReadyTimer);
 	}
@@ -206,13 +206,13 @@ static void EntityOutput_CTriggerRemoveTFPlayerCondition_OnStartTouch(const char
 static void RequestFrame_StartReadyTimer()
 {
 	// Automatically start the ready timer
-	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + sm_mitm_setup_time.FloatValue);
+	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + mitm_setup_time.FloatValue);
 	GameRules_SetProp("m_bAwaitingReadyRestart", false);
 	
 	Event event = CreateEvent("teamplay_round_restart_seconds");
 	if (event)
 	{
-		event.SetInt("seconds", sm_mitm_setup_time.IntValue);
+		event.SetInt("seconds", mitm_setup_time.IntValue);
 		event.Fire();
 	}
 }

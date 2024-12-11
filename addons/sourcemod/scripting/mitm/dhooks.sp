@@ -28,6 +28,7 @@ static DynamicHook g_hDHook_CTFPlayer_IsAllowedToPickUpFlag;
 static DynamicHook g_hDHook_CBasePlayer_EntSelectSpawnPoint;
 static DynamicHook g_hDHook_CBaseFilter_PassesFilterImpl;
 static DynamicHook g_hDHook_CTFItem_PickUp;
+static DynamicHook g_hDHook_CTeamplayRoundBasedRules_RespawnPlayers;
 
 static ArrayList m_justSpawnedList;
 
@@ -90,6 +91,7 @@ void DHooks_Init()
 	g_hDHook_CBasePlayer_EntSelectSpawnPoint = PSM_AddDynamicHookFromConf("CBasePlayer::EntSelectSpawnPoint");
 	g_hDHook_CBaseFilter_PassesFilterImpl = PSM_AddDynamicHookFromConf("CBaseFilter::PassesFilterImpl");
 	g_hDHook_CTFItem_PickUp = PSM_AddDynamicHookFromConf("CTFItem::PickUp");
+	g_hDHook_CTeamplayRoundBasedRules_RespawnPlayers = PSM_AddDynamicHookFromConf("CTeamplayRoundBasedRules::RespawnPlayers");
 	
 	DHooks_CopyScriptFunctionBinding("CTFBot", "AddBotAttribute", "CTFPlayer", DHookCallback_CTFBot_AddAttribute_Pre);
 	DHooks_CopyScriptFunctionBinding("CTFBot", "AddBotTag", "CTFPlayer", DHookCallback_CTFBot_AddTag_Pre);
@@ -171,6 +173,12 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 	}
 }
 
+void DHooks_HookGameRules()
+{
+	if (g_hDHook_CTeamplayRoundBasedRules_RespawnPlayers)
+		PSM_DHookGameRules(g_hDHook_CTeamplayRoundBasedRules_RespawnPlayers, Hook_Pre, DHookCallback_CTFGameRules_RespawnPlayers);
+}
+
 static void DHooks_CopyScriptFunctionBinding(const char[] sourceClassName, const char[] functionName, const char[] targetClassName, DHookCallback callbackPre = INVALID_FUNCTION, DHookCallback callbackPost = INVALID_FUNCTION, bool bEmpty = true)
 {
 	VScriptFunction pTargetFunc = VScript_GetClassFunction(targetClassName, functionName);
@@ -212,18 +220,18 @@ static void DHooks_CopyScriptFunctionBinding(const char[] sourceClassName, const
 static void DHooks_CreateScriptDetour(const char[] szClassName, const char[] functionName, DHookCallback callbackPre = INVALID_FUNCTION, DHookCallback callbackPost = INVALID_FUNCTION)
 {
 	DynamicDetour detour;
+	char name[64];
 	
 	if (szClassName[0])
 	{
 		detour = VScript_GetClassFunction(szClassName, functionName).CreateDetour();
+		Format(name, sizeof(name), "%s::%s", szClassName, functionName);
 	}
 	else
 	{
 		detour = VScript_GetGlobalFunction(functionName).CreateDetour();
+		strcopy(name, sizeof(name), functionName);
 	}
-	
-	char name[64];
-	Format(name, sizeof(name), "%s::%s", szClassName, functionName);
 	
 	if (detour)
 	{
@@ -1641,6 +1649,15 @@ static MRESReturn DHookCallback_CCaptureFlag_PickUp_Post(int item, DHookParam pa
 	}
 	
 	return MRES_Ignored;
+}
+
+static MRESReturn DHookCallback_CTFGameRules_RespawnPlayers(DHookParam params)
+{
+	bool bTeam = params.Get(2);
+	TFTeam team = params.Get(3);
+	
+	// do not allow blue team to naturally respawn
+	return bTeam && team == TFTeam_Invaders ? MRES_Supercede : MRES_Ignored;
 }
 
 static MRESReturn DHookCallback_CBaseEntity_SetModel_Post(int entity, DHookParam params)

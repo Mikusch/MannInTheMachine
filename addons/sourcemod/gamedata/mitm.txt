@@ -416,6 +416,11 @@
 				"linux"		"269"
 				"windows"	"231"
 			}
+			"CTeamplayRoundBasedRules::RespawnPlayers"
+			{
+				"linux"		"215"
+				"windows"	"213"
+			}
 			"CBaseCombatCharacter::ClearLastKnownArea"
 			{
 				"linux"		"325"
@@ -1292,6 +1297,28 @@
 					"bInvisible"
 					{
 						"type"	"bool"
+					}
+				}
+			}
+			"CTeamplayRoundBasedRules::RespawnPlayers"
+			{
+				"offset"	"CTeamplayRoundBasedRules::RespawnPlayers"
+				"hooktype"	"gamerules"
+				"return"	"void"
+				"this"		"ignore"
+				"arguments"
+				{
+					"bForceRespawn"
+					{
+						"type"	"bool"
+					}
+					"bTeam"
+					{
+						"type"	"bool"
+					}
+					"iTeam"
+					{
+						"type"	"int"
 					}
 				}
 			}

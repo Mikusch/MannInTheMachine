@@ -234,6 +234,7 @@ public void OnMapStart()
 	g_bInWaitingForPlayers = false;
 	
 	Precache();
+	DHooks_HookGameRules();
 }
 
 public void OnConfigsExecuted()
@@ -657,6 +658,8 @@ static void OnPluginStateChanged(bool bEnabled)
 			
 			OnClientPutInServer(client);
 		}
+		
+		OnMapStart();
 	}
 	else
 	{

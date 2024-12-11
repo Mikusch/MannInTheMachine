@@ -92,7 +92,10 @@ void DHooks_Init()
 	g_hDHook_CBaseFilter_PassesFilterImpl = PSM_AddDynamicHookFromConf("CBaseFilter::PassesFilterImpl");
 	g_hDHook_CTFItem_PickUp = PSM_AddDynamicHookFromConf("CTFItem::PickUp");
 	g_hDHook_CTeamplayRoundBasedRules_RespawnPlayers = PSM_AddDynamicHookFromConf("CTeamplayRoundBasedRules::RespawnPlayers");
-	
+}
+
+void DHooks_VScriptInit()
+{
 	DHooks_CopyScriptFunctionBinding("CTFBot", "AddBotAttribute", "CTFPlayer", DHookCallback_CTFBot_AddAttribute_Pre);
 	DHooks_CopyScriptFunctionBinding("CTFBot", "AddBotTag", "CTFPlayer", DHookCallback_CTFBot_AddTag_Pre);
 	DHooks_CopyScriptFunctionBinding("CTFBot", "AddWeaponRestriction", "CTFPlayer", DHookCallback_CTFBot_SetWeaponRestriction_Pre);
@@ -114,8 +117,6 @@ void DHooks_Init()
 	DHooks_CopyScriptFunctionBinding("CTFBot", "RemoveWeaponRestriction", "CTFPlayer", DHookCallback_CTFBot_RemoveWeaponRestriction_Pre);
 	DHooks_CopyScriptFunctionBinding("CTFBot", "GenerateAndWearItem", "CTFPlayer", _, _, false);
 	DHooks_CopyScriptFunctionBinding("CTFBot", "UpdateDelayedThreatNotices", "CTFPlayer", _, _, true);
-	
-	VScript_ResetScriptVM();
 	
 	DHooks_CreateScriptDetour("CTFPlayer", "IsBotOfType", DHookCallback_CTFBot_IsBotOfType_Pre);
 	DHooks_CreateScriptDetour(NULL_STRING, "IsPlayerABot", DHookCallback_IsPlayerABot_Pre);

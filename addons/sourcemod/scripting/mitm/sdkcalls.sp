@@ -117,7 +117,10 @@ void SDKCalls_Init(GameData hGameConf)
 	g_hSDKCall_CTFBotHintEngineerNest_DetonateStaleNest = PrepSDKCall_CTFBotHintEngineerNest_DetonateStaleNest(hGameConf);
 	g_hSDKCall_CTFGrenadePipebombProjectile_GetLiveTime = PrepSDKCall_CTFGrenadePipebombProjectile_GetLiveTime(hGameConf);
 	g_hSDKCall_CBaseTrigger_PassesTriggerFilters = PrepSDKCall_CBaseTrigger_PassesTriggerFilters(hGameConf);
-	
+}
+
+void SDKCalls_VScriptInit()
+{
 	g_hSDKCall_CBaseCombatWeapon_HasAmmo = PrepSDKCall_FromScriptFunction("CBaseCombatWeapon", "HasAnyAmmo");
 }
 

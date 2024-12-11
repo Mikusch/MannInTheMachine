@@ -231,10 +231,26 @@ public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int maxlen)
 
 public void OnMapStart()
 {
+	if (!PSM_IsEnabled())
+		return;
+	
 	g_bInWaitingForPlayers = false;
 	
 	Precache();
 	DHooks_HookGameRules();
+}
+
+public void VScript_OnScriptVMInitialized()
+{
+	static bool bInitialized = false;
+	
+	if (!PSM_IsEnabled() || bInitialized)
+		return;
+	
+	DHooks_VScriptInit();
+	SDKCalls_VScriptInit();
+	
+	bInitialized = true;
 }
 
 public void OnConfigsExecuted()
@@ -660,6 +676,9 @@ static void OnPluginStateChanged(bool bEnabled)
 		}
 		
 		OnMapStart();
+		
+		if (VScript_IsScriptVMInitialized())
+			VScript_OnScriptVMInitialized();
 	}
 	else
 	{

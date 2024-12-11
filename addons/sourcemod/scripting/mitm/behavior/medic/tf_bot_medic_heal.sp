@@ -25,6 +25,7 @@ methodmap CTFBotMedicHeal < NextBotAction
 	public static void Init()
 	{
 		ActionFactory = new NextBotActionFactory("MedicHeal");
+		ActionFactory.SetCallback(NextBotActionCallbackType_OnStart, OnStart);
 		ActionFactory.SetCallback(NextBotActionCallbackType_Update, Update);
 		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldHurry, ShouldHurry);
 	}
@@ -33,6 +34,21 @@ methodmap CTFBotMedicHeal < NextBotAction
 	{
 		return view_as<CTFBotMedicHeal>(ActionFactory.Create());
 	}
+}
+
+static int OnStart(CTFBotMedicHeal action, int actor, NextBotAction priorAction)
+{
+	int patient = SelectPatient(actor);
+	if (patient != -1)
+	{
+		int medigun = GetPlayerWeaponSlot(actor, TFWeaponSlot_Secondary);
+		if (medigun != -1)
+		{
+			TF2Util_SetPlayerActiveWeapon(actor, medigun);
+		}
+	}
+	
+	return action.Continue();
 }
 
 static int Update(CTFBotMedicHeal action, int actor, float interval)

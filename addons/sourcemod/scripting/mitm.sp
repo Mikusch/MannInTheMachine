@@ -19,7 +19,7 @@
 #pragma newdecls required
 
 #include <sourcemod>
-#include <tf2_stocks>
+#include <tf2>
 #include <sdkhooks>
 #include <clientprefs>
 #include <dhooks>

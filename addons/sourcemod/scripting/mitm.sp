@@ -231,9 +231,6 @@ public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int maxlen)
 
 public void OnMapStart()
 {
-	if (!PSM_IsEnabled())
-		return;
-	
 	g_bInWaitingForPlayers = false;
 	
 	Precache();

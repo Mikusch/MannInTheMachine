@@ -722,20 +722,6 @@ public void OnMapStart()
 	g_flNextClientTick = 0.0;
 	
 	DHooks_HookGamerules();
-	
-	// Add HUD icons to downloadables
-	DirectoryListing directory = OpenDirectory("materials/hud");
-	if (directory)
-	{
-		char file[PLATFORM_MAX_PATH];
-		FileType type;
-		while (directory.GetNext(file, sizeof(file), type))
-		{
-			Format(file, sizeof(file), "materials/hud/%s", file);
-			AddFileToDownloadsTable(file);
-		}
-	}
-	delete directory;
 }
 
 public void OnClientPutInServer(int client)

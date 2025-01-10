@@ -61,10 +61,10 @@ bool g_bInEndlessRollEscalation;
 // Plugin ConVars
 ConVar mitm_developer;
 ConVar mitm_custom_upgrades_file;
-ConVar mitm_spawn_hurry_time;
+ConVar mitm_bot_spawn_hurry_time;
 ConVar mitm_queue_points;
 ConVar mitm_rename_robots;
-ConVar mitm_invader_allow_suicide;
+ConVar mitm_bot_allow_suicide;
 ConVar mitm_party_enabled;
 ConVar mitm_party_max_size;
 ConVar mitm_setup_time;
@@ -72,6 +72,7 @@ ConVar mitm_max_spawn_deaths;
 ConVar mitm_defender_ping_limit;
 ConVar mitm_shield_damage_drain_rate;
 ConVar mitm_bot_taunt_on_upgrade;
+ConVar mitm_romevision;
 
 // Game ConVars
 ConVar tf_avoidteammates_pushaway;

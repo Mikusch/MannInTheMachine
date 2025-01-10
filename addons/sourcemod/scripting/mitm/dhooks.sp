@@ -532,7 +532,7 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 		newBot.StartIdleSound();
 		
 		// Add our items first, they'll get replaced below by the normal MvM items if any are needed
-		if (IsMannVsMachineMode() && (newBot.GetTFTeam() == TFTeam_Invaders))
+		if (IsMannVsMachineMode() && (newBot.GetTFTeam() == TFTeam_Invaders) && mitm_romevision.BoolValue)
 		{
 			// Apply the Rome 2 promo items to each player. They'll be 
 			// filtered out for clients that do not have Romevision.
@@ -1146,7 +1146,7 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 	else
 	{
 		// player is trying to switch from invaders to a different team
-		if (nCurrentTeam == TFTeam_Invaders && nDesiredTeam != nCurrentTeam && !mitm_invader_allow_suicide.BoolValue)
+		if (nCurrentTeam == TFTeam_Invaders && nDesiredTeam != nCurrentTeam && !mitm_bot_allow_suicide.BoolValue)
 		{
 			if (IsPlayerAlive(player))
 				PrintCenterText(player, "%t", "Invader_NotAllowedToSuicide");

@@ -138,7 +138,7 @@ static Action ConCmd_AddQueuePoints(int client, int args)
 
 static Action CommandListener_Suicide(int client, const char[] command, int argc)
 {
-	if (TF2_GetClientTeam(client) == TFTeam_Invaders && !mitm_invader_allow_suicide.BoolValue && !mitm_developer.BoolValue)
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders && !mitm_bot_allow_suicide.BoolValue && !mitm_developer.BoolValue)
 	{
 		// invaders may not suicide
 		PrintCenterText(client, "%t", "Invader_NotAllowedToSuicide");

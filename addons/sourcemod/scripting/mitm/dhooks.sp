@@ -101,6 +101,7 @@ void DHooks_VScriptInit()
 	DHooks_CopyScriptFunctionBinding("CTFBot", "AddWeaponRestriction", "CTFPlayer", DHookCallback_CTFBot_SetWeaponRestriction_Pre);
 	DHooks_CopyScriptFunctionBinding("CTFBot", "ClearAllBotAttributes", "CTFPlayer", DHookCallback_CTFBot_ClearAllAttributes_Pre);
 	DHooks_CopyScriptFunctionBinding("CTFBot", "ClearAllBotTags", "CTFPlayer", DHookCallback_CTFBot_ClearTags_Pre);
+	DHooks_CopyScriptFunctionBinding("CTFBot", "GetAllBotTags", "CTFPlayer", DHookCallback_GetAllBotTags_Pre);
 	DHooks_CopyScriptFunctionBinding("CTFBot", "ClearAllWeaponRestrictions", "CTFPlayer", DHookCallback_CTFBot_ClearWeaponRestrictions);
 	DHooks_CopyScriptFunctionBinding("CTFBot", "DisbandCurrentSquad", "CTFPlayer", DHookCallback_CTFBot_DisbandAndDeleteSquad);
 	DHooks_CopyScriptFunctionBinding("CTFBot", "DelayedThreatNotice", "CTFPlayer", _, _, true);
@@ -1811,6 +1812,27 @@ static MRESReturn DHookCallback_CTFBot_ClearTags_Pre(int bot)
 		return MRES_Ignored;
 	
 	CTFPlayer(bot).ClearTags();
+	
+	return MRES_Supercede;
+}
+
+static MRESReturn DHookCallback_GetAllBotTags_Pre(int bot, DHookParam params)
+{
+	if (IsFakeClient(bot))
+		return MRES_Ignored;
+	
+	HSCRIPT table = params.Get(1);
+	
+	ArrayList tags = CTFPlayer(bot).GetAllBotTags();
+	for (int i = 0; i < tags.Length; ++i)
+	{
+		char key[16], value[64];
+		if (IntToString(i, key, sizeof(key)) && tags.GetString(i, value, sizeof(value)))
+		{
+			table.SetValueString(key, FIELD_CSTRING, value);
+		}
+	}
+	delete tags;
 	
 	return MRES_Supercede;
 }

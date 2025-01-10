@@ -705,6 +705,11 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		this.m_tags.Clear();
 	}
 	
+	public ArrayList GetAllBotTags()
+	{
+		return this.m_tags.Clone();
+	}
+	
 	public void AddTag(const char[] tag)
 	{
 		if (!this.HasTag(tag))

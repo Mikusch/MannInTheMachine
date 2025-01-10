@@ -1445,10 +1445,11 @@ static MRESReturn DHookCallback_DoTeleporterOverride_Post(DHookReturn ret, DHook
 		char szSpawnPointName[64];
 		spawnEnt.GetPropString(Prop_Data, "m_iName", szSpawnPointName, sizeof(szSpawnPointName));
 		
-		for (int iTelePoints = 0; iTelePoints < Entity(obj).GetTeleportWhere().Length; ++iTelePoints)
+		ArrayList teleportWhere = Entity(obj).GetTeleportWhere();
+		for (int iTelePoints = 0; iTelePoints < teleportWhere.Length; ++iTelePoints)
 		{
 			char teleportWhereName[64];
-			Entity(obj).GetTeleportWhere().GetString(iTelePoints, teleportWhereName, sizeof(teleportWhereName));
+			teleportWhere.GetString(iTelePoints, teleportWhereName, sizeof(teleportWhereName));
 			
 			if (StrEqual(teleportWhereName, szSpawnPointName, false))
 			{
@@ -1456,6 +1457,7 @@ static MRESReturn DHookCallback_DoTeleporterOverride_Post(DHookReturn ret, DHook
 				break;
 			}
 		}
+		delete teleportWhere;
 	}
 	
 	if (teleporterList.Length > 0)

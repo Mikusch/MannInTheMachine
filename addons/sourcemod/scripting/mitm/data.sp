@@ -799,7 +799,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public ArrayList GetTeleportWhere()
 	{
-		return this.m_teleportWhereName;
+		return this.m_teleportWhereName.Clone();
 	}
 	
 	public void ClearTeleportWhere()

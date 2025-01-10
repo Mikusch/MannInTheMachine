@@ -764,15 +764,10 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		return this.m_mission;
 	}
 	
-	public void SetMission(MissionType mission, bool resetBehaviorSystem = true)
+	public void SetMission(MissionType mission)
 	{
 		this.SetPrevMission(this.m_mission);
 		this.m_mission = mission;
-		
-		if (resetBehaviorSystem)
-		{
-			this.MyNextBotPointer().GetIntentionInterface().Reset();
-		}
 		
 		// Temp hack - some missions play an idle loop
 		if (this.m_mission > NO_MISSION)

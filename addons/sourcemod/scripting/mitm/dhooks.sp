@@ -2079,7 +2079,7 @@ static MRESReturn DHookCallback_ScriptSetMission_Pre(int bot, DHookParam params)
 	if (IsFakeClient(bot))
 		return MRES_Ignored;
 	
-	CTFPlayer(bot).SetMission(params.Get(1), params.Get(2));
+	CTFPlayer(bot).SetMission(params.Get(1));
 	
 	return MRES_Supercede;
 }

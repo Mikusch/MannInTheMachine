@@ -764,10 +764,15 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		return this.m_mission;
 	}
 	
-	public void SetMission(MissionType mission)
+	public void SetMission(MissionType mission, bool resetBehaviorSystem = true)
 	{
 		this.SetPrevMission(this.m_mission);
 		this.m_mission = mission;
+		
+		if (resetBehaviorSystem)
+		{
+			this.MyNextBotPointer().GetIntentionInterface().Reset();
+		}
 		
 		// Temp hack - some missions play an idle loop
 		if (this.m_mission > NO_MISSION)
@@ -1155,6 +1160,35 @@ methodmap CTFPlayer < CBaseCombatCharacter
 				MultiplyAttributeValue(this.index, "damage bonus", 1.1);
 			}
 		}
+	}
+	
+	public bool IsWeaponRestricted(int weapon)
+	{
+		if (!IsValidEntity(weapon))
+		{
+			return false;
+		}
+		
+		TFClassType iClass = TF2_GetPlayerClass(this.index);
+		int iIndex = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
+		int iLoadoutSlot = TF2Econ_GetItemLoadoutSlot(iIndex, iClass);
+		
+		if (this.HasWeaponRestriction(MELEE_ONLY))
+		{
+			return (iLoadoutSlot != LOADOUT_POSITION_MELEE);
+		}
+		
+		if (this.HasWeaponRestriction(PRIMARY_ONLY))
+		{
+			return (iLoadoutSlot != LOADOUT_POSITION_PRIMARY);
+		}
+		
+		if (this.HasWeaponRestriction(SECONDARY_ONLY))
+		{
+			return (iLoadoutSlot != LOADOUT_POSITION_SECONDARY);
+		}
+		
+		return false;
 	}
 	
 	public bool EquipRequiredWeapon()

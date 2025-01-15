@@ -187,12 +187,12 @@
 		"#format"	"{1:N}"
 		"en"		"{blue}{1} {default}was kicked for dying in the spawn area too many times."
 	}
-	"Invader_CaptureGate_Annotation"
+	"Invader_CaptureGate"
 	{
 		"#format"	"{1:s}"
 		"en"		"Capture {1}"
 	}
-	"Invader_DeliverFlag_Annotation"
+	"Invader_DeliverFlag"
 	{
 		"en"		"Deliver The Bomb To The Hatch"
 	}
@@ -210,7 +210,7 @@
 	}
 	"Invader_DestroySentries_DetonateHere"
 	{
-		"en"		"Detonate here to complete your mission"
+		"en"		"Detonate Here To Complete Your Mission"
 	}
 	"Invader_Queue_Header"
 	{

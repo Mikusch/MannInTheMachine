@@ -1065,7 +1065,7 @@ void ShowGateBotAnnotation(int client)
 				CBaseEntity(trigger).WorldSpaceCenter(center);
 				
 				char text[64];
-				Format(text, sizeof(text), "%T", "Invader_CaptureGate_Annotation", client, iszPrintName);
+				Format(text, sizeof(text), "%T", "Invader_CaptureGate", client, iszPrintName);
 				CTFPlayer(client).ShowAnnotation(MITM_HINT_MASK | client, text, _, center, -1.0, "coach/coach_go_here.wav");
 				return;
 			}

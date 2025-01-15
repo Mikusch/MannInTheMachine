@@ -34,6 +34,7 @@ methodmap CTFBotMainAction < NextBotAction
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
 		ActionFactory.SetCallback(NextBotActionCallbackType_CreateInitialAction, CreateInitialAction);
 		ActionFactory.SetEventCallback(EventResponderType_OnKilled, OnKilled);
+		ActionFactory.SetEventCallback(EventResponderType_OnInjured, OnInjured);
 		ActionFactory.SetEventCallback(EventResponderType_OnContact, OnContact);
 		ActionFactory.SetEventCallback(EventResponderType_OnOtherKilled, OnOtherKilled);
 		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldAttack, ShouldAttack);
@@ -217,6 +218,16 @@ static void CreateInitialAction(CTFBotMainAction action)
 static int OnKilled(CTFBotMainAction action, int actor, int attacker, int inflictor, float damage, int damagetype)
 {
 	return action.TryChangeTo(CTFBotDead(), RESULT_CRITICAL, "I died!");
+}
+
+static int OnInjured(CTFBotMainAction action, int actor, int attacker, int inflictor, float damage, int damagetype, int weapon, const float damageForce[3], const float damagePosition[3], int damagecustom)
+{
+	if (damagecustom & TF_CUSTOM_BACKSTAB)
+	{
+		CTFPlayer(actor).DelayedThreatNotice(inflictor, 0.5, "Invader_DelayedThreatNotice_Spy");
+	}
+	
+	return action.TryContinue();
 }
 
 static int OnContact(CTFBotMainAction action, int actor, int other, Address result)

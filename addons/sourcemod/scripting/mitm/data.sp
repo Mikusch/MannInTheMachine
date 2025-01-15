@@ -1404,7 +1404,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		return -1;
 	}
 	
-	public void DelayedThreatNotice(int who, float noticeDelay, const char[] reason)
+	public void DelayedThreatNotice(int who, float noticeDelay, const char[] reason = "")
 	{
 		float when = GetGameTime() + noticeDelay;
 		
@@ -1450,7 +1450,8 @@ methodmap CTFPlayer < CBaseCombatCharacter
 					if (IsValidEntity(who))
 					{
 						char reason[64];
-						Format(reason, sizeof(reason), "%T", info.m_reason, this.index);
+						Format(reason, sizeof(reason), "%T", info.m_reason[0] ? info.m_reason : "Invader_DelayedThreatNotice_Generic", this.index);
+						
 						this.ShowAnnotation(MITM_HINT_MASK | this.index, reason, who, _, 5.0, "coach/coach_attack_here.wav", false);
 					}
 					

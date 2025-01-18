@@ -220,11 +220,14 @@ static int OnKilled(CTFBotMainAction action, int actor, int attacker, int inflic
 	return action.TryChangeTo(CTFBotDead(), RESULT_CRITICAL, "I died!");
 }
 
-static int OnInjured(CTFBotMainAction action, int actor, int attacker, int inflictor, float damage, int damagetype, int weapon, const float damageForce[3], const float damagePosition[3], int damagecustom)
+static int OnInjured(CTFBotMainAction action, CBaseCombatCharacter actor, CBaseEntity attacker, CBaseEntity inflictor, float damage, int damagetype, CBaseEntity weapon, const float damageForce[3], const float damagePosition[3], int damagecustom)
 {
-	if (damagecustom & TF_CUSTOM_BACKSTAB)
+	if (inflictor.IsValid() && inflictor.GetProp(Prop_Data, "m_iTeamNum") != actor.GetProp(Prop_Data, "m_iTeamNum"))
 	{
-		CTFPlayer(actor).DelayedThreatNotice(inflictor, 0.5, "Invader_DelayedThreatNotice_Spy");
+		if (damagecustom & TF_CUSTOM_BACKSTAB)
+		{
+			CTFPlayer(actor).DelayedThreatNotice(inflictor, 0.5, "Invader_DelayedThreatNotice_Spy");
+		}
 	}
 	
 	return action.TryContinue();

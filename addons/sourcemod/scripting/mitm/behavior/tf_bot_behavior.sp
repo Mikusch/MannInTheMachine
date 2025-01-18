@@ -224,7 +224,7 @@ static int OnInjured(CTFBotMainAction action, CBaseCombatCharacter actor, CBaseE
 {
 	if (inflictor.IsValid() && inflictor.GetProp(Prop_Data, "m_iTeamNum") != actor.GetProp(Prop_Data, "m_iTeamNum"))
 	{
-		if (damagecustom & TF_CUSTOM_BACKSTAB)
+		if (damagecustom == TF_CUSTOM_BACKSTAB)
 		{
 			CTFPlayer(actor).DelayedThreatNotice(inflictor, 0.5, "Invader_DelayedThreatNotice_Spy");
 		}

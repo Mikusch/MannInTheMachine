@@ -40,14 +40,17 @@ ArrayList Queue_GetDefenderQueue()
 		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
 			continue;
 		
+		int iPartySize = CTFPlayer(client).IsInAParty() ? CTFPlayer(client).GetParty().GetMemberCount() : 0;
+		
+		// apply ping limit, unless player is in a full party
+		if (!IsFakeClient(client) && (GetClientAvgLatency(client, NetFlow_Outgoing) * 1000.0) >= mitm_defender_ping_limit.FloatValue && iPartySize < mitm_party_max_size.IntValue)
+			continue;
+		
 		// ignore players in a party, they get handled separately
-		if (CTFPlayer(client).IsInAParty() && CTFPlayer(client).GetParty().GetMemberCount() > 1)
+		if (iPartySize > 1)
 			continue;
 		
 		if (CTFPlayer(client).HasPreference(PREF_DEFENDER_DISABLE_QUEUE) || CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
-			continue;
-		
-		if (!IsFakeClient(client) && (GetClientAvgLatency(client, NetFlow_Outgoing) * 1000.0) >= mitm_defender_ping_limit.FloatValue)
 			continue;
 		
 		if (!Forwards_OnIsValidDefender(client))

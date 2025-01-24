@@ -137,9 +137,11 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 					float velocity[3];
 					CTFPlayer(actor).GetAbsVelocity(velocity);
 					
-					// as long as they are moving, slow down the timer drastically
-					float flTimeToSubtract = GetVectorLength(velocity) >= GetEntPropFloat(actor, Prop_Send, "m_flMaxspeed") ? (interval / 4) : interval;
-					CTFPlayer(actor).m_flSpawnTimeLeft -= flTimeToSubtract;
+					float flMaxSpeed = GetEntPropFloat(actor, Prop_Send, "m_flMaxspeed");
+					
+					// as long as they are moving, don't tick down the timer
+					if (flMaxSpeed > 1.0 && GetVectorLength(velocity) < flMaxSpeed)
+						CTFPlayer(actor).m_flSpawnTimeLeft -= interval;
 					
 					if (CTFPlayer(actor).m_flSpawnTimeLeft <= 0.0)
 					{

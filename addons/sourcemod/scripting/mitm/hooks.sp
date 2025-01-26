@@ -29,13 +29,10 @@ void Hooks_Init()
 
 static Action OnSayText2(UserMsg msg_id, BfRead msg, const int[] players, int clientsNum, bool reliable, bool init)
 {
-	if (!mitm_rename_robots.BoolValue)
-		return Plugin_Continue;
-	
 	int client = msg.ReadByte();
 	bool bWantsToChat = view_as<bool>(msg.ReadByte());
 	
-	if (!bWantsToChat && CTFPlayer(client).IsInvader())
+	if (!bWantsToChat && CTFPlayer(client).HasInvaderName())
 	{
 		char szBuf[MAX_MESSAGE_LENGTH];
 		msg.ReadString(szBuf, sizeof(szBuf));

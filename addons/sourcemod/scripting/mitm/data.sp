@@ -901,15 +901,20 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		return strcopy(buffer, maxlen, m_invaderName[this.index]) != 0;
 	}
 	
+	public bool HasInvaderName()
+	{
+		return m_invaderName[this.index][0];
+	}
+	
 	public void ResetInvaderName()
 	{
-		m_invaderName[this.index][0] = EOS;
-		
 		if (m_prevName[this.index][0])
 		{
 			SetClientName(this.index, m_prevName[this.index]);
 			m_prevName[this.index][0] = EOS;
 		}
+		
+		m_invaderName[this.index][0] = EOS;
 	}
 	
 	public DifficultyType GetDifficulty()

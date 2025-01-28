@@ -65,6 +65,7 @@ ConVar mitm_bot_spawn_hurry_time;
 ConVar mitm_queue_points;
 ConVar mitm_rename_robots;
 ConVar mitm_bot_allow_suicide;
+ConVar mitm_queue_enabled;
 ConVar mitm_party_enabled;
 ConVar mitm_party_max_size;
 ConVar mitm_setup_time;

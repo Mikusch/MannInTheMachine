@@ -66,6 +66,7 @@ static CountdownTimer m_altFireButtonTimer[MAXPLAYERS + 1];
 static CountdownTimer m_specialFireButtonTimer[MAXPLAYERS + 1];
 
 // Non-resetting Properties
+static int m_defenderPriority[MAXPLAYERS + 1];
 static int m_invaderPriority[MAXPLAYERS + 1];
 static int m_invaderMiniBossPriority[MAXPLAYERS + 1];
 static int m_defenderQueuePoints[MAXPLAYERS + 1];
@@ -282,6 +283,18 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		public set(int spawnPoint)
 		{
 			m_spawnPointEntity[this.index] = spawnPoint;
+		}
+	}
+	
+	property int m_defenderPriority
+	{
+		public get()
+		{
+			return m_defenderPriority[this.index];
+		}
+		public set(int defenderPriority)
+		{
+			m_defenderPriority[this.index] = defenderPriority;
 		}
 	}
 	
@@ -626,7 +639,9 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public bool IsValidDefender()
 	{
-		return !this.HasPreference(PREF_DEFENDER_DISABLE_QUEUE)
+		return !IsClientSourceTV(this.index)
+			&& this.GetTFTeam() != TFTeam_Unassigned
+			&& !this.HasPreference(PREF_DEFENDER_DISABLE_QUEUE)
 			&& !this.HasPreference(PREF_SPECTATOR_MODE)
 			&& Forwards_OnIsValidDefender(this.index);
 	}
@@ -1799,6 +1814,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public void OnClientPutInServer()
 	{
+		this.m_defenderPriority = 0;
 		this.m_invaderPriority = 0;
 		this.m_invaderMiniBossPriority = 0;
 		this.m_defenderQueuePoints = 0;

@@ -295,186 +295,6 @@ TFTeam GetEnemyTeam(TFTeam team)
 	}
 }
 
-void SelectNewDefenders()
-{
-	// Move everyone to spectator team
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
-			continue;
-		
-		TF2_ForceChangeClientTeam(client, TFTeam_Spectator);
-	}
-	
-	CPrintToChatAll("%s %t", PLUGIN_TAG, "Queue_NewDefenders");
-	
-	char redTeamname[MAX_TEAM_NAME_LENGTH], blueTeamname[MAX_TEAM_NAME_LENGTH];
-	mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
-	mp_tournament_blueteamname.GetString(blueTeamname, sizeof(blueTeamname));
-	
-	ArrayList players = new ArrayList();
-	
-	// Collect all valid players
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		if (IsClientSourceTV(client))
-			continue;
-		
-		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
-			continue;
-		
-		players.Push(client);
-	}
-	
-	ArrayList queue = Queue_GetDefenderQueue();
-	int iDefenderCount = 0, iReqDefenderCount = tf_mvm_defenders_team_size.IntValue;
-	
-	// Select our defenders
-	for (int i = 0; i < queue.Length; i++)
-	{
-		int client = queue.Get(i, QueueData::m_client);
-		Party party = queue.Get(i, QueueData::m_party);
-		
-		// All members of a party queue together
-		if (party.IsValid())
-		{
-			// Only let parties play if all members have space to join
-			if (iReqDefenderCount - iDefenderCount - party.GetMemberCount(false) < 0)
-				continue;
-			
-			int[] members = new int[MaxClients];
-			int count = party.CollectMembers(members, false);
-			for (int j = 0; j < count; j++)
-			{
-				int member = members[j];
-				
-				TF2_ForceChangeClientTeam(member, TFTeam_Defenders);
-				CTFPlayer(member).SetQueuePoints(0);
-				CPrintToChat(member, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
-				
-				players.Erase(players.FindValue(member));
-				++iDefenderCount;
-			}
-		}
-		else
-		{
-			TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
-			CTFPlayer(client).SetQueuePoints(0);
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
-			
-			players.Erase(players.FindValue(client));
-			++iDefenderCount;
-		}
-		
-		// If we have enough defenders, early out
-		if (iReqDefenderCount <= iDefenderCount)
-			break;
-	}
-	
-	// We have less defenders than we wanted.
-	// Pick random players, regardless of their defender preference.
-	if (iDefenderCount < iReqDefenderCount)
-	{
-		players.Sort(Sort_Random, Sort_Integer);
-		
-		for (int i = 0; i < players.Length; i++)
-		{
-			int client = players.Get(i);
-			
-			if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
-				continue;
-			
-			// Keep filling slots until our quota is met
-			if (iDefenderCount++ < iReqDefenderCount)
-			{
-				TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
-				CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender_Forced", redTeamname);
-				
-				players.Erase(i);
-			}
-		}
-	}
-	
-	if (iDefenderCount < iReqDefenderCount)
-	{
-		LogError("Not enough players to meet defender quota (%d/%d)", iDefenderCount, iReqDefenderCount);
-	}
-	
-	// Move everyone else to the spectator team
-	for (int i = 0; i < players.Length; i++)
-	{
-		int client = players.Get(i);
-		
-		TF2_ForceChangeClientTeam(client, TFTeam_Spectator);
-		
-		if (!CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
-		{
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname);
-		}
-	}
-	
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		if (TF2_GetClientTeam(client) != TFTeam_Defenders)
-			continue;
-		
-		// Show class selection menu
-		if (TF2_GetPlayerClass(client) == TFClass_Unknown)
-		{
-			ShowVGUIPanel(client, "class_red");
-		}
-	}
-	
-	// Free the memory
-	delete players;
-	delete queue;
-}
-
-void FindReplacementDefender()
-{
-	ArrayList queue = Queue_GetDefenderQueue();
-	for (int i = 0; i < queue.Length; i++)
-	{
-		int client = queue.Get(i, QueueData::m_client);
-		
-		// Exclude parties in queue
-		if (client == -1 || CTFPlayer(client).IsInAParty())
-			continue;
-		
-		if (TF2_GetClientTeam(client) != TFTeam_Spectator)
-			continue;
-		
-		if (CTFPlayer(client).HasPreference(PREF_DEFENDER_DISABLE_REPLACEMENT))
-			continue;
-		
-		// Don't force switch because we want GetTeamAssignmentOverride to decide
-		TF2_ChangeClientTeam(client, TFTeam_Defenders);
-		
-		// Validate that they were successfully switched
-		if (TF2_GetClientTeam(client) == TFTeam_Defenders)
-		{
-			CTFPlayer(client).SetQueuePoints(CTFPlayer(client).GetQueuePoints() / 2);
-			
-			char redTeamname[MAX_TEAM_NAME_LENGTH];
-			mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender_Replacement", redTeamname);
-			
-			break;
-		}
-	}
-	
-	delete queue;
-}
-
 ArrayList GetInvaderQueue(bool bIsMiniBoss = false)
 {
 	ArrayList queue = new ArrayList();
@@ -1314,4 +1134,123 @@ void ShowProgressBar(int client, const char[] szTitle, float flProgress, float i
 	
 	SetHudTextParams(-1.0, CTFPlayer(client).HasTheFlag() ? 0.65 : 0.75, interval, 255, 255, 255, 255);
 	ShowSyncHudText(client, g_hWarningHudSync, "%t\n%s", szTitle, szProgressBar);
+}
+
+void SelectRandomDefenders()
+{
+	char redTeamname[MAX_TEAM_NAME_LENGTH], blueTeamname[MAX_TEAM_NAME_LENGTH];
+	mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
+	mp_tournament_blueteamname.GetString(blueTeamname, sizeof(blueTeamname));
+	
+	ArrayList players = new ArrayList();
+	
+	// Collect all valid players
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (IsClientSourceTV(client))
+			continue;
+		
+		players.Push(client);
+	}
+	
+	int iDefenderCount = 0, iReqDefenderCount = tf_mvm_defenders_team_size.IntValue;
+	
+	players.SortCustom(SortPlayersByDefenderPriority);
+	
+	for (int i = 0; i < players.Length; i++)
+	{
+		int client = players.Get(i);
+		
+		if (!CTFPlayer(client).IsValidDefender())
+			continue;
+		
+		// Keep filling slots until our quota is met
+		if (iDefenderCount++ >= iReqDefenderCount)
+			break;
+		
+		TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
+		CTFPlayer(client).m_defenderPriority = 0;
+		CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender", redTeamname);
+		
+		players.Erase(i);
+	}
+	
+	// We have less defenders than we wanted.
+	// Pick random players, regardless of their defender preference.
+	if (iDefenderCount < iReqDefenderCount)
+	{
+		for (int i = 0; i < players.Length; i++)
+		{
+			int client = players.Get(i);
+			
+			// Never force spectators
+			if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
+				continue;
+			
+			// Keep filling slots until our quota is met
+			if (iDefenderCount++ >= iReqDefenderCount)
+				break;
+			
+			TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender_Forced", redTeamname);
+			
+			players.Erase(i);
+		}
+	}
+	
+	if (iDefenderCount < iReqDefenderCount)
+	{
+		LogError("Not enough players to meet defender quota (%d/%d)", iDefenderCount, iReqDefenderCount);
+	}
+	
+	delete players;
+}
+
+void FindReplacementDefender()
+{
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (TF2_GetClientTeam(client) != TFTeam_Spectator)
+			continue;
+		
+		if (!CTFPlayer(client).IsValidDefender())
+			continue;
+		
+		// Don't force switch because we want GetTeamAssignmentOverride to decide
+		TF2_ChangeClientTeam(client, TFTeam_Defenders);
+		
+		// Validate that they were successfully switched
+		if (TF2_GetClientTeam(client) == TFTeam_Defenders)
+		{
+			CTFPlayer(client).m_defenderPriority = 0;
+			
+			char redTeamname[MAX_TEAM_NAME_LENGTH];
+			mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender_Replacement", redTeamname);
+			
+			break;
+		}
+	}
+}
+
+static int SortPlayersByDefenderPriority(int index1, int index2, Handle array, Handle hndl)
+{
+	ArrayList list = view_as<ArrayList>(array);
+	int client1 = list.Get(index1);
+	int client2 = list.Get(index2);
+	
+	// Sort by highest priority
+	int c = Compare(CTFPlayer(client2).m_defenderPriority, CTFPlayer(client1).m_defenderPriority);
+	if (c == 0)
+	{
+		c = GetRandomInt(-1, 1);
+	}
+	
+	return c;
 }

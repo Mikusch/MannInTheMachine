@@ -227,14 +227,23 @@ static void EventHook_WinPanel(Event event, const char[] name, bool dontBroadcas
 		if (!Forwards_OnIsValidDefender(client))
 			continue;
 		
-		player.AddQueuePoints(points);
-		CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_AwardedQueuePoints", points, player.GetQueuePoints());
+		if (Queue_IsEnabled())
+		{
+			player.AddQueuePoints(points);
+		}
+		else
+		{
+			CTFPlayer(client).m_defenderPriority++;
+		}
 	}
 }
 
 static void RequestFrameCallback_FindReplacementDefender()
 {
-	FindReplacementDefender();
+	if (Queue_IsEnabled())
+		Queue_FindReplacementDefender();
+	else
+		FindReplacementDefender();
 }
 
 static Action Timer_CheckGateBotAnnotation(Handle timer, int userid)

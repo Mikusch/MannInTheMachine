@@ -365,6 +365,11 @@ void Party_Init()
 	RegConsoleCmd("sm_party_name", ConCmd_PartyName, "Rename your party.");
 }
 
+bool Party_IsEnabled()
+{
+	return mitm_party_enabled.BoolValue && mitm_queue_enabled.BoolValue;
+}
+
 ArrayList Party_GetAllActiveParties()
 {
 	return g_parties.Clone();
@@ -378,7 +383,7 @@ bool Party_ShouldRunCommand(int client)
 		return false;
 	}
 	
-	if (!mitm_party_enabled.BoolValue)
+	if (!Party_IsEnabled())
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_FeatureDisabled");
 		return false;

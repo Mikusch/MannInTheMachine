@@ -28,6 +28,7 @@ void ConVars_Init()
 	mitm_queue_points = CreateConVar("mitm_queue_points", "5", "Amount of queue points awarded to players that did not become defenders.", _, true, 1.0);
 	mitm_rename_robots = CreateConVar("mitm_rename_robots", "0", "Whether to rename robots as they spawn.");
 	mitm_bot_allow_suicide = CreateConVar("mitm_bot_allow_suicide", "0", "Whether to allow bots to suicide.");
+	mitm_queue_enabled = CreateConVar("mitm_queue_enabled", "1", "Whether to enable the defender queue. If set to 0, players will be randomly selected.");
 	mitm_party_enabled = CreateConVar("mitm_party_enabled", "1", "Whether to allow players to create and join parties.");
 	mitm_party_max_size = CreateConVar("mitm_party_max_size", "0", "Maximum size of player parties.", _, true, 0.0, true, 10.0);
 	mitm_setup_time = CreateConVar("mitm_setup_time", "150", "Time for defenders to set up before the round automatically starts.");

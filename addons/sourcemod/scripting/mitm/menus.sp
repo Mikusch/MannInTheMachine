@@ -18,21 +18,26 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+#define MENU_INFO_QUEUE			"queue"
+#define MENU_INFO_PREFERENCES	"preferences"
+#define MENU_INFO_PARTY			"party"
+#define MENU_INFO_CREDITS		"credits"
+
 void Menus_DisplayMainMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_MainMenu, MenuAction_Select | MenuAction_End | MenuAction_DisplayItem);
 	
 	menu.SetTitle("%t\n%t", "Menu_Header", "Menu_Main_Title");
 	
-	menu.AddItem("queue", "Menu_Main_Queue");
-	menu.AddItem("preferences", "Menu_Main_Preferences");
+	if (Queue_IsEnabled())
+		menu.AddItem(MENU_INFO_QUEUE, "Menu_Main_Queue");
 	
-	if (mitm_party_enabled.BoolValue)
-	{
-		menu.AddItem("party", "Menu_Main_Party");
-	}
+	menu.AddItem(MENU_INFO_PREFERENCES, "Menu_Main_Preferences");
 	
-	menu.AddItem("credits", "Menu_Main_Credits");
+	if (Party_IsEnabled())
+		menu.AddItem(MENU_INFO_PARTY, "Menu_Main_Party");
+	
+	menu.AddItem(MENU_INFO_CREDITS, "Menu_Main_Credits");
 	
 	menu.Display(client, MENU_TIME_FOREVER);
 }
@@ -46,19 +51,19 @@ static int MenuHandler_MainMenu(Menu menu, MenuAction action, int param1, int pa
 			char info[32];
 			menu.GetItem(param2, info, sizeof(info));
 			
-			if (StrEqual(info, "queue"))
+			if (StrEqual(info, MENU_INFO_QUEUE))
 			{
 				Menus_DisplayQueueMenu(param1);
 			}
-			else if (StrEqual(info, "preferences"))
+			else if (StrEqual(info, MENU_INFO_PREFERENCES))
 			{
 				Menus_DisplayPreferencesMenu(param1);
 			}
-			else if (StrEqual(info, "party"))
+			else if (StrEqual(info, MENU_INFO_PARTY))
 			{
 				Menus_DisplayPartyMenu(param1);
 			}
-			else if (StrEqual(info, "credits"))
+			else if (StrEqual(info, MENU_INFO_CREDITS))
 			{
 				Menus_DisplayCreditsMenu(param1);
 			}
@@ -235,7 +240,10 @@ void Menus_DisplayPreferencesMenu(int client)
 	AddPreferenceToMenu(menu, PREF_SPECTATOR_MODE, "Preference_SpectatorMode");
 	AddPreferenceToMenu(menu, PREF_INVADER_DISABLE_MINIBOSS, "Preference_DisableMiniBoss");
 	AddPreferenceToMenu(menu, PREF_DISABLE_ANNOTATIONS, "Preference_DisableAnnotations");
-	AddPreferenceToMenu(menu, PREF_IGNORE_PARTY_INVITES, "Preference_IgnorePartyInvites");
+	
+	if (Party_IsEnabled())
+		AddPreferenceToMenu(menu, PREF_IGNORE_PARTY_INVITES, "Preference_IgnorePartyInvites");
+	
 	AddPreferenceToMenu(menu, PREF_DEFENDER_DISABLE_REPLACEMENT, "Preference_DisableDefenderReplacement");
 	AddPreferenceToMenu(menu, PREF_INVADER_DISABLE_CUSTOM_VIEWMODELS, "Preference_DisableCustomViewModels");
 	

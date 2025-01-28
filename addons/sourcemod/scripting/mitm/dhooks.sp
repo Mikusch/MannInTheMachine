@@ -307,7 +307,24 @@ static MRESReturn DHookCallback_CPopulationManager_RestoreCheckpoint_Pre(int pop
 			tf_mvm_min_players_to_start.IntValue = 0;
 		}
 		
-		SelectNewDefenders();
+		// Move everyone to spectator team
+		for (int client = 1; client <= MaxClients; client++)
+		{
+			if (!IsClientInGame(client))
+				continue;
+			
+			if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
+				continue;
+			
+			TF2_ForceChangeClientTeam(client, TFTeam_Spectator);
+		}
+		
+		CPrintToChatAll("%s %t", PLUGIN_TAG, "Queue_NewDefenders");
+		
+		if (Queue_IsEnabled())
+			Queue_SelectNewDefenders();
+		else
+			SelectRandomDefenders();
 	}
 	else
 	{

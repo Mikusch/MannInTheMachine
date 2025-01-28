@@ -56,6 +56,12 @@ static Action ConCmd_Queue(int client, int args)
 	if (!PSM_IsEnabled())
 		return Plugin_Continue;
 	
+	if (!Queue_IsEnabled())
+	{
+		ReplyToCommand(client, "%t", "Queue_FeatureDisabled");
+		return Plugin_Continue;
+	}
+	
 	if (client == 0)
 	{
 		ReplyToCommand(client, "%t", "Command is in-game only");

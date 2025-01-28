@@ -111,6 +111,25 @@
 	{
 		"en"		"Use human viewmodels as robot"
 	}
+	"SelectedAsDefender"
+	{
+		"#format"	"{1:s}"
+		"en"	"You have been assigned to team {red}{1}{default}."
+	}
+	"SelectedAsDefender_Forced"
+	{
+		"#format"	"{1:s}"
+		"en"	"You have been forcibly assigned to team {red}{1}{default}."
+	}
+	"SelectedAsDefender_Replacement"
+	{
+		"#format"	"{1:s}"
+		"en"	"You have been assigned to team {red}{1}{default} to fill a vacant slot."
+	}
+	"Queue_FeatureDisabled"
+	{
+		"en"		"The queue is currently disabled."
+	}
 	"Queue_NewDefenders"
 	{
 		"en"		"Selecting a new set of defenders..."

@@ -626,9 +626,9 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public bool IsValidDefender()
 	{
-		return !CTFPlayer(player).HasPreference(PREF_DEFENDER_DISABLE_QUEUE)
-			&& !CTFPlayer(player).HasPreference(PREF_SPECTATOR_MODE)
-			&& Forwards_IsValidDefender(player);
+		return !this.HasPreference(PREF_DEFENDER_DISABLE_QUEUE)
+			&& !this.HasPreference(PREF_SPECTATOR_MODE)
+			&& Forwards_OnIsValidDefender(this.index);
 	}
 	
 	public float GetSpawnTime()

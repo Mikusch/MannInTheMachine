@@ -50,10 +50,7 @@ ArrayList Queue_GetDefenderQueue()
 		if (iPartySize > 1)
 			continue;
 		
-		if (CTFPlayer(client).HasPreference(PREF_DEFENDER_DISABLE_QUEUE) || CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
-			continue;
-		
-		if (!Forwards_OnIsValidDefender(client))
+		if (!CTFPlayer(client).IsValidDefender())
 			continue;
 		
 		QueueData data;

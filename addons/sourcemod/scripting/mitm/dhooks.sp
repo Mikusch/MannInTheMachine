@@ -1157,7 +1157,7 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 		
 		if (nDesiredTeam == TFTeam_Defenders)
 		{
-			if (!Forwards_OnIsValidDefender(player))
+			if (!CTFPlayer(player).IsValidDefender())
 			{
 				ret.Value = TFTeam_Spectator;
 				return MRES_Supercede;
@@ -1175,10 +1175,7 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 			}
 			
 			// players can join defenders freely if a slot is open
-			if (iDefenderCount >= tf_mvm_defenders_team_size.IntValue ||
-				CTFPlayer(player).IsInAParty() ||
-				CTFPlayer(player).HasPreference(PREF_DEFENDER_DISABLE_QUEUE) ||
-				CTFPlayer(player).HasPreference(PREF_SPECTATOR_MODE))
+			if (iDefenderCount >= tf_mvm_defenders_team_size.IntValue || CTFPlayer(player).IsInAParty() && CTFPlayer(client).GetParty().GetMemberCount() > 1)
 			{
 				ret.Value = TFTeam_Spectator;
 				return MRES_Supercede;

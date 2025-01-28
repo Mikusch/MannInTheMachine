@@ -624,6 +624,13 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		g_hCookieQueue.SetInt(this.index, this.m_defenderQueuePoints);
 	}
 	
+	public bool IsValidDefender()
+	{
+		return !CTFPlayer(player).HasPreference(PREF_DEFENDER_DISABLE_QUEUE)
+			&& !CTFPlayer(player).HasPreference(PREF_SPECTATOR_MODE)
+			&& Forwards_IsValidDefender(player);
+	}
+	
 	public float GetSpawnTime()
 	{
 		return this.m_flSpawnTime;

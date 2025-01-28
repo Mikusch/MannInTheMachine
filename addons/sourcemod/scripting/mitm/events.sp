@@ -221,7 +221,7 @@ static void EventHook_WinPanel(Event event, const char[] name, bool dontBroadcas
 		if (!player.IsInvader())
 			continue;
 		
-		if (player.HasPreference(PREF_DEFENDER_DISABLE_QUEUE) && !player.IsInAParty())
+		if (player.HasPreference(PREF_DEFENDER_DISABLE_QUEUE) && (!player.IsInAParty() || player.GetParty().GetMemberCount() <= 1))
 			continue;
 		
 		if (!Forwards_OnIsValidDefender(client))

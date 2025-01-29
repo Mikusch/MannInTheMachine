@@ -1138,13 +1138,8 @@ void ShowProgressBar(int client, const char[] szTitle, float flProgress, float i
 
 void SelectRandomDefenders()
 {
-	char redTeamname[MAX_TEAM_NAME_LENGTH], blueTeamname[MAX_TEAM_NAME_LENGTH];
-	mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
-	mp_tournament_blueteamname.GetString(blueTeamname, sizeof(blueTeamname));
-	
 	ArrayList players = new ArrayList();
 	
-	// Collect all valid players
 	for (int client = 1; client <= MaxClients; client++)
 	{
 		if (!IsClientInGame(client))
@@ -1156,10 +1151,10 @@ void SelectRandomDefenders()
 		players.Push(client);
 	}
 	
+	players.SortCustom(SortPlayersByDefenderPriority);
 	int iDefenderCount = 0, iReqDefenderCount = tf_mvm_defenders_team_size.IntValue;
 	
-	players.SortCustom(SortPlayersByDefenderPriority);
-	
+	// Select our defenders
 	for (int i = 0; i < players.Length; i++)
 	{
 		int client = players.Get(i);
@@ -1173,7 +1168,7 @@ void SelectRandomDefenders()
 		
 		TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
 		CTFPlayer(client).m_defenderPriority = 0;
-		CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender", redTeamname);
+		CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender");
 		
 		players.Erase(i);
 	}
@@ -1186,7 +1181,6 @@ void SelectRandomDefenders()
 		{
 			int client = players.Get(i);
 			
-			// Never force spectators
 			if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 				continue;
 			
@@ -1195,7 +1189,7 @@ void SelectRandomDefenders()
 				break;
 			
 			TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender_Forced", redTeamname);
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender_Forced");
 			
 			players.Erase(i);
 		}
@@ -1211,8 +1205,25 @@ void SelectRandomDefenders()
 
 void FindReplacementDefender()
 {
+	ArrayList players = new ArrayList();
+	
 	for (int client = 1; client <= MaxClients; client++)
 	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (IsClientSourceTV(client))
+			continue;
+		
+		players.Push(client);
+	}
+	
+	players.SortCustom(SortPlayersByDefenderPriority);
+	
+	for (int i = 0; i < players.Length; i++)
+	{
+		int client = players.Get(i);
+		
 		if (!IsClientInGame(client))
 			continue;
 		
@@ -1229,14 +1240,12 @@ void FindReplacementDefender()
 		if (TF2_GetClientTeam(client) == TFTeam_Defenders)
 		{
 			CTFPlayer(client).m_defenderPriority = 0;
-			
-			char redTeamname[MAX_TEAM_NAME_LENGTH];
-			mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender_Replacement", redTeamname);
-			
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender_Replacement");
 			break;
 		}
 	}
+	
+	delete players;
 }
 
 static int SortPlayersByDefenderPriority(int index1, int index2, Handle array, Handle hndl)

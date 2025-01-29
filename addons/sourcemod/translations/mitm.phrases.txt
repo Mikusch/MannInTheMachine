@@ -113,53 +113,42 @@
 	}
 	"SelectedAsDefender"
 	{
-		"#format"	"{1:s}"
-		"en"	"You have been assigned to team {red}{1}{default}."
+		"en"	"You have been assigned to the {red}MANN CO.{default} team."
 	}
 	"SelectedAsDefender_Forced"
 	{
-		"#format"	"{1:s}"
-		"en"	"You have been forcibly assigned to team {red}{1}{default}."
+		"en"	"You have been forcibly assigned to the {red}MANN CO.{default} team because not enough players were eligible to play."
 	}
 	"SelectedAsDefender_Replacement"
 	{
-		"#format"	"{1:s}"
-		"en"	"You have been assigned to team {red}{1}{default} to fill a vacant slot."
+		"en"	"You have been moved to the {red}MANN CO.{default} team to fill a vacant slot."
+	}
+	"SelectedAsInvader"
+	{
+		"en"		"You have been assigned to the {blue}ROBOT{default} team."
 	}
 	"Queue_FeatureDisabled"
 	{
-		"en"		"The queue is currently disabled."
+		"en"		"The queue system is currently disabled."
 	}
 	"Queue_NewDefenders"
 	{
 		"en"		"Selecting a new set of defenders..."
 	}
-	"Queue_SelectedAsDefender"
+	"Queue_PointsReset"
 	{
-		"#format"	"{1:s}"
-		"en"		"You have been assigned to team {red}{1}{default}. Your queue points have been reset."
+		"en"		"Your queue points have been reset."
 	}
-	"Queue_SelectedAsDefender_Replacement"
+	"Queue_PointsHalved"
 	{
-		"#format"	"{1:s}"
-		"en"		"You have been assigned to team {red}{1}{default} to fill a vacant slot. Your queue points have been halved."
+		"en"		"Your queue points have been halved."
 	}
-	"Queue_SelectedAsDefender_Forced"
-	{
-		"#format"	"{1:s}"
-		"en"		"You have been forcibly assigned to team {red}{1}{default} because not enough players were eligible to play. Your queue points have not been reset."
-	}
-	"Queue_AwardedQueuePoints"
+	"Queue_PointsAwarded"
 	{
 		"#format"	"{1:d},{2:d}"
 		"en"		"You have been awarded {green}{1} {default}queue points (Total: {green}{2}{default})."
 	}
-	"Queue_SelectedAsInvader"
-	{
-		"#format"	"{1:s}"
-		"en"		"You have been assigned to team {blue}{1}{default}."
-	}
-	"Queue_AddedPoints"
+	"Queue_PointsAdded"
 	{
 		"#format"	"{1:d},{2:t}"
 		"en"		"Added {green}{1} {default}queue points to {cyan}{2}{default}."

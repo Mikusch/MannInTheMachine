@@ -230,6 +230,7 @@ static void EventHook_WinPanel(Event event, const char[] name, bool dontBroadcas
 		if (Queue_IsEnabled())
 		{
 			player.AddQueuePoints(points);
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_PointsAwarded", points, player.GetQueuePoints());
 		}
 		else
 		{

@@ -132,11 +132,11 @@ static Action ConCmd_AddQueuePoints(int client, int args)
 	
 	if (tn_is_ml)
 	{
-		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Queue_AddedPoints", amount, target_name);
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Queue_PointsAdded", amount, target_name);
 	}
 	else
 	{
-		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Queue_AddedPoints", amount, "_s", target_name);
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Queue_PointsAdded", amount, "_s", target_name);
 	}
 	
 	return Plugin_Handled;

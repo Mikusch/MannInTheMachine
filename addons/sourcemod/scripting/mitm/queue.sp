@@ -90,13 +90,8 @@ ArrayList Queue_GetDefenderQueue()
 
 void Queue_SelectNewDefenders()
 {
-	char redTeamname[MAX_TEAM_NAME_LENGTH], blueTeamname[MAX_TEAM_NAME_LENGTH];
-	mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
-	mp_tournament_blueteamname.GetString(blueTeamname, sizeof(blueTeamname));
-	
 	ArrayList players = new ArrayList();
 	
-	// Collect all valid players
 	for (int client = 1; client <= MaxClients; client++)
 	{
 		if (!IsClientInGame(client))
@@ -132,7 +127,7 @@ void Queue_SelectNewDefenders()
 				
 				TF2_ForceChangeClientTeam(member, TFTeam_Defenders);
 				CTFPlayer(member).SetQueuePoints(0);
-				CPrintToChat(member, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
+				CPrintToChat(member, "%s %t %t", PLUGIN_TAG, "SelectedAsDefender", "Queue_PointsReset");
 				
 				players.Erase(players.FindValue(member));
 				++iDefenderCount;
@@ -142,7 +137,7 @@ void Queue_SelectNewDefenders()
 		{
 			TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
 			CTFPlayer(client).SetQueuePoints(0);
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender", redTeamname);
+			CPrintToChat(client, "%s %t %t", PLUGIN_TAG, "SelectedAsDefender", "Queue_PointsReset");
 			
 			players.Erase(players.FindValue(client));
 			++iDefenderCount;
@@ -163,7 +158,6 @@ void Queue_SelectNewDefenders()
 		{
 			int client = players.Get(i);
 			
-			// Never force spectators
 			if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 				continue;
 			
@@ -172,7 +166,7 @@ void Queue_SelectNewDefenders()
 				break;
 			
 			TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender_Forced", redTeamname);
+			CPrintToChat(client, "%s %t %t", PLUGIN_TAG, "SelectedAsDefender_Forced", "Queue_NotReset");
 			
 			players.Erase(i);
 		}
@@ -192,7 +186,7 @@ void Queue_SelectNewDefenders()
 		
 		if (!CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 		{
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsInvader", blueTeamname);
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsInvader");
 		}
 	}
 	
@@ -240,11 +234,7 @@ void Queue_FindReplacementDefender()
 		if (TF2_GetClientTeam(client) == TFTeam_Defenders)
 		{
 			CTFPlayer(client).SetQueuePoints(CTFPlayer(client).GetQueuePoints() / 2);
-			
-			char redTeamname[MAX_TEAM_NAME_LENGTH];
-			mp_tournament_redteamname.GetString(redTeamname, sizeof(redTeamname));
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_SelectedAsDefender_Replacement", redTeamname);
-			
+			CPrintToChat(client, "%s %t %t", PLUGIN_TAG, "SelectedAsDefender_Replacement", "Queue_PointsHalved");
 			break;
 		}
 	}

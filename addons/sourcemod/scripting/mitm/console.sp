@@ -58,7 +58,7 @@ static Action ConCmd_Queue(int client, int args)
 	
 	if (!Queue_IsEnabled())
 	{
-		ReplyToCommand(client, "%t", "Queue_FeatureDisabled");
+		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Queue_FeatureDisabled");
 		return Plugin_Continue;
 	}
 	

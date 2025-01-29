@@ -1136,6 +1136,27 @@ void ShowProgressBar(int client, const char[] szTitle, float flProgress, float i
 	ShowSyncHudText(client, g_hWarningHudSync, "%t\n%s", szTitle, szProgressBar);
 }
 
+void SelectNewDefenders()
+{
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
+			continue;
+		
+		TF2_ForceChangeClientTeam(client, TFTeam_Spectator);
+	}
+	
+	CPrintToChatAll("%s %t", PLUGIN_TAG, "Queue_NewDefenders");
+	
+	if (Queue_IsEnabled())
+		Queue_SelectNewDefenders();
+	else
+		SelectRandomDefenders();
+}
+
 void SelectRandomDefenders()
 {
 	ArrayList players = new ArrayList();

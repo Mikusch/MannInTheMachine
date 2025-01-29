@@ -71,6 +71,7 @@ ConVar mitm_party_max_size;
 ConVar mitm_setup_time;
 ConVar mitm_max_spawn_deaths;
 ConVar mitm_defender_ping_limit;
+ConVar mitm_cycle_defenders_on_wave_completion;
 ConVar mitm_shield_damage_drain_rate;
 ConVar mitm_bot_taunt_on_upgrade;
 ConVar mitm_romevision;

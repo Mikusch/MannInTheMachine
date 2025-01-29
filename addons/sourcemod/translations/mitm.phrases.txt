@@ -69,19 +69,19 @@
 	}
 	"Menu_Credits_Title"
 	{
-		"en"	"➤ Credits"
+		"en"		"➤ Credits"
 	}
 	"Menu_Credits_Mikusch"
 	{
-		"en"	"Code and gameplay"
+		"en"		"Code and gameplay"
 	}
 	"Menu_Credits_Kenzzer"
 	{
-		"en"	"Early coding help"
+		"en"		"Early coding help"
 	}
 	"Menu_Credits_trigger_hurt"
 	{
-		"en"	"Custom robot viewmodels"
+		"en"		"Custom robot viewmodels"
 	}
 	"Preference_DisableDefender"
 	{
@@ -113,15 +113,15 @@
 	}
 	"SelectedAsDefender"
 	{
-		"en"	"You have been assigned to the {red}MANN CO.{default} team."
+		"en"		"You have been assigned to the {red}MANN CO.{default} team."
 	}
 	"SelectedAsDefender_Forced"
 	{
-		"en"	"You have been forcibly assigned to the {red}MANN CO.{default} team because not enough players were eligible to play."
+		"en"		"You have been forcibly assigned to the {red}MANN CO.{default} team because not enough players were eligible to play."
 	}
 	"SelectedAsDefender_Replacement"
 	{
-		"en"	"You have been moved to the {red}MANN CO.{default} team to fill a vacant slot."
+		"en"		"You have been moved to the {red}MANN CO.{default} team to fill a vacant slot."
 	}
 	"SelectedAsInvader"
 	{

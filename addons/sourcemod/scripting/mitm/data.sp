@@ -2575,16 +2575,6 @@ methodmap CTFObjectiveResource < CBaseEntity
 		}
 	}
 	
-	public int GetMannVsMachineMaxWaveCount()
-	{
-		return this.GetProp(Prop_Send, "m_nMannVsMachineMaxWaveCount");
-	}
-	
-	public int GetMannVsMachineWaveCount()
-	{
-		return this.GetProp(Prop_Send, "m_nMannVsMachineWaveCount");
-	}
-	
 	public bool IsPopFileEventType(int fileType)
 	{
 		return this.GetProp(Prop_Send, "m_nMvMEventPopfileType") == fileType;

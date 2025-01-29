@@ -28,7 +28,6 @@ void Events_Init()
 	PSM_AddEventHook("teamplay_point_captured", EventHook_TeamplayPointCaptured);
 	PSM_AddEventHook("teamplay_flag_event", EventHook_TeamplayFlagEvent);
 	PSM_AddEventHook("teams_changed", EventHook_TeamsChanged);
-	PSM_AddEventHook("mvm_wave_complete", EventHook_MvMWaveComplete);
 	PSM_AddEventHook("pve_win_panel", EventHook_WinPanel);
 }
 
@@ -205,15 +204,6 @@ static void EventHook_TeamsChanged(Event event, const char[] name, bool dontBroa
 	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && GameRules_GetRoundState() != RoundState_GameOver && !mitm_developer.BoolValue)
 	{
 		RequestFrame(RequestFrameCallback_FindReplacementDefender);
-	}
-}
-
-static void EventHook_MvMWaveComplete(Event event, const char[] name, bool dontBroadcast)
-{
-	bool bLastWave = g_pObjectiveResource.GetMannVsMachineWaveCount() >= g_pObjectiveResource.GetMannVsMachineMaxWaveCount();
-	if (!bLastWave && !g_pPopulationManager.IsInEndlessWaves() && mitm_cycle_defenders_on_wave_completion.BoolValue)
-	{
-		SelectNewDefenders();
 	}
 }
 

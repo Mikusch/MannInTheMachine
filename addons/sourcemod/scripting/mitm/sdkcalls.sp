@@ -33,6 +33,7 @@ static Handle g_hSDKCall_CTFPlayerShared_ResetRageBuffs;
 static Handle g_hSDKCall_CPopulationManager_IsInEndlessWaves;
 static Handle g_hSDKCall_CPopulationManager_GetHealthMultiplier;
 static Handle g_hSDKCall_CPopulationManager_ResetMap;
+static Handle g_hSDKCall_CPopulationManager_GetCurrentWave;
 static Handle g_hSDKCall_IsSpaceToSpawnHere;
 static Handle g_hSDKCall_CTFPlayer_RemoveObject;
 static Handle g_hSDKCall_CTFBotMvMEngineerHintFinder_FindHint;
@@ -42,14 +43,12 @@ static Handle g_hSDKCall_CGameRules_ShouldCollide;
 static Handle g_hSDKCall_CTeamplayRules_TeamMayCapturePoint;
 static Handle g_hSDKCall_CTFBotHintEngineerNest_GetSentryHint;
 static Handle g_hSDKCall_CTFBotHintEngineerNest_GetTeleporterHint;
-static Handle g_hSDKCall_CPopulationManager_GetCurrentWave;
 static Handle g_hSDKCall_CBaseEntity_ShouldCollide;
 static Handle g_hSDKCall_CBaseEntity_IsCombatItem;
 static Handle g_hSDKCall_CBaseObject_GetMaxHealthForCurrentLevel;
 static Handle g_hSDKCall_CBaseCombatWeapon_Clip1;
 static Handle g_hSDKCall_CSpawnLocation_FindSpawnLocation;
 static Handle g_hSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold;
-static Handle g_hSDKCall_CPopulationManager_SetCheckpoint;
 static Handle g_hSDKCall_IPopulationSpawner_Spawn;
 static Handle g_hSDKCall_BotGenerateAndWearItem;
 static Handle g_hSDKCall_GetBombInfo;
@@ -95,6 +94,7 @@ void SDKCalls_Init(GameData hGameConf)
 	g_hSDKCall_CPopulationManager_IsInEndlessWaves = PrepSDKCall_CPopulationManager_IsInEndlessWaves(hGameConf);
 	g_hSDKCall_CPopulationManager_GetHealthMultiplier = PrepSDKCall_CPopulationManager_GetHealthMultiplier(hGameConf);
 	g_hSDKCall_CPopulationManager_ResetMap = PrepSDKCall_CPopulationManager_ResetMap(hGameConf);
+	g_hSDKCall_CPopulationManager_GetCurrentWave = PrepSDKCall_CPopulationManager_GetCurrentWave(hGameConf);
 	g_hSDKCall_IsSpaceToSpawnHere = PrepSDKCall_IsSpaceToSpawnHere(hGameConf);
 	g_hSDKCall_CTFPlayer_RemoveObject = PrepSDKCall_CTFPlayer_RemoveObject(hGameConf);
 	g_hSDKCall_CTFBotMvMEngineerHintFinder_FindHint = PrepSDKCall_CTFBotMvMEngineerHintFinder_FindHint(hGameConf);
@@ -104,14 +104,12 @@ void SDKCalls_Init(GameData hGameConf)
 	g_hSDKCall_CTeamplayRules_TeamMayCapturePoint = PrepSDKCall_CTeamplayRules_TeamMayCapturePoint(hGameConf);
 	g_hSDKCall_CTFBotHintEngineerNest_GetSentryHint = PrepSDKCall_CTFBotHintEngineerNest_GetSentryHint(hGameConf);
 	g_hSDKCall_CTFBotHintEngineerNest_GetTeleporterHint = PrepSDKCall_CTFBotHintEngineerNest_GetTeleporterHint(hGameConf);
-	g_hSDKCall_CPopulationManager_GetCurrentWave = PrepSDKCall_CPopulationManager_GetCurrentWave(hGameConf);
 	g_hSDKCall_CBaseEntity_ShouldCollide = PrepSDKCall_CBaseEntity_ShouldCollide(hGameConf);
 	g_hSDKCall_CBaseEntity_IsCombatItem = PrepSDKCall_CBaseEntity_IsCombatItem(hGameConf);
 	g_hSDKCall_CBaseObject_GetMaxHealthForCurrentLevel = PrepSDKCall_CBaseObject_GetMaxHealthForCurrentLevel(hGameConf);
 	g_hSDKCall_CBaseCombatWeapon_Clip1 = PrepSDKCall_CBaseCombatWeapon_Clip1(hGameConf);
 	g_hSDKCall_CSpawnLocation_FindSpawnLocation = PrepSDKCall_CSpawnLocation_FindSpawnLocation(hGameConf);
 	g_hSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold = PrepSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold(hGameConf);
-	g_hSDKCall_CPopulationManager_SetCheckpoint = PrepSDKCall_CPopulationManager_SetCheckpoint(hGameConf);
 	g_hSDKCall_IPopulationSpawner_Spawn = PrepSDKCall_IPopulationSpawner_Spawn(hGameConf);
 	g_hSDKCall_BotGenerateAndWearItem = PrepSDKCall_BotGenerateAndWearItem(hGameConf);
 	g_hSDKCall_GetBombInfo = PrepSDKCall_GetBombInfo(hGameConf);
@@ -346,6 +344,19 @@ static Handle PrepSDKCall_CPopulationManager_ResetMap(GameData hGameConf)
 	return call;
 }
 
+static Handle PrepSDKCall_CPopulationManager_GetCurrentWave(GameData hGameConf)
+{
+	StartPrepSDKCall(SDKCall_Entity);
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CPopulationManager::GetCurrentWave");
+	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogError("Failed to create SDKCall: CPopulationManager::GetCurrentWave");
+	
+	return call;
+}
+
 static Handle PrepSDKCall_IsSpaceToSpawnHere(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Static);
@@ -473,19 +484,6 @@ static Handle PrepSDKCall_CTFBotHintEngineerNest_GetTeleporterHint(GameData hGam
 	return call;
 }
 
-static Handle PrepSDKCall_CPopulationManager_GetCurrentWave(GameData hGameConf)
-{
-	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CPopulationManager::GetCurrentWave");
-	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
-	
-	Handle call = EndPrepSDKCall();
-	if (!call)
-		LogError("Failed to create SDKCall: CPopulationManager::GetCurrentWave");
-	
-	return call;
-}
-
 static Handle PrepSDKCall_CBaseEntity_ShouldCollide(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
@@ -564,19 +562,6 @@ static Handle PrepSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThresho
 	Handle call = EndPrepSDKCall();
 	if (!call)
 		LogError("Failed to create SDKCall: CPopulationManager::GetSentryBusterDamageAndKillThreshold");
-	
-	return call;
-}
-
-static Handle PrepSDKCall_CPopulationManager_SetCheckpoint(GameData hGameConf)
-{
-	StartPrepSDKCall(SDKCall_Entity);
-	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CPopulationManager::SetCheckpoint");
-	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
-	
-	Handle call = EndPrepSDKCall();
-	if (!call)
-		LogError("Failed to create SDKCall: CPopulationManager::SetCheckpoint");
 	
 	return call;
 }
@@ -793,6 +778,14 @@ void SDKCall_CPopulationManager_ResetMap(int populator)
 		SDKCall(g_hSDKCall_CPopulationManager_ResetMap, populator);
 }
 
+Address SDKCall_CPopulationManager_GetCurrentWave(int populator)
+{
+	if (g_hSDKCall_CPopulationManager_GetCurrentWave)
+		return SDKCall(g_hSDKCall_CPopulationManager_GetCurrentWave, populator);
+	
+	return Address_Null;
+}
+
 bool SDKCall_IsSpaceToSpawnHere(const float where[3])
 {
 	if (g_hSDKCall_IsSpaceToSpawnHere)
@@ -855,14 +848,6 @@ int SDKCall_CTFBotHintEngineerNest_GetTeleporterHint(int hint)
 	return -1;
 }
 
-Address SDKCall_CPopulationManager_GetCurrentWave(int populator)
-{
-	if (g_hSDKCall_CPopulationManager_GetCurrentWave)
-		return SDKCall(g_hSDKCall_CPopulationManager_GetCurrentWave, populator);
-	
-	return Address_Null;
-}
-
 bool SDKCall_CBaseEntity_ShouldCollide(int entity, Collision_Group_t collisionGroup, int contentsMask)
 {
 	if (g_hSDKCall_CBaseEntity_ShouldCollide)
@@ -907,12 +892,6 @@ void SDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold(int popula
 {
 	if (g_hSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold)
 		SDKCall(g_hSDKCall_CPopulationManager_GetSentryBusterDamageAndKillThreshold, populator, nDamage, nKills);
-}
-
-void SDKCall_CPopulationManager_SetCheckpoint(int populator, int waveNumber)
-{
-	if (g_hSDKCall_CPopulationManager_SetCheckpoint)
-		SDKCall(g_hSDKCall_CPopulationManager_SetCheckpoint, populator, waveNumber);
 }
 
 bool SDKCall_IPopulationSpawner_Spawn(Address pSpawner, const float vSpawnPosition[3], CUtlVector &spawnVector = view_as<CUtlVector>(0))

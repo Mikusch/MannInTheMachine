@@ -2381,6 +2381,11 @@ methodmap CPopulationManager < CBaseEntity
 		return CWave(SDKCall_CPopulationManager_GetCurrentWave(this.index));
 	}
 	
+	public int GetWaveNumber()
+	{
+		return this.m_iCurrentWaveIndex;
+	}
+	
 	public CWave GetWave(int iWaveIndex)
 	{
 		int iOldWaveIndex = this.m_iCurrentWaveIndex;
@@ -2390,14 +2395,18 @@ methodmap CPopulationManager < CBaseEntity
 		return wave;
 	}
 	
+	public void JumpToWave(int waveNumber, float fCleanMoneyPercent = -1.0)
+	{
+		int flags = GetCommandFlags("tf_mvm_jump_to_wave");
+		SetCommandFlags("tf_mvm_jump_to_wave", (flags & ~FCVAR_CHEAT));
+		ServerCommand("tf_mvm_jump_to_wave %d %f", waveNumber, fCleanMoneyPercent);
+		ServerExecute();
+		SetCommandFlags("tf_mvm_jump_to_wave", flags);
+	}
+	
 	public bool IsInEndlessWaves()
 	{
 		return SDKCall_CPopulationManager_IsInEndlessWaves(this.index);
-	}
-	
-	public void SetCheckpoint(int waveNumber)
-	{
-		SDKCall_CPopulationManager_SetCheckpoint(this.index, waveNumber);
 	}
 	
 	public float GetHealthMultiplier(bool bIsTank = false)

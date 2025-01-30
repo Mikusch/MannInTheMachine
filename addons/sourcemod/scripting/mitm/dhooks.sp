@@ -312,12 +312,12 @@ static MRESReturn DHookCallback_CPopulationManager_RestoreCheckpoint_Pre(int pop
 		
 		if (nMaxConsecutiveWipes > 0 && g_nNumConsecutiveWipes >= nMaxConsecutiveWipes)
 		{
-			int iNextWaveIndex = g_pPopulationManager.m_iCurrentWaveIndex + 1;
+			int iNextWaveIndex = g_pPopulationManager.GetWaveNumber() + 1;
 			if (iNextWaveIndex < g_pObjectiveResource.GetMannVsMachineMaxWaveCount())
 			{
 				g_nNumConsecutiveWipes = 0;
 				
-				g_pPopulationManager.SetCheckpoint(iNextWaveIndex);
+				g_pPopulationManager.JumpToWave(iNextWaveIndex + 1);
 				
 				CWave pWave = g_pPopulationManager.GetWave(iNextWaveIndex);
 				

@@ -18,28 +18,26 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static char g_aCreditInfos[][] =
-{
-	"Mikusch",
-	"Kenzzer",
-	"trigger_hurt"
-};
+#define MENU_INFO_QUEUE			"queue"
+#define MENU_INFO_PREFERENCES	"preferences"
+#define MENU_INFO_PARTY			"party"
+#define MENU_INFO_CREDITS		"credits"
 
 void Menus_DisplayMainMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_MainMenu, MenuAction_Select | MenuAction_End | MenuAction_DisplayItem);
 	
-	menu.SetTitle("%T", "Menu_Main_Title", client);
+	menu.SetTitle("%t\n%t", "Menu_Header", "Menu_Main_Title");
 	
-	menu.AddItem("queue", "Menu_Main_Queue");
-	menu.AddItem("preferences", "Menu_Main_Preferences");
+	if (Queue_IsEnabled())
+		menu.AddItem(MENU_INFO_QUEUE, "Menu_Main_Queue");
 	
-	if (sm_mitm_party_enabled.BoolValue)
-	{
-		menu.AddItem("party", "Menu_Main_Party");
-	}
+	menu.AddItem(MENU_INFO_PREFERENCES, "Menu_Main_Preferences");
 	
-	menu.AddItem("credits", "Menu_Main_Credits");
+	if (Party_IsEnabled())
+		menu.AddItem(MENU_INFO_PARTY, "Menu_Main_Party");
+	
+	menu.AddItem(MENU_INFO_CREDITS, "Menu_Main_Credits");
 	
 	menu.Display(client, MENU_TIME_FOREVER);
 }
@@ -53,19 +51,19 @@ static int MenuHandler_MainMenu(Menu menu, MenuAction action, int param1, int pa
 			char info[32];
 			menu.GetItem(param2, info, sizeof(info));
 			
-			if (StrEqual(info, "queue"))
+			if (StrEqual(info, MENU_INFO_QUEUE))
 			{
 				Menus_DisplayQueueMenu(param1);
 			}
-			else if (StrEqual(info, "preferences"))
+			else if (StrEqual(info, MENU_INFO_PREFERENCES))
 			{
 				Menus_DisplayPreferencesMenu(param1);
 			}
-			else if (StrEqual(info, "party"))
+			else if (StrEqual(info, MENU_INFO_PARTY))
 			{
 				Menus_DisplayPartyMenu(param1);
 			}
-			else if (StrEqual(info, "credits"))
+			else if (StrEqual(info, MENU_INFO_CREDITS))
 			{
 				Menus_DisplayCreditsMenu(param1);
 			}
@@ -91,8 +89,8 @@ void Menus_DisplayQueueMenu(int client)
 		Menu menu = new Menu(MenuHandler_QueueMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End);
 		menu.ExitBackButton = true;
 		
-		char title[64];
-		Format(title, sizeof(title), "%T", "Menu_Queue_Title", client);
+		char title[128];
+		Format(title, sizeof(title), "%T\n%T", "Menu_Header", client, "Menu_Queue_Title", client);
 		
 		int index = queue.FindValue(client, QueueData::m_client);
 		if (index != -1)
@@ -235,14 +233,17 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 void Menus_DisplayPreferencesMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_PreferencesMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
-	menu.SetTitle("%T", "Menu_Preferences_Title", client);
+	menu.SetTitle("%t\n%t", "Menu_Header", "Menu_Preferences_Title");
 	menu.ExitBackButton = true;
 	
 	AddPreferenceToMenu(menu, PREF_DEFENDER_DISABLE_QUEUE, "Preference_DisableDefender");
 	AddPreferenceToMenu(menu, PREF_SPECTATOR_MODE, "Preference_SpectatorMode");
 	AddPreferenceToMenu(menu, PREF_INVADER_DISABLE_MINIBOSS, "Preference_DisableMiniBoss");
 	AddPreferenceToMenu(menu, PREF_DISABLE_ANNOTATIONS, "Preference_DisableAnnotations");
-	AddPreferenceToMenu(menu, PREF_IGNORE_PARTY_INVITES, "Preference_IgnorePartyInvites");
+	
+	if (Party_IsEnabled())
+		AddPreferenceToMenu(menu, PREF_IGNORE_PARTY_INVITES, "Preference_IgnorePartyInvites");
+	
 	AddPreferenceToMenu(menu, PREF_DEFENDER_DISABLE_REPLACEMENT, "Preference_DisableDefenderReplacement");
 	AddPreferenceToMenu(menu, PREF_INVADER_DISABLE_CUSTOM_VIEWMODELS, "Preference_DisableCustomViewModels");
 	
@@ -305,7 +306,7 @@ void Menus_DisplayPartyMenu(int client)
 	
 	// show title
 	char title[512];
-	Format(title, sizeof(title), "%T\n", "Party_Menu_Title", client);
+	Format(title, sizeof(title), "%T\n%T\n", "Menu_Header", client, "Party_Menu_Title", client);
 	
 	if (CTFPlayer(client).IsInAParty())
 	{
@@ -438,7 +439,7 @@ static int MenuHandler_PartyMenu(Menu menu, MenuAction action, int param1, int p
 void Menus_DisplayPartyManageMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_PartyManageMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
-	menu.SetTitle("%T", "Party_ManageMenu_Title", client);
+	menu.SetTitle("%t\n%t", "Menu_Header", "Party_ManageMenu_Title");
 	menu.ExitBackButton = true;
 	
 	menu.AddItem("invite_members", "Party_ManageMenu_InviteMembers");
@@ -488,7 +489,7 @@ static int MenuHandler_PartyManageMenu(Menu menu, MenuAction action, int param1,
 void Menus_DisplayPartyManageInviteMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_PartyManageInviteMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
-	menu.SetTitle("%T", "Party_ManageInviteMenu_Title", client);
+	menu.SetTitle("%t\n%t", "Menu_Header", "Party_ManageInviteMenu_Title");
 	menu.ExitBackButton = true;
 	
 	for (int other = 1; other <= MaxClients; other++)
@@ -597,7 +598,7 @@ void Menus_DisplayPartyManageKickMenu(int client)
 	Party party = CTFPlayer(client).GetParty();
 	
 	Menu menu = new Menu(MenuHandler_PartyKickMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
-	menu.SetTitle("%T", "Party_KickMenu_Title", client);
+	menu.SetTitle("%t\n%t", "Menu_Header", "Party_KickMenu_Title");
 	menu.ExitBackButton = true;
 	
 	int[] members = new int[MaxClients];
@@ -673,7 +674,7 @@ static int MenuHandler_PartyKickMenu(Menu menu, MenuAction action, int param1, i
 void Menus_DisplayPartyInviteMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_PartyInviteMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
-	menu.SetTitle("%T", "Party_InviteMenu_Title", client);
+	menu.SetTitle("%t\n%t", "Menu_Header", "Party_InviteMenu_Title");
 	menu.ExitBackButton = true;
 	
 	ArrayList parties = Party_GetAllActiveParties();
@@ -741,19 +742,22 @@ static int MenuHandler_PartyInviteMenu(Menu menu, MenuAction action, int param1,
 void Menus_DisplayCreditsMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_CreditsMenu, MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
-	menu.SetTitle("%T", "Menu_Credits_Title", client);
+	menu.SetTitle("%t\n%t", "Menu_Header", "Menu_Credits_Title");
 	menu.ExitBackButton = true;
 	
-	for (int i = 0; i < sizeof(g_aCreditInfos); i++)
-	{
-		char display[64], phrase[64];
-		Format(phrase, sizeof(phrase), "Menu_Credits_%s", g_aCreditInfos[i]);
-		Format(display, sizeof(display), "%s - %T", g_aCreditInfos[i], phrase, client);
-		
-		menu.AddItem(g_aCreditInfos[i], display, ITEMDRAW_DISABLED);
-	}
+	AddContributorToMenu(menu, "Mikusch", client);
+	AddContributorToMenu(menu, "Kenzzer", client);
+	AddContributorToMenu(menu, "trigger_hurt", client);
 	
 	menu.Display(client, MENU_TIME_FOREVER);
+}
+
+static void AddContributorToMenu(Menu menu, char[] contributor, int client)
+{
+	char phrase[64], display[64];
+	Format(phrase, sizeof(phrase), "Menu_Credits_%s", contributor);
+	Format(display, sizeof(display), "%s: %T", contributor, phrase, client);
+	menu.AddItem(contributor, display, ITEMDRAW_DISABLED);
 }
 
 static int MenuHandler_CreditsMenu(Menu menu, MenuAction action, int param1, int param2)

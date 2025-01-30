@@ -34,6 +34,7 @@ methodmap CTFBotMainAction < NextBotAction
 		ActionFactory.SetCallback(NextBotActionCallbackType_OnEnd, OnEnd);
 		ActionFactory.SetCallback(NextBotActionCallbackType_CreateInitialAction, CreateInitialAction);
 		ActionFactory.SetEventCallback(EventResponderType_OnKilled, OnKilled);
+		ActionFactory.SetEventCallback(EventResponderType_OnInjured, OnInjured);
 		ActionFactory.SetEventCallback(EventResponderType_OnContact, OnContact);
 		ActionFactory.SetEventCallback(EventResponderType_OnOtherKilled, OnOtherKilled);
 		ActionFactory.SetQueryCallback(ContextualQueryType_ShouldAttack, ShouldAttack);
@@ -136,17 +137,19 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 					float velocity[3];
 					CTFPlayer(actor).GetAbsVelocity(velocity);
 					
-					// as long as they are moving, slow down the timer drastically
-					float flTimeToSubtract = GetVectorLength(velocity) >= GetEntPropFloat(actor, Prop_Send, "m_flMaxspeed") ? (interval / 4) : interval;
-					CTFPlayer(actor).m_flSpawnTimeLeft -= flTimeToSubtract;
+					float flMaxSpeed = GetEntPropFloat(actor, Prop_Send, "m_flMaxspeed");
+					
+					// as long as they are moving, don't tick down the timer
+					if (flMaxSpeed > 1.0 && GetVectorLength(velocity) < flMaxSpeed)
+						CTFPlayer(actor).m_flSpawnTimeLeft -= interval;
 					
 					if (CTFPlayer(actor).m_flSpawnTimeLeft <= 0.0)
 					{
 						ForcePlayerSuicide(actor);
 						
 						// kick players for dying to the spawn timer too many times
-						int iMaxDeaths = sm_mitm_max_spawn_deaths.IntValue;
-						if (iMaxDeaths && !sm_mitm_developer.BoolValue)
+						int iMaxDeaths = mitm_max_spawn_deaths.IntValue;
+						if (iMaxDeaths && !mitm_developer.BoolValue)
 						{
 							if (iMaxDeaths <= ++CTFPlayer(actor).m_spawnDeathCount)
 							{
@@ -217,6 +220,19 @@ static void CreateInitialAction(CTFBotMainAction action)
 static int OnKilled(CTFBotMainAction action, int actor, int attacker, int inflictor, float damage, int damagetype)
 {
 	return action.TryChangeTo(CTFBotDead(), RESULT_CRITICAL, "I died!");
+}
+
+static int OnInjured(CTFBotMainAction action, CBaseCombatCharacter actor, CBaseEntity attacker, CBaseEntity inflictor, float damage, int damagetype, CBaseEntity weapon, const float damageForce[3], const float damagePosition[3], int damagecustom)
+{
+	if (inflictor.IsValid() && inflictor.GetProp(Prop_Data, "m_iTeamNum") != actor.GetProp(Prop_Data, "m_iTeamNum"))
+	{
+		if (damagecustom == TF_CUSTOM_BACKSTAB)
+		{
+			CTFPlayer(actor).DelayedThreatNotice(inflictor, 0.5, "Invader_DelayedThreatNotice_Spy");
+		}
+	}
+	
+	return action.TryContinue();
 }
 
 static int OnContact(CTFBotMainAction action, int actor, int other, Address result)

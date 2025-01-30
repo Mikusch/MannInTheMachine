@@ -19,7 +19,7 @@
 #pragma newdecls required
 
 #include <sourcemod>
-#include <tf2_stocks>
+#include <tf2>
 #include <sdkhooks>
 #include <clientprefs>
 #include <dhooks>
@@ -61,21 +61,23 @@ bool g_bAllowTeamChange;	// Bypass CTFGameRules::GetTeamAssignmentOverride?
 bool g_bInEndlessRollEscalation;
 
 // Plugin ConVars
-ConVar sm_mitm_developer;
-ConVar sm_mitm_custom_upgrades_file;
-ConVar sm_mitm_spawn_hurry_time;
-ConVar sm_mitm_queue_points;
-ConVar sm_mitm_rename_robots;
-ConVar sm_mitm_invader_allow_suicide;
-ConVar sm_mitm_party_enabled;
-ConVar sm_mitm_party_max_size;
-ConVar sm_mitm_setup_time;
-ConVar sm_mitm_max_spawn_deaths;
-ConVar sm_mitm_defender_ping_limit;
-ConVar sm_mitm_shield_damage_drain_rate;
-ConVar sm_mitm_bot_taunt_on_upgrade;
-ConVar sm_mitm_autoincrement_max_wipes;
-ConVar sm_mitm_autoincrement_currency_percentage;
+ConVar mitm_developer;
+ConVar mitm_custom_upgrades_file;
+ConVar mitm_bot_spawn_hurry_time;
+ConVar mitm_queue_points;
+ConVar mitm_rename_robots;
+ConVar mitm_bot_allow_suicide;
+ConVar mitm_queue_enabled;
+ConVar mitm_party_enabled;
+ConVar mitm_party_max_size;
+ConVar mitm_setup_time;
+ConVar mitm_max_spawn_deaths;
+ConVar mitm_defender_ping_limit;
+ConVar mitm_shield_damage_drain_rate;
+ConVar mitm_bot_taunt_on_upgrade;
+ConVar mitm_romevision;
+ConVar mitm_autoincrement_max_wipes;
+ConVar mitm_autoincrement_currency_percentage;
 
 // Game ConVars
 ConVar tf_avoidteammates_pushaway;
@@ -99,8 +101,6 @@ ConVar tf_bot_taunt_victim_chance;
 ConVar tf_bot_always_full_reload;
 ConVar tf_bot_flag_kill_on_touch;
 ConVar tf_bot_melee_only;
-ConVar mp_tournament_redteamname;
-ConVar mp_tournament_blueteamname;
 ConVar mp_waitingforplayers_time;
 ConVar phys_pushscale;
 
@@ -156,11 +156,11 @@ public void OnPluginStart()
 	g_hWarningHudSync = CreateHudSynchronizer();
 	
 	g_hSpyWatchOverrides = new StringMap();
-	g_hSpyWatchOverrides.SetString("models/weapons/v_models/v_watch_spy.mdl", "models/weapons/v_models/v_watch_spy_bot.mdl");
-	g_hSpyWatchOverrides.SetString("models/weapons/v_models/v_watch_pocket_spy.mdl", "models/weapons/v_models/v_watch_pocket_spy_bot.mdl");
-	g_hSpyWatchOverrides.SetString("models/weapons/v_models/v_watch_leather_spy.mdl", "models/weapons/v_models/v_watch_leather_spy_bot.mdl");
-	g_hSpyWatchOverrides.SetString("models/weapons/v_models/v_ttg_watch_spy.mdl", "models/weapons/v_models/v_ttg_watch_spy_bot.mdl");
-	g_hSpyWatchOverrides.SetString("models/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch.mdl", "models/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch_bot.mdl");
+	g_hSpyWatchOverrides.SetString("models/weapons/v_models/v_watch_spy.mdl", "models/mvm/weapons/v_models/v_watch_spy_bot.mdl");
+	g_hSpyWatchOverrides.SetString("models/weapons/v_models/v_watch_pocket_spy.mdl", "models/mvm/weapons/v_models/v_watch_pocket_spy_bot.mdl");
+	g_hSpyWatchOverrides.SetString("models/weapons/v_models/v_watch_leather_spy.mdl", "models/mvm/weapons/v_models/v_watch_leather_spy_bot.mdl");
+	g_hSpyWatchOverrides.SetString("models/weapons/v_models/v_ttg_watch_spy.mdl", "models/mvm/weapons/v_models/v_ttg_watch_spy_bot.mdl");
+	g_hSpyWatchOverrides.SetString("models/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch.mdl", "models/mvm/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch_bot.mdl");
 	
 	LoadTranslations("common.phrases");
 	LoadTranslations("mitm.phrases");
@@ -195,7 +195,7 @@ public void OnPluginStart()
 	if (!hGameConf)
 		SetFailState("Could not find mitm gamedata");
 	
-	PSM_Init("sm_mitm_enabled", hGameConf);
+	PSM_Init("mitm_enabled", hGameConf);
 	PSM_AddPluginStateChangedHook(OnPluginStateChanged);
 	
 	Entity.Init();
@@ -238,6 +238,20 @@ public void OnMapStart()
 	g_bInWaitingForPlayers = false;
 	
 	Precache();
+	DHooks_HookGameRules();
+}
+
+public void VScript_OnScriptVMInitialized()
+{
+	static bool bInitialized = false;
+	
+	if (!PSM_IsEnabled() || bInitialized)
+		return;
+	
+	DHooks_VScriptInit();
+	SDKCalls_VScriptInit();
+	
+	bInitialized = true;
 }
 
 public void OnConfigsExecuted()
@@ -650,7 +664,7 @@ static void OnPluginStateChanged(bool bEnabled)
 		if (g_pGameRules.IsValid())
 		{
 			char path[PLATFORM_MAX_PATH];
-			sm_mitm_custom_upgrades_file.GetString(path, sizeof(path));
+			mitm_custom_upgrades_file.GetString(path, sizeof(path));
 			
 			if (path[0])
 			{
@@ -665,6 +679,11 @@ static void OnPluginStateChanged(bool bEnabled)
 			
 			OnClientPutInServer(client);
 		}
+		
+		OnMapStart();
+		
+		if (VScript_IsScriptVMInitialized())
+			VScript_OnScriptVMInitialized();
 	}
 	else
 	{
@@ -682,43 +701,38 @@ static void Precache()
 	PrecacheSound("ui/system_message_alert.wav");
 	PrecacheSound(")mvm/mvm_tele_activate.wav");
 	
+	SuperPrecacheModel(GUNSLINGER_ENGINEER_ARMS_OVERRIDE);
+	SuperPrecacheModel("models/mvm/weapons/c_models/c_engineer_bot_gunslinger_animations.mdl");
+	
+	SuperPrecacheModel(PDA_SPY_ARMS_OVERRIDE);
+	SuperPrecacheModel("models/mvm/weapons/v_models/v_pda_spy_bot_animations.mdl");
+	
+	SuperPrecacheModel("models/mvm/weapons/v_models/v_ttg_watch_spy_bot.mdl");
+	SuperPrecacheModel("models/mvm/weapons/v_models/v_watch_leather_spy_bot.mdl");
+	SuperPrecacheModel("models/mvm/weapons/v_models/v_watch_pocket_spy_bot.mdl");
+	SuperPrecacheModel("models/mvm/weapons/v_models/v_watch_pocket_spy_bot_animations.mdl");
+	SuperPrecacheModel("models/mvm/weapons/v_models/v_watch_spy_bot.mdl");
+	SuperPrecacheModel("models/mvm/weapons/v_models/v_watch_spy_bot_animations.mdl");
+	SuperPrecacheModel("models/mvm/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch_bot.mdl");
+	
 	for (int i = 0; i < sizeof(g_aBotArmModels); i++)
 	{
 		if (g_aBotArmModels[i][0])
 			SuperPrecacheModel(g_aBotArmModels[i]);
 	}
 	
-	SuperPrecacheModel(GUNSLINGER_ENGINEER_ARMS_OVERRIDE);
-	SuperPrecacheModel(PDA_SPY_ARMS_OVERRIDE);
-	
-	SuperPrecacheModel("models/weapons/c_models/c_demo_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_engineer_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_engineer_bot_gunslinger_animations.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_heavy_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_medic_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_pyro_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_scout_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_sniper_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_soldier_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/c_models/c_spy_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/v_models/v_pda_spy_animations.mdl");
-	SuperPrecacheModel("models/weapons/v_models/v_pda_spy_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/v_models/v_ttg_watch_spy_bot.mdl");
-	SuperPrecacheModel("models/weapons/v_models/v_watch_leather_spy_bot.mdl");
-	SuperPrecacheModel("models/weapons/v_models/v_watch_pocket_spy_animations.mdl");
-	SuperPrecacheModel("models/weapons/v_models/v_watch_pocket_spy_bot.mdl");
-	SuperPrecacheModel("models/weapons/v_models/v_watch_pocket_spy_bot_animations.mdl");
-	SuperPrecacheModel("models/weapons/v_models/v_watch_spy_animations.mdl");
-	SuperPrecacheModel("models/weapons/v_models/v_watch_spy_bot.mdl");
-	SuperPrecacheModel("models/weapons/v_models/v_watch_spy_bot_animations.mdl");
-	SuperPrecacheModel("models/workshop_partner/weapons/v_models/v_hm_watch/v_hm_watch_bot.mdl");
-	
-	AddFileToDownloadsTable("materials/models/bots/pyro/pyro_bot_righthand_blue.vmt");
-	AddFileToDownloadsTable("materials/models/bots/pyro/pyro_bot_righthand_red.vmt");
-	AddFileToDownloadsTable("materials/models/bots/spy/spy_bot_arms_blue.vmt");
-	AddFileToDownloadsTable("materials/models/bots/spy/spy_bot_arms_red.vmt");
-	AddFileToDownloadsTable("materials/models/bots/spy/spy_bot_body_blue_unfinished.vtf");
-	AddFileToDownloadsTable("materials/models/bots/spy/spy_bot_body_red_unfinished.vtf");
+	for (int i = 0; i < sizeof(g_aRawPlayerClassNamesShort); i++)
+	{
+		if (g_aRawPlayerClassNamesShort[i][0])
+		{
+			char szModel[PLATFORM_MAX_PATH];
+			Format(szModel, sizeof(szModel), "models/mvm/weapons/c_models/c_%s_bot_animations.mdl", g_aRawPlayerClassNamesShort[i]);
+			if (FileExists(szModel))
+				SuperPrecacheModel(szModel);
+			
+			PrecacheViewModelMaterialsForClass(g_aRawPlayerClassNamesShort[i]);
+		}
+	}
 }
 
 static INextBot CreateNextBotPlayer(Address entity)

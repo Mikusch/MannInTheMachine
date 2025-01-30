@@ -20,6 +20,13 @@
 
 #define MY_CURRENT_GUN	0
 
+enum struct DelayedNoticeInfo
+{
+	int m_who;
+	float m_when;
+	char m_reason[64];
+}
+
 // Auto Jump
 static CountdownTimer m_autoJumpTimer[MAXPLAYERS + 1];
 static float m_flAutoJumpMin[MAXPLAYERS + 1];
@@ -50,6 +57,7 @@ static char m_invaderName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
 static char m_prevName[MAXPLAYERS + 1][MAX_NAME_LENGTH];
 static bool m_isWaitingForFullReload[MAXPLAYERS + 1];
 static Handle m_annotationTimer[MAXPLAYERS + 1];
+static ArrayList m_delayedNoticeList[MAXPLAYERS + 1];
 
 // PressXButton
 static int m_inputButtons[MAXPLAYERS + 1];
@@ -58,6 +66,7 @@ static CountdownTimer m_altFireButtonTimer[MAXPLAYERS + 1];
 static CountdownTimer m_specialFireButtonTimer[MAXPLAYERS + 1];
 
 // Non-resetting Properties
+static int m_defenderPriority[MAXPLAYERS + 1];
 static int m_invaderPriority[MAXPLAYERS + 1];
 static int m_invaderMiniBossPriority[MAXPLAYERS + 1];
 static int m_defenderQueuePoints[MAXPLAYERS + 1];
@@ -65,7 +74,6 @@ static int m_preferences[MAXPLAYERS + 1];
 static Party m_party[MAXPLAYERS + 1];
 static bool m_isPartyMenuActive[MAXPLAYERS + 1];
 static int m_spawnDeathCount[MAXPLAYERS + 1];
-static bool m_hasDisabledDefenderThisRound[MAXPLAYERS + 1];
 
 methodmap CTFPlayer < CBaseCombatCharacter
 {
@@ -278,6 +286,18 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		}
 	}
 	
+	property int m_defenderPriority
+	{
+		public get()
+		{
+			return m_defenderPriority[this.index];
+		}
+		public set(int defenderPriority)
+		{
+			m_defenderPriority[this.index] = defenderPriority;
+		}
+	}
+	
 	property int m_invaderPriority
 	{
 		public get()
@@ -386,6 +406,18 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		}
 	}
 	
+	property ArrayList m_delayedNoticeList
+	{
+		public get()
+		{
+			return m_delayedNoticeList[this.index];
+		}
+		public set(ArrayList delayedNoticeList)
+		{
+			m_delayedNoticeList[this.index] = delayedNoticeList;
+		}
+	}
+	
 	property int m_inputButtons
 	{
 		public get()
@@ -467,18 +499,6 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		public set(int iSpawnDeathCount)
 		{
 			m_spawnDeathCount[this.index] = iSpawnDeathCount;
-		}
-	}
-	
-	property bool m_hasDisabledDefenderThisRound
-	{
-		public get()
-		{
-			return m_hasDisabledDefenderThisRound[this.index];
-		}
-		public set(bool hasDisabledDefenderThisRound)
-		{
-			m_hasDisabledDefenderThisRound[this.index] = hasDisabledDefenderThisRound;
 		}
 	}
 	
@@ -617,6 +637,15 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		g_hCookieQueue.SetInt(this.index, this.m_defenderQueuePoints);
 	}
 	
+	public bool IsValidDefender()
+	{
+		return !IsClientSourceTV(this.index)
+			&& this.GetTFTeam() != TFTeam_Unassigned
+			&& !this.HasPreference(PREF_DEFENDER_DISABLE_QUEUE)
+			&& !this.HasPreference(PREF_SPECTATOR_MODE)
+			&& Forwards_OnIsValidDefender(this.index);
+	}
+	
 	public float GetSpawnTime()
 	{
 		return this.m_flSpawnTime;
@@ -718,6 +747,11 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		this.m_tags.Clear();
 	}
 	
+	public ArrayList GetAllBotTags()
+	{
+		return this.m_tags.Clone();
+	}
+	
 	public void AddTag(const char[] tag)
 	{
 		if (!this.HasTag(tag))
@@ -807,7 +841,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public ArrayList GetTeleportWhere()
 	{
-		return this.m_teleportWhereName;
+		return this.m_teleportWhereName.Clone();
 	}
 	
 	public void ClearTeleportWhere()
@@ -889,15 +923,20 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		return strcopy(buffer, maxlen, m_invaderName[this.index]) != 0;
 	}
 	
+	public bool HasInvaderName()
+	{
+		return m_invaderName[this.index][0];
+	}
+	
 	public void ResetInvaderName()
 	{
-		m_invaderName[this.index][0] = EOS;
-		
 		if (m_prevName[this.index][0])
 		{
 			SetClientName(this.index, m_prevName[this.index]);
 			m_prevName[this.index][0] = EOS;
 		}
+		
+		m_invaderName[this.index][0] = EOS;
 	}
 	
 	public DifficultyType GetDifficulty()
@@ -1165,6 +1204,35 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		}
 	}
 	
+	public bool IsWeaponRestricted(int weapon)
+	{
+		if (!IsValidEntity(weapon))
+		{
+			return false;
+		}
+		
+		TFClassType iClass = TF2_GetPlayerClass(this.index);
+		int iIndex = GetEntProp(weapon, Prop_Send, "m_iItemDefinitionIndex");
+		int iLoadoutSlot = TF2Econ_GetItemLoadoutSlot(iIndex, iClass);
+		
+		if (this.HasWeaponRestriction(MELEE_ONLY))
+		{
+			return (iLoadoutSlot != LOADOUT_POSITION_MELEE);
+		}
+		
+		if (this.HasWeaponRestriction(PRIMARY_ONLY))
+		{
+			return (iLoadoutSlot != LOADOUT_POSITION_PRIMARY);
+		}
+		
+		if (this.HasWeaponRestriction(SECONDARY_ONLY))
+		{
+			return (iLoadoutSlot != LOADOUT_POSITION_SECONDARY);
+		}
+		
+		return false;
+	}
+	
 	public bool EquipRequiredWeapon()
 	{
 		// if we have a required weapon on our stack, it takes precedence (items, etc)
@@ -1363,6 +1431,64 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		return -1;
 	}
 	
+	public void DelayedThreatNotice(int who, float noticeDelay, const char[] reason = "")
+	{
+		float when = GetGameTime() + noticeDelay;
+		
+		// if we already have a delayed notice for this threat, ignore the new one unless the delay is less
+		for (int i = 0; i < this.m_delayedNoticeList.Length; ++i)
+		{
+			DelayedNoticeInfo info;
+			if (this.m_delayedNoticeList.GetArray(i, info))
+			{
+				if (info.m_who == EntIndexToEntRef(who))
+				{
+					if (info.m_when > when)
+					{
+						// update delay to shorter time
+						info.m_when = when;
+						this.m_delayedNoticeList.SetArray(i, info);
+					}
+					return;
+				}
+			}
+		}
+		
+		// new notice
+		DelayedNoticeInfo delay;
+		delay.m_who = EntIndexToEntRef(who);
+		delay.m_when = when;
+		strcopy(delay.m_reason, sizeof(delay.m_reason), reason);
+		this.m_delayedNoticeList.PushArray(delay);
+	}
+	
+	public void UpdateDelayedThreatNotices()
+	{
+		for (int i = 0; i < this.m_delayedNoticeList.Length; ++i)
+		{
+			DelayedNoticeInfo info;
+			if (this.m_delayedNoticeList.GetArray(i, info))
+			{
+				if (info.m_when <= GetGameTime())
+				{
+					// delay is up - notice this threat
+					int who = info.m_who;
+					
+					if (IsValidEntity(who))
+					{
+						char reason[64];
+						Format(reason, sizeof(reason), "%T", info.m_reason[0] ? info.m_reason : "Invader_DelayedThreatNotice_Generic", this.index);
+						
+						this.ShowAnnotation(MITM_HINT_MASK | this.index, reason, who, _, 5.0, "coach/coach_attack_here.wav", false);
+					}
+					
+					this.m_delayedNoticeList.Erase(i);
+					--i;
+				}
+			}
+		}
+	}
+	
 	public void ShowAnnotation(int id, const char[] text, int target = 0, const float worldPos[3] = ZERO_VECTOR, float lifeTime = 10.0, const char[] sound = "ui/hint.wav", bool showDistance = true, bool showEffect = true)
 	{
 		if (this.HasPreference(PREF_DISABLE_ANNOTATIONS))
@@ -1407,12 +1533,12 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public float CalculateSpawnTime()
 	{
-		if (sm_mitm_spawn_hurry_time.FloatValue <= 0.0)
+		if (mitm_bot_spawn_hurry_time.FloatValue <= 0.0)
 			return -1.0;
 		
 		// factor in squad speed
 		float flSpeed = this.IsInASquad() ? this.GetSquad().GetSlowestMemberSpeed() : this.GetPropFloat(Prop_Send, "m_flMaxspeed");
-		return sm_mitm_spawn_hurry_time.FloatValue + (sm_mitm_spawn_hurry_time.FloatValue * (300.0 / flSpeed));
+		return mitm_bot_spawn_hurry_time.FloatValue * (300.0 / flSpeed);
 	}
 	
 	public bool ShouldAutoJump()
@@ -1543,16 +1669,9 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	public bool SetPreference(MannInTheMachinePreference preference, bool enable)
 	{
 		if (enable)
-		{
 			this.m_preferences |= view_as<int>(preference);
-			
-			if (preference == PREF_DEFENDER_DISABLE_QUEUE || preference == PREF_SPECTATOR_MODE)
-				this.m_hasDisabledDefenderThisRound = true;
-		}
 		else
-		{
 			this.m_preferences &= ~view_as<int>(preference);
-		}
 		
 		g_hCookiePreferences.SetInt(this.index, this.m_preferences);
 		
@@ -1690,10 +1809,12 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		this.m_fireButtonTimer = new CountdownTimer();
 		this.m_altFireButtonTimer = new CountdownTimer();
 		this.m_specialFireButtonTimer = new CountdownTimer();
+		this.m_delayedNoticeList = new ArrayList(sizeof(DelayedNoticeInfo));
 	}
 	
 	public void OnClientPutInServer()
 	{
+		this.m_defenderPriority = 0;
 		this.m_invaderPriority = 0;
 		this.m_invaderMiniBossPriority = 0;
 		this.m_defenderQueuePoints = 0;
@@ -1701,7 +1822,6 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		this.m_party = NULL_PARTY;
 		this.m_isPartyMenuActive = false;
 		this.m_spawnDeathCount = 0;
-		this.m_hasDisabledDefenderThisRound = false;
 		
 		m_invaderName[this.index][0] = EOS;
 		m_prevName[this.index][0] = EOS;
@@ -1751,6 +1871,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		
 		// MannInTheMachinePlayer
 		this.m_annotationTimer = null;
+		this.m_delayedNoticeList.Clear();
 	}
 }
 

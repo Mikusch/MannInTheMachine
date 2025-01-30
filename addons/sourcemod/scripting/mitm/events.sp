@@ -202,7 +202,7 @@ void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool dontBroadc
 
 static void EventHook_TeamsChanged(Event event, const char[] name, bool dontBroadcast)
 {
-	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && GameRules_GetRoundState() != RoundState_GameOver && !sm_mitm_developer.BoolValue)
+	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && GameRules_GetRoundState() != RoundState_GameOver && !mitm_developer.BoolValue)
 	{
 		RequestFrame(RequestFrameCallback_FindReplacementDefender);
 	}
@@ -214,7 +214,7 @@ static void EventHook_PVEWinPanel(Event event, const char[] name, bool dontBroad
 	if (iWinningTeam == TFTeam_Invaders)
 		g_nNumConsecutiveWipes++;
 	
-	int points = sm_mitm_queue_points.IntValue;
+	int points = mitm_queue_points.IntValue;
 	
 	for (int client = 1; client <= MaxClients; client++)
 	{
@@ -223,27 +223,24 @@ static void EventHook_PVEWinPanel(Event event, const char[] name, bool dontBroad
 		
 		CTFPlayer player = CTFPlayer(client);
 		
-		if (player.m_hasDisabledDefenderThisRound)
-		{
-			player.m_hasDisabledDefenderThisRound = false;
-			
-			// Don't let players earn queue points if they disabled the queue this round.
-			// Some cheeky bastards buffer up queue points to play together anyway.
-			if (!sm_mitm_party_enabled.BoolValue)
-				continue;
-		}
-		
 		if (!player.IsInvader())
 			continue;
 		
-		if (player.HasPreference(PREF_DEFENDER_DISABLE_QUEUE))
+		if (player.HasPreference(PREF_DEFENDER_DISABLE_QUEUE) && (!player.IsInAParty() || player.GetParty().GetMemberCount() <= 1))
 			continue;
 		
 		if (!Forwards_OnIsValidDefender(client))
 			continue;
 		
-		player.AddQueuePoints(points);
-		CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_AwardedQueuePoints", points, player.GetQueuePoints());
+		if (Queue_IsEnabled())
+		{
+			player.AddQueuePoints(points);
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_PointsAwarded", points, player.GetQueuePoints());
+		}
+		else
+		{
+			CTFPlayer(client).m_defenderPriority++;
+		}
 	}
 }
 
@@ -254,7 +251,10 @@ static void EventHook_MvMWaveComplete(Event event, const char[] name, bool dontB
 
 static void RequestFrameCallback_FindReplacementDefender()
 {
-	FindReplacementDefender();
+	if (Queue_IsEnabled())
+		Queue_FindReplacementDefender();
+	else
+		FindReplacementDefender();
 }
 
 static Action Timer_CheckGateBotAnnotation(Handle timer, int userid)

@@ -149,7 +149,7 @@ methodmap Party
 	
 	public int GetMaxPlayers()
 	{
-		int iMaxPartySize = sm_mitm_party_max_size.IntValue, iDefenderCount = tf_mvm_defenders_team_size.IntValue;
+		int iMaxPartySize = mitm_party_max_size.IntValue, iDefenderCount = tf_mvm_defenders_team_size.IntValue;
 		return (iMaxPartySize == 0) ? iDefenderCount : Min(iMaxPartySize, iDefenderCount);
 	}
 	
@@ -365,6 +365,11 @@ void Party_Init()
 	RegConsoleCmd("sm_party_name", ConCmd_PartyName, "Rename your party.");
 }
 
+bool Party_IsEnabled()
+{
+	return mitm_party_enabled.BoolValue && mitm_queue_enabled.BoolValue;
+}
+
 ArrayList Party_GetAllActiveParties()
 {
 	return g_parties.Clone();
@@ -378,7 +383,7 @@ bool Party_ShouldRunCommand(int client)
 		return false;
 	}
 	
-	if (!sm_mitm_party_enabled.BoolValue)
+	if (!Party_IsEnabled())
 	{
 		CReplyToCommand(client, "%s %t", PLUGIN_TAG, "Party_FeatureDisabled");
 		return false;

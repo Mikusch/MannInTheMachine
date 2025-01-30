@@ -17,9 +17,13 @@
 
 "Phrases"
 {
+	"Menu_Header"
+	{
+		"en"		"MANN IN THE MACHINE"
+	}
 	"Menu_Main_Title"
 	{
-		"en"		"Welcome to Mann in the Machine!"
+		"en"		"➤ Main Menu"
 	}
 	"Menu_Main_Queue"
 	{
@@ -39,7 +43,7 @@
 	}
 	"Menu_Queue_Title"
 	{
-		"en"		"Defender Queue"
+		"en"		"➤ Defender Queue"
 	}
 	"Menu_Queue_Title_QueuePoints"
 	{
@@ -57,7 +61,7 @@
 	}
 	"Menu_Preferences_Title"
 	{
-		"en"		"User Preferences"
+		"en"		"➤ User Preferences"
 	}
 	"Menu_Preferences_NotLoaded"
 	{
@@ -65,19 +69,19 @@
 	}
 	"Menu_Credits_Title"
 	{
-		"en"	"Gamemode Credits"
+		"en"		"➤ Credits"
 	}
 	"Menu_Credits_Mikusch"
 	{
-		"en"	"Code and gameplay"
+		"en"		"Code and gameplay"
 	}
 	"Menu_Credits_Kenzzer"
 	{
-		"en"	"Early coding assistance"
+		"en"		"Early coding help"
 	}
 	"Menu_Credits_trigger_hurt"
 	{
-		"en"	"Custom robot viewmodels"
+		"en"		"Custom robot viewmodels"
 	}
 	"Preference_DisableDefender"
 	{
@@ -107,31 +111,44 @@
 	{
 		"en"		"Use human viewmodels as robot"
 	}
+	"SelectedAsDefender"
+	{
+		"en"		"You have been assigned to the {red}MANN CO.{default} team."
+	}
+	"SelectedAsDefender_Forced"
+	{
+		"en"		"You have been forcibly assigned to the {red}MANN CO.{default} team because not enough players were eligible to play."
+	}
+	"SelectedAsDefender_Replacement"
+	{
+		"en"		"You have been moved to the {red}MANN CO.{default} team to fill a vacant slot."
+	}
+	"SelectedAsInvader"
+	{
+		"en"		"You have been assigned to the {blue}ROBOT{default} team."
+	}
+	"Queue_FeatureDisabled"
+	{
+		"en"		"The queue system is currently disabled."
+	}
 	"Queue_NewDefenders"
 	{
 		"en"		"Selecting a new set of defenders..."
 	}
-	"Queue_SelectedAsDefender"
+	"Queue_PointsReset"
 	{
-		"#format"	"{1:s}"
-		"en"		"You have been assigned to team {red}{1}{default}. Your queue points have been reset."
+		"en"		"Your queue points have been reset."
 	}
-	"Queue_SelectedAsDefender_Forced"
+	"Queue_PointsHalved"
 	{
-		"#format"	"{1:s}"
-		"en"		"You have been assigned to team {red}{1}{default} to fill a vacant slot. Your queue points have not been reset."
+		"en"		"Your queue points have been halved."
 	}
-	"Queue_AwardedQueuePoints"
+	"Queue_PointsAwarded"
 	{
 		"#format"	"{1:d},{2:d}"
 		"en"		"You have been awarded {green}{1} {default}queue points (Total: {green}{2}{default})."
 	}
-	"Queue_SelectedAsInvader"
-	{
-		"#format"	"{1:s}"
-		"en"		"You have been assigned to team {blue}{1}{default}."
-	}
-	"Queue_AddedPoints"
+	"Queue_PointsAdded"
 	{
 		"#format"	"{1:d},{2:t}"
 		"en"		"Added {green}{1} {default}queue points to {cyan}{2}{default}."
@@ -178,14 +195,22 @@
 		"#format"	"{1:N}"
 		"en"		"{blue}{1} {default}was kicked for dying in the spawn area too many times."
 	}
-	"Invader_CaptureGate_Annotation"
+	"Invader_CaptureGate"
 	{
 		"#format"	"{1:s}"
 		"en"		"Capture {1}"
 	}
-	"Invader_DeliverFlag_Annotation"
+	"Invader_DeliverFlag"
 	{
 		"en"		"Deliver The Bomb To The Hatch"
+	}
+	"Invader_DelayedThreatNotice_Generic"
+	{
+		"en"		"Threat"
+	}
+	"Invader_DelayedThreatNotice_Spy"
+	{
+		"en"		"Spy"
 	}
 	"Invader_DestroySentries_DetonateSentry"
 	{
@@ -193,7 +218,7 @@
 	}
 	"Invader_DestroySentries_DetonateHere"
 	{
-		"en"		"Detonate here to complete your mission"
+		"en"		"Detonate Here To Complete Your Mission"
 	}
 	"Invader_Queue_Header"
 	{
@@ -228,23 +253,23 @@
 	
 	"Party_Menu_Title"
 	{
-		"en"		"Party Menu"
+		"en"		"➤ Party Menu"
 	}
 	"Party_InviteMenu_Title"
 	{
-		"en"		"Pending Party Invites"
+		"en"		"➤ Pending Party Invites"
 	}
 	"Party_ManageInviteMenu_Title"
 	{
-		"en"		"Invite Players"
+		"en"		"➤ Invite Players"
 	}
 	"Party_ManageMenu_Title"
 	{
-		"en"		"Manage Party"
+		"en"		"➤ Manage Party"
 	}
 	"Party_KickMenu_Title"
 	{
-		"en"		"Kick Members"
+		"en"		"➤ Kick Party Members"
 	}
 	"Party_KickMenu_NoMembers"
 	{

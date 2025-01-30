@@ -117,7 +117,7 @@ methodmap Entity
 	
 	public ArrayList GetTeleportWhere()
 	{
-		return this.m_teleportWhereName;
+		return this.m_teleportWhereName.Clone();
 	}
 	
 	public void SetGlowEntity(int hGlowEntity)

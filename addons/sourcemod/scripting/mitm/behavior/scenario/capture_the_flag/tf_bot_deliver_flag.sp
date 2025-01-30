@@ -163,7 +163,7 @@ static int Update(CTFBotDeliverFlag action, int actor, float interval)
 		return action.Done("I'm no longer carrying the flag");
 	}
 	
-	if (UpgradeOverTime(action, actor) && sm_mitm_bot_taunt_on_upgrade.BoolValue)
+	if (UpgradeOverTime(action, actor) && mitm_bot_taunt_on_upgrade.BoolValue)
 	{
 		return action.SuspendFor(CTFBotTaunt(), "Taunting for our new upgrade");
 	}
@@ -177,7 +177,7 @@ static int Update(CTFBotDeliverFlag action, int actor, float interval)
 			CBaseEntity(captureZone).WorldSpaceCenter(center);
 			
 			char text[64];
-			Format(text, sizeof(text), "%T", "Invader_DeliverFlag_Annotation", actor);
+			Format(text, sizeof(text), "%T", "Invader_DeliverFlag", actor);
 			CTFPlayer(actor).ShowAnnotation(MITM_HINT_MASK | actor, text, _, center, 10.0, "coach/coach_go_here.wav");
 			
 			action.m_annotationTimer.Invalidate();

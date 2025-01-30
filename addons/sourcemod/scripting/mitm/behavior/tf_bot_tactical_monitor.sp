@@ -48,5 +48,7 @@ static int Update(CTFBotTacticalMonitor action, int actor, float interval)
 		return action.SuspendFor(result, "Opportunistically using buff item");
 	}
 	
+	CTFPlayer(actor).UpdateDelayedThreatNotices();
+	
 	return action.Continue();
 }

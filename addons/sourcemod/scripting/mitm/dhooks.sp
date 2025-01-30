@@ -212,9 +212,9 @@ static void DHooks_CopyScriptFunctionBinding(const char[] sourceClassName, const
 	char targetName[64];
 	Format(targetName, sizeof(targetName), "%s::%s", targetClassName, functionName);
 	
-	#if defined DEBUG
+#if defined DEBUG
 	LogMessage("Copied script function binding: %s::%s -> %s", sourceClassName, functionName, targetName);
-	#endif
+#endif
 	
 	// not setup for detour
 	if (callbackPre == INVALID_FUNCTION && callbackPost == INVALID_FUNCTION)
@@ -307,8 +307,8 @@ static MRESReturn DHookCallback_CPopulationManager_RestoreCheckpoint_Pre(int pop
 			tf_mvm_min_players_to_start.IntValue = 0;
 		}
 		
-		int nMaxConsecutiveWipes = sm_mitm_autoincrement_max_wipes.IntValue;
-		float fCleanMoneyPercent = sm_mitm_autoincrement_currency_percentage.FloatValue;
+		int nMaxConsecutiveWipes = mitm_autoincrement_max_wipes.IntValue;
+		float fCleanMoneyPercent = mitm_autoincrement_currency_percentage.FloatValue;
 		
 		if (nMaxConsecutiveWipes > 0 && g_nNumConsecutiveWipes >= nMaxConsecutiveWipes)
 		{

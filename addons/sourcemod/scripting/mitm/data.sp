@@ -518,7 +518,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	{
 		public get()
 		{
-			return GetEntData(this.index, GetOffset("CTFPlayer", "m_bIsMissionEnemy"), 1) != 0;
+			return GetEntData(this.index, GetOffset("CTFPlayer", "m_bIsMissionEnemy"), 1);
 		}
 		public set(bool bIsMissionEnemy)
 		{
@@ -530,7 +530,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	{
 		public get()
 		{
-			return GetEntData(this.index, GetOffset("CTFPlayer", "m_bIsSupportEnemy"), 1) != 0;
+			return GetEntData(this.index, GetOffset("CTFPlayer", "m_bIsSupportEnemy"), 1);
 		}
 		public set(bool bIsSupportEnemy)
 		{
@@ -542,7 +542,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	{
 		public get()
 		{
-			GetEntData(this.index, GetOffset("CTFPlayer", "m_bIsLimitedSupportEnemy"), 1) != 0;
+			GetEntData(this.index, GetOffset("CTFPlayer", "m_bIsLimitedSupportEnemy"), 1);
 		}
 		public set(bool bIsLimitedSupportEnemy)
 		{
@@ -663,7 +663,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public bool IsMiniBoss()
 	{
-		return this.GetProp(Prop_Send, "m_bIsMiniBoss") != 0;
+		return this.GetProp(Prop_Send, "m_bIsMiniBoss");
 	}
 	
 	public int GetFlagTarget()
@@ -920,7 +920,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public bool GetInvaderName(char[] buffer, int maxlen)
 	{
-		return strcopy(buffer, maxlen, m_invaderName[this.index]) != 0;
+		return strcopy(buffer, maxlen, m_invaderName[this.index]);
 	}
 	
 	public bool HasInvaderName()
@@ -1663,7 +1663,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public bool HasPreference(MannInTheMachinePreference preference)
 	{
-		return this.m_preferences & view_as<int>(preference) != 0;
+		return this.m_preferences & view_as<int>(preference);
 	}
 	
 	public bool SetPreference(MannInTheMachinePreference preference, bool enable)
@@ -2304,7 +2304,7 @@ methodmap CPopulationManager < CBaseEntity
 	{
 		public get()
 		{
-			return GetEntData(this.index, GetOffset("CPopulationManager", "m_bIsInitialized"), 1) != 0;
+			return GetEntData(this.index, GetOffset("CPopulationManager", "m_bIsInitialized"), 1);
 		}
 		public set(bool bIsInitialized)
 		{
@@ -2316,7 +2316,7 @@ methodmap CPopulationManager < CBaseEntity
 	{
 		public get()
 		{
-			return GetEntData(this.index, GetOffset("CPopulationManager", "m_canBotsAttackWhileInSpawnRoom"), 1) != 0;
+			return GetEntData(this.index, GetOffset("CPopulationManager", "m_canBotsAttackWhileInSpawnRoom"), 1);
 		}
 	}
 	
@@ -2336,7 +2336,7 @@ methodmap CPopulationManager < CBaseEntity
 	{
 		public get()
 		{
-			return GetEntData(this.index, GetOffset("CPopulationManager", "m_bSpawningPaused"), 1) != 0;
+			return GetEntData(this.index, GetOffset("CPopulationManager", "m_bSpawningPaused"), 1);
 		}
 	}
 	
@@ -2484,7 +2484,7 @@ methodmap CTFTankBoss < CBaseEntity
 	{
 		public get()
 		{
-			return GetEntData(this.index, GetOffset("CTFTankBoss", "m_isDroppingBomb"), 1) != 0;
+			return GetEntData(this.index, GetOffset("CTFTankBoss", "m_isDroppingBomb"), 1);
 		}
 		public set(bool isDroppingBomb)
 		{
@@ -2520,7 +2520,7 @@ methodmap CBaseTFBotHintEntity < CBaseEntity
 	{
 		public get()
 		{
-			return GetEntData(this.index, GetOffset("CBaseTFBotHintEntity", "m_isDisabled"), 1) != 0;
+			return GetEntData(this.index, GetOffset("CBaseTFBotHintEntity", "m_isDisabled"), 1);
 		}
 	}
 	
@@ -2687,7 +2687,7 @@ methodmap CTFObjectiveResource < CBaseEntity
 	
 	public bool GetMannVsMachineIsBetweenWaves()
 	{
-		return this.GetProp(Prop_Send, "m_bMannVsMachineBetweenWaves") != 0;
+		return this.GetProp(Prop_Send, "m_bMannVsMachineBetweenWaves");
 	}
 	
 	public void IncrementMannVsMachineWaveClassCount(any iszClassIconName, int iFlags)

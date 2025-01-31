@@ -426,7 +426,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	
 	CTFPlayer player = CTFPlayer(client);
 	
-	if (player.m_inputButtons != 0)
+	if (player.m_inputButtons)
 	{
 		buttons |= player.m_inputButtons;
 		player.m_inputButtons = 0;

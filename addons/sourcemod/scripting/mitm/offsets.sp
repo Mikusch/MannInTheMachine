@@ -50,6 +50,7 @@ void Offsets_Init(GameData hGameConf)
 	SetOffset(hGameConf, "CPopulationManager", "m_iCurrentWaveIndex");
 	SetOffset(hGameConf, "CPopulationManager", "m_bSpawningPaused");
 	SetOffset(hGameConf, "CPopulationManager", "m_EndlessActiveBotUpgrades");
+	SetOffset(hGameConf, "CPopulationManager", "m_bIsWaveJumping");
 	SetOffset(hGameConf, "CPopulationManager", "m_defaultEventChangeAttributesName");
 	
 	SetOffset(hGameConf, "CWave", "m_nSentryBustersSpawned");

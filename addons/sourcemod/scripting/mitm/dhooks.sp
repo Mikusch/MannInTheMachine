@@ -56,7 +56,6 @@ void DHooks_Init()
 	PSM_AddDynamicDetourFromConf("CTFGCServerSystem::PreClientUpdate", DHookCallback_CTFGCServerSystem_PreClientUpdate_Pre, DHookCallback_CTFGCServerSystem_PreClientUpdate_Post);
 	PSM_AddDynamicDetourFromConf("CPopulationManager::AllocateBots", DHookCallback_CPopulationManager_AllocateBots_Pre);
 	PSM_AddDynamicDetourFromConf("CPopulationManager::EndlessRollEscalation", DHookCallback_CPopulationManager_EndlessRollEscalation_Pre, DHookCallback_CPopulationManager_EndlessRollEscalation_Post);
-	PSM_AddDynamicDetourFromConf("CPopulationManager::RestoreCheckpoint", DHookCallback_CPopulationManager_RestoreCheckpoint_Pre);
 	PSM_AddDynamicDetourFromConf("CTFBotSpawner::Spawn", DHookCallback_CTFBotSpawner_Spawn_Pre);
 	PSM_AddDynamicDetourFromConf("CSquadSpawner::Spawn", _, DHookCallback_CSquadSpawner_Spawn_Post);
 	PSM_AddDynamicDetourFromConf("CPopulationManager::Update", DHookCallback_CPopulationManager_Update_Pre, DHookCallback_CPopulationManager_Update_Post);
@@ -292,67 +291,6 @@ static MRESReturn DHookCallback_CPopulationManager_EndlessRollEscalation_Post(in
 	g_bInEndlessRollEscalation = false;
 	
 	return MRES_Ignored;
-}
-
-static MRESReturn DHookCallback_CPopulationManager_RestoreCheckpoint_Pre(int populator)
-{
-	// NOTE: RestoreCheckpoint is called twice after a call to ResetMap().
-	// After waiting for players ends, it will call this function again while `m_bIsInitialized` is `false`, then set it to `true`.
-	// This technically starts waiting for players again on the first call, but we force it to terminate immediately on the second call.
-	if (CPopulationManager(populator).m_bIsInitialized)
-	{
-		if (g_bInWaitingForPlayers)
-		{
-			g_bInWaitingForPlayers = false;
-			tf_mvm_min_players_to_start.IntValue = 0;
-		}
-		
-		int nMaxConsecutiveWipes = mitm_autoincrement_max_wipes.IntValue;
-		float fCleanMoneyPercent = mitm_autoincrement_currency_percentage.FloatValue;
-		
-		if (nMaxConsecutiveWipes > 0 && g_nNumConsecutiveWipes >= nMaxConsecutiveWipes)
-		{
-			int iNextWaveIndex = g_pPopulationManager.GetWaveNumber() + 1;
-			if (iNextWaveIndex < g_pObjectiveResource.GetMannVsMachineMaxWaveCount())
-			{
-				g_nNumConsecutiveWipes = 0;
-				
-				g_pPopulationManager.JumpToWave(iNextWaveIndex + 1);
-				
-				CWave pWave = g_pPopulationManager.GetWave(iNextWaveIndex);
-				
-				int nCurrency = pWave.GetTotalCurrency();
-				g_pMVMStats.ClearStats(g_pPopulationManager.m_iCurrentWaveIndex);
-				g_pMVMStats.RoundEvent_CreditsDropped(g_pPopulationManager.m_iCurrentWaveIndex, nCurrency);
-				g_pMVMStats.RoundEvent_AcquiredCredits(g_pPopulationManager.m_iCurrentWaveIndex, RoundToFloor(nCurrency * fCleanMoneyPercent), false);
-				
-				CPrintToChatAll("%s %t", PLUGIN_TAG, "Wave_AutoIncremented", iNextWaveIndex + 1, nMaxConsecutiveWipes);
-			}
-		}
-		
-		SelectNewDefenders();
-	}
-	else
-	{
-		g_bInWaitingForPlayers = true;
-		tf_mvm_min_players_to_start.IntValue = MaxClients + 1;
-		
-		CreateTimer(mp_waitingforplayers_time.FloatValue, Timer_OnWaitingForPlayersEnd);
-	}
-	
-	return MRES_Ignored;
-}
-
-static void Timer_OnWaitingForPlayersEnd(Handle timer)
-{
-	if (!g_bInWaitingForPlayers)
-		return;
-	
-	if (g_pPopulationManager.IsValid())
-	{
-		g_pPopulationManager.m_bIsInitialized = false;
-		g_pPopulationManager.ResetMap();
-	}
 }
 
 // The meat of the spawning logic. Any error happening in here WILL cause bots to spawn!

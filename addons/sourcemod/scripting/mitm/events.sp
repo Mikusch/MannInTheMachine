@@ -30,6 +30,7 @@ void Events_Init()
 	PSM_AddEventHook("teams_changed", EventHook_TeamsChanged);
 	PSM_AddEventHook("pve_win_panel", EventHook_PVEWinPanel);
 	PSM_AddEventHook("mvm_wave_complete", EventHook_MvMWaveComplete);
+	PSM_AddEventHook("mvm_wave_failed", EventHook_MvMWaveFailed);
 }
 
 static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
@@ -247,6 +248,65 @@ static void EventHook_PVEWinPanel(Event event, const char[] name, bool dontBroad
 static void EventHook_MvMWaveComplete(Event event, const char[] name, bool dontBroadcast)
 {
 	g_nNumConsecutiveWipes = 0;
+}
+
+static void EventHook_MvMWaveFailed(Event event, const char[] name, bool dontBroadcast)
+{
+	if (g_pPopulationManager.m_bIsInitialized)
+	{
+		if (g_bInWaitingForPlayers)
+		{
+			g_bInWaitingForPlayers = false;
+			tf_mvm_min_players_to_start.IntValue = 0;
+		}
+		
+		int nMaxConsecutiveWipes = mitm_autoincrement_max_wipes.IntValue;
+		float fCleanMoneyPercent = mitm_autoincrement_currency_percentage.FloatValue;
+		
+		if (nMaxConsecutiveWipes > 0 && g_nNumConsecutiveWipes >= nMaxConsecutiveWipes)
+		{
+			int iNextWaveIndex = g_pPopulationManager.GetWaveNumber() + 1;
+			if (iNextWaveIndex < g_pObjectiveResource.GetMannVsMachineMaxWaveCount())
+			{
+				g_nNumConsecutiveWipes = 0;
+				
+				g_pPopulationManager.JumpToWave(iNextWaveIndex);
+				
+				CWave pWave = g_pPopulationManager.GetWave(iNextWaveIndex);
+				
+				int nCurrency = pWave.GetTotalCurrency();
+				g_pMVMStats.ClearStats(g_pPopulationManager.GetWaveNumber());
+				g_pMVMStats.RoundEvent_CreditsDropped(g_pPopulationManager.GetWaveNumber(), nCurrency);
+				g_pMVMStats.RoundEvent_AcquiredCredits(g_pPopulationManager.GetWaveNumber(), RoundToFloor(nCurrency * fCleanMoneyPercent), false);
+				
+				CPrintToChatAll("%s %t", PLUGIN_TAG, "Wave_AutoIncremented", iNextWaveIndex + 1, fCleanMoneyPercent * 100.0, nMaxConsecutiveWipes);
+			}
+		}
+		
+		if (!g_pPopulationManager.m_bIsWaveJumping)
+		{
+			SelectNewDefenders();
+		}
+	}
+	else
+	{
+		g_bInWaitingForPlayers = true;
+		tf_mvm_min_players_to_start.IntValue = MaxClients + 1;
+		
+		CreateTimer(mp_waitingforplayers_time.FloatValue, Timer_OnWaitingForPlayersEnd);
+	}
+}
+
+static void Timer_OnWaitingForPlayersEnd(Handle timer)
+{
+	if (!g_bInWaitingForPlayers)
+		return;
+	
+	if (g_pPopulationManager.IsValid())
+	{
+		g_pPopulationManager.m_bIsInitialized = false;
+		g_pPopulationManager.ResetMap();
+	}
 }
 
 static void RequestFrameCallback_FindReplacementDefender()

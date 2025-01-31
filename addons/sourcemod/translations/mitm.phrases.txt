@@ -241,8 +241,8 @@
 	}
 	"Wave_AutoIncremented"
 	{
-		"#format"	"{1:d},{2:d}"
-		"en"		"The game has skipped to {cyan}Wave {1} {default}due to the defenders losing {red}{2} times{default} in a row."
+		"#format"	"{1:d},{2:0.f},{3:d}"
+		"en"		"Skipped to {cyan}Wave {1}{default} with {green}{2}%% of credits collected{default} due to the defenders losing {red}{3} time(s){default} in a row."
 	}
 	"Spectator_Mode"
 	{

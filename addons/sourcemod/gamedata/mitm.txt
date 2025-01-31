@@ -101,11 +101,6 @@
 				"linux"		"@_ZN18CPopulationManager19GetHealthMultiplierEb"
 				"windows"	"\x55\x8B\xEC\x80\xB9\x0E\x06\x00\x00\x00"
 			}
-			"CPopulationManager::RestoreCheckpoint"
-			{
-				"linux"		"@_ZN18CPopulationManager17RestoreCheckpointEv"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x30\x53\x8B\xD9\x56\x57"
-			}
 			"CPopulationManager::GetCurrentWave"
 			{
 				"linux"		"@_ZN18CPopulationManager14GetCurrentWaveEv"
@@ -585,7 +580,7 @@
 			}
 			"CPopulationManager::m_iCurrentWaveIndex"
 			{
-				"linux"		"680"
+				"linux"		"656"
 				"windows"	"656"
 			}
 			"CPopulationManager::m_bSpawningPaused"
@@ -597,6 +592,11 @@
 			{
 				"linux"		"740"
 				"windows"	"740"
+			}
+			"CPopulationManager::m_bIsWaveJumping"
+			{
+				"linux"		"717"
+				"windows"	"717"
 			}
 			"CPopulationManager::m_defaultEventChangeAttributesName"
 			{
@@ -828,13 +828,6 @@
 			"CPopulationManager::EndlessRollEscalation"
 			{
 				"signature"	"CPopulationManager::EndlessRollEscalation"
-				"callconv"	"thiscall"
-				"return"	"void"
-				"this"		"entity"
-			}
-			"CPopulationManager::RestoreCheckpoint"
-			{
-				"signature"	"CPopulationManager::RestoreCheckpoint"
 				"callconv"	"thiscall"
 				"return"	"void"
 				"this"		"entity"

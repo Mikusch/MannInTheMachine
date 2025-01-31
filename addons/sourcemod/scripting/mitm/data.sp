@@ -2340,19 +2340,27 @@ methodmap CPopulationManager < CBaseEntity
 		}
 	}
 	
-	property Address m_defaultEventChangeAttributesName
-	{
-		public get()
-		{
-			return view_as<Address>(GetEntData(this.index, GetOffset("CPopulationManager", "m_defaultEventChangeAttributesName")));
-		}
-	}
-	
 	property CUtlVector m_EndlessActiveBotUpgrades
 	{
 		public get()
 		{
 			return CUtlVector(GetEntityAddress(this.index) + GetOffset("CPopulationManager", "m_EndlessActiveBotUpgrades"));
+		}
+	}
+	
+	property bool m_bIsWaveJumping
+	{
+		public get()
+		{
+			return GetEntData(this.index, GetOffset("CPopulationManager", "m_bIsWaveJumping"), 1);
+		}
+	}
+	
+	property Address m_defaultEventChangeAttributesName
+	{
+		public get()
+		{
+			return view_as<Address>(GetEntData(this.index, GetOffset("CPopulationManager", "m_defaultEventChangeAttributesName")));
 		}
 	}
 	
@@ -2398,8 +2406,8 @@ methodmap CPopulationManager < CBaseEntity
 	public void JumpToWave(int waveNumber, float fCleanMoneyPercent = -1.0)
 	{
 		int flags = GetCommandFlags("tf_mvm_jump_to_wave");
-		SetCommandFlags("tf_mvm_jump_to_wave", (flags & ~FCVAR_CHEAT));
-		ServerCommand("tf_mvm_jump_to_wave %d %f", waveNumber, fCleanMoneyPercent);
+		SetCommandFlags("tf_mvm_jump_to_wave", flags & ~FCVAR_CHEAT);
+		ServerCommand("tf_mvm_jump_to_wave %d %f", waveNumber + 1, fCleanMoneyPercent);
 		ServerExecute();
 		SetCommandFlags("tf_mvm_jump_to_wave", flags);
 	}

@@ -211,10 +211,6 @@ static void EventHook_TeamsChanged(Event event, const char[] name, bool dontBroa
 
 static void EventHook_PVEWinPanel(Event event, const char[] name, bool dontBroadcast)
 {
-	TFTeam iWinningTeam = view_as<TFTeam>(event.GetInt("winning_team"));
-	if (iWinningTeam == TFTeam_Invaders)
-		g_nNumConsecutiveWipes++;
-	
 	int points = mitm_queue_points.IntValue;
 	
 	for (int client = 1; client <= MaxClients; client++)
@@ -285,6 +281,7 @@ static void EventHook_MvMWaveFailed(Event event, const char[] name, bool dontBro
 		
 		if (!g_pPopulationManager.m_bIsWaveJumping)
 		{
+			g_nNumConsecutiveWipes++;
 			SelectNewDefenders();
 		}
 	}

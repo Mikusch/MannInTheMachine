@@ -236,6 +236,7 @@ public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int maxlen)
 public void OnMapStart()
 {
 	g_bInWaitingForPlayers = false;
+	g_nNumConsecutiveWipes = 0;
 	
 	Precache();
 	DHooks_HookGameRules();

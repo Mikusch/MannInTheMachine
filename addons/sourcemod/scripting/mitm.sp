@@ -42,6 +42,7 @@
 #define PLUGIN_VERSION	"1.0.0"
 
 // Global entities
+CMannVsMachineStats g_pMVMStats = view_as<CMannVsMachineStats>(INVALID_ENT_REFERENCE);
 CPopulationManager g_pPopulationManager = view_as<CPopulationManager>(INVALID_ENT_REFERENCE);
 CTFObjectiveResource g_pObjectiveResource = view_as<CTFObjectiveResource>(INVALID_ENT_REFERENCE);
 CTFGameRules g_pGameRules = view_as<CTFGameRules>(INVALID_ENT_REFERENCE);
@@ -54,6 +55,7 @@ Cookie g_hCookiePreferences;
 CEntityFactory g_hEntityFactory;
 Handle g_hWarningHudSync;
 StringMap g_hSpyWatchOverrides;
+int g_nNumConsecutiveWipes;
 bool g_bInWaitingForPlayers;
 bool g_bAllowTeamChange;	// Bypass CTFGameRules::GetTeamAssignmentOverride?
 bool g_bInEndlessRollEscalation;
@@ -74,6 +76,8 @@ ConVar mitm_defender_ping_limit;
 ConVar mitm_shield_damage_drain_rate;
 ConVar mitm_bot_taunt_on_upgrade;
 ConVar mitm_romevision;
+ConVar mitm_autoincrement_max_wipes;
+ConVar mitm_autoincrement_currency_percentage;
 
 // Game ConVars
 ConVar tf_avoidteammates_pushaway;
@@ -312,7 +316,11 @@ public void OnEntityCreated(int entity, const char[] classname)
 	SDKHooks_OnEntityCreated(entity, classname);
 	
 	// Store the references of entities that should only exist once
-	if (StrEqual(classname, "info_populator"))
+	if (StrEqual(classname, "tf_mann_vs_machine_stats"))
+	{
+		g_pMVMStats = CMannVsMachineStats(EntIndexToEntRef(entity));
+	}
+	else if (StrEqual(classname, "info_populator"))
 	{
 		g_pPopulationManager = CPopulationManager(EntIndexToEntRef(entity));
 	}
@@ -418,7 +426,7 @@ public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3
 	
 	CTFPlayer player = CTFPlayer(client);
 	
-	if (player.m_inputButtons != 0)
+	if (player.m_inputButtons)
 	{
 		buttons |= player.m_inputButtons;
 		player.m_inputButtons = 0;

@@ -28,7 +28,9 @@ void Events_Init()
 	PSM_AddEventHook("teamplay_point_captured", EventHook_TeamplayPointCaptured);
 	PSM_AddEventHook("teamplay_flag_event", EventHook_TeamplayFlagEvent);
 	PSM_AddEventHook("teams_changed", EventHook_TeamsChanged);
-	PSM_AddEventHook("pve_win_panel", EventHook_WinPanel);
+	PSM_AddEventHook("pve_win_panel", EventHook_PVEWinPanel);
+	PSM_AddEventHook("mvm_wave_complete", EventHook_MvMWaveComplete);
+	PSM_AddEventHook("mvm_wave_failed", EventHook_MvMWaveFailed);
 }
 
 static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroadcast)
@@ -207,7 +209,7 @@ static void EventHook_TeamsChanged(Event event, const char[] name, bool dontBroa
 	}
 }
 
-static void EventHook_WinPanel(Event event, const char[] name, bool dontBroadcast)
+static void EventHook_PVEWinPanel(Event event, const char[] name, bool dontBroadcast)
 {
 	int points = mitm_queue_points.IntValue;
 	
@@ -236,6 +238,75 @@ static void EventHook_WinPanel(Event event, const char[] name, bool dontBroadcas
 		{
 			CTFPlayer(client).m_defenderPriority++;
 		}
+	}
+}
+
+static void EventHook_MvMWaveComplete(Event event, const char[] name, bool dontBroadcast)
+{
+	g_nNumConsecutiveWipes = 0;
+}
+
+static void EventHook_MvMWaveFailed(Event event, const char[] name, bool dontBroadcast)
+{
+	if (g_pPopulationManager.m_bIsInitialized)
+	{
+		bool bWasInWaitingForPlayers = g_bInWaitingForPlayers;
+		if (g_bInWaitingForPlayers)
+		{
+			g_bInWaitingForPlayers = false;
+			tf_mvm_min_players_to_start.IntValue = 0;
+		}
+		
+		int nMaxConsecutiveWipes = mitm_autoincrement_max_wipes.IntValue;
+		float fCleanMoneyPercent = mitm_autoincrement_currency_percentage.FloatValue;
+		
+		if (nMaxConsecutiveWipes > 0 && g_nNumConsecutiveWipes >= nMaxConsecutiveWipes)
+		{
+			int iCurrentWaveIndex = g_pPopulationManager.GetWaveNumber();
+			int iNextWaveIndex = iCurrentWaveIndex + 1;
+			if (iNextWaveIndex < g_pObjectiveResource.GetMannVsMachineMaxWaveCount())
+			{
+				g_nNumConsecutiveWipes = 0;
+				
+				g_pPopulationManager.m_iCurrentWaveIndex++;
+				CWave pWave = g_pPopulationManager.GetCurrentWave();
+				
+				int nCurrency = pWave.GetTotalCurrency();
+				g_pMVMStats.SetCurrentWave(iCurrentWaveIndex);
+				
+				g_pMVMStats.RoundEvent_CreditsDropped(iCurrentWaveIndex, nCurrency);
+				g_pMVMStats.RoundEvent_AcquiredCredits(iCurrentWaveIndex, RoundToFloor(nCurrency * fCleanMoneyPercent), false);
+				
+				g_pPopulationManager.JumpToWave(iNextWaveIndex);
+				
+				CPrintToChatAll("%s %t", PLUGIN_TAG, "Wave_AutoIncremented", iNextWaveIndex + 1, fCleanMoneyPercent * 100.0, nMaxConsecutiveWipes);
+			}
+		}
+		
+		if (bWasInWaitingForPlayers || !g_pPopulationManager.m_bIsWaveJumping)
+		{
+			g_nNumConsecutiveWipes++;
+			SelectNewDefenders();
+		}
+	}
+	else
+	{
+		g_bInWaitingForPlayers = true;
+		tf_mvm_min_players_to_start.IntValue = MaxClients + 1;
+		
+		CreateTimer(mp_waitingforplayers_time.FloatValue, Timer_OnWaitingForPlayersEnd);
+	}
+}
+
+static void Timer_OnWaitingForPlayersEnd(Handle timer)
+{
+	if (!g_bInWaitingForPlayers)
+		return;
+	
+	if (g_pPopulationManager.IsValid())
+	{
+		g_pPopulationManager.m_bIsInitialized = false;
+		g_pPopulationManager.ResetMap();
 	}
 }
 

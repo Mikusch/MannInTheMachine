@@ -125,13 +125,13 @@ methodmap Party
 	public bool GetName(char[] buffer, int maxlen)
 	{
 		PartyInfo info;
-		if (g_parties.GetArray(this.m_listIndex, info) && strlen(info.name) != 0)
+		if (g_parties.GetArray(this.m_listIndex, info) && strlen(info.name))
 		{
-			return strcopy(buffer, maxlen, info.name) != 0;
+			return strcopy(buffer, maxlen, info.name);
 		}
 		else
 		{
-			return Format(buffer, maxlen, "%T", "Party_Name_Default", LANG_SERVER, this.GetLeader()) != 0;
+			return Format(buffer, maxlen, "%T", "Party_Name_Default", LANG_SERVER, this.GetLeader());
 		}
 	}
 	

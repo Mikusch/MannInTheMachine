@@ -37,6 +37,8 @@ void ConVars_Init()
 	mitm_shield_damage_drain_rate = CreateConVar("mitm_shield_damage_drain_rate", "0.05", "How much energy to drain for each point of damage to the shield.");
 	mitm_bot_taunt_on_upgrade = CreateConVar("mitm_bot_taunt_on_upgrade", "1", "Whether bots should automatically taunt when the bomb levels up.");
 	mitm_romevision = CreateConVar("mitm_romevision", "1", "Whether to allow romevision items to be generated.");
+	mitm_autoincrement_max_wipes = CreateConVar("mitm_autoincrement_max_wipes", "2", "After this many losses the current wave will be skipped.");
+	mitm_autoincrement_currency_percentage = CreateConVar("mitm_autoincrement_currency_percentage", "0.90", "Percentage of currency gained from a skipped wave.", _, true, 0.0, true, 1.0);
 	
 	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");

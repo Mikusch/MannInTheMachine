@@ -101,11 +101,6 @@
 				"linux"		"@_ZN18CPopulationManager19GetHealthMultiplierEb"
 				"windows"	"\x55\x8B\xEC\x80\xB9\x0E\x06\x00\x00\x00"
 			}
-			"CPopulationManager::RestoreCheckpoint"
-			{
-				"linux"		"@_ZN18CPopulationManager17RestoreCheckpointEv"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x30\x53\x8B\xD9\x56\x57"
-			}
 			"CPopulationManager::GetCurrentWave"
 			{
 				"linux"		"@_ZN18CPopulationManager14GetCurrentWaveEv"
@@ -125,6 +120,11 @@
 			{
 				"linux"		"@_ZN18CPopulationManager6UpdateEv"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x14\x53\x56\x33\xD2"
+			}
+			"CMannVsMachineStats::SetCurrentWave"
+			{
+				"linux"		"@_ZN19CMannVsMachineStats14SetCurrentWaveEj"
+				"windows"	"\x55\x8B\xEC\x8B\x45\x08\x83\xEC\x40"
 			}
 			"CPeriodicSpawnPopulator::Update"
 			{
@@ -583,6 +583,11 @@
 				"linux"		"645"
 				"windows"	"645"
 			}
+			"CPopulationManager::m_iCurrentWaveIndex"
+			{
+				"linux"		"656"
+				"windows"	"656"
+			}
 			"CPopulationManager::m_bSpawningPaused"
 			{
 				"linux"		"716"
@@ -592,6 +597,11 @@
 			{
 				"linux"		"740"
 				"windows"	"740"
+			}
+			"CPopulationManager::m_bIsWaveJumping"
+			{
+				"linux"		"717"
+				"windows"	"717"
 			}
 			"CPopulationManager::m_defaultEventChangeAttributesName"
 			{
@@ -612,6 +622,11 @@
 			{
 				"linux"		"52"
 				"windows"	"52"
+			}
+			"CWave::m_totalCurrency"
+			{
+				"linux"		"76"
+				"windows"	"76"
 			}
 			"IPopulationSpawner::m_spawner"
 			{
@@ -818,13 +833,6 @@
 			"CPopulationManager::EndlessRollEscalation"
 			{
 				"signature"	"CPopulationManager::EndlessRollEscalation"
-				"callconv"	"thiscall"
-				"return"	"void"
-				"this"		"entity"
-			}
-			"CPopulationManager::RestoreCheckpoint"
-			{
-				"signature"	"CPopulationManager::RestoreCheckpoint"
 				"callconv"	"thiscall"
 				"return"	"void"
 				"this"		"entity"

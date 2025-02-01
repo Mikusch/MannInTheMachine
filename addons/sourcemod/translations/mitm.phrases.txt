@@ -239,6 +239,11 @@
 		"#format"	"{1:d}"
 		"en"		"...and {1} more"
 	}
+	"Wave_AutoIncremented"
+	{
+		"#format"	"{1:d},{2:0.f},{3:d}"
+		"en"		"Advanced to {cyan}Wave {1}{default} with {green}{2}%% of credits collected{default} due to the defenders losing {red}{3} time(s){default} in a row."
+	}
 	"Spectator_Mode"
 	{
 		"en"		"You are in SPECTATOR MODE"

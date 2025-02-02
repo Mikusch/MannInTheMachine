@@ -19,11 +19,13 @@
 #pragma newdecls required
 
 static StringMap g_offsets;
+static StringMap g_addresses;
 static StringMap g_typeSizes;
 
 void Offsets_Init(GameData hGameConf)
 {
 	g_offsets = new StringMap();
+	g_addresses = new StringMap();
 	g_typeSizes = new StringMap();
 	
 	SetOffset(hGameConf, "CTFBotSpawner", "m_class");
@@ -111,6 +113,8 @@ void Offsets_Init(GameData hGameConf)
 	SetOffset(hGameConf, "CTFGrenadePipebombProjectile", "m_flCreationTime");
 	SetOffset(hGameConf, "CTFTankBoss", "m_isDroppingBomb");
 	
+	SetAddress(hGameConf, "CPopulationManager::m_nNumConsecutiveWipes");
+	
 	SetTypeSize(hGameConf, "CMvMBotUpgrade");
 	SetTypeSize(hGameConf, "EventChangeAttributes_t");
 	SetTypeSize(hGameConf, "item_attributes_t");
@@ -126,11 +130,27 @@ any GetOffset(const char[] cls, const char[] prop)
 	
 	int offset;
 	if (!g_offsets.GetValue(key, offset))
-	{
-		ThrowError("Offset '%s' not present in map", key);
-	}
+		ThrowError("Failed to find offset '%s'", key);
 	
 	return offset;
+}
+
+Address GetAddress(const char[] key)
+{
+	Address address;
+	if (!g_addresses.GetValue(key, address))
+		ThrowError("Failed to find address '%s'", key);
+	
+	return address;
+}
+
+int GetTypeSize(const char[] key)
+{
+	int size;
+	if (!g_typeSizes.GetValue(key, size))
+		ThrowError("Failed to find size for type '%s'", key);
+	
+	return size;
 }
 
 static void SetOffset(GameData hGameConf, const char[] cls, const char[] prop)
@@ -149,7 +169,7 @@ static void SetOffset(GameData hGameConf, const char[] cls, const char[] prop)
 			base_offset = FindSendPropInfo("CBaseEntity", base_prop);
 			if (base_offset == -1)
 			{
-				ThrowError("Base offset '%s::%s' could not be found", cls, base_prop);
+				ThrowError("Failed to find base offset '%s::%s'", cls, base_prop);
 			}
 		}
 		
@@ -165,7 +185,7 @@ static void SetOffset(GameData hGameConf, const char[] cls, const char[] prop)
 		int offset = hGameConf.GetOffset(key);
 		if (offset == -1)
 		{
-			ThrowError("Offset '%s' could not be found", key);
+			ThrowError("Failed to find offset '%s'", key);
 		}
 		
 		g_offsets.SetValue(key, offset);
@@ -174,6 +194,15 @@ static void SetOffset(GameData hGameConf, const char[] cls, const char[] prop)
 		LogMessage("Found gamedata offset: %s (offset %d)", key, offset);
 #endif
 	}
+}
+
+static void SetAddress(GameData hGameConf, const char[] key)
+{
+	Address address = hGameConf.GetAddress(key);
+	if (!address)
+		ThrowError("Failed to calculate address '%s'", key);
+	
+	g_addresses.SetValue(key, address);
 }
 
 static void SetTypeSize(GameData hGameConf, const char[] name)
@@ -186,13 +215,4 @@ static void SetTypeSize(GameData hGameConf, const char[] name)
 		ThrowError("Failed to find size for type '%s", name);
 	
 	g_typeSizes.SetValue(name, size);
-}
-
-int GetTypeSize(const char[] name)
-{
-	int size;
-	if (!g_typeSizes.GetValue(name, size))
-		ThrowError("Failed to find size for type '%s'", name);
-	
-	return size;
 }

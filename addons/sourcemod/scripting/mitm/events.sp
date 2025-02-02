@@ -29,7 +29,6 @@ void Events_Init()
 	PSM_AddEventHook("teamplay_flag_event", EventHook_TeamplayFlagEvent);
 	PSM_AddEventHook("teams_changed", EventHook_TeamsChanged);
 	PSM_AddEventHook("pve_win_panel", EventHook_PVEWinPanel);
-	PSM_AddEventHook("mvm_wave_complete", EventHook_MvMWaveComplete);
 	PSM_AddEventHook("mvm_wave_failed", EventHook_MvMWaveFailed);
 }
 
@@ -241,11 +240,6 @@ static void EventHook_PVEWinPanel(Event event, const char[] name, bool dontBroad
 	}
 }
 
-static void EventHook_MvMWaveComplete(Event event, const char[] name, bool dontBroadcast)
-{
-	g_nNumConsecutiveWipes = 0;
-}
-
 static void EventHook_MvMWaveFailed(Event event, const char[] name, bool dontBroadcast)
 {
 	if (g_pPopulationManager.m_bIsInitialized)
@@ -257,14 +251,13 @@ static void EventHook_MvMWaveFailed(Event event, const char[] name, bool dontBro
 		int nMaxConsecutiveWipes = mitm_autoincrement_max_wipes.IntValue;
 		float fCleanMoneyPercent = mitm_autoincrement_currency_percentage.FloatValue;
 		
-		if (nMaxConsecutiveWipes > 0 && g_nNumConsecutiveWipes >= nMaxConsecutiveWipes)
+		// m_nNumConsecutiveWipes gets incremented when the round starts
+		if (nMaxConsecutiveWipes > 0 && g_pPopulationManager.m_nNumConsecutiveWipes - 1 >= nMaxConsecutiveWipes)
 		{
 			int iCurrentWaveIndex = g_pPopulationManager.GetWaveNumber();
 			int iNextWaveIndex = iCurrentWaveIndex + 1;
 			if (iNextWaveIndex < g_pObjectiveResource.GetMannVsMachineMaxWaveCount())
 			{
-				g_nNumConsecutiveWipes = 0;
-				
 				g_pPopulationManager.m_iCurrentWaveIndex++;
 				CWave pWave = g_pPopulationManager.GetCurrentWave();
 				
@@ -282,9 +275,6 @@ static void EventHook_MvMWaveFailed(Event event, const char[] name, bool dontBro
 		
 		if (bInWaitingForPlayers || !g_pPopulationManager.m_bIsWaveJumping)
 			SelectNewDefenders();
-		
-		if (!bInWaitingForPlayers)
-			g_nNumConsecutiveWipes++;
 	}
 	else
 	{

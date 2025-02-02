@@ -2347,6 +2347,14 @@ methodmap CPopulationManager < CBaseEntity
 		}
 	}
 	
+	property int m_nNumConsecutiveWipes
+	{
+		public get()
+		{
+			return LoadFromAddress(GetAddress("CPopulationManager::m_nNumConsecutiveWipes"), NumberType_Int32);
+		}
+	}
+	
 	public bool CanBotsAttackWhileInSpawnRoom()
 	{
 		return this.m_canBotsAttackWhileInSpawnRoom;

@@ -56,7 +56,6 @@ CEntityFactory g_hEntityFactory;
 Handle g_hWarningHudSync;
 StringMap g_hSpyWatchOverrides;
 Handle g_hWaitingForPlayersTimer;
-int g_nNumConsecutiveWipes;
 bool g_bInWaitingForPlayers;
 bool g_bAllowTeamChange;	// Bypass CTFGameRules::GetTeamAssignmentOverride?
 bool g_bInEndlessRollEscalation;
@@ -237,7 +236,6 @@ public APLRes AskPluginLoad2(Handle self, bool late, char[] error, int maxlen)
 public void OnMapStart()
 {
 	g_bInWaitingForPlayers = false;
-	g_nNumConsecutiveWipes = 0;
 	
 	Precache();
 	DHooks_HookGameRules();

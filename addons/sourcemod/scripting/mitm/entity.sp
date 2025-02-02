@@ -96,9 +96,9 @@ methodmap Entity
 		{
 			return g_hEntityProperties.Get(this.m_listIndex, EntityProperties::m_hGlowEntity);
 		}
-		public set(int glowEntity)
+		public set(int hGlowEntity)
 		{
-			g_hEntityProperties.Set(this.m_listIndex, glowEntity, EntityProperties::m_hGlowEntity);
+			g_hEntityProperties.Set(this.m_listIndex, hGlowEntity, EntityProperties::m_hGlowEntity);
 		}
 	}
 	
@@ -128,6 +128,19 @@ methodmap Entity
 	public int GetGlowEntity()
 	{
 		return this.m_hGlowEntity;
+	}
+	
+	public void CreateGlowEntity(const int color[4])
+	{
+		int hGlowEntity = this.GetGlowEntity();
+		if (!IsValidEntity(hGlowEntity))
+		{
+			hGlowEntity = CreateGlowEntity(view_as<int>(this), color);
+			if (IsValidEntity(hGlowEntity))
+			{
+				this.SetGlowEntity(hGlowEntity);
+			}
+		}
 	}
 	
 	public void Destroy()

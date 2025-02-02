@@ -363,47 +363,28 @@ int FindNextInvader(bool bMiniBoss)
 	return priorityClient;
 }
 
-int CreateEntityGlow(int entity)
+int CreateGlowEntity(int parent, const int color[4])
 {
-	int glow = CreateEntityByName("tf_taunt_prop");
+	int glow = CreateEntityByName("tf_glow");
 	if (glow != -1)
 	{
-		char iszModel[PLATFORM_MAX_PATH];
+		float origin[3], angles[3];
+		GetEntPropVector(parent, Prop_Data, "m_vecAbsOrigin", origin);
+		GetEntPropVector(parent, Prop_Data, "m_angAbsRotation", angles);
 		
-		if (HasEntProp(entity, Prop_Send, "m_iszCustomModel"))
-		{
-			GetEntPropString(entity, Prop_Send, "m_iszCustomModel", iszModel, sizeof(iszModel));
-		}
+		DispatchKeyValueVector(glow, "origin", origin);
+		DispatchKeyValueVector(glow, "angles", angles);
 		
-		if (!iszModel[0])
-		{
-			GetEntPropString(entity, Prop_Data, "m_ModelName", iszModel, sizeof(iszModel));
-		}
+		SetEntPropEnt(glow, Prop_Send, "m_hTarget", parent);
 		
-		SetEntityModel(glow, iszModel);
+		SetVariantString("!activator");
+		AcceptEntityInput(glow, "SetParent", parent);
 		
-		if (DispatchSpawn(glow))
-		{
-			SetEntPropEnt(glow, Prop_Data, "m_hEffectEntity", entity);
-			SetEntProp(glow, Prop_Send, "m_bGlowEnabled", true);
-			
-			SetEntityRenderMode(glow, RENDER_TRANSCOLOR);
-			SetEntityRenderColor(glow, 0, 0, 0, 0);
-			
-			int fEffects = GetEntProp(glow, Prop_Send, "m_fEffects");
-			SetEntProp(glow, Prop_Send, "m_fEffects", fEffects | EF_BONEMERGE | EF_NOSHADOW | EF_NORECEIVESHADOW);
-			
-			SetVariantString("!activator");
-			AcceptEntityInput(glow, "SetParent", entity);
-			
-			SDKHook(glow, SDKHook_SetTransmit, SDKHookCB_EntityGlow_SetTransmit);
-			
-			return EntIndexToEntRef(glow);
-		}
-		else
-		{
-			RemoveEntity(glow);
-		}
+		SetVariantColor(color);
+		AcceptEntityInput(glow, "SetGlowColor");
+		
+		PSM_SDKHook(glow, SDKHook_SetTransmit, SDKHookCB_EntityGlow_SetTransmit);
+		return EntIndexToEntRef(glow);
 	}
 	
 	return INVALID_ENT_REFERENCE;

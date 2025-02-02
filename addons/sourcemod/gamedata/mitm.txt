@@ -361,10 +361,10 @@
 				"linux"		"18"
 				"windows"	"17"
 			}
-			"CBaseEntity::SetModel"
+			"CBaseEntity::UpdateTransmitState"
 			{
-				"linux"		"27"
-				"windows"	"26"
+				"linux"		"22"
+				"windows"	"21"
 			}
 			"CBaseEntity::IsCombatItem"
 			{
@@ -1208,19 +1208,12 @@
 					}
 				}
 			}
-			"CBaseEntity::SetModel"
+			"CBaseEntity::UpdateTransmitState"
 			{
-				"offset"	"CBaseEntity::SetModel"
+				"offset"	"CBaseEntity::UpdateTransmitState"
 				"hooktype"	"entity"
-				"return"	"void"
+				"return"	"int"
 				"this"		"entity"
-				"arguments"
-				{
-					"szModelName"
-					{
-						"type"	"charptr"
-					}
-				}
 			}
 			"CBaseObject::IsPlacementPosValid"
 			{

@@ -1872,6 +1872,8 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		// MannInTheMachinePlayer
 		this.m_annotationTimer = null;
 		this.m_delayedNoticeList.Clear();
+		
+		Entity(this.index).CreateGlowEntity( { 255, 255, 0, 255 } );
 	}
 }
 

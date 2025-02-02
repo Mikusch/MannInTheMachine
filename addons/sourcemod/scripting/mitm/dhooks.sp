@@ -926,6 +926,8 @@ static MRESReturn DHookCallback_CMissionPopulator_UpdateMissionDestroySentries_P
 						bot.SetMission(MISSION_DESTROY_SENTRIES);
 						bot.SetMissionTarget(targetSentry);
 						
+						bot.MyNextBotPointer().Update();
+						
 						bot.MarkAsMissionEnemy();
 						
 						didSpawn = true;
@@ -1091,7 +1093,7 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 	// allow this function to set each player's team and currency
 	CBaseEntity(player).RemoveFlag(FL_FAKECLIENT);
 	
-	if (GameRules_GetRoundState() == RoundState_Pregame || g_bInWaitingForPlayers)
+	if (GameRules_GetRoundState() == RoundState_Pregame || IsInWaitingForPlayers())
 	{
 		ret.Value = TFTeam_Defenders;
 		return MRES_Supercede;

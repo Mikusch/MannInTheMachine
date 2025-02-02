@@ -1284,3 +1284,39 @@ static int SortPlayersByDefenderPriority(int index1, int index2, Handle array, H
 	
 	return c;
 }
+
+bool IsInWaitingForPlayers()
+{
+	return g_bInWaitingForPlayers;
+}
+
+void SetInWaitingForPlayers(bool bWaitingForPlayers)
+{
+	if (g_bInWaitingForPlayers == bWaitingForPlayers)
+		return;
+	
+	g_bInWaitingForPlayers = bWaitingForPlayers;
+	
+	if (bWaitingForPlayers)
+	{
+		tf_mvm_min_players_to_start.IntValue = MaxClients + 1;
+		g_hWaitingForPlayersTimer = CreateTimer(mp_waitingforplayers_time.FloatValue, Timer_OnWaitingForPlayersEnd);
+	}
+	else
+	{
+		tf_mvm_min_players_to_start.IntValue = 0;
+		delete g_hWaitingForPlayersTimer;
+	}
+}
+
+static void Timer_OnWaitingForPlayersEnd(Handle timer)
+{
+	if (g_hWaitingForPlayersTimer != timer)
+		return;
+	
+	if (g_pPopulationManager.IsValid())
+	{
+		g_pPopulationManager.m_bIsInitialized = false;
+		g_pPopulationManager.ResetMap();
+	}
+}

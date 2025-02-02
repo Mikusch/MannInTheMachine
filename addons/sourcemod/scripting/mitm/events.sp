@@ -250,12 +250,9 @@ static void EventHook_MvMWaveFailed(Event event, const char[] name, bool dontBro
 {
 	if (g_pPopulationManager.m_bIsInitialized)
 	{
-		bool bWasInWaitingForPlayers = g_bInWaitingForPlayers;
-		if (g_bInWaitingForPlayers)
-		{
-			g_bInWaitingForPlayers = false;
-			tf_mvm_min_players_to_start.IntValue = 0;
-		}
+		bool bInWaitingForPlayers = IsInWaitingForPlayers();
+		if (bInWaitingForPlayers)
+			SetInWaitingForPlayers(false);
 		
 		int nMaxConsecutiveWipes = mitm_autoincrement_max_wipes.IntValue;
 		float fCleanMoneyPercent = mitm_autoincrement_currency_percentage.FloatValue;
@@ -283,30 +280,15 @@ static void EventHook_MvMWaveFailed(Event event, const char[] name, bool dontBro
 			}
 		}
 		
-		if (bWasInWaitingForPlayers || !g_pPopulationManager.m_bIsWaveJumping)
-		{
-			g_nNumConsecutiveWipes++;
+		if (bInWaitingForPlayers || !g_pPopulationManager.m_bIsWaveJumping)
 			SelectNewDefenders();
-		}
+		
+		if (!bInWaitingForPlayers)
+			g_nNumConsecutiveWipes++;
 	}
 	else
 	{
-		g_bInWaitingForPlayers = true;
-		tf_mvm_min_players_to_start.IntValue = MaxClients + 1;
-		
-		CreateTimer(mp_waitingforplayers_time.FloatValue, Timer_OnWaitingForPlayersEnd);
-	}
-}
-
-static void Timer_OnWaitingForPlayersEnd(Handle timer)
-{
-	if (!g_bInWaitingForPlayers)
-		return;
-	
-	if (g_pPopulationManager.IsValid())
-	{
-		g_pPopulationManager.m_bIsInitialized = false;
-		g_pPopulationManager.ResetMap();
+		SetInWaitingForPlayers(true);
 	}
 }
 

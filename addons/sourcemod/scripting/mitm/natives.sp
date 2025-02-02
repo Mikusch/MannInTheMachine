@@ -46,7 +46,7 @@ static int Native_IsInEndlessWaves(Handle plugin, int numParams)
 
 static int Native_IsInWaitingForPlayers(Handle plugin, int numParams)
 {
-	return g_bInWaitingForPlayers;
+	return IsInWaitingForPlayers();
 }
 
 static int GetNativeInGameClient(int param)

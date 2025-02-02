@@ -188,7 +188,7 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 
 static void EntityOutput_CTFGameRules_OnStateEnterBetweenRounds(const char[] output, int caller, int activator, float delay)
 {
-	if (!g_bInWaitingForPlayers && mitm_setup_time.IntValue > 0)
+	if (!IsInWaitingForPlayers() && mitm_setup_time.IntValue > 0)
 	{
 		RequestFrame(RequestFrame_StartReadyTimer);
 	}

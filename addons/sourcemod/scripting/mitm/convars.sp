@@ -115,7 +115,7 @@ static void ConVarChanged_PartyEnabled(ConVar convar, const char[] oldValue, con
 
 static void ConVarChanged_MinPlayersToStart(ConVar convar, const char[] oldValue, const char[] newValue)
 {
-	if (!g_bInWaitingForPlayers)
+	if (!IsInWaitingForPlayers())
 		return;
 	
 	// Don't allow maps to modify this using point_servercommand

@@ -55,6 +55,7 @@ Cookie g_hCookiePreferences;
 CEntityFactory g_hEntityFactory;
 Handle g_hWarningHudSync;
 StringMap g_hSpyWatchOverrides;
+Handle g_hWaitingForPlayersTimer;
 int g_nNumConsecutiveWipes;
 bool g_bInWaitingForPlayers;
 bool g_bAllowTeamChange;	// Bypass CTFGameRules::GetTeamAssignmentOverride?

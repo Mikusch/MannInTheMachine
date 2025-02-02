@@ -1873,7 +1873,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		this.m_annotationTimer = null;
 		this.m_delayedNoticeList.Clear();
 		
-		Entity(this.index).CreateGlowEntity( { 255, 255, 0, 255 } );
+		Entity(this.index).CreateGlowEntity( { 0, 255, 0, 255 } );
 	}
 }
 

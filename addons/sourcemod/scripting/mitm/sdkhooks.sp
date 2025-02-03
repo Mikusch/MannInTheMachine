@@ -189,19 +189,35 @@ static Action SDKHookCB_CTFTankBoss_Think(int entity)
 	return Plugin_Continue;
 }
 
-Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)
+Action SDKHookCB_PlayerGlow_SetTransmit(int entity, int client)
 {
-	int hEffectEntity = GetEntPropEnt(entity, Prop_Data, "m_hMoveParent");
+	Action action = Plugin_Handled;
 	
-	if (!IsValidEntity(hEffectEntity))
-		return Plugin_Handled;
+	if (CTFPlayer(client).IsInASquad())
+	{
+		CTFBotSquad squad = CTFPlayer(client).GetSquad();
+		int hEffectEntity = GetEntPropEnt(entity, Prop_Data, "m_hMoveParent");
+		
+		if (hEffectEntity != client && (squad.IsLeader(hEffectEntity) || squad.IsLeader(client) && squad.IsMember(hEffectEntity)))
+		{
+			// show the glow of our squad leader or our squad members
+			action = Plugin_Continue;
+		}
+	}
 	
-	// do not show by default
+	CBaseEntity(entity).RefreshNetwork(client, action == Plugin_Continue ? true : false);
+	return action;
+}
+
+Action SDKHookCB_ObjectGlow_SetTransmit(int entity, int client)
+{
 	Action action = Plugin_Handled;
 	
 	int hMissionTarget = CTFPlayer(client).GetMissionTarget();
 	if (IsValidEntity(hMissionTarget) && IsBaseObject(hMissionTarget))
 	{
+		int hEffectEntity = GetEntPropEnt(entity, Prop_Data, "m_hMoveParent");
+		
 		// mission target - only outline if not carried
 		if (hEffectEntity == hMissionTarget)
 		{
@@ -217,16 +233,6 @@ Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)
 			{
 				action = Plugin_Continue;
 			}
-		}
-	}
-	
-	if (CTFPlayer(client).IsInASquad())
-	{
-		CTFBotSquad squad = CTFPlayer(client).GetSquad();
-		if (hEffectEntity != client && (squad.IsLeader(hEffectEntity) || squad.IsLeader(client) && squad.IsMember(hEffectEntity)))
-		{
-			// show the glow of our squad leader or our squad members
-			action = Plugin_Continue;
 		}
 	}
 	

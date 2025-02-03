@@ -1281,7 +1281,7 @@ void SetInWaitingForPlayers(bool bWaitingForPlayers)
 	if (bWaitingForPlayers)
 	{
 		tf_mvm_min_players_to_start.IntValue = MaxClients + 1;
-		g_hWaitingForPlayersTimer = CreateTimer(mp_waitingforplayers_time.FloatValue, Timer_OnWaitingForPlayersEnd);
+		g_hWaitingForPlayersTimer = CreateTimer(mp_waitingforplayers_time.FloatValue, Timer_OnWaitingForPlayersEnd, _, TIMER_FLAG_NO_MAPCHANGE);
 	}
 	else
 	{

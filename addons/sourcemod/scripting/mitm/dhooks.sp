@@ -190,7 +190,7 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 	else if (HasEntProp(entity, Prop_Data, "CBaseCombatWeaponDefaultTouch"))
 	{
 		if (g_hDHook_CBaseEntity_FVisible)
-			PSM_DHookEntity(g_hDHook_CBaseEntity_FVisible, Hook_Pre, entity, DHookCallback_CBaseCombatWeapon_FVisible);
+			PSM_DHookEntity(g_hDHook_CBaseEntity_FVisible, Hook_Pre, entity, DHookCallback_CBaseCombatWeapon_FVisible_Pre);
 	}
 }
 
@@ -1664,7 +1664,7 @@ static MRESReturn DHookCallback_CBaseEntity_SetModel_Post(int entity, DHookParam
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_CBaseCombatWeapon_FVisible(int weapon, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CBaseCombatWeapon_FVisible_Pre(int weapon, DHookReturn ret, DHookParam params)
 {
 	int entity = params.Get(1);
 	

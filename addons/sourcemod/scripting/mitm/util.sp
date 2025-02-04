@@ -1031,13 +1031,6 @@ void TF2_ForceChangeClientTeam(int client, TFTeam team)
 	g_bAllowTeamChange = true;
 	TF2_ChangeClientTeam(client, team);
 	g_bAllowTeamChange = false;
-	
-	if (team == TFTeam_Defenders)
-	{
-		TFClassType class = TF2_GetPlayerClass(client);
-		if (class == TFClass_Unknown)
-			TF2_SetPlayerClass(client, view_as<TFClassType>(GetRandomInt(view_as<int>(TFClass_Unknown) + 1, view_as<int>(TFClass_Engineer))));
-	}
 }
 
 int GetEffectiveViewModelIndex(int client, int weapon)

@@ -196,9 +196,7 @@ void Queue_SelectNewDefenders()
 		
 		// Show class selection menu
 		if (TF2_GetPlayerClass(client) == TFClass_Unknown)
-		{
-			ShowVGUIPanel(client, "class_red");
-		}
+			ShowVGUIPanel(client, TF2_GetClientTeam(client) == TFTeam_Red ? "class_red" : "class_blue");
 	}
 	
 	// Free the memory

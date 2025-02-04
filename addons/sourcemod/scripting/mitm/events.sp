@@ -240,6 +240,10 @@ static void EventHook_MvMWaveFailed(Event event, const char[] name, bool dontBro
 {
 	if (g_pPopulationManager.m_bIsInitialized)
 	{
+		bool bInWaitingForPlayers = IsInWaitingForPlayers();
+		if (bInWaitingForPlayers)
+			SetInWaitingForPlayers(false);
+		
 		int nMaxConsecutiveWipes = mitm_autoincrement_max_wipes.IntValue;
 		float fCleanMoneyPercent = mitm_autoincrement_currency_percentage.FloatValue;
 		
@@ -265,11 +269,8 @@ static void EventHook_MvMWaveFailed(Event event, const char[] name, bool dontBro
 			}
 		}
 		
-		if (IsInWaitingForPlayers() || !g_pPopulationManager.m_bIsWaveJumping)
+		if (bInWaitingForPlayers || !g_pPopulationManager.m_bIsWaveJumping)
 			SelectNewDefenders();
-		
-		if (IsInWaitingForPlayers())
-			SetInWaitingForPlayers(false);
 	}
 	else
 	{

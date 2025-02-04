@@ -50,6 +50,7 @@ CTFGameRules g_pGameRules = view_as<CTFGameRules>(INVALID_ENT_REFERENCE);
 // Cookies
 Cookie g_hCookieQueue;
 Cookie g_hCookiePreferences;
+Cookie g_hCookieDefenderPriority;
 
 // Other globals
 CEntityFactory g_hEntityFactory;
@@ -190,6 +191,7 @@ public void OnPluginStart()
 	
 	g_hCookieQueue = new Cookie("mitm_queue", "Mann in the Machine: Queue Points", CookieAccess_Protected);
 	g_hCookiePreferences = new Cookie("mitm_preferences", "Mann in the Machine: Preferences", CookieAccess_Protected);
+	g_hCookieDefenderPriority = new Cookie("mitm_defender_priority", "Mann in the Machine: Defender Priority", CookieAccess_Private);
 	
 	GameData hGameConf = new GameData("mitm");
 	if (!hGameConf)
@@ -305,6 +307,7 @@ public void OnClientCookiesCached(int client)
 	CTFPlayer player = CTFPlayer(client);
 	player.m_defenderQueuePoints = g_hCookieQueue.GetInt(client);
 	player.m_preferences = g_hCookiePreferences.GetInt(client);
+	player.m_defenderPriority = g_hCookieDefenderPriority.GetInt(client);
 }
 
 public void OnEntityCreated(int entity, const char[] classname)

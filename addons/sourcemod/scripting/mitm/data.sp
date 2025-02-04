@@ -637,6 +637,23 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		g_hCookieQueue.SetInt(this.index, this.m_defenderQueuePoints);
 	}
 	
+	public int GetDefenderPriority()
+	{
+		return this.m_defenderPriority;
+	}
+	
+	public void IncrementDefenderPriority()
+	{
+		this.m_defenderPriority++;
+		g_hCookieDefenderPriority.SetInt(this.index, this.m_defenderPriority);
+	}
+	
+	public void ResetDefenderPriority()
+	{
+		this.m_defenderPriority = 0;
+		g_hCookieDefenderPriority.SetInt(this.index, this.m_defenderPriority);
+	}
+	
 	public bool IsValidDefender()
 	{
 		return !IsClientSourceTV(this.index)

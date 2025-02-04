@@ -100,6 +100,9 @@ void Queue_SelectNewDefenders()
 		if (IsClientSourceTV(client))
 			continue;
 		
+		if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
+			continue;
+		
 		players.Push(client);
 	}
 	
@@ -158,9 +161,6 @@ void Queue_SelectNewDefenders()
 		{
 			int client = players.Get(i);
 			
-			if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
-				continue;
-			
 			// Keep filling slots until our quota is met
 			if (iDefenderCount++ >= iReqDefenderCount)
 				break;
@@ -183,11 +183,7 @@ void Queue_SelectNewDefenders()
 		int client = players.Get(i);
 		
 		TF2_ForceChangeClientTeam(client, TFTeam_Spectator);
-		
-		if (!CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
-		{
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsInvader");
-		}
+		CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsInvader");
 	}
 	
 	for (int client = 1; client <= MaxClients; client++)

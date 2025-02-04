@@ -233,10 +233,6 @@ static void EventHook_PVEWinPanel(Event event, const char[] name, bool dontBroad
 			player.AddQueuePoints(points);
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_PointsAwarded", points, player.GetQueuePoints());
 		}
-		else
-		{
-			CTFPlayer(client).m_defenderPriority++;
-		}
 	}
 }
 

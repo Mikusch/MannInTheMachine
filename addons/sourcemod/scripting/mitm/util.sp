@@ -1031,6 +1031,13 @@ void TF2_ForceChangeClientTeam(int client, TFTeam team)
 	g_bAllowTeamChange = true;
 	TF2_ChangeClientTeam(client, team);
 	g_bAllowTeamChange = false;
+	
+	if (team == TFTeam_Defenders)
+	{
+		TFClassType class = TF2_GetPlayerClass(client);
+		if (class == TFClass_Unknown)
+			TF2_SetPlayerClass(client, view_as<TFClassType>(GetRandomInt(view_as<int>(TFClass_Unknown) + 1, view_as<int>(TFClass_Engineer))));
+	}
 }
 
 int GetEffectiveViewModelIndex(int client, int weapon)
@@ -1169,6 +1176,9 @@ void SelectRandomDefenders()
 		if (IsClientSourceTV(client))
 			continue;
 		
+		if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
+			continue;
+		
 		players.Push(client);
 	}
 	
@@ -1188,7 +1198,7 @@ void SelectRandomDefenders()
 			break;
 		
 		TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
-		CTFPlayer(client).m_defenderPriority = 0;
+		CTFPlayer(client).ResetDefenderPriority();
 		CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender");
 		
 		players.Erase(i);
@@ -1202,9 +1212,6 @@ void SelectRandomDefenders()
 		{
 			int client = players.Get(i);
 			
-			if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
-				continue;
-			
 			// Keep filling slots until our quota is met
 			if (iDefenderCount++ >= iReqDefenderCount)
 				break;
@@ -1214,6 +1221,11 @@ void SelectRandomDefenders()
 			
 			players.Erase(i);
 		}
+	}
+	
+	for (int i = 0; i < players.Length; i++)
+	{
+		CTFPlayer(players.Get(i)).IncrementDefenderPriority();
 	}
 	
 	if (iDefenderCount < iReqDefenderCount)
@@ -1260,7 +1272,7 @@ void FindReplacementDefender()
 		// Validate that they were successfully switched
 		if (TF2_GetClientTeam(client) == TFTeam_Defenders)
 		{
-			CTFPlayer(client).m_defenderPriority = 0;
+			CTFPlayer(client).ResetDefenderPriority();
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender_Replacement");
 			break;
 		}

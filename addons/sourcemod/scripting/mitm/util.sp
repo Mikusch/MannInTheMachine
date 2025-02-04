@@ -1314,7 +1314,7 @@ void SetInWaitingForPlayers(bool bWaitingForPlayers)
 	else
 	{
 		tf_mvm_min_players_to_start.IntValue = 0;
-		delete g_hWaitingForPlayersTimer;
+		g_hWaitingForPlayersTimer = null;
 	}
 }
 

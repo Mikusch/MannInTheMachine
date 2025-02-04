@@ -19,6 +19,7 @@
 #pragma newdecls required
 
 static DynamicHook g_hDHook_CBaseEntity_SetModel;
+static DynamicHook g_hDHook_CBaseEntity_FVisible;
 static DynamicHook g_hDHook_CBaseObject_IsPlacementPosValid;
 static DynamicHook g_hDHook_CBaseObject_CanBeUpgraded;
 static DynamicHook g_hDHook_CItem_ComeToRest;
@@ -81,6 +82,7 @@ void DHooks_Init()
 	PSM_AddDynamicDetourFromConf("OnBotTeleported", DHookCallback_OnBotTeleported_Pre);
 	
 	g_hDHook_CBaseEntity_SetModel = PSM_AddDynamicHookFromConf("CBaseEntity::SetModel");
+	g_hDHook_CBaseEntity_FVisible = PSM_AddDynamicHookFromConf("CBaseEntity::FVisible");
 	g_hDHook_CBaseObject_IsPlacementPosValid = PSM_AddDynamicHookFromConf("CBaseObject::IsPlacementPosValid");
 	g_hDHook_CBaseObject_CanBeUpgraded = PSM_AddDynamicHookFromConf("CBaseObject::CanBeUpgraded");
 	g_hDHook_CItem_ComeToRest = PSM_AddDynamicHookFromConf("CItem::ComeToRest");
@@ -184,6 +186,11 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 	{
 		if (g_hDHook_CBaseEntity_SetModel)
 			PSM_DHookEntity(g_hDHook_CBaseEntity_SetModel, Hook_Post, entity, DHookCallback_CBaseEntity_SetModel_Post);
+	}
+	else if (HasEntProp(entity, Prop_Data, "CBaseCombatWeaponDefaultTouch"))
+	{
+		if (g_hDHook_CBaseEntity_FVisible)
+			PSM_DHookEntity(g_hDHook_CBaseEntity_FVisible, Hook_Pre, entity, DHookCallback_CBaseCombatWeapon_FVisible);
 	}
 }
 
@@ -1652,6 +1659,20 @@ static MRESReturn DHookCallback_CBaseEntity_SetModel_Post(int entity, DHookParam
 	{
 		// no existing glow entity, create one
 		Entity(entity).SetGlowEntity(CreateEntityGlow(entity));
+	}
+	
+	return MRES_Ignored;
+}
+
+static MRESReturn DHookCallback_CBaseCombatWeapon_FVisible(int weapon, DHookReturn ret, DHookParam params)
+{
+	int entity = params.Get(1);
+	
+	// Fixes players rarely spawning without weapons
+	if (IsEntityClient(entity))
+	{
+		ret.Value = true;
+		return MRES_Supercede;
 	}
 	
 	return MRES_Ignored;

@@ -2406,7 +2406,7 @@ methodmap CPopulationManager < CBaseEntity
 	{
 		int flags = GetCommandFlags("tf_mvm_jump_to_wave");
 		SetCommandFlags("tf_mvm_jump_to_wave", flags & ~FCVAR_CHEAT);
-		InsertServerCommand("tf_mvm_jump_to_wave %d %f", waveNumber + 1, fCleanMoneyPercent);
+		ServerCommand("tf_mvm_jump_to_wave %d %f", waveNumber + 1, fCleanMoneyPercent);
 		ServerExecute();
 		SetCommandFlags("tf_mvm_jump_to_wave", flags);
 	}

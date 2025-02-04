@@ -1218,7 +1218,12 @@ void SelectRandomDefenders()
 	
 	for (int i = 0; i < players.Length; i++)
 	{
-		CTFPlayer(players.Get(i)).IncrementDefenderPriority();
+		int client = players.Get(i);
+		
+		if (!CTFPlayer(client).IsValidDefender())
+			continue;
+		
+		CTFPlayer(client).IncrementDefenderPriority();
 	}
 	
 	if (iDefenderCount < iReqDefenderCount)
@@ -1277,14 +1282,13 @@ void FindReplacementDefender()
 static int SortPlayersByDefenderPriority(int index1, int index2, Handle array, Handle hndl)
 {
 	ArrayList list = view_as<ArrayList>(array);
-	int client1 = list.Get(index1);
-	int client2 = list.Get(index2);
+	CTFPlayer player1 = list.Get(index1);
+	CTFPlayer player2 = list.Get(index2);
 	
-	// Sort by highest priority
-	int c = Compare(CTFPlayer(client2).GetDefenderPriority(), CTFPlayer(client1).GetDefenderPriority());
+	int c = Compare(player2.GetDefenderPriority(), player1.GetDefenderPriority());
 	if (c == 0)
 	{
-		c = GetRandomInt(-1, 1);
+		c = GetRandomInt(0, 1) ? -1 : 1;
 	}
 	
 	return c;

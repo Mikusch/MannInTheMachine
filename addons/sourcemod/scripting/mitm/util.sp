@@ -1281,7 +1281,7 @@ static int SortPlayersByDefenderPriority(int index1, int index2, Handle array, H
 	int client2 = list.Get(index2);
 	
 	// Sort by highest priority
-	int c = Compare(CTFPlayer(client2).m_defenderPriority, CTFPlayer(client1).m_defenderPriority);
+	int c = Compare(CTFPlayer(client2).GetDefenderPriority(), CTFPlayer(client1).GetDefenderPriority());
 	if (c == 0)
 	{
 		c = GetRandomInt(-1, 1);

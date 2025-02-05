@@ -33,7 +33,6 @@ void ConVars_Init()
 	mitm_party_max_size = CreateConVar("mitm_party_max_size", "0", "Maximum size of player parties.", _, true, 0.0, true, 10.0);
 	mitm_setup_time = CreateConVar("mitm_setup_time", "150", "Time for defenders to set up before the round automatically starts.");
 	mitm_max_spawn_deaths = CreateConVar("mitm_max_spawn_deaths", "3", "How many times a player can die to the spawn timer before getting kicked.");
-	mitm_defender_ping_limit = CreateConVar("mitm_defender_ping_limit", "200", "Maximum ping a client can have to play on the defender team.");
 	mitm_shield_damage_drain_rate = CreateConVar("mitm_shield_damage_drain_rate", "0.05", "How much energy to drain for each point of damage to the shield.");
 	mitm_bot_taunt_on_upgrade = CreateConVar("mitm_bot_taunt_on_upgrade", "1", "Whether bots should automatically taunt when the bomb levels up.");
 	mitm_romevision = CreateConVar("mitm_romevision", "1", "Whether to allow romevision items to be generated.");

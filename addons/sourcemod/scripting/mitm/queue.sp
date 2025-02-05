@@ -39,14 +39,8 @@ ArrayList Queue_GetDefenderQueue()
 		if (!IsClientInGame(client))
 			continue;
 		
-		int iPartySize = CTFPlayer(client).IsInAParty() ? CTFPlayer(client).GetParty().GetMemberCount() : 0;
-		
-		// apply ping limit, unless player is in a full party
-		if (!IsFakeClient(client) && (GetClientAvgLatency(client, NetFlow_Outgoing) * 1000.0) >= mitm_defender_ping_limit.FloatValue && iPartySize < mitm_party_max_size.IntValue)
-			continue;
-		
 		// ignore players in a party, they get handled separately
-		if (iPartySize > 1)
+		if (CTFPlayer(client).IsInAParty() && CTFPlayer(client).GetParty().GetMemberCount() > 1)
 			continue;
 		
 		if (!CTFPlayer(client).IsValidDefender())

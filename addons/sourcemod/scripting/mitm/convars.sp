@@ -67,23 +67,9 @@ void ConVars_Init()
 	IntToString(MaxClients, value, sizeof(value));
 	PSM_AddEnforcedConVar("tf_mvm_max_connected_players", value);
 	
-	PSM_AddPluginStateChangedHook(ConVars_OnPluginStateChanged);
-}
-
-static void ConVars_OnPluginStateChanged(bool bEnable)
-{
-	if (bEnable)
-	{
-		mitm_custom_upgrades_file.AddChangeHook(ConVarChanged_CustomUpgradesFile);
-		mitm_party_enabled.AddChangeHook(ConVarChanged_PartyEnabled);
-		tf_mvm_min_players_to_start.AddChangeHook(ConVarChanged_MinPlayersToStart);
-	}
-	else
-	{
-		mitm_custom_upgrades_file.RemoveChangeHook(ConVarChanged_CustomUpgradesFile);
-		mitm_party_enabled.RemoveChangeHook(ConVarChanged_PartyEnabled);
-		tf_mvm_min_players_to_start.RemoveChangeHook(ConVarChanged_MinPlayersToStart);
-	}
+	PSM_AddConVarChangeHook(mitm_custom_upgrades_file, ConVarChanged_CustomUpgradesFile);
+	PSM_AddConVarChangeHook(mitm_party_enabled, ConVarChanged_PartyEnabled);
+	PSM_AddConVarChangeHook(tf_mvm_min_players_to_start, ConVarChanged_MinPlayersToStart);
 }
 
 static void ConVarChanged_CustomUpgradesFile(ConVar convar, const char[] oldValue, const char[] newValue)

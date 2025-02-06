@@ -606,6 +606,11 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		}
 	}
 	
+	public void ForceChangeTeam(TFTeam team, bool bFullTeamSwitch = false)
+	{
+		SDKCall_CTFPlayer_ForceChangeTeam(this.index, team, bFullTeamSwitch);
+	}
+	
 	public TFTeam GetTFTeam()
 	{
 		return TF2_GetClientTeam(this.index);

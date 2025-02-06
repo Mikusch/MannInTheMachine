@@ -73,6 +73,7 @@ void DHooks_Init()
 	PSM_AddDynamicDetourFromConf("CTFPlayer::DoClassSpecialSkill", DHookCallback_CTFPlayer_DoClassSpecialSkill_Pre);
 	PSM_AddDynamicDetourFromConf("CTFPlayer::RemoveAllOwnedEntitiesFromWorld", DHookCallback_CTFPlayer_RemoveAllOwnedEntitiesFromWorld_Pre);
 	PSM_AddDynamicDetourFromConf("CTFPlayer::CanBuild", DHookCallback_CTFPlayer_CanBuild_Pre, DHookCallback_CTFPlayer_CanBuild_Post);
+	PSM_AddDynamicDetourFromConf("CTFPlayer::ForceChangeTeam", DHookCallback_CTFPlayer_ForceChangeTeam_Pre, DHookCallback_CTFPlayer_ForceChangeTeam_Post);
 	PSM_AddDynamicDetourFromConf("CWeaponMedigun::AllowedToHealTarget", DHookCallback_CWeaponMedigun_AllowedToHealTarget_Pre);
 	PSM_AddDynamicDetourFromConf("CSpawnLocation::FindSpawnLocation", _, DHookCallback_CSpawnLocation_FindSpawnLocation_Post);
 	PSM_AddDynamicDetourFromConf("CTraceFilterObject::ShouldHitEntity", _, DHookCallback_CTraceFilterObject_ShouldHitEntity_Post);
@@ -1271,6 +1272,21 @@ static MRESReturn DHookCallback_CTFPlayer_CanBuild_Post(int player, DHookReturn 
 			return MRES_Supercede;
 		}
 	}
+	
+	return MRES_Ignored;
+}
+
+static MRESReturn DHookCallback_CTFPlayer_ForceChangeTeam_Pre(int player, DHookParam params)
+{
+	// If it's forced, there is probably a good reason
+	g_bAllowTeamChange = true;
+	
+	return MRES_Ignored;
+}
+
+static MRESReturn DHookCallback_CTFPlayer_ForceChangeTeam_Post(int player, DHookParam params)
+{
+	g_bAllowTeamChange = false;
 	
 	return MRES_Ignored;
 }

@@ -236,6 +236,11 @@
 				"linux"		"@_ZN9CTFPlayer8CanBuildEii"
 				"windows"	"\x55\x8B\xEC\x83\xEC\x0C\x53\x8B\x5D\x08\x57\x8B\xF9\x83\xFB\x03"
 			}
+			"CTFPlayer::ForceChangeTeam"
+			{
+				"linux"		"@_ZN9CTFPlayer15ForceChangeTeamEib"
+				"windows"	"\x55\x8B\xEC\x53\x8B\x5D\x08\x56\x8B\xF1\x57\x8B\xFB"
+			}
 			"CEconEntity::UpdateModelToClass"
 			{
 				"linux"		"@_ZN11CEconEntity18UpdateModelToClassEv"
@@ -1066,6 +1071,24 @@
 					"iObjectMode"
 					{
 						"type"	"int"
+					}
+				}
+			}
+			"CTFPlayer::ForceChangeTeam"
+			{
+				"signature"	"CTFPlayer::ForceChangeTeam"
+				"callconv"	"thiscall"
+				"return"	"void"
+				"this"		"entity"
+				"arguments"
+				{
+					"iTeamNum"
+					{
+						"type"	"int"
+					}
+					"bFullTeamSwitch"
+					{
+						"type"	"bool"
 					}
 				}
 			}

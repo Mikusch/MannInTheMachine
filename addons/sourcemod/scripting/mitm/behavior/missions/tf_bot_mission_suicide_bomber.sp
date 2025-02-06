@@ -441,7 +441,7 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 	ForcePlayerSuicide(actor);
 	if (IsPlayerAlive(actor))
 	{
-		TF2_ForceChangeClientTeam(actor, TFTeam_Spectator);
+		CTFPlayer(actor).ForceChangeTeam(TFTeam_Spectator);
 	}
 	
 	if (action.m_bWasKilled)

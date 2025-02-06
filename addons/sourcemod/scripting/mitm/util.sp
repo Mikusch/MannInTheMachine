@@ -1026,13 +1026,6 @@ int CollectPlayers(ArrayList &playerList, TFTeam team = TFTeam_Any, bool isAlive
 	return playerList.Length;
 }
 
-void TF2_ForceChangeClientTeam(int client, TFTeam team)
-{
-	g_bAllowTeamChange = true;
-	TF2_ChangeClientTeam(client, team);
-	g_bAllowTeamChange = false;
-}
-
 int GetEffectiveViewModelIndex(int client, int weapon)
 {
 	int nModelIndex = 0;
@@ -1146,7 +1139,7 @@ void SelectNewDefenders()
 		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
 			continue;
 		
-		TF2_ForceChangeClientTeam(client, TFTeam_Spectator);
+		CTFPlayer(client).ForceChangeTeam(TFTeam_Spectator);
 	}
 	
 	CPrintToChatAll("%s %t", PLUGIN_TAG, "Queue_NewDefenders");
@@ -1190,7 +1183,7 @@ void SelectRandomDefenders()
 		if (iDefenderCount++ >= iReqDefenderCount)
 			break;
 		
-		TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
+		CTFPlayer(client).ForceChangeTeam(TFTeam_Defenders);
 		CTFPlayer(client).ResetDefenderPriority();
 		CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender");
 		
@@ -1209,7 +1202,7 @@ void SelectRandomDefenders()
 			if (iDefenderCount++ >= iReqDefenderCount)
 				break;
 			
-			TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
+			CTFPlayer(client).ForceChangeTeam(TFTeam_Defenders);
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender_Forced");
 			
 			players.Erase(i);

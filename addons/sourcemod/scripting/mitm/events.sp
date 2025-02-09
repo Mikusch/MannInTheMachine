@@ -244,28 +244,31 @@ static void EventHook_MvMWaveFailed(Event event, const char[] name, bool dontBro
 		if (bInWaitingForPlayers)
 			SetInWaitingForPlayers(false);
 		
-		int nMaxConsecutiveWipes = mitm_autoincrement_max_wipes.IntValue;
-		float fCleanMoneyPercent = mitm_autoincrement_currency_percentage.FloatValue;
-		
-		// m_nNumConsecutiveWipes gets incremented when the round starts
-		if (nMaxConsecutiveWipes > 0 && g_pPopulationManager.m_nNumConsecutiveWipes - 1 >= nMaxConsecutiveWipes)
+		if (!g_pPopulationManager.IsInEndlessWaves())
 		{
-			int iCurrentWaveIndex = g_pPopulationManager.GetWaveNumber();
-			int iNextWaveIndex = iCurrentWaveIndex + 1;
-			if (iNextWaveIndex < g_pObjectiveResource.GetMannVsMachineMaxWaveCount())
+			int nMaxConsecutiveWipes = mitm_autoincrement_max_wipes.IntValue;
+			float fCleanMoneyPercent = mitm_autoincrement_currency_percentage.FloatValue;
+			
+			// m_nNumConsecutiveWipes gets incremented when the round starts
+			if (nMaxConsecutiveWipes > 0 && g_pPopulationManager.m_nNumConsecutiveWipes - 1 >= nMaxConsecutiveWipes)
 			{
-				g_pPopulationManager.m_iCurrentWaveIndex++;
-				CWave pWave = g_pPopulationManager.GetCurrentWave();
-				
-				int nCurrency = pWave.GetTotalCurrency();
-				g_pMVMStats.SetCurrentWave(iCurrentWaveIndex);
-				
-				g_pMVMStats.RoundEvent_CreditsDropped(iCurrentWaveIndex, nCurrency);
-				g_pMVMStats.RoundEvent_AcquiredCredits(iCurrentWaveIndex, RoundToFloor(nCurrency * fCleanMoneyPercent), false);
-				
-				g_pPopulationManager.JumpToWave(iNextWaveIndex);
-				
-				CPrintToChatAll("%s %t", PLUGIN_TAG, "Wave_AutoIncremented", iNextWaveIndex + 1, fCleanMoneyPercent * 100.0, nMaxConsecutiveWipes);
+				int iCurrentWaveIndex = g_pPopulationManager.GetWaveNumber();
+				int iNextWaveIndex = iCurrentWaveIndex + 1;
+				if (iNextWaveIndex < g_pObjectiveResource.GetMannVsMachineMaxWaveCount())
+				{
+					g_pPopulationManager.m_iCurrentWaveIndex++;
+					CWave pWave = g_pPopulationManager.GetCurrentWave();
+					
+					int nCurrency = pWave.GetTotalCurrency();
+					g_pMVMStats.SetCurrentWave(iCurrentWaveIndex);
+					
+					g_pMVMStats.RoundEvent_CreditsDropped(iCurrentWaveIndex, nCurrency);
+					g_pMVMStats.RoundEvent_AcquiredCredits(iCurrentWaveIndex, RoundToFloor(nCurrency * fCleanMoneyPercent), false);
+					
+					g_pPopulationManager.JumpToWave(iNextWaveIndex);
+					
+					CPrintToChatAll("%s %t", PLUGIN_TAG, "Wave_AutoIncremented", iNextWaveIndex + 1, fCleanMoneyPercent * 100.0, nMaxConsecutiveWipes);
+				}
 			}
 		}
 		

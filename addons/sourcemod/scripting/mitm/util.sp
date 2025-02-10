@@ -1145,7 +1145,7 @@ void SelectNewDefenders()
 	CPrintToChatAll("%s %t", PLUGIN_TAG, "Queue_NewDefenders");
 	
 	if (Queue_IsEnabled())
-		Queue_SelectNewDefenders();
+		Queue_SelectDefenders();
 	else
 		SelectRandomDefenders();
 }
@@ -1183,7 +1183,7 @@ void SelectRandomDefenders()
 		if (iDefenderCount++ >= iReqDefenderCount)
 			break;
 		
-		CTFPlayer(client).ForceChangeTeam(TFTeam_Defenders);
+		CTFPlayer(client).SetAsDefender();
 		CTFPlayer(client).ResetDefenderPriority();
 		CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender");
 		
@@ -1202,7 +1202,7 @@ void SelectRandomDefenders()
 			if (iDefenderCount++ >= iReqDefenderCount)
 				break;
 			
-			CTFPlayer(client).ForceChangeTeam(TFTeam_Defenders);
+			CTFPlayer(client).SetAsDefender();
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender_Forced");
 			
 			players.Erase(i);

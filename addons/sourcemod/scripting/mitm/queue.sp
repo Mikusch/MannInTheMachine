@@ -82,7 +82,7 @@ ArrayList Queue_GetDefenderQueue()
 	return queue;
 }
 
-void Queue_SelectNewDefenders()
+void Queue_SelectDefenders()
 {
 	ArrayList players = new ArrayList();
 	
@@ -122,7 +122,7 @@ void Queue_SelectNewDefenders()
 			{
 				int member = members[j];
 				
-				CTFPlayer(member).ForceChangeTeam(TFTeam_Defenders);
+				CTFPlayer(member).SetAsDefender();
 				CTFPlayer(member).SetQueuePoints(0);
 				CPrintToChat(member, "%s %t %t", PLUGIN_TAG, "SelectedAsDefender", "Queue_PointsReset");
 				
@@ -132,7 +132,7 @@ void Queue_SelectNewDefenders()
 		}
 		else
 		{
-			CTFPlayer(client).ForceChangeTeam(TFTeam_Defenders);
+			CTFPlayer(client).SetAsDefender();
 			CTFPlayer(client).SetQueuePoints(0);
 			CPrintToChat(client, "%s %t %t", PLUGIN_TAG, "SelectedAsDefender", "Queue_PointsReset");
 			
@@ -159,7 +159,7 @@ void Queue_SelectNewDefenders()
 			if (iDefenderCount++ >= iReqDefenderCount)
 				break;
 			
-			CTFPlayer(client).ForceChangeTeam(TFTeam_Defenders);
+			CTFPlayer(client).SetAsDefender();
 			CPrintToChat(client, "%s %t %t", PLUGIN_TAG, "SelectedAsDefender_Forced", "Queue_NotReset");
 			
 			players.Erase(i);

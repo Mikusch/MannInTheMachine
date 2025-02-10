@@ -616,6 +616,13 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		return TF2_GetClientTeam(this.index);
 	}
 	
+	public void SetAsDefender()
+	{
+		this.ForceChangeTeam(TFTeam_Defenders);
+		TF2_SetPlayerClass(this.index, TFClass_Unknown);
+		ShowVGUIPanel(this.index, this.GetTFTeam() == TFTeam_Red ? "class_red" : "class_blue");
+	}
+	
 	public bool IsInvader()
 	{
 		if (IsClientSourceTV(this.index))

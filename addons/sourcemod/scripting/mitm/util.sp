@@ -960,19 +960,6 @@ bool StrPtrEquals(Address psz1, Address psz2)
 	return !strcmp(sz1, sz2, false);
 }
 
-void MultiplyAttributeValue(int entity, const char[] szAttrib, float flMult)
-{
-	Address pAttrib = TF2Attrib_GetByName(entity, szAttrib);
-	if (pAttrib)
-	{
-		TF2Attrib_SetValue(pAttrib, TF2Attrib_GetValue(pAttrib) * flMult);
-	}
-	else
-	{
-		TF2Attrib_SetByName(entity, szAttrib, flMult);
-	}
-}
-
 float TranslateAttributeValue(int iFormat, float flValue)
 {
 	switch (iFormat)

@@ -1220,16 +1220,33 @@ methodmap CTFPlayer < CBaseCombatCharacter
 					}
 				}
 				
-				MultiplyAttributeValue(this.index, "damage penalty", 0.75);
+				this.MultiplyAttributeValue("damage penalty", 0.75);
+				this.MultiplyAttributeValue("spread penalty", 1.5);
+				this.MultiplyAttributeValue("projectile spread angle penalty", 6.0);
 			}
 			case NORMAL:
 			{
-				MultiplyAttributeValue(this.index, "damage penalty", 0.9);
+				this.MultiplyAttributeValue("damage penalty", 0.9);
+				this.MultiplyAttributeValue("spread penalty", 1.25);
+				this.MultiplyAttributeValue("projectile spread angle penalty", 3.0);
 			}
 			case EXPERT:
 			{
-				MultiplyAttributeValue(this.index, "damage bonus", 1.1);
+				this.MultiplyAttributeValue("damage bonus", 1.1);
 			}
+		}
+	}
+	
+	public void MultiplyAttributeValue(const char[] szAttrib, float flMult)
+	{
+		Address pAttrib = TF2Attrib_GetByName(this.index, szAttrib);
+		if (pAttrib)
+		{
+			TF2Attrib_SetValue(pAttrib, TF2Attrib_GetValue(pAttrib) * flMult);
+		}
+		else
+		{
+			TF2Attrib_SetByName(this.index, szAttrib, flMult);
 		}
 	}
 	

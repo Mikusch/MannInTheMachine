@@ -209,13 +209,7 @@ void Queue_FindReplacementDefender()
 		if (client == -1)
 			continue;
 		
-		if (TF2_GetClientTeam(client) != TFTeam_Spectator)
-			continue;
-		
-		if (!CTFPlayer(client).IsValidDefender())
-			continue;
-		
-		if (CTFPlayer(client).HasPreference(PREF_DEFENDER_DISABLE_REPLACEMENT))
+		if (!CTFPlayer(client).IsValidReplacementDefender())
 			continue;
 		
 		// Don't force switch because we want GetTeamAssignmentOverride to decide

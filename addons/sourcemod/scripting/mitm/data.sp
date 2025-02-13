@@ -675,6 +675,13 @@ methodmap CTFPlayer < CBaseCombatCharacter
 			&& Forwards_OnIsValidDefender(this.index);
 	}
 	
+	public bool IsValidReplacementDefender()
+	{
+		return this.GetTFTeam() == TFTeam_Spectator
+			&& this.IsValidDefender()
+			&& !this.HasPreference(PREF_DEFENDER_DISABLE_REPLACEMENT);
+	}
+	
 	public float GetSpawnTime()
 	{
 		return this.m_flSpawnTime;

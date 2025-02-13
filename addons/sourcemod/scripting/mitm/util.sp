@@ -1244,6 +1244,9 @@ void FindReplacementDefender()
 		if (!CTFPlayer(client).IsValidDefender())
 			continue;
 		
+		if (CTFPlayer(client).HasPreference(PREF_DEFENDER_DISABLE_REPLACEMENT))
+			continue;
+		
 		// Don't force switch because we want GetTeamAssignmentOverride to decide
 		TF2_ChangeClientTeam(client, TFTeam_Defenders);
 		

@@ -212,6 +212,9 @@ void Queue_FindReplacementDefender()
 		if (TF2_GetClientTeam(client) != TFTeam_Spectator)
 			continue;
 		
+		if (!CTFPlayer(client).IsValidDefender())
+			continue;
+		
 		if (CTFPlayer(client).HasPreference(PREF_DEFENDER_DISABLE_REPLACEMENT))
 			continue;
 		

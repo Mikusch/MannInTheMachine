@@ -34,26 +34,6 @@ ArrayList Queue_GetDefenderQueue()
 {
 	ArrayList queue = new ArrayList(sizeof(QueueData));
 	
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		// ignore players in a party, they get handled separately
-		if (CTFPlayer(client).IsInAParty() && CTFPlayer(client).GetParty().GetMemberCount() > 1)
-			continue;
-		
-		if (!CTFPlayer(client).IsValidDefender())
-			continue;
-		
-		QueueData data;
-		data.m_points = CTFPlayer(client).GetQueuePoints();
-		data.m_client = client;
-		data.m_party = NULL_PARTY;
-		
-		queue.PushArray(data);
-	}
-	
 	ArrayList parties = Party_GetAllActiveParties();
 	for (int i = 0; i < parties.Length; i++)
 	{
@@ -75,6 +55,26 @@ ArrayList Queue_GetDefenderQueue()
 		queue.PushArray(data);
 	}
 	delete parties;
+	
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		// ignore party clients (see above)
+		if (queue.FindValue(client) != -1)
+			continue;
+		
+		if (!CTFPlayer(client).IsValidDefender())
+			continue;
+		
+		QueueData data;
+		data.m_points = CTFPlayer(client).GetQueuePoints();
+		data.m_client = client;
+		data.m_party = NULL_PARTY;
+		
+		queue.PushArray(data);
+	}
 	
 	// sort by queue points
 	queue.Sort(Sort_Descending, Sort_Integer);

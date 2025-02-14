@@ -260,10 +260,13 @@ static void EventHook_MvMWaveFailed(Event event, const char[] name, bool dontBro
 					CWave pWave = g_pPopulationManager.GetCurrentWave();
 					
 					int nCurrency = pWave.GetTotalCurrency();
-					g_pMVMStats.SetCurrentWave(iCurrentWaveIndex);
-					
-					g_pMVMStats.RoundEvent_CreditsDropped(iCurrentWaveIndex, nCurrency);
-					g_pMVMStats.RoundEvent_AcquiredCredits(iCurrentWaveIndex, RoundToFloor(nCurrency * fCleanMoneyPercent), false);
+					if (nCurrency > 0)
+					{
+						g_pMVMStats.SetCurrentWave(iCurrentWaveIndex);
+						
+						g_pMVMStats.RoundEvent_CreditsDropped(iCurrentWaveIndex, nCurrency);
+						g_pMVMStats.RoundEvent_AcquiredCredits(iCurrentWaveIndex, RoundToFloor(nCurrency * fCleanMoneyPercent), false);
+					}
 					
 					g_pPopulationManager.JumpToWave(iNextWaveIndex);
 					

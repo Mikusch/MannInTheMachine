@@ -37,9 +37,9 @@
 	{
 		"en"		"Open party menu"
 	}
-	"Menu_Main_Credits"
+	"Menu_Main_Contributors"
 	{
-		"en"		"View gamemode credits"
+		"en"		"View gamemode contributors"
 	}
 	"Menu_Queue_Title"
 	{
@@ -67,19 +67,19 @@
 	{
 		"en"		"Your preferences are still loading, please wait a moment."
 	}
-	"Menu_Credits_Title"
+	"Menu_Contributors_Title"
 	{
-		"en"		"➤ Credits"
+		"en"		"➤ Contributors"
 	}
-	"Menu_Credits_Mikusch"
+	"Menu_Contributors_Mikusch"
 	{
 		"en"		"Code and gameplay"
 	}
-	"Menu_Credits_Kenzzer"
+	"Menu_Contributors_Kenzzer"
 	{
 		"en"		"Early coding help"
 	}
-	"Menu_Credits_trigger_hurt"
+	"Menu_Contributors_trigger_hurt"
 	{
 		"en"		"Custom robot viewmodels"
 	}

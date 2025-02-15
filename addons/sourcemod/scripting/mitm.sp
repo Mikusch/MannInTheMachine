@@ -208,6 +208,7 @@ public void OnPluginStart()
 	Events_Init();
 	Forwards_Init();
 	Hooks_Init();
+	Menus_Init();
 	Party_Init();
 	
 	Offsets_Init(hGameConf);

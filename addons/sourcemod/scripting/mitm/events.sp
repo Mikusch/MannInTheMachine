@@ -38,9 +38,16 @@ static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroad
 	if (client == 0)
 		return;
 	
-	CTFPlayer(client).Spawn();
+	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
 	
+	CTFPlayer(client).Spawn();
 	CTFPlayer(client).m_annotationTimer = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
+	
+	// Once first player spawns, automatically start ready timer
+	if (team == TFTeam_Defenders && !IsInWaitingForPlayers() && GameRules_GetPropFloat("m_flRestartRoundTime") == -1)
+	{
+		BeginSetup();
+	}
 }
 
 static void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)

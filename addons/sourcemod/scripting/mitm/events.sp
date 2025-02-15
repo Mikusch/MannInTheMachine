@@ -274,6 +274,11 @@ static void EventHook_MvMWaveFailed(Event event, const char[] name, bool dontBro
 				}
 			}
 		}
+		else
+		{
+			g_iEndlessRandomSeed = GetURandomInt();
+			LogMessage("Generated seed for endless waves: %d", g_iEndlessRandomSeed);
+		}
 		
 		if (bInWaitingForPlayers || !g_pPopulationManager.m_bIsWaveJumping)
 			SelectNewDefenders();

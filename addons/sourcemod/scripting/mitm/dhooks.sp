@@ -1385,8 +1385,7 @@ static MRESReturn DHookCallback_CUniformRandomStream_SetSeed_Pre(DHookParam para
 {
 	if (g_bInEndlessRollEscalation)
 	{
-		// force endless to be truly random
-		params.Set(1, GetURandomInt());
+		params.Set(1, g_iEndlessRandomSeed);
 		return MRES_ChangedHandled;
 	}
 	

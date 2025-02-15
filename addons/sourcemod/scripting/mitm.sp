@@ -60,6 +60,7 @@ Handle g_hWaitingForPlayersTimer;
 bool g_bInWaitingForPlayers;
 bool g_bAllowTeamChange;	// Bypass CTFGameRules::GetTeamAssignmentOverride?
 bool g_bInEndlessRollEscalation;
+int g_iEndlessRandomSeed;
 
 // Plugin ConVars
 ConVar mitm_developer;

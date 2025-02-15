@@ -1116,19 +1116,6 @@ void ShowProgressBar(int client, const char[] szTitle, float flProgress, float i
 	ShowSyncHudText(client, g_hWarningHudSync, "%t\n%s", szTitle, szProgressBar);
 }
 
-void BeginSetup()
-{
-	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + mitm_setup_time.FloatValue);
-	GameRules_SetProp("m_bAwaitingReadyRestart", false);
-	
-	Event event = CreateEvent("teamplay_round_restart_seconds");
-	if (event)
-	{
-		event.SetInt("seconds", mitm_setup_time.IntValue);
-		event.Fire();
-	}
-}
-
 void SelectNewDefenders()
 {
 	for (int client = 1; client <= MaxClients; client++)

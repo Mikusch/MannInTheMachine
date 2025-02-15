@@ -44,7 +44,7 @@ static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroad
 	CTFPlayer(client).m_annotationTimer = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
 	
 	// Once first player spawns, automatically start ready timer
-	if (team == TFTeam_Defenders && !IsInWaitingForPlayers() && GameRules_GetPropFloat("m_flRestartRoundTime") == -1)
+	if (team == TFTeam_Defenders && GameRules_GetRoundState() != RoundState_Pregame && !IsInWaitingForPlayers() && GameRules_GetPropFloat("m_flRestartRoundTime") == -1)
 	{
 		BeginSetup();
 	}

@@ -1227,15 +1227,15 @@ methodmap CTFPlayer < CBaseCombatCharacter
 					}
 				}
 				
-				this.MultiplyAttributeValue("damage penalty", 0.75);
-				this.MultiplyAttributeValue("spread penalty", 1.5);
-				this.MultiplyAttributeValue("projectile spread angle penalty", 6.0);
+				this.MultiplyAttributeValue("damage penalty", 0.8);
+				this.MultiplyAttributeValue("spread penalty", 1.2);
+				this.MultiplyAttributeValue("projectile spread angle penalty", 2.0);
 			}
 			case NORMAL:
 			{
 				this.MultiplyAttributeValue("damage penalty", 0.9);
-				this.MultiplyAttributeValue("spread penalty", 1.25);
-				this.MultiplyAttributeValue("projectile spread angle penalty", 3.0);
+				this.MultiplyAttributeValue("spread penalty", 1.1);
+				this.MultiplyAttributeValue("projectile spread angle penalty", 1.0);
 			}
 			case EXPERT:
 			{

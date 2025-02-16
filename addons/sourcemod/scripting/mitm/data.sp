@@ -1227,7 +1227,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 					}
 				}
 				
-				this.MultiplyAttributeValue("damage penalty", 0.8);
+				this.MultiplyAttributeValue("damage penalty", 0.85);
 				this.MultiplyAttributeValue("spread penalty", 1.2);
 				this.MultiplyAttributeValue("projectile spread angle penalty", 2.0);
 			}

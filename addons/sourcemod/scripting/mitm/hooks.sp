@@ -23,7 +23,6 @@ void Hooks_Init()
 	PSM_AddUserMessageHook(GetUserMessageId("SayText2"), OnSayText2, true);
 	PSM_AddUserMessageHook(GetUserMessageId("TextMsg"), OnTextMsg, true);
 	
-	PSM_AddEntityOutputHook("tf_gamerules", "OnStateEnterBetweenRounds", EntityOutput_CTFGameRules_OnStateEnterBetweenRounds);
 	PSM_AddEntityOutputHook("trigger_remove_tf_player_condition", "OnStartTouch", EntityOutput_CTriggerRemoveTFPlayerCondition_OnStartTouch);
 }
 
@@ -186,30 +185,8 @@ static void RequestFrameCallback_PrintEndlessBotUpgrades(int msg_dest)
 	}
 }
 
-static void EntityOutput_CTFGameRules_OnStateEnterBetweenRounds(const char[] output, int caller, int activator, float delay)
-{
-	if (!IsInWaitingForPlayers() && mitm_setup_time.IntValue > 0)
-	{
-		RequestFrame(RequestFrame_StartReadyTimer);
-	}
-}
-
 static void EntityOutput_CTriggerRemoveTFPlayerCondition_OnStartTouch(const char[] output, int caller, int activator, float delay)
 {
 	// Copy behavior of CTriggerRemoveTFPlayerCondition::StartTouch
 	SDKCall_CBaseCombatCharacter_ClearLastKnownArea(activator);
-}
-
-static void RequestFrame_StartReadyTimer()
-{
-	// Automatically start the ready timer
-	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + mitm_setup_time.FloatValue);
-	GameRules_SetProp("m_bAwaitingReadyRestart", false);
-	
-	Event event = CreateEvent("teamplay_round_restart_seconds");
-	if (event)
-	{
-		event.SetInt("seconds", mitm_setup_time.IntValue);
-		event.Fire();
-	}
 }

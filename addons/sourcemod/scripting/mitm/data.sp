@@ -616,8 +616,12 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	public void SetAsDefender()
 	{
 		this.ForceChangeTeam(TFTeam_Defenders);
-		TF2_SetPlayerClass(this.index, TFClass_Unknown);
-		ShowVGUIPanel(this.index, this.GetTFTeam() == TFTeam_Red ? "class_red" : "class_blue");
+		
+		if (!IsFakeClient(this.index))
+		{
+			TF2_SetPlayerClass(this.index, TFClass_Unknown);
+			ShowVGUIPanel(this.index, this.GetTFTeam() == TFTeam_Red ? "class_red" : "class_blue");
+		}
 	}
 	
 	public bool IsInvader()
@@ -666,7 +670,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	public bool IsValidDefender()
 	{
 		return !IsClientSourceTV(this.index)
-			&& this.GetTFTeam() != TFTeam_Unassigned
+			&& (this.GetTFTeam() != TFTeam_Unassigned || mitm_developer.BoolValue && IsFakeClient(this.index))
 			&& !this.HasPreference(PREF_DEFENDER_DISABLE_QUEUE)
 			&& !this.HasPreference(PREF_SPECTATOR_MODE)
 			&& Forwards_OnIsValidDefender(this.index);

@@ -100,10 +100,6 @@ methodmap Entity
 		{
 			return g_hEntityProperties.Get(this.m_listIndex, EntityProperties::m_teleportWhereName);
 		}
-		public set(ArrayList teleportWhereName)
-		{
-			g_hEntityProperties.Set(this.m_listIndex, teleportWhereName, EntityProperties::m_teleportWhereName);
-		}
 	}
 	
 	property int m_hGlowEntity

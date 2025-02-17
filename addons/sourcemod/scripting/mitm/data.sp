@@ -568,10 +568,6 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		{
 			return GetEntData(this.index, GetOffset("CTFPlayer", "m_accumulatedSentryGunKillCount"));
 		}
-		public set(int accumulatedSentryGunKillCount)
-		{
-			GetEntData(this.index, GetOffset("CTFPlayer", "m_accumulatedSentryGunKillCount"), accumulatedSentryGunKillCount);
-		}
 	}
 	
 	property Address m_iszClassIcon
@@ -591,10 +587,6 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		public get()
 		{
 			return GetEntDataFloat(this.index, GetOffset("CTFPlayer", "m_flSpawnTime"));
-		}
-		public set(float flSpawnTime)
-		{
-			SetEntDataFloat(this.index, GetOffset("CTFPlayer", "m_flSpawnTime"), flSpawnTime);
 		}
 	}
 	
@@ -2522,10 +2514,6 @@ methodmap CTFTankBoss < CBaseEntity
 		public get()
 		{
 			return GetEntData(this.index, GetOffset("CTFTankBoss", "m_isDroppingBomb"), 1);
-		}
-		public set(bool isDroppingBomb)
-		{
-			SetEntData(this.index, GetOffset("CTFTankBoss", "m_isDroppingBomb"), isDroppingBomb, 1);
 		}
 	}
 }

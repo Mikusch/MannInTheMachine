@@ -886,7 +886,7 @@ void ShowGateBotAnnotation(int client)
 				
 				char text[64];
 				Format(text, sizeof(text), "%T", "Invader_CaptureGate", client, iszPrintName);
-				CTFPlayer(client).ShowAnnotation(MITM_HINT_MASK | client, text, _, center, -1.0, "coach/coach_go_here.wav");
+				CTFPlayer(client).ShowAnnotation(MITM_GENERIC_HINT_MASK | client, text, _, center, -1.0, "coach/coach_go_here.wav");
 				return;
 			}
 		}

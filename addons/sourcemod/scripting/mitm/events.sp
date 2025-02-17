@@ -58,7 +58,7 @@ static void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroad
 	
 	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
 	{
-		CTFPlayer(victim).HideAnnotation(MITM_HINT_MASK | victim);
+		CTFPlayer(victim).HideAnnotation(MITM_GENERIC_HINT_MASK | victim);
 	}
 }
 
@@ -189,7 +189,7 @@ static void EventHook_TeamplayPointCaptured(Event event, const char[] name, bool
 			CTFPlayer player = CTFPlayer(client);
 			
 			// hide current annotation and recreate later
-			player.HideAnnotation(MITM_HINT_MASK | client);
+			player.HideAnnotation(MITM_GENERIC_HINT_MASK | client);
 			player.m_annotationTimer = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
 		}
 	}

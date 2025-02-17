@@ -610,7 +610,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public bool IsAutoKickDisabled()
 	{
-		return this.GetProp("m_autoKickDisabled", Prop_Data);
+		return this.GetProp(Prop_Data, "m_autoKickDisabled");
 	}
 	
 	public void SetAsDefender()
@@ -1529,7 +1529,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 						char reason[64];
 						Format(reason, sizeof(reason), "%T", info.m_reason[0] ? info.m_reason : "Invader_DelayedThreatNotice_Generic", this.index);
 						
-						this.ShowAnnotation(MITM_HINT_MASK | this.index, reason, who, _, 5.0, "coach/coach_attack_here.wav", false);
+						this.ShowAnnotation(MITM_THREAT_NOTICE_HINT_MASK | this.index, reason, who, _, 5.0, "coach/coach_attack_here.wav", false);
 					}
 					
 					this.m_delayedNoticeList.Erase(i);

@@ -24,30 +24,30 @@ void SDKHooks_OnEntityCreated(int entity, const char[] classname)
 {
 	if (IsEntityClient(entity))
 	{
-		PSM_SDKHook(entity, SDKHook_OnTakeDamageAlive, SDKHookCB_Client_OnTakeDamageAlive);
-		PSM_SDKHook(entity, SDKHook_WeaponEquipPost, SDKHookCB_Client_WeaponEquipPost);
-		PSM_SDKHook(entity, SDKHook_WeaponSwitchPost, SDKHookCB_Client_WeaponSwitchPost);
+		PSM_SDKHook(entity, SDKHook_OnTakeDamageAlive, SDKHook_CTFPlayer_OnTakeDamageAlive);
+		PSM_SDKHook(entity, SDKHook_WeaponEquipPost, SDKHook_CTFPlayer_WeaponEquipPost);
+		PSM_SDKHook(entity, SDKHook_WeaponSwitchPost, SDKHook_CTFPlayer_WeaponSwitchPost);
 	}
 	else if (StrEqual(classname, "tf_projectile_pipe_remote"))
 	{
-		PSM_SDKHook(entity, SDKHook_SetTransmit, SDKHookCB_ProjectilePipeRemote_SetTransmit);
+		PSM_SDKHook(entity, SDKHook_SetTransmit, SDKHook_CTFGrenadePipebombProjectile_SetTransmit);
 	}
 	else if (StrEqual(classname, "bot_hint_engineer_nest"))
 	{
-		PSM_SDKHook(entity, SDKHook_Think, SDKHookCB_BotHintEngineerNest_Think);
-		PSM_SDKHook(entity, SDKHook_ThinkPost, SDKHookCB_BotHintEngineerNest_ThinkPost);
+		PSM_SDKHook(entity, SDKHook_Think, SDKHook_CTFBotHintEngineerNest_Think);
+		PSM_SDKHook(entity, SDKHook_ThinkPost, SDKHook_CTFBotHintEngineerNest_ThinkPost);
 	}
 	else if (StrEqual(classname, "entity_medigun_shield"))
 	{
-		PSM_SDKHook(entity, SDKHook_OnTakeDamagePost, SDKHookCB_EntityMedigunShield_OnTakeDamagePost);
+		PSM_SDKHook(entity, SDKHook_OnTakeDamagePost, SDKHook_CTFMedigunShield_OnTakeDamagePost);
 	}
 	else if (StrEqual(classname, "tank_boss"))
 	{
-		PSM_SDKHook(entity, SDKHook_Think, SDKHookCB_CTFTankBoss_Think);
+		PSM_SDKHook(entity, SDKHook_Think, SDKHook_CTFTankBoss_Think);
 	}
 }
 
-static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
+static Action SDKHook_CTFPlayer_OnTakeDamageAlive(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
 {
 	CTakeDamageInfo info = GetGlobalDamageInfo();
 	
@@ -83,7 +83,7 @@ static Action SDKHookCB_Client_OnTakeDamageAlive(int victim, int &attacker, int 
 	return Plugin_Continue;
 }
 
-static void SDKHookCB_Client_WeaponEquipPost(int client, int weapon)
+static void SDKHook_CTFPlayer_WeaponEquipPost(int client, int weapon)
 {
 	if (!CTFPlayer(client).ShouldUseCustomViewModel())
 		return;
@@ -110,7 +110,7 @@ static void SDKHookCB_Client_WeaponEquipPost(int client, int weapon)
 	}
 }
 
-static void SDKHookCB_Client_WeaponSwitchPost(int client, int weapon)
+static void SDKHook_CTFPlayer_WeaponSwitchPost(int client, int weapon)
 {
 	if (!CTFPlayer(client).ShouldUseCustomViewModel() || !IsValidEntity(weapon))
 		return;
@@ -123,7 +123,7 @@ static void SDKHookCB_Client_WeaponSwitchPost(int client, int weapon)
 	SetEntProp(weapon, Prop_Send, "m_nCustomViewmodelModelIndex", nModelIndex);
 }
 
-static Action SDKHookCB_ProjectilePipeRemote_SetTransmit(int entity, int client)
+static Action SDKHook_CTFGrenadePipebombProjectile_SetTransmit(int entity, int client)
 {
 	TFTeam team = view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum"));
 	if (team == TFTeam_Defenders)
@@ -143,14 +143,14 @@ static Action SDKHookCB_ProjectilePipeRemote_SetTransmit(int entity, int client)
 	return Plugin_Continue;
 }
 
-static Action SDKHookCB_BotHintEngineerNest_Think(int entity)
+static Action SDKHook_CTFBotHintEngineerNest_Think(int entity)
 {
 	g_bHasActiveTeleporterPre = GetEntProp(entity, Prop_Send, "m_bHasActiveTeleporter") != 0;
 	
 	return Plugin_Continue;
 }
 
-static void SDKHookCB_BotHintEngineerNest_ThinkPost(int entity)
+static void SDKHook_CTFBotHintEngineerNest_ThinkPost(int entity)
 {
 	if (!g_bHasActiveTeleporterPre && GetEntProp(entity, Prop_Send, "m_bHasActiveTeleporter"))
 	{
@@ -168,7 +168,7 @@ static void SDKHookCB_BotHintEngineerNest_ThinkPost(int entity)
 	}
 }
 
-static void SDKHookCB_EntityMedigunShield_OnTakeDamagePost(int victim, int attacker, int inflictor, float damage, int damagetype)
+static void SDKHook_CTFMedigunShield_OnTakeDamagePost(int victim, int attacker, int inflictor, float damage, int damagetype)
 {
 	int owner = GetEntPropEnt(victim, Prop_Send, "m_hOwnerEntity");
 	if (!IsValidEntity(owner))
@@ -177,7 +177,7 @@ static void SDKHookCB_EntityMedigunShield_OnTakeDamagePost(int victim, int attac
 	SetEntPropFloat(owner, Prop_Send, "m_flRageMeter", GetEntPropFloat(owner, Prop_Send, "m_flRageMeter") - (damage * mitm_shield_damage_drain_rate.FloatValue));
 }
 
-static Action SDKHookCB_CTFTankBoss_Think(int entity)
+static Action SDKHook_CTFTankBoss_Think(int entity)
 {
 	if (CTFTankBoss(entity).m_isDroppingBomb && GetEntProp(entity, Prop_Data, "m_bSequenceFinished"))
 	{

@@ -198,7 +198,7 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 void DHooks_HookGameRules()
 {
 	if (g_hDHook_CTeamplayRoundBasedRules_RespawnPlayers)
-		PSM_DHookGameRules(g_hDHook_CTeamplayRoundBasedRules_RespawnPlayers, Hook_Pre, DHookCallback_CTFGameRules_RespawnPlayers);
+		PSM_DHookGameRules(g_hDHook_CTeamplayRoundBasedRules_RespawnPlayers, Hook_Pre, DHookCallback_CTFGameRules_RespawnPlayers_Pre);
 }
 
 static void DHooks_CopyScriptFunctionBinding(const char[] sourceClassName, const char[] functionName, const char[] targetClassName, DHookCallback callbackPre = INVALID_FUNCTION, DHookCallback callbackPost = INVALID_FUNCTION, bool bEmpty = true)
@@ -1650,7 +1650,7 @@ static MRESReturn DHookCallback_CCaptureFlag_PickUp_Post(int item, DHookParam pa
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_CTFGameRules_RespawnPlayers(DHookParam params)
+static MRESReturn DHookCallback_CTFGameRules_RespawnPlayers_Pre(DHookParam params)
 {
 	bool bTeam = params.Get(2);
 	TFTeam team = params.Get(3);

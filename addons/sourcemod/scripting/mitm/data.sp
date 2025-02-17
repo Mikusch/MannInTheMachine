@@ -608,6 +608,11 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		return TF2_GetClientTeam(this.index);
 	}
 	
+	public bool IsAutoKickDisabled()
+	{
+		return this.GetProp("m_autoKickDisabled", Prop_Data);
+	}
+	
 	public void SetAsDefender()
 	{
 		this.ForceChangeTeam(TFTeam_Defenders);

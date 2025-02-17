@@ -149,7 +149,7 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 						
 						// kick players for dying to the spawn timer too many times
 						int iMaxDeaths = mitm_max_spawn_deaths.IntValue;
-						if (iMaxDeaths && !mitm_developer.BoolValue)
+						if (iMaxDeaths && !CTFPlayer(actor).IsAutoKickDisabled() && !mitm_developer.BoolValue)
 						{
 							if (iMaxDeaths <= ++CTFPlayer(actor).m_spawnDeathCount)
 							{

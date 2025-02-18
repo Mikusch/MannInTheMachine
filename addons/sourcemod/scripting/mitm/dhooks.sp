@@ -180,7 +180,7 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 	else if (StrEqual(classname, "tf_glow"))
 	{
 		if (g_hDHook_CBaseEntity_UpdateTransmitState)
-			PSM_DHookEntity(g_hDHook_CBaseEntity_UpdateTransmitState, Hook_Pre, entity, DHookCallback_CTFGlow_UpdateTransmitState);
+			PSM_DHookEntity(g_hDHook_CBaseEntity_UpdateTransmitState, Hook_Pre, entity, DHookCallback_CTFGlow_UpdateTransmitState_Pre);
 	}
 }
 
@@ -1715,7 +1715,7 @@ static MRESReturn DHookCallback_CCurrencyPack_ComeToRest_Pre(int item)
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_CTFGlow_UpdateTransmitState(int glow, DHookReturn ret)
+static MRESReturn DHookCallback_CTFGlow_UpdateTransmitState_Pre(int glow, DHookReturn ret)
 {
 	ret.Value = FL_EDICT_ALWAYS;
 	return MRES_Supercede;

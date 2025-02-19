@@ -22,7 +22,6 @@ void ConVars_Init()
 {
 	CreateConVar("mitm_version", PLUGIN_VERSION, "Plugin version.", FCVAR_SPONLY | FCVAR_REPLICATED | FCVAR_NOTIFY | FCVAR_DONTRECORD);
 	CreateConVar("mitm_enabled", "1", "Whether the plugin is enabled.");
-	mitm_developer = CreateConVar("mitm_developer", "0", "Toggle plugin developer mode.");
 	mitm_custom_upgrades_file = CreateConVar("mitm_custom_upgrades_file", "", "Path to custom upgrades file, set to an empty string to use the default.");
 	mitm_bot_spawn_hurry_time = CreateConVar("mitm_bot_spawn_hurry_time", "15", "The base time invaders have to leave their spawn, in seconds.");
 	mitm_queue_points = CreateConVar("mitm_queue_points", "5", "Amount of queue points awarded to players that did not become defenders.", _, true, 1.0);
@@ -39,6 +38,7 @@ void ConVars_Init()
 	mitm_autoincrement_max_wipes = CreateConVar("mitm_autoincrement_max_wipes", "3", "After this many losses the current wave will be skipped.");
 	mitm_autoincrement_currency_percentage = CreateConVar("mitm_autoincrement_currency_percentage", "0.90", "Percentage of currency gained from a skipped wave.", _, true, 0.0, true, 1.0);
 	
+	developer = FindConVar("developer");
 	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");
 	tf_deploying_bomb_time = FindConVar("tf_deploying_bomb_time");

@@ -1106,7 +1106,7 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 		ret.Value = TFTeam_Defenders;
 		return MRES_Supercede;
 	}
-	else if (g_bAllowTeamChange || (mitm_developer.BoolValue && !IsFakeClient(player)))
+	else if (g_bAllowTeamChange || (developer.BoolValue && !IsFakeClient(player)))
 	{
 		if (nDesiredTeam == TFTeam_Spectator || nDesiredTeam == TFTeam_Defenders)
 			return MRES_Ignored;

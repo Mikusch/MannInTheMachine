@@ -670,7 +670,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	public bool IsValidDefender()
 	{
 		return !IsClientSourceTV(this.index)
-			&& (this.GetTFTeam() != TFTeam_Unassigned || mitm_developer.BoolValue && IsFakeClient(this.index))
+			&& (this.GetTFTeam() != TFTeam_Unassigned || developer.BoolValue && IsFakeClient(this.index))
 			&& !this.HasPreference(PREF_DEFENDER_DISABLE_QUEUE)
 			&& !this.HasPreference(PREF_SPECTATOR_MODE)
 			&& Forwards_OnIsValidDefender(this.index);

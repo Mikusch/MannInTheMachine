@@ -63,7 +63,6 @@ bool g_bInEndlessRollEscalation;
 int g_iEndlessRandomSeed;
 
 // Plugin ConVars
-ConVar mitm_developer;
 ConVar mitm_custom_upgrades_file;
 ConVar mitm_bot_spawn_hurry_time;
 ConVar mitm_queue_points;
@@ -81,6 +80,7 @@ ConVar mitm_autoincrement_max_wipes;
 ConVar mitm_autoincrement_currency_percentage;
 
 // Game ConVars
+ConVar developer;
 ConVar tf_avoidteammates_pushaway;
 ConVar tf_deploying_bomb_delay_time;
 ConVar tf_deploying_bomb_time;

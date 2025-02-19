@@ -468,8 +468,8 @@
 			}
 			"CTeamplayRules::TeamMayCapturePoint"
 			{
-				"linux"		"159"
-				"windows"	"158"
+				"linux"		"160"
+				"windows"	"159"
 			}
 			
 			// Data Offsets

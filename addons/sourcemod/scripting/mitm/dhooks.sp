@@ -395,7 +395,8 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 		spawner.GetName(name, sizeof(name), "TFBot");
 		newBot.SetInvaderName(name, mitm_rename_robots.BoolValue);
 		
-		CBaseEntity(g_internalSpawnPoint).SetAbsOrigin(here);
+		SetEntPropVector(g_internalSpawnPoint, Prop_Data, "m_vecAbsOrigin", here);
+		// CBaseEntity(g_internalSpawnPoint).SetAbsOrigin(here); // FIXME this causes crashes after the latest update, add it back later
 		CBaseEntity(g_internalSpawnPoint).SetLocalAngles(ZERO_VECTOR);
 		newBot.SetSpawnPoint(g_internalSpawnPoint);
 		

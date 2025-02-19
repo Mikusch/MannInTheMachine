@@ -104,7 +104,7 @@ void DHooks_VScriptInit()
 	DHooks_CopyScriptFunctionBinding("CTFBot", "ClearAllBotAttributes", "CTFPlayer", DHookCallback_CTFBot_ScriptClearAllBotAttributes_Pre);
 	DHooks_CopyScriptFunctionBinding("CTFBot", "ClearAllBotTags", "CTFPlayer", DHookCallback_CTFBot_ScriptClearAllBotTags_Pre);
 	DHooks_CopyScriptFunctionBinding("CTFBot", "ClearAllWeaponRestrictions", "CTFPlayer", DHookCallback_CTFBot_ScriptClearAllWeaponRestrictions_Pre);
-	DHooks_CopyScriptFunctionBinding("CTFBot", "DelayedThreatNotice", "CTFPlayer", .bEmpty = true);
+	DHooks_CopyScriptFunctionBinding("CTFBot", "DelayedThreatNotice", "CTFPlayer", DHookCallback_CTFBot_DelayedThreatNotices_Pre);
 	DHooks_CopyScriptFunctionBinding("CTFBot", "DisbandCurrentSquad", "CTFPlayer", DHookCallback_CTFBot_ScriptDisbandCurrentSquad_Pre);
 	DHooks_CopyScriptFunctionBinding("CTFBot", "GenerateAndWearItem", "CTFPlayer", .bEmpty = false);
 	DHooks_CopyScriptFunctionBinding("CTFBot", "GetAllBotTags", "CTFPlayer", DHookCallback_CTFBot_ScriptGetAllBotTags_Pre);
@@ -132,7 +132,7 @@ void DHooks_VScriptInit()
 	DHooks_CopyScriptFunctionBinding("CTFBot", "SetPrevMission", "CTFPlayer", DHookCallback_CTFBot_ScriptSetPrevMission_Pre);
 	DHooks_CopyScriptFunctionBinding("CTFBot", "SetScaleOverride", "CTFPlayer", DHookCallback_CTFBot_ScriptSetScaleOverride_Pre);
 	DHooks_CopyScriptFunctionBinding("CTFBot", "ShouldAutoJump", "CTFPlayer", DHookCallback_CTFBot_ScriptShouldAutoJump_Pre);
-	DHooks_CopyScriptFunctionBinding("CTFBot", "UpdateDelayedThreatNotices", "CTFPlayer", .bEmpty = true);
+	DHooks_CopyScriptFunctionBinding("CTFBot", "UpdateDelayedThreatNotices", "CTFPlayer", DHookCallback_CTFBot_ScriptUpdateDelayedThreatNotices_Pre);
 	
 	DHooks_CreateScriptDetour("CTFPlayer", "IsBotOfType", DHookCallback_CTFPlayer_ScriptIsBotOfType_Pre);
 	DHooks_CreateScriptDetour(NULL_STRING, "IsPlayerABot", DHookCallback_IsPlayerABot_Pre);
@@ -1837,6 +1837,16 @@ static MRESReturn DHookCallback_CTFBot_ScriptClearAllWeaponRestrictions_Pre(int 
 	return MRES_Supercede;
 }
 
+static MRESReturn DHookCallback_CTFBot_DelayedThreatNotices_Pre(int bot, DHookParam params)
+{
+	int who = VScript_HScriptToEntity(params.Get(1));
+	float flNoticeDelay = params.Get(2);
+	
+	CTFPlayer(bot).DelayedThreatNotice(who, flNoticeDelay);
+	
+	return MRES_Supercede;
+}
+
 static MRESReturn DHookCallback_CTFBot_ScriptDisbandCurrentSquad_Pre(int bot)
 {
 	if (IsFakeClient(bot))
@@ -2120,6 +2130,13 @@ static MRESReturn DHookCallback_CTFBot_ScriptShouldAutoJump_Pre(int bot, DHookPa
 		return MRES_Ignored;
 	
 	CTFPlayer(bot).ShouldAutoJump();
+	
+	return MRES_Supercede;
+}
+
+static MRESReturn DHookCallback_CTFBot_ScriptUpdateDelayedThreatNotices_Pre(int bot)
+{
+	CTFPlayer(bot).UpdateDelayedThreatNotices();
 	
 	return MRES_Supercede;
 }

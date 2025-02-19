@@ -448,8 +448,8 @@
 			}
 			"CTeamplayRoundBasedRules::RespawnPlayers"
 			{
-				"linux"		"215"
-				"windows"	"213"
+				"linux"		"216"
+				"windows"	"214"
 			}
 			"CBaseCombatCharacter::ClearLastKnownArea"
 			{

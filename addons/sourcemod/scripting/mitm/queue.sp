@@ -171,13 +171,20 @@ void Queue_SelectDefenders()
 		LogError("Not enough players to meet defender quota (%d/%d)", iDefenderCount, iReqDefenderCount);
 	}
 	
+	int points = mitm_queue_points.IntValue;
+	
 	// Move everyone else to the spectator team
 	for (int i = 0; i < players.Length; i++)
 	{
 		int client = players.Get(i);
 		
-		CTFPlayer(client).ForceChangeTeam(TFTeam_Spectator);
+		CTFPlayer player = CTFPlayer(client);
+		
+		player.ForceChangeTeam(TFTeam_Spectator);
 		CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsInvader");
+		
+		player.AddQueuePoints(points);
+		CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_PointsAwarded", points, player.GetQueuePoints());
 	}
 	
 	for (int client = 1; client <= MaxClients; client++)

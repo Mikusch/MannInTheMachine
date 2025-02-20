@@ -568,10 +568,6 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		{
 			return GetEntData(this.index, GetOffset("CTFPlayer", "m_accumulatedSentryGunKillCount"));
 		}
-		public set(int accumulatedSentryGunKillCount)
-		{
-			GetEntData(this.index, GetOffset("CTFPlayer", "m_accumulatedSentryGunKillCount"), accumulatedSentryGunKillCount);
-		}
 	}
 	
 	property Address m_iszClassIcon
@@ -592,10 +588,6 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		{
 			return GetEntDataFloat(this.index, GetOffset("CTFPlayer", "m_flSpawnTime"));
 		}
-		public set(float flSpawnTime)
-		{
-			SetEntDataFloat(this.index, GetOffset("CTFPlayer", "m_flSpawnTime"), flSpawnTime);
-		}
 	}
 	
 	property CWaveSpawnPopulator m_pWaveSpawnPopulator
@@ -606,9 +598,30 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		}
 	}
 	
+	public void ForceChangeTeam(TFTeam team, bool bFullTeamSwitch = false)
+	{
+		SDKCall_CTFPlayer_ForceChangeTeam(this.index, team, bFullTeamSwitch);
+	}
+	
 	public TFTeam GetTFTeam()
 	{
 		return TF2_GetClientTeam(this.index);
+	}
+	
+	public bool IsAutoKickDisabled()
+	{
+		return this.GetProp(Prop_Data, "m_autoKickDisabled");
+	}
+	
+	public void SetAsDefender()
+	{
+		this.ForceChangeTeam(TFTeam_Defenders);
+		
+		if (!IsFakeClient(this.index))
+		{
+			TF2_SetPlayerClass(this.index, TFClass_Unknown);
+			ShowVGUIPanel(this.index, this.GetTFTeam() == TFTeam_Red ? "class_red" : "class_blue");
+		}
 	}
 	
 	public bool IsInvader()
@@ -637,13 +650,37 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		g_hCookieQueue.SetInt(this.index, this.m_defenderQueuePoints);
 	}
 	
+	public int GetDefenderPriority()
+	{
+		return this.m_defenderPriority;
+	}
+	
+	public void IncrementDefenderPriority()
+	{
+		this.m_defenderPriority++;
+		g_hCookieDefenderPriority.SetInt(this.index, this.m_defenderPriority);
+	}
+	
+	public void ResetDefenderPriority()
+	{
+		this.m_defenderPriority = 0;
+		g_hCookieDefenderPriority.SetInt(this.index, this.m_defenderPriority);
+	}
+	
 	public bool IsValidDefender()
 	{
 		return !IsClientSourceTV(this.index)
-			&& this.GetTFTeam() != TFTeam_Unassigned
+			&& (this.GetTFTeam() != TFTeam_Unassigned || developer.BoolValue && IsFakeClient(this.index))
 			&& !this.HasPreference(PREF_DEFENDER_DISABLE_QUEUE)
 			&& !this.HasPreference(PREF_SPECTATOR_MODE)
 			&& Forwards_OnIsValidDefender(this.index);
+	}
+	
+	public bool IsValidReplacementDefender()
+	{
+		return this.GetTFTeam() == TFTeam_Spectator
+			&& this.IsValidDefender()
+			&& !this.HasPreference(PREF_DEFENDER_DISABLE_REPLACEMENT);
 	}
 	
 	public float GetSpawnTime()
@@ -1191,16 +1228,33 @@ methodmap CTFPlayer < CBaseCombatCharacter
 					}
 				}
 				
-				MultiplyAttributeValue(this.index, "damage penalty", 0.75);
+				this.MultiplyAttributeValue("damage penalty", 0.85);
+				this.MultiplyAttributeValue("spread penalty", 1.2);
+				this.MultiplyAttributeValue("projectile spread angle penalty", 2.0);
 			}
 			case NORMAL:
 			{
-				MultiplyAttributeValue(this.index, "damage penalty", 0.9);
+				this.MultiplyAttributeValue("damage penalty", 0.9);
+				this.MultiplyAttributeValue("spread penalty", 1.1);
+				this.MultiplyAttributeValue("projectile spread angle penalty", 1.0);
 			}
 			case EXPERT:
 			{
-				MultiplyAttributeValue(this.index, "damage bonus", 1.1);
+				this.MultiplyAttributeValue("damage bonus", 1.1);
 			}
+		}
+	}
+	
+	public void MultiplyAttributeValue(const char[] szAttrib, float flMult)
+	{
+		Address pAttrib = TF2Attrib_GetByName(this.index, szAttrib);
+		if (pAttrib)
+		{
+			TF2Attrib_SetValue(pAttrib, TF2Attrib_GetValue(pAttrib) * flMult);
+		}
+		else
+		{
+			TF2Attrib_SetByName(this.index, szAttrib, flMult);
 		}
 	}
 	
@@ -1479,7 +1533,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 						char reason[64];
 						Format(reason, sizeof(reason), "%T", info.m_reason[0] ? info.m_reason : "Invader_DelayedThreatNotice_Generic", this.index);
 						
-						this.ShowAnnotation(MITM_HINT_MASK | this.index, reason, who, _, 5.0, "coach/coach_attack_here.wav", false);
+						this.ShowAnnotation(MITM_THREAT_NOTICE_HINT_MASK | this.index, reason, who, _, 5.0, "coach/coach_attack_here.wav", false);
 					}
 					
 					this.m_delayedNoticeList.Erase(i);
@@ -1538,7 +1592,9 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		
 		// factor in squad speed
 		float flSpeed = this.IsInASquad() ? this.GetSquad().GetSlowestMemberSpeed() : this.GetPropFloat(Prop_Send, "m_flMaxspeed");
-		return mitm_bot_spawn_hurry_time.FloatValue * (300.0 / flSpeed);
+		float flTime = mitm_bot_spawn_hurry_time.FloatValue * (300.0 / flSpeed);
+		
+		return Max(flTime, mitm_bot_spawn_hurry_time.FloatValue);
 	}
 	
 	public bool ShouldAutoJump()
@@ -2469,10 +2525,6 @@ methodmap CTFTankBoss < CBaseEntity
 		public get()
 		{
 			return GetEntData(this.index, GetOffset("CTFTankBoss", "m_isDroppingBomb"), 1);
-		}
-		public set(bool isDroppingBomb)
-		{
-			SetEntData(this.index, GetOffset("CTFTankBoss", "m_isDroppingBomb"), isDroppingBomb, 1);
 		}
 	}
 }

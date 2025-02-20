@@ -167,7 +167,7 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 		{
 			char text[64];
 			Format(text, sizeof(text), "%T", "Invader_DestroySentries_DetonateSentry", actor);
-			CTFPlayer(actor).ShowAnnotation(MITM_HINT_MASK | actor, text, action.m_victim, _, -1.0, "coach/coach_attack_here.wav");
+			CTFPlayer(actor).ShowAnnotation(MITM_GENERIC_HINT_MASK | actor, text, action.m_victim, _, -1.0, "coach/coach_attack_here.wav");
 			action.m_annotationTimer.Invalidate();
 		}
 	}
@@ -277,7 +277,7 @@ static int Update(CTFBotMissionSuicideBomber action, int actor, float interval)
 
 static void OnEnd(CTFBotMissionSuicideBomber action, int actor, NextBotAction nextAction)
 {
-	CTFPlayer(actor).HideAnnotation(MITM_HINT_MASK | actor);
+	CTFPlayer(actor).HideAnnotation(MITM_GENERIC_HINT_MASK | actor);
 	
 	delete action.m_detonateTimer;
 	delete action.m_talkTimer;
@@ -441,7 +441,7 @@ static void Detonate(CTFBotMissionSuicideBomber action, int actor)
 	ForcePlayerSuicide(actor);
 	if (IsPlayerAlive(actor))
 	{
-		TF2_ForceChangeClientTeam(actor, TFTeam_Spectator);
+		CTFPlayer(actor).ForceChangeTeam(TFTeam_Spectator);
 	}
 	
 	if (action.m_bWasKilled)

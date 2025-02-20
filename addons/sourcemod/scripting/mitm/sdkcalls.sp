@@ -29,6 +29,7 @@ static Handle g_hSDKCall_CCaptureZone_Capture;
 static Handle g_hSDKCall_CTFPlayer_DoAnimationEvent;
 static Handle g_hSDKCall_CTFPlayer_PlaySpecificSequence;
 static Handle g_hSDKCall_CTFPlayer_DoClassSpecialSkill;
+static Handle g_hSDKCall_CTFPlayer_ForceChangeTeam;
 static Handle g_hSDKCall_CTFPlayerShared_ResetRageBuffs;
 static Handle g_hSDKCall_CPopulationManager_IsInEndlessWaves;
 static Handle g_hSDKCall_CPopulationManager_GetHealthMultiplier;
@@ -92,6 +93,7 @@ void SDKCalls_Init(GameData hGameConf)
 	g_hSDKCall_CTFPlayer_PlaySpecificSequence = PrepSDKCall_CTFPlayer_PlaySpecificSequence(hGameConf);
 	g_hSDKCall_CTFPlayer_DoClassSpecialSkill = PrepSDKCall_CTFPlayer_DoClassSpecialSkill(hGameConf);
 	g_hSDKCall_CTFPlayerShared_ResetRageBuffs = PrepSDKCall_CTFPlayerShared_ResetRageBuffs(hGameConf);
+	g_hSDKCall_CTFPlayer_ForceChangeTeam = PrepSDKCall_CTFPlayer_ForceChangeTeam(hGameConf);
 	g_hSDKCall_CPopulationManager_IsInEndlessWaves = PrepSDKCall_CPopulationManager_IsInEndlessWaves(hGameConf);
 	g_hSDKCall_CPopulationManager_GetHealthMultiplier = PrepSDKCall_CPopulationManager_GetHealthMultiplier(hGameConf);
 	g_hSDKCall_CPopulationManager_ResetMap = PrepSDKCall_CPopulationManager_ResetMap(hGameConf);
@@ -291,6 +293,20 @@ static Handle PrepSDKCall_CTFPlayer_DoClassSpecialSkill(GameData hGameConf)
 	Handle call = EndPrepSDKCall();
 	if (!call)
 		LogError("Failed to create SDKCall: CTFPlayer::DoClassSpecialSkill");
+	
+	return call;
+}
+
+static Handle PrepSDKCall_CTFPlayer_ForceChangeTeam(GameData hGameConf)
+{
+	StartPrepSDKCall(SDKCall_Player);
+	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CTFPlayer::ForceChangeTeam");
+	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_AddParameter(SDKType_Bool, SDKPass_ByValue);
+	
+	Handle call = EndPrepSDKCall();
+	if (!call)
+		LogError("Failed to create SDKCall: CTFPlayer::ForceChangeTeam");
 	
 	return call;
 }
@@ -765,6 +781,12 @@ bool SDKCall_CTFPlayer_DoClassSpecialSkill(int player)
 	return false;
 }
 
+void SDKCall_CTFPlayer_ForceChangeTeam(int player, TFTeam iTeamNum, bool bFullTeamSwitch = false)
+{
+	if (g_hSDKCall_CTFPlayer_ForceChangeTeam)
+		SDKCall(g_hSDKCall_CTFPlayer_ForceChangeTeam, player, iTeamNum, bFullTeamSwitch);
+}
+
 void SDKCall_CTFPlayerShared_ResetRageBuffs(Address m_Shared)
 {
 	if (g_hSDKCall_CTFPlayerShared_ResetRageBuffs)
@@ -845,10 +867,10 @@ bool SDKCall_CGameRules_ShouldCollide(Collision_Group_t collisionGroup0, Collisi
 	return false;
 }
 
-bool SDKCall_CTeamplayRules_TeamMayCapturePoint(TFTeam team, int pointIndex)
+bool SDKCall_CTeamplayRules_TeamMayCapturePoint(TFTeam iTeam, int pointIndex)
 {
 	if (g_hSDKCall_CTeamplayRules_TeamMayCapturePoint)
-		return SDKCall(g_hSDKCall_CTeamplayRules_TeamMayCapturePoint, team, pointIndex);
+		return SDKCall(g_hSDKCall_CTeamplayRules_TeamMayCapturePoint, iTeam, pointIndex);
 	
 	return false;
 }

@@ -34,32 +34,6 @@ ArrayList Queue_GetDefenderQueue()
 {
 	ArrayList queue = new ArrayList(sizeof(QueueData));
 	
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		int iPartySize = CTFPlayer(client).IsInAParty() ? CTFPlayer(client).GetParty().GetMemberCount() : 0;
-		
-		// apply ping limit, unless player is in a full party
-		if (!IsFakeClient(client) && (GetClientAvgLatency(client, NetFlow_Outgoing) * 1000.0) >= mitm_defender_ping_limit.FloatValue && iPartySize < mitm_party_max_size.IntValue)
-			continue;
-		
-		// ignore players in a party, they get handled separately
-		if (iPartySize > 1)
-			continue;
-		
-		if (!CTFPlayer(client).IsValidDefender())
-			continue;
-		
-		QueueData data;
-		data.m_points = CTFPlayer(client).GetQueuePoints();
-		data.m_client = client;
-		data.m_party = NULL_PARTY;
-		
-		queue.PushArray(data);
-	}
-	
 	ArrayList parties = Party_GetAllActiveParties();
 	for (int i = 0; i < parties.Length; i++)
 	{
@@ -82,13 +56,33 @@ ArrayList Queue_GetDefenderQueue()
 	}
 	delete parties;
 	
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		// ignore party clients (see above)
+		if (queue.FindValue(client) != -1)
+			continue;
+		
+		if (!CTFPlayer(client).IsValidDefender())
+			continue;
+		
+		QueueData data;
+		data.m_points = CTFPlayer(client).GetQueuePoints();
+		data.m_client = client;
+		data.m_party = NULL_PARTY;
+		
+		queue.PushArray(data);
+	}
+	
 	// sort by queue points
 	queue.Sort(Sort_Descending, Sort_Integer);
 	
 	return queue;
 }
 
-void Queue_SelectNewDefenders()
+void Queue_SelectDefenders()
 {
 	ArrayList players = new ArrayList();
 	
@@ -98,6 +92,9 @@ void Queue_SelectNewDefenders()
 			continue;
 		
 		if (IsClientSourceTV(client))
+			continue;
+		
+		if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 			continue;
 		
 		players.Push(client);
@@ -125,7 +122,7 @@ void Queue_SelectNewDefenders()
 			{
 				int member = members[j];
 				
-				TF2_ForceChangeClientTeam(member, TFTeam_Defenders);
+				CTFPlayer(member).SetAsDefender();
 				CTFPlayer(member).SetQueuePoints(0);
 				CPrintToChat(member, "%s %t %t", PLUGIN_TAG, "SelectedAsDefender", "Queue_PointsReset");
 				
@@ -135,7 +132,7 @@ void Queue_SelectNewDefenders()
 		}
 		else
 		{
-			TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
+			CTFPlayer(client).SetAsDefender();
 			CTFPlayer(client).SetQueuePoints(0);
 			CPrintToChat(client, "%s %t %t", PLUGIN_TAG, "SelectedAsDefender", "Queue_PointsReset");
 			
@@ -158,14 +155,11 @@ void Queue_SelectNewDefenders()
 		{
 			int client = players.Get(i);
 			
-			if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
-				continue;
-			
 			// Keep filling slots until our quota is met
 			if (iDefenderCount++ >= iReqDefenderCount)
 				break;
 			
-			TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
+			CTFPlayer(client).SetAsDefender();
 			CPrintToChat(client, "%s %t %t", PLUGIN_TAG, "SelectedAsDefender_Forced", "Queue_NotReset");
 			
 			players.Erase(i);
@@ -182,12 +176,8 @@ void Queue_SelectNewDefenders()
 	{
 		int client = players.Get(i);
 		
-		TF2_ForceChangeClientTeam(client, TFTeam_Spectator);
-		
-		if (!CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
-		{
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsInvader");
-		}
+		CTFPlayer(client).ForceChangeTeam(TFTeam_Spectator);
+		CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsInvader");
 	}
 	
 	for (int client = 1; client <= MaxClients; client++)
@@ -200,9 +190,7 @@ void Queue_SelectNewDefenders()
 		
 		// Show class selection menu
 		if (TF2_GetPlayerClass(client) == TFClass_Unknown)
-		{
-			ShowVGUIPanel(client, "class_red");
-		}
+			ShowVGUIPanel(client, TF2_GetClientTeam(client) == TFTeam_Red ? "class_red" : "class_blue");
 	}
 	
 	// Free the memory
@@ -221,10 +209,7 @@ void Queue_FindReplacementDefender()
 		if (client == -1)
 			continue;
 		
-		if (TF2_GetClientTeam(client) != TFTeam_Spectator)
-			continue;
-		
-		if (CTFPlayer(client).HasPreference(PREF_DEFENDER_DISABLE_REPLACEMENT))
+		if (!CTFPlayer(client).IsValidReplacementDefender())
 			continue;
 		
 		// Don't force switch because we want GetTeamAssignmentOverride to decide

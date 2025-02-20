@@ -22,7 +22,6 @@ void ConVars_Init()
 {
 	CreateConVar("mitm_version", PLUGIN_VERSION, "Plugin version.", FCVAR_SPONLY | FCVAR_REPLICATED | FCVAR_NOTIFY | FCVAR_DONTRECORD);
 	CreateConVar("mitm_enabled", "1", "Whether the plugin is enabled.");
-	mitm_developer = CreateConVar("mitm_developer", "0", "Toggle plugin developer mode.");
 	mitm_custom_upgrades_file = CreateConVar("mitm_custom_upgrades_file", "", "Path to custom upgrades file, set to an empty string to use the default.");
 	mitm_bot_spawn_hurry_time = CreateConVar("mitm_bot_spawn_hurry_time", "15", "The base time invaders have to leave their spawn, in seconds.");
 	mitm_queue_points = CreateConVar("mitm_queue_points", "5", "Amount of queue points awarded to players that did not become defenders.", _, true, 1.0);
@@ -33,13 +32,13 @@ void ConVars_Init()
 	mitm_party_max_size = CreateConVar("mitm_party_max_size", "0", "Maximum size of player parties.", _, true, 0.0, true, 10.0);
 	mitm_setup_time = CreateConVar("mitm_setup_time", "150", "Time for defenders to set up before the round automatically starts.");
 	mitm_max_spawn_deaths = CreateConVar("mitm_max_spawn_deaths", "3", "How many times a player can die to the spawn timer before getting kicked.");
-	mitm_defender_ping_limit = CreateConVar("mitm_defender_ping_limit", "200", "Maximum ping a client can have to play on the defender team.");
 	mitm_shield_damage_drain_rate = CreateConVar("mitm_shield_damage_drain_rate", "0.05", "How much energy to drain for each point of damage to the shield.");
 	mitm_bot_taunt_on_upgrade = CreateConVar("mitm_bot_taunt_on_upgrade", "1", "Whether bots should automatically taunt when the bomb levels up.");
 	mitm_romevision = CreateConVar("mitm_romevision", "1", "Whether to allow romevision items to be generated.");
 	mitm_autoincrement_max_wipes = CreateConVar("mitm_autoincrement_max_wipes", "3", "After this many losses the current wave will be skipped.");
 	mitm_autoincrement_currency_percentage = CreateConVar("mitm_autoincrement_currency_percentage", "0.90", "Percentage of currency gained from a skipped wave.", _, true, 0.0, true, 1.0);
 	
+	developer = FindConVar("developer");
 	tf_avoidteammates_pushaway = FindConVar("tf_avoidteammates_pushaway");
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");
 	tf_deploying_bomb_time = FindConVar("tf_deploying_bomb_time");
@@ -68,23 +67,9 @@ void ConVars_Init()
 	IntToString(MaxClients, value, sizeof(value));
 	PSM_AddEnforcedConVar("tf_mvm_max_connected_players", value);
 	
-	PSM_AddPluginStateChangedHook(ConVars_OnPluginStateChanged);
-}
-
-static void ConVars_OnPluginStateChanged(bool bEnable)
-{
-	if (bEnable)
-	{
-		mitm_custom_upgrades_file.AddChangeHook(ConVarChanged_CustomUpgradesFile);
-		mitm_party_enabled.AddChangeHook(ConVarChanged_PartyEnabled);
-		tf_mvm_min_players_to_start.AddChangeHook(ConVarChanged_MinPlayersToStart);
-	}
-	else
-	{
-		mitm_custom_upgrades_file.RemoveChangeHook(ConVarChanged_CustomUpgradesFile);
-		mitm_party_enabled.RemoveChangeHook(ConVarChanged_PartyEnabled);
-		tf_mvm_min_players_to_start.RemoveChangeHook(ConVarChanged_MinPlayersToStart);
-	}
+	PSM_AddConVarChangeHook(mitm_custom_upgrades_file, ConVarChanged_CustomUpgradesFile);
+	PSM_AddConVarChangeHook(mitm_party_enabled, ConVarChanged_PartyEnabled);
+	PSM_AddConVarChangeHook(tf_mvm_min_players_to_start, ConVarChanged_MinPlayersToStart);
 }
 
 static void ConVarChanged_CustomUpgradesFile(ConVar convar, const char[] oldValue, const char[] newValue)

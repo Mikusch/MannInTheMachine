@@ -84,7 +84,8 @@
 #define PROGRESS_BAR_CHAR_FILLED	"▰"
 #define PROGRESS_BAR_CHAR_EMPTY		"▱"
 
-#define MITM_HINT_MASK	(0x10200)	// annotations have id ( MITM_HINT_MASK | entindex )
+#define MITM_GENERIC_HINT_MASK			(0x10200)	// annotations have id ( MITM_GENERIC_HINT_MASK | entindex )
+#define MITM_THREAT_NOTICE_HINT_MASK	(0x10300)
 
 // CollectPlayers
 #define COLLECT_ONLY_LIVING_PLAYERS true

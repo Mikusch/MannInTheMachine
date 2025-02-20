@@ -39,8 +39,15 @@ static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroad
 		return;
 	
 	CTFPlayer(client).Spawn();
-	
 	CTFPlayer(client).m_annotationTimer = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
+	
+	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
+	
+	// Once first player picks a class and spawns in, automatically start ready timer
+	if (team == TFTeam_Defenders && (GameRules_GetProp("m_bInSetup") || g_pObjectiveResource.GetMannVsMachineIsBetweenWaves()) && !IsInWaitingForPlayers() && GameRules_GetPropFloat("m_flRestartRoundTime") == -1)
+	{
+		BeginSetup();
+	}
 }
 
 static void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
@@ -51,7 +58,7 @@ static void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroad
 	
 	if (TF2_GetClientTeam(victim) == TFTeam_Invaders)
 	{
-		CTFPlayer(victim).HideAnnotation(MITM_HINT_MASK | victim);
+		CTFPlayer(victim).HideAnnotation(MITM_GENERIC_HINT_MASK | victim);
 	}
 }
 
@@ -184,7 +191,7 @@ static void EventHook_TeamplayPointCaptured(Event event, const char[] name, bool
 			CTFPlayer player = CTFPlayer(client);
 			
 			// hide current annotation and recreate later
-			player.HideAnnotation(MITM_HINT_MASK | client);
+			player.HideAnnotation(MITM_GENERIC_HINT_MASK | client);
 			player.m_annotationTimer = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
 		}
 	}
@@ -204,7 +211,7 @@ void EventHook_TeamplayFlagEvent(Event event, const char[] name, bool dontBroadc
 
 static void EventHook_TeamsChanged(Event event, const char[] name, bool dontBroadcast)
 {
-	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && GameRules_GetRoundState() != RoundState_GameOver && !mitm_developer.BoolValue)
+	if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && GameRules_GetRoundState() != RoundState_GameOver && !developer.BoolValue)
 	{
 		RequestFrame(RequestFrameCallback_FindReplacementDefender);
 	}
@@ -235,10 +242,6 @@ static void EventHook_PVEWinPanel(Event event, const char[] name, bool dontBroad
 			player.AddQueuePoints(points);
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_PointsAwarded", points, player.GetQueuePoints());
 		}
-		else
-		{
-			CTFPlayer(client).m_defenderPriority++;
-		}
 	}
 }
 
@@ -250,29 +253,40 @@ static void EventHook_MvMWaveFailed(Event event, const char[] name, bool dontBro
 		if (bInWaitingForPlayers)
 			SetInWaitingForPlayers(false);
 		
-		int nMaxConsecutiveWipes = mitm_autoincrement_max_wipes.IntValue;
-		float fCleanMoneyPercent = mitm_autoincrement_currency_percentage.FloatValue;
-		
-		// m_nNumConsecutiveWipes gets incremented when the round starts
-		if (nMaxConsecutiveWipes > 0 && g_pPopulationManager.m_nNumConsecutiveWipes - 1 >= nMaxConsecutiveWipes)
+		if (!g_pPopulationManager.IsInEndlessWaves())
 		{
-			int iCurrentWaveIndex = g_pPopulationManager.GetWaveNumber();
-			int iNextWaveIndex = iCurrentWaveIndex + 1;
-			if (iNextWaveIndex < g_pObjectiveResource.GetMannVsMachineMaxWaveCount())
+			int nMaxConsecutiveWipes = mitm_autoincrement_max_wipes.IntValue;
+			float fCleanMoneyPercent = mitm_autoincrement_currency_percentage.FloatValue;
+			
+			// m_nNumConsecutiveWipes gets incremented when the round starts
+			if (nMaxConsecutiveWipes > 0 && g_pPopulationManager.m_nNumConsecutiveWipes - 1 >= nMaxConsecutiveWipes)
 			{
-				g_pPopulationManager.m_iCurrentWaveIndex++;
-				CWave pWave = g_pPopulationManager.GetCurrentWave();
-				
-				int nCurrency = pWave.GetTotalCurrency();
-				g_pMVMStats.SetCurrentWave(iCurrentWaveIndex);
-				
-				g_pMVMStats.RoundEvent_CreditsDropped(iCurrentWaveIndex, nCurrency);
-				g_pMVMStats.RoundEvent_AcquiredCredits(iCurrentWaveIndex, RoundToFloor(nCurrency * fCleanMoneyPercent), false);
-				
-				g_pPopulationManager.JumpToWave(iNextWaveIndex);
-				
-				CPrintToChatAll("%s %t", PLUGIN_TAG, "Wave_AutoIncremented", iNextWaveIndex + 1, fCleanMoneyPercent * 100.0, nMaxConsecutiveWipes);
+				int iCurrentWaveIndex = g_pPopulationManager.GetWaveNumber();
+				int iNextWaveIndex = iCurrentWaveIndex + 1;
+				if (iNextWaveIndex < g_pObjectiveResource.GetMannVsMachineMaxWaveCount())
+				{
+					g_pPopulationManager.m_iCurrentWaveIndex++;
+					CWave pWave = g_pPopulationManager.GetCurrentWave();
+					
+					int nCurrency = pWave.GetTotalCurrency();
+					if (nCurrency > 0)
+					{
+						g_pMVMStats.SetCurrentWave(iCurrentWaveIndex);
+						
+						g_pMVMStats.RoundEvent_CreditsDropped(iCurrentWaveIndex, nCurrency);
+						g_pMVMStats.RoundEvent_AcquiredCredits(iCurrentWaveIndex, RoundToFloor(nCurrency * fCleanMoneyPercent), false);
+					}
+					
+					g_pPopulationManager.JumpToWave(iNextWaveIndex);
+					
+					CPrintToChatAll("%s %t", PLUGIN_TAG, "Wave_AutoIncremented", iNextWaveIndex + 1, fCleanMoneyPercent * 100.0, nMaxConsecutiveWipes);
+				}
 			}
+		}
+		else
+		{
+			g_iEndlessRandomSeed = GetURandomInt();
+			LogMessage("Generated seed for endless waves: %d", g_iEndlessRandomSeed);
 		}
 		
 		if (bInWaitingForPlayers || !g_pPopulationManager.m_bIsWaveJumping)

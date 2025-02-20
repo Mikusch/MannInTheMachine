@@ -50,6 +50,7 @@ CTFGameRules g_pGameRules = view_as<CTFGameRules>(INVALID_ENT_REFERENCE);
 // Cookies
 Cookie g_hCookieQueue;
 Cookie g_hCookiePreferences;
+Cookie g_hCookieDefenderPriority;
 
 // Other globals
 CEntityFactory g_hEntityFactory;
@@ -59,9 +60,9 @@ Handle g_hWaitingForPlayersTimer;
 bool g_bInWaitingForPlayers;
 bool g_bAllowTeamChange;	// Bypass CTFGameRules::GetTeamAssignmentOverride?
 bool g_bInEndlessRollEscalation;
+int g_iEndlessRandomSeed;
 
 // Plugin ConVars
-ConVar mitm_developer;
 ConVar mitm_custom_upgrades_file;
 ConVar mitm_bot_spawn_hurry_time;
 ConVar mitm_queue_points;
@@ -72,7 +73,6 @@ ConVar mitm_party_enabled;
 ConVar mitm_party_max_size;
 ConVar mitm_setup_time;
 ConVar mitm_max_spawn_deaths;
-ConVar mitm_defender_ping_limit;
 ConVar mitm_shield_damage_drain_rate;
 ConVar mitm_bot_taunt_on_upgrade;
 ConVar mitm_romevision;
@@ -80,6 +80,7 @@ ConVar mitm_autoincrement_max_wipes;
 ConVar mitm_autoincrement_currency_percentage;
 
 // Game ConVars
+ConVar developer;
 ConVar tf_avoidteammates_pushaway;
 ConVar tf_deploying_bomb_delay_time;
 ConVar tf_deploying_bomb_time;
@@ -190,6 +191,7 @@ public void OnPluginStart()
 	
 	g_hCookieQueue = new Cookie("mitm_queue", "Mann in the Machine: Queue Points", CookieAccess_Protected);
 	g_hCookiePreferences = new Cookie("mitm_preferences", "Mann in the Machine: Preferences", CookieAccess_Protected);
+	g_hCookieDefenderPriority = new Cookie("mitm_defender_priority", "Mann in the Machine: Defender Priority", CookieAccess_Private);
 	
 	GameData hGameConf = new GameData("mitm");
 	if (!hGameConf)
@@ -206,6 +208,7 @@ public void OnPluginStart()
 	Events_Init();
 	Forwards_Init();
 	Hooks_Init();
+	Menus_Init();
 	Party_Init();
 	
 	Offsets_Init(hGameConf);
@@ -305,6 +308,7 @@ public void OnClientCookiesCached(int client)
 	CTFPlayer player = CTFPlayer(client);
 	player.m_defenderQueuePoints = g_hCookieQueue.GetInt(client);
 	player.m_preferences = g_hCookiePreferences.GetInt(client);
+	player.m_defenderPriority = g_hCookieDefenderPriority.GetInt(client);
 }
 
 public void OnEntityCreated(int entity, const char[] classname)
@@ -392,8 +396,8 @@ public void OnGameFrame()
 	
 	delete queue;
 	
-	float flTime = GameRules_GetPropFloat("m_flRestartRoundTime") - GetGameTime();
-	int nTime = RoundToCeil(flTime);
+	float flRestartRoundTime = GameRules_GetPropFloat("m_flRestartRoundTime");
+	int nSecondsToStart = RoundToCeil(flRestartRoundTime - GetGameTime());
 	
 	SetHudTextParams(-1.0, 0.9, GetGameFrameTime(), 255, 255, 255, 255);
 	
@@ -409,9 +413,9 @@ public void OnGameFrame()
 		{
 			ShowSyncHudText(client, g_hWarningHudSync, "%t", "Spectator_Mode");
 		}
-		else if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && CTFPlayer(client).IsInvader())
+		else if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && CTFPlayer(client).IsInvader() && flRestartRoundTime != -1)
 		{
-			ShowSyncHudText(client, g_hWarningHudSync, "%t", "Invader_WaitingToSpawn", nTime);
+			ShowSyncHudText(client, g_hWarningHudSync, "%t", "Invader_WaitingToSpawn", nSecondsToStart);
 		}
 	}
 }

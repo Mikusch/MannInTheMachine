@@ -21,7 +21,36 @@
 #define MENU_INFO_QUEUE			"queue"
 #define MENU_INFO_PREFERENCES	"preferences"
 #define MENU_INFO_PARTY			"party"
-#define MENU_INFO_CREDITS		"credits"
+#define MENU_INFO_CONTRIBUTORS	"contributors"
+
+#define STEAM_PROFILE_URL	"https://steamcommunity.com/profiles/%s"
+
+static ArrayList g_contributors;
+
+enum struct ContributorInfo
+{
+	char name[MAX_NAME_LENGTH];
+	char steam_id[64];
+}
+
+void Menus_Init()
+{
+	g_contributors = new ArrayList(sizeof(ContributorInfo));
+	
+	ContributorInfo info;
+	
+	info.name = "Mikusch";
+	info.steam_id = "76561198071478507";
+	g_contributors.PushArray(info);
+	
+	info.name = "Kenzzer";
+	info.steam_id = "76561198059675572";
+	g_contributors.PushArray(info);
+	
+	info.name = "trigger_hurt";
+	info.steam_id = "76561198036209556";
+	g_contributors.PushArray(info);
+}
 
 void Menus_DisplayMainMenu(int client)
 {
@@ -37,7 +66,7 @@ void Menus_DisplayMainMenu(int client)
 	if (Party_IsEnabled())
 		menu.AddItem(MENU_INFO_PARTY, "Menu_Main_Party");
 	
-	menu.AddItem(MENU_INFO_CREDITS, "Menu_Main_Credits");
+	menu.AddItem(MENU_INFO_CONTRIBUTORS, "Menu_Main_Contributors");
 	
 	menu.Display(client, MENU_TIME_FOREVER);
 }
@@ -63,9 +92,9 @@ static int MenuHandler_MainMenu(Menu menu, MenuAction action, int param1, int pa
 			{
 				Menus_DisplayPartyMenu(param1);
 			}
-			else if (StrEqual(info, MENU_INFO_CREDITS))
+			else if (StrEqual(info, MENU_INFO_CONTRIBUTORS))
 			{
-				Menus_DisplayCreditsMenu(param1);
+				Menus_DisplayContributorsMenu(param1);
 			}
 		}
 		case MenuAction_End:
@@ -739,31 +768,49 @@ static int MenuHandler_PartyInviteMenu(Menu menu, MenuAction action, int param1,
 	return 0;
 }
 
-void Menus_DisplayCreditsMenu(int client)
+void Menus_DisplayContributorsMenu(int client)
 {
-	Menu menu = new Menu(MenuHandler_CreditsMenu, MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
-	menu.SetTitle("%t\n%t", "Menu_Header", "Menu_Credits_Title");
+	Menu menu = new Menu(MenuHandler_ContributorsMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
+	menu.SetTitle("%t\n%t", "Menu_Header", "Menu_Contributors_Title");
 	menu.ExitBackButton = true;
 	
-	AddContributorToMenu(menu, "Mikusch", client);
-	AddContributorToMenu(menu, "Kenzzer", client);
-	AddContributorToMenu(menu, "trigger_hurt", client);
+	for (int i = 0; i < g_contributors.Length; i++)
+	{
+		ContributorInfo info;
+		if (g_contributors.GetArray(i, info))
+		{
+			char phrase[64], display[64];
+			Format(phrase, sizeof(phrase), "Menu_Contributors_%s", info.name);
+			Format(display, sizeof(display), "%s: %T", info.name, phrase, client);
+			
+			menu.AddItem(info.name, display);
+		}
+	}
 	
 	menu.Display(client, MENU_TIME_FOREVER);
 }
 
-static void AddContributorToMenu(Menu menu, char[] contributor, int client)
-{
-	char phrase[64], display[64];
-	Format(phrase, sizeof(phrase), "Menu_Credits_%s", contributor);
-	Format(display, sizeof(display), "%s: %T", contributor, phrase, client);
-	menu.AddItem(contributor, display, ITEMDRAW_DISABLED);
-}
-
-static int MenuHandler_CreditsMenu(Menu menu, MenuAction action, int param1, int param2)
+static int MenuHandler_ContributorsMenu(Menu menu, MenuAction action, int param1, int param2)
 {
 	switch (action)
 	{
+		case MenuAction_Select:
+		{
+			char info[32];
+			menu.GetItem(param2, info, sizeof(info));
+			
+			int index = g_contributors.FindString(info, ContributorInfo::name);
+			if (index != -1)
+			{
+				ContributorInfo contributor;
+				if (g_contributors.GetArray(index, contributor))
+				{
+					char url[192];
+					Format(url, sizeof(url), STEAM_PROFILE_URL, contributor.steam_id);
+					ShowMOTDPanel(param1, contributor.name, url, MOTDPANEL_TYPE_URL);
+				}
+			}
+		}
 		case MenuAction_Cancel:
 		{
 			if (param2 == MenuCancel_ExitBack)

@@ -867,7 +867,7 @@ void ShowGateBotAnnotation(int client)
 				
 				char text[64];
 				Format(text, sizeof(text), "%T", "Invader_CaptureGate", client, iszPrintName);
-				CTFPlayer(client).ShowAnnotation(MITM_HINT_MASK | client, text, _, center, -1.0, "coach/coach_go_here.wav");
+				CTFPlayer(client).ShowAnnotation(MITM_GENERIC_HINT_MASK | client, text, _, center, -1.0, "coach/coach_go_here.wav");
 				return;
 			}
 		}
@@ -941,19 +941,6 @@ bool StrPtrEquals(Address psz1, Address psz2)
 	return !strcmp(sz1, sz2, false);
 }
 
-void MultiplyAttributeValue(int entity, const char[] szAttrib, float flMult)
-{
-	Address pAttrib = TF2Attrib_GetByName(entity, szAttrib);
-	if (pAttrib)
-	{
-		TF2Attrib_SetValue(pAttrib, TF2Attrib_GetValue(pAttrib) * flMult);
-	}
-	else
-	{
-		TF2Attrib_SetByName(entity, szAttrib, flMult);
-	}
-}
-
 float TranslateAttributeValue(int iFormat, float flValue)
 {
 	switch (iFormat)
@@ -1005,13 +992,6 @@ int CollectPlayers(ArrayList &playerList, TFTeam team = TFTeam_Any, bool isAlive
 	}
 	
 	return playerList.Length;
-}
-
-void TF2_ForceChangeClientTeam(int client, TFTeam team)
-{
-	g_bAllowTeamChange = true;
-	TF2_ChangeClientTeam(client, team);
-	g_bAllowTeamChange = false;
 }
 
 int GetEffectiveViewModelIndex(int client, int weapon)
@@ -1117,6 +1097,19 @@ void ShowProgressBar(int client, const char[] szTitle, float flProgress, float i
 	ShowSyncHudText(client, g_hWarningHudSync, "%t\n%s", szTitle, szProgressBar);
 }
 
+void BeginSetup()
+{
+	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + mitm_setup_time.FloatValue);
+	GameRules_SetProp("m_bAwaitingReadyRestart", false);
+	
+	Event event = CreateEvent("teamplay_round_restart_seconds");
+	if (event)
+	{
+		event.SetInt("seconds", mitm_setup_time.IntValue);
+		event.Fire();
+	}
+}
+
 void SelectNewDefenders()
 {
 	for (int client = 1; client <= MaxClients; client++)
@@ -1127,13 +1120,13 @@ void SelectNewDefenders()
 		if (TF2_GetClientTeam(client) == TFTeam_Unassigned)
 			continue;
 		
-		TF2_ForceChangeClientTeam(client, TFTeam_Spectator);
+		CTFPlayer(client).ForceChangeTeam(TFTeam_Spectator);
 	}
 	
 	CPrintToChatAll("%s %t", PLUGIN_TAG, "Queue_NewDefenders");
 	
 	if (Queue_IsEnabled())
-		Queue_SelectNewDefenders();
+		Queue_SelectDefenders();
 	else
 		SelectRandomDefenders();
 }
@@ -1148,6 +1141,9 @@ void SelectRandomDefenders()
 			continue;
 		
 		if (IsClientSourceTV(client))
+			continue;
+		
+		if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
 			continue;
 		
 		players.Push(client);
@@ -1168,8 +1164,8 @@ void SelectRandomDefenders()
 		if (iDefenderCount++ >= iReqDefenderCount)
 			break;
 		
-		TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
-		CTFPlayer(client).m_defenderPriority = 0;
+		CTFPlayer(client).SetAsDefender();
+		CTFPlayer(client).ResetDefenderPriority();
 		CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender");
 		
 		players.Erase(i);
@@ -1183,18 +1179,25 @@ void SelectRandomDefenders()
 		{
 			int client = players.Get(i);
 			
-			if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
-				continue;
-			
 			// Keep filling slots until our quota is met
 			if (iDefenderCount++ >= iReqDefenderCount)
 				break;
 			
-			TF2_ForceChangeClientTeam(client, TFTeam_Defenders);
+			CTFPlayer(client).SetAsDefender();
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender_Forced");
 			
 			players.Erase(i);
 		}
+	}
+	
+	for (int i = 0; i < players.Length; i++)
+	{
+		int client = players.Get(i);
+		
+		if (!CTFPlayer(client).IsValidDefender())
+			continue;
+		
+		CTFPlayer(client).IncrementDefenderPriority();
 	}
 	
 	if (iDefenderCount < iReqDefenderCount)
@@ -1229,10 +1232,7 @@ void FindReplacementDefender()
 		if (!IsClientInGame(client))
 			continue;
 		
-		if (TF2_GetClientTeam(client) != TFTeam_Spectator)
-			continue;
-		
-		if (!CTFPlayer(client).IsValidDefender())
+		if (!CTFPlayer(client).IsValidReplacementDefender())
 			continue;
 		
 		// Don't force switch because we want GetTeamAssignmentOverride to decide
@@ -1241,7 +1241,7 @@ void FindReplacementDefender()
 		// Validate that they were successfully switched
 		if (TF2_GetClientTeam(client) == TFTeam_Defenders)
 		{
-			CTFPlayer(client).m_defenderPriority = 0;
+			CTFPlayer(client).ResetDefenderPriority();
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender_Replacement");
 			break;
 		}
@@ -1253,14 +1253,13 @@ void FindReplacementDefender()
 static int SortPlayersByDefenderPriority(int index1, int index2, Handle array, Handle hndl)
 {
 	ArrayList list = view_as<ArrayList>(array);
-	int client1 = list.Get(index1);
-	int client2 = list.Get(index2);
+	CTFPlayer player1 = list.Get(index1);
+	CTFPlayer player2 = list.Get(index2);
 	
-	// Sort by highest priority
-	int c = Compare(CTFPlayer(client2).m_defenderPriority, CTFPlayer(client1).m_defenderPriority);
+	int c = Compare(player2.GetDefenderPriority(), player1.GetDefenderPriority());
 	if (c == 0)
 	{
-		c = GetRandomInt(-1, 1);
+		c = GetRandomInt(0, 1) ? -1 : 1;
 	}
 	
 	return c;
@@ -1286,7 +1285,7 @@ void SetInWaitingForPlayers(bool bWaitingForPlayers)
 	else
 	{
 		tf_mvm_min_players_to_start.IntValue = 0;
-		delete g_hWaitingForPlayersTimer;
+		g_hWaitingForPlayersTimer = null;
 	}
 }
 

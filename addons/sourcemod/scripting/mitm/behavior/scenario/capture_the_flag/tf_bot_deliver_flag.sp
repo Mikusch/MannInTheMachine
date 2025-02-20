@@ -140,7 +140,7 @@ static int OnStart(CTFBotDeliverFlag action, int actor, NextBotAction priorActio
 		}
 	}
 	
-	if (IsMannVsMachineMode())
+	if (IsMannVsMachineMode() && CTFPlayer(actor).GetDifficulty() < EXPERT)
 	{
 		TF2Attrib_SetByName(actor, "self dmg push force decreased", 0.0);
 	}
@@ -178,7 +178,7 @@ static int Update(CTFBotDeliverFlag action, int actor, float interval)
 			
 			char text[64];
 			Format(text, sizeof(text), "%T", "Invader_DeliverFlag", actor);
-			CTFPlayer(actor).ShowAnnotation(MITM_HINT_MASK | actor, text, _, center, 10.0, "coach/coach_go_here.wav");
+			CTFPlayer(actor).ShowAnnotation(MITM_GENERIC_HINT_MASK | actor, text, _, center, 10.0, "coach/coach_go_here.wav");
 			
 			action.m_annotationTimer.Invalidate();
 		}
@@ -191,7 +191,7 @@ static void OnEnd(CTFBotDeliverFlag action, int actor, NextBotAction nextAction)
 {
 	CTFPlayer(actor).ClearAttribute(SUPPRESS_FIRE);
 	
-	CTFPlayer(actor).HideAnnotation(MITM_HINT_MASK | actor);
+	CTFPlayer(actor).HideAnnotation(MITM_GENERIC_HINT_MASK | actor);
 	
 	if (!IsFakeClient(actor))
 	{

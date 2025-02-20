@@ -70,11 +70,27 @@ methodmap Entity
 		return view_as<Entity>(ref);
 	}
 	
+	property int m_ref
+	{
+		public get()
+		{
+			return view_as<int>(this);
+		}
+	}
+	
+	property int m_entindex
+	{
+		public get()
+		{
+			return EntRefToEntIndex(this.m_ref);
+		}
+	}
+	
 	property int m_listIndex
 	{
 		public get()
 		{
-			return g_hEntityProperties.FindValue(view_as<int>(this), EntityProperties::m_ref);
+			return g_hEntityProperties.FindValue(this.m_ref, EntityProperties::m_ref);
 		}
 	}
 	
@@ -83,10 +99,6 @@ methodmap Entity
 		public get()
 		{
 			return g_hEntityProperties.Get(this.m_listIndex, EntityProperties::m_teleportWhereName);
-		}
-		public set(ArrayList teleportWhereName)
-		{
-			g_hEntityProperties.Set(this.m_listIndex, teleportWhereName, EntityProperties::m_teleportWhereName);
 		}
 	}
 	

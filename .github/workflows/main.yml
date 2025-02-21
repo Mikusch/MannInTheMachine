@@ -3,7 +3,7 @@ name: Compile and release
 on:
   push:
     branches:
-      ci
+      master
 
 env:
   PLUGIN_NAME: mitm

@@ -30,7 +30,7 @@ jobs:
           repos["https://github.com/TF2-DMB/CBaseNPC"]="addons/sourcemod/scripting/include"
           repos["https://github.com/nosoop/SMExt-SourceScramble"]="addons/sourcemod/scripting/include"
           repos["https://github.com/FortyTwoFortyTwo/VScript"]="addons/sourcemod/scripting/include"
-          repos["https://github.com/Scags/SM-Memory"]="pawn/sourcemod/scripting/include"
+          repos["https://github.com/Mikusch/SM-Memory"]="pawn/sourcemod/scripting/include"
           repos["https://github.com/nosoop/SM-TFEconData"]="addons/sourcemod/scripting/include"
           repos["https://github.com/FlaminSarge/tf2attributes"]="addons/sourcemod/scripting/include"
           repos["https://github.com/nosoop/SM-TFUtils"]="addons/sourcemod/scripting/include"

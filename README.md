@@ -6,9 +6,13 @@
 
 <img src="https://github.com/user-attachments/assets/cdb1f705-b3a0-4c10-814e-5ef6738ac2d9" alt="Logo" width="500"/>
 
+<sub>Logo by [Octatonic Sunrise](https://steamcommunity.com/profiles/76561198027701160)</sub>
+
 </div>
 
 ---
+
+
 
 **Mann in the Machine** is a SourceMod plugin that turns Mann vs. Machine into a player versus player gamemode.
 Players take turns defending Mann Co. while everyone else joins the robot horde and attempts to destroy it instead!
@@ -116,7 +120,6 @@ This repository contains a **custom bot upgrade file** optimized for Mann in the
 * **[Mikusch](https://github.com/Mikusch) (Developer)** - Code and gameplay
 * **[Kenzzer](https://github.com/Kenzzer) (Developer)** - Early coding assistance & library development
 * **[trigger_hurt](https://steamcommunity.com/profiles/76561198036209556) (Modeler)** - Custom robot viewmodels
-* **[Octatonic Sunrise](https://steamcommunity.com/profiles/76561198027701160) (Artist)** - Logo
 
 ## Special Thanks
 

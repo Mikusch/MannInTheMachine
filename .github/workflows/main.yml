@@ -44,11 +44,17 @@ jobs:
             echo "Cloning $repo..."
           
             git clone --depth 1 "$repo" "$repo_name"
-            find "$repo_name" -type f -name "*.inc" -exec cp --parents {} "$include_path" \;
-
           
-            # Find all .inc files and move them directly into the include folder
-            find "$repo_name" -type f -name "*.inc" -exec mv {} ${{ env.SCRIPTS_PATH }}/addons/sourcemod/scripting/include/ \;
+            find "$repo_name" -type f -name "*.inc" | while read file; do
+               # Remove the repository folder prefix (e.g., "CBaseNPC/scripting/include/")
+               relative_path="${file#*/scripting/include/}"
+          
+               # Ensure the target subdirectory exists
+               mkdir -p "${{ env.SCRIPTS_PATH }}/addons/sourcemod/scripting/include/$(dirname "$relative_path")"
+          
+              # Move the file while keeping the directory structure
+              mv "$file" "${{ env.SCRIPTS_PATH }}/addons/sourcemod/scripting/include/$relative_path"
+            done  
           
             rm -rf "$repo_name"
           done

@@ -939,7 +939,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	{
 		if (m_idleSound[this.index][0])
 		{
-			StopGameSound(this.index, m_idleSound[this.index]);
+			EmitGameSoundToAll(m_idleSound[this.index], this.index, SND_STOP);
 			m_idleSound[this.index][0] = EOS;
 		}
 	}

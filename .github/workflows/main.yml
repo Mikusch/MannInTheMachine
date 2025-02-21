@@ -107,3 +107,16 @@ jobs:
       - name: List files in the zip
         run: unzip -l ${{ github.event.repository.name }}.zip
         working-directory: ${{ env.SCRIPTS_PATH }}/addons/sourcemod
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ steps.setup_sp.outputs.plugin-version }}
+          artifacts: addons/sourcemod/${{ github.event.repository.name }}.zip
+          draft: true
+          allowUpdates: true
+          updateOnlyUnreleased: true
+          skipIfReleaseExists: true

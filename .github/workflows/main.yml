@@ -46,6 +46,10 @@ jobs:
             git clone --depth 1 "$repo" "$repo_name"
             find "$repo_name" -type f -name "*.inc" -exec cp --parents {} "$include_path" \;
 
+          
+            # Find all .inc files and move them directly into the include folder
+            find "$repo_name" -type f -name "*.inc" -exec mv {} ${{ env.SCRIPTS_PATH }}/addons/sourcemod/scripting/include/ \;
+          
             rm -rf "$repo_name"
           done
 
@@ -63,8 +67,6 @@ jobs:
             echo "Downloading $url -> $target_path"
             curl -sSL "$url" -o "$target_path"
           done
-          
-          ls -R ${{ env.SCRIPTS_PATH }}/addons/sourcemod/scripting/include
 
       - name: Setup SourcePawn Compiler ${{ matrix.sm-version }}
         id: setup_sp

@@ -4,7 +4,7 @@
 
 **Mann vs. Machine, but the robots are player-controlled.**
 
-<img src="https://github.com/user-attachments/assets/cdb1f705-b3a0-4c10-814e-5ef6738ac2d9" alt="Logo" width="500"/>
+<img src="banner.png" alt="Logo" width="500"/>
 
 <sub>Logo by [Octatonic Sunrise](https://steamcommunity.com/profiles/76561198027701160)</sub>
 

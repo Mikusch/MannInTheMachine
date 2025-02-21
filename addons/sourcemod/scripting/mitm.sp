@@ -146,7 +146,7 @@ public Plugin myinfo =
 {
 	name = "Mann in the Machine",
 	author = "Mikusch",
-	description = "Mann vs. Machine, but as a 32-player PvP gamemode.",
+	description = "Mann vs. Machine, but the robots are player-controlled.",
 	version = PLUGIN_VERSION,
 	url = "https://github.com/Mikusch/MannInTheMachine"
 }

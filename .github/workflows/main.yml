@@ -1,0 +1,99 @@
+name: Compile and release
+
+on:
+  push:
+    branches:
+      ci
+
+env:
+  PLUGIN_NAME: mitm
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sm-version: [ '1.12.x' ]
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set environment variables
+        run: echo SCRIPTS_PATH=$(pwd) >> $GITHUB_ENV
+
+      - name: Download repositories
+        run: |
+          # Define repositories and their include paths
+          declare -A repos
+          repos["https://github.com/TF2-DMB/CBaseNPC"]="addons/sourcemod/scripting/include"
+          repos["https://github.com/nosoop/SMExt-SourceScramble"]="addons/sourcemod/scripting/include"
+          repos["https://github.com/FortyTwoFortyTwo/VScript"]="addons/sourcemod/scripting/include"
+          repos["https://github.com/Scags/SM-Memory"]="pawn/sourcemod/scripting/include"
+          repos["https://github.com/nosoop/SM-TFEconData"]="addons/sourcemod/scripting/include"
+          repos["https://github.com/FlaminSarge/tf2attributes"]="addons/sourcemod/scripting/include"
+          repos["https://github.com/nosoop/SM-TFUtils"]="addons/sourcemod/scripting/include"
+
+          # Create include directory if not exists
+          mkdir -p ${{ env.SCRIPTS_PATH }}/addons/sourcemod/scripting/include
+
+          for repo in "${!repos[@]}"; do
+            repo_name=$(basename "$repo")
+            include_path="${repos[$repo]}"
+            echo "Cloning $repo..."
+          
+            git clone --depth 1 "$repo" "$repo_name"
+            find "$repo_name" -type f -name "*.inc" -exec cp --parents {} "$include_path" \;
+
+            rm -rf "$repo_name"
+          done
+
+      - name: Download include files
+        run: |
+          # Define individual files and their target paths
+          declare -A includes
+          includes["https://raw.githubusercontent.com/DoctorMcKay/sourcemod-plugins/master/scripting/include/morecolors.inc"]="addons/sourcemod/scripting/include/morecolors.inc"
+          includes["https://raw.githubusercontent.com/Mikusch/PluginStateManager/refs/heads/master/addons/sourcemod/scripting/include/pluginstatemanager.inc"
+
+          # Download each file
+          for url in "${!includes[@]}"; do
+            target_path="${includes[$url]}"
+            mkdir -p "$(dirname "$target_path")"
+            echo "Downloading $url -> $target_path"
+            curl -sSL "$url" -o "$target_path"
+          done
+
+      - name: Setup SourcePawn Compiler ${{ matrix.sm-version }}
+        id: setup_sp
+        uses: rumblefrog/setup-sp@master
+        with:
+          version: ${{ matrix.sm-version }}
+          version-file: ./addons/sourcemod/scripting/${{ env.PLUGIN_NAME }}.sp
+          define-name: PLUGIN_VERSION
+
+      - name: Compile plugins
+        run: |
+          mkdir ../plugins
+          spcomp -v2 -E -i "include" -o"../plugins/${{ env.PLUGIN_NAME }}.smx" ${{ env.PLUGIN_NAME }}.sp
+          echo "===OUT FILES==="
+          ls ../plugins
+          echo "===VERSION==="
+          echo ${{ steps.setup_sp.outputs.plugin-version }}
+        working-directory: ${{ env.SCRIPTS_PATH }}/addons/sourcemod/scripting
+
+      - name: Install zip
+        uses: montudor/action-zip@v1
+
+      - name: Zip output
+        run: |
+          zip -qq -y -r ${{ github.event.repository.name }}.zip configs plugins scripting extensions gamedata translations data
+        working-directory: ${{ env.SCRIPTS_PATH }}/addons/sourcemod
+
+      - name: List files in the directory
+        run: ls -R
+        working-directory: ${{ env.SCRIPTS_PATH }}/addons/sourcemod
+
+      - name: List files in the zip
+        run: unzip -l ${{ github.event.repository.name }}.zip
+        working-directory: ${{ env.SCRIPTS_PATH }}/addons/sourcemod

@@ -54,7 +54,7 @@ jobs:
           # Define individual files and their target paths
           declare -A includes
           includes["https://raw.githubusercontent.com/DoctorMcKay/sourcemod-plugins/master/scripting/include/morecolors.inc"]="addons/sourcemod/scripting/include/morecolors.inc"
-          includes["https://raw.githubusercontent.com/Mikusch/PluginStateManager/refs/heads/master/addons/sourcemod/scripting/include/pluginstatemanager.inc"
+          includes["https://raw.githubusercontent.com/Mikusch/PluginStateManager/refs/heads/master/addons/sourcemod/scripting/include/pluginstatemanager.inc"]="addons/sourcemod/scripting/include/pluginstatemanager.inc"
 
           # Download each file
           for url in "${!includes[@]}"; do

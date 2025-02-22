@@ -272,7 +272,7 @@ static void RequestFrameCallback_FindReplacementDefender()
 	if (Queue_IsEnabled())
 		Queue_FindReplacementDefender();
 	else
-		FindReplacementDefender();
+		FindRandomReplacementDefender();
 }
 
 static Action Timer_CheckGateBotAnnotation(Handle timer, int userid)

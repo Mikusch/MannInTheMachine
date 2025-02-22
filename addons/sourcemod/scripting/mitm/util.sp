@@ -1227,7 +1227,7 @@ void SelectRandomDefenders()
 	delete players;
 }
 
-void FindReplacementDefender()
+void FindRandomReplacementDefender()
 {
 	ArrayList players = new ArrayList();
 	

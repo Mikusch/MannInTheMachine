@@ -73,11 +73,11 @@
 	}
 	"Menu_Contributors_Mikusch"
 	{
-		"en"		"Code and gameplay"
+		"en"		"Code & gameplay"
 	}
 	"Menu_Contributors_Kenzzer"
 	{
-		"en"		"Early coding help"
+		"en"		"Early coding assistance & library development"
 	}
 	"Menu_Contributors_trigger_hurt"
 	{

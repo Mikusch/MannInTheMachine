@@ -117,10 +117,10 @@ This repository contains a **custom bot upgrade file** optimized for Mann in the
 
 ## Contributors
 
-* **[Mikusch](https://github.com/Mikusch) (Developer)** - Code and gameplay
-* **[Kenzzer](https://github.com/Kenzzer) (Developer)** - Early coding assistance & library development
-* **[trigger_hurt](https://steamcommunity.com/profiles/76561198036209556) (Modeler)** - Custom robot viewmodels
+* **[Mikusch](https://github.com/Mikusch)** - Code & gameplay
+* **[Kenzzer](https://github.com/Kenzzer)** - Early coding assistance & library development
+* **[trigger_hurt](https://steamcommunity.com/profiles/76561198036209556)** - Custom robot viewmodels
 
 ## Special Thanks
 
-* **[Red Sun Over Paradise](https://redsun.tf)** - Playtesting and giving feedback
+* **[Red Sun Over Paradise](https://redsun.tf)** - Playtesting & giving feedback

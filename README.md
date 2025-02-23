@@ -71,7 +71,7 @@ The gamemode includes a **wave skip** feature that allows automatic progression 
 
 ### Does this support 100 players?
 
-By default, no. However, you can use [Source Scramble Patches](https://github.com/Mikusch/SourceScramblePatches) to **increase the bot limit**.
+By default, no. However, you can use [Source Scramble Patches](https://github.com/Mikusch/SourceScramble-Patches) to **increase the bot limit**.
 Keep in mind that most missions won't spawn more than **22 bots at once**, so modifying the population file may be necessary to prevent long wait times between spawns.
 
 ### Can you play as the tank?

@@ -26,6 +26,7 @@
 #include <tf2attributes>
 #include <tf_econ_data>
 #include <tf2utils>
+#include <loadsoundscript>
 #include <cbasenpc>
 #include <cbasenpc/tf/nav>
 #include <morecolors>

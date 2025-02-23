@@ -31,6 +31,7 @@ Players take turns defending Mann Co. while everyone else joins the robot horde 
 * [Source Scramble](https://github.com/nosoop/SMExt-SourceScramble)
 * [VScript](https://github.com/FortyTwoFortyTwo/VScript)
 * [SM-Memory](https://github.com/Scags/SM-Memory)
+* [LoadSoundScript](https://github.com/haxtonsale/LoadSoundScript)
 * [TF2 Econ Data](https://github.com/nosoop/SM-TFEconData)
 * [TF2 Attributes](https://github.com/FlaminSarge/tf2attributes)
 * [TF2 Utils](https://github.com/nosoop/SM-TFUtils)

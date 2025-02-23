@@ -29,12 +29,7 @@ jobs:
         run: |
           declare -A repos=(
             ["https://github.com/TF2-DMB/CBaseNPC"]="addons/sourcemod/scripting/include"
-            ["https://github.com/nosoop/SMExt-SourceScramble"]="addons/sourcemod/scripting/include"
-            ["https://github.com/FortyTwoFortyTwo/VScript"]="addons/sourcemod/scripting/include"
             ["https://github.com/Scags/SM-Memory"]="pawn/sourcemod/scripting/include"
-            ["https://github.com/nosoop/SM-TFEconData"]="addons/sourcemod/scripting/include"
-            ["https://github.com/FlaminSarge/tf2attributes"]="addons/sourcemod/scripting/include"
-            ["https://github.com/nosoop/SM-TFUtils"]="addons/sourcemod/scripting/include"
           )
 
           for repo in "${!repos[@]}"; do
@@ -57,6 +52,12 @@ jobs:
           declare -A includes=(
             ["https://raw.githubusercontent.com/DoctorMcKay/sourcemod-plugins/master/scripting/include/morecolors.inc"]="addons/sourcemod/scripting/include/morecolors.inc"
             ["https://raw.githubusercontent.com/Mikusch/PluginStateManager/master/addons/sourcemod/scripting/include/pluginstatemanager.inc"]="addons/sourcemod/scripting/include/pluginstatemanager.inc"
+            ["https://raw.githubusercontent.com/haxtonsale/LoadSoundScript/refs/heads/master/sourcepawn/loadsoundscript.inc"]="addons/sourcemod/scripting/include/loadsoundscript.inc"
+            ["https://raw.githubusercontent.com/nosoop/SM-TFUtils/refs/heads/master/scripting/include/tf2utils.inc"]="addons/sourcemod/scripting/include/tf2utils.inc"
+            ["https://raw.githubusercontent.com/FlaminSarge/tf2attributes/refs/heads/master/scripting/include/tf2attributes.inc"]="addons/sourcemod/scripting/include/tf2attributes.inc"
+            ["https://raw.githubusercontent.com/nosoop/SM-TFEconData/refs/heads/master/scripting/include/tf_econ_data.inc"]="addons/sourcemod/scripting/include/tf_econ_data.inc"
+            ["https://raw.githubusercontent.com/FortyTwoFortyTwo/VScript/refs/heads/main/scripting/include/vscript.inc"]="addons/sourcemod/scripting/include/vscript.inc"
+            ["https://raw.githubusercontent.com/nosoop/SMExt-SourceScramble/refs/heads/master/scripting/include/sourcescramble.inc"]="addons/sourcemod/scripting/include/sourcescramble.inc"
           )
 
           for url in "${!includes[@]}"; do

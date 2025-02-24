@@ -962,7 +962,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public bool HasInvaderName()
 	{
-		return m_invaderName[this.index][0];
+		return m_invaderName[this.index][0] != EOS;
 	}
 	
 	public void ResetInvaderName()

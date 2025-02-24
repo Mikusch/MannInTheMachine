@@ -30,6 +30,11 @@ bool Queue_IsEnabled()
 	return mitm_queue_enabled.BoolValue;
 }
 
+/**
+ * Returns the defender queue, sorted by queue points.
+ *
+ * @return	ArrayList<QueueData>
+ */
 ArrayList Queue_GetDefenderQueue()
 {
 	ArrayList queue = new ArrayList(sizeof(QueueData));
@@ -187,19 +192,6 @@ void Queue_SelectDefenders()
 		CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_PointsAwarded", points, player.GetQueuePoints());
 	}
 	
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		if (TF2_GetClientTeam(client) != TFTeam_Defenders)
-			continue;
-		
-		// Show class selection menu
-		if (TF2_GetPlayerClass(client) == TFClass_Unknown)
-			ShowVGUIPanel(client, TF2_GetClientTeam(client) == TFTeam_Red ? "class_red" : "class_blue");
-	}
-	
 	// Free the memory
 	delete players;
 	delete queue;
@@ -225,8 +217,8 @@ void Queue_FindReplacementDefender()
 		// Validate that they were successfully switched
 		if (TF2_GetClientTeam(client) == TFTeam_Defenders)
 		{
-			CTFPlayer(client).SetQueuePoints(CTFPlayer(client).GetQueuePoints() / 2);
-			CPrintToChat(client, "%s %t %t", PLUGIN_TAG, "SelectedAsDefender_Replacement", "Queue_PointsHalved");
+			CTFPlayer(client).SetQueuePoints(0);
+			CPrintToChat(client, "%s %t %t", PLUGIN_TAG, "SelectedAsDefender_Replacement", "Queue_PointsReset");
 			break;
 		}
 	}

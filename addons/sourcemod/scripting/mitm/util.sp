@@ -1045,33 +1045,23 @@ void SuperPrecacheModel(const char[] szModel)
 	
 	Format(szPath, sizeof(szPath), "%s.phy", szBase);
 	if (FileExists(szPath))
-	{
 		AddFileToDownloadsTable(szPath);
-	}
 	
 	Format(szPath, sizeof(szPath), "%s.vvd", szBase);
 	if (FileExists(szPath))
-	{
 		AddFileToDownloadsTable(szPath);
-	}
 	
 	Format(szPath, sizeof(szPath), "%s.dx80.vtx", szBase);
 	if (FileExists(szPath))
-	{
 		AddFileToDownloadsTable(szPath);
-	}
 	
 	Format(szPath, sizeof(szPath), "%s.dx90.vtx", szBase);
 	if (FileExists(szPath))
-	{
 		AddFileToDownloadsTable(szPath);
-	}
 	
 	Format(szPath, sizeof(szPath), "%s.sw.vtx", szBase);
 	if (FileExists(szPath))
-	{
 		AddFileToDownloadsTable(szPath);
-	}
 }
 
 void PrecacheViewModelMaterialsForClass(const char[] szClass)

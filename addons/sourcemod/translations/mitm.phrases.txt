@@ -139,10 +139,6 @@
 	{
 		"en"		"Your queue points have been reset."
 	}
-	"Queue_PointsHalved"
-	{
-		"en"		"Your queue points have been halved."
-	}
 	"Queue_PointsAwarded"
 	{
 		"#format"	"{1:d},{2:d}"

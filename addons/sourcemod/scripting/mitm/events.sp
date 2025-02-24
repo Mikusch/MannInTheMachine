@@ -118,6 +118,8 @@ static void EventHook_PlayerBuiltObject(Event event, const char[] name, bool don
 	TFObjectType type = view_as<TFObjectType>(event.GetInt("object"));
 	int index = event.GetInt("index");
 	
+	Entity(index).CreateGlowEntity( { 255, 255, 255, 255 }, SDKHook_ObjectGlow_SetTransmit);
+	
 	if (TF2_GetClientTeam(builder) == TFTeam_Invaders)
 	{
 		float origin[3];

@@ -18,9 +18,9 @@
 #pragma semicolon 1
 #pragma newdecls required
 
-static DynamicHook g_hDHook_CBaseEntity_SetModel;
 static DynamicHook g_hDHook_CBaseEntity_FVisible;
 static DynamicHook g_hDHook_CBaseObject_IsPlacementPosValid;
+static DynamicHook g_hDHook_CBaseEntity_UpdateTransmitState;
 static DynamicHook g_hDHook_CBaseObject_CanBeUpgraded;
 static DynamicHook g_hDHook_CItem_ComeToRest;
 static DynamicHook g_hDHook_CBaseEntity_ShouldTransmit;
@@ -82,9 +82,9 @@ void DHooks_Init()
 	PSM_AddDynamicDetourFromConf("DoTeleporterOverride", DHookCallback_DoTeleporterOverride_Pre);
 	PSM_AddDynamicDetourFromConf("OnBotTeleported", DHookCallback_OnBotTeleported_Pre);
 	
-	g_hDHook_CBaseEntity_SetModel = PSM_AddDynamicHookFromConf("CBaseEntity::SetModel");
 	g_hDHook_CBaseEntity_FVisible = PSM_AddDynamicHookFromConf("CBaseEntity::FVisible");
 	g_hDHook_CBaseObject_IsPlacementPosValid = PSM_AddDynamicHookFromConf("CBaseObject::IsPlacementPosValid");
+	g_hDHook_CBaseEntity_UpdateTransmitState = PSM_AddDynamicHookFromConf("CBaseEntity::UpdateTransmitState");
 	g_hDHook_CBaseObject_CanBeUpgraded = PSM_AddDynamicHookFromConf("CBaseObject::CanBeUpgraded");
 	g_hDHook_CItem_ComeToRest = PSM_AddDynamicHookFromConf("CItem::ComeToRest");
 	g_hDHook_CBaseEntity_ShouldTransmit = PSM_AddDynamicHookFromConf("CBaseEntity::ShouldTransmit");
@@ -142,9 +142,6 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 {
 	if (IsEntityClient(entity))
 	{
-		if (g_hDHook_CBaseEntity_SetModel)
-			PSM_DHookEntity(g_hDHook_CBaseEntity_SetModel, Hook_Post, entity, DHookCallback_CBaseEntity_SetModel_Post);
-		
 		if (g_hDHook_CBaseEntity_ShouldTransmit)
 			PSM_DHookEntity(g_hDHook_CBaseEntity_ShouldTransmit, Hook_Pre, entity, DHookCallback_CTFPlayer_ShouldTransmit_Pre);
 		
@@ -183,10 +180,10 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 		if (g_hDHook_CItem_ComeToRest)
 			PSM_DHookEntity(g_hDHook_CItem_ComeToRest, Hook_Pre, entity, DHookCallback_CCurrencyPack_ComeToRest_Pre);
 	}
-	else if (StrEqual(classname, "obj_sentrygun"))
+	else if (StrEqual(classname, "tf_glow"))
 	{
-		if (g_hDHook_CBaseEntity_SetModel)
-			PSM_DHookEntity(g_hDHook_CBaseEntity_SetModel, Hook_Post, entity, DHookCallback_CBaseEntity_SetModel_Post);
+		if (g_hDHook_CBaseEntity_UpdateTransmitState)
+			PSM_DHookEntity(g_hDHook_CBaseEntity_UpdateTransmitState, Hook_Pre, entity, DHookCallback_CTFGlow_UpdateTransmitState_Pre);
 	}
 	else if (HasEntProp(entity, Prop_Data, "CBaseCombatWeaponDefaultTouch"))
 	{
@@ -1657,25 +1654,6 @@ static MRESReturn DHookCallback_CTFGameRules_RespawnPlayers_Pre(DHookParam param
 	return bTeam && team == TFTeam_Invaders ? MRES_Supercede : MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_CBaseEntity_SetModel_Post(int entity, DHookParam params)
-{
-	char szModelName[PLATFORM_MAX_PATH];
-	params.GetString(1, szModelName, sizeof(szModelName));
-	
-	int hGlowEntity = Entity(entity).GetGlowEntity();
-	if (IsValidEntity(hGlowEntity))
-	{
-		// we already have a glow, update it with the new model
-		SetEntityModel(hGlowEntity, szModelName);
-	}
-	else
-	{
-		// no existing glow entity, create one
-		Entity(entity).SetGlowEntity(CreateEntityGlow(entity));
-	}
-	
-	return MRES_Ignored;
-}
 
 static MRESReturn DHookCallback_CBaseCombatWeapon_FVisible_Pre(int weapon, DHookReturn ret, DHookParam params)
 {
@@ -1770,6 +1748,12 @@ static MRESReturn DHookCallback_CCurrencyPack_ComeToRest_Pre(int item)
 	}
 	
 	return MRES_Ignored;
+}
+
+static MRESReturn DHookCallback_CTFGlow_UpdateTransmitState_Pre(int glow, DHookReturn ret)
+{
+	ret.Value = FL_EDICT_ALWAYS;
+	return MRES_Supercede;
 }
 
 static MRESReturn DHookCallback_CTFBot_ScriptAddBotAttribute_Pre(int bot, DHookParam params)

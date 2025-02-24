@@ -208,43 +208,53 @@ static void SDKHook_CTFPlayerResource_ThinkPost(int manager)
 	}
 }
 
-Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)
+Action SDKHook_PlayerGlow_SetTransmit(int entity, int client)
 {
-	int hEffectEntity = GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity");
-	
-	if (!IsValidEntity(hEffectEntity))
-		return Plugin_Handled;
-	
-	int hMissionTarget = CTFPlayer(client).GetMissionTarget();
-	if (IsValidEntity(hMissionTarget) && IsBaseObject(hMissionTarget))
-	{
-		// target sentry - only outline if not carried
-		if (hEffectEntity == hMissionTarget)
-		{
-			if (!GetEntProp(hMissionTarget, Prop_Send, "m_bCarried"))
-			{
-				return Plugin_Continue;
-			}
-		}
-		// player - only outline if carrying target sentry
-		else if (hEffectEntity == GetEntPropEnt(hMissionTarget, Prop_Send, "m_hBuilder"))
-		{
-			if (GetEntProp(hMissionTarget, Prop_Send, "m_bCarried"))
-			{
-				return Plugin_Continue;
-			}
-		}
-	}
+	Action action = Plugin_Handled;
 	
 	if (CTFPlayer(client).IsInASquad())
 	{
 		CTFBotSquad squad = CTFPlayer(client).GetSquad();
+		int hEffectEntity = GetEntPropEnt(entity, Prop_Data, "m_hMoveParent");
+		
 		if (hEffectEntity != client && (squad.IsLeader(hEffectEntity) || squad.IsLeader(client) && squad.IsMember(hEffectEntity)))
 		{
 			// show the glow of our squad leader or our squad members
-			return Plugin_Continue;
+			action = Plugin_Continue;
 		}
 	}
 	
-	return Plugin_Handled;
+	CBaseEntity(entity).RefreshNetwork(client, action == Plugin_Continue ? true : false);
+	return action;
+}
+
+Action SDKHook_ObjectGlow_SetTransmit(int entity, int client)
+{
+	Action action = Plugin_Handled;
+	
+	int hMissionTarget = CTFPlayer(client).GetMissionTarget();
+	if (IsValidEntity(hMissionTarget) && IsBaseObject(hMissionTarget))
+	{
+		int hEffectEntity = GetEntPropEnt(entity, Prop_Data, "m_hMoveParent");
+		
+		// mission target - only outline if not carried
+		if (hEffectEntity == hMissionTarget)
+		{
+			if (!GetEntProp(hMissionTarget, Prop_Send, "m_bCarried"))
+			{
+				action = Plugin_Continue;
+			}
+		}
+		// player - only outline if carrying mission target
+		else if (hEffectEntity == GetEntPropEnt(hMissionTarget, Prop_Send, "m_hBuilder"))
+		{
+			if (GetEntProp(hMissionTarget, Prop_Send, "m_bCarried"))
+			{
+				action = Plugin_Continue;
+			}
+		}
+	}
+	
+	CBaseEntity(entity).RefreshNetwork(client, action == Plugin_Continue ? true : false);
+	return action;
 }

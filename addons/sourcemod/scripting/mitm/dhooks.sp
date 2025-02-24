@@ -304,8 +304,6 @@ static MRESReturn DHookCallback_CPopulationManager_EndlessRollEscalation_Post(in
 // The meat of the spawning logic. Any error happening in here WILL cause bots to spawn!
 static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, DHookReturn ret, DHookParam params)
 {
-	CTFPlayer newBot = CTFPlayer(-1);
-	
 	float rawHere[3];
 	params.GetVector(1, rawHere);
 	
@@ -372,7 +370,7 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 	}
 	
 	// find dead bot we can re-use
-	newBot = CTFPlayer(FindNextInvader(spawner.m_defaultAttributes.m_attributeFlags & MINIBOSS));
+	CTFPlayer newBot = FindNextInvader(spawner.m_defaultAttributes.m_attributeFlags & MINIBOSS);
 	
 	if (newBot.IsValid())
 	{

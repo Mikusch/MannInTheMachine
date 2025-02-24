@@ -328,39 +328,29 @@ ArrayList GetInvaderQueue(bool bIsMiniBoss = false)
 	return queue;
 }
 
-int FindNextInvader(bool bMiniBoss)
+CTFPlayer FindNextInvader(bool bIsMiniBoss)
 {
-	ArrayList queue = GetInvaderQueue(bMiniBoss);
-	int priorityClient = -1;
+	CTFPlayer priorityPlayer = CTFPlayer(-1);
+	
+	ArrayList queue = GetInvaderQueue(bIsMiniBoss);
 	for (int i = 0; i < queue.Length; i++)
 	{
-		int client = queue.Get(i);
+		CTFPlayer player = CTFPlayer(queue.Get(i));
 		if (i == 0)
 		{
 			// Remember the player and reset priority
-			priorityClient = client;
-			CTFPlayer(client).m_invaderPriority = 0;
-			
-			// This player is becoming a miniboss
-			if (bMiniBoss)
-			{
-				CTFPlayer(client).m_invaderMiniBossPriority = 0;
-			}
+			priorityPlayer = player;
+			player.ResetInvaderPriority(bIsMiniBoss);
 		}
 		else
 		{
 			// Every player who doesn't get spawned gets a priority point
-			CTFPlayer(client).m_invaderPriority++;
-			
-			if (bMiniBoss)
-			{
-				CTFPlayer(client).m_invaderMiniBossPriority++;
-			}
+			player.IncrementInvaderPriority(bIsMiniBoss);
 		}
 	}
 	delete queue;
 	
-	return priorityClient;
+	return priorityPlayer;
 }
 
 int CreateEntityGlow(int entity)
@@ -426,7 +416,7 @@ int SortPlayersByPriority(int index1, int index2, Handle array, Handle hndl)
 	int client2 = list.Get(index2);
 	
 	// Sort by highest priority
-	return Compare(CTFPlayer(client2).m_invaderPriority, CTFPlayer(client1).m_invaderPriority);
+	return Compare(CTFPlayer(client2).GetInvaderPriority(false), CTFPlayer(client1).GetInvaderPriority(false));
 }
 
 int SortPlayersByMinibossPriority(int index1, int index2, Handle array, Handle hndl)
@@ -436,12 +426,12 @@ int SortPlayersByMinibossPriority(int index1, int index2, Handle array, Handle h
 	int client2 = list.Get(index2);
 	
 	// Sort by highest miniboss priority
-	int c = Compare(CTFPlayer(client2).m_invaderMiniBossPriority, CTFPlayer(client1).m_invaderMiniBossPriority);
+	int c = Compare(CTFPlayer(client2).GetInvaderPriority(true), CTFPlayer(client1).GetInvaderPriority(true));
 	
 	// Sort by highest priority
 	if (c == 0)
 	{
-		c = Compare(CTFPlayer(client2).m_invaderPriority, CTFPlayer(client1).m_invaderPriority);
+		c = Compare(CTFPlayer(client2).GetInvaderPriority(false), CTFPlayer(client1).GetInvaderPriority(false));
 	}
 	
 	return c;

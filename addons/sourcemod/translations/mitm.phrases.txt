@@ -45,6 +45,10 @@
 	{
 		"en"		"➤ Defender Queue"
 	}
+	"Menu_Queue_NoPlayers"
+	{
+		"en"		"There are no players in the queue"
+	}
 	"Menu_Queue_Title_QueuePoints"
 	{
 		"#format"	"{1:d},{2:d}"

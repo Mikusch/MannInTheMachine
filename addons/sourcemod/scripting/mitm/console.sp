@@ -24,6 +24,7 @@ void Console_Init()
 	RegConsoleCmd("sm_queue", ConCmd_Queue, "Opens the queue menu.");
 	RegConsoleCmd("sm_preferences", ConCmd_Settings, "Opens the preferences menu.");
 	RegConsoleCmd("sm_party", ConCmd_Party, "Opens the party menu.");
+	RegConsoleCmd("sm_contributors", ConCmd_Contributors, "Opens the contributor menu.");
 	
 	RegAdminCmd("sm_addqueue", ConCmd_AddQueuePoints, ADMFLAG_CHEATS, "Adds defender queue points to a player.");
 	
@@ -99,6 +100,21 @@ static Action ConCmd_Party(int client, int args)
 		return Plugin_Handled;
 	
 	Menus_DisplayPartyMenu(client);
+	return Plugin_Handled;
+}
+
+static Action ConCmd_Contributors(int client, int args)
+{
+	if (!PSM_IsEnabled())
+		return Plugin_Continue;
+	
+	if (client == 0)
+	{
+		ReplyToCommand(client, "%t", "Command is in-game only");
+		return Plugin_Handled;
+	}
+	
+	Menus_DisplayContributorsMenu(client);
 	return Plugin_Handled;
 }
 

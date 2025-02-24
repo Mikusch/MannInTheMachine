@@ -34,6 +34,9 @@ void Console_Init()
 	PSM_AddCommandListener(CommandListener_JoinTeam, "jointeam");
 	PSM_AddCommandListener(CommandListener_JoinClass, "joinclass");
 	PSM_AddCommandListener(CommandListener_Buyback, "td_buyback");
+	
+	PSM_AddMultiTargetFilter("@defenders", MultiTargetFilter_Defenders, "Target_Defenders", true);
+	PSM_AddMultiTargetFilter("@invaders", MultiTargetFilter_Invaders, "Target_Invaders", true);
 }
 
 static Action ConCmd_MannInTheMachine(int client, int args)
@@ -218,4 +221,26 @@ static Action CommandListener_Buyback(int client, const char[] command, int argc
 	}
 	
 	return Plugin_Continue;
+}
+
+static bool MultiTargetFilter_Defenders(const char[] pattern, ArrayList clients)
+{
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (IsClientInGame(client) && TF2_GetClientTeam(client) == TFTeam_Defenders)
+			clients.Push(client);
+	}
+	
+	return clients.Length > 0;
+}
+
+static bool MultiTargetFilter_Invaders(const char[] pattern, ArrayList clients)
+{
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (IsClientInGame(client) && CTFPlayer(client).IsInvader())
+			clients.Push(client);
+	}
+	
+	return clients.Length > 0;
 }

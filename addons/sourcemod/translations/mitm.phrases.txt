@@ -244,6 +244,14 @@
 	{
 		"en"		"You are in SPECTATOR MODE"
 	}
+	"Target_Defenders"
+	{
+		"en"		"Defenders"
+	}
+	"Target_Invaders"
+	{
+		"en"		"Invaders"
+	}
 	
 	// Party
 	

@@ -1,0 +1,419 @@
+/**
+ * Copyright (C) 2022  Mikusch
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+"Phrases"
+{
+	"Menu_Header"
+	{
+		"es"		"MANN EN LAS MAQUINAS"
+	}
+	"Menu_Main_Title"
+	{
+		"es"		"➤ Menu Principal"
+	}
+	"Menu_Main_Queue"
+	{
+		"es"		"Ver fila de Defensores"
+	}
+	"Menu_Main_Preferences"
+	{
+		"es"		"Cambiar preferencias"
+	}
+	"Menu_Main_Party"
+	{
+		"es"		"Abrir menu de Grupo"
+	}
+	"Menu_Main_Contributors"
+	{
+		"es"		"Ver contribuidores del Modo de Juego"
+	}
+	"Menu_Queue_Title"
+	{
+		"es"		"➤ Fila de Defensores"
+	}
+	"Menu_Queue_NoPlayers"
+	{
+		"es"		"No hay jugadores en la fila"
+	}
+	"Menu_Queue_Title_QueuePoints"
+	{
+		"es"		"Tus puntos de fila: {1} [#{2}]"
+	}
+	"Menu_Queue_Title_PartyQueuePoints"
+	{
+		"es"		"Tus puntos de fila grupal: {1} [#{2}]"
+	}
+	"Menu_Queue_Title_NotInQueue"
+	{
+		"es"		"No te encuentras actualmente en la fila."
+	}
+	"Menu_Preferences_Title"
+	{
+		"es"		"➤ Preferencias de Usuario"
+	}
+	"Menu_Preferences_NotLoaded"
+	{
+		"es"		"Tus preferencias aun se estan cargando, espera un momento."
+	}
+	"Menu_Contributors_Title"
+	{
+		"es"		"➤ Contribuidores"
+	}
+	"Menu_Contributors_Mikusch"
+	{
+		"es"		"Codigo y gameplay"
+	}
+	"Menu_Contributors_Kenzzer"
+	{
+		"es"		"Ayuda temprana de programación y desarrollo de librerías"
+	}
+	"Menu_Contributors_trigger_hurt"
+	{
+		"es"		"Modelos de Brazo de Robots Custom"
+	}
+	"Preference_DisableDefender"
+	{
+		"es"		"Deshabilitar jugar como defensor"
+	}
+	"Preference_SpectatorMode"
+	{
+		"es"		"Habilitar modo espectador (no podrás reaparecer)"
+	}
+	"Preference_DisableMiniBoss"
+	{
+		"es"		"Deshabilitar jugar como robot gigante"
+	}
+	"Preference_DisableAnnotations"
+	{
+		"es"		"Deshabilitar pistas de anotaciones"
+	}
+	"Preference_IgnorePartyInvites"
+	{
+		"es"		"Bloquear invitaciones de grupo"
+	}
+	"Preference_DisableDefenderReplacement"
+	{
+		"es"		"Deshabilitar el ser seleccionado como defensor sustituto"
+	}
+	"Preference_DisableCustomViewModels"
+	{
+		"es"		"Usar modelos de brazo humanos como robot"
+	}
+	"SelectedAsDefender"
+	{
+		"es"		"Has sido asignado al equipo {red}MANN CO.{default}."
+	}
+	"SelectedAsDefender_Forced"
+	{
+		"es"		"Has sido asignado de forma forzada al equipo {red}MANN CO.{default} porque no hay suficientes jugadores elegibles para jugar."
+	}
+	"SelectedAsDefender_Replacement"
+	{
+		"es"		"Fuiste movido al equipo {red}MANN CO.{default} para cubrir una vacante libre."
+	}
+	"SelectedAsInvader"
+	{
+		"es"		"Fusite asignado al equipo {blue}ROBOT{default}."
+	}
+	"Queue_FeatureDisabled"
+	{
+		"es"		"El sistema de fila se encuentra actualmente deshabilitado."
+	}
+	"Queue_NewDefenders"
+	{
+		"es"		"Seleccionando nuevos defensores..."
+	}
+	"Queue_PointsReset"
+	{
+		"es"		"Tus puntos de fila fueron reiniciados."
+	}
+	"Queue_PointsAwarded"
+	{
+		"es"		"Fuiste recompensado con {green}{1} {default}puntos de fila (Total: {green}{2}{default})."
+	}
+	"Queue_PointsAdded"
+	{
+		"es"		"Añadido {green}{1} {default}puntos de fila a {cyan}{2}{default}."
+	}
+	"Squad_NotAllowedToHeal"
+	{
+		"es"		"Solo tienes permitido curar al líder de tu pelotón {1}"
+	}
+	"Squad_NotAllowedToPickUpFlag"
+	{
+		"es"		"Solo el líder de tu pelotón ({1}) puede agarrar la bomba"
+	}
+	"Invader_NotAllowedToSuicide"
+	{
+		"es"		"No puedes suicidarte siendo robot"
+	}
+	"Invader_WaitingToSpawn"
+	{
+		"es"		"Eres un ROBOT\nLa oleada comenzará en {1} segundos"
+	}
+	"Invader_Spawned"
+	{
+		"es"		"Has reaparecido como: {1}"
+	}
+	"Invader_SpawnTimer_Countdown"
+	{
+		"es"		"ABANDONA EL ÁREA DE REAPARICIÓN"
+	}
+	"Invader_SpawnTimer_Warning"
+	{
+		"es"		"{red}ADVERTENCIA: {default}Si mueres en el área de reaparición {cyan}{1} {default}vez mas, ¡serás expulsado del servidor!"
+	}
+	"Invader_SpawnTimer_KickReason"
+	{
+		"es"		"Demasiadas muertes en el área de reaparición"
+	}
+	"Invader_SpawnTimer_Kicked"
+	{
+		"es"		"{blue}{1} {default}fue expulsado por morir en el área de reaparición reiteradas veces."
+	}
+	"Invader_CaptureGate"
+	{
+		"es"		"Captura {1}"
+	}
+	"Invader_DeliverFlag"
+	{
+		"es"		"Entrega la Bomba a la Escotilla"
+	}
+	"Invader_DelayedThreatNotice_Generic"
+	{
+		"es"		"Amenaza"
+	}
+	"Invader_DelayedThreatNotice_Spy"
+	{
+		"es"		"Espía"
+	}
+	"Invader_DestroySentries_DetonateSentry"
+	{
+		"es"		"Detonar"
+	}
+	"Invader_DestroySentries_DetonateHere"
+	{
+		"es"		"Detona aquí para completar tu misión"
+	}
+	"Invader_Queue_Header"
+	{
+		"es"		"EL SIGUIENTE ROBOT REAPARECERÁ"
+	}
+	"Invader_Deployed"
+	{
+		"es"		"{blue}{1} {default}desplegó la bomba con {lightgreen}{2}{default}/{lightgreen}{3} {default}VIDA restante."
+	}
+	"Tank_Deployed"
+	{
+		"es"		"{blue}El Tanque {default}desplegó la bomca con {lightgreen}{1}{default}/{lightgreen}{2} {default}VIDA restante."
+	}
+	"Endless_MoreAttributes"
+	{
+		"es"		"...y {1} más"
+	}
+	"Wave_AutoIncremented"
+	{
+		"es"		"Se avanzó a la {cyan}Oleada {1}{default} con {lightgreen}{2}%% créditos recolectados{default} debido a los defensores perdiendo {red}{3} vez/veces{default} de forma consecutiva."
+	}
+	"Spectator_Mode"
+	{
+		"es"		"Te encuentras en el MODO ESPECTADOR"
+	}
+	"Target_Defenders"
+	{
+		"es"		"Defensores"
+	}
+	"Target_Invaders"
+	{
+		"es"		"Invasores"
+	}
+	
+	// Party
+	
+	"Party_Menu_Title"
+	{
+		"es"		"➤ Menu de Grupo"
+	}
+	"Party_InviteMenu_Title"
+	{
+		"es"		"➤ Invitaciones de Grupo Pendientes"
+	}
+	"Party_ManageInviteMenu_Title"
+	{
+		"es"		"➤ Invitar Jugadores"
+	}
+	"Party_ManageMenu_Title"
+	{
+		"es"		"➤ Gestionar Grupo"
+	}
+	"Party_KickMenu_Title"
+	{
+		"es"		"➤ Expulsar Miembros del Grupo"
+	}
+	"Party_KickMenu_NoMembers"
+	{
+		"es"		"No hay miembros para expulsar"
+	}
+	"Party_Menu_CurrentParty"
+	{
+		"es"		"Tu grupo: {1}"
+	}
+	"Party_Menu_Members"
+	{
+		"es"		"Miembros ({1}/{2}):"
+	}
+	"Party_Menu_NotInAParty"
+	{
+		"es"		"No te encuentras en un grupo."
+	}
+	"Party_Menu_QueuePoints"
+	{
+		"es"		"Puntos de fila: {1} [#{2}]"
+	}
+	"Party_Menu_NotEnoughMembersForQueue"
+	{
+		"es"		"¡Invita jugadores para hacer fila juntos!"
+	}
+	"Party_Menu_ManageParty"
+	{
+		"es"		"★ Gestionar grupo"
+	}
+	"Party_Menu_CreateParty"
+	{
+		"es"		"Crear nuevo grupo"
+	}
+	"Party_Menu_LeaveParty"
+	{
+		"es"		"Abandonar grupo"
+	}
+	"Party_Menu_ViewPartyInvites"
+	{
+		"es"		"Ver invitaciones pendientes"
+	}
+	"Party_ManageMenu_InviteMembers"
+	{
+		"es"		"★ Invitar jugadores"
+	}
+	"Party_ManageMenu_KickMembers"
+	{
+		"es"		"★ Expulsar miembros"
+	}
+	"Party_ManageInviteMenu_NoPlayers"
+	{
+		"es"		"No hay jugadores para invitar"
+	}
+	"Party_ManageInviteMenu_AlreadyInvited"
+	{
+		"es"		"(pendiente)"
+	}
+	"Party_InviteMenu_NoPendingInvites"
+	{
+		"es"		"No hay invitaciones pendientes"
+	}
+	"Party_FeatureDisabled"
+	{
+		"es"		"El sistema de grupo se encuentra deshabilitado."
+	}
+	"Party_PlayerInvitePending"
+	{
+		"es"		"{lightgreen}{1} {default}ya tiene una invitación pendiente."
+	}
+	"Party_PlayerIgnoringInvites"
+	{
+		"es"		"{lightgreen}{1} {default}tiene sus invitaciones de grupo bloqueadas y no puede ser invitado."
+	}
+	"Party_PlayerBlocked"
+	{
+		"es"		"{lightgreen}{1} {default}no tiene permitido unirse a grupos."
+	}
+	"Party_InvitedPlayers"
+	{
+		"es"		"Invitaste al jugador {lightgreen}{1} {default}a {cyan}{2}{default}."
+	}
+	"Party_DoesNotExist"
+	{
+		"es"		"Este grupo no existe. Tal vez ya fue disuelto."
+	}
+	"Party_AlreadyMember"
+	{
+		"es"		"¡Ya eres un miembro de este grupo!"
+	}
+	"Party_AlreadyInAParty"
+	{
+		"es"		"¡Ya te encuentras en un grupo!"
+	}
+	"Party_RequireInvite"
+	{
+		"es"		"¡Necesitas una invitación para unirte a este grupo!"
+	}
+	"Party_MaxMembers"
+	{
+		"es"		"Este grupo se encuentra lleno y no acepta nuevos miembros."
+	}
+	"Party_Created"
+	{
+		"es"		"Creaste y te uniste automaticamente a {cyan}{1}{default}."
+	}
+	"Party_NotAllowed"
+	{
+		"es"		"No tienes permitido usar los grupos."
+	}
+	"Party_Joined"
+	{
+		"es"		"Te uniste a {cyan}{1}{default}."
+	}
+	"Party_JoinedOther"
+	{
+		"es"		"{lightgreen}{1} {default}se unió al grupo."
+	}
+	"Party_Left"
+	{
+		"es"		"Abandonaste {cyan}{1}{default}."
+	}
+	"Party_LeftOther"
+	{
+		"es"		"{lightgreen}{1} {default}se fué del grupo."
+	}
+	"Party_Kicked"
+	{
+		"es"		"Fuiste expulsado de {cyan}{1}{default}."
+	}
+	"Party_KickedOther"
+	{
+		"es"		"{lightgreen}{1} {default}fue expulsado del grupo."
+	}
+	"Party_RequireMember"
+	{
+		"es"		"Debes estar en un grupo para usar esto."
+	}
+	"Party_RequireLeader"
+	{
+		"es"		"Debes ser el líder del grupo para usar esto."
+	}
+	"Party_Renamed"
+	{
+		"es"		"Renombraste tu grupo a {cyan}{1}{default}."
+	}
+	"Party_IncomingInvite"
+	{
+		"es"		"Has sido invitado a {cyan}{1}{default} por {lightgreen}{2}{default}. Escribe {yellow}/party {default}para aceptar."
+	}
+	"Party_Name_Default"
+	{
+		"es"		"{1}'s Grupo"
+	}
+}

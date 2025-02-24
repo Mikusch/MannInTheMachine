@@ -39,7 +39,7 @@
 // Uncomment this for diagnostic messages in server console (very verbose)
 // #define DEBUG
 
-#define PLUGIN_VERSION	"1.0.0"
+#define PLUGIN_VERSION	"1.0.3"
 
 // Global entities
 CMannVsMachineStats g_pMVMStats = view_as<CMannVsMachineStats>(INVALID_ENT_REFERENCE);
@@ -147,7 +147,7 @@ public Plugin myinfo =
 {
 	name = "Mann in the Machine",
 	author = "Mikusch",
-	description = "Mann vs. Machine, but as a 32-player PvP gamemode.",
+	description = "Mann vs. Machine, but the robots are player-controlled.",
 	version = PLUGIN_VERSION,
 	url = "https://github.com/Mikusch/MannInTheMachine"
 }

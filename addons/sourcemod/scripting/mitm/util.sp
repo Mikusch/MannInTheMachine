@@ -328,39 +328,29 @@ ArrayList GetInvaderQueue(bool bIsMiniBoss = false)
 	return queue;
 }
 
-int FindNextInvader(bool bMiniBoss)
+CTFPlayer FindNextInvader(bool bIsMiniBoss)
 {
-	ArrayList queue = GetInvaderQueue(bMiniBoss);
-	int priorityClient = -1;
+	CTFPlayer priorityPlayer = CTFPlayer(-1);
+	
+	ArrayList queue = GetInvaderQueue(bIsMiniBoss);
 	for (int i = 0; i < queue.Length; i++)
 	{
-		int client = queue.Get(i);
+		CTFPlayer player = CTFPlayer(queue.Get(i));
 		if (i == 0)
 		{
 			// Remember the player and reset priority
-			priorityClient = client;
-			CTFPlayer(client).m_invaderPriority = 0;
-			
-			// This player is becoming a miniboss
-			if (bMiniBoss)
-			{
-				CTFPlayer(client).m_invaderMiniBossPriority = 0;
-			}
+			priorityPlayer = player;
+			player.ResetInvaderPriority(bIsMiniBoss);
 		}
 		else
 		{
 			// Every player who doesn't get spawned gets a priority point
-			CTFPlayer(client).m_invaderPriority++;
-			
-			if (bMiniBoss)
-			{
-				CTFPlayer(client).m_invaderMiniBossPriority++;
-			}
+			player.IncrementInvaderPriority(bIsMiniBoss);
 		}
 	}
 	delete queue;
 	
-	return priorityClient;
+	return priorityPlayer;
 }
 
 int CreateGlowEntity(int parent, const int color[4], SDKHookCB callback)
@@ -407,7 +397,7 @@ int SortPlayersByPriority(int index1, int index2, Handle array, Handle hndl)
 	int client2 = list.Get(index2);
 	
 	// Sort by highest priority
-	return Compare(CTFPlayer(client2).m_invaderPriority, CTFPlayer(client1).m_invaderPriority);
+	return Compare(CTFPlayer(client2).GetInvaderPriority(false), CTFPlayer(client1).GetInvaderPriority(false));
 }
 
 int SortPlayersByMinibossPriority(int index1, int index2, Handle array, Handle hndl)
@@ -417,12 +407,12 @@ int SortPlayersByMinibossPriority(int index1, int index2, Handle array, Handle h
 	int client2 = list.Get(index2);
 	
 	// Sort by highest miniboss priority
-	int c = Compare(CTFPlayer(client2).m_invaderMiniBossPriority, CTFPlayer(client1).m_invaderMiniBossPriority);
+	int c = Compare(CTFPlayer(client2).GetInvaderPriority(true), CTFPlayer(client1).GetInvaderPriority(true));
 	
 	// Sort by highest priority
 	if (c == 0)
 	{
-		c = Compare(CTFPlayer(client2).m_invaderPriority, CTFPlayer(client1).m_invaderPriority);
+		c = Compare(CTFPlayer(client2).GetInvaderPriority(false), CTFPlayer(client1).GetInvaderPriority(false));
 	}
 	
 	return c;
@@ -1026,33 +1016,23 @@ void SuperPrecacheModel(const char[] szModel)
 	
 	Format(szPath, sizeof(szPath), "%s.phy", szBase);
 	if (FileExists(szPath))
-	{
 		AddFileToDownloadsTable(szPath);
-	}
 	
 	Format(szPath, sizeof(szPath), "%s.vvd", szBase);
 	if (FileExists(szPath))
-	{
 		AddFileToDownloadsTable(szPath);
-	}
 	
 	Format(szPath, sizeof(szPath), "%s.dx80.vtx", szBase);
 	if (FileExists(szPath))
-	{
 		AddFileToDownloadsTable(szPath);
-	}
 	
 	Format(szPath, sizeof(szPath), "%s.dx90.vtx", szBase);
 	if (FileExists(szPath))
-	{
 		AddFileToDownloadsTable(szPath);
-	}
 	
 	Format(szPath, sizeof(szPath), "%s.sw.vtx", szBase);
 	if (FileExists(szPath))
-	{
 		AddFileToDownloadsTable(szPath);
-	}
 }
 
 void PrecacheViewModelMaterialsForClass(const char[] szClass)
@@ -1095,19 +1075,6 @@ void ShowProgressBar(int client, const char[] szTitle, float flProgress, float i
 	
 	SetHudTextParams(-1.0, CTFPlayer(client).HasTheFlag() ? 0.65 : 0.75, interval, 255, 255, 255, 255);
 	ShowSyncHudText(client, g_hWarningHudSync, "%t\n%s", szTitle, szProgressBar);
-}
-
-void BeginSetup()
-{
-	GameRules_SetPropFloat("m_flRestartRoundTime", GetGameTime() + mitm_setup_time.FloatValue);
-	GameRules_SetProp("m_bAwaitingReadyRestart", false);
-	
-	Event event = CreateEvent("teamplay_round_restart_seconds");
-	if (event)
-	{
-		event.SetInt("seconds", mitm_setup_time.IntValue);
-		event.Fire();
-	}
 }
 
 void SelectNewDefenders()
@@ -1208,7 +1175,7 @@ void SelectRandomDefenders()
 	delete players;
 }
 
-void FindReplacementDefender()
+void FindRandomReplacementDefender()
 {
 	ArrayList players = new ArrayList();
 	

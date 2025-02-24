@@ -45,6 +45,10 @@ void SDKHooks_OnEntityCreated(int entity, const char[] classname)
 	{
 		PSM_SDKHook(entity, SDKHook_Think, SDKHook_CTFTankBoss_Think);
 	}
+	else if (StrEqual(classname, "tf_player_manager"))
+	{
+		PSM_SDKHook(entity, SDKHook_ThinkPost, SDKHook_CTFPlayerResource_ThinkPost);
+	}
 }
 
 static Action SDKHook_CTFPlayer_OnTakeDamageAlive(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3], int damagecustom)
@@ -189,7 +193,22 @@ static Action SDKHook_CTFTankBoss_Think(int entity)
 	return Plugin_Continue;
 }
 
-Action SDKHookCB_PlayerGlow_SetTransmit(int entity, int client)
+static void SDKHook_CTFPlayerResource_ThinkPost(int manager)
+{
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (TF2_GetClientTeam(client) != TFTeam_Invaders)
+			continue;
+		
+		// Hide buyback text for invaders
+		SetEntPropFloat(manager, Prop_Send, "m_flNextRespawnTime", 0.0, client);
+	}
+}
+
+Action SDKHook_PlayerGlow_SetTransmit(int entity, int client)
 {
 	Action action = Plugin_Handled;
 	
@@ -209,7 +228,7 @@ Action SDKHookCB_PlayerGlow_SetTransmit(int entity, int client)
 	return action;
 }
 
-Action SDKHookCB_ObjectGlow_SetTransmit(int entity, int client)
+Action SDKHook_ObjectGlow_SetTransmit(int entity, int client)
 {
 	Action action = Plugin_Handled;
 	

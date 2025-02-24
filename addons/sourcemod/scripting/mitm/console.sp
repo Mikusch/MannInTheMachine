@@ -24,6 +24,7 @@ void Console_Init()
 	RegConsoleCmd("sm_queue", ConCmd_Queue, "Opens the queue menu.");
 	RegConsoleCmd("sm_preferences", ConCmd_Settings, "Opens the preferences menu.");
 	RegConsoleCmd("sm_party", ConCmd_Party, "Opens the party menu.");
+	RegConsoleCmd("sm_contributors", ConCmd_Contributors, "Opens the contributor menu.");
 	
 	RegAdminCmd("sm_addqueue", ConCmd_AddQueuePoints, ADMFLAG_CHEATS, "Adds defender queue points to a player.");
 	
@@ -34,6 +35,9 @@ void Console_Init()
 	PSM_AddCommandListener(CommandListener_JoinTeam, "jointeam");
 	PSM_AddCommandListener(CommandListener_JoinClass, "joinclass");
 	PSM_AddCommandListener(CommandListener_Buyback, "td_buyback");
+	
+	PSM_AddMultiTargetFilter("@defenders", MultiTargetFilter_Defenders, "Target_Defenders", true);
+	PSM_AddMultiTargetFilter("@invaders", MultiTargetFilter_Invaders, "Target_Invaders", true);
 }
 
 static Action ConCmd_MannInTheMachine(int client, int args)
@@ -96,6 +100,21 @@ static Action ConCmd_Party(int client, int args)
 		return Plugin_Handled;
 	
 	Menus_DisplayPartyMenu(client);
+	return Plugin_Handled;
+}
+
+static Action ConCmd_Contributors(int client, int args)
+{
+	if (!PSM_IsEnabled())
+		return Plugin_Continue;
+	
+	if (client == 0)
+	{
+		ReplyToCommand(client, "%t", "Command is in-game only");
+		return Plugin_Handled;
+	}
+	
+	Menus_DisplayContributorsMenu(client);
 	return Plugin_Handled;
 }
 
@@ -218,4 +237,26 @@ static Action CommandListener_Buyback(int client, const char[] command, int argc
 	}
 	
 	return Plugin_Continue;
+}
+
+static bool MultiTargetFilter_Defenders(const char[] pattern, ArrayList clients)
+{
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (IsClientInGame(client) && TF2_GetClientTeam(client) == TFTeam_Defenders)
+			clients.Push(client);
+	}
+	
+	return clients.Length > 0;
+}
+
+static bool MultiTargetFilter_Invaders(const char[] pattern, ArrayList clients)
+{
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (IsClientInGame(client) && CTFPlayer(client).IsInvader())
+			clients.Push(client);
+	}
+	
+	return clients.Length > 0;
 }

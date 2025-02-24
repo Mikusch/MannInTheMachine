@@ -667,6 +667,27 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		g_hCookieDefenderPriority.SetInt(this.index, this.m_defenderPriority);
 	}
 	
+	public int GetInvaderPriority(bool bIsMiniBoss)
+	{
+		return bIsMiniBoss ? this.m_invaderMiniBossPriority : this.m_invaderPriority;
+	}
+	
+	public void IncrementInvaderPriority(bool bIsMiniBoss)
+	{
+		if (bIsMiniBoss)
+			this.m_invaderMiniBossPriority++;
+		else
+			this.m_invaderPriority++;
+	}
+	
+	public void ResetInvaderPriority(bool bIsMiniBoss)
+	{
+		if (bIsMiniBoss)
+			this.m_invaderMiniBossPriority = 0;
+		else
+			this.m_invaderPriority = 0;
+	}
+	
 	public bool IsValidDefender()
 	{
 		return !IsClientSourceTV(this.index)
@@ -962,7 +983,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public bool HasInvaderName()
 	{
-		return m_invaderName[this.index][0];
+		return m_invaderName[this.index][0] != EOS;
 	}
 	
 	public void ResetInvaderName()

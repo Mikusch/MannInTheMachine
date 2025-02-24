@@ -30,6 +30,11 @@ bool Queue_IsEnabled()
 	return mitm_queue_enabled.BoolValue;
 }
 
+/**
+ * Returns the defender queue, sorted by queue points.
+ *
+ * @return	ArrayList<QueueData>
+ */
 ArrayList Queue_GetDefenderQueue()
 {
 	ArrayList queue = new ArrayList(sizeof(QueueData));
@@ -62,7 +67,7 @@ ArrayList Queue_GetDefenderQueue()
 			continue;
 		
 		// ignore party clients (see above)
-		if (queue.FindValue(client) != -1)
+		if (queue.FindValue(client, QueueData::m_client) != -1)
 			continue;
 		
 		if (!CTFPlayer(client).IsValidDefender())
@@ -171,26 +176,20 @@ void Queue_SelectDefenders()
 		LogError("Not enough players to meet defender quota (%d/%d)", iDefenderCount, iReqDefenderCount);
 	}
 	
+	int points = mitm_queue_points.IntValue;
+	
 	// Move everyone else to the spectator team
 	for (int i = 0; i < players.Length; i++)
 	{
 		int client = players.Get(i);
 		
-		CTFPlayer(client).ForceChangeTeam(TFTeam_Spectator);
+		CTFPlayer player = CTFPlayer(client);
+		
+		player.ForceChangeTeam(TFTeam_Spectator);
 		CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsInvader");
-	}
-	
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
 		
-		if (TF2_GetClientTeam(client) != TFTeam_Defenders)
-			continue;
-		
-		// Show class selection menu
-		if (TF2_GetPlayerClass(client) == TFClass_Unknown)
-			ShowVGUIPanel(client, TF2_GetClientTeam(client) == TFTeam_Red ? "class_red" : "class_blue");
+		player.AddQueuePoints(points);
+		CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_PointsAwarded", points, player.GetQueuePoints());
 	}
 	
 	// Free the memory
@@ -218,8 +217,8 @@ void Queue_FindReplacementDefender()
 		// Validate that they were successfully switched
 		if (TF2_GetClientTeam(client) == TFTeam_Defenders)
 		{
-			CTFPlayer(client).SetQueuePoints(CTFPlayer(client).GetQueuePoints() / 2);
-			CPrintToChat(client, "%s %t %t", PLUGIN_TAG, "SelectedAsDefender_Replacement", "Queue_PointsHalved");
+			CTFPlayer(client).SetQueuePoints(0);
+			CPrintToChat(client, "%s %t %t", PLUGIN_TAG, "SelectedAsDefender_Replacement", "Queue_PointsReset");
 			break;
 		}
 	}

@@ -73,11 +73,11 @@
 	}
 	"Menu_Contributors_Mikusch"
 	{
-		"en"		"Code and gameplay"
+		"en"		"Code & gameplay"
 	}
 	"Menu_Contributors_Kenzzer"
 	{
-		"en"		"Early coding help"
+		"en"		"Early coding assistance & library development"
 	}
 	"Menu_Contributors_trigger_hurt"
 	{
@@ -138,10 +138,6 @@
 	"Queue_PointsReset"
 	{
 		"en"		"Your queue points have been reset."
-	}
-	"Queue_PointsHalved"
-	{
-		"en"		"Your queue points have been halved."
 	}
 	"Queue_PointsAwarded"
 	{
@@ -247,6 +243,14 @@
 	"Spectator_Mode"
 	{
 		"en"		"You are in SPECTATOR MODE"
+	}
+	"Target_Defenders"
+	{
+		"en"		"Defenders"
+	}
+	"Target_Invaders"
+	{
+		"en"		"Invaders"
 	}
 	
 	// Party

@@ -28,7 +28,6 @@ void Events_Init()
 	PSM_AddEventHook("teamplay_point_captured", EventHook_TeamplayPointCaptured);
 	PSM_AddEventHook("teamplay_flag_event", EventHook_TeamplayFlagEvent);
 	PSM_AddEventHook("teams_changed", EventHook_TeamsChanged);
-	PSM_AddEventHook("pve_win_panel", EventHook_PVEWinPanel);
 	PSM_AddEventHook("mvm_wave_failed", EventHook_MvMWaveFailed);
 }
 
@@ -40,14 +39,6 @@ static void EventHook_PlayerSpawn(Event event, const char[] name, bool dontBroad
 	
 	CTFPlayer(client).Spawn();
 	CTFPlayer(client).m_annotationTimer = CreateTimer(1.0, Timer_CheckGateBotAnnotation, GetClientUserId(client), TIMER_REPEAT);
-	
-	TFTeam team = view_as<TFTeam>(event.GetInt("team"));
-	
-	// Once first player picks a class and spawns in, automatically start ready timer
-	if (team == TFTeam_Defenders && (GameRules_GetProp("m_bInSetup") || g_pObjectiveResource.GetMannVsMachineIsBetweenWaves()) && !IsInWaitingForPlayers() && GameRules_GetPropFloat("m_flRestartRoundTime") == -1)
-	{
-		BeginSetup();
-	}
 }
 
 static void EventHook_PlayerDeath(Event event, const char[] name, bool dontBroadcast)
@@ -217,34 +208,6 @@ static void EventHook_TeamsChanged(Event event, const char[] name, bool dontBroa
 	}
 }
 
-static void EventHook_PVEWinPanel(Event event, const char[] name, bool dontBroadcast)
-{
-	int points = mitm_queue_points.IntValue;
-	
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		CTFPlayer player = CTFPlayer(client);
-		
-		if (!player.IsInvader())
-			continue;
-		
-		if (player.HasPreference(PREF_DEFENDER_DISABLE_QUEUE) && (!player.IsInAParty() || player.GetParty().GetMemberCount() <= 1))
-			continue;
-		
-		if (!Forwards_OnIsValidDefender(client))
-			continue;
-		
-		if (Queue_IsEnabled())
-		{
-			player.AddQueuePoints(points);
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_PointsAwarded", points, player.GetQueuePoints());
-		}
-	}
-}
-
 static void EventHook_MvMWaveFailed(Event event, const char[] name, bool dontBroadcast)
 {
 	if (g_pPopulationManager.m_bIsInitialized)
@@ -303,7 +266,7 @@ static void RequestFrameCallback_FindReplacementDefender()
 	if (Queue_IsEnabled())
 		Queue_FindReplacementDefender();
 	else
-		FindReplacementDefender();
+		FindRandomReplacementDefender();
 }
 
 static Action Timer_CheckGateBotAnnotation(Handle timer, int userid)

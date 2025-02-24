@@ -76,10 +76,10 @@ void DHooks_Init()
 	PSM_AddDynamicDetourFromConf("CTFPlayer::ForceChangeTeam", DHookCallback_CTFPlayer_ForceChangeTeam_Pre, DHookCallback_CTFPlayer_ForceChangeTeam_Post);
 	PSM_AddDynamicDetourFromConf("CWeaponMedigun::AllowedToHealTarget", DHookCallback_CWeaponMedigun_AllowedToHealTarget_Pre);
 	PSM_AddDynamicDetourFromConf("CSpawnLocation::FindSpawnLocation", _, DHookCallback_CSpawnLocation_FindSpawnLocation_Post);
-	PSM_AddDynamicDetourFromConf("CTraceFilterObject::ShouldHitEntity", _, DHookCallback_CTraceFilterObject_ShouldHitEntity_Post);
+	PSM_AddDynamicDetourFromConf("CTraceFilterObject::ShouldHitEntity", DHookCallback_CTraceFilterObject_ShouldHitEntity_Pre);
 	PSM_AddDynamicDetourFromConf("CLagCompensationManager::StartLagCompensation", DHookCallback_CLagCompensationManager_StartLagCompensation_Pre, DHookCallback_CLagCompensationManager_StartLagCompensation_Post);
 	PSM_AddDynamicDetourFromConf("CUniformRandomStream::SetSeed", DHookCallback_CUniformRandomStream_SetSeed_Pre);
-	PSM_AddDynamicDetourFromConf("DoTeleporterOverride", _, DHookCallback_DoTeleporterOverride_Post);
+	PSM_AddDynamicDetourFromConf("DoTeleporterOverride", DHookCallback_DoTeleporterOverride_Pre);
 	PSM_AddDynamicDetourFromConf("OnBotTeleported", DHookCallback_OnBotTeleported_Pre);
 	
 	g_hDHook_CBaseEntity_SetModel = PSM_AddDynamicHookFromConf("CBaseEntity::SetModel");
@@ -1326,7 +1326,7 @@ static MRESReturn DHookCallback_CSpawnLocation_FindSpawnLocation_Post(Address wh
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_CTraceFilterObject_ShouldHitEntity_Post(Address pFilter, DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_CTraceFilterObject_ShouldHitEntity_Pre(Address pFilter, DHookReturn ret, DHookParam params)
 {
 	int me = GetEntityFromAddress(LoadFromAddress(pFilter + GetOffset("CTraceFilterSimple", "m_pPassEnt"), NumberType_Int32));
 	int entity = GetEntityFromAddress(params.Get(1));
@@ -1335,14 +1335,14 @@ static MRESReturn DHookCallback_CTraceFilterObject_ShouldHitEntity_Post(Address 
 	{
 		if (IsMannVsMachineMode())
 		{
-			if (CTFPlayer(entity).HasMission(MISSION_DESTROY_SENTRIES))
+			if (CTFPlayer(entity).HasMission(MISSION_DESTROY_SENTRIES) || CTFPlayer(entity).HasMission(MISSION_REPROGRAMMED))
 			{
 				// Don't collide with sentry busters since they don't collide with us
 				ret.Value = false;
 				return MRES_Supercede;
 			}
 			
-			if (CTFPlayer(me).HasMission(MISSION_DESTROY_SENTRIES))
+			if (CTFPlayer(me).HasMission(MISSION_DESTROY_SENTRIES) || CTFPlayer(me).HasMission(MISSION_REPROGRAMMED))
 			{
 				// Sentry Busters don't collide with enemies (so they can't be body-blocked)
 				ret.Value = false;
@@ -1390,7 +1390,7 @@ static MRESReturn DHookCallback_CUniformRandomStream_SetSeed_Pre(DHookParam para
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_DoTeleporterOverride_Post(DHookReturn ret, DHookParam params)
+static MRESReturn DHookCallback_DoTeleporterOverride_Pre(DHookReturn ret, DHookParam params)
 {
 	CBaseEntity spawnEnt = CBaseEntity(params.Get(1));
 	
@@ -1453,13 +1453,14 @@ static MRESReturn DHookCallback_DoTeleporterOverride_Post(DHookReturn ret, DHook
 		return MRES_Supercede;
 	}
 	
+	delete teleporterList;
+	
 	float spawnEntCenter[3];
 	spawnEnt.WorldSpaceCenter(spawnEntCenter);
 	
 	CNavArea nav = TheNavMesh.GetNearestNavArea(spawnEntCenter);
 	if (!nav)
 	{
-		delete teleporterList;
 		ret.Value = SPAWN_LOCATION_NOT_FOUND;
 		return MRES_Supercede;
 	}
@@ -1475,7 +1476,6 @@ static MRESReturn DHookCallback_DoTeleporterOverride_Post(DHookReturn ret, DHook
 		nav.GetCenter(vSpawnPosition);
 	}
 	
-	delete teleporterList;
 	params.SetVector(2, vSpawnPosition);
 	ret.Value = SPAWN_LOCATION_NAV;
 	return MRES_Supercede;

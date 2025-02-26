@@ -190,10 +190,11 @@ static int Update(CTFBotMainAction action, int actor, float interval)
 			{
 				LogMessage("\"%L\" underground (position \"%3.2f %3.2f %3.2f\")", actor, origin[0], origin[1], origin[2]);
 				
-				// teleport bot to a reasonable place
 				float center[3];
 				myArea.GetCenter(center);
-				TeleportEntity(actor, center);
+				
+				// teleport bot to a reasonable place
+				CBaseEntity(actor).SetAbsOrigin(center);
 			}
 		}
 		else
@@ -228,6 +229,7 @@ static int OnInjured(CTFBotMainAction action, CBaseCombatCharacter actor, CBaseE
 	{
 		if (damagecustom == TF_CUSTOM_BACKSTAB)
 		{
+			// backstabs that don't kill me make me mad
 			CTFPlayer(actor).DelayedThreatNotice(inflictor, 0.5, "Invader_DelayedThreatNotice_Spy");
 		}
 	}

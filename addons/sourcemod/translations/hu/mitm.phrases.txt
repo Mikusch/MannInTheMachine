@@ -2,433 +2,433 @@
 {
 	"Menu_Header"
 	{
-		"en"		"MANN A GÉPBEN"
+		"hu"		"MANN A GÉPBEN"
 	}
 	"Menu_Main_Title"
 	{
-		"en"		"➤ Főmenü"
+		"hu"		"➤ Főmenü"
 	}
 	"Menu_Main_Queue"
 	{
-		"en"		"Védők várólistájának megtekintése"
+		"hu"		"Védők várólistájának megtekintése"
 	}
 	"Menu_Main_Preferences"
 	{
-		"en"		"Beállítások módosítása"
+		"hu"		"Beállítások módosítása"
 	}
 	"Menu_Main_Party"
 	{
-		"en"		"Csapat menü megnyitása"
+		"hu"		"Csapat menü megnyitása"
 	}
 	"Menu_Main_Contributors"
 	{
-		"en"		"Játékmód közreműködőinek megtekintése"
+		"hu"		"Játékmód közreműködőinek megtekintése"
 	}
 	"Menu_Queue_Title"
 	{
-		"en"		"➤ Védők várólistája"
+		"hu"		"➤ Védők várólistája"
 	}
 	"Menu_Queue_NoPlayers"
 	{
-		"en"		"Nincsenek játékosok a várólistán"
+		"hu"		"Nincsenek játékosok a várólistán"
 	}
 	"Menu_Queue_Title_QueuePoints"
 	{
 		"#format"	"{1:d},{2:d}"
-		"en"		"Várólistás pontjaid: {1} [#{2}]"
+		"hu"		"Várólistás pontjaid: {1} [#{2}]"
 	}
 	"Menu_Queue_Title_PartyQueuePoints"
 	{
 		"#format"	"{1:d},{2:d}"
-		"en"		"Csapatod várólistás pontjai: {1} [#{2}]"
+		"hu"		"Csapatod várólistás pontjai: {1} [#{2}]"
 	}
 	"Menu_Queue_Title_NotInQueue"
 	{
-		"en"		"Jelenleg nem vagy a várólistán."
+		"hu"		"Jelenleg nem vagy a várólistán."
 	}
 	"Menu_Preferences_Title"
 	{
-		"en"		"➤ Felhasználói beállítások"
+		"hu"		"➤ Felhasználói beállítások"
 	}
 	"Menu_Preferences_NotLoaded"
 	{
-		"en"		"A beállításaid még betöltés alatt vannak, kérlek várj egy pillanatot."
+		"hu"		"A beállításaid még betöltés alatt vannak, kérlek várj egy pillanatot."
 	}
 	"Menu_Contributors_Title"
 	{
-		"en"		"➤ Közreműködők"
+		"hu"		"➤ Közreműködők"
 	}
 	"Menu_Contributors_Mikusch"
 	{
-		"en"		"Kód és játékmenet"
+		"hu"		"Kód és játékmenet"
 	}
 	"Menu_Contributors_Kenzzer"
 	{
-		"en"		"Korai kódolási segítség és könyvtárfejlesztés"
+		"hu"		"Korai kódolási segítség és könyvtárfejlesztés"
 	}
 	"Menu_Contributors_trigger_hurt"
 	{
-		"en"		"Egyedi robot nézetmodellek"
+		"hu"		"Egyedi robot nézetmodellek"
 	}
 	"Preference_DisableDefender"
 	{
-		"en"		"Ne játszhassak védőként"
+		"hu"		"Ne játszhassak védőként"
 	}
 	"Preference_SpectatorMode"
 	{
-		"en"		"Megfigyelő mód engedélyezése (nem fogsz újraéledni)"
+		"hu"		"Megfigyelő mód engedélyezése (nem fogsz újraéledni)"
 	}
 	"Preference_DisableMiniBoss"
 	{
-		"en"		"Óriás robotként való játszás letiltása"
+		"hu"		"Óriás robotként való játszás letiltása"
 	}
 	"Preference_DisableAnnotations"
 	{
-		"en"		"Tippek kijelzésének letiltása"
+		"hu"		"Tippek kijelzésének letiltása"
 	}
 	"Preference_IgnorePartyInvites"
 	{
-		"en"		"Csapat meghívások blokkolása"
+		"hu"		"Csapat meghívások blokkolása"
 	}
 	"Preference_DisableDefenderReplacement"
 	{
-		"en"		"Helyettesítő védőként való kiválasztás letiltása"
+		"hu"		"Helyettesítő védőként való kiválasztás letiltása"
 	}
 	"Preference_DisableCustomViewModels"
 	{
-		"en"		"Emberi nézetmodellek használata robotként"
+		"hu"		"Emberi nézetmodellek használata robotként"
 	}
 	"SelectedAsDefender"
 	{
-		"en"		"A {red}MANN CO.{default} csapatba kerültél."
+		"hu"		"A {red}MANN CO.{default} csapatba kerültél."
 	}
 	"SelectedAsDefender_Forced"
 	{
-		"en"		"Kényszerítve lettél a {red}MANN CO.{default} csapatba, mert nem volt elég játékos, aki játszhatott volna."
+		"hu"		"Kényszerítve lettél a {red}MANN CO.{default} csapatba, mert nem volt elég játékos, aki játszhatott volna."
 	}
 	"SelectedAsDefender_Replacement"
 	{
-		"en"		"Áthelyeztek a {red}MANN CO.{default} csapatba egy üres hely betöltésére."
+		"hu"		"Áthelyeztek a {red}MANN CO.{default} csapatba egy üres hely betöltésére."
 	}
 	"SelectedAsInvader"
 	{
-		"en"		"A {blue}ROBOT{default} csapatba kerültél."
+		"hu"		"A {blue}ROBOT{default} csapatba kerültél."
 	}
 	"Queue_FeatureDisabled"
 	{
-		"en"		"A várólista rendszer jelenleg le van tiltva."
+		"hu"		"A várólista rendszer jelenleg le van tiltva."
 	}
 	"Queue_NewDefenders"
 	{
-		"en"		"Új védők kiválasztása..."
+		"hu"		"Új védők kiválasztása..."
 	}
 	"Queue_PointsReset"
 	{
-		"en"		"A várólistás pontjaid visszaállítva."
+		"hu"		"A várólistás pontjaid visszaállítva."
 	}
 	"Queue_PointsAwarded"
 	{
 		"#format"	"{1:d},{2:d}"
-		"en"		"{green}{1} {default}várólistás pontot kaptál (Összesen: {green}{2}{default})."
+		"hu"		"{green}{1} {default}várólistás pontot kaptál (Összesen: {green}{2}{default})."
 	}
 	"Queue_PointsAdded"
 	{
 		"#format"	"{1:d},{2:t}"
-		"en"		"{green}{1} {default}várólistás pont hozzáadva: {cyan}{2}{default}."
+		"hu"		"{green}{1} {default}várólistás pont hozzáadva: {cyan}{2}{default}."
 	}
 	"Squad_NotAllowedToHeal"
 	{
 		"#format"	"{1:N}"
-		"en"		"Csak a csapatvezetőt gyógyíthatod: {1}"
+		"hu"		"Csak a csapatvezetőt gyógyíthatod: {1}"
 	}
 	"Squad_NotAllowedToPickUpFlag"
 	{
 		"#format"	"{1:N}"
-		"en"		"Csak a csapatvezetőd ({1}) veheti fel a bombát"
+		"hu"		"Csak a csapatvezetőd ({1}) veheti fel a bombát"
 	}
 	"Invader_NotAllowedToSuicide"
 	{
-		"en"		"Robotként nem követhetsz el öngyilkosságot"
+		"hu"		"Robotként nem követhetsz el öngyilkosságot"
 	}
 	"Invader_WaitingToSpawn"
 	{
 		"#format"	"{1:d}"
-		"en"		"ROBOT vagy\nA robot hullám {1} másodperc múlva kezdődik"
+		"hu"		"ROBOT vagy\nA robot hullám {1} másodperc múlva kezdődik"
 	}
 	"Invader_Spawned"
 	{
 		"#format"	"{1:s}"
-		"en"		"Megjelentél mint: {1}"
+		"hu"		"Megjelentél mint: {1}"
 	}
 	"Invader_SpawnTimer_Countdown"
 	{
-		"en"		"HAGYD EL A KEZDŐTERÜLETET"
+		"hu"		"HAGYD EL A KEZDŐTERÜLETET"
 	}
 	"Invader_SpawnTimer_Warning"
 	{
 		"#format"	"{1:d}"
-		"en"		"{red}FIGYELMEZTETÉS: {default}Ha még {cyan}{1} {default}alkalommal meghalsz a kezdőterületen, ki leszel rúgva a szerverről!"
+		"hu"		"{red}FIGYELMEZTETÉS: {default}Ha még {cyan}{1} {default}alkalommal meghalsz a kezdőterületen, ki leszel rúgva a szerverről!"
 	}
 	"Invader_SpawnTimer_KickReason"
 	{
-		"en"		"Túl sok halál a kezdőterületen"
+		"hu"		"Túl sok halál a kezdőterületen"
 	}
 	"Invader_SpawnTimer_Kicked"
 	{
 		"#format"	"{1:N}"
-		"en"		"{blue}{1} {default}ki lett rúgva, mert túl sokszor halt meg a kezdőterületen."
+		"hu"		"{blue}{1} {default}ki lett rúgva, mert túl sokszor halt meg a kezdőterületen."
 	}
 	"Invader_CaptureGate"
 	{
 		"#format"	"{1:s}"
-		"en"		"Foglald el: {1}"
+		"hu"		"Foglald el: {1}"
 	}
 	"Invader_DeliverFlag"
 	{
-		"en"		"Juttasd el a bombát a nyíláshoz"
+		"hu"		"Juttasd el a bombát a nyíláshoz"
 	}
 	"Invader_DelayedThreatNotice_Generic"
 	{
-		"en"		"Fenyegetés"
+		"hu"		"Fenyegetés"
 	}
 	"Invader_DelayedThreatNotice_Spy"
 	{
-		"en"		"Kém"
+		"hu"		"Kém"
 	}
 	"Invader_DestroySentries_DetonateSentry"
 	{
-		"en"		"Robbantás"
+		"hu"		"Robbantás"
 	}
 	"Invader_DestroySentries_DetonateHere"
 	{
-		"en"		"Robbants itt a küldetés teljesítéséhez"
+		"hu"		"Robbants itt a küldetés teljesítéséhez"
 	}
 	"Invader_Queue_Header"
 	{
-		"en"		"KÖVETKEZŐ ROBOT MEGJELENÉSEK"
+		"hu"		"KÖVETKEZŐ ROBOT MEGJELENÉSEK"
 	}
 	"Invader_Deployed"
 	{
 		"#format"	"{1:N},{2:d},{3:d}"
-		"en"		"{blue}{1} {default}elhelyezte a bombát {lightgreen}{2}{default}/{lightgreen}{3} {default}HP-val."
+		"hu"		"{blue}{1} {default}elhelyezte a bombát {lightgreen}{2}{default}/{lightgreen}{3} {default}HP-val."
 	}
 	"Tank_Deployed"
 	{
 		"#format"	"{1:d},{2:d}"
-		"en"		"{blue}A Tank {default}elhelyezte a bombát {lightgreen}{1}{default}/{lightgreen}{2} {default}HP-val."
+		"hu"		"{blue}A Tank {default}elhelyezte a bombát {lightgreen}{1}{default}/{lightgreen}{2} {default}HP-val."
 	}
 	"Endless_MoreAttributes"
 	{
 		"#format"	"{1:d}"
-		"en"		"...és még {1} további"
+		"hu"		"...és még {1} további"
 	}
 	"Wave_AutoIncremented"
 	{
 		"#format"	"{1:d},{2:0.f},{3:d}"
-		"en"		"Továbblépés a {cyan}{1}. robot hullámra{default} {lightgreen}{2}%% begyűjtött kredittel{default}, mivel a védők {red}{3} alkalommal{default} vesztettek egymás után."
+		"hu"		"Továbblépés a {cyan}{1}. robot hullámra{default} {lightgreen}{2}%% begyűjtött kredittel{default}, mivel a védők {red}{3} alkalommal{default} vesztettek egymás után."
 	}
 	"Spectator_Mode"
 	{
-		"en"		"MEGFIGYELŐ MÓDBAN VAGY"
+		"hu"		"MEGFIGYELŐ MÓDBAN VAGY"
 	}
 	"Target_Defenders"
 	{
-		"en"		"Védők"
+		"hu"		"Védők"
 	}
 	"Target_Invaders"
 	{
-		"en"		"Támadók"
+		"hu"		"Támadók"
 	}
 	
 	// Party
 	
 	"Party_Menu_Title"
 	{
-		"en"		"➤ Csapat Menü"
+		"hu"		"➤ Csapat Menü"
 	}
 	"Party_InviteMenu_Title"
 	{
-		"en"		"➤ Függőben lévő csapat meghívások"
+		"hu"		"➤ Függőben lévő csapat meghívások"
 	}
 	"Party_ManageInviteMenu_Title"
 	{
-		"en"		"➤ Játékosok meghívása"
+		"hu"		"➤ Játékosok meghívása"
 	}
 	"Party_ManageMenu_Title"
 	{
-		"en"		"➤ Csapat kezelése"
+		"hu"		"➤ Csapat kezelése"
 	}
 	"Party_KickMenu_Title"
 	{
-		"en"		"➤ Csapattagok kirúgása"
+		"hu"		"➤ Csapattagok kirúgása"
 	}
 	"Party_KickMenu_NoMembers"
 	{
-		"en"		"Nincs kirúgható tag"
+		"hu"		"Nincs kirúgható tag"
 	}
 	"Party_Menu_CurrentParty"
 	{
 		"#format"	"{1:s}"
-		"en"		"Csapatod: {1}"
+		"hu"		"Csapatod: {1}"
 	}
 	"Party_Menu_Members"
 	{
 		"#format"	"{1:d},{2:d}"
-		"en"		"Tagok ({1}/{2}):"
+		"hu"		"Tagok ({1}/{2}):"
 	}
 	"Party_Menu_NotInAParty"
 	{
-		"en"		"Nem vagy csapatban."
+		"hu"		"Nem vagy csapatban."
 	}
 	"Party_Menu_QueuePoints"
 	{
 		"#format"	"{1:d},{2:d}"
-		"en"		"Várólistás pontok: {1} [#{2}]"
+		"hu"		"Várólistás pontok: {1} [#{2}]"
 	}
 	"Party_Menu_NotEnoughMembersForQueue"
 	{
-		"en"		"Hívj meg játékosokat a közös várakozáshoz!"
+		"hu"		"Hívj meg játékosokat a közös várakozáshoz!"
 	}
 	"Party_Menu_ManageParty"
 	{
-		"en"		"★ Csapat kezelése"
+		"hu"		"★ Csapat kezelése"
 	}
 	"Party_Menu_CreateParty"
 	{
-		"en"		"Új csapat létrehozása"
+		"hu"		"Új csapat létrehozása"
 	}
 	"Party_Menu_LeaveParty"
 	{
-		"en"		"Csapat elhagyása"
+		"hu"		"Csapat elhagyása"
 	}
 	"Party_Menu_ViewPartyInvites"
 	{
-		"en"		"Függőben lévő meghívások megtekintése"
+		"hu"		"Függőben lévő meghívások megtekintése"
 	}
 	"Party_ManageMenu_InviteMembers"
 	{
-		"en"		"★ Játékosok meghívása"
+		"hu"		"★ Játékosok meghívása"
 	}
 	"Party_ManageMenu_KickMembers"
 	{
-		"en"		"★ Tagok kirúgása"
+		"hu"		"★ Tagok kirúgása"
 	}
 	"Party_ManageInviteMenu_NoPlayers"
 	{
-		"en"		"Nincs meghívható játékos"
+		"hu"		"Nincs meghívható játékos"
 	}
 	"Party_ManageInviteMenu_AlreadyInvited"
 	{
-		"en"		"(függőben)"
+		"hu"		"(függőben)"
 	}
 	"Party_InviteMenu_NoPendingInvites"
 	{
-		"en"		"Nincsenek függőben lévő meghívások"
+		"hu"		"Nincsenek függőben lévő meghívások"
 	}
 	"Party_FeatureDisabled"
 	{
-		"en"		"A csapat rendszer jelenleg le van tiltva."
+		"hu"		"A csapat rendszer jelenleg le van tiltva."
 	}
 	"Party_PlayerInvitePending"
 	{
 		"#format"	"{1:N}"
-		"en"		"{lightgreen}{1} {default}már kapott meghívást."
+		"hu"		"{lightgreen}{1} {default}már kapott meghívást."
 	}
 	"Party_PlayerIgnoringInvites"
 	{
 		"#format"	"{1:N}"
-		"en"		"{lightgreen}{1} {default}blokkolja a csapat meghívásokat, nem hívható meg."
+		"hu"		"{lightgreen}{1} {default}blokkolja a csapat meghívásokat, nem hívható meg."
 	}
 	"Party_PlayerBlocked"
 	{
 		"#format"	"{1:N}"
-		"en"		"{lightgreen}{1} {default}nem csatlakozhat csapatokhoz."
+		"hu"		"{lightgreen}{1} {default}nem csatlakozhat csapatokhoz."
 	}
 	"Party_InvitedPlayers"
 	{
 		"#format"	"{1:N},{2:s}"
-		"en"		"Meghívtad {lightgreen}{1} {default}játékost a {cyan}{2}{default} csapatba."
+		"hu"		"Meghívtad {lightgreen}{1} {default}játékost a {cyan}{2}{default} csapatba."
 	}
 	"Party_DoesNotExist"
 	{
-		"en"		"A csapat nem létezik. Lehet, hogy már feloszlott."
+		"hu"		"A csapat nem létezik. Lehet, hogy már feloszlott."
 	}
 	"Party_AlreadyMember"
 	{
-		"en"		"Már tagja vagy ennek a csapatnak!"
+		"hu"		"Már tagja vagy ennek a csapatnak!"
 	}
 	"Party_AlreadyInAParty"
 	{
-		"en"		"Már egy csapatban vagy!"
+		"hu"		"Már egy csapatban vagy!"
 	}
 	"Party_RequireInvite"
 	{
-		"en"		"Meghívásra van szükséged, hogy csatlakozz ehhez a csapathoz!"
+		"hu"		"Meghívásra van szükséged, hogy csatlakozz ehhez a csapathoz!"
 	}
 	"Party_MaxMembers"
 	{
-		"en"		"Ez a csapat már tele van, nem fogad új tagokat."
+		"hu"		"Ez a csapat már tele van, nem fogad új tagokat."
 	}
 	"Party_Created"
 	{
 		"#format"	"{1:s}"
-		"en"		"Létrehoztad és automatikusan csatlakoztál: {cyan}{1}{default}."
+		"hu"		"Létrehoztad és automatikusan csatlakoztál: {cyan}{1}{default}."
 	}
 	"Party_NotAllowed"
 	{
-		"en"		"Nem használhatod a csapat funkciót."
+		"hu"		"Nem használhatod a csapat funkciót."
 	}
 	"Party_Joined"
 	{
 		"#format"	"{1:s}"
-		"en"		"Csatlakoztál: {cyan}{1}{default}."
+		"hu"		"Csatlakoztál: {cyan}{1}{default}."
 	}
 	"Party_JoinedOther"
 	{
 		"#format"	"{1:N}"
-		"en"		"{lightgreen}{1} {default}csatlakozott a csapathoz."
+		"hu"		"{lightgreen}{1} {default}csatlakozott a csapathoz."
 	}
 	"Party_Left"
 	{
 		"#format"	"{1:s}"
-		"en"		"Elhagytad: {cyan}{1}{default}."
+		"hu"		"Elhagytad: {cyan}{1}{default}."
 	}
 	"Party_LeftOther"
 	{
 		"#format"	"{1:N}"
-		"en"		"{lightgreen}{1} {default}elhagyta a csapatot."
+		"hu"		"{lightgreen}{1} {default}elhagyta a csapatot."
 	}
 	"Party_Kicked"
 	{
 		"#format"	"{1:s}"
-		"en"		"Ki lettél rúgva innen: {cyan}{1}{default}."
+		"hu"		"Ki lettél rúgva innen: {cyan}{1}{default}."
 	}
 	"Party_KickedOther"
 	{
 		"#format"	"{1:N}"
-		"en"		"{lightgreen}{1} {default}ki lett rúgva a csapatból."
+		"hu"		"{lightgreen}{1} {default}ki lett rúgva a csapatból."
 	}
 	"Party_RequireMember"
 	{
-		"en"		"Csapatban kell lenned ennek használatához."
+		"hu"		"Csapatban kell lenned ennek használatához."
 	}
 	"Party_RequireLeader"
 	{
-		"en"		"Csapatvezetőnek kell lenned ennek használatához."
+		"hu"		"Csapatvezetőnek kell lenned ennek használatához."
 	}
 	"Party_Renamed"
 	{
 		"#format"	"{1:s}"
-		"en"		"Átnevezted a csapatodat erre: {cyan}{1}{default}."
+		"hu"		"Átnevezted a csapatodat erre: {cyan}{1}{default}."
 	}
 	"Party_IncomingInvite"
 	{
 		"#format"	"{1:s},{2:N}"
-		"en"		"Meghívást kaptál a {cyan}{1}{default} csapatba {lightgreen}{2}{default} játékostól. Írd be: {yellow}/party {default}az elfogadáshoz."
+		"hu"		"Meghívást kaptál a {cyan}{1}{default} csapatba {lightgreen}{2}{default} játékostól. Írd be: {yellow}/party {default}az elfogadáshoz."
 	}
 	"Party_Name_Default"
 	{
 		"#format"	"{1:N}"
-		"en"		"{1} Csapata"
+		"hu"		"{1} Csapata"
 	}
 }

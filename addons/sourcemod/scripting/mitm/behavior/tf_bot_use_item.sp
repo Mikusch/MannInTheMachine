@@ -94,9 +94,12 @@ static int Update(CTFBotUseItem action, CTFPlayer actor, float interval)
 	{
 		if (action.m_cooldownTimer.IsElapsed())
 		{
-			// use it
-			actor.PressFireButton();
-			action.m_cooldownTimer.Invalidate();
+			if (actor.GetPropFloat(Prop_Data, "m_flNextAttack") <= GetGameTime())
+			{
+				// use it
+				actor.PressFireButton();
+				action.m_cooldownTimer.Invalidate();
+			}
 		}
 	}
 	else // used

@@ -163,6 +163,16 @@ static int Update(CTFBotDeliverFlag action, int actor, float interval)
 		return action.Done("I'm no longer carrying the flag");
 	}
 	
+	if (IsMannVsMachineMode())
+	{
+		// let the bomb carrier use it's buff banners/etc
+		NextBotAction result = CTFPlayer(actor).OpportunisticallyUseWeaponAbilities();
+		if (result)
+		{
+			return action.SuspendFor(result, "Opportunistically using buff item");
+		}
+	}
+	
 	if (UpgradeOverTime(action, actor) && mitm_bot_taunt_on_upgrade.BoolValue)
 	{
 		return action.SuspendFor(CTFBotTaunt(), "Taunting for our new upgrade");

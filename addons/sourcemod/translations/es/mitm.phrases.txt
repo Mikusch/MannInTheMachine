@@ -202,7 +202,7 @@
 	}
 	"Tank_Deployed"
 	{
-		"es"		"{blue}El Tanque {default}desplegó la bomca con {lightgreen}{1}{default}/{lightgreen}{2} {default}VIDA restante."
+		"es"		"{blue}El Tanque {default}desplegó la bomba con {lightgreen}{1}{default}/{lightgreen}{2} {default}VIDA restante."
 	}
 	"Endless_MoreAttributes"
 	{

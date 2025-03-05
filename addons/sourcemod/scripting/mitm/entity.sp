@@ -142,12 +142,12 @@ methodmap Entity
 		return this.m_hGlowEntity;
 	}
 	
-	public void CreateGlowEntity(const int color[4], SDKHookCB callback)
+	public void CreateGlowEntity(SDKHookCB callback)
 	{
 		int hGlowEntity = this.GetGlowEntity();
 		if (!IsValidEntity(hGlowEntity))
 		{
-			hGlowEntity = CreateGlowEntity(view_as<int>(this), color, callback);
+			hGlowEntity = CreateGlowEntity(this.m_entindex, callback);
 			if (IsValidEntity(hGlowEntity))
 			{
 				this.SetGlowEntity(hGlowEntity);

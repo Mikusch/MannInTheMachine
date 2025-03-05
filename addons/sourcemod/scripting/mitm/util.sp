@@ -353,7 +353,7 @@ CTFPlayer FindNextInvader(bool bIsMiniBoss)
 	return priorityPlayer;
 }
 
-int CreateGlowEntity(int parent, const int color[4], SDKHookCB callback)
+int CreateGlowEntity(int parent, SDKHookCB callback)
 {
 	int glow = CreateEntityByName("tf_glow");
 	if (glow != -1)
@@ -369,9 +369,6 @@ int CreateGlowEntity(int parent, const int color[4], SDKHookCB callback)
 		
 		SetVariantString("!activator");
 		AcceptEntityInput(glow, "SetParent", parent);
-		
-		SetVariantColor(color);
-		AcceptEntityInput(glow, "SetGlowColor");
 		
 		PSM_SDKHook(glow, SDKHook_SetTransmit, callback);
 		return EntIndexToEntRef(glow);

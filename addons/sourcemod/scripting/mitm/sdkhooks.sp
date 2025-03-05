@@ -212,14 +212,34 @@ Action SDKHook_PlayerGlow_SetTransmit(int entity, int client)
 {
 	Action action = Plugin_Handled;
 	
+	int hEffectEntity = GetEntPropEnt(entity, Prop_Data, "m_hMoveParent");
+	int hMissionTarget = CTFPlayer(client).GetMissionTarget();
+	
+	// outline player if carrying mission target
+	if (IsValidEntity(hMissionTarget) && IsBaseObject(hMissionTarget))
+	{
+		if (hEffectEntity == GetEntPropEnt(hMissionTarget, Prop_Send, "m_hBuilder"))
+		{
+			if (GetEntProp(hMissionTarget, Prop_Send, "m_bCarried"))
+			{
+				SetVariantColor(GLOW_COLOR_MISSION);
+				AcceptEntityInput(entity, "SetGlowColor");
+				
+				action = Plugin_Continue;
+			}
+		}
+	}
+	
+	// outline squad leader or squad members
 	if (CTFPlayer(client).IsInASquad())
 	{
 		CTFBotSquad squad = CTFPlayer(client).GetSquad();
-		int hEffectEntity = GetEntPropEnt(entity, Prop_Data, "m_hMoveParent");
 		
 		if (hEffectEntity != client && (squad.IsLeader(hEffectEntity) || squad.IsLeader(client) && squad.IsMember(hEffectEntity)))
 		{
-			// show the glow of our squad leader or our squad members
+			SetVariantColor(GLOW_COLOR_SQUAD);
+			AcceptEntityInput(entity, "SetGlowColor");
+			
 			action = Plugin_Continue;
 		}
 	}
@@ -233,23 +253,19 @@ Action SDKHook_ObjectGlow_SetTransmit(int entity, int client)
 	Action action = Plugin_Handled;
 	
 	int hMissionTarget = CTFPlayer(client).GetMissionTarget();
+	
+	// outline mission target if not carried
 	if (IsValidEntity(hMissionTarget) && IsBaseObject(hMissionTarget))
 	{
 		int hEffectEntity = GetEntPropEnt(entity, Prop_Data, "m_hMoveParent");
 		
-		// mission target - only outline if not carried
 		if (hEffectEntity == hMissionTarget)
 		{
 			if (!GetEntProp(hMissionTarget, Prop_Send, "m_bCarried"))
 			{
-				action = Plugin_Continue;
-			}
-		}
-		// player - only outline if carrying mission target
-		else if (hEffectEntity == GetEntPropEnt(hMissionTarget, Prop_Send, "m_hBuilder"))
-		{
-			if (GetEntProp(hMissionTarget, Prop_Send, "m_bCarried"))
-			{
+				SetVariantColor(GLOW_COLOR_MISSION);
+				AcceptEntityInput(entity, "SetGlowColor");
+				
 				action = Plugin_Continue;
 			}
 		}

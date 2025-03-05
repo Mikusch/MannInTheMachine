@@ -24,6 +24,9 @@
 
 #define ZERO_VECTOR	{ 0.0, 0.0, 0.0 }
 
+#define GLOW_COLOR_MISSION	{ 255, 255, 255, 255 }
+#define GLOW_COLOR_SQUAD	{ 153, 255, 153, 255 }
+
 #define VEC_HULL_MIN	{ -24.0, -24.0, 0.0 }
 #define VEC_HULL_MAX	{ 24.0, 24.0, 82.0 }
 

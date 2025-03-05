@@ -1950,7 +1950,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		this.m_annotationTimer = null;
 		this.m_delayedNoticeList.Clear();
 		
-		Entity(this.index).CreateGlowEntity( { 153, 255, 153, 255 }, SDKHook_PlayerGlow_SetTransmit);
+		Entity(this.index).CreateGlowEntity(SDKHook_PlayerGlow_SetTransmit);
 	}
 }
 

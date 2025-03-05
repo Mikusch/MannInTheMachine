@@ -187,14 +187,6 @@
 	{
 		"it"		"Consegna la Bomba alla Botola"
 	}
-	"Invader_DelayedThreatNotice_Generic"
-	{
-		"it"		"Minaccia"
-	}
-	"Invader_DelayedThreatNotice_Spy"
-	{
-		"it"		"Spia"
-	}
 	"Invader_DestroySentries_DetonateSentry"
 	{
 		"it"		"Detona"

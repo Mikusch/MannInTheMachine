@@ -187,14 +187,6 @@
 	{
 		"fr"		"Transporte la bombe à la trappe"
 	}
-	"Invader_DelayedThreatNotice_Generic"
-	{
-		"fr"		"Menace"
-	}
-	"Invader_DelayedThreatNotice_Spy"
-	{
-		"fr"		"Spy"
-	}
 	"Invader_DestroySentries_DetonateSentry"
 	{
 		"fr"		"Cible"

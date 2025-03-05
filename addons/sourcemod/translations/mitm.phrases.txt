@@ -187,14 +187,6 @@
 	{
 		"en"		"Deliver The Bomb To The Hatch"
 	}
-	"Invader_DelayedThreatNotice_Generic"
-	{
-		"en"		"Threat"
-	}
-	"Invader_DelayedThreatNotice_Spy"
-	{
-		"en"		"Spy"
-	}
 	"Invader_DestroySentries_DetonateSentry"
 	{
 		"en"		"Detonate"

@@ -187,14 +187,6 @@
 	{
 		"hu"		"Juttasd el a bombát a nyíláshoz"
 	}
-	"Invader_DelayedThreatNotice_Generic"
-	{
-		"hu"		"Fenyegetés"
-	}
-	"Invader_DelayedThreatNotice_Spy"
-	{
-		"hu"		"Kém"
-	}
 	"Invader_DestroySentries_DetonateSentry"
 	{
 		"hu"		"Robbantás"

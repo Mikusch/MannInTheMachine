@@ -209,12 +209,20 @@ static void SDKHook_CTFPlayerResource_ThinkPost(int manager)
 	}
 }
 
-Action SDKHook_PlayerGlow_SetTransmit(int entity, int client)
+Action SDKHook_PlayerGlow_SetTransmit(int glow, int client)
 {
 	Action action = Plugin_Handled;
 	
-	int hEffectEntity = GetEntPropEnt(entity, Prop_Data, "m_hMoveParent");
+	int hEffectEntity = GetEntPropEnt(glow, Prop_Data, "m_hMoveParent");
 	int hMissionTarget = CTFPlayer(client).GetMissionTarget();
+	
+	if (CTFPlayer(client).HasDelayedThreatNotice(hEffectEntity))
+	{
+		SetVariantColor(GLOW_COLOR_THREAT);
+		AcceptEntityInput(glow, "SetGlowColor");
+		
+		action = Plugin_Continue;
+	}
 	
 	// outline player if carrying mission target
 	if (IsValidEntity(hMissionTarget) && IsBaseObject(hMissionTarget))
@@ -224,7 +232,7 @@ Action SDKHook_PlayerGlow_SetTransmit(int entity, int client)
 			if (GetEntProp(hMissionTarget, Prop_Send, "m_bCarried"))
 			{
 				SetVariantColor(GLOW_COLOR_MISSION);
-				AcceptEntityInput(entity, "SetGlowColor");
+				AcceptEntityInput(glow, "SetGlowColor");
 				
 				action = Plugin_Continue;
 			}
@@ -239,17 +247,17 @@ Action SDKHook_PlayerGlow_SetTransmit(int entity, int client)
 		if (hEffectEntity != client && (squad.IsLeader(hEffectEntity) || squad.IsLeader(client) && squad.IsMember(hEffectEntity)))
 		{
 			SetVariantColor(GLOW_COLOR_SQUAD);
-			AcceptEntityInput(entity, "SetGlowColor");
+			AcceptEntityInput(glow, "SetGlowColor");
 			
 			action = Plugin_Continue;
 		}
 	}
 	
-	CBaseEntity(entity).RefreshNetwork(client, action == Plugin_Continue ? true : false);
+	CBaseEntity(glow).RefreshNetwork(client, action == Plugin_Continue ? true : false);
 	return action;
 }
 
-Action SDKHook_ObjectGlow_SetTransmit(int entity, int client)
+Action SDKHook_ObjectGlow_SetTransmit(int glow, int client)
 {
 	Action action = Plugin_Handled;
 	
@@ -258,20 +266,20 @@ Action SDKHook_ObjectGlow_SetTransmit(int entity, int client)
 	// outline mission target if not carried
 	if (IsValidEntity(hMissionTarget) && IsBaseObject(hMissionTarget))
 	{
-		int hEffectEntity = GetEntPropEnt(entity, Prop_Data, "m_hMoveParent");
+		int hEffectEntity = GetEntPropEnt(glow, Prop_Data, "m_hMoveParent");
 		
 		if (hEffectEntity == hMissionTarget)
 		{
 			if (!GetEntProp(hMissionTarget, Prop_Send, "m_bCarried"))
 			{
 				SetVariantColor(GLOW_COLOR_MISSION);
-				AcceptEntityInput(entity, "SetGlowColor");
+				AcceptEntityInput(glow, "SetGlowColor");
 				
 				action = Plugin_Continue;
 			}
 		}
 	}
 	
-	CBaseEntity(entity).RefreshNetwork(client, action == Plugin_Continue ? true : false);
+	CBaseEntity(glow).RefreshNetwork(client, action == Plugin_Continue ? true : false);
 	return action;
 }

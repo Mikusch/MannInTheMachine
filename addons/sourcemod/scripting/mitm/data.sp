@@ -24,7 +24,6 @@ enum struct DelayedNoticeInfo
 {
 	int m_who;
 	float m_when;
-	char m_reason[64];
 }
 
 // Auto Jump
@@ -1506,7 +1505,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		return -1;
 	}
 	
-	public void DelayedThreatNotice(int who, float noticeDelay, const char[] reason = "")
+	public void DelayedThreatNotice(int who, float noticeDelay)
 	{
 		float when = GetGameTime() + noticeDelay;
 		
@@ -1533,7 +1532,6 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		DelayedNoticeInfo delay;
 		delay.m_who = EntIndexToEntRef(who);
 		delay.m_when = when;
-		strcopy(delay.m_reason, sizeof(delay.m_reason), reason);
 		this.m_delayedNoticeList.PushArray(delay);
 	}
 	
@@ -1546,22 +1544,28 @@ methodmap CTFPlayer < CBaseCombatCharacter
 			{
 				if (info.m_when <= GetGameTime())
 				{
-					// delay is up - notice this threat
-					int who = info.m_who;
-					
-					if (IsValidEntity(who))
-					{
-						char reason[64];
-						Format(reason, sizeof(reason), "%T", info.m_reason[0] ? info.m_reason : "Invader_DelayedThreatNotice_Generic", this.index);
-						
-						this.ShowAnnotation(MITM_THREAT_NOTICE_HINT_MASK | this.index, reason, who, _, 5.0, "coach/coach_attack_here.wav", false);
-					}
-					
 					this.m_delayedNoticeList.Erase(i);
 					--i;
 				}
 			}
 		}
+	}
+	
+	public bool HasDelayedThreatNotice(int who)
+	{
+		for (int i = 0; i < this.m_delayedNoticeList.Length; ++i)
+		{
+			DelayedNoticeInfo info;
+			if (this.m_delayedNoticeList.GetArray(i, info))
+			{
+				if (EntRefToEntIndex(info.m_who) == who)
+				{
+					return true;
+				}
+			}
+		}
+		
+		return false;
 	}
 	
 	public void ShowAnnotation(int id, const char[] text, int target = 0, const float worldPos[3] = ZERO_VECTOR, float lifeTime = 10.0, const char[] sound = "ui/hint.wav", bool showDistance = true, bool showEffect = true)

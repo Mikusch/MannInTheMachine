@@ -24,6 +24,7 @@
 
 #define ZERO_VECTOR	{ 0.0, 0.0, 0.0 }
 
+#define GLOW_COLOR_THREAT	{ 255, 0, 0, 255 }
 #define GLOW_COLOR_MISSION	{ 255, 255, 255, 255 }
 #define GLOW_COLOR_SQUAD	{ 153, 255, 153, 255 }
 

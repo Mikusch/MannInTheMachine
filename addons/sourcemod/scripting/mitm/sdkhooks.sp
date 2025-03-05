@@ -218,13 +218,18 @@ Action SDKHook_PlayerGlow_SetTransmit(int glow, int client)
 		int hEffectEntity = GetEntPropEnt(glow, Prop_Data, "m_hMoveParent");
 		int hMissionTarget = CTFPlayer(client).GetMissionTarget();
 		
-		// outline if this is a threat we should notice
-		if (CTFPlayer(client).HasDelayedThreatNotice(hEffectEntity))
+		// outline squad leader or squad members
+		if (CTFPlayer(client).IsInASquad())
 		{
-			SetVariantColor(GLOW_COLOR_THREAT);
-			AcceptEntityInput(glow, "SetGlowColor");
+			CTFBotSquad squad = CTFPlayer(client).GetSquad();
 			
-			action = Plugin_Continue;
+			if (hEffectEntity != client && (squad.IsLeader(hEffectEntity) || squad.IsLeader(client) && squad.IsMember(hEffectEntity)))
+			{
+				SetVariantColor(GLOW_COLOR_SQUAD);
+				AcceptEntityInput(glow, "SetGlowColor");
+				
+				action = Plugin_Continue;
+			}
 		}
 		
 		// outline player if carrying mission target
@@ -239,20 +244,6 @@ Action SDKHook_PlayerGlow_SetTransmit(int glow, int client)
 					
 					action = Plugin_Continue;
 				}
-			}
-		}
-		
-		// outline squad leader or squad members
-		if (CTFPlayer(client).IsInASquad())
-		{
-			CTFBotSquad squad = CTFPlayer(client).GetSquad();
-			
-			if (hEffectEntity != client && (squad.IsLeader(hEffectEntity) || squad.IsLeader(client) && squad.IsMember(hEffectEntity)))
-			{
-				SetVariantColor(GLOW_COLOR_SQUAD);
-				AcceptEntityInput(glow, "SetGlowColor");
-				
-				action = Plugin_Continue;
 			}
 		}
 	}

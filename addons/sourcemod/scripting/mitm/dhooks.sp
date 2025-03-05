@@ -200,12 +200,6 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 	}
 }
 
-void DHooks_HookGameRules()
-{
-	if (g_hDHook_CTeamplayRoundBasedRules_RespawnPlayers)
-		PSM_DHookGameRules(g_hDHook_CTeamplayRoundBasedRules_RespawnPlayers, Hook_Pre, DHookCallback_CTFGameRules_RespawnPlayers_Pre);
-}
-
 void DHooks_HookAlwaysTransmitEntity(int entity)
 {
 	if (g_hDHook_CBaseEntity_UpdateTransmitState)

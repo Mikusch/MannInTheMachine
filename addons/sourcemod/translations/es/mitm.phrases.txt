@@ -176,6 +176,14 @@
 	{
 		"es"		"Entrega la Bomba a la Escotilla"
 	}
+	"Invader_DelayedThreatNotice_Generic"
+	{
+		"es"		"Amenaza"
+	}
+	"Invader_DelayedThreatNotice_Spy"
+	{
+		"es"		"Espía"
+	}
 	"Invader_DestroySentries_DetonateSentry"
 	{
 		"es"		"Detonar"

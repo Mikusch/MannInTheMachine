@@ -230,7 +230,7 @@ static int OnInjured(CTFBotMainAction action, CBaseCombatCharacter actor, CBaseE
 		if (damagecustom == TF_CUSTOM_BACKSTAB)
 		{
 			// backstabs that don't kill me make me mad
-			CTFPlayer(actor).DelayedThreatNotice(inflictor, 0.5);
+			CTFPlayer(actor).DelayedThreatNotice(inflictor, 0.5, "Invader_DelayedThreatNotice_Spy");
 		}
 	}
 	

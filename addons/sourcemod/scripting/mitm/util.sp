@@ -371,6 +371,8 @@ int CreateGlowEntity(int parent, SDKHookCB callback)
 		AcceptEntityInput(glow, "SetParent", parent);
 		
 		PSM_SDKHook(glow, SDKHook_SetTransmit, callback);
+		DHooks_HookAlwaysTransmitEntity(glow);
+		
 		return EntIndexToEntRef(glow);
 	}
 	

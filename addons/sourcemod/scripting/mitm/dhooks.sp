@@ -180,10 +180,9 @@ void DHooks_OnEntityCreated(int entity, const char[] classname)
 		if (g_hDHook_CItem_ComeToRest)
 			PSM_DHookEntity(g_hDHook_CItem_ComeToRest, Hook_Pre, entity, DHookCallback_CCurrencyPack_ComeToRest_Pre);
 	}
-	else if (StrEqual(classname, "tf_glow"))
+	else if (StrEqual(classname, "tf_projectile_pipe_remote"))
 	{
-		if (g_hDHook_CBaseEntity_UpdateTransmitState)
-			PSM_DHookEntity(g_hDHook_CBaseEntity_UpdateTransmitState, Hook_Pre, entity, DHookCallback_CTFGlow_UpdateTransmitState_Pre);
+		DHooks_HookAlwaysTransmitEntity(entity);
 	}
 	else if (HasEntProp(entity, Prop_Data, "CBaseCombatWeaponDefaultTouch"))
 	{
@@ -196,6 +195,12 @@ void DHooks_HookGameRules()
 {
 	if (g_hDHook_CTeamplayRoundBasedRules_RespawnPlayers)
 		PSM_DHookGameRules(g_hDHook_CTeamplayRoundBasedRules_RespawnPlayers, Hook_Pre, DHookCallback_CTFGameRules_RespawnPlayers_Pre);
+}
+
+void DHooks_HookAlwaysTransmitEntity(int entity)
+{
+	if (g_hDHook_CBaseEntity_UpdateTransmitState)
+		PSM_DHookEntity(g_hDHook_CBaseEntity_UpdateTransmitState, Hook_Pre, entity, DHookCallback_CBaseEntity_UpdateTransmitState_Pre);
 }
 
 static void DHooks_CopyScriptFunctionBinding(const char[] sourceClassName, const char[] functionName, const char[] targetClassName, DHookCallback callbackPre = INVALID_FUNCTION, DHookCallback callbackPost = INVALID_FUNCTION, bool bEmpty = true)
@@ -1750,7 +1755,7 @@ static MRESReturn DHookCallback_CCurrencyPack_ComeToRest_Pre(int item)
 	return MRES_Ignored;
 }
 
-static MRESReturn DHookCallback_CTFGlow_UpdateTransmitState_Pre(int glow, DHookReturn ret)
+static MRESReturn DHookCallback_CBaseEntity_UpdateTransmitState_Pre(int glow, DHookReturn ret)
 {
 	ret.Value = FL_EDICT_ALWAYS;
 	return MRES_Supercede;

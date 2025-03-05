@@ -129,22 +129,23 @@ static void SDKHook_CTFPlayer_WeaponSwitchPost(int client, int weapon)
 
 static Action SDKHook_CTFGrenadePipebombProjectile_SetTransmit(int entity, int client)
 {
+	Action action = Plugin_Continue;
+	
 	TFTeam team = view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum"));
-	if (team == TFTeam_Defenders)
+	
+	// do not show defender stickybombs to the invading team
+	if (team == TFTeam_Defenders && team != TF2_GetClientTeam(client))
 	{
-		// do not show defender stickybombs to the invading team
-		if (CTFPlayer(client).IsInvader())
+		// only when fully armed
+		float flCreationTime = GetEntDataFloat(entity, GetOffset("CTFGrenadePipebombProjectile", "m_flCreationTime"));
+		if ((GetGameTime() - flCreationTime) >= SDKCall_CTFGrenadePipebombProjectile_GetLiveTime(entity))
 		{
-			// only when fully armed
-			float flCreationTime = GetEntDataFloat(entity, GetOffset("CTFGrenadePipebombProjectile", "m_flCreationTime"));
-			if ((GetGameTime() - flCreationTime) >= SDKCall_CTFGrenadePipebombProjectile_GetLiveTime(entity))
-			{
-				return Plugin_Handled;
-			}
+			action = Plugin_Handled;
 		}
 	}
 	
-	return Plugin_Continue;
+	CBaseEntity(entity).RefreshNetwork(client, action == Plugin_Continue ? true : false);
+	return action;
 }
 
 static Action SDKHook_CTFBotHintEngineerNest_Think(int entity)

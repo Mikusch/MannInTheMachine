@@ -1,0 +1,434 @@
+"Phrases"
+{
+	"Menu_Header"
+	{
+		"fr"		"MANN DANS LA MACHINE"
+	}
+	"Menu_Main_Title"
+	{
+		"fr"		"➤ Menu principal"
+	}
+	"Menu_Main_Queue"
+	{
+		"fr"		"Voir la file d'attente défenseurs"
+	}
+	"Menu_Main_Preferences"
+	{
+		"fr"		"Changer les préférences"
+	}
+	"Menu_Main_Party"
+	{
+		"fr"		"Ouvrir menu d'équipe"
+	}
+	"Menu_Main_Contributors"
+	{
+		"fr"		"Voir les contributeurs à ce mode de jeu"
+	}
+	"Menu_Queue_Title"
+	{
+		"fr"		"➤ File d'attente défenseurs"
+	}
+	"Menu_Queue_NoPlayers"
+	{
+		"fr"		"Il n'y a aucun joueurs dans la file d'attente"
+	}
+	"Menu_Queue_Title_QueuePoints"
+	{
+		"#format"	"{1:d},{2:d}"
+		"fr"		"Tes points de file d'attente: {1} [#{2}]"
+	}
+	"Menu_Queue_Title_PartyQueuePoints"
+	{
+		"#format"	"{1:d},{2:d}"
+		"fr"		"Les points de file d'attente de ton équipe: {1} [#{2}]"
+	}
+	"Menu_Queue_Title_NotInQueue"
+	{
+		"fr"		"Tu n'es pas dans la file d'attente actuellement."
+	}
+	"Menu_Preferences_Title"
+	{
+		"fr"		"➤ Préférences utilisateur"
+	}
+	"Menu_Preferences_NotLoaded"
+	{
+		"fr"		"Tes préférences sont entrain d'être chargé, merci d'attendre un moment."
+	}
+	"Menu_Contributors_Title"
+	{
+		"fr"		"➤ Contributeurs"
+	}
+	"Menu_Contributors_Mikusch"
+	{
+		"fr"		"Programmation & gameplay"
+	}
+	"Menu_Contributors_Kenzzer"
+	{
+		"fr"		"Assistance programmation & développement bibliothéque"
+	}
+	"Menu_Contributors_trigger_hurt"
+	{
+		"fr"		"Modèles type-robot première personne"
+	}
+	"Preference_DisableDefender"
+	{
+		"fr"		"Désactiver la possibilité de jouer en défenseur"
+	}
+	"Preference_SpectatorMode"
+	{
+		"fr"		"Activer mode spectateur (aucune apparition)"
+	}
+	"Preference_DisableMiniBoss"
+	{
+		"fr"		"Désactiver l'apparition en tant que robot"
+	}
+	"Preference_DisableAnnotations"
+	{
+		"fr"		"Désactiver les bulles explicatives"
+	}
+	"Preference_IgnorePartyInvites"
+	{
+		"fr"		"Bloquer les invitations d'équipe"
+	}
+	"Preference_DisableDefenderReplacement"
+	{
+		"fr"		"Désactiver la possibilité de jouer en défenseur de substitution"
+	}
+	"Preference_DisableCustomViewModels"
+	{
+		"fr"		"Utiliser les modèles type-humain à la première personne"
+	}
+	"SelectedAsDefender"
+	{
+		"fr"		"Tu as été assigné au coté de {red}MANN CO.{default}."
+	}
+	"SelectedAsDefender_Forced"
+	{
+		"fr"		"Tu as été assigné de force au coté de {red}MANN CO.{default} car il n'y pas asser de joueurs éligibles."
+	}
+	"SelectedAsDefender_Replacement"
+	{
+		"fr"		"Tu as été assigné au coté de {red}MANN CO.{default} pour remplir une position vacante."
+	}
+	"SelectedAsInvader"
+	{
+		"fr"		"Tu as été assigné aux {blue}ROBOTS{default}."
+	}
+	"Queue_FeatureDisabled"
+	{
+		"fr"		"Le système de file d'attente est actuellement désactivé."
+	}
+	"Queue_NewDefenders"
+	{
+		"fr"		"Sélection d'un nouveau groupe de défenseurs..."
+	}
+	"Queue_PointsReset"
+	{
+		"fr"		"Tes points de file d'attente ont été remis à zéro."
+	}
+	"Queue_PointsAwarded"
+	{
+		"#format"	"{1:d},{2:d}"
+		"fr"		"Tu as reçus {green}{1} {default}points de file d'attente (Total: {green}{2}{default})."
+	}
+	"Queue_PointsAdded"
+	{
+		"#format"	"{1:d},{2:t}"
+		"fr"		"Ajout de {green}{1} {default}points de file d'attente à {cyan}{2}{default}."
+	}
+	"Squad_NotAllowedToHeal"
+	{
+		"#format"	"{1:N}"
+		"fr"		"Tu ne peux que soigner ton chef d'escouade {1}"
+	}
+	"Squad_NotAllowedToPickUpFlag"
+	{
+		"#format"	"{1:N}"
+		"fr"		"Seulement ton chef d'escouade ({1}) est autorisé à transporter la bombe"
+	}
+	"Invader_NotAllowedToSuicide"
+	{
+		"fr"		"Tu n'es pas autorisé à te suicider en tant que robot"
+	}
+	"Invader_WaitingToSpawn"
+	{
+		"#format"	"{1:d}"
+		"fr"		"Tu es un ROBOT\nLa prochaine vague commence dans {1} secondes"
+	}
+	"Invader_Spawned"
+	{
+		"#format"	"{1:s}"
+		"fr"		"Tu es apparu en tant que: {1}"
+	}
+	"Invader_SpawnTimer_Countdown"
+	{
+		"fr"		"SORT DE LA ZONE DE RÉAPPARITION"
+	}
+	"Invader_SpawnTimer_Warning"
+	{
+		"#format"	"{1:d}"
+		"fr"		"{red}ATTENTION: {default}Si tu meurs dans la zone de réapparition encore {cyan}{1} {default}fois, tu seras expulsé du serveur!"
+	}
+	"Invader_SpawnTimer_KickReason"
+	{
+		"fr"		"Trop de fois morts dans la zone de réapparition"
+	}
+	"Invader_SpawnTimer_Kicked"
+	{
+		"#format"	"{1:N}"
+		"fr"		"{blue}{1} {default}a été expulsé à raison d'avoir été mort trop de fois dans la zone de réapparition."
+	}
+	"Invader_CaptureGate"
+	{
+		"#format"	"{1:s}"
+		"fr"		"Capture {1}"
+	}
+	"Invader_DeliverFlag"
+	{
+		"fr"		"Transporte la bombe à la trappe"
+	}
+	"Invader_DelayedThreatNotice_Generic"
+	{
+		"fr"		"Menace"
+	}
+	"Invader_DelayedThreatNotice_Spy"
+	{
+		"fr"		"Spy"
+	}
+	"Invader_DestroySentries_DetonateSentry"
+	{
+		"fr"		"Cible"
+	}
+	"Invader_DestroySentries_DetonateHere"
+	{
+		"fr"		"Explose ICI pour compléter ta mission"
+	}
+	"Invader_Queue_Header"
+	{
+		"fr"		"PROCHAIN ROBOTS"
+	}
+	"Invader_Deployed"
+	{
+		"#format"	"{1:N},{2:d},{3:d}"
+		"fr"		"{blue}{1} {default}a deployé la bombe avec {lightgreen}{2}{default}/{lightgreen}{3} {default}PV restant."
+	}
+	"Tank_Deployed"
+	{
+		"#format"	"{1:d},{2:d}"
+		"fr"		"{blue}Le char {default}a deployé la bombe avec {lightgreen}{1}{default}/{lightgreen}{2} {default}PV restant."
+	}
+	"Endless_MoreAttributes"
+	{
+		"#format"	"{1:d}"
+		"fr"		"...et {1} de plus"
+	}
+	"Wave_AutoIncremented"
+	{
+		"#format"	"{1:d},{2:0.f},{3:d}"
+		"fr"		"La mission a avancé à la {cyan}Vague {1}{default} avec {lightgreen}{2}%% d'argent{default} car les défenseurs ont perdu {red}{3} fois{default} de suite."
+	}
+	"Spectator_Mode"
+	{
+		"fr"		"Tu es en MODE SPECTATEUR"
+	}
+	"Target_Defenders"
+	{
+		"fr"		"Défenseurs"
+	}
+	"Target_Invaders"
+	{
+		"fr"		"Attaquants"
+	}
+	
+	// Party
+	
+	"Party_Menu_Title"
+	{
+		"fr"		"➤ Menu d'équipe"
+	}
+	"Party_InviteMenu_Title"
+	{
+		"fr"		"➤ Invitations d'équipe en attentes"
+	}
+	"Party_ManageInviteMenu_Title"
+	{
+		"fr"		"➤ Inviter des joueurs"
+	}
+	"Party_ManageMenu_Title"
+	{
+		"fr"		"➤ Gérer l'équipe"
+	}
+	"Party_KickMenu_Title"
+	{
+		"fr"		"➤ Expulser un membre d'équipe"
+	}
+	"Party_KickMenu_NoMembers"
+	{
+		"fr"		"Aucun membre à expulser"
+	}
+	"Party_Menu_CurrentParty"
+	{
+		"#format"	"{1:s}"
+		"fr"		"Ton équipe: {1}"
+	}
+	"Party_Menu_Members"
+	{
+		"#format"	"{1:d},{2:d}"
+		"fr"		"Membres ({1}/{2}):"
+	}
+	"Party_Menu_NotInAParty"
+	{
+		"fr"		"Tu n'es pas dans une équipe."
+	}
+	"Party_Menu_QueuePoints"
+	{
+		"#format"	"{1:d},{2:d}"
+		"fr"		"Points de file d'attente: {1} [#{2}]"
+	}
+	"Party_Menu_NotEnoughMembersForQueue"
+	{
+		"fr"		"Invite plus de joueurs pour rejoindre la file d'attente!"
+	}
+	"Party_Menu_ManageParty"
+	{
+		"fr"		"★ Gérer l'équipe"
+	}
+	"Party_Menu_CreateParty"
+	{
+		"fr"		"Créer une nouvelle équipe"
+	}
+	"Party_Menu_LeaveParty"
+	{
+		"fr"		"Quitter l'équipe"
+	}
+	"Party_Menu_ViewPartyInvites"
+	{
+		"fr"		"Voir les invitations en attentes"
+	}
+	"Party_ManageMenu_InviteMembers"
+	{
+		"fr"		"★ Inviter des joueurs"
+	}
+	"Party_ManageMenu_KickMembers"
+	{
+		"fr"		"★ Expulser un membre"
+	}
+	"Party_ManageInviteMenu_NoPlayers"
+	{
+		"fr"		"Aucun joueurs"
+	}
+	"Party_ManageInviteMenu_AlreadyInvited"
+	{
+		"fr"		"(en attente)"
+	}
+	"Party_InviteMenu_NoPendingInvites"
+	{
+		"fr"		"Aucune invitations en attentes"
+	}
+	"Party_FeatureDisabled"
+	{
+		"fr"		"Le système d'équipe est actuellement désactivé."
+	}
+	"Party_PlayerInvitePending"
+	{
+		"#format"	"{1:N}"
+		"fr"		"{lightgreen}{1} {default}as déjà une invitation en attente."
+	}
+	"Party_PlayerIgnoringInvites"
+	{
+		"#format"	"{1:N}"
+		"fr"		"{lightgreen}{1} {default}as bloqué les invitations d'équipe et ne peut pas être invité."
+	}
+	"Party_PlayerBlocked"
+	{
+		"#format"	"{1:N}"
+		"fr"		"{lightgreen}{1} {default}n'est pas autorisé à rejoindre une équipe."
+	}
+	"Party_InvitedPlayers"
+	{
+		"#format"	"{1:N},{2:s}"
+		"fr"		"Tu as invité {lightgreen}{1} {default}à rejoindre {cyan}{2}{default}."
+	}
+	"Party_DoesNotExist"
+	{
+		"fr"		"Cette équipe n'existe pas. Elle a peut être été dissous."
+	}
+	"Party_AlreadyMember"
+	{
+		"fr"		"Tu es déjà membre de cette équipe!"
+	}
+	"Party_AlreadyInAParty"
+	{
+		"fr"		"Tu es déjà dans une équipe!"
+	}
+	"Party_RequireInvite"
+	{
+		"fr"		"Tu dois avoir une invitation pour rejoindre cette équipe!"
+	}
+	"Party_MaxMembers"
+	{
+		"fr"		"L'équipe est complète, il n'est pas possible d'inviter plus de joueurs."
+	}
+	"Party_Created"
+	{
+		"#format"	"{1:s}"
+		"fr"		"Tu as créé et rejoint automatiquement {cyan}{1}{default}."
+	}
+	"Party_NotAllowed"
+	{
+		"fr"		"Tu n'es pas autorisé à utiliser les fonctionnalités d'équipe."
+	}
+	"Party_Joined"
+	{
+		"#format"	"{1:s}"
+		"fr"		"Tu as rejoint {cyan}{1}{default}."
+	}
+	"Party_JoinedOther"
+	{
+		"#format"	"{1:N}"
+		"fr"		"{lightgreen}{1} {default}a rejoind l'équipe."
+	}
+	"Party_Left"
+	{
+		"#format"	"{1:s}"
+		"fr"		"Tu as quitté {cyan}{1}{default}."
+	}
+	"Party_LeftOther"
+	{
+		"#format"	"{1:N}"
+		"fr"		"{lightgreen}{1} {default}a quitté l'équipe."
+	}
+	"Party_Kicked"
+	{
+		"#format"	"{1:s}"
+		"fr"		"Tu as été retiré de {cyan}{1}{default}."
+	}
+	"Party_KickedOther"
+	{
+		"#format"	"{1:N}"
+		"fr"		"{lightgreen}{1} {default}a été retiré de l'équipe."
+	}
+	"Party_RequireMember"
+	{
+		"fr"		"Tu dois être dans une équipe pour effectuer cette action."
+	}
+	"Party_RequireLeader"
+	{
+		"fr"		"Tu dois être le chef de l'équipe pour effectuer cette action."
+	}
+	"Party_Renamed"
+	{
+		"#format"	"{1:s}"
+		"fr"		"Tu as changé le nom de l'équipe pour {cyan}{1}{default}."
+	}
+	"Party_IncomingInvite"
+	{
+		"#format"	"{1:s},{2:N}"
+		"fr"		"Tu as été invité à rejoindre {cyan}{1}{default} par {lightgreen}{2}{default}. Utilise la commande {yellow}/party {default}pour accepter."
+	}
+	"Party_Name_Default"
+	{
+		"#format"	"{1:N}"
+		"fr"		"L'équipe de {1}"
+	}
+}

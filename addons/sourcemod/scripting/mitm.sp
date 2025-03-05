@@ -241,7 +241,7 @@ public void OnMapStart()
 	g_bInWaitingForPlayers = false;
 	
 	Precache();
-	DHooks_HookGameRules();
+	DHooks_OnMapStart();
 }
 
 public void VScript_OnScriptVMInitialized()

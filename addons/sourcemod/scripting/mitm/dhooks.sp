@@ -138,6 +138,15 @@ void DHooks_VScriptInit()
 	DHooks_CreateScriptDetour(NULL_STRING, "IsPlayerABot", DHookCallback_IsPlayerABot_Pre);
 }
 
+void DHooks_OnMapStart()
+{
+	m_cooldownTimer.Invalidate();
+	m_checkForDangerousSentriesTimer.Invalidate();
+	
+	if (g_hDHook_CTeamplayRoundBasedRules_RespawnPlayers)
+		PSM_DHookGameRules(g_hDHook_CTeamplayRoundBasedRules_RespawnPlayers, Hook_Pre, DHookCallback_CTFGameRules_RespawnPlayers_Pre);
+}
+
 void DHooks_OnEntityCreated(int entity, const char[] classname)
 {
 	if (IsEntityClient(entity))

@@ -1,0 +1,434 @@
+"Phrases"
+{
+	"Menu_Header"
+	{
+		"it"		"MANN IN THE MACHINE"
+	}
+	"Menu_Main_Title"
+	{
+		"it"		"➤ Menù principale"
+	}
+	"Menu_Main_Queue"
+	{
+		"it"		"Visualizza la fila dei difensori"
+	}
+	"Menu_Main_Preferences"
+	{
+		"it"		"Cambia le preferenze"
+	}
+	"Menu_Main_Party"
+	{
+		"it"		"Apri il menù del gruppo"
+	}
+	"Menu_Main_Contributors"
+	{
+		"it"		"Visualizza i collaboratori della modalità di gioco"
+	}
+	"Menu_Queue_Title"
+	{
+		"it"		"➤ Fila dei difensori"
+	}
+	"Menu_Queue_NoPlayers"
+	{
+		"it"		"Non ci sono giocatori in fila"
+	}
+	"Menu_Queue_Title_QueuePoints"
+	{
+		"#format"	"{1:d},{2:d}"
+		"it"		"I tuoi punti fila: {1} [#{2}]"
+	}
+	"Menu_Queue_Title_PartyQueuePoints"
+	{
+		"#format"	"{1:d},{2:d}"
+		"it"		"Punti fila del vostro gruppo: {1} [#{2}]"
+	}
+	"Menu_Queue_Title_NotInQueue"
+	{
+		"it"		"Al momento non sei in coda."
+	}
+	"Menu_Preferences_Title"
+	{
+		"it"		"➤ Preferenze dell'utente"
+	}
+	"Menu_Preferences_NotLoaded"
+	{
+		"it"		"Le preferenze sono ancora in fase di caricamento, attendere un attimo."
+	}
+	"Menu_Contributors_Title"
+	{
+		"it"		"➤ Collaboratori"
+	}
+	"Menu_Contributors_Mikusch"
+	{
+		"it"		"Codice & gameplay"
+	}
+	"Menu_Contributors_Kenzzer"
+	{
+		"it"		"Assistenza alla codifica iniziale e sviluppo della libreria"
+	}
+	"Menu_Contributors_trigger_hurt"
+	{
+		"it"		"Modelli di visualizzazione personalizzati dei robot"
+	}
+	"Preference_DisableDefender"
+	{
+		"it"		"Disabilita il poter giocare come difensore"
+	}
+	"Preference_SpectatorMode"
+	{
+		"it"		"Abilita la modalità spettatore (non vieni generato)"
+	}
+	"Preference_DisableMiniBoss"
+	{
+		"it"		"Disabilita giocare come robot gigante"
+	}
+	"Preference_DisableAnnotations"
+	{
+		"it"		"Disabilita le annotazioni dei suggerimenti"
+	}
+	"Preference_IgnorePartyInvites"
+	{
+		"it"		"Blocca gli inviti al gruppo"
+	}
+	"Preference_DisableDefenderReplacement"
+	{
+		"it"		"Disabilita la selezione come difensore sostitutivo"
+	}
+	"Preference_DisableCustomViewModels"
+	{
+		"it"		"Usa i modelli di visualizzazione umani come robot"
+	}
+	"SelectedAsDefender"
+	{
+		"it"		"Sei stato assegnato alla squadra {red}MANN CO."
+	}
+	"SelectedAsDefender_Forced"
+	{
+		"it"		"Sei stato assegnato forzatamente alla squadra {red}MANN CO.{default} perché non c'erano abbastanza giocatori idonei."
+	}
+	"SelectedAsDefender_Replacement"
+	{
+		"it"		"Sei stato spostato alla squadra {red}MANN CO.{default} per riempire un posto vacante."
+	}
+	"SelectedAsInvader"
+	{
+		"it"		"Sei stato assegnato alla squadra {blue}ROBOT."
+	}
+	"Queue_FeatureDisabled"
+	{
+		"it"		"Il sistema di fila è attualmente disattivato."
+	}
+	"Queue_NewDefenders"
+	{
+		"it"		"Selezionando dei nuovi difensori..."
+	}
+	"Queue_PointsReset"
+	{
+		"it"		"I tuoi punti fila sono stati azzerati."
+	}
+	"Queue_PointsAwarded"
+	{
+		"#format"	"{1:d},{2:d}"
+		"it"		"Ti sono stati assegnati {green}{1} {default}punti fila (Totale: {green}{2}{default})."
+	}
+	"Queue_PointsAdded"
+	{
+		"#format"	"{1:d},{2:t}"
+		"it"		"Aggiunti {green}{1} {default}punti fila a {cyan}{2}{default}."
+	}
+	"Squad_NotAllowedToHeal"
+	{
+		"#format"	"{1:N}"
+		"it"		"Si può curare solo il proprio caposquadra {1}"
+	}
+	"Squad_NotAllowedToPickUpFlag"
+	{
+		"#format"	"{1:N}"
+		"it"		"Solo il tuo caposquadra ({1}) può prendere la bomba"
+	}
+	"Invader_NotAllowedToSuicide"
+	{
+		"it"		"Non è permesso suicidarsi come robot"
+	}
+	"Invader_WaitingToSpawn"
+	{
+		"#format"	"{1:d}"
+		"it"		"Sei un ROBOT\nL'ondata inizierà tra {1} secondi"
+	}
+	"Invader_Spawned"
+	{
+		"#format"	"{1:s}"
+		"it"		"Sei stato generato come: {1}"
+	}
+	"Invader_SpawnTimer_Countdown"
+	{
+		"it"		"LASCIARE L'AREA DI GENERAZIONE"
+	}
+	"Invader_SpawnTimer_Warning"
+	{
+		"#format"	"{1:d}"
+		"it"		"{red}ATTENZIONE: {default}Se muori nell'area di generazione altre {cyan}{1} {default} volte, sarai espulso dal server!"
+	}
+	"Invader_SpawnTimer_KickReason"
+	{
+		"it"		"Troppe morti nell'area di generazione"
+	}
+	"Invader_SpawnTimer_Kicked"
+	{
+		"#format"	"{1:N}"
+		"it"		"{blue}{1} {default}è stato cacciato per essere morto troppe volte nell'area di generazione."
+	}
+	"Invader_CaptureGate"
+	{
+		"#format"	"{1:s}"
+		"it"		"Cattura {1}"
+	}
+	"Invader_DeliverFlag"
+	{
+		"it"		"Consegna la Bomba alla Botola"
+	}
+	"Invader_DelayedThreatNotice_Generic"
+	{
+		"it"		"Minaccia"
+	}
+	"Invader_DelayedThreatNotice_Spy"
+	{
+		"it"		"Spia"
+	}
+	"Invader_DestroySentries_DetonateSentry"
+	{
+		"it"		"Detona"
+	}
+	"Invader_DestroySentries_DetonateHere"
+	{
+		"it"		"Detona qui per completare la tua missione"
+	}
+	"Invader_Queue_Header"
+	{
+		"it"		"GENERAZIONE DELLA PROSSIMA ONDATA"
+	}
+	"Invader_Deployed"
+	{
+		"#format"	"{1:N},{2:d},{3:d}"
+		"it"		"{blue}{1} {default}ha dispiegato la bomba con {lightgreen}{2}{default}/{lightgreen}{3} {default}HP rimasti."
+	}
+	"Tank_Deployed"
+	{
+		"#format"	"{1:d},{2:d}"
+		"it"		"{blue}Il Carro Armato {default}ha dispiegato la bomba con {lightgreen}{1}{default}/{lightgreen}{2} {default}HP rimasti."
+	}
+	"Endless_MoreAttributes"
+	{
+		"#format"	"{1:d}"
+		"it"		"...e altri {1}"
+	}
+	"Wave_AutoIncremented"
+	{
+		"#format"	"{1:d},{2:0.f},{3:d}"
+		"it"		"Avanzati all' {cyan}Ondata {1}{default} con {lightgreen}{2}%% dei crediti raccolti{default} a causa della perdita dei difensori per {red}{3} volte{default} consecutive."
+	}
+	"Spectator_Mode"
+	{
+		"it"		"Sei nella MODALITA' SPETTATORE"
+	}
+	"Target_Defenders"
+	{
+		"it"		"Difensori"
+	}
+	"Target_Invaders"
+	{
+		"it"		"Invasori"
+	}
+	
+	// Party
+	
+	"Party_Menu_Title"
+	{
+		"it"		"➤ Menù del Gruppo"
+	}
+	"Party_InviteMenu_Title"
+	{
+		"it"		"➤ Inviti al Gruppo in attesa"
+	}
+	"Party_ManageInviteMenu_Title"
+	{
+		"it"		"➤ Invita Giocatori"
+	}
+	"Party_ManageMenu_Title"
+	{
+		"it"		"➤ Gestisci Gruppo"
+	}
+	"Party_KickMenu_Title"
+	{
+		"it"		"➤ Espelli Membri del Gruppo"
+	}
+	"Party_KickMenu_NoMembers"
+	{
+		"it"		"Nessun membro da espellere"
+	}
+	"Party_Menu_CurrentParty"
+	{
+		"#format"	"{1:s}"
+		"it"		"Il tuo gruppo: {1}"
+	}
+	"Party_Menu_Members"
+	{
+		"#format"	"{1:d},{2:d}"
+		"it"		"Membri ({1}/{2}):"
+	}
+	"Party_Menu_NotInAParty"
+	{
+		"it"		"Non fai parte di un gruppo."
+	}
+	"Party_Menu_QueuePoints"
+	{
+		"#format"	"{1:d},{2:d}"
+		"it"		"Punti Fila: {1} [#{2}]"
+	}
+	"Party_Menu_NotEnoughMembersForQueue"
+	{
+		"it"		"Invita i giocatori a mettersi in fila insieme!"
+	}
+	"Party_Menu_ManageParty"
+	{
+		"it"		"★ Gestisci Gruppo"
+	}
+	"Party_Menu_CreateParty"
+	{
+		"it"		"Crea un nuovo gruppo"
+	}
+	"Party_Menu_LeaveParty"
+	{
+		"it"		"Lascia il gruppo"
+	}
+	"Party_Menu_ViewPartyInvites"
+	{
+		"it"		"Visualizza gli inviti in sospeso"
+	}
+	"Party_ManageMenu_InviteMembers"
+	{
+		"it"		"★ Invita giocatori"
+	}
+	"Party_ManageMenu_KickMembers"
+	{
+		"it"		"★ Espelli membri"
+	}
+	"Party_ManageInviteMenu_NoPlayers"
+	{
+		"it"		"Nessun giocatore da invitare"
+	}
+	"Party_ManageInviteMenu_AlreadyInvited"
+	{
+		"it"		"(in attesa)"
+	}
+	"Party_InviteMenu_NoPendingInvites"
+	{
+		"it"		"Nessun invito in sospeso"
+	}
+	"Party_FeatureDisabled"
+	{
+		"it"		"Il sistema dei gruppi è attualmente disattivato."
+	}
+	"Party_PlayerInvitePending"
+	{
+		"#format"	"{1:N}"
+		"it"		"{lightgreen}{1} {default}ha già un invito in sospeso."
+	}
+	"Party_PlayerIgnoringInvites"
+	{
+		"#format"	"{1:N}"
+		"it"		"{lightgreen}{1} {default}blocca gli inviti ai gruppi e non può essere invitato."
+	}
+	"Party_PlayerBlocked"
+	{
+		"#format"	"{1:N}"
+		"it"		"{lightgreen}{1} {default}non è autorizzato a partecipare ai gruppi."
+	}
+	"Party_InvitedPlayers"
+	{
+		"#format"	"{1:N},{2:s}"
+		"it"		"Sei stato invitato {lightgreen}{1} {default}a {cyan}{2}{default}."
+	}
+	"Party_DoesNotExist"
+	{
+		"it"		"Il gruppo non esiste. Forse è già stato sciolto."
+	}
+	"Party_AlreadyMember"
+	{
+		"it"		"Sei già un membro di questo gruppo!"
+	}
+	"Party_AlreadyInAParty"
+	{
+		"it"		"Sei già membro di un gruppo"
+	}
+	"Party_RequireInvite"
+	{
+		"it"		"Per partecipare a questo gruppo è necessario un invito!"
+	}
+	"Party_MaxMembers"
+	{
+		"it"		"Questo gruppo è già al completo e non può accettare nuovi membri."
+	}
+	"Party_Created"
+	{
+		"#format"	"{1:s}"
+		"it"		"Hai creato e ti sei unito automaticamente a {cyan}{1}{default}."
+	}
+	"Party_NotAllowed"
+	{
+		"it"		"Non è consentito utilizzare la funzione party."
+	}
+	"Party_Joined"
+	{
+		"#format"	"{1:s}"
+		"it"		"Ti sei unito a {cyan}{1}{default}."
+	}
+	"Party_JoinedOther"
+	{
+		"#format"	"{1:N}"
+		"it"		"{lightgreen}{1} {default}si è unito al gruppo."
+	}
+	"Party_Left"
+	{
+		"#format"	"{1:s}"
+		"it"		"Hai lasciato {cyan}{1}{default}."
+	}
+	"Party_LeftOther"
+	{
+		"#format"	"{1:N}"
+		"it"		"{lightgreen}{1} {default}hai lasciato il gruppo."
+	}
+	"Party_Kicked"
+	{
+		"#format"	"{1:s}"
+		"it"		"Sei stato espulso da {cyan}{1}{default}."
+	}
+	"Party_KickedOther"
+	{
+		"#format"	"{1:N}"
+		"it"		"{lightgreen}{1} {default}è stato espulso dal gruppo."
+	}
+	"Party_RequireMember"
+	{
+		"it"		"È necessario essere in un gruppo per poterlo utilizzare."
+	}
+	"Party_RequireLeader"
+	{
+		"it"		"Per utilizzarlo è necessario essere il capo del gruppo."
+	}
+	"Party_Renamed"
+	{
+		"#format"	"{1:s}"
+		"it"		"Hai rinominato il tuo gruppo in {cyan}{1}{default}."
+	}
+	"Party_IncomingInvite"
+	{
+		"#format"	"{1:s},{2:N}"
+		"it"		"Sei stato invitato a {cyan}{1}{default} da {lightgreen}{2}{default}. Scrivi {yellow}/party {default}per accettare l'invito."
+	}
+	"Party_Name_Default"
+	{
+		"#format"	"{1:N}"
+		"it"		"Gruppo di {1}"
+	}
+}

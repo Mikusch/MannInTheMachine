@@ -192,7 +192,7 @@ void Menus_DisplayQueueMenu(int client)
 	}
 	else
 	{
-		PrintHintText(client, "%t", "Menu_Queue_NotLoaded");
+		PrintHintText(client, "%t", "Menu_Queue_NoPlayers");
 		Menus_DisplayMainMenu(client);
 	}
 	delete queue;

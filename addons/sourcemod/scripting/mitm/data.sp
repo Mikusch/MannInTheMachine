@@ -1554,7 +1554,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 						char reason[64];
 						Format(reason, sizeof(reason), "%T", info.m_reason[0] ? info.m_reason : "Invader_DelayedThreatNotice_Generic", this.index);
 						
-						this.ShowAnnotation(MITM_THREAT_NOTICE_HINT_MASK | this.index, reason, who, _, 5.0, "coach/coach_attack_here.wav", false);
+						this.ShowAnnotation(MITM_THREAT_NOTICE_HINT_MASK | this.index, reason, EntRefToEntIndex(who), _, 5.0, "coach/coach_attack_here.wav", false);
 					}
 					
 					this.m_delayedNoticeList.Erase(i);

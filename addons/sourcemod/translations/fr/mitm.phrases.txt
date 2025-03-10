@@ -80,7 +80,7 @@
 	}
 	"Preference_DisableMiniBoss"
 	{
-		"fr"		"Désactiver l'apparition en tant que robot"
+		"fr"		"Désactiver l'apparition en tant que robot géant"
 	}
 	"Preference_DisableAnnotations"
 	{

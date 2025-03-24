@@ -1655,6 +1655,20 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		this.m_specialFireButtonTimer.Start(duration);
 	}
 	
+	public bool ShouldCharge()
+	{
+		float velocity[3];
+		this.GetPropVector(Prop_Data, "m_vecAbsVelocity", velocity);
+		
+		bool bShouldCharge = true;
+		if (this.HasAttribute(AIR_CHARGE_ONLY) && (this.GetPropEnt(Prop_Send, "m_hGroundEntity") != -1 || velocity[2] > 0.0))
+		{
+			bShouldCharge = false;
+		}
+		
+		return bShouldCharge;
+	}
+	
 	public NextBotAction OpportunisticallyUseWeaponAbilities()
 	{
 		if (!this.m_opportunisticTimer.IsElapsed())
@@ -1663,6 +1677,16 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		}
 		
 		this.m_opportunisticTimer.Start(GetRandomFloat(0.1, 0.2));
+		
+		// if I'm wearing a charge shield, use it!
+		if (TF2_GetPlayerClass(this.index) == TFClass_DemoMan && this.GetProp(Prop_Send, "m_bShieldEquipped"))
+		{
+			bool bShouldCharge = this.ShouldCharge();
+			if (bShouldCharge)
+			{
+				this.PressAltFireButton();
+			}
+		}
 		
 		int numWeapons = this.GetPropArraySize(Prop_Send, "m_hMyWeapons");
 		for (int i = 0; i < numWeapons; ++i)

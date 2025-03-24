@@ -1202,10 +1202,7 @@ static MRESReturn DHookCallback_CTFPlayer_DoClassSpecialSkill_Pre(int player, DH
 {
 	if (TF2_GetPlayerClass(player) == TFClass_DemoMan && GetEntProp(player, Prop_Send, "m_bShieldEquipped"))
 	{
-		float velocity[3];
-		GetEntPropVector(player, Prop_Data, "m_vecAbsVelocity", velocity);
-		
-		if (CTFPlayer(player).HasAttribute(AIR_CHARGE_ONLY) && (GetEntPropEnt(player, Prop_Send, "m_hGroundEntity") != -1 || velocity[2] > 0.0))
+		if (!CTFPlayer(player).ShouldCharge())
 		{
 			ret.Value = false;
 			return MRES_Supercede;

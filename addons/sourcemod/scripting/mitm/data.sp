@@ -1623,18 +1623,21 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		if (!this.HasAttribute(AUTO_JUMP))
 			return false;
 		
-		if (!this.m_autoJumpTimer.HasStarted())
+		if (!this.m_autoJumpTimer.HasStarted() || this.m_autoJumpTimer.IsElapsed())
 		{
-			this.m_autoJumpTimer.Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
-			return true;
-		}
-		else if (this.m_autoJumpTimer.IsElapsed())
-		{
-			this.m_autoJumpTimer.Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
+			this.ResetAutoJumpTimer();
 			return true;
 		}
 		
 		return false;
+	}
+	
+	public void ResetAutoJumpTimer()
+	{
+		if (!this.HasAttribute(AUTO_JUMP))
+			return;
+		
+		this.m_autoJumpTimer.Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
 	}
 	
 	public void PressFireButton(float duration = -1.0)

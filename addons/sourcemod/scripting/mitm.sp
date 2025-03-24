@@ -493,6 +493,12 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 			TE_TFParticleEffectAttachment(szEffectName, client, PATTACH_POINT_FOLLOW, "foot_L");
 			TE_TFParticleEffectAttachment(szEffectName, client, PATTACH_POINT_FOLLOW, "foot_R");
 		}
+		
+		// jumping manually resets auto jump
+		if (player.HasAttribute(AUTO_JUMP))
+		{
+			player.ResetAutoJumpTimer();
+		}
 	}
 }
 

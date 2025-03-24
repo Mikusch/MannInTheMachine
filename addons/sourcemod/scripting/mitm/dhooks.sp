@@ -270,7 +270,7 @@ static void DHooks_CreateScriptDetour(const char[] szClassName, const char[] fun
 
 static MRESReturn DHookCallback_CTFGCServerSystem_PreClientUpdate_Pre()
 {
-	// Allows us to have an MvM server with 32 visible player slots
+	// Allows us to have an MvM server with unlimited visible player slots
 	GameRules_SetProp("m_bPlayingMannVsMachine", false);
 	
 	return MRES_Ignored;

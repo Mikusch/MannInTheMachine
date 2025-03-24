@@ -1671,6 +1671,11 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public NextBotAction OpportunisticallyUseWeaponAbilities()
 	{
+		if (!mitm_bot_force_use_weapon_abilities.BoolValue)
+		{
+			return NULL_ACTION;
+		}
+		
 		if (!this.m_opportunisticTimer.IsElapsed())
 		{
 			return NULL_ACTION;

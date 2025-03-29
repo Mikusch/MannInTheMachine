@@ -37,7 +37,7 @@ void ConVars_Init()
 	mitm_bot_flag_carrier_allow_blast_jumping = CreateConVar("mitm_bot_flag_carrier_allow_blast_jumping", "0", "Whether bots are allowed to blast jump while carrying the flag.");
 	mitm_bot_force_use_weapon_abilities = CreateConVar("mitm_bot_force_use_weapon_abilities", "0", "Whether bots are forced to use their weapon abilities and items.");
 	mitm_romevision = CreateConVar("mitm_romevision", "1", "Whether to allow romevision items to be generated.");
-	mitm_autoincrement_max_wipes = CreateConVar("mitm_autoincrement_max_wipes", "3", "After this many losses the current wave will be skipped.");
+	mitm_autoincrement_max_wipes = CreateConVar("mitm_autoincrement_max_wipes", "2", "After this many losses the current wave will be skipped.");
 	mitm_autoincrement_currency_percentage = CreateConVar("mitm_autoincrement_currency_percentage", "0.90", "Percentage of currency gained from a skipped wave.", _, true, 0.0, true, 1.0);
 	
 	developer = FindConVar("developer");

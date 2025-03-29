@@ -1981,6 +1981,8 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		// MannInTheMachinePlayer
 		this.m_annotationTimer = null;
 		this.m_delayedNoticeList.Clear();
+		
+		Entity(this.index).CreateGlowEntity(SDKHook_PlayerGlow_SetTransmit);
 	}
 }
 

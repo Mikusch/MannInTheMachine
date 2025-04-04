@@ -129,22 +129,23 @@ static void SDKHook_CTFPlayer_WeaponSwitchPost(int client, int weapon)
 
 static Action SDKHook_CTFGrenadePipebombProjectile_SetTransmit(int entity, int client)
 {
+	Action action = Plugin_Continue;
+	
 	TFTeam team = view_as<TFTeam>(GetEntProp(entity, Prop_Data, "m_iTeamNum"));
-	if (team == TFTeam_Defenders)
+	
+	// do not show defender stickybombs to the invading team
+	if (team == TFTeam_Defenders && team != TF2_GetClientTeam(client))
 	{
-		// do not show defender stickybombs to the invading team
-		if (CTFPlayer(client).IsInvader())
+		// only when fully armed
+		float flCreationTime = GetEntDataFloat(entity, GetOffset("CTFGrenadePipebombProjectile", "m_flCreationTime"));
+		if ((GetGameTime() - flCreationTime) >= SDKCall_CTFGrenadePipebombProjectile_GetLiveTime(entity))
 		{
-			// only when fully armed
-			float flCreationTime = GetEntDataFloat(entity, GetOffset("CTFGrenadePipebombProjectile", "m_flCreationTime"));
-			if ((GetGameTime() - flCreationTime) >= SDKCall_CTFGrenadePipebombProjectile_GetLiveTime(entity))
-			{
-				return Plugin_Handled;
-			}
+			action = Plugin_Handled;
 		}
 	}
 	
-	return Plugin_Continue;
+	CBaseEntity(entity).RefreshNetwork(client, action == Plugin_Continue ? true : false);
+	return action;
 }
 
 static Action SDKHook_CTFBotHintEngineerNest_Think(int entity)
@@ -208,43 +209,75 @@ static void SDKHook_CTFPlayerResource_ThinkPost(int manager)
 	}
 }
 
-Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)
+Action SDKHook_PlayerGlow_SetTransmit(int glow, int client)
 {
-	int hEffectEntity = GetEntPropEnt(entity, Prop_Data, "m_hEffectEntity");
+	Action action = Plugin_Handled;
 	
-	if (!IsValidEntity(hEffectEntity))
-		return Plugin_Handled;
-	
-	int hMissionTarget = CTFPlayer(client).GetMissionTarget();
-	if (IsValidEntity(hMissionTarget) && IsBaseObject(hMissionTarget))
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
-		// target sentry - only outline if not carried
-		if (hEffectEntity == hMissionTarget)
+		int hEffectEntity = GetEntPropEnt(glow, Prop_Data, "m_hMoveParent");
+		int hMissionTarget = CTFPlayer(client).GetMissionTarget();
+		
+		// outline squad leader or squad members
+		if (CTFPlayer(client).IsInASquad())
 		{
-			if (!GetEntProp(hMissionTarget, Prop_Send, "m_bCarried"))
+			CTFBotSquad squad = CTFPlayer(client).GetSquad();
+			
+			if (hEffectEntity != client && (squad.IsLeader(hEffectEntity) || squad.IsLeader(client) && squad.IsMember(hEffectEntity)))
 			{
-				return Plugin_Continue;
+				SetVariantColor(GLOW_COLOR_SQUAD);
+				AcceptEntityInput(glow, "SetGlowColor");
+				
+				action = Plugin_Continue;
 			}
 		}
-		// player - only outline if carrying target sentry
-		else if (hEffectEntity == GetEntPropEnt(hMissionTarget, Prop_Send, "m_hBuilder"))
+		
+		// outline player if carrying mission target
+		if (IsValidEntity(hMissionTarget) && IsBaseObject(hMissionTarget))
 		{
-			if (GetEntProp(hMissionTarget, Prop_Send, "m_bCarried"))
+			if (hEffectEntity == GetEntPropEnt(hMissionTarget, Prop_Send, "m_hBuilder"))
 			{
-				return Plugin_Continue;
+				if (GetEntProp(hMissionTarget, Prop_Send, "m_bCarried"))
+				{
+					SetVariantColor(GLOW_COLOR_MISSION);
+					AcceptEntityInput(glow, "SetGlowColor");
+					
+					action = Plugin_Continue;
+				}
 			}
 		}
 	}
 	
-	if (CTFPlayer(client).IsInASquad())
+	CBaseEntity(glow).RefreshNetwork(client, action == Plugin_Continue ? true : false);
+	return action;
+}
+
+Action SDKHook_ObjectGlow_SetTransmit(int glow, int client)
+{
+	Action action = Plugin_Handled;
+	
+	if (TF2_GetClientTeam(client) == TFTeam_Invaders)
 	{
-		CTFBotSquad squad = CTFPlayer(client).GetSquad();
-		if (hEffectEntity != client && (squad.IsLeader(hEffectEntity) || squad.IsLeader(client) && squad.IsMember(hEffectEntity)))
+		int hMissionTarget = CTFPlayer(client).GetMissionTarget();
+		
+		// outline mission target if not carried
+		if (IsValidEntity(hMissionTarget) && IsBaseObject(hMissionTarget))
 		{
-			// show the glow of our squad leader or our squad members
-			return Plugin_Continue;
+			int hEffectEntity = GetEntPropEnt(glow, Prop_Data, "m_hMoveParent");
+			
+			if (hEffectEntity == hMissionTarget)
+			{
+				if (!GetEntProp(hMissionTarget, Prop_Send, "m_bCarried"))
+				{
+					SetVariantColor(GLOW_COLOR_MISSION);
+					AcceptEntityInput(glow, "SetGlowColor");
+					
+					action = Plugin_Continue;
+				}
+			}
 		}
 	}
 	
-	return Plugin_Handled;
+	CBaseEntity(glow).RefreshNetwork(client, action == Plugin_Continue ? true : false);
+	return action;
 }

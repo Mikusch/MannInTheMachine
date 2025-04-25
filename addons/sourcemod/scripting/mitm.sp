@@ -252,10 +252,12 @@ public void VScript_OnScriptVMInitialized()
 	if (!PSM_IsEnabled() || bInitialized)
 		return;
 	
+	bInitialized = true;
+	
 	DHooks_VScriptInit();
 	SDKCalls_VScriptInit();
 	
-	bInitialized = true;
+	VScript_ResetScriptVM();
 }
 
 public void OnConfigsExecuted()

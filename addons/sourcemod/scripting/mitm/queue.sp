@@ -188,8 +188,11 @@ void Queue_SelectDefenders()
 		player.ForceChangeTeam(TFTeam_Spectator);
 		CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsInvader");
 		
-		player.AddQueuePoints(points);
-		CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_PointsAwarded", points, player.GetQueuePoints());
+		if (!CTFPlayer(client).HasPreference(PREF_DEFENDER_DISABLE_QUEUE))
+		{
+			player.AddQueuePoints(points);
+			CPrintToChat(client, "%s %t", PLUGIN_TAG, "Queue_PointsAwarded", points, player.GetQueuePoints());
+		}
 	}
 	
 	// Free the memory

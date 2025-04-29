@@ -676,16 +676,16 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	{
 		if (bIsMiniBoss)
 			this.m_invaderMiniBossPriority++;
-		else
-			this.m_invaderPriority++;
+		
+		this.m_invaderPriority++;
 	}
 	
 	public void ResetInvaderPriority(bool bIsMiniBoss)
 	{
 		if (bIsMiniBoss)
 			this.m_invaderMiniBossPriority = 0;
-		else
-			this.m_invaderPriority = 0;
+		
+		this.m_invaderPriority = 0;
 	}
 	
 	public bool IsValidDefender()

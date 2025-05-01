@@ -484,7 +484,6 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 					event.Fire();
 				}
 			}
-			
 		}
 		
 		newBot.SetScaleOverride(spawner.m_scale);
@@ -1107,7 +1106,12 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 		ret.Value = TFTeam_Defenders;
 		return MRES_Supercede;
 	}
-	else if (g_bAllowTeamChange || (developer.BoolValue && !IsFakeClient(player)))
+	else if (g_bAllowTeamChange)
+	{
+		ret.Value = nDesiredTeam;
+		return MRES_Supercede;
+	}
+	else if (developer.BoolValue && !IsFakeClient(player))
 	{
 		if (nDesiredTeam == TFTeam_Spectator || nDesiredTeam == TFTeam_Defenders)
 			return MRES_Ignored;
@@ -1118,7 +1122,7 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 	else
 	{
 		// player is trying to switch from invaders to a different team
-		if (nCurrentTeam == TFTeam_Invaders && nDesiredTeam != nCurrentTeam && !mitm_bot_allow_suicide.BoolValue)
+		if (!g_bAllowTeamChange && nCurrentTeam == TFTeam_Invaders && nDesiredTeam != nCurrentTeam && !mitm_bot_allow_suicide.BoolValue)
 		{
 			if (IsPlayerAlive(player))
 				PrintCenterText(player, "%t", "Invader_NotAllowedToSuicide");

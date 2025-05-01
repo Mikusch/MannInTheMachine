@@ -1029,6 +1029,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		if (bAllowModelScaling && this.IsMiniBoss())
 		{
 			this.SetModelScale(this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : tf_mvm_miniboss_scale.FloatValue);
+			RunScriptCode(this.index, -1, -1, "NetProps.SetPropVector(self, \"m_vecViewOffset\", self.GetClassEyeHeight())");
 		}
 	}
 	

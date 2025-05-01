@@ -112,5 +112,5 @@ static void ConVarChanged_MinPlayersToStart(ConVar convar, const char[] oldValue
 
 static void ConVarChanged_DefendersTeamSize(ConVar convar, const char[] oldValue, const char[] newValue)
 {
-	tf_mvm_max_invaders.IntValue = MaxClients - convar.IntValue;
+	UpdateMaxInvaders();
 }

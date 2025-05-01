@@ -696,6 +696,8 @@ static void OnPluginStateChanged(bool bEnabled)
 		
 		OnMapStart();
 		
+		UpdateMaxInvaders();
+		
 		if (VScript_IsScriptVMInitialized())
 			VScript_OnScriptVMInitialized();
 	}

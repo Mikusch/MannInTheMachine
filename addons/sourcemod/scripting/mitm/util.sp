@@ -1287,6 +1287,11 @@ void RunScriptCode(int entity, int activator, int caller, const char[] format, a
 	AcceptEntityInput(entity, "RunScriptCode", activator, caller);
 }
 
+void UpdateMaxInvaders()
+{
+	tf_mvm_max_invaders.IntValue = MaxClients - tf_mvm_defenders_team_size.IntValue;
+}
+
 static void Timer_OnWaitingForPlayersEnd(Handle timer)
 {
 	if (g_hWaitingForPlayersTimer != timer)

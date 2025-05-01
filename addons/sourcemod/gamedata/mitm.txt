@@ -137,7 +137,7 @@
 			"CWaveSpawnPopulator::Update"
 			{
 				"linux"		"@_ZN19CWaveSpawnPopulator6UpdateEv"
-				"windows"	"\x55\x8B\xEC\x83\xEC\x4C\x57\x8B\xF9"
+				"windows"	"\x55\x8B\xEC\x83\xEC\x44\x8B\x15\x2A\x2A\x2A\x2A\x53\x56\x57"
 			}
 			"CMissionPopulator::UpdateMission"
 			{
@@ -237,12 +237,12 @@
 			"CCaptureZone::Capture"
 			{
 				"linux"		"@_ZN12CCaptureZone7CaptureEP11CBaseEntity"
-				"windows"	"\x55\x8B\xEC\x51\x53\x57\x8B\x7D\x08\x8B\xD9\x85\xFF\x0F\x84\x2A\x2A\x2A\x2A\x8B\x07\x8B\xCF\x8B\x80\x48\x01\x00\x00\xFF\xD0\x84\xC0\x0F\x84\x2A\x2A\x2A\x2A\x8B\xCF"
+				"windows"	"\x55\x8B\xEC\x51\x53\x57\x8B\x7D\x08\x8B\xD9\x85\xFF\x0F\x84\x2A\x2A\x2A\x2A"
 			}
 			"CWeaponMedigun::AllowedToHealTarget"
 			{
 				"linux"		"@_ZN14CWeaponMedigun19AllowedToHealTargetEP11CBaseEntity"
-				"windows"	"\x55\x8B\xEC\x53\x8B\xD9\x56\x57\x8B\x93\x10\x02\x00\x00\x85\xD2\x0F\x84\x2A\x2A\x2A\x2A\xB9\xFF\x1F\x00\x00\x83\xFA\xFF\x74\x2A\x0F\xB7\xCA\xA1\x2A\x2A\x2A\x2A\xC1\xE1\x04\x8D\x78\x04\x03\xF9\x0F\x84\x2A\x2A\x2A\x2A\xC1\xEA\x10\x39\x57\x04\x0F\x85\x2A\x2A\x2A\x2A\x8B\x3F\x85\xFF\x0F\x84\x2A\x2A\x2A\x2A\x8B\x07\x8B\xCF\x8B\x80\x48\x01\x00\x00\xFF\xD0\x84\xC0\x0F\x84\x2A\x2A\x2A\x2A\x8B\x75\x08\x85\xF6\x74\x2A"
+				"windows"	"\x55\x8B\xEC\x53\x8B\xD9\x56\x57\x8B\x93\x10\x02\x00\x00\x85\xD2\x0F\x84\x2A\x2A\x2A\x2A\xB9\xFF\x1F\x00\x00\x83\xFA\xFF\x74\x2A\x0F\xB7\xCA\xA1\x2A\x2A\x2A\x2A\xC1\xE1\x04\x8D\x78\x04\x03\xF9\x0F\x84\x2A\x2A\x2A\x2A\xC1\xEA\x10\x39\x57\x04\x0F\x85\x2A\x2A\x2A\x2A\x8B\x3F\x85\xFF\x0F\x84\x2A\x2A\x2A\x2A\x8B\x07\x8B\xCF\x8B\x80\x4C\x01\x00\x00\xFF\xD0\x84\xC0\x0F\x84\x2A\x2A\x2A\x2A\x8B\x75\x08\x85\xF6\x74\x2A"
 			}
 			"CPopulationManager::ResetMap"
 			{
@@ -356,48 +356,48 @@
 			}
 			"CBaseEntity::IsCombatItem"
 			{
-				"linux"		"88"
-				"windows"	"87"
+				"linux"		"89"
+				"windows"	"88"
 			}
 			"CBaseEntity::FVisible"
 			{
-				"linux"		"148"
-				"windows"	"148"
+				"linux"		"149"
+				"windows"	"149"
 			}
 			"CBaseObject::IsPlacementPosValid"
 			{
-				"linux"		"341"
-				"windows"	"340"
+				"linux"		"342"
+				"windows"	"341"
 			}
 			"CBaseObject::CanBeUpgraded"
 			{
-				"linux"		"383"
-				"windows"	"382"
+				"linux"		"385"
+				"windows"	"383"
 			}
 			"CBaseObject::GetMaxHealthForCurrentLevel"
 			{
-				"linux"		"392"
-				"windows"	"390"
+				"linux"		"393"
+				"windows"	"391"
 			}
 			"CBaseCombatWeapon::Clip1"
 			{
-				"linux"		"350"
-				"windows"	"344"
+				"linux"		"351"
+				"windows"	"345"
 			}
 			"CTFGrenadePipebombProjectile::GetLiveTime"
 			{
-				"linux"		"257"
-				"windows"	"256"
+				"linux"		"258"
+				"windows"	"257"
 			}
 			"CBaseTrigger::PassesTriggerFilters"
 			{
-				"linux"		"208"
-				"windows"	"207"
+				"linux"		"209"
+				"windows"	"208"
 			}
 			"CItem::ComeToRest"
 			{
-				"linux"		"233"
-				"windows"	"230"
+				"linux"		"234"
+				"windows"	"231"
 			}
 			"IPopulationSpawner::GetClassIcon"
 			{
@@ -411,38 +411,38 @@
 			}
 			"CBaseCombatCharacter::ShouldGib"
 			{
-				"linux"		"297"
-				"windows"	"296"
+				"linux"		"298"
+				"windows"	"297"
 			}
 			"CTFPlayer::IsAllowedToPickUpFlag"
 			{
-				"linux"		"485"
-				"windows"	"484"
+				"linux"		"486"
+				"windows"	"485"
 			}
 			"CBasePlayer::EntSelectSpawnPoint"
 			{
-				"linux"		"404"
-				"windows"	"403"
+				"linux"		"405"
+				"windows"	"404"
 			}
 			"CTFItem::PickUp"
 			{
-				"linux"		"269"
-				"windows"	"231"
+				"linux"		"270"
+				"windows"	"232"
 			}
 			"CTeamplayRoundBasedRules::RespawnPlayers"
 			{
 				"linux"		"216"
-				"windows"	"214"
+				"windows"	"215"
 			}
 			"CBaseCombatCharacter::ClearLastKnownArea"
 			{
-				"linux"		"325"
-				"windows"	"324"
+				"linux"		"326"
+				"windows"	"325"
 			}
 			"CBaseFilter::PassesFilterImpl"
 			{
-				"linux"		"199"
-				"windows"	"198"
+				"linux"		"200"
+				"windows"	"199"
 			}
 			"CGameRules::ShouldCollide"
 			{
@@ -451,8 +451,8 @@
 			}
 			"CTeamplayRules::TeamMayCapturePoint"
 			{
-				"linux"		"160"
-				"windows"	"159"
+				"linux"		"161"
+				"windows"	"160"
 			}
 			
 			// Data Offsets

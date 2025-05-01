@@ -75,6 +75,7 @@ ConVar mitm_setup_time;
 ConVar mitm_max_spawn_deaths;
 ConVar mitm_shield_damage_drain_rate;
 ConVar mitm_bot_taunt_on_upgrade;
+ConVar mitm_bot_flag_carrier_allow_blast_jumping;
 ConVar mitm_romevision;
 ConVar mitm_autoincrement_max_wipes;
 ConVar mitm_autoincrement_currency_percentage;
@@ -251,10 +252,12 @@ public void VScript_OnScriptVMInitialized()
 	if (!PSM_IsEnabled() || bInitialized)
 		return;
 	
+	bInitialized = true;
+	
 	DHooks_VScriptInit();
 	SDKCalls_VScriptInit();
 	
-	bInitialized = true;
+	VScript_ResetScriptVM();
 }
 
 public void OnConfigsExecuted()
@@ -490,6 +493,12 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
 			static char szEffectName[] = "rocketjump_smoke";
 			TE_TFParticleEffectAttachment(szEffectName, client, PATTACH_POINT_FOLLOW, "foot_L");
 			TE_TFParticleEffectAttachment(szEffectName, client, PATTACH_POINT_FOLLOW, "foot_R");
+		}
+		
+		// jumping manually resets auto jump
+		if (player.HasAttribute(AUTO_JUMP))
+		{
+			player.ResetAutoJumpTimer();
 		}
 	}
 }

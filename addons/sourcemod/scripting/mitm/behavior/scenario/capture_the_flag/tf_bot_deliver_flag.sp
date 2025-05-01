@@ -140,7 +140,7 @@ static int OnStart(CTFBotDeliverFlag action, int actor, NextBotAction priorActio
 		}
 	}
 	
-	if (IsMannVsMachineMode() && CTFPlayer(actor).GetDifficulty() < EXPERT)
+	if (IsMannVsMachineMode() && !mitm_bot_flag_carrier_allow_blast_jumping.BoolValue)
 	{
 		TF2Attrib_SetByName(actor, "self dmg push force decreased", 0.0);
 	}

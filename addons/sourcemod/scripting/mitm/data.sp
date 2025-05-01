@@ -676,16 +676,16 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	{
 		if (bIsMiniBoss)
 			this.m_invaderMiniBossPriority++;
-		else
-			this.m_invaderPriority++;
+		
+		this.m_invaderPriority++;
 	}
 	
 	public void ResetInvaderPriority(bool bIsMiniBoss)
 	{
 		if (bIsMiniBoss)
 			this.m_invaderMiniBossPriority = 0;
-		else
-			this.m_invaderPriority = 0;
+		
+		this.m_invaderPriority = 0;
 	}
 	
 	public bool IsValidDefender()
@@ -1029,6 +1029,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		if (bAllowModelScaling && this.IsMiniBoss())
 		{
 			this.SetModelScale(this.m_fModelScaleOverride > 0.0 ? this.m_fModelScaleOverride : tf_mvm_miniboss_scale.FloatValue);
+			RunScriptCode(this.index, -1, -1, "NetProps.SetPropVector(self, \"m_vecViewOffset\", self.GetClassEyeHeight())");
 		}
 	}
 	
@@ -1623,18 +1624,21 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		if (!this.HasAttribute(AUTO_JUMP))
 			return false;
 		
-		if (!this.m_autoJumpTimer.HasStarted())
+		if (!this.m_autoJumpTimer.HasStarted() || this.m_autoJumpTimer.IsElapsed())
 		{
-			this.m_autoJumpTimer.Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
-			return true;
-		}
-		else if (this.m_autoJumpTimer.IsElapsed())
-		{
-			this.m_autoJumpTimer.Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
+			this.ResetAutoJumpTimer();
 			return true;
 		}
 		
 		return false;
+	}
+	
+	public void ResetAutoJumpTimer()
+	{
+		if (!this.HasAttribute(AUTO_JUMP))
+			return;
+		
+		this.m_autoJumpTimer.Start(GetRandomFloat(this.m_flAutoJumpMin, this.m_flAutoJumpMax));
 	}
 	
 	public void PressFireButton(float duration = -1.0)
@@ -1663,6 +1667,18 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		}
 		
 		this.m_opportunisticTimer.Start(GetRandomFloat(0.1, 0.2));
+		
+		// if I'm wearing a charge shield, use it!
+		if (TF2_GetPlayerClass(this.index) == TFClass_DemoMan && this.GetProp(Prop_Send, "m_bShieldEquipped"))
+		{
+			float velocity[3];
+			this.GetPropVector(Prop_Data, "m_vecAbsVelocity", velocity);
+			
+			if (this.HasAttribute(AIR_CHARGE_ONLY) && (this.GetPropEnt(Prop_Send, "m_hGroundEntity") == -1 && velocity[2] <= 0.0))
+			{
+				this.PressAltFireButton();
+			}
+		}
 		
 		int numWeapons = this.GetPropArraySize(Prop_Send, "m_hMyWeapons");
 		for (int i = 0; i < numWeapons; ++i)

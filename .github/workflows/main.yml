@@ -7,23 +7,21 @@ on:
 
 env:
   PLUGIN_NAME: mitm
+  SCRIPTS_PATH: addons/sourcemod/scripting
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        sm-version: ['1.12.x']
+        sm-version: [ '1.12.x' ]
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set environment variables
-        run: echo "SCRIPTS_PATH=$(pwd)" >> $GITHUB_ENV
-
-      - name: Create include directory
-        run: mkdir -p ${{ env.SCRIPTS_PATH }}/addons/sourcemod/scripting/include
+      - name: Prepare include directory
+        run: mkdir -p ${{ env.SCRIPTS_PATH }}/include
 
       - name: Download repositories
         run: |
@@ -40,8 +38,8 @@ jobs:
           
             find "$repo_name" -type f -name "*.inc" | while read -r file; do
               relative_path="${file#*/scripting/include/}"
-              mkdir -p "${{ env.SCRIPTS_PATH }}/addons/sourcemod/scripting/include/$(dirname "$relative_path")"
-              mv "$file" "${{ env.SCRIPTS_PATH }}/addons/sourcemod/scripting/include/$relative_path"
+              mkdir -p "${{ env.SCRIPTS_PATH }}/include/$(dirname "$relative_path")"
+              mv "$file" "${{ env.SCRIPTS_PATH }}/include/$relative_path"
             done
           
             rm -rf "$repo_name"
@@ -50,21 +48,20 @@ jobs:
       - name: Download include files
         run: |
           declare -A includes=(
-            ["https://raw.githubusercontent.com/DoctorMcKay/sourcemod-plugins/master/scripting/include/morecolors.inc"]="addons/sourcemod/scripting/include/morecolors.inc"
-            ["https://raw.githubusercontent.com/Mikusch/PluginStateManager/master/addons/sourcemod/scripting/include/pluginstatemanager.inc"]="addons/sourcemod/scripting/include/pluginstatemanager.inc"
-            ["https://raw.githubusercontent.com/haxtonsale/LoadSoundScript/refs/heads/master/sourcepawn/loadsoundscript.inc"]="addons/sourcemod/scripting/include/loadsoundscript.inc"
-            ["https://raw.githubusercontent.com/nosoop/SM-TFUtils/refs/heads/master/scripting/include/tf2utils.inc"]="addons/sourcemod/scripting/include/tf2utils.inc"
-            ["https://raw.githubusercontent.com/FlaminSarge/tf2attributes/refs/heads/master/scripting/include/tf2attributes.inc"]="addons/sourcemod/scripting/include/tf2attributes.inc"
-            ["https://raw.githubusercontent.com/nosoop/SM-TFEconData/refs/heads/master/scripting/include/tf_econ_data.inc"]="addons/sourcemod/scripting/include/tf_econ_data.inc"
-            ["https://raw.githubusercontent.com/FortyTwoFortyTwo/VScript/refs/heads/main/scripting/include/vscript.inc"]="addons/sourcemod/scripting/include/vscript.inc"
-            ["https://raw.githubusercontent.com/nosoop/SMExt-SourceScramble/refs/heads/master/scripting/include/sourcescramble.inc"]="addons/sourcemod/scripting/include/sourcescramble.inc"
+            ["https://raw.githubusercontent.com/DoctorMcKay/sourcemod-plugins/master/scripting/include/morecolors.inc"]="morecolors.inc"
+            ["https://raw.githubusercontent.com/Mikusch/PluginStateManager/master/addons/sourcemod/scripting/include/pluginstatemanager.inc"]="pluginstatemanager.inc"
+            ["https://raw.githubusercontent.com/haxtonsale/LoadSoundScript/refs/heads/master/sourcepawn/loadsoundscript.inc"]="loadsoundscript.inc"
+            ["https://raw.githubusercontent.com/nosoop/SM-TFUtils/refs/heads/master/scripting/include/tf2utils.inc"]="tf2utils.inc"
+            ["https://raw.githubusercontent.com/FlaminSarge/tf2attributes/refs/heads/master/scripting/include/tf2attributes.inc"]="tf2attributes.inc"
+            ["https://raw.githubusercontent.com/nosoop/SM-TFEconData/refs/heads/master/scripting/include/tf_econ_data.inc"]="tf_econ_data.inc"
+            ["https://raw.githubusercontent.com/FortyTwoFortyTwo/VScript/refs/heads/main/scripting/include/vscript.inc"]="vscript.inc"
+            ["https://raw.githubusercontent.com/nosoop/SMExt-SourceScramble/refs/heads/master/scripting/include/sourcescramble.inc"]="sourcescramble.inc"
           )
 
           for url in "${!includes[@]}"; do
-            target_path="${includes[$url]}"
-            mkdir -p "$(dirname "$target_path")"
-            echo "Downloading $url -> $target_path"
-            curl -sSL "$url" -o "$target_path"
+            filename="${includes[$url]}"
+            echo "Downloading $url -> $filename"
+            curl -sSL "$url" -o "${{ env.SCRIPTS_PATH }}/include/$filename"
           done
 
       - name: Setup SourcePawn Compiler ${{ matrix.sm-version }}
@@ -72,43 +69,43 @@ jobs:
         uses: rumblefrog/setup-sp@master
         with:
           version: ${{ matrix.sm-version }}
-          version-file: ./addons/sourcemod/scripting/${{ env.PLUGIN_NAME }}.sp
+          version-file: ${{ env.SCRIPTS_PATH }}/${{ env.PLUGIN_NAME }}.sp
           define-name: PLUGIN_VERSION
 
-      - name: Compile plugins
+      - name: Compile plugin
         run: |
           mkdir -p ../plugins
-          spcomp -v2 -E -i "include" -o "../plugins/${{ env.PLUGIN_NAME }}.smx" ${{ env.PLUGIN_NAME }}.sp
-          echo "===OUT FILES==="
+          spcomp -v2 -E -i "include" -o "../plugins/${{ env.PLUGIN_NAME }}.smx" "${{ env.PLUGIN_NAME }}.sp"
+          echo "=== OUT FILES ==="
           ls ../plugins
-          echo "===VERSION==="
+          echo "=== VERSION ==="
           echo ${{ steps.setup_sp.outputs.plugin-version }}
-        working-directory: ${{ env.SCRIPTS_PATH }}/addons/sourcemod/scripting
+        working-directory: ${{ env.SCRIPTS_PATH }}
 
-      - name: Install zip
+      - name: Install zip utility
         uses: montudor/action-zip@v1
 
       - name: Zip output
         run: |
-          zip -qq -y -r ${{ github.event.repository.name }}.zip configs plugins scripting extensions gamedata translations data
-        working-directory: ${{ env.SCRIPTS_PATH }}/addons/sourcemod
+          zip -qq -r ${{ github.event.repository.name }}.zip addons/sourcemod
 
-      - name: List files in the directory
-        run: ls -R
-        working-directory: ${{ env.SCRIPTS_PATH }}/addons/sourcemod
+      - name: List build outputs
+        run: |
+          echo "::group::Directory contents"
+          ls -R
+          echo "::endgroup::"
+          echo "::group::Zip contents"
+          unzip -l ${{ github.event.repository.name }}.zip
+          echo "::endgroup::"
 
-      - name: List files in the zip
-        run: unzip -l ${{ github.event.repository.name }}.zip
-        working-directory: ${{ env.SCRIPTS_PATH }}/addons/sourcemod
-
-      - name: Create Release
+      - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ steps.setup_sp.outputs.plugin-version }}
-          artifacts: addons/sourcemod/${{ github.event.repository.name }}.zip
+          artifacts: ./${{ github.event.repository.name }}.zip
           draft: true
           allowUpdates: true
           updateOnlyUnreleased: true

@@ -86,6 +86,7 @@ ConVar tf_avoidteammates_pushaway;
 ConVar tf_deploying_bomb_delay_time;
 ConVar tf_deploying_bomb_time;
 ConVar tf_mvm_defenders_team_size;
+ConVar tf_mvm_max_invaders;
 ConVar tf_mvm_miniboss_scale;
 ConVar tf_mvm_min_players_to_start;
 ConVar tf_mvm_bot_allow_flag_carrier_to_fight;

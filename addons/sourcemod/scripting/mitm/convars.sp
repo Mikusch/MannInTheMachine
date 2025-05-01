@@ -44,6 +44,7 @@ void ConVars_Init()
 	tf_deploying_bomb_delay_time = FindConVar("tf_deploying_bomb_delay_time");
 	tf_deploying_bomb_time = FindConVar("tf_deploying_bomb_time");
 	tf_mvm_defenders_team_size = FindConVar("tf_mvm_defenders_team_size");
+	tf_mvm_max_invaders = FindConVar("tf_mvm_max_invaders");
 	tf_mvm_miniboss_scale = FindConVar("tf_mvm_miniboss_scale");
 	tf_mvm_min_players_to_start = FindConVar("tf_mvm_min_players_to_start");
 	tf_mvm_bot_allow_flag_carrier_to_fight = FindConVar("tf_mvm_bot_allow_flag_carrier_to_fight");
@@ -71,6 +72,7 @@ void ConVars_Init()
 	PSM_AddConVarChangeHook(mitm_custom_upgrades_file, ConVarChanged_CustomUpgradesFile);
 	PSM_AddConVarChangeHook(mitm_party_enabled, ConVarChanged_PartyEnabled);
 	PSM_AddConVarChangeHook(tf_mvm_min_players_to_start, ConVarChanged_MinPlayersToStart);
+	PSM_AddConVarChangeHook(tf_mvm_defenders_team_size, ConVarChanged_DefendersTeamSize);
 }
 
 static void ConVarChanged_CustomUpgradesFile(ConVar convar, const char[] oldValue, const char[] newValue)
@@ -106,4 +108,9 @@ static void ConVarChanged_MinPlayersToStart(ConVar convar, const char[] oldValue
 	
 	// Don't allow maps to modify this using point_servercommand
 	convar.IntValue = MaxClients + 1;
+}
+
+static void ConVarChanged_DefendersTeamSize(ConVar convar, const char[] oldValue, const char[] newValue)
+{
+	tf_mvm_max_invaders.IntValue = MaxClients - convar.IntValue;
 }

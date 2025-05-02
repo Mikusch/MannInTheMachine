@@ -1,4 +1,4 @@
-name: Compile and Release
+name: Compile and release
 
 on:
   push:
@@ -41,27 +41,28 @@ jobs:
               mkdir -p "${{ env.SCRIPTS_PATH }}/include/$(dirname "$relative_path")"
               mv "$file" "${{ env.SCRIPTS_PATH }}/include/$relative_path"
             done
-          
+
             rm -rf "$repo_name"
           done
 
       - name: Download include files
         run: |
-          declare -A includes=(
-            ["https://raw.githubusercontent.com/DoctorMcKay/sourcemod-plugins/master/scripting/include/morecolors.inc"]="morecolors.inc"
-            ["https://raw.githubusercontent.com/Mikusch/PluginStateManager/master/addons/sourcemod/scripting/include/pluginstatemanager.inc"]="pluginstatemanager.inc"
-            ["https://raw.githubusercontent.com/haxtonsale/LoadSoundScript/refs/heads/master/sourcepawn/loadsoundscript.inc"]="loadsoundscript.inc"
-            ["https://raw.githubusercontent.com/nosoop/SM-TFUtils/refs/heads/master/scripting/include/tf2utils.inc"]="tf2utils.inc"
-            ["https://raw.githubusercontent.com/FlaminSarge/tf2attributes/refs/heads/master/scripting/include/tf2attributes.inc"]="tf2attributes.inc"
-            ["https://raw.githubusercontent.com/nosoop/SM-TFEconData/refs/heads/master/scripting/include/tf_econ_data.inc"]="tf_econ_data.inc"
-            ["https://raw.githubusercontent.com/FortyTwoFortyTwo/VScript/refs/heads/main/scripting/include/vscript.inc"]="vscript.inc"
-            ["https://raw.githubusercontent.com/nosoop/SMExt-SourceScramble/refs/heads/master/scripting/include/sourcescramble.inc"]="sourcescramble.inc"
+          includes=(
+            "https://raw.githubusercontent.com/DoctorMcKay/sourcemod-plugins/master/scripting/include/morecolors.inc"
+            "https://raw.githubusercontent.com/Mikusch/PluginStateManager/master/addons/sourcemod/scripting/include/pluginstatemanager.inc"
+            "https://raw.githubusercontent.com/haxtonsale/LoadSoundScript/refs/heads/master/sourcepawn/loadsoundscript.inc"
+            "https://raw.githubusercontent.com/nosoop/SM-TFUtils/refs/heads/master/scripting/include/tf2utils.inc"
+            "https://raw.githubusercontent.com/FlaminSarge/tf2attributes/refs/heads/master/scripting/include/tf2attributes.inc"
+            "https://raw.githubusercontent.com/nosoop/SM-TFEconData/refs/heads/master/scripting/include/tf_econ_data.inc"
+            "https://raw.githubusercontent.com/FortyTwoFortyTwo/VScript/refs/heads/main/scripting/include/vscript.inc"
+            "https://raw.githubusercontent.com/nosoop/SMExt-SourceScramble/refs/heads/master/scripting/include/sourcescramble.inc"
           )
 
-          for url in "${!includes[@]}"; do
-            filename="${includes[$url]}"
-            echo "Downloading $url -> $filename"
-            curl -sSL "$url" -o "${{ env.SCRIPTS_PATH }}/include/$filename"
+          mkdir -p "${{ env.SCRIPTS_PATH }}/include"
+
+          for url in "${includes[@]}"; do
+            echo "Downloading $url"
+            curl -sSL -O --output-dir "${{ env.SCRIPTS_PATH }}/include" "$url"
           done
 
       - name: Setup SourcePawn Compiler ${{ matrix.sm-version }}

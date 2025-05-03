@@ -371,7 +371,7 @@
 			}
 			"CBaseObject::CanBeUpgraded"
 			{
-				"linux"		"385"
+				"linux"		"384"
 				"windows"	"383"
 			}
 			"CBaseObject::GetMaxHealthForCurrentLevel"
@@ -451,8 +451,8 @@
 			}
 			"CTeamplayRules::TeamMayCapturePoint"
 			{
-				"linux"		"161"
-				"windows"	"160"
+				"linux"		"160"
+				"windows"	"159"
 			}
 			
 			// Data Offsets

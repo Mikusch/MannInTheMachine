@@ -39,7 +39,7 @@
 // Uncomment this for diagnostic messages in server console (very verbose)
 // #define DEBUG
 
-#define PLUGIN_VERSION	"1.1.3"
+#define PLUGIN_VERSION	"1.1.4"
 
 // Global entities
 CMannVsMachineStats g_pMVMStats = view_as<CMannVsMachineStats>(INVALID_ENT_REFERENCE);

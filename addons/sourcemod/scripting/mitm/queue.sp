@@ -67,7 +67,7 @@ ArrayList Queue_GetDefenderQueue()
 			continue;
 		
 		// ignore party clients (see above)
-		if (queue.FindValue(client, QueueData::m_client) != -1)
+		if (CTFPlayer(client).IsInAParty() && CTFPlayer(client).GetParty().GetMemberCount() > 1)
 			continue;
 		
 		if (!CTFPlayer(client).IsValidDefender())

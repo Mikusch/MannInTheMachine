@@ -201,6 +201,7 @@ public void OnPluginStart()
 	
 	PSM_Init("mitm_enabled", hGameConf);
 	PSM_AddPluginStateChangedHook(OnPluginStateChanged);
+	PSM_AddShouldEnableCallback(ShouldEnable);
 	
 	Entity.Init();
 	
@@ -710,6 +711,11 @@ static void OnPluginStateChanged(bool bEnabled)
 			g_pGameRules.SetCustomUpgradesFile(DEFAULT_UPGRADES_FILE);
 		}
 	}
+}
+
+static bool ShouldEnable()
+{
+	return IsMannVsMachineMode();
 }
 
 static void Precache()

@@ -31,6 +31,7 @@ static DynamicHook g_hDHook_CBaseFilter_PassesFilterImpl;
 static DynamicHook g_hDHook_CTFItem_PickUp;
 static DynamicHook g_hDHook_CTeamplayRoundBasedRules_RespawnPlayers;
 
+static bool g_bPrevPlayingMannVsMachine;
 static ArrayList m_justSpawnedList;
 
 static int g_internalSpawnPoint = INVALID_ENT_REFERENCE;
@@ -271,6 +272,7 @@ static void DHooks_CreateScriptDetour(const char[] szClassName, const char[] fun
 static MRESReturn DHookCallback_CTFGCServerSystem_PreClientUpdate_Pre()
 {
 	// Allows us to have an MvM server with unlimited visible player slots
+	g_bPrevPlayingMannVsMachine = GameRules_GetProp("m_bPlayingMannVsMachine") != 0;
 	GameRules_SetProp("m_bPlayingMannVsMachine", false);
 	
 	return MRES_Ignored;
@@ -279,7 +281,7 @@ static MRESReturn DHookCallback_CTFGCServerSystem_PreClientUpdate_Pre()
 static MRESReturn DHookCallback_CTFGCServerSystem_PreClientUpdate_Post()
 {
 	// Set it back afterwards
-	GameRules_SetProp("m_bPlayingMannVsMachine", true);
+	GameRules_SetProp("m_bPlayingMannVsMachine", g_bPrevPlayingMannVsMachine);
 	
 	return MRES_Ignored;
 }

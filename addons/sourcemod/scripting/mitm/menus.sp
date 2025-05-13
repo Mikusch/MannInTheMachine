@@ -56,7 +56,7 @@ void Menus_DisplayMainMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_MainMenu, MenuAction_Select | MenuAction_End | MenuAction_DisplayItem);
 	
-	menu.SetTitle("%t\n%t", "Menu_Header", "Menu_Main_Title");
+	menu.SetTitle("%T\n%T", "Menu_Header", client, "Menu_Main_Title", client);
 	
 	if (Queue_IsEnabled())
 		menu.AddItem(MENU_INFO_QUEUE, "Menu_Main_Queue");
@@ -262,7 +262,7 @@ static int MenuHandler_QueueMenu(Menu menu, MenuAction action, int param1, int p
 void Menus_DisplayPreferencesMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_PreferencesMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
-	menu.SetTitle("%t\n%t", "Menu_Header", "Menu_Preferences_Title");
+	menu.SetTitle("%T\n%T", "Menu_Header", client, "Menu_Preferences_Title", client);
 	menu.ExitBackButton = true;
 	
 	AddPreferenceToMenu(menu, PREF_DEFENDER_DISABLE_QUEUE, "Preference_DisableDefender");
@@ -468,7 +468,7 @@ static int MenuHandler_PartyMenu(Menu menu, MenuAction action, int param1, int p
 void Menus_DisplayPartyManageMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_PartyManageMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
-	menu.SetTitle("%t\n%t", "Menu_Header", "Party_ManageMenu_Title");
+	menu.SetTitle("%T\n%T", "Menu_Header", client, "Party_ManageMenu_Title", client);
 	menu.ExitBackButton = true;
 	
 	menu.AddItem("invite_members", "Party_ManageMenu_InviteMembers");
@@ -518,7 +518,7 @@ static int MenuHandler_PartyManageMenu(Menu menu, MenuAction action, int param1,
 void Menus_DisplayPartyManageInviteMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_PartyManageInviteMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
-	menu.SetTitle("%t\n%t", "Menu_Header", "Party_ManageInviteMenu_Title");
+	menu.SetTitle("%T\n%T", "Menu_Header", client, "Party_ManageInviteMenu_Title", client);
 	menu.ExitBackButton = true;
 	
 	for (int other = 1; other <= MaxClients; other++)
@@ -627,7 +627,7 @@ void Menus_DisplayPartyManageKickMenu(int client)
 	Party party = CTFPlayer(client).GetParty();
 	
 	Menu menu = new Menu(MenuHandler_PartyKickMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
-	menu.SetTitle("%t\n%t", "Menu_Header", "Party_KickMenu_Title");
+	menu.SetTitle("%T\n%T", "Menu_Header", client, "Party_KickMenu_Title", client);
 	menu.ExitBackButton = true;
 	
 	int[] members = new int[MaxClients];
@@ -703,7 +703,7 @@ static int MenuHandler_PartyKickMenu(Menu menu, MenuAction action, int param1, i
 void Menus_DisplayPartyInviteMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_PartyInviteMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
-	menu.SetTitle("%t\n%t", "Menu_Header", "Party_InviteMenu_Title");
+	menu.SetTitle("%T\n%T", "Menu_Header", client, "Party_InviteMenu_Title", client);
 	menu.ExitBackButton = true;
 	
 	ArrayList parties = Party_GetAllActiveParties();
@@ -771,7 +771,7 @@ static int MenuHandler_PartyInviteMenu(Menu menu, MenuAction action, int param1,
 void Menus_DisplayContributorsMenu(int client)
 {
 	Menu menu = new Menu(MenuHandler_ContributorsMenu, MenuAction_Select | MenuAction_Cancel | MenuAction_End | MenuAction_DisplayItem);
-	menu.SetTitle("%t\n%t", "Menu_Header", "Menu_Contributors_Title");
+	menu.SetTitle("%T\n%T", "Menu_Header", client, "Menu_Contributors_Title", client);
 	menu.ExitBackButton = true;
 	
 	for (int i = 0; i < g_contributors.Length; i++)

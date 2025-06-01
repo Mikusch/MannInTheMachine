@@ -98,6 +98,14 @@
 	{
 		"en"		"Use human viewmodels as robot"
 	}
+	"SpectatorMode_Enabled"
+	{
+		"en"		"You are now in {gray}SPECTATOR MODE{default}."
+	}
+	"SpectatorMode_Disabled"
+	{
+		"en"		"You are no longer in {gray}SPECTATOR MODE{default}."
+	}
 	"SelectedAsDefender"
 	{
 		"en"		"You have been assigned to the {red}MANN CO.{default} team."

@@ -297,7 +297,7 @@ static int MenuHandler_PreferencesMenu(Menu menu, MenuAction action, int param1,
 			
 			MannInTheMachinePreference preference = view_as<MannInTheMachinePreference>(StringToInt(info));
 			
-			CTFPlayer(param1).SetPreference(preference, !CTFPlayer(param1).HasPreference(preference));
+			CTFPlayer(param1).TogglePreference(preference);
 			
 			Menus_DisplayPreferencesMenu(param1);
 		}

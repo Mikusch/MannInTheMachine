@@ -25,6 +25,7 @@ void Console_Init()
 	RegConsoleCmd("sm_preferences", ConCmd_Settings, "Opens the preferences menu.");
 	RegConsoleCmd("sm_party", ConCmd_Party, "Opens the party menu.");
 	RegConsoleCmd("sm_contributors", ConCmd_Contributors, "Opens the contributor menu.");
+	RegConsoleCmd("sm_afk", ConCmd_ToggleSpectatorMode, "Toggles spectator mode.");
 	
 	RegAdminCmd("sm_addqueue", ConCmd_AddQueuePoints, ADMFLAG_CHEATS, "Adds defender queue points to a player.");
 	
@@ -115,6 +116,23 @@ static Action ConCmd_Contributors(int client, int args)
 	}
 	
 	Menus_DisplayContributorsMenu(client);
+	return Plugin_Handled;
+}
+
+static Action ConCmd_ToggleSpectatorMode(int client, int args)
+{
+	if (!PSM_IsEnabled())
+		return Plugin_Continue;
+	
+	if (client == 0)
+	{
+		ReplyToCommand(client, "%t", "Command is in-game only");
+		return Plugin_Handled;
+	}
+	
+	bool enabled = CTFPlayer(client).TogglePreference(PREF_SPECTATOR_MODE);
+	PrintToChatAll("%s %t", PLUGIN_TAG, enabled ? "SpectatorMode_Enabled" : "SpectatorMode_Disabled");
+	
 	return Plugin_Handled;
 }
 

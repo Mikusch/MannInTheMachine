@@ -1759,6 +1759,11 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		return this.m_preferences & view_as<int>(preference);
 	}
 	
+	public bool TogglePreference(MannInTheMachinePreference preference)
+	{
+		return this.SetPreference(preference, !this.HasPreference(preference));
+	}
+	
 	public bool SetPreference(MannInTheMachinePreference preference, bool enable)
 	{
 		if (enable)
@@ -1768,7 +1773,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		
 		g_hCookiePreferences.SetInt(this.index, this.m_preferences);
 		
-		return true;
+		return enable;
 	}
 	
 	public bool ShouldUseCustomViewModel()

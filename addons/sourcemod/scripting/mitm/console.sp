@@ -131,7 +131,7 @@ static Action ConCmd_ToggleSpectatorMode(int client, int args)
 	}
 	
 	bool enabled = CTFPlayer(client).TogglePreference(PREF_SPECTATOR_MODE);
-	PrintToChatAll("%s %t", PLUGIN_TAG, enabled ? "SpectatorMode_Enabled" : "SpectatorMode_Disabled");
+	CPrintToChat(client, "%s %t", PLUGIN_TAG, enabled ? "SpectatorMode_Enabled" : "SpectatorMode_Disabled");
 	
 	return Plugin_Handled;
 }

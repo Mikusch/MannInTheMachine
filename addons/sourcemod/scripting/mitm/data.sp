@@ -619,6 +619,11 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		
 		if (!IsFakeClient(this.index))
 		{
+			if (IsPlayerAlive(this.index))
+			{
+				ForcePlayerSuicide(this.index, false);
+			}
+			
 			TF2_SetPlayerClass(this.index, TFClass_Unknown);
 			ShowVGUIPanel(this.index, this.GetTFTeam() == TFTeam_Red ? "class_red" : "class_blue");
 		}
@@ -1912,21 +1917,6 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public void OnClientPutInServer()
 	{
-		this.m_defenderPriority = 0;
-		this.m_invaderPriority = 0;
-		this.m_invaderMiniBossPriority = 0;
-		this.m_defenderQueuePoints = 0;
-		this.m_preferences = 0;
-		this.m_party = NULL_PARTY;
-		this.m_isPartyMenuActive = false;
-		this.m_spawnDeathCount = 0;
-		
-		m_invaderName[this.index][0] = EOS;
-		m_prevName[this.index][0] = EOS;
-	}
-	
-	public void ResetOnTeamChange()
-	{
 		// NextBotPlayer< PlayerType >::NextBotPlayer
 		this.m_inputButtons = 0;
 		this.m_spawnPointEntity = INVALID_ENT_REFERENCE;
@@ -1947,8 +1937,17 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		this.SetAutoJump(0.0, 0.0);
 		
 		// MannInTheMachinePlayer
-		TF2Attrib_RemoveAll(this.index);
-		this.ResetInvaderName();
+		this.m_defenderPriority = 0;
+		this.m_invaderPriority = 0;
+		this.m_invaderMiniBossPriority = 0;
+		this.m_defenderQueuePoints = 0;
+		this.m_preferences = 0;
+		this.m_party = NULL_PARTY;
+		this.m_isPartyMenuActive = false;
+		this.m_spawnDeathCount = 0;
+		
+		m_invaderName[this.index][0] = EOS;
+		m_prevName[this.index][0] = EOS;
 	}
 	
 	public void Spawn()

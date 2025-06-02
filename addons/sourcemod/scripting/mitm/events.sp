@@ -65,6 +65,7 @@ static Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroa
 	bool bSilent = team != TFTeam_Defenders;
 	event.SetInt("silent", bSilent);
 	
+	// CTFBot::ChangeTeam
 	if (IsMannVsMachineMode())
 	{
 		CTFPlayer(client).SetPrevMission(NO_MISSION);
@@ -74,10 +75,7 @@ static Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroa
 		
 		if (team != TFTeam_Invaders)
 		{
-			SetVariantString("");
-			AcceptEntityInput(client, "SetCustomModel");
-			
-			CTFPlayer(client).ResetOnTeamChange();
+			CTFPlayer(client).ResetInvaderName();
 		}
 	}
 	

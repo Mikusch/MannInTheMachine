@@ -78,7 +78,12 @@ static Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroa
 			CTFPlayer(client).ResetInvaderName();
 		}
 	}
-	
+
+	if (team == TFTeam_Spectator)
+		CTFPlayer(client).CreateCamera();
+	else
+		CTFPlayer(client).DestroyCamera();
+
 	return Plugin_Changed;
 }
 

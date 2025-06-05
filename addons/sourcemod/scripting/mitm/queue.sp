@@ -156,19 +156,20 @@ void Queue_SelectDefenders()
 	{
 		players.Sort(Sort_Random, Sort_Integer);
 		
-		for (int i = 0; i < players.Length; i++)
-		{
-			int client = players.Get(i);
-			
-			// Keep filling slots until our quota is met
-			if (iDefenderCount++ >= iReqDefenderCount)
-				break;
-			
-			CTFPlayer(client).SetAsDefender();
-			CPrintToChat(client, "%s %t %t", PLUGIN_TAG, "SelectedAsDefender_Forced", "Queue_NotReset");
-			
-			players.Erase(i);
-		}
+               for (int i = 0; i < players.Length; i++)
+               {
+                       int client = players.Get(i);
+
+                       // Keep filling slots until our quota is met
+                       if (iDefenderCount >= iReqDefenderCount)
+                               break;
+
+                       CTFPlayer(client).SetAsDefender();
+                       CPrintToChat(client, "%s %t %t", PLUGIN_TAG, "SelectedAsDefender_Forced", "Queue_NotReset");
+
+                       players.Erase(i);
+                       ++iDefenderCount;
+               }
 	}
 	
 	if (iDefenderCount < iReqDefenderCount)

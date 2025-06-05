@@ -1146,16 +1146,17 @@ void SelectRandomDefenders()
 		if (!CTFPlayer(client).IsValidDefender())
 			continue;
 		
-		// Keep filling slots until our quota is met
-		if (iDefenderCount++ >= iReqDefenderCount)
-			break;
-		
-		CTFPlayer(client).SetAsDefender();
-		CTFPlayer(client).ResetDefenderPriority();
-		CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender");
-		
-		players.Erase(i);
-	}
+               // Keep filling slots until our quota is met
+               if (iDefenderCount >= iReqDefenderCount)
+                       break;
+
+               CTFPlayer(client).SetAsDefender();
+               CTFPlayer(client).ResetDefenderPriority();
+               CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender");
+
+               players.Erase(i);
+               ++iDefenderCount;
+       }
 	
 	// We have less defenders than we wanted.
 	// Pick random players, regardless of their defender preference.
@@ -1165,16 +1166,17 @@ void SelectRandomDefenders()
 		{
 			int client = players.Get(i);
 			
-			// Keep filling slots until our quota is met
-			if (iDefenderCount++ >= iReqDefenderCount)
-				break;
-			
-			CTFPlayer(client).SetAsDefender();
-			CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender_Forced");
-			
-			players.Erase(i);
-		}
-	}
+                       // Keep filling slots until our quota is met
+                       if (iDefenderCount >= iReqDefenderCount)
+                               break;
+
+                       CTFPlayer(client).SetAsDefender();
+                       CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender_Forced");
+
+                       players.Erase(i);
+                       ++iDefenderCount;
+               }
+       }
 	
 	for (int i = 0; i < players.Length; i++)
 	{

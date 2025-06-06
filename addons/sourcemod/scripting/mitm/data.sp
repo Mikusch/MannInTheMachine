@@ -615,14 +615,13 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public void SetAsDefender()
 	{
-		this.ForceChangeTeam(TFTeam_Defenders);
-		
 		if (IsPlayerAlive(this.index))
 		{
 			ForcePlayerSuicide(this.index, false);
 		}
 		
 		this.ResetPlayerClass();
+		this.ForceChangeTeam(TFTeam_Defenders);
 		ShowVGUIPanel(this.index, this.GetTFTeam() == TFTeam_Red ? "class_red" : "class_blue");
 	}
 	

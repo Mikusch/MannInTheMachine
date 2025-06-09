@@ -1147,7 +1147,7 @@ void SelectRandomDefenders()
 			continue;
 		
 		// Keep filling slots until our quota is met
-		if (iDefenderCount++ >= iReqDefenderCount)
+		if (iDefenderCount >= iReqDefenderCount)
 			break;
 		
 		CTFPlayer(client).SetAsDefender();
@@ -1155,6 +1155,7 @@ void SelectRandomDefenders()
 		CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender");
 		
 		players.Erase(i);
+		iDefenderCount++;
 	}
 	
 	// We have less defenders than we wanted.
@@ -1166,13 +1167,14 @@ void SelectRandomDefenders()
 			int client = players.Get(i);
 			
 			// Keep filling slots until our quota is met
-			if (iDefenderCount++ >= iReqDefenderCount)
+			if (iDefenderCount >= iReqDefenderCount)
 				break;
 			
 			CTFPlayer(client).SetAsDefender();
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender_Forced");
 			
 			players.Erase(i);
+			iDefenderCount++;
 		}
 	}
 	

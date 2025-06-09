@@ -628,18 +628,21 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public void SetAsDefender()
 	{
-		this.ForceChangeTeam(TFTeam_Defenders);
-		
-		if (!IsFakeClient(this.index))
+		if (IsPlayerAlive(this.index))
 		{
-			if (IsPlayerAlive(this.index))
-			{
-				ForcePlayerSuicide(this.index, false);
-			}
-			
-			TF2_SetPlayerClass(this.index, TFClass_Unknown);
-			ShowVGUIPanel(this.index, this.GetTFTeam() == TFTeam_Red ? "class_red" : "class_blue");
+			ForcePlayerSuicide(this.index, false);
 		}
+		
+		this.ResetPlayerClass();
+		this.ForceChangeTeam(TFTeam_Defenders);
+		ShowVGUIPanel(this.index, this.GetTFTeam() == TFTeam_Red ? "class_red" : "class_blue");
+	}
+	
+	public void ResetPlayerClass()
+	{
+		SetVariantString("");
+		this.AcceptInput("SetCustomModel");
+		TF2_SetPlayerClass(this.index, TFClass_Unknown);
 	}
 	
 	public bool IsInvader()

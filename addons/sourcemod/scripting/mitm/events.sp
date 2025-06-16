@@ -68,15 +68,17 @@ static Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroa
 	// CTFBot::ChangeTeam
 	if (IsMannVsMachineMode())
 	{
-		CTFPlayer(client).SetPrevMission(NO_MISSION);
-		CTFPlayer(client).ClearAllAttributes();
-		// Clear Sound
-		CTFPlayer(client).StopIdleSound();
+		CTFPlayer player = CTFPlayer(client);
 		
-		if (team != TFTeam_Invaders)
-		{
-			CTFPlayer(client).ResetInvaderName();
-		}
+		player.SetPrevMission(NO_MISSION);
+		player.ClearAllAttributes();
+		// Clear Sound
+		player.StopIdleSound();
+		
+		if (team == TFTeam_Defenders)
+			player.ResetPlayerClass();
+		else if (team != TFTeam_Invaders)
+			player.ResetInvaderName();
 	}
 
 	if (team == TFTeam_Spectator)

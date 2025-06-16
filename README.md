@@ -12,8 +12,6 @@
 
 ---
 
-
-
 **Mann in the Machine** is a SourceMod plugin that turns Mann vs. Machine into a player versus player gamemode.
 Players take turns defending Mann Co. while everyone else joins the robot horde and attempts to destroy it instead!
 
@@ -53,7 +51,7 @@ Many common `CTFBot` functions have been reimplemented or replicated on `CTFPlay
 
 ### How is this different from [Be With Robots](https://github.com/caxanga334/tf-bewithrobots-redux) or similar plugins?
 
-Unlike other plugins, Mann in the Machine is a **PvP gamemode** and is **not** compatible with bots.
+Unlike other plugins, Mann in the Machine is a **PvP gamemode** and is **not** compatible with TFBots.
 
 Players spawn as robots exactly as defined in the mission.
 For example, if no giants are present in a wave, no one can spawn as a giant.
@@ -64,7 +62,7 @@ This ensures the original mission balance and design are preserved.
 Sometimes. Converting a PvE gamemode into a PvP one naturally turns the balance on its head.
 Having a **carefully selected mission rotation** as well as choosing the defender team size wisely can contribute to a balanced match.
 
-Most missions were **not** designed for player-controlled robots, obviously.
+Most missions were obviously **not** designed for player-controlled robots.
 **Advanced or Expert community-created missions** are recommended for the best experience.
 Avoid **Intermediate and Normal** difficulty missions, as they are generally far too easy for defenders.
 
@@ -72,8 +70,8 @@ The gamemode includes a **wave skip** feature that allows automatic progression 
 
 ### Does this support 100 players?
 
-By default, no. However, you can use [Source Scramble Patches](https://github.com/Mikusch/SourceScramble-Patches) to **increase the bot limit**.
-Keep in mind that most missions won't spawn more than **22 bots at once**, so modifying the population file may be necessary to prevent long wait times between spawns.
+Yes, the gamemode will automatically increase the maximum allowed bots based on server slots and current defenders.
+However, most missions won't spawn more than **22 bots at once**, so modifying the population file may be necessary to prevent long wait times between spawns.
 
 ### Can you play as the tank?
 

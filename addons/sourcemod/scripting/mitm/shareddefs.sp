@@ -91,6 +91,9 @@
 #define COLLECT_ONLY_LIVING_PLAYERS true
 #define APPEND_PLAYERS true
 
+#define PANEL_CLASS_BLUE	"class_blue"
+#define PANEL_CLASS_RED		"class_red"
+
 #define GUNSLINGER_ENGINEER_ARMS_OVERRIDE	"models/mvm/weapons/c_models/c_engineer_bot_gunslinger.mdl"
 #define PDA_SPY_ARMS_OVERRIDE				"models/mvm/weapons/v_models/v_pda_spy_bot.mdl"
 

@@ -344,25 +344,22 @@ void Menus_DisplayPartyMenu(int client)
 		// show party name
 		char name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
-		Format(title, sizeof(title), "%s%T\n", title, "Party_Menu_CurrentParty", client, name);
-		
 		// show queue points
 		ArrayList queue = Queue_GetDefenderQueue();
 		int index = queue.FindValue(party, QueueData::m_party);
+		char queueInfo[128];
 		if (index != -1)
 		{
-			Format(title, sizeof(title), "%s%T", title, "Party_Menu_QueuePoints", client, queue.Get(index, QueueData::m_points), index + 1);
+			Format(queueInfo, sizeof(queueInfo), "%T", "Party_Menu_QueuePoints", client, queue.Get(index, QueueData::m_points), index + 1);
 		}
 		else
 		{
-			Format(title, sizeof(title), "%s%T", title, "Party_Menu_NotEnoughMembersForQueue", client);
+			Format(queueInfo, sizeof(queueInfo), "%T", "Party_Menu_NotEnoughMembersForQueue", client);
 		}
 		delete queue;
 		
-		StrCat(title, sizeof(title), "\n \n");
-		
-		// show member count
-		Format(title, sizeof(title), "%s%T\n", title, "Party_Menu_Members", client, party.GetMemberCount(), party.GetMaxPlayers());
+		// combine party info in single Format call to avoid multiple string parsing operations
+		Format(title, sizeof(title), "%s%T\n%s\n \n%T\n", title, "Party_Menu_CurrentParty", client, name, queueInfo, "Party_Menu_Members", client, party.GetMemberCount(), party.GetMaxPlayers());
 		
 		// show party members
 		int[] members = new int[MaxClients];
@@ -376,11 +373,8 @@ void Menus_DisplayPartyMenu(int client)
 	}
 	else
 	{
-		Format(title, sizeof(title), "%s%T", title, "Party_Menu_NotInAParty", client);
+		Format(title, sizeof(title), "%s%T \n", title, "Party_Menu_NotInAParty", client);
 	}
-	
-	// final newline so it looks nicer
-	StrCat(title, sizeof(title), " \n");
 	
 	menu.SetTitle(title);
 	

@@ -183,6 +183,13 @@ static Action CommandListener_Suicide(int client, const char[] command, int argc
 {
 	if (TF2_GetClientTeam(client) == TFTeam_Invaders && !mitm_bot_allow_suicide.BoolValue && !developer.BoolValue)
 	{
+		// Allow suicide during round transitions (game over, pregame)
+		RoundState roundState = GameRules_GetRoundState();
+		if (roundState == RoundState_GameOver || roundState == RoundState_Pregame)
+		{
+			return Plugin_Continue;
+		}
+		
 		// invaders may not suicide
 		PrintCenterText(client, "%t", "Invader_NotAllowedToSuicide");
 		return Plugin_Handled;

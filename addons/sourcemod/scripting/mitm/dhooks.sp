@@ -1126,6 +1126,14 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 		// player is trying to switch from invaders to a different team
 		if (!g_bAllowTeamChange && nCurrentTeam == TFTeam_Invaders && nDesiredTeam != nCurrentTeam && !mitm_bot_allow_suicide.BoolValue)
 		{
+			// Allow team changes during round transitions (game over, pregame)
+			RoundState roundState = GameRules_GetRoundState();
+			if (roundState == RoundState_GameOver || roundState == RoundState_Pregame)
+			{
+				// Allow the team change during round transitions
+				return MRES_Ignored;
+			}
+			
 			if (IsPlayerAlive(player))
 				PrintCenterText(player, "%t", "Invader_NotAllowedToSuicide");
 			

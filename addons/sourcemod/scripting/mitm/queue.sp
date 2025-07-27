@@ -221,6 +221,7 @@ void Queue_FindReplacementDefender()
 		// Validate that they were successfully switched
 		if (TF2_GetClientTeam(client) == TFTeam_Defenders)
 		{
+			CTFPlayer(client).SetAsDefender();
 			CTFPlayer(client).SetQueuePoints(0);
 			CPrintToChat(client, "%s %t %t", PLUGIN_TAG, "SelectedAsDefender_Replacement", "Queue_PointsReset");
 			break;

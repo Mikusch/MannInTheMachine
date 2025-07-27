@@ -1229,6 +1229,7 @@ void FindRandomReplacementDefender()
 		// Validate that they were successfully switched
 		if (TF2_GetClientTeam(client) == TFTeam_Defenders)
 		{
+			CTFPlayer(client).SetAsDefender();
 			CTFPlayer(client).ResetDefenderPriority();
 			CPrintToChat(client, "%s %t", PLUGIN_TAG, "SelectedAsDefender_Replacement");
 			break;

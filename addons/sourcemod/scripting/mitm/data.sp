@@ -74,7 +74,7 @@ static int m_preferences[MAXPLAYERS + 1];
 static Party m_party[MAXPLAYERS + 1];
 static bool m_isPartyMenuActive[MAXPLAYERS + 1];
 static int m_spawnDeathCount[MAXPLAYERS + 1];
-static int m_cameraEntity[MAXPLAYERS + 1];
+static int m_hCameraEntity[MAXPLAYERS + 1];
 
 methodmap CTFPlayer < CBaseCombatCharacter
 {
@@ -503,15 +503,15 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		}
 	}
 
-	property int m_cameraEntity
+	property int m_hCameraEntity
 	{
 		public get()
 		{
-			return m_cameraEntity[this.index];
+			return m_hCameraEntity[this.index];
 		}
 		public set(int hCameraEntity)
 		{
-			m_cameraEntity[this.index] = hCameraEntity;
+			m_hCameraEntity[this.index] = hCameraEntity;
 		}
 	}
 	
@@ -1913,7 +1913,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 
 	public void CreateCamera()
 	{
-		if (IsValidEntity(this.m_cameraEntity))
+		if (IsValidEntity(this.m_hCameraEntity))
 			return;
 		
 		float origin[3], angles[3];
@@ -1923,7 +1923,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		CBaseEntity prop = CBaseEntity(CreateEntityByName("prop_dynamic"));
 		if (prop.IsValid())
 		{
-			prop.KeyValue("model", "models/props_mvm/mvm_human_skull.mdl");
+			prop.KeyValue("model", CAMERA_MODEL);
 			prop.KeyValueVector("origin", origin);
 			prop.KeyValueVector("angles", angles);
 			prop.SetPropEnt(Prop_Send, "m_hOwnerEntity", this);
@@ -1953,14 +1953,14 @@ methodmap CTFPlayer < CBaseCombatCharacter
 
 			prop.SetNextThink(GetGameTime());
 			
-			this.m_cameraEntity = EntIndexToEntRef(prop);
+			this.m_hCameraEntity = EntIndexToEntRef(prop);
 		}
 	}
 
 	public void DestroyCamera()
 	{
-		if (IsValidEntity(this.m_cameraEntity))
-			RemoveEntity(this.m_cameraEntity);
+		if (IsValidEntity(this.m_hCameraEntity))
+			RemoveEntity(this.m_hCameraEntity);
 	}
 	
 	public void Init()
@@ -2007,7 +2007,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		this.m_party = NULL_PARTY;
 		this.m_isPartyMenuActive = false;
 		this.m_spawnDeathCount = 0;
-		this.m_cameraEntity = INVALID_ENT_REFERENCE;
+		this.m_hCameraEntity = INVALID_ENT_REFERENCE;
 		
 		m_invaderName[this.index][0] = EOS;
 		m_prevName[this.index][0] = EOS;

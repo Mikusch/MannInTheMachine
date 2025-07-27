@@ -249,33 +249,6 @@ Action SDKHookCB_EntityGlow_SetTransmit(int entity, int client)
 	return Plugin_Handled;
 }
 
-void SDKHookCB_Text_ThinkPost(int entity)
-{
-	int owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
-	if (owner == -1)
-		return;
-	
-	char name[MAX_NAME_LENGTH];
-	if (!GetClientName(owner, name, sizeof(name)))
-		return;
-	
-	DispatchKeyValue(entity, "message", name);
-	
-	int parent = GetEntPropEnt(entity, Prop_Data, "m_hMoveParent");
-	if (parent == -1)
-		return;
-	
-	float pos[3], maxs[3];
-	CBaseEntity(parent).WorldSpaceCenter(pos);
-	GetEntPropVector(parent, Prop_Data, "m_vecMaxs", maxs);
-	
-	pos[2] += maxs[2];
-	pos[2] += 8.0;
-	DispatchKeyValueVector(entity, "origin", pos);
-	
-	CBaseEntity(entity).SetNextThink(GetGameTime());
-}
-
 Action SDKHookCB_Camera_SetTransmit(int entity, int client)
 {
 	int owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
@@ -315,6 +288,33 @@ void SDKHookCB_Camera_ThinkPost(int entity)
 	
 	DispatchKeyValueVector(entity, "origin", origin);
 	DispatchKeyValueVector(entity, "angles", angles);
+	
+	CBaseEntity(entity).SetNextThink(GetGameTime());
+}
+
+void SDKHookCB_Text_ThinkPost(int entity)
+{
+	int owner = GetEntPropEnt(entity, Prop_Send, "m_hOwnerEntity");
+	if (owner == -1)
+		return;
+	
+	char name[MAX_NAME_LENGTH];
+	if (!GetClientName(owner, name, sizeof(name)))
+		return;
+	
+	DispatchKeyValue(entity, "message", name);
+	
+	int parent = GetEntPropEnt(entity, Prop_Data, "m_hMoveParent");
+	if (parent == -1)
+		return;
+	
+	float pos[3], maxs[3];
+	CBaseEntity(parent).WorldSpaceCenter(pos);
+	GetEntPropVector(parent, Prop_Data, "m_vecMaxs", maxs);
+	
+	pos[2] += maxs[2];
+	pos[2] += 8.0;
+	DispatchKeyValueVector(entity, "origin", pos);
 	
 	CBaseEntity(entity).SetNextThink(GetGameTime());
 }

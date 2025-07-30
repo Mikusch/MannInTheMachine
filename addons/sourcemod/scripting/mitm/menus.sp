@@ -165,14 +165,7 @@ void Menus_DisplayQueueMenu(int client)
 				char name[MAX_NAME_LENGTH];
 				party.GetName(name, sizeof(name));
 				
-				if (CTFPlayer(client).IsInAParty() && CTFPlayer(client).GetParty() == party)
-				{
-					strcopy(display, sizeof(display), party.IsLeader(client) ? SYMBOL_PARTY_LEADER : SYMBOL_PARTY_MEMBER);
-				}
-				else
-				{
-					strcopy(display, sizeof(display), SYMBOL_PARTY_OTHER);
-				}
+				CTFPlayer(client).GetPartySymbol(client, display, sizeof(display));
 				
 				Format(info, sizeof(info), "party_%d", party.m_id);
 				Format(display, sizeof(display), "%s %s (%d)", display, name, points);
@@ -370,7 +363,9 @@ void Menus_DisplayPartyMenu(int client)
 		for (int i = 0; i < count; i++)
 		{
 			int member = members[i];
-			Format(title, sizeof(title), "%s%s %N", title, party.IsLeader(member) ? SYMBOL_PARTY_LEADER : SYMBOL_PARTY_MEMBER, member);
+			char symbol[8];
+			CTFPlayer(client).GetPartySymbol(member, symbol, sizeof(symbol));
+			Format(title, sizeof(title), "%s%s %N", title, symbol, member);
 			Format(title, sizeof(title), "%s (%d)\n", title, CTFPlayer(member).GetQueuePoints());
 		}
 	}
@@ -545,15 +540,13 @@ void Menus_DisplayPartyManageInviteMenu(int client)
 		
 		if (CTFPlayer(other).IsInAParty())
 		{
-			// show party members (including others)
+			char symbol[8];
+			CTFPlayer(client).GetPartySymbol(other, symbol, sizeof(symbol));
+			Format(display, sizeof(display), "%s %N", symbol, other);
+			
 			if (CTFPlayer(other).GetParty() == party)
 			{
-				Format(display, sizeof(display), SYMBOL_PARTY_MEMBER ... " %N", other);
 				style = ITEMDRAW_DISABLED;
-			}
-			else
-			{
-				Format(display, sizeof(display), SYMBOL_PARTY_OTHER ... " %N", other);
 			}
 		}
 		else
@@ -723,7 +716,9 @@ void Menus_DisplayPartyInviteMenu(int client)
 		
 		char display[64], name[MAX_NAME_LENGTH];
 		party.GetName(name, sizeof(name));
-		Format(display, sizeof(display), "%s (" ... SYMBOL_PARTY_LEADER ... " %N)", name, party.GetLeader());
+		char leaderSymbol[8];
+		CTFPlayer(client).GetPartySymbol(party.GetLeader(), leaderSymbol, sizeof(leaderSymbol));
+		Format(display, sizeof(display), "%s (%s %N)", name, leaderSymbol, party.GetLeader());
 		
 		menu.AddItem(id, display);
 	}

@@ -35,6 +35,10 @@
 #define MAX_USER_MSG_DATA		255
 #define MAX_TEAM_NAME_LENGTH	32	// Max length of a team's name
 
+#define SYMBOL_PARTY_LEADER	"★"
+#define SYMBOL_PARTY_MEMBER	"☆"
+#define SYMBOL_PARTY_OTHER	"◆"
+
 #define NULL_SQUAD	CTFBotSquad(0)
 #define NULL_PARTY	Party(0)
 

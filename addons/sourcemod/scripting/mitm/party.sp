@@ -20,10 +20,6 @@
 
 #define MAX_PARTY_NAME_LENGTH	32
 
-#define SYMBOL_PARTY_LEADER	"★"
-#define SYMBOL_PARTY_MEMBER	"☆"
-#define SYMBOL_PARTY_OTHER	"◆"
-
 #define SOUND_PARTY_UPDATE	"ui/message_update.wav"
 #define SOUND_PARTY_INVITE	"ui/notification_alert.wav"
 

@@ -1898,6 +1898,26 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		this.m_isPartyMenuActive = bIsPartyMenuActive;
 	}
 	
+	public int GetPartySymbol(int other, char[] buffer, int maxlen)
+	{
+		if (!this.IsInAParty())
+		{
+			buffer[0] = EOS;
+			return 0;
+		}
+		
+		Party party = this.GetParty();
+		
+		if (CTFPlayer(other).IsInAParty() && CTFPlayer(other).GetParty() == party)
+		{
+			return strcopy(buffer, maxlen, party.IsLeader(other) ? SYMBOL_PARTY_LEADER : SYMBOL_PARTY_MEMBER);
+		}
+		else
+		{
+			return strcopy(buffer, maxlen, SYMBOL_PARTY_OTHER);
+		}
+	}
+	
 	public void Init()
 	{
 		this.m_autoJumpTimer = new CountdownTimer();

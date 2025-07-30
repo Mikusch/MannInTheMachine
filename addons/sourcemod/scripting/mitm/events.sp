@@ -65,11 +65,11 @@ static Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroa
 	bool bSilent = team != TFTeam_Defenders;
 	event.SetInt("silent", bSilent);
 	
+	CTFPlayer player = CTFPlayer(client);
+
 	// CTFBot::ChangeTeam
 	if (IsMannVsMachineMode())
 	{
-		CTFPlayer player = CTFPlayer(client);
-		
 		player.SetPrevMission(NO_MISSION);
 		player.ClearAllAttributes();
 		// Clear Sound
@@ -80,7 +80,12 @@ static Action EventHook_PlayerTeam(Event event, const char[] name, bool dontBroa
 		else if (team != TFTeam_Invaders)
 			player.ResetInvaderName();
 	}
-	
+
+	if (team == TFTeam_Spectator)
+		player.CreateCamera();
+	else
+		player.DestroyCamera();
+
 	return Plugin_Changed;
 }
 

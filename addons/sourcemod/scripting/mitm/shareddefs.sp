@@ -22,6 +22,8 @@
 
 #define DEFAULT_UPGRADES_FILE	"scripts/items/mvm_upgrades.txt"
 
+#define CAMERA_MODEL	"models/props_mvm/mvm_human_skull.mdl"
+
 #define ZERO_VECTOR	{ 0.0, 0.0, 0.0 }
 
 #define VEC_HULL_MIN	{ -24.0, -24.0, 0.0 }

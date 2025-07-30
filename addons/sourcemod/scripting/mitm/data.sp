@@ -74,6 +74,7 @@ static int m_preferences[MAXPLAYERS + 1];
 static Party m_party[MAXPLAYERS + 1];
 static bool m_isPartyMenuActive[MAXPLAYERS + 1];
 static int m_spawnDeathCount[MAXPLAYERS + 1];
+static int m_hCameraEntity[MAXPLAYERS + 1];
 
 methodmap CTFPlayer < CBaseCombatCharacter
 {
@@ -499,6 +500,18 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		public set(int iSpawnDeathCount)
 		{
 			m_spawnDeathCount[this.index] = iSpawnDeathCount;
+		}
+	}
+
+	property int m_hCameraEntity
+	{
+		public get()
+		{
+			return m_hCameraEntity[this.index];
+		}
+		public set(int hCameraEntity)
+		{
+			m_hCameraEntity[this.index] = hCameraEntity;
 		}
 	}
 	
@@ -1897,6 +1910,59 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	{
 		this.m_isPartyMenuActive = bIsPartyMenuActive;
 	}
+
+	public void CreateCamera()
+	{
+		if (IsValidEntity(this.m_hCameraEntity))
+			return;
+		
+		float origin[3], angles[3];
+		GetClientEyePosition(this.index, origin);
+		GetClientEyeAngles(this.index, angles);
+		
+		CBaseEntity prop = CBaseEntity(CreateEntityByName("prop_dynamic"));
+		if (prop.IsValid())
+		{
+			prop.KeyValue("model", CAMERA_MODEL);
+			prop.KeyValueVector("origin", origin);
+			prop.KeyValueVector("angles", angles);
+			prop.SetPropEnt(Prop_Send, "m_hOwnerEntity", this);
+			prop.Spawn();
+			
+			CBaseEntity text = CBaseEntity(CreateEntityByName("point_worldtext"));
+			if (text.IsValid())
+			{
+				text.KeyValueVector("origin", origin);
+				text.KeyValueVector("angles", angles);
+				text.KeyValueInt("orientation", 1);
+				text.KeyValueInt("textsize", 5);
+				text.KeyValueInt("rainbow", GetUserAdmin(this.index) != INVALID_ADMIN_ID ? 1 : 0);
+				text.SetPropEnt(Prop_Send, "m_hOwnerEntity", this);
+				text.Spawn();
+				
+				SetVariantString("!activator");
+				text.AcceptInput("SetParent", prop);
+
+				SDKHook(text, SDKHook_SetTransmit, SDKHookCB_Camera_SetTransmit);
+				SDKHook(text, SDKHook_ThinkPost, SDKHookCB_Text_ThinkPost);
+
+				text.SetNextThink(GetGameTime());
+			}
+			
+			SDKHook(prop, SDKHook_SetTransmit, SDKHookCB_Camera_SetTransmit);
+			SDKHook(prop, SDKHook_ThinkPost, SDKHookCB_Camera_ThinkPost);
+
+			prop.SetNextThink(GetGameTime());
+			
+			this.m_hCameraEntity = EntIndexToEntRef(prop);
+		}
+	}
+
+	public void DestroyCamera()
+	{
+		if (IsValidEntity(this.m_hCameraEntity))
+			RemoveEntity(this.m_hCameraEntity);
+	}
 	
 	public int GetPartySymbol(int other, char[] buffer, int maxlen)
 	{
@@ -1962,6 +2028,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		this.m_party = NULL_PARTY;
 		this.m_isPartyMenuActive = false;
 		this.m_spawnDeathCount = 0;
+		this.m_hCameraEntity = INVALID_ENT_REFERENCE;
 		
 		m_invaderName[this.index][0] = EOS;
 		m_prevName[this.index][0] = EOS;

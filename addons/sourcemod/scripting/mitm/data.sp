@@ -1936,6 +1936,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 				text.KeyValueVector("angles", angles);
 				text.KeyValueInt("orientation", 1);
 				text.KeyValueInt("textsize", 5);
+				text.KeyValueInt("rainbow", GetUserAdmin(this.index) != INVALID_ADMIN_ID ? 1 : 0);
 				text.SetPropEnt(Prop_Send, "m_hOwnerEntity", this);
 				text.Spawn();
 				

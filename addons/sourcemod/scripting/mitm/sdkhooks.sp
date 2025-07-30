@@ -314,6 +314,7 @@ void SDKHookCB_Text_ThinkPost(int entity)
 	
 	pos[2] += maxs[2];
 	pos[2] += 8.0;
+
 	DispatchKeyValueVector(entity, "origin", pos);
 	
 	CBaseEntity(entity).SetNextThink(GetGameTime());

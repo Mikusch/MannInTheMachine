@@ -295,7 +295,7 @@ TFTeam GetEnemyTeam(TFTeam team)
 	}
 }
 
-ArrayList GetInvaderQueue(bool bIsMiniBoss = false)
+ArrayList GetInvaderQueue(bool bIsMiniBoss = false, bool bIncludeActive = false)
 {
 	ArrayList queue = new ArrayList();
 	
@@ -308,7 +308,7 @@ ArrayList GetInvaderQueue(bool bIsMiniBoss = false)
 		if (IsFakeClient(client))
 			continue;
 		
-		if (TF2_GetClientTeam(client) != TFTeam_Spectator)
+		if (!bIncludeActive && TF2_GetClientTeam(client) != TFTeam_Spectator)
 			continue;
 		
 		if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
@@ -332,11 +332,11 @@ CTFPlayer FindNextInvader(bool bIsMiniBoss)
 {
 	CTFPlayer priorityPlayer = CTFPlayer(-1);
 	
-	ArrayList queue = GetInvaderQueue(bIsMiniBoss);
+	ArrayList queue = GetInvaderQueue(bIsMiniBoss, true);
 	for (int i = 0; i < queue.Length; i++)
 	{
 		CTFPlayer player = CTFPlayer(queue.Get(i));
-		if (i == 0)
+		if (!priorityPlayer.IsValid() && player.GetTFTeam() == TFTeam_Spectator)
 		{
 			// Remember the player and reset priority
 			priorityPlayer = player;

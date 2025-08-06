@@ -308,10 +308,10 @@ ArrayList GetInvaderQueue(bool bIsMiniBoss = false, bool bIncludeActive = false)
 		if (IsFakeClient(client))
 			continue;
 		
-		if (!bIncludeActive && TF2_GetClientTeam(client) != TFTeam_Spectator)
+		if (!CTFPlayer(client).IsInvader())
 			continue;
 		
-		if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
+		if (!bIncludeActive && TF2_GetClientTeam(client) != TFTeam_Spectator)
 			continue;
 		
 		if (bIsMiniBoss && CTFPlayer(client).HasPreference(PREF_INVADER_DISABLE_MINIBOSS))
@@ -344,7 +344,7 @@ CTFPlayer FindNextInvader(bool bIsMiniBoss)
 		}
 		else
 		{
-			// Every player who doesn't get spawned gets a priority point
+			// Every other invader who didn't spawn gets a priority point
 			player.IncrementInvaderPriority(bIsMiniBoss);
 		}
 	}

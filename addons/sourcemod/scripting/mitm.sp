@@ -369,9 +369,6 @@ public void OnGameFrame()
 			if (!IsClientInGame(client))
 				continue;
 			
-			if (!CTFPlayer(client).IsInvader())
-				continue;
-			
 			if (!IsClientObserver(client))
 				continue;
 			

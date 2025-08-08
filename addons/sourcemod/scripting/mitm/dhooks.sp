@@ -1097,7 +1097,7 @@ static MRESReturn DHookCallback_CTFGameRules_GetTeamAssignmentOverride_Pre(DHook
 	TFTeam nDesiredTeam = params.Get(2);
 	TFTeam nCurrentTeam = TF2_GetClientTeam(player);
 	
-	if (IsClientSourceTV(player))
+	if (IsClientSourceTV(player) || IsClientReplay(player))
 		return MRES_Ignored;
 	
 	// allow this function to set each player's team and currency

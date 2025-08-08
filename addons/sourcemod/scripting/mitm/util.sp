@@ -1126,7 +1126,7 @@ void SelectRandomDefenders()
 		if (!IsClientInGame(client))
 			continue;
 		
-		if (IsClientSourceTV(client))
+		if (IsClientSourceTV(client) || IsClientReplay(client))
 			continue;
 		
 		if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
@@ -1205,7 +1205,7 @@ void FindRandomReplacementDefender()
 		if (!IsClientInGame(client))
 			continue;
 		
-		if (IsClientSourceTV(client))
+		if (!CTFPlayer(client).IsValidReplacementDefender())
 			continue;
 		
 		players.Push(client);
@@ -1216,12 +1216,6 @@ void FindRandomReplacementDefender()
 	for (int i = 0; i < players.Length; i++)
 	{
 		int client = players.Get(i);
-		
-		if (!IsClientInGame(client))
-			continue;
-		
-		if (!CTFPlayer(client).IsValidReplacementDefender())
-			continue;
 		
 		// Don't force switch because we want GetTeamAssignmentOverride to decide
 		TF2_ChangeClientTeam(client, TFTeam_Defenders);

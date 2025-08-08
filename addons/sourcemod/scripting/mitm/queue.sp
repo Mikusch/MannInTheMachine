@@ -96,7 +96,7 @@ void Queue_SelectDefenders()
 		if (!IsClientInGame(client))
 			continue;
 		
-		if (IsClientSourceTV(client))
+		if (IsClientSourceTV(client) || IsClientReplay(client))
 			continue;
 		
 		if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))

@@ -641,7 +641,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public bool IsInvader()
 	{
-		if (IsClientSourceTV(this.index))
+		if (IsClientSourceTV(this.index) || IsClientReplay(this.index))
 			return false;
 		
 		TFTeam team = this.GetTFTeam();
@@ -705,7 +705,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public bool IsValidDefender()
 	{
-		return !IsClientSourceTV(this.index)
+		return !IsClientSourceTV(this.index) && !IsClientReplay(this.index)
 			&& (this.GetTFTeam() != TFTeam_Unassigned || developer.BoolValue && IsFakeClient(this.index))
 			&& !this.HasPreference(PREF_DEFENDER_DISABLE_QUEUE)
 			&& !this.HasPreference(PREF_SPECTATOR_MODE)

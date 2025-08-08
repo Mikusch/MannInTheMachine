@@ -639,7 +639,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		TF2_SetPlayerClass(this.index, TFClass_Unknown);
 	}
 	
-	public bool IsInvader()
+	public bool IsValidInvader()
 	{
 		if (IsClientSourceTV(this.index) || IsClientReplay(this.index))
 			return false;
@@ -714,8 +714,8 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public bool IsValidReplacementDefender()
 	{
-		return this.GetTFTeam() == TFTeam_Spectator
-			&& this.IsValidDefender()
+		return this.IsValidDefender()
+			&& this.GetTFTeam() == TFTeam_Spectator
 			&& !this.HasPreference(PREF_DEFENDER_DISABLE_REPLACEMENT);
 	}
 	

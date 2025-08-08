@@ -272,7 +272,7 @@ static bool MultiTargetFilter_Invaders(const char[] pattern, ArrayList clients)
 {
 	for (int client = 1; client <= MaxClients; client++)
 	{
-		if (IsClientInGame(client) && CTFPlayer(client).IsInvader())
+		if (IsClientInGame(client) && CTFPlayer(client).IsValidInvader())
 			clients.Push(client);
 	}
 	

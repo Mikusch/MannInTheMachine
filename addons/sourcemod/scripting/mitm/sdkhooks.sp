@@ -133,7 +133,7 @@ static Action SDKHook_CTFGrenadePipebombProjectile_SetTransmit(int entity, int c
 	if (team == TFTeam_Defenders)
 	{
 		// do not show defender stickybombs to the invading team
-		if (CTFPlayer(client).IsInvader())
+		if (CTFPlayer(client).IsValidInvader())
 		{
 			// only when fully armed
 			float flCreationTime = GetEntDataFloat(entity, GetOffset("CTFGrenadePipebombProjectile", "m_flCreationTime"));

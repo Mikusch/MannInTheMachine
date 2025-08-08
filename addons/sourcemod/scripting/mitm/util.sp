@@ -308,7 +308,7 @@ ArrayList GetInvaderQueue(bool bIsMiniBoss = false, bool bIncludeActive = false)
 		if (IsFakeClient(client))
 			continue;
 		
-		if (!CTFPlayer(client).IsInvader())
+		if (!CTFPlayer(client).IsValidInvader())
 			continue;
 		
 		if (!bIncludeActive && TF2_GetClientTeam(client) != TFTeam_Spectator)

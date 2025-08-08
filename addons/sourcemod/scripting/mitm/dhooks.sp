@@ -2153,7 +2153,7 @@ static MRESReturn DHookCallback_CTFPlayer_ScriptIsBotOfType_Pre(int player, DHoo
 	int botType = params.Get(1);
 	
 	// make scripts believe that all invaders are TFBots
-	if (botType == TF_BOT_TYPE && CTFPlayer(player).IsInvader())
+	if (botType == TF_BOT_TYPE && CTFPlayer(player).IsValidInvader())
 	{
 		ret.Value = true;
 		return MRES_Supercede;
@@ -2166,7 +2166,7 @@ static MRESReturn DHookCallback_IsPlayerABot_Pre(DHookReturn ret, DHookParam par
 {
 	int player = VScript_HScriptToEntity(params.Get(1));
 	
-	if (IsValidEntity(player) && CTFPlayer(player).IsInvader())
+	if (IsValidEntity(player) && CTFPlayer(player).IsValidInvader())
 	{
 		ret.Value = true;
 		return MRES_Supercede;

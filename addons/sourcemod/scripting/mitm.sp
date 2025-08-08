@@ -415,7 +415,7 @@ public void OnGameFrame()
 		{
 			ShowSyncHudText(client, g_hWarningHudSync, "%t", "Spectator_Mode");
 		}
-		else if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && CTFPlayer(client).IsInvader() && flRestartRoundTime != -1)
+		else if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && CTFPlayer(client).IsValidInvader() && flRestartRoundTime != -1)
 		{
 			ShowSyncHudText(client, g_hWarningHudSync, "%t", "Invader_WaitingToSpawn", nSecondsToStart);
 		}

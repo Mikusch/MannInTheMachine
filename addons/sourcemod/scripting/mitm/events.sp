@@ -217,7 +217,10 @@ static void EventHook_MvMWaveFailed(Event event, const char[] name, bool dontBro
 	{
 		bool bInWaitingForPlayers = IsInWaitingForPlayers();
 		if (bInWaitingForPlayers)
+		{
 			SetInWaitingForPlayers(false);
+			g_pPopulationManager.m_nNumConsecutiveWipes = 0;
+		}
 		
 		if (!g_pPopulationManager.IsInEndlessWaves())
 		{
@@ -225,7 +228,7 @@ static void EventHook_MvMWaveFailed(Event event, const char[] name, bool dontBro
 			float fCleanMoneyPercent = mitm_autoincrement_currency_percentage.FloatValue;
 			
 			// m_nNumConsecutiveWipes gets incremented when the round starts
-			if (nMaxConsecutiveWipes > 0 && g_pPopulationManager.m_nNumConsecutiveWipes - 1 >= nMaxConsecutiveWipes)
+			if (nMaxConsecutiveWipes > 0 && g_pPopulationManager.m_nNumConsecutiveWipes >= nMaxConsecutiveWipes)
 			{
 				int iCurrentWaveIndex = g_pPopulationManager.GetWaveNumber();
 				int iNextWaveIndex = iCurrentWaveIndex + 1;
@@ -244,6 +247,7 @@ static void EventHook_MvMWaveFailed(Event event, const char[] name, bool dontBro
 					}
 					
 					g_pPopulationManager.JumpToWave(iNextWaveIndex);
+					g_pPopulationManager.m_nNumConsecutiveWipes = 0;
 					
 					CPrintToChatAll("%s %t", PLUGIN_TAG, "Wave_AutoIncremented", iNextWaveIndex + 1, fCleanMoneyPercent * 100.0, nMaxConsecutiveWipes);
 				}

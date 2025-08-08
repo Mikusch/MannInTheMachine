@@ -2534,6 +2534,10 @@ methodmap CPopulationManager < CBaseEntity
 		{
 			return LoadFromAddress(GetAddress("CPopulationManager::m_nNumConsecutiveWipes"), NumberType_Int32);
 		}
+		public set(int nNumConsecutiveWipes)
+		{
+			StoreToAddress(GetAddress("CPopulationManager::m_nNumConsecutiveWipes"), nNumConsecutiveWipes, NumberType_Int32);
+		}
 	}
 	
 	public bool CanBotsAttackWhileInSpawnRoom()

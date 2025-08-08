@@ -639,15 +639,6 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		TF2_SetPlayerClass(this.index, TFClass_Unknown);
 	}
 	
-	public bool IsValidInvader()
-	{
-		if (IsClientSourceTV(this.index) || IsClientReplay(this.index))
-			return false;
-		
-		TFTeam team = this.GetTFTeam();
-		return team == TFTeam_Invaders || (team == TFTeam_Spectator && !this.HasPreference(PREF_SPECTATOR_MODE));
-	}
-	
 	public int GetQueuePoints()
 	{
 		return this.m_defenderQueuePoints;
@@ -701,6 +692,15 @@ methodmap CTFPlayer < CBaseCombatCharacter
 			this.m_invaderMiniBossPriority = 0;
 		
 		this.m_invaderPriority = 0;
+	}
+	
+	public bool IsValidInvader()
+	{
+		if (IsClientSourceTV(this.index) || IsClientReplay(this.index))
+			return false;
+		
+		TFTeam team = this.GetTFTeam();
+		return team == TFTeam_Invaders || (team == TFTeam_Spectator && !this.HasPreference(PREF_SPECTATOR_MODE));
 	}
 	
 	public bool IsValidDefender()

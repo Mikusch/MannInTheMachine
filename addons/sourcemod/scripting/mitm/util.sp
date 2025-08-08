@@ -317,7 +317,7 @@ ArrayList GetInvaderQueue(bool bIsMiniBoss = false, bool bIncludeActive = false)
 		if (bIsMiniBoss && CTFPlayer(client).HasPreference(PREF_INVADER_DISABLE_MINIBOSS))
 			continue;
 		
-		if (!Forwards_OnIsValidInvader(client, bIsMiniBoss))
+		if (!Forwards_OnIsValidMiniBoss(client))
 			continue;
 		
 		queue.Push(client);

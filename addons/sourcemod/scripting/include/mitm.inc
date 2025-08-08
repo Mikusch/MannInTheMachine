@@ -65,13 +65,12 @@ methodmap MannInTheMachinePlayer < CBaseCombatCharacter
 forward bool MannInTheMachine_OnIsValidDefender(int client);
 
 /**
- * Called when the plugin determines whether a player is allowed to become an invader.
+ * Called when the plugin determines whether a player is allowed to become a giant robot.
  *
  * @param client		Client index.
- * @param bIsMiniBoss	True if the next invader is a miniboss.
- * @return				True if the player is allowed to become an invader, false otherwise.
+ * @return				True if the player is allowed to become a giant robot, false otherwise.
  */
-forward bool MannInTheMachine_OnIsValidInvader(int client, bool bIsMiniBoss);
+forward bool MannInTheMachine_OnIsValidMiniBoss(int client);
 
 /**
  * Called when a Sentry Buster has successfully detonated their target.
@@ -102,6 +101,16 @@ native bool MannInTheMachine_IsInEndlessWaves();
  * @return		True if the game is in Waiting For Players.
  */
 native bool MannInTheMachine_IsInWaitingForPlayers();
+
+/**
+ * Called when the plugin determines whether a player is allowed to become an invader.
+ *
+ * @param client		Client index.
+ * @param bIsMiniBoss	True if the next invader is a miniboss.
+ * @return				True if the player is allowed to become an invader, false otherwise.
+ */
+#pragma deprecated No longer supported; use MannInTheMachine_OnIsValidMiniBoss instead.
+forward bool MannInTheMachine_OnIsValidInvader(int client, bool bIsMiniBoss);
 
 public SharedPlugin __pl_mitm =
 {

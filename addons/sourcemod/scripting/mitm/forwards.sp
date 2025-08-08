@@ -19,14 +19,14 @@
 #pragma newdecls required
 
 static GlobalForward g_hForwardOnIsValidDefender;
-static GlobalForward g_hForwardOnIsValidInvader;
+static GlobalForward g_hForwardOnIsValidMiniBoss;
 static GlobalForward g_hForwardOnSentryBusterDetonate;
 static GlobalForward g_hForwardOnTankDeployed;
 
 void Forwards_Init()
 {
 	g_hForwardOnIsValidDefender = new GlobalForward("MannInTheMachine_OnIsValidDefender", ET_Single, Param_Cell);
-	g_hForwardOnIsValidInvader = new GlobalForward("MannInTheMachine_OnIsValidInvader", ET_Single, Param_Cell, Param_Cell);
+	g_hForwardOnIsValidMiniBoss = new GlobalForward("MannInTheMachine_OnIsValidMiniBoss", ET_Single, Param_Cell);
 	g_hForwardOnSentryBusterDetonate = new GlobalForward("MannInTheMachine_OnSentryBusterDetonate", ET_Single, Param_Cell, Param_Cell);
 	g_hForwardOnTankDeployed = new GlobalForward("MannInTheMachine_OnTankDeployed", ET_Single, Param_Cell);
 }
@@ -42,13 +42,12 @@ bool Forwards_OnIsValidDefender(int client)
 	return bReturnVal;
 }
 
-bool Forwards_OnIsValidInvader(int client, bool bIsMiniboss)
+bool Forwards_OnIsValidMiniBoss(int client)
 {
 	bool bReturnVal = true;
 	
-	Call_StartForward(g_hForwardOnIsValidInvader);
+	Call_StartForward(g_hForwardOnIsValidMiniBoss);
 	Call_PushCell(client);
-	Call_PushCell(bIsMiniboss);
 	Call_Finish(bReturnVal);
 	
 	return bReturnVal;

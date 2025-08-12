@@ -332,24 +332,33 @@ CTFPlayer FindNextInvader(bool bIsMiniBoss)
 {
 	CTFPlayer priorityPlayer = CTFPlayer(-1);
 	
-	ArrayList queue = GetInvaderQueue(bIsMiniBoss, true);
-	for (int i = 0; i < queue.Length; i++)
+	ArrayList queue = GetInvaderQueue(bIsMiniBoss, bIsMiniBoss);
+	
+	if (queue.Length > 0)
 	{
-		CTFPlayer player = CTFPlayer(queue.Get(i));
-		if (!priorityPlayer.IsValid() && player.GetTFTeam() == TFTeam_Spectator)
+		priorityPlayer = CTFPlayer(queue.Get(0));
+		
+		if (priorityPlayer.GetTFTeam() == TFTeam_Spectator)
 		{
-			// Remember the player and reset priority
-			priorityPlayer = player;
-			player.ResetInvaderPriority(bIsMiniBoss);
+			priorityPlayer.ResetInvaderPriority(bIsMiniBoss);
 		}
-		else
+		
+		for (int i = 1; i < queue.Length; i++)
 		{
-			// Every other invader who didn't spawn gets a priority point
-			player.IncrementInvaderPriority(bIsMiniBoss);
+			CTFPlayer player = CTFPlayer(queue.Get(i));
+			
+			if (bIsMiniBoss)
+			{
+				player.IncrementInvaderPriority(true);
+			}
+			else if (player.GetTFTeam() == TFTeam_Spectator)
+			{
+				player.IncrementInvaderPriority(false);
+			}
 		}
 	}
-	delete queue;
 	
+	delete queue;
 	return priorityPlayer;
 }
 

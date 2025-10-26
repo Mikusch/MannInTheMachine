@@ -295,7 +295,7 @@ TFTeam GetEnemyTeam(TFTeam team)
 	}
 }
 
-ArrayList GetInvaderQueue(bool bIsMiniBoss = false)
+ArrayList GetInvaderQueue(bool bIsMiniBoss = false, bool bIncludeAlive = false)
 {
 	ArrayList queue = new ArrayList();
 	
@@ -308,7 +308,7 @@ ArrayList GetInvaderQueue(bool bIsMiniBoss = false)
 		if (!CTFPlayer(client).IsValidInvader())
 			continue;
 		
-		if (TF2_GetClientTeam(client) != TFTeam_Spectator)
+		if (!bIncludeAlive && TF2_GetClientTeam(client) != TFTeam_Spectator)
 			continue;
 		
 		if (bIsMiniBoss && CTFPlayer(client).HasPreference(PREF_INVADER_DISABLE_MINIBOSS))
@@ -338,7 +338,7 @@ CTFPlayer FindNextInvader(bool bIsMiniBoss)
 	}
 
 	delete queue;
-	queue = GetInvaderQueue(bIsMiniBoss);
+	queue = GetInvaderQueue(bIsMiniBoss, true);
 	
 	// Award priority to everyone who wasn't selected
 	for (int i = 0; i < queue.Length; i++)
@@ -348,7 +348,9 @@ CTFPlayer FindNextInvader(bool bIsMiniBoss)
 		if (player == priorityPlayer)
 			continue;
 		
-		if (player.GetTFTeam() == TFTeam_Spectator)
+		// Spectators always earn priority.
+		// Living invaders can only earn miniboss priority, unless they are already a miniboss.
+		if (player.GetTFTeam() == TFTeam_Spectator || (bIsMiniBoss && !player.IsMiniBoss()))
 		{
 			player.IncrementInvaderPriority(bIsMiniBoss);
 		}

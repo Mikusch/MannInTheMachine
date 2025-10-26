@@ -359,8 +359,8 @@ public void OnGameFrame()
 	if (!PSM_IsEnabled())
 		return;
 
-	ArrayList queue = GetInvaderQueue(false);
-	ArrayList minibossQueue = GetInvaderQueue(true);
+	ArrayList queue = GetInvaderQueue(false, true);
+	ArrayList minibossQueue = GetInvaderQueue(true, true);
 
 	for (int client = 1; client <= MaxClients; client++)
 	{

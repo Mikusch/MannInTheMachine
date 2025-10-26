@@ -1297,9 +1297,10 @@ void UpdateMaxInvaders()
 	tf_mvm_max_invaders.IntValue = MaxClients - tf_mvm_defenders_team_size.IntValue;
 }
 
-void FormatQueueText(ArrayList queue, int client, const char[] phrase, char[] text, int length)
+void FormatQueueText(ArrayList queue, int client, const char[] phrase, char[] buffer, int maxlength)
 {
-	if (queue.Length == 0)
+	int length = queue.Length;
+	if (length == 0)
 		return;
 
 	int pos = queue.FindValue(client);
@@ -1307,19 +1308,18 @@ void FormatQueueText(ArrayList queue, int client, const char[] phrase, char[] te
 	if (pos == -1)
 		return;
 
-	if (text[0])
-		Format(text, length, "%s\n\n", text);
+	if (buffer[0])
+		Format(buffer, maxlength, "%s\n\n", buffer);
 
 	char symbols[MAX_USER_MSG_DATA];
 
-	int count = Min(queue.Length, 10);
-	for (int i = 0; i < count; i++)
+	for (int i = 0; i < length; i++)
 	{
 		StrCat(symbols, sizeof(symbols), i == pos ? "■" : "□");
 	}
 
 	Format(symbols, sizeof(symbols), "%s [#%d]", symbols, pos + 1);
-	Format(text, length, "%s%T\n%s", text, phrase, client, symbols);
+	Format(buffer, maxlength, "%s%T\n%s", buffer, phrase, client, symbols);
 }
 
 static void Timer_OnWaitingForPlayersEnd(Handle timer)

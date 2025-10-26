@@ -1793,6 +1793,9 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	
 	public bool ShouldUseCustomViewModel()
 	{
+		if (g_pObjectiveResource.IsValid() && g_pObjectiveResource.IsPopFileEventType(MVM_EVENT_POPFILE_HALLOWEEN))
+			return false;
+
 		return this.GetTFTeam() == TFTeam_Invaders && !this.HasPreference(PREF_INVADER_DISABLE_CUSTOM_VIEWMODELS);
 	}
 	

@@ -203,10 +203,6 @@
 	{
 		"hu"		"Robbants itt a küldetés teljesítéséhez"
 	}
-	"Invader_Queue_Header"
-	{
-		"hu"		"KÖVETKEZŐ ROBOT MEGJELENÉSEK"
-	}
 	"Invader_Deployed"
 	{
 		"#format"	"{1:N},{2:d},{3:d}"

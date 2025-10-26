@@ -358,45 +358,33 @@ public void OnGameFrame()
 {
 	if (!PSM_IsEnabled())
 		return;
-	
-	ArrayList queue = GetInvaderQueue();
-	queue.Resize(Min(queue.Length, 8));
-	
-	if (queue.Length > 0)
+
+	ArrayList queue = GetInvaderQueue(false);
+	ArrayList minibossQueue = GetInvaderQueue(true);
+
+	for (int client = 1; client <= MaxClients; client++)
 	{
-		for (int client = 1; client <= MaxClients; client++)
-		{
-			if (!IsClientInGame(client))
-				continue;
-			
-			if (!IsClientObserver(client))
-				continue;
-			
-			int iObserverMode = GetEntProp(client, Prop_Send, "m_iObserverMode");
-			if (iObserverMode == OBS_MODE_DEATHCAM || iObserverMode == OBS_MODE_FREEZECAM)
-				continue;
-			
-			char text[MAX_USER_MSG_DATA];
-			Format(text, sizeof(text), "%T\n", "Invader_Queue_Header", client);
-			
-			for (int i = 0; i < queue.Length; i++)
-			{
-				int other = queue.Get(i);
-				if (other == client)
-				{
-					Format(text, sizeof(text), "%s\n➤ %N", text, other);
-				}
-				else
-				{
-					Format(text, sizeof(text), "%s\n%N", text, other);
-				}
-			}
-			
+		if (!IsClientInGame(client))
+			continue;
+
+		if (!IsClientObserver(client))
+			continue;
+
+		int iObserverMode = GetEntProp(client, Prop_Send, "m_iObserverMode");
+		if (iObserverMode == OBS_MODE_DEATHCAM || iObserverMode == OBS_MODE_FREEZECAM)
+			continue;
+
+		char text[MAX_USER_MSG_DATA];
+
+		FormatQueueText(queue, client, "Invader_Queue_Regular", text, sizeof(text));
+		FormatQueueText(minibossQueue, client, "Invader_Queue_Miniboss", text, sizeof(text));
+
+		if (text[0])
 			PrintKeyHintText(client, text);
-		}
 	}
 	
 	delete queue;
+	delete minibossQueue;
 	
 	float flRestartRoundTime = GameRules_GetPropFloat("m_flRestartRoundTime");
 	int nSecondsToStart = RoundToCeil(flRestartRoundTime - GetGameTime());

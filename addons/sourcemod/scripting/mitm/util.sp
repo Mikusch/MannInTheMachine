@@ -305,9 +305,6 @@ ArrayList GetInvaderQueue(bool bIsMiniBoss = false)
 		if (!IsClientInGame(client))
 			continue;
 		
-		if (IsFakeClient(client))
-			continue;
-		
 		if (!CTFPlayer(client).IsValidInvader())
 			continue;
 		
@@ -1296,6 +1293,31 @@ void RunScriptCode(int entity, int activator, int caller, const char[] format, a
 void UpdateMaxInvaders()
 {
 	tf_mvm_max_invaders.IntValue = MaxClients - tf_mvm_defenders_team_size.IntValue;
+}
+
+void FormatQueueText(ArrayList queue, int client, const char[] phrase, char[] text, int length)
+{
+	if (queue.Length == 0)
+		return;
+
+	int pos = queue.FindValue(client);
+
+	if (pos == -1)
+		return;
+
+	if (text[0])
+		Format(text, length, "%s\n\n", text);
+
+	char symbols[MAX_USER_MSG_DATA];
+
+	int count = Min(queue.Length, 10);
+	for (int i = 0; i < count; i++)
+	{
+		StrCat(symbols, sizeof(symbols), i == pos ? "■" : "□");
+	}
+
+	Format(symbols, sizeof(symbols), "%s [#%d]", symbols, pos + 1);
+	Format(text, length, "%s%T\n%s", text, phrase, client, symbols);
 }
 
 static void Timer_OnWaitingForPlayersEnd(Handle timer)

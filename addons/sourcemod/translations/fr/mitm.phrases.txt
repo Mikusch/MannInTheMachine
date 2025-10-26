@@ -203,10 +203,6 @@
 	{
 		"fr"		"Explose ICI pour compléter ta mission"
 	}
-	"Invader_Queue_Header"
-	{
-		"fr"		"PROCHAIN ROBOTS"
-	}
 	"Invader_Deployed"
 	{
 		"#format"	"{1:N},{2:d},{3:d}"

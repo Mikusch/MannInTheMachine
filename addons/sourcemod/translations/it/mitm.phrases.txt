@@ -203,10 +203,6 @@
 	{
 		"it"		"Detona qui per completare la tua missione"
 	}
-	"Invader_Queue_Header"
-	{
-		"it"		"GENERAZIONE DELLA PROSSIMA ONDATA"
-	}
 	"Invader_Deployed"
 	{
 		"#format"	"{1:N},{2:d},{3:d}"

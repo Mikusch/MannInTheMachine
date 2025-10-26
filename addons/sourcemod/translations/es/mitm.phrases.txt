@@ -192,10 +192,6 @@
 	{
 		"es"		"Detona aquí para completar tu misión"
 	}
-	"Invader_Queue_Header"
-	{
-		"es"		"EL SIGUIENTE ROBOT REAPARECERÁ"
-	}
 	"Invader_Deployed"
 	{
 		"es"		"{blue}{1} {default}desplegó la bomba con {lightgreen}{2}{default}/{lightgreen}{3} {default}VIDA restante."

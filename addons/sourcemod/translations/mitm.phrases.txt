@@ -211,9 +211,13 @@
 	{
 		"en"		"Detonate Here To Complete Your Mission"
 	}
-	"Invader_Queue_Header"
+	"Invader_Queue_Regular"
 	{
-		"en"		"NEXT ROBOT SPAWNS"
+		"en"		"ROBOT QUEUE:"
+	}
+	"Invader_Queue_Miniboss"
+	{
+		"en"		"GIANT ROBOT QUEUE:"
 	}
 	"Invader_Deployed"
 	{

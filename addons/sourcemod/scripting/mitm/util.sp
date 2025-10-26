@@ -305,6 +305,9 @@ ArrayList GetInvaderQueue(bool bIsMiniBoss = false, bool bIncludeAlive = false)
 		if (!IsClientInGame(client))
 			continue;
 		
+		if (IsFakeClient(client))
+			continue;
+		
 		if (!CTFPlayer(client).IsValidInvader())
 			continue;
 		
@@ -1299,8 +1302,7 @@ void UpdateMaxInvaders()
 
 void FormatQueueText(ArrayList queue, int client, const char[] phrase, char[] buffer, int maxlength)
 {
-	int length = queue.Length;
-	if (length == 0)
+	if (queue.Length == 0)
 		return;
 
 	int pos = queue.FindValue(client);
@@ -1313,6 +1315,7 @@ void FormatQueueText(ArrayList queue, int client, const char[] phrase, char[] bu
 
 	char symbols[MAX_USER_MSG_DATA];
 
+	int length = Min(queue.Length, 22);
 	for (int i = 0; i < length; i++)
 	{
 		StrCat(symbols, sizeof(symbols), i == pos ? "■" : "□");

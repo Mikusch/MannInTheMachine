@@ -428,7 +428,7 @@ static MRESReturn DHookCallback_CTFBotSpawner_Spawn_Pre(CTFBotSpawner spawner, D
 		
 		if (spawner.m_defaultAttributes.m_attributeFlags & MINIBOSS)
 		{
-			newBot.SetProp(Prop_Send, "m_bIsMiniBoss", true);
+			newBot.SetIsMiniBoss(true);
 		}
 		
 		if (spawner.m_defaultAttributes.m_attributeFlags & USE_BOSS_HEALTH_BAR)

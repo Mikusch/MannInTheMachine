@@ -739,6 +739,11 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		return this.GetProp(Prop_Send, "m_bIsMiniBoss");
 	}
 	
+	public void SetIsMiniBoss(bool isMiniBoss)
+	{
+		this.SetProp(Prop_Send, "m_bIsMiniBoss", isMiniBoss);
+	}
+
 	public int GetFlagTarget()
 	{
 		return this.m_hFollowingFlagTarget;

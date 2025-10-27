@@ -823,7 +823,7 @@ static void ApplyRobotWeaponRestrictions(int client, int &buttons)
 		delete attributes;
 	}
 	
-	if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_LUNCHBOX || weaponID == TF_WEAPON_BUFF_ITEM || weaponID == TF_WEAPON_BAT_WOOD)
+	if (weaponID == TF_WEAPON_MEDIGUN || weaponID == TF_WEAPON_LUNCHBOX || weaponID == TF_WEAPON_BUFF_ITEM)
 	{
 		// Allow robots to use certain weapons at all times
 		return;

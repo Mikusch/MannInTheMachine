@@ -1315,14 +1315,13 @@ void FormatQueueText(ArrayList queue, int client, const char[] phrase, char[] bu
 
 	char symbols[MAX_USER_MSG_DATA];
 
-	int length = Min(queue.Length, 22);
+	int length = Min(queue.Length, 16);
 	for (int i = 0; i < length; i++)
 	{
-		StrCat(symbols, sizeof(symbols), i == pos ? "■" : "□");
+		StrCat(symbols, sizeof(symbols), i == pos ? "●" : "○");
 	}
 
-	Format(symbols, sizeof(symbols), "%s [#%d]", symbols, pos + 1);
-	Format(buffer, maxlength, "%s%T\n%s", buffer, phrase, client, symbols);
+	Format(buffer, maxlength, "%s%T\n❮❮ %s ❮❮", buffer, phrase, client, pos + 1, symbols);
 }
 
 static void Timer_OnWaitingForPlayersEnd(Handle timer)

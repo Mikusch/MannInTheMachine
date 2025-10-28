@@ -213,11 +213,13 @@
 	}
 	"Invader_Queue_Regular"
 	{
-		"en"		"ROBOT QUEUE:"
+		"#format"	"{1:d}"
+		"en"		"ROBOT QUEUE [#{1}]"
 	}
 	"Invader_Queue_Miniboss"
 	{
-		"en"		"GIANT ROBOT QUEUE:"
+		"#format"	"{1:d}"
+		"en"		"GIANT ROBOT QUEUE [#{1}]"
 	}
 	"Invader_Deployed"
 	{

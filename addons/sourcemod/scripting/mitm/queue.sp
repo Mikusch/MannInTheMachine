@@ -235,7 +235,7 @@ static int SortDefenderQueue(int index1, int index2, Handle array, Handle hndl)
 	ArrayList list = view_as<ArrayList>(array);
 	
 	QueueData data1, data2;
-	if (!list.GetArray(index1, data1) || !list.GetArray(index2, data2));
+	if (!list.GetArray(index1, data1) || !list.GetArray(index2, data2))
 		return 0;
 
 	// Sort by queue points

@@ -694,6 +694,14 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		this.m_invaderPriority = 0;
 	}
 	
+	public float GetTimeConnected()
+	{
+		if (IsFakeClient(this.index))
+			return 0.0;
+
+		return GetClientTime(this.index);
+	}
+
 	public bool IsValidInvader()
 	{
 		if (IsClientSourceTV(this.index) || IsClientReplay(this.index))

@@ -81,9 +81,8 @@ ArrayList Queue_GetDefenderQueue()
 		queue.PushArray(data);
 	}
 	
-	// sort by queue points
-	queue.Sort(Sort_Descending, Sort_Integer);
 	
+	queue.SortCustom(SortDefenderQueue);
 	return queue;
 }
 
@@ -229,4 +228,37 @@ void Queue_FindReplacementDefender()
 	}
 	
 	delete queue;
+}
+
+static int SortDefenderQueue(int index1, int index2, Handle array, Handle hndl)
+{
+	ArrayList list = view_as<ArrayList>(array);
+	
+	QueueData data1, data2;
+	if (!list.GetArray(index1, data1) || !list.GetArray(index2, data2));
+		return 0;
+
+	// Sort by queue points
+	int c = Compare(data2.m_points, data1.m_points);
+
+	// Sort by highest connection time
+	if (c == 0)
+	{
+		float time1, time2;
+
+		// For parties, use the leader's connection time
+		if (data1.m_party.IsValid())
+			time1 = CTFPlayer(data1.m_party.GetLeader()).GetTimeConnected();
+		else
+			time1 = CTFPlayer(data1.m_client).GetTimeConnected();
+
+		if (data2.m_party.IsValid())
+			time2 = CTFPlayer(data2.m_party.GetLeader()).GetTimeConnected();
+		else
+			time2 = CTFPlayer(data2.m_client).GetTimeConnected();
+
+		c = Compare(time2, time1);
+	}
+
+	return c;
 }

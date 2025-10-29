@@ -323,7 +323,7 @@ ArrayList GetInvaderQueue(bool bIsMiniBoss = false, bool bIncludeAlive = false)
 		queue.Push(client);
 	}
 	
-	queue.SortCustom(bIsMiniBoss ? SortPlayersByMinibossPriority : SortPlayersByPriority);
+	queue.SortCustom(bIsMiniBoss ? SortInvadersByMiniBossPriority : SortInvadersByPriority);
 	
 	return queue;
 }
@@ -420,17 +420,42 @@ int Compare(any val1, any val2)
 	return 0;
 }
 
-int SortPlayersByPriority(int index1, int index2, Handle array, Handle hndl)
+static int SortDefendersByPriority(int index1, int index2, Handle array, Handle hndl)
+{
+	ArrayList list = view_as<ArrayList>(array);
+	CTFPlayer player1 = list.Get(index1);
+	CTFPlayer player2 = list.Get(index2);
+	
+	int c = Compare(player2.GetDefenderPriority(), player1.GetDefenderPriority());
+
+	// Sort by highest connection time
+	if (c == 0)
+	{
+		c = Compare(player2.GetTimeConnected(), player1.GetTimeConnected());
+	}
+	
+	return c;
+}
+
+static int SortInvadersByPriority(int index1, int index2, Handle array, Handle hndl)
 {
 	ArrayList list = view_as<ArrayList>(array);
 	int client1 = list.Get(index1);
 	int client2 = list.Get(index2);
 	
 	// Sort by highest priority
-	return Compare(CTFPlayer(client2).GetInvaderPriority(false), CTFPlayer(client1).GetInvaderPriority(false));
+	int c = Compare(CTFPlayer(client2).GetInvaderPriority(false), CTFPlayer(client1).GetInvaderPriority(false));
+
+	// Sort by highest connection time
+	if (c == 0)
+	{
+		c = Compare(CTFPlayer(client2).GetTimeConnected(), CTFPlayer(client1).GetTimeConnected());
+	}
+
+	return c;
 }
 
-int SortPlayersByMinibossPriority(int index1, int index2, Handle array, Handle hndl)
+static int SortInvadersByMiniBossPriority(int index1, int index2, Handle array, Handle hndl)
 {
 	ArrayList list = view_as<ArrayList>(array);
 	int client1 = list.Get(index1);
@@ -442,7 +467,7 @@ int SortPlayersByMinibossPriority(int index1, int index2, Handle array, Handle h
 	// Sort by highest priority
 	if (c == 0)
 	{
-		c = Compare(CTFPlayer(client2).GetInvaderPriority(false), CTFPlayer(client1).GetInvaderPriority(false));
+		c = SortInvadersByPriority(index1, index2, array, hndl);
 	}
 	
 	return c;
@@ -1146,7 +1171,7 @@ void SelectRandomDefenders()
 		players.Push(client);
 	}
 	
-	players.SortCustom(SortPlayersByDefenderPriority);
+	players.SortCustom(SortDefendersByPriority);
 	int iDefenderCount = 0, iReqDefenderCount = tf_mvm_defenders_team_size.IntValue;
 	
 	// Select our defenders
@@ -1222,7 +1247,7 @@ void FindRandomReplacementDefender()
 		players.Push(client);
 	}
 	
-	players.SortCustom(SortPlayersByDefenderPriority);
+	players.SortCustom(SortDefendersByPriority);
 	
 	for (int i = 0; i < players.Length; i++)
 	{
@@ -1242,21 +1267,6 @@ void FindRandomReplacementDefender()
 	}
 	
 	delete players;
-}
-
-static int SortPlayersByDefenderPriority(int index1, int index2, Handle array, Handle hndl)
-{
-	ArrayList list = view_as<ArrayList>(array);
-	CTFPlayer player1 = list.Get(index1);
-	CTFPlayer player2 = list.Get(index2);
-	
-	int c = Compare(player2.GetDefenderPriority(), player1.GetDefenderPriority());
-	if (c == 0)
-	{
-		c = GetRandomInt(0, 1) ? -1 : 1;
-	}
-	
-	return c;
 }
 
 bool IsInWaitingForPlayers()

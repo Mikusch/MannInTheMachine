@@ -426,12 +426,13 @@ static int SortDefendersByPriority(int index1, int index2, Handle array, Handle 
 	CTFPlayer player1 = list.Get(index1);
 	CTFPlayer player2 = list.Get(index2);
 	
+	// Sort by highest priority
 	int c = Compare(player2.GetDefenderPriority(), player1.GetDefenderPriority());
 
-	// Sort by highest connection time
+	// Sort randomly
 	if (c == 0)
 	{
-		c = Compare(player2.GetTimeConnected(), player1.GetTimeConnected());
+		c = GetRandomInt(0, 1) ? -1 : 1;
 	}
 	
 	return c;

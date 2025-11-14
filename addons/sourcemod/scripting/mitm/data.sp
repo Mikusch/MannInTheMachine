@@ -587,11 +587,11 @@ methodmap CTFPlayer < CBaseCombatCharacter
 	{
 		public get()
 		{
-			return view_as<Address>(GetEntData(this.index, FindSendPropInfo("CTFPlayer", "m_iszClassIcon")));
+			return LoadAddressFromAddress(GetEntityAddress(this.index) + view_as<Address>(FindSendPropInfo("CTFPlayer", "m_iszClassIcon")));
 		}
 		public set(Address iszClassIcon)
 		{
-			SetEntData(this.index, FindSendPropInfo("CTFPlayer", "m_iszClassIcon"), iszClassIcon);
+			StoreAddressToAddress(GetEntityAddress(this.index) + view_as<Address>(FindSendPropInfo("CTFPlayer", "m_iszClassIcon")), iszClassIcon);
 		}
 	}
 	
@@ -919,7 +919,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 		for (int i = 0; i < teleportWhereName.Count(); ++i)
 		{
 			char name[64];
-			PtrToString(LoadFromAddress(teleportWhereName.Get(i), NumberType_Int32), name, sizeof(name));
+			PtrToString(LoadAddressFromAddress(teleportWhereName.Get(i)), name, sizeof(name));
 			
 			this.m_teleportWhereName.PushString(name);
 		}
@@ -1144,7 +1144,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 			for (int i = 0; i < pEvent.m_items.Count(); i++)
 			{
 				char item[64];
-				PtrToString(LoadFromAddress(pEvent.m_items.Get(i), NumberType_Int32), item, sizeof(item));
+				PtrToString(LoadAddressFromAddress(pEvent.m_items.Get(i)), item, sizeof(item));
 				
 				this.AddItem(item);
 			}
@@ -1154,7 +1154,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 				Address itemAttributes = pEvent.m_itemsAttributes.Get(i, GetTypeSize("item_attributes_t"));
 				
 				char itemName[64];
-				PtrToString(LoadFromAddress(itemAttributes + GetOffset("item_attributes_t", "m_itemName"), NumberType_Int32), itemName, sizeof(itemName));
+				PtrToString(LoadAddressFromAddress(itemAttributes + GetOffset("item_attributes_t", "m_itemName")), itemName, sizeof(itemName));
 				
 				int itemDef = GetItemDefinitionIndexByName(itemName);
 				
@@ -1192,7 +1192,7 @@ methodmap CTFPlayer < CBaseCombatCharacter
 			for (int i = 0; i < pEvent.m_tags.Count(); ++i)
 			{
 				char tag[64];
-				PtrToString(LoadFromAddress(pEvent.m_tags.Get(i), NumberType_Int32), tag, sizeof(tag));
+				PtrToString(LoadAddressFromAddress(pEvent.m_tags.Get(i)), tag, sizeof(tag));
 				
 				this.AddTag(tag);
 			}
@@ -2083,7 +2083,7 @@ methodmap EventChangeAttributes_t < Address
 	{
 		public get()
 		{
-			return LoadFromAddress(this + GetOffset("EventChangeAttributes_t", "m_eventName"), NumberType_Int32);
+			return LoadAddressFromAddress(this + GetOffset("EventChangeAttributes_t", "m_eventName"));
 		}
 	}
 	
@@ -2225,7 +2225,7 @@ methodmap CTFBotSpawner < Address
 	
 	public void GetName(char[] buffer, int maxlen, const char[] defValue = "")
 	{
-		Address m_name = LoadFromAddress(this + GetOffset("CTFBotSpawner", "m_name"), NumberType_Int32);
+		Address m_name = LoadAddressFromAddress(this + GetOffset("CTFBotSpawner", "m_name"));
 		if (m_name)
 		{
 			PtrToString(m_name, buffer, maxlen);
@@ -2238,7 +2238,7 @@ methodmap CTFBotSpawner < Address
 	
 	public Address GetClassIcon(int nSpawnNum = -1)
 	{
-		return LoadFromAddress(SDKCall_IPopulationSpawner_GetClassIcon(this, nSpawnNum), NumberType_Int32);
+		return LoadAddressFromAddress(SDKCall_IPopulationSpawner_GetClassIcon(this, nSpawnNum));
 	}
 };
 
@@ -2293,7 +2293,7 @@ methodmap CMissionPopulator < Address
 	{
 		public get()
 		{
-			return LoadFromAddress(this + GetOffset("IPopulationSpawner", "m_spawner"), NumberType_Int32);
+			return LoadAddressFromAddress(this + GetOffset("IPopulationSpawner", "m_spawner"));
 		}
 	}
 	
@@ -2540,7 +2540,7 @@ methodmap CPopulationManager < CBaseEntity
 	{
 		public get()
 		{
-			return view_as<Address>(GetEntData(this.index, GetOffset("CPopulationManager", "m_defaultEventChangeAttributesName")));
+			return LoadAddressFromAddress(GetEntityAddress(this.index) + GetOffset("CPopulationManager", "m_defaultEventChangeAttributesName"));
 		}
 	}
 	

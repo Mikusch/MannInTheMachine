@@ -1337,7 +1337,7 @@ static MRESReturn DHookCallback_CSpawnLocation_FindSpawnLocation_Post(Address wh
 
 static MRESReturn DHookCallback_CTraceFilterObject_ShouldHitEntity_Pre(Address pFilter, DHookReturn ret, DHookParam params)
 {
-	int me = GetEntityFromAddress(LoadFromAddress(pFilter + GetOffset("CTraceFilterSimple", "m_pPassEnt"), NumberType_Int32));
+	int me = GetEntityFromAddress(LoadAddressFromAddress(pFilter + GetOffset("CTraceFilterSimple", "m_pPassEnt")));
 	int entity = GetEntityFromAddress(params.Get(1));
 	
 	if (IsEntityClient(entity))

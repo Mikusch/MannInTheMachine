@@ -150,7 +150,7 @@ static Handle PrepSDKCall_CTFBotSpawner_GetClassIcon(GameData hGameConf)
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Pointer); // return value
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // thisptr
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // int nSpawnNum
-	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain); // return string_t
+	PrepSDKCall_SetReturnInfo(SDKType_VirtualAddress, SDKPass_Plain); // return string_t
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
@@ -167,7 +167,7 @@ static Handle PrepSDKCall_IPopulationSpawner_GetClassIcon(GameData hGameConf)
 	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Virtual, "IPopulationSpawner::GetClassIcon");
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Pointer); // return value
 	PrepSDKCall_AddParameter(SDKType_PlainOldData, SDKPass_Plain); // int nSpawnNum
-	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain); // return string_t
+	PrepSDKCall_SetReturnInfo(SDKType_VirtualAddress, SDKPass_Plain); // return string_t
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)
@@ -366,7 +366,7 @@ static Handle PrepSDKCall_CPopulationManager_GetCurrentWave(GameData hGameConf)
 {
 	StartPrepSDKCall(SDKCall_Entity);
 	PrepSDKCall_SetFromConf(hGameConf, SDKConf_Signature, "CPopulationManager::GetCurrentWave");
-	PrepSDKCall_SetReturnInfo(SDKType_PlainOldData, SDKPass_Plain);
+	PrepSDKCall_SetReturnInfo(SDKType_VirtualAddress, SDKPass_Plain);
 	
 	Handle call = EndPrepSDKCall();
 	if (!call)

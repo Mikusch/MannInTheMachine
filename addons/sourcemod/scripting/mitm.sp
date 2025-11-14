@@ -34,6 +34,7 @@
 #include <smmem>
 #include <sourcescramble>
 #include <vscript>
+#include <virtual_address>
 #include <mitm>
 
 // Uncomment this for diagnostic messages in server console (very verbose)

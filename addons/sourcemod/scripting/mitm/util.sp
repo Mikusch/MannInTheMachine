@@ -1048,7 +1048,7 @@ int GetEffectiveViewModelIndex(int client, int weapon)
 	{
 		nModelIndex = PrecacheModel(PDA_SPY_ARMS_OVERRIDE);
 	}
-	else
+	else if (TF2_GetPlayerClass(client) != TFClass_Unknown)
 	{
 		nModelIndex = PrecacheModel(g_aBotArmModels[TF2_GetPlayerClass(client)]);
 	}

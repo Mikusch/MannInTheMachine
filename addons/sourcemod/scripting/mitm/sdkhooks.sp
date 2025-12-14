@@ -118,12 +118,15 @@ static void SDKHook_CTFPlayer_WeaponSwitchPost(int client, int weapon)
 {
 	if (!CTFPlayer(client).ShouldUseCustomViewModel() || !IsValidEntity(weapon))
 		return;
-	
+
 	int nModelIndex = GetEffectiveViewModelIndex(client, weapon);
 	if (nModelIndex == 0)
 		return;
-	
-	SetEntProp(GetEntPropEnt(client, Prop_Send, "m_hViewModel"), Prop_Send, "m_nModelIndex", nModelIndex);
+
+	int viewModel = GetEntPropEnt(client, Prop_Send, "m_hViewModel");
+	if (viewModel != -1)
+		SetEntProp(viewModel, Prop_Send, "m_nModelIndex", nModelIndex);
+
 	SetEntProp(weapon, Prop_Send, "m_nCustomViewmodelModelIndex", nModelIndex);
 }
 

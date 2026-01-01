@@ -354,62 +354,6 @@ public void OnEntityDestroyed(int entity)
 		Entity(entity).Destroy();
 }
 
-public void OnGameFrame()
-{
-	if (!PSM_IsEnabled())
-		return;
-
-	ArrayList queue = GetInvaderQueue(false, true);
-	ArrayList minibossQueue = GetInvaderQueue(true, true);
-
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
-
-		if (!IsClientObserver(client))
-			continue;
-
-		int iObserverMode = GetEntProp(client, Prop_Send, "m_iObserverMode");
-		if (iObserverMode == OBS_MODE_DEATHCAM || iObserverMode == OBS_MODE_FREEZECAM)
-			continue;
-
-		char text[MAX_USER_MSG_DATA];
-
-		FormatQueueText(queue, client, "Invader_Queue_Regular", text, sizeof(text));
-		FormatQueueText(minibossQueue, client, "Invader_Queue_Miniboss", text, sizeof(text));
-
-		if (text[0])
-			PrintKeyHintText(client, text);
-	}
-	
-	delete queue;
-	delete minibossQueue;
-	
-	float flRestartRoundTime = GameRules_GetPropFloat("m_flRestartRoundTime");
-	int nSecondsToStart = RoundToCeil(flRestartRoundTime - GetGameTime());
-	
-	SetHudTextParams(-1.0, 0.9, GetGameFrameTime(), 255, 255, 255, 255);
-	
-	for (int client = 1; client <= MaxClients; client++)
-	{
-		if (!IsClientInGame(client))
-			continue;
-		
-		if (!IsClientObserver(client))
-			continue;
-		
-		if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
-		{
-			ShowSyncHudText(client, g_hWarningHudSync, "%t", "Spectator_Mode");
-		}
-		else if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && CTFPlayer(client).IsValidInvader() && flRestartRoundTime != -1)
-		{
-			ShowSyncHudText(client, g_hWarningHudSync, "%t", "Invader_WaitingToSpawn", nSecondsToStart);
-		}
-	}
-}
-
 public Action OnPlayerRunCmd(int client, int &buttons, int &impulse, float vel[3], float angles[3], int &weapon, int &subtype, int &cmdnum, int &tickcount, int &seed, int mouse[2])
 {
 	if (!PSM_IsEnabled())
@@ -681,8 +625,9 @@ static void OnPluginStateChanged(bool bEnabled)
 		}
 		
 		OnMapStart();
-		
 		UpdateMaxInvaders();
+
+		CreateTimer(0.1, Timer_UpdateHud, _, TIMER_REPEAT);
 		
 		if (VScript_IsScriptVMInitialized())
 			VScript_OnScriptVMInitialized();
@@ -696,6 +641,64 @@ static void OnPluginStateChanged(bool bEnabled)
 			g_pGameRules.SetCustomUpgradesFile(DEFAULT_UPGRADES_FILE);
 		}
 	}
+}
+
+static Action Timer_UpdateHud(Handle timer)
+{
+	if (!PSM_IsEnabled())
+		return Plugin_Stop;
+
+	ArrayList queue = GetInvaderQueue(false, true);
+	ArrayList minibossQueue = GetInvaderQueue(true, true);
+
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+
+		if (!IsClientObserver(client))
+			continue;
+
+		int iObserverMode = GetEntProp(client, Prop_Send, "m_iObserverMode");
+		if (iObserverMode == OBS_MODE_DEATHCAM || iObserverMode == OBS_MODE_FREEZECAM)
+			continue;
+
+		char text[MAX_USER_MSG_DATA];
+
+		FormatQueueText(queue, client, "Invader_Queue_Regular", text, sizeof(text));
+		FormatQueueText(minibossQueue, client, "Invader_Queue_Miniboss", text, sizeof(text));
+
+		if (text[0])
+			PrintKeyHintText(client, text);
+	}
+	
+	delete queue;
+	delete minibossQueue;
+	
+	float flRestartRoundTime = GameRules_GetPropFloat("m_flRestartRoundTime");
+	int nSecondsToStart = Max(RoundToCeil(flRestartRoundTime - GetGameTime()), 0);
+	
+	SetHudTextParams(-1.0, 0.9, 0.1, 255, 255, 255, 255);
+	
+	for (int client = 1; client <= MaxClients; client++)
+	{
+		if (!IsClientInGame(client))
+			continue;
+		
+		if (!IsClientObserver(client))
+			continue;
+		
+		if (CTFPlayer(client).HasPreference(PREF_SPECTATOR_MODE))
+		{
+			ShowSyncHudText(client, g_hWarningHudSync, "%t", "Spectator_Mode");
+		}
+		else if (g_pObjectiveResource.GetMannVsMachineIsBetweenWaves() && CTFPlayer(client).IsValidInvader() && nSecondsToStart > 0)
+		{
+			ShowSyncHudText(client, g_hWarningHudSync, "%t", "Invader_WaitingToSpawn", nSecondsToStart);
+		}
+	}
+
+	return Plugin_Continue;
 }
 
 static bool ShouldEnable()

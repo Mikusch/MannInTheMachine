@@ -23,12 +23,14 @@ enum struct EntityProperties
 	
 	ArrayList m_teleportWhereName;
 	int m_hGlowEntity;
-	
+	int m_hAssociatedNest;
+
 	void Init(int ref)
 	{
 		this.m_ref = ref;
 		this.m_teleportWhereName = new ArrayList(ByteCountToCells(64));
 		this.m_hGlowEntity = INVALID_ENT_REFERENCE;
+		this.m_hAssociatedNest = INVALID_ENT_REFERENCE;
 	}
 	
 	void Destroy()
@@ -113,6 +115,18 @@ methodmap Entity
 			g_hEntityProperties.Set(this.m_listIndex, hGlowEntity, EntityProperties::m_hGlowEntity);
 		}
 	}
+
+	property int m_hAssociatedNest
+	{
+		public get()
+		{
+			return g_hEntityProperties.Get(this.m_listIndex, EntityProperties::m_hAssociatedNest);
+		}
+		public set(int hAssociatedNest)
+		{
+			g_hEntityProperties.Set(this.m_listIndex, hAssociatedNest, EntityProperties::m_hAssociatedNest);
+		}
+	}
 	
 	public void SetTeleportWhere(ArrayList teleportWhereName)
 	{
@@ -140,6 +154,16 @@ methodmap Entity
 	public int GetGlowEntity()
 	{
 		return this.m_hGlowEntity;
+	}
+
+	public void SetAssociatedNest(int hAssociatedNest)
+	{
+		this.m_hAssociatedNest = hAssociatedNest;
+	}
+
+	public int GetAssociatedNest()
+	{
+		return this.m_hAssociatedNest;
 	}
 	
 	public void Destroy()

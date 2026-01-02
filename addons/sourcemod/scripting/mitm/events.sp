@@ -18,13 +18,25 @@
 #pragma semicolon 1
 #pragma newdecls required
 
+enum struct EngineerNestPosition
+{
+	int m_ref;
+	float m_pos[3];
+}
+
+static ArrayList g_hEngineerNestPositions;
+
 void Events_Init()
 {
+	g_hEngineerNestPositions = new ArrayList(sizeof(EngineerNestPosition));
+
 	PSM_AddEventHook("player_spawn", EventHook_PlayerSpawn);
 	PSM_AddEventHook("player_death", EventHook_PlayerDeath);
 	PSM_AddEventHook("player_team", EventHook_PlayerTeam, EventHookMode_Pre);
 	PSM_AddEventHook("post_inventory_application", EventHook_PostInventoryApplication);
 	PSM_AddEventHook("player_builtobject", EventHook_PlayerBuiltObject);
+	PSM_AddEventHook("object_removed", EventHook_ObjectRemoved);
+	PSM_AddEventHook("teamplay_round_start", EventHook_TeamplayRoundStart);
 	PSM_AddEventHook("teamplay_point_captured", EventHook_TeamplayPointCaptured);
 	PSM_AddEventHook("teamplay_flag_event", EventHook_TeamplayFlagEvent);
 	PSM_AddEventHook("teams_changed", EventHook_TeamsChanged);
@@ -139,7 +151,28 @@ static void EventHook_PlayerBuiltObject(Event event, const char[] name, bool don
 			int iHealth = RoundToFloor(SDKCall_CBaseObject_GetMaxHealthForCurrentLevel(index) * tf_bot_engineer_building_health_multiplier.FloatValue);
 			SetEntProp(index, Prop_Data, "m_iMaxHealth", iHealth);
 			SetEntProp(index, Prop_Data, "m_iHealth", iHealth);
-			
+
+			// move the nest so the particle always appears above the teleporter
+			int nest = FindEngineerNestForPlayer(builder);
+			if (nest != -1)
+			{
+				int ref = EntIndexToEntRef(nest);
+
+				// associate the teleporter with this nest
+				Entity(index).SetAssociatedNest(ref);
+
+				if (g_hEngineerNestPositions.FindValue(ref, EngineerNestPosition::m_ref) == -1)
+				{
+					EngineerNestPosition data;
+					data.m_ref = ref;
+					GetEntPropVector(nest, Prop_Data, "m_vecAbsOrigin", data.m_pos);
+
+					g_hEngineerNestPositions.PushArray(data);
+				}
+
+				CBaseEntity(nest).SetAbsOrigin(origin);
+			}
+
 			// the teleporter owns this hint now
 			int hint = FindTeleporterHintForPlayer(builder);
 			if (hint != -1)
@@ -163,6 +196,30 @@ static void EventHook_PlayerBuiltObject(Event event, const char[] name, bool don
 			}
 		}
 	}
+}
+
+static void EventHook_ObjectRemoved(Event event, const char[] name, bool dontBroadcast)
+{
+	int obj = event.GetInt("index");
+
+	int nest = Entity(obj).GetAssociatedNest();
+	if (nest == -1)
+		return;
+
+	int index = g_hEngineerNestPositions.FindValue(nest, EngineerNestPosition::m_ref);
+	if (index == -1)
+		return;
+
+	EngineerNestPosition data;
+	if (g_hEngineerNestPositions.GetArray(index, data))
+		CBaseEntity(nest).SetAbsOrigin(data.m_pos);
+
+	g_hEngineerNestPositions.Erase(index);
+}
+
+static void EventHook_TeamplayRoundStart(Event event, const char[] name, bool dontBroadcast)
+{
+	g_hEngineerNestPositions.Clear();
 }
 
 static void EventHook_TeamplayPointCaptured(Event event, const char[] name, bool dontBroadcast)

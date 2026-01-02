@@ -1258,7 +1258,7 @@ static MRESReturn DHookCallback_CTFPlayer_CanBuild_Post(int player, DHookReturn 
 			// dispenser: cannot be built
 			case TFObject_Dispenser:
 			{
-				bDisallowBuilding = true;
+				bDisallowBuilding = !mitm_bot_engineer_allow_dispenser.BoolValue;
 			}
 			// teleporter: only exit can be built with teleporter hint
 			case TFObject_Teleporter, TFObject_Sapper:

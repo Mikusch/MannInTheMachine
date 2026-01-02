@@ -76,6 +76,7 @@ ConVar mitm_max_spawn_deaths;
 ConVar mitm_shield_damage_drain_rate;
 ConVar mitm_bot_taunt_on_upgrade;
 ConVar mitm_bot_flag_carrier_allow_blast_jumping;
+ConVar mitm_bot_engineer_allow_dispenser;
 ConVar mitm_romevision;
 ConVar mitm_autoincrement_max_wipes;
 ConVar mitm_autoincrement_currency_percentage;

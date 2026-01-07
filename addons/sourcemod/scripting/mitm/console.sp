@@ -35,6 +35,7 @@ void Console_Init()
 	PSM_AddCommandListener(CommandListener_AutoTeam, "autoteam");
 	PSM_AddCommandListener(CommandListener_JoinTeam, "jointeam");
 	PSM_AddCommandListener(CommandListener_JoinClass, "joinclass");
+	PSM_AddCommandListener(CommandListener_JoinClass, "join_class");
 	PSM_AddCommandListener(CommandListener_Buyback, "td_buyback");
 	
 	PSM_AddMultiTargetFilter("@defenders", MultiTargetFilter_Defenders, "Target_Defenders", true);

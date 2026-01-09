@@ -2,40 +2,48 @@ name: Compile and release
 
 on:
   push:
-    branches:
-      - master
+  pull_request:
+  workflow_dispatch:
 
 env:
   PLUGIN_NAME: mitm
   SCRIPTS_PATH: addons/sourcemod/scripting
+  SM_VERSION: '1.12.x'
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        sm-version: [ '1.12.x' ]
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Prepare include directory
-        run: mkdir -p ${{ env.SCRIPTS_PATH }}/include
+      - name: Cache include files
+        id: cache-includes
+        uses: actions/cache@v5
+        with:
+          path: ${{ env.SCRIPTS_PATH }}/include
+          key: includes-${{ hashFiles('.github/workflows/main.yml') }}
 
       - name: Download repositories
+        if: steps.cache-includes.outputs.cache-hit != 'true'
         run: |
+          set -e
           declare -A repos=(
             ["https://github.com/TF2-DMB/CBaseNPC"]="addons/sourcemod/scripting/include"
             ["https://github.com/Scags/SM-Memory"]="pawn/sourcemod/scripting/include"
           )
+
+          mkdir -p "${{ env.SCRIPTS_PATH }}/include"
 
           for repo in "${!repos[@]}"; do
             repo_name=$(basename "$repo")
             include_path="${repos[$repo]}"
             echo "Cloning $repo..."
             git clone --depth 1 "$repo" "$repo_name"
-          
+
             find "$repo_name" -type f -name "*.inc" | while read -r file; do
               relative_path="${file#*/scripting/include/}"
               mkdir -p "${{ env.SCRIPTS_PATH }}/include/$(dirname "$relative_path")"
@@ -46,7 +54,9 @@ jobs:
           done
 
       - name: Download include files
+        if: steps.cache-includes.outputs.cache-hit != 'true'
         run: |
+          set -e
           includes=(
             "https://raw.githubusercontent.com/DoctorMcKay/sourcemod-plugins/master/scripting/include/morecolors.inc"
             "https://raw.githubusercontent.com/Mikusch/PluginStateManager/master/addons/sourcemod/scripting/include/pluginstatemanager.inc"
@@ -62,14 +72,14 @@ jobs:
 
           for url in "${includes[@]}"; do
             echo "Downloading $url"
-            curl -sSL -O --output-dir "${{ env.SCRIPTS_PATH }}/include" "$url"
+            curl --fail -sSL -O --output-dir "${{ env.SCRIPTS_PATH }}/include" "$url"
           done
 
-      - name: Setup SourcePawn Compiler ${{ matrix.sm-version }}
+      - name: Setup SourcePawn compiler
         id: setup_sp
         uses: rumblefrog/setup-sp@master
         with:
-          version: ${{ matrix.sm-version }}
+          version: ${{ env.SM_VERSION }}
           version-file: ${{ env.SCRIPTS_PATH }}/${{ env.PLUGIN_NAME }}.sp
           define-name: PLUGIN_VERSION
 
@@ -77,32 +87,14 @@ jobs:
         run: |
           mkdir -p ../plugins
           spcomp -v2 -E -i "include" -o "../plugins/${{ env.PLUGIN_NAME }}.smx" "${{ env.PLUGIN_NAME }}.sp"
-          echo "=== OUT FILES ==="
-          ls ../plugins
-          echo "=== VERSION ==="
-          echo ${{ steps.setup_sp.outputs.plugin-version }}
         working-directory: ${{ env.SCRIPTS_PATH }}
 
-      - name: Install zip utility
-        uses: montudor/action-zip@v1
-
       - name: Zip output
-        run: |
-          zip -qq -r ${{ github.event.repository.name }}.zip addons/sourcemod
+        run: zip -qq -r ${{ github.event.repository.name }}.zip addons/sourcemod
 
-      - name: List build outputs
-        run: |
-          echo "::group::Directory contents"
-          ls -R
-          echo "::endgroup::"
-          echo "::group::Zip contents"
-          unzip -l ${{ github.event.repository.name }}.zip
-          echo "::endgroup::"
-
-      - name: Create GitHub Release
+      - name: Create GitHub release
+        if: github.ref_name == 'master'
         uses: ncipollo/release-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ steps.setup_sp.outputs.plugin-version }}

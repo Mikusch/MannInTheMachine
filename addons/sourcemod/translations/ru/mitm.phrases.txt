@@ -1,0 +1,448 @@
+"Phrases"
+{
+	"Menu_Header"
+	{
+		"ru"		"МАНН В МАШИНЕ"
+	}
+	"Menu_Main_Title"
+	{
+		"ru"		"➤ Главное Меню"
+	}
+	"Menu_Main_Queue"
+	{
+		"ru"		"Просмотреть очередь защитников"
+	}
+	"Menu_Main_Preferences"
+	{
+		"ru"		"Изменить настройки"
+	}
+	"Menu_Main_Party"
+	{
+		"ru"		"Открыть меню группы"
+	}
+	"Menu_Main_Contributors"
+	{
+		"ru"		"Просмотреть разработчиков режима"
+	}
+	"Menu_Queue_Title"
+	{
+		"ru"		"➤ Очередь Защитников"
+	}
+	"Menu_Queue_NoPlayers"
+	{
+		"ru"		"В очереди нет игроков"
+	}
+	"Menu_Queue_Title_QueuePoints"
+	{
+		"#format"	"{1:d},{2:d}"
+		"ru"		"Ваши очки очереди: {1} [#{2}]"
+	}
+	"Menu_Queue_Title_PartyQueuePoints"
+	{
+		"#format"	"{1:d},{2:d}"
+		"ru"		"Очки очереди вашей группы: {1} [#{2}]"
+	}
+	"Menu_Queue_Title_NotInQueue"
+	{
+		"ru"		"Вы сейчас не находитесь в очереди."
+	}
+	"Menu_Preferences_Title"
+	{
+		"ru"		"➤ Пользовательские Настройки"
+	}
+	"Menu_Preferences_NotLoaded"
+	{
+		"ru"		"Ваши настройки все еще загружаются, пожалуйста, подождите."
+	}
+	"Menu_Contributors_Title"
+	{
+		"ru"		"➤ Разработчики"
+	}
+	"Menu_Contributors_Mikusch"
+	{
+		"ru"		"Код и геймплей"
+	}
+	"Menu_Contributors_Kenzzer"
+	{
+		"ru"		"Ранняя помощь в программировании и разработка библиотек"
+	}
+	"Menu_Contributors_trigger_hurt"
+	{
+		"ru"		"Кастомные модели от первого лица роботов"
+	}
+	"Preference_DisableDefender"
+	{
+		"ru"		"Отключить игру в роли защитника"
+	}
+	"Preference_SpectatorMode"
+	{
+		"ru"		"Включить режим наблюдателя (отключение спавна)"
+	}
+	"Preference_DisableMiniBoss"
+	{
+		"ru"		"Отключить игру в роли гигантского робота"
+	}
+	"Preference_DisableAnnotations"
+	{
+		"ru"		"Отключить аннотации с подсказками"
+	}
+	"Preference_IgnorePartyInvites"
+	{
+		"ru"		"Блокировать приглашения в группы"
+	}
+	"Preference_DisableDefenderReplacement"
+	{
+		"ru"		"Отключить игру в роли запасного защитника"
+	}
+	"Preference_DisableCustomViewModels"
+	{
+		"ru"		"Использовать человеческий вид от первого лица при игре за робота"
+	}
+	"SpectatorMode_Enabled"
+	{
+		"ru"		"Теперь вы в {gray}РЕЖИМЕ НАБЛЮДАТЕЛЯ{default}."
+	}
+	"SpectatorMode_Disabled"
+	{
+		"ru"		"Вы больше не в {gray}РЕЖИМЕ НАБЛЮДАТЕЛЯ{default}."
+	}
+	"SelectedAsDefender"
+	{
+		"ru"		"Вас назначили в команду {red}МАНН КО.{default}."
+	}
+	"SelectedAsDefender_Forced"
+	{
+		"ru"		"Вы были принудительно назначены в команду {red}МАНН КО.{default}, т.к. было недостаточно подходящих игроков."
+	}
+	"SelectedAsDefender_Replacement"
+	{
+		"ru"		"Вы были перемещены в команду {red}МАНН КО.{default}, чтобы заполнить пустое место."
+	}
+	"SelectedAsInvader"
+	{
+		"ru"		"Вас назначили в команду {blue}РОБОТОВ{default}."
+	}
+	"Queue_FeatureDisabled"
+	{
+		"ru"		"Система очереди в настоящее время отключена."
+	}
+	"Queue_NewDefenders"
+	{
+		"ru"		"Выбор новой команды защитников..."
+	}
+	"Queue_PointsReset"
+	{
+		"ru"		"Ваши очки очереди были сброшены"
+	}
+	"Queue_PointsAwarded"
+	{
+		"#format"	"{1:d},{2:d}"
+		"ru"		"Вы были награждены {green}{1} {default}очками очереди. (Всего: {green}{2}{default})."
+	}
+	"Queue_PointsAdded"
+	{
+		"#format"	"{1:d},{2:t}"
+		"ru"		"Добавлено {green}{1} {default}очков очереди игроку {cyan}{2}{default}."
+	}
+	"Squad_NotAllowedToHeal"
+	{
+		"#format"	"{1:N}"
+		"ru"		"Вы можете лечить только своего командира отряда {1}"
+	}
+	"Squad_NotAllowedToPickUpFlag"
+	{
+		"#format"	"{1:N}"
+		"ru"		"Только ваш командир отряда ({1}) может подобрать бомбу"
+	}
+	"Invader_NotAllowedToSuicide"
+	{
+		"ru"		"Вы не можете попрощаться с жестоким миром, играя в роли робота."
+	}
+	"Invader_WaitingToSpawn"
+	{
+		"#format"	"{1:d}"
+		"ru"		"Вы РОБОТ\nВолна начнётся через {1} секунд"
+	}
+	"Invader_Spawned"
+	{
+		"#format"	"{1:s}"
+		"ru"		"Вы появились в роли: {1}"
+	}
+	"Invader_SpawnTimer_Countdown"
+	{
+		"ru"		"ПОКИНЬТЕ ЗОНУ ВОЗРОЖДЕНИЯ"
+	}
+	"Invader_SpawnTimer_Warning"
+	{
+		"#format"	"{1:d}"
+		"ru"		"{red}ВНИМАНИЕ: {default}Если вы умрёте в зоне возрождения ещё {cyan}{1} {default}раз(а), вас выгонят с сервера!"
+	}
+	"Invader_SpawnTimer_KickReason"
+	{
+		"ru"		"Слишком много смертей в зоне возрождения"
+	}
+	"Invader_SpawnTimer_Kicked"
+	{
+		"#format"	"{1:N}"
+		"ru"		"{blue}{1} {default}был выгнан за то, что слишком много раз умирал в зоне возрождения."
+	}
+	"Invader_CaptureGate"
+	{
+		"#format"	"{1:s}"
+		"ru"		"Захватите {1}"
+	}
+	"Invader_DeliverFlag"
+	{
+		"ru"		"Доставьте Бомбу на Базу"
+	}
+	"Invader_DelayedThreatNotice_Generic"
+	{
+		"ru"		"Угроза"
+	}
+	"Invader_DelayedThreatNotice_Spy"
+	{
+		"ru"		"Шпион"
+	}
+	"Invader_DestroySentries_DetonateSentry"
+	{
+		"ru"		"Цель"
+	}
+	"Invader_DestroySentries_DetonateHere"
+	{
+		"ru"		"Детонируйте Здесь, Чтобы Завершить Свою Миссию"
+	}
+	"Invader_Queue_Regular"
+	{
+		"#format"	"{1:d}"
+		"ru"		"ОЧЕРЕДЬ РОБОТОВ [#{1}]"
+	}
+	"Invader_Queue_Miniboss"
+	{
+		"#format"	"{1:d}"
+		"ru"		"ОЧЕРЕДЬ ГИГАНТСКИХ РОБОТОВ [#{1}]"
+	}
+	"Invader_Deployed"
+	{
+		"#format"	"{1:N},{2:d},{3:d}"
+		"ru"		"{blue}{1} {default}заложил бомбу с {lightgreen}{2}{default}/{lightgreen}{3} {default}остававишимся ОЗ."
+	}
+	"Tank_Deployed"
+	{
+		"#format"	"{1:d},{2:d}"
+		"ru"		"{blue}Танк {default}заложил бомбу с {lightgreen}{1}{default}/{lightgreen}{2} {default}остававишимся ОЗ."
+	}
+	"Endless_MoreAttributes"
+	{
+		"#format"	"{1:d}"
+		"ru"		"...и ещё {1}"
+	}
+	"Wave_AutoIncremented"
+	{
+		"#format"	"{1:d},{2:0.f},{3:d}"
+		"ru"		"Миссия продвинулась до {cyan}Волны {1}{default} с {lightgreen}{2}%% собранных кредитов{default}, поскольку защитники проиграли {red}{3} раза{default} подряд."
+	}
+	"Spectator_Mode"
+	{
+		"ru"		"Вы в РЕЖИМЕ НАБЛЮДАТЕЛЯ"
+	}
+	"Target_Defenders"
+	{
+		"ru"		"Защитники"
+	}
+	"Target_Invaders"
+	{
+		"ru"		"Захватчики"
+	}
+	
+	// Party
+	
+	"Party_Menu_Title"
+	{
+		"ru"		"➤ Меню Группы"
+	}
+	"Party_InviteMenu_Title"
+	{
+		"ru"		"➤ Ожидающие Приглашения Группы"
+	}
+	"Party_ManageInviteMenu_Title"
+	{
+		"ru"		"➤ Пригласить Игроков"
+	}
+	"Party_ManageMenu_Title"
+	{
+		"ru"		"➤ Управление Группой"
+	}
+	"Party_KickMenu_Title"
+	{
+		"ru"		"➤ Выгнать Членов Группы"
+	}
+	"Party_KickMenu_NoMembers"
+	{
+		"ru"		"Нет членов, которых можно выгнать"
+	}
+	"Party_Menu_CurrentParty"
+	{
+		"#format"	"{1:s}"
+		"ru"		"Ваша группа: {1}"
+	}
+	"Party_Menu_Members"
+	{
+		"#format"	"{1:d},{2:d}"
+		"ru"		"Члены ({1}/{2}):"
+	}
+	"Party_Menu_NotInAParty"
+	{
+		"ru"		"Вы не состоите в группе."
+	}
+	"Party_Menu_QueuePoints"
+	{
+		"#format"	"{1:d},{2:d}"
+		"ru"		"Очки очереди: {1} [#{2}]"
+	}
+	"Party_Menu_NotEnoughMembersForQueue"
+	{
+		"ru"		"Пригласите игроков, чтобы встать в очередь вместе!"
+	}
+	"Party_Menu_ManageParty"
+	{
+		"ru"		"★ Управление группой"
+	}
+	"Party_Menu_CreateParty"
+	{
+		"ru"		"Создать новую группу"
+	}
+	"Party_Menu_LeaveParty"
+	{
+		"ru"		"Покинуть группу"
+	}
+	"Party_Menu_ViewPartyInvites"
+	{
+		"ru"		"Просмотреть ожидающие приглашения"
+	}
+	"Party_ManageMenu_InviteMembers"
+	{
+		"ru"		"★ Пригласить игроков"
+	}
+	"Party_ManageMenu_KickMembers"
+	{
+		"ru"		"★ Выгнать игроков"
+	}
+	"Party_ManageInviteMenu_NoPlayers"
+	{
+		"ru"		"Нет игроков, которых можно пригласить"
+	}
+	"Party_ManageInviteMenu_AlreadyInvited"
+	{
+		"ru"		"(ожидающее)"
+	}
+	"Party_InviteMenu_NoPendingInvites"
+	{
+		"ru"		"Нет ожидающих приглашений"
+	}
+	"Party_FeatureDisabled"
+	{
+		"ru"		"Система группы в настоящее время отключена."
+	}
+	"Party_PlayerInvitePending"
+	{
+		"#format"	"{1:N}"
+		"ru"		"{lightgreen}{1} {default}уже имеет ожидающее приглашение."
+	}
+	"Party_PlayerIgnoringInvites"
+	{
+		"#format"	"{1:N}"
+		"ru"		"{lightgreen}{1} {default}блокирует приглашения в группу и не может быть приглашен."
+	}
+	"Party_PlayerBlocked"
+	{
+		"#format"	"{1:N}"
+		"ru"		"{lightgreen}{1} {default}не допускается к вступлению в группы."
+	}
+	"Party_InvitedPlayers"
+	{
+		"#format"	"{1:N},{2:s}"
+		"ru"		"Вы пригласили {lightgreen}{1} {default}в {cyan}{2}{default}."
+	}
+	"Party_DoesNotExist"
+	{
+		"ru"		"Группа не существует. Возможно, она уже была распущена."
+	}
+	"Party_AlreadyMember"
+	{
+		"ru"		"Вы уже член этой группы!"
+	}
+	"Party_AlreadyInAParty"
+	{
+		"ru"		"Вы и так уже в группе!"
+	}
+	"Party_RequireInvite"
+	{
+		"ru"		"Вам нужно приглашение, чтобы вступить в эту группу!"
+	}
+	"Party_MaxMembers"
+	{
+		"ru"		"Эта группа уже заполнена и не может принимать новых участников."
+	}
+	"Party_Created"
+	{
+		"#format"	"{1:s}"
+		"ru"		"Вы создали и автоматически вступили в {cyan}{1}{default}."
+	}
+	"Party_NotAllowed"
+	{
+		"ru"		"Вам не разрешается использовать функцию групп."
+	}
+	"Party_Joined"
+	{
+		"#format"	"{1:s}"
+		"ru"		"Вы вступили в {cyan}{1}{default}."
+	}
+	"Party_JoinedOther"
+	{
+		"#format"	"{1:N}"
+		"ru"		"{lightgreen}{1} {default}вступил в группу."
+	}
+	"Party_Left"
+	{
+		"#format"	"{1:s}"
+		"ru"		"Вы покинули {cyan}{1}{default}."
+	}
+	"Party_LeftOther"
+	{
+		"#format"	"{1:N}"
+		"ru"		"{lightgreen}{1} {default}покинул группу."
+	}
+	"Party_Kicked"
+	{
+		"#format"	"{1:s}"
+		"ru"		"Вы были выгнаны из {cyan}{1}{default}."
+	}
+	"Party_KickedOther"
+	{
+		"#format"	"{1:N}"
+		"ru"		"{lightgreen}{1} {default}был выгнан из группы."
+	}
+	"Party_RequireMember"
+	{
+		"ru"		"Чтобы использовать эту функцию, вам необходимо быть в группе."
+	}
+	"Party_RequireLeader"
+	{
+		"ru"		"Чтобы использовать эту функцию, вам необходимо быть лидером группы."
+	}
+	"Party_Renamed"
+	{
+		"#format"	"{1:s}"
+		"ru"		"Вы переименовали свою группу в {cyan}{1}{default}."
+	}
+	"Party_IncomingInvite"
+	{
+		"#format"	"{1:s},{2:N}"
+		"ru"		"Вы были приглашены в {cyan}{1}{default} игроком {lightgreen}{2}{default}. Напишите {yellow}/party {default}, чтобы принять."
+	}
+	"Party_Name_Default"
+	{
+		"#format"	"{1:N}"
+		"ru"		"Группа игрока {1}"
+	}
+}
